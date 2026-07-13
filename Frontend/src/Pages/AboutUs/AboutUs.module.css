@@ -1,0 +1,570 @@
+aboutus.module.css /* =====================================================
+   Aurevian — About Us
+   Palette: ivory bg, warm gold accent, deep espresso text
+   Type: serif display (Fraunces/Playfair) + clean sans body
+   Signature: a gold "chain" rail with beads runs down the
+   left margin, echoing a necklace strand between sections.
+   ===================================================== */
+
+.page {
+  --ivory: #f8f4ec;
+  --beige: #ece3d2;
+  --espresso: #241f19;
+  --charcoal: #3a332b;
+  --gold: #b08d57;
+  --gold-soft: #d8c39c;
+  --line: rgba(176, 141, 87, 0.35);
+
+  background: var(--ivory);
+  color: var(--charcoal);
+  font-family: "Work Sans", "Segoe UI", sans-serif;
+  overflow-x: hidden;
+}
+
+.h2 {
+  font-family: "Fraunces", "Playfair Display", Georgia, serif;
+  font-weight: 500;
+  font-size: 2rem;
+  line-height: 1.2;
+  color: var(--espresso);
+  margin: 0 0 16px;
+}
+
+.h2Light {
+  color: var(--ivory);
+}
+
+.eyebrow,
+.eyebrowSmall {
+  display: inline-block;
+  font-family: "Work Sans", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+
+/* ================= HERO ================= */
+.hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 48px;
+  padding: 96px 64px 80px;
+  max-width: 1360px;
+  margin: 0 auto;
+}
+
+.heroTitle {
+  font-family: "Fraunces", "Playfair Display", Georgia, serif;
+  font-weight: 500;
+  font-size: 3rem;
+  line-height: 1.12;
+  color: var(--espresso);
+  margin: 0 0 20px;
+}
+
+.heroSub {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--charcoal);
+  max-width: 420px;
+  margin: 0;
+}
+
+.heroText {
+  order: 1;
+}
+
+.heroImage {
+  order: 2;
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
+}
+
+/* ================= CHAIN-RAIL BODY ================= */
+.chainBody {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 64px;
+}
+
+.chainRow {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  column-gap: 32px;
+}
+
+.railCell {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.railCell::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  width: 2px;
+  height: calc(100% + 96px); /* bridges the gap to the next bead */
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--line) 0,
+    var(--line) 4px,
+    transparent 4px,
+    transparent 9px
+  );
+  transform: translateX(-50%);
+}
+
+.railCellLast::after {
+  display: none;
+}
+
+.bead {
+  width: 12px;
+  height: 12px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow:
+    0 0 0 4px var(--ivory),
+    0 0 0 5px var(--line);
+  z-index: 1;
+}
+
+.rowContent {
+  padding: 0 0 96px;
+}
+
+.chainRowLast .rowContent {
+  padding-bottom: 88px;
+}
+
+/* ---- Story ---- */
+.storyGrid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.storyText p {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--charcoal);
+  margin: 0 0 16px;
+}
+
+/* Asymmetric two-photo gallery: a tall portrait on the left,
+   a square resting against its bottom-right corner. Both share
+   one aspect-ratio system so they never fight for height. */
+.storyImages {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 16px;
+  height: 100%;
+}
+
+.displayImage1 {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+  grid-row: span 2;
+  box-shadow: 0 14px 32px rgba(36, 31, 25, 0.16);
+  transition: transform 0.35s ease;
+}
+
+.displayImage2 {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+  align-self: end;
+  box-shadow: 0 14px 32px rgba(36, 31, 25, 0.16);
+  transition: transform 0.35s ease;
+}
+
+.displayImage1:hover,
+.displayImage2:hover {
+  transform: translateY(-4px);
+}
+
+/* ---- Values ---- */
+.valuesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 8px;
+}
+
+.valueCard {
+  background: var(--beige);
+  border: 1px solid var(--gold-soft);
+  border-radius: 4px;
+  padding: 28px 24px;
+}
+
+.valueIcon {
+  font-size: 1.4rem;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+
+.valueTitle {
+  font-family: "Fraunces", "Playfair Display", Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--espresso);
+  margin: 0 0 8px;
+}
+
+.valueCopy {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--charcoal);
+  margin: 0;
+}
+
+/* ---- Craft (dark full panel) ---- */
+.craftPanel {
+  background: radial-gradient(
+    120% 140% at 0% 0%,
+    #2c251d 0%,
+    var(--espresso) 55%
+  );
+  border: 1px solid rgba(216, 195, 156, 0.18);
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: 1fr 0.85fr;
+  align-items: center;
+  gap: 44px;
+  padding: 48px 52px;
+}
+
+.craftText {
+  display: flex;
+  flex-direction: column;
+}
+
+.craftCopy {
+  color: var(--gold-soft);
+  font-size: 1rem;
+  line-height: 1.75;
+  margin: 0;
+}
+
+/* Facts pulled straight from the copy above, given room to breathe
+   instead of leaving the panel's lower half empty. */
+.craftStats {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(12px, 3vw, 28px);
+  margin: 32px 0 0;
+  padding: 22px 0 0;
+  border-top: 1px solid rgba(216, 195, 156, 0.22);
+}
+
+.craftStats li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding-right: clamp(8px, 2vw, 20px);
+  border-right: 1px solid rgba(216, 195, 156, 0.16);
+}
+
+.craftStats li:last-child {
+  padding-right: 0;
+  border-right: none;
+}
+
+.craftStatNum {
+  font-family: "Fraunces", "Playfair Display", Georgia, serif;
+  font-size: clamp(1rem, 1.1rem + 1vw, 1.35rem);
+  font-weight: 500;
+  color: var(--ivory);
+  white-space: nowrap;
+}
+
+.craftStatLabel {
+  font-size: clamp(0.62rem, 0.55rem + 0.5vw, 0.7rem);
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+  color: rgba(248, 244, 236, 0.62);
+}
+
+/* Same asymmetric gallery pattern as the story section, so the
+   two photo moments on the page feel like one considered system. */
+.craftImages {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 14px;
+}
+
+.craftImageMain {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 6px;
+  grid-row: span 2;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+  transition: transform 0.35s ease;
+}
+
+.craftImageAccent {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 6px;
+  align-self: end;
+  border: 3px solid rgba(248, 244, 236, 0.08);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+  transition: transform 0.35s ease;
+}
+
+.craftImageMain:hover,
+.craftImageAccent:hover {
+  transform: translateY(-4px);
+}
+
+/* ---- Quote ---- */
+.quote {
+  font-family: "Fraunces", "Playfair Display", Georgia, serif;
+  font-size: 1.6rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--espresso);
+  max-width: 760px;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.quoteCite {
+  display: block;
+  margin-top: 18px;
+  font-family: "Work Sans", sans-serif;
+  font-style: normal;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* ================= CTA ================= */
+.cta {
+  text-align: center;
+  padding: 64px 24px 120px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.ctaTitle {
+  font-family: "Fraunces", "Playfair Display", Georgia, serif;
+  font-size: 1.7rem;
+  font-weight: 500;
+  color: var(--espresso);
+  margin: 0 0 24px;
+}
+
+.ctaButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--espresso);
+  color: var(--ivory);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 14px 28px;
+  border-radius: 999px;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.ctaButton:hover {
+  background: var(--gold);
+  transform: translateY(-2px);
+}
+
+/* ================= RESPONSIVE ================= */
+
+/* ---- Laptop / small desktop ---- */
+@media (max-width: 1200px) {
+  .hero {
+    padding: 80px 40px 64px;
+    gap: 36px;
+  }
+
+  .chainBody {
+    padding: 0 40px;
+  }
+
+  .heroTitle {
+    font-size: 2.5rem;
+  }
+
+  .valuesGrid {
+    gap: 20px;
+  }
+
+  .craftPanel {
+    gap: 32px;
+    padding: 40px;
+  }
+}
+
+/* ---- Tablet / mobile: single-column stacking ---- */
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 64px 24px 48px;
+    gap: 28px;
+  }
+
+  .heroTitle {
+    font-size: 2.2rem;
+  }
+
+  .heroImage {
+    height: auto;
+    width: 100%;
+    aspect-ratio: auto;
+    object-fit: contain;
+    border-radius: 12px;
+  }
+
+  .chainBody {
+    padding: 0 24px;
+  }
+
+  .chainRow {
+    grid-template-columns: 1fr;
+  }
+
+  .railCell {
+    display: none;
+  }
+
+  .storyGrid,
+  .valuesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .storyImages {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .craftPanel {
+    grid-template-columns: 1fr;
+    padding: 32px;
+    gap: 32px;
+  }
+
+  .craftImages {
+    order: -1;
+  }
+
+  .rowContent {
+    padding-bottom: 64px;
+  }
+}
+
+/* ---- Small phones ---- */
+@media (max-width: 560px) {
+  .hero {
+    padding: 48px 20px 40px;
+    gap: 20px;
+  }
+
+  .heroTitle {
+    font-size: 1.75rem;
+  }
+
+  .heroSub {
+    font-size: 0.95rem;
+    max-width: none;
+  }
+
+  .heroImage {
+    aspect-ratio: auto;
+    object-fit: contain;
+    border-radius: 10px;
+  }
+
+  .chainBody {
+    padding: 0 18px;
+  }
+
+  .h2 {
+    font-size: 1.6rem;
+  }
+
+  /* The asymmetric two-photo mini-grid gets too cramped this narrow —
+     stack both photos full-width instead. */
+  .storyImages,
+  .craftImages {
+    grid-template-columns: 1fr;
+  }
+
+  .displayImage1,
+  .displayImage2,
+  .craftImageMain,
+  .craftImageAccent {
+    grid-row: auto;
+    aspect-ratio: 4 / 3;
+    align-self: auto;
+  }
+
+  .craftPanel {
+    padding: 24px;
+  }
+
+  .craftStats {
+    gap: 10px;
+  }
+
+  .craftStats li {
+    padding-right: 8px;
+  }
+
+  .quote {
+    font-size: 1.3rem;
+  }
+
+  .ctaTitle {
+    font-size: 1.4rem;
+  }
+
+  .ctaButton {
+    width: auto;
+    max-width: 100%;
+    padding: 14px 24px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctaButton,
+  .displayImage1,
+  .displayImage2,
+  .craftImageMain,
+  .craftImageAccent {
+    transition: none;
+  }
+}
