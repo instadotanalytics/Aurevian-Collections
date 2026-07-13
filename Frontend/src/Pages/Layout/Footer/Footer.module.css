@@ -1,0 +1,330 @@
+/* ------------------------------------------------------------------
+ * Footer.module.css
+ * Aurevian — black / white / gold luxury jewellery footer
+ * ------------------------------------------------------------------ */
+
+.footer {
+  --ink: #0b0b0c;
+  --ink-soft: #151516;
+  --paper: #f6f4ee;
+  --muted: #9c9a92;
+  --muted-2: #8f8d85;
+  --line: #3a3630;
+  --line-soft: #2a2723;
+  --gold: #c9a24b;
+  --gold-light: #e9d9a8;
+  --gold-deep: #8a6d2f;
+
+  background-color: var(--ink);
+  color: var(--paper);
+  position: relative;
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.topLine {
+  height: 2px;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--gold-deep) 15%,
+    var(--gold-light) 50%,
+    var(--gold-deep) 85%,
+    transparent 100%
+  );
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 64px 24px 40px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 32px 32px;
+}
+
+@media (max-width: 767px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+}
+
+/* ---- Brand column ---- */
+.brandCol {
+  grid-column: span 4;
+}
+@media (max-width: 767px) {
+  .brandCol {
+    grid-column: span 1;
+  }
+}
+
+.logoRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.gemIcon {
+  color: var(--gold);
+}
+
+.brandName {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 24px;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  background-image: linear-gradient(90deg, var(--gold-deep) 0%, var(--gold-light) 45%, var(--gold) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tagline {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 280px;
+}
+
+.contactList {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 14px;
+  color: #a9a79f;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.contactItem svg {
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+.socialRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.socialBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  background-color: transparent;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.socialBtn:hover {
+  border-color: var(--gold);
+  background-color: rgba(201, 162, 75, 0.08);
+}
+
+.socialBtn svg {
+  color: var(--gold-light);
+}
+
+/* ---- Link columns ---- */
+.linkCol {
+  grid-column: span 2;
+}
+@media (max-width: 767px) {
+  .linkCol {
+    grid-column: span 1;
+  }
+}
+
+.heading {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-weight: 600;
+  color: var(--gold-light);
+  margin: 0 0 20px;
+}
+
+.linkList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.linkItem a {
+  font-size: 14px;
+  color: #c9c8c2;
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+
+.linkItem a:hover {
+  color: var(--gold-light);
+}
+
+/* ---- Newsletter ---- */
+.newsletterText {
+  font-size: 14px;
+  color: #a9a79f;
+  margin: 0 0 16px;
+}
+
+.newsletterForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.emailInput {
+  font-size: 14px;
+  padding: 10px 12px;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--paper);
+  outline: none;
+  transition: border-color 0.25s ease;
+}
+
+.emailInput:focus {
+  border-color: var(--gold);
+}
+
+.subscribeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 11px;
+  border: none;
+  cursor: pointer;
+  color: var(--ink);
+  background-image: linear-gradient(90deg, var(--gold-deep), var(--gold-light));
+  transition: opacity 0.3s ease;
+}
+
+.subscribeBtn:hover {
+  opacity: 0.9;
+}
+
+/* ---- About / policy row ---- */
+.metaRow {
+  margin-top: 56px;
+  padding-top: 32px;
+  border-top: 1px solid var(--line-soft);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.metaLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+
+.metaLinks a {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-2);
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+
+.metaLinks a:hover {
+  color: var(--gold-light);
+}
+
+/* ---- Chain divider (signature element) ---- */
+.chainStrip {
+  padding: 20px 0;
+  background-color: var(--ink-soft);
+}
+
+.chainRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.chainLink {
+  display: block;
+  width: 5px;
+  height: 5px;
+  transform: rotate(45deg);
+}
+
+.chainLink.bright {
+  background-color: var(--gold-light);
+  opacity: 1;
+}
+
+.chainLink.dim {
+  background-image: linear-gradient(135deg, var(--gold-deep), var(--gold));
+  opacity: 0.55;
+}
+
+/* ---- Bottom bar ---- */
+.bottomBar {
+  background-color: var(--ink-soft);
+}
+
+.bottomInner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .bottomInner {
+    flex-direction: row;
+  }
+}
+
+.copyright {
+  font-size: 12px;
+  color: #7d7b73;
+  margin: 0;
+}
+
+.paymentRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.paymentTag {
+  font-size: 10px;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
