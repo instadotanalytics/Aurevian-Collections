@@ -24,8 +24,10 @@ import {
   offersDropdown,
   accountDropdown,
   aboutDropdown,
-} from "./Navdata";
+} from "./NavData";
+
 import logo from "../../../assets/Aurevianlogo.png";
+
 
 import { Link } from "react-router-dom";
 

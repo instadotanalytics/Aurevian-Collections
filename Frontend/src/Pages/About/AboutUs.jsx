@@ -11,7 +11,7 @@ import displayImage2 from "../../assets/displayImage2.png";
 import craftImage1 from "../../assets/craftImage1.png";
 import craftImage2 from "../../assets/craftImage2.png";
 
-import Header from "../../Component/Header/Header";
+import Header from "../Layout/Header/Header.jsx";
 
 const values = [
   {
