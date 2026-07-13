@@ -1,0 +1,784 @@
+/* ==========================================================================
+   Story.module.css
+   Theme is intentionally identical to Header.module.css — same ink / ivory /
+   gold palette, same two typefaces, same hairline + easing conventions —
+   so this section reads as part of the same house, not a bolted-on page.
+   Font import is safe to remove if Header's <link>/@import already loads it
+   globally in your app shell.
+   ========================================================================== */
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap");
+
+.story {
+  /* ---- shared brand tokens (mirrors Header.module.css exactly) ---- */
+  --ink: #15130f;
+  --ivory: #fbf9f4;
+  --panel: #ffffff;
+  --gold: #b3873f;
+  --gold-deep: #8a6a30;
+  --gold-soft: rgba(179, 135, 63, 0.1);
+  --mid: #8c8577;
+  --line: #e8e2d5;
+
+  /* ---- editorial-specific tokens, still derived from the same palette ---- */
+  --serif: "Cormorant Garamond", serif;
+  --sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: 0.25s var(--ease);
+  --transition-slow: 0.9s var(--ease);
+  --container: min(1200px, 92vw);
+  --gutter: clamp(24px, 6vw, 96px);
+
+  position: relative;
+  width: 100%;
+  max-width: 100vw;
+  /* overflow-x: hidden; */
+  background: var(--ivory);
+  color: var(--ink);
+  font-family: var(--sans);
+}
+
+.story * {
+  box-sizing: border-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Shared eyebrow label used across sections for visual rhythm */
+.eyebrow {
+  display: inline-block;
+  font-family: var(--sans);
+  font-size: clamp(11px, 1vw, 12.5px);
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  margin: 0 0 18px;
+}
+
+.hairline {
+  width: 44px;
+  height: 1.5px;
+  background: var(--gold);
+  border: none;
+  margin: 0 0 22px;
+}
+
+/* ==========================================================================
+   1. HERO
+   ========================================================================== */
+.hero {
+  position: relative;
+  height: 100svh;
+  min-height: 560px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.heroBackground {
+  position: absolute;
+  inset: -6% 0 0 0;
+  width: 100%;
+  height: 112%;
+  will-change: transform;
+}
+
+.heroImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 35%;
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(21, 19, 15, 0.55) 0%,
+    rgba(21, 19, 15, 0.4) 45%,
+    rgba(21, 19, 15, 0.7) 100%
+  );
+  z-index: 1;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 24px;
+  color: var(--ivory);
+}
+
+.heroBrand {
+  font-family: var(--sans);
+  font-size: clamp(13px, 2vw, 16px);
+  font-weight: 600;
+  letter-spacing: clamp(6px, 1.4vw, 10px);
+  text-transform: uppercase;
+  margin: 0 0 20px;
+}
+
+.heroTagline {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(2.1rem, 6vw, 4.6rem);
+  line-height: 1.15;
+  letter-spacing: 0.3px;
+  margin: 0;
+  max-width: 16ch;
+}
+
+.heroScroll {
+  position: absolute;
+  bottom: clamp(24px, 5vh, 48px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--ivory);
+}
+
+.heroScrollLabel {
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.heroScrollLine {
+  width: 1px;
+  height: 40px;
+  background: rgba(251, 249, 244, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.heroScrollLine::after {
+  content: "";
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--gold);
+  animation: scrollTravel 2.2s var(--ease) infinite;
+}
+
+@keyframes scrollTravel {
+  0% {
+    top: -100%;
+  }
+  60% {
+    top: 100%;
+  }
+  100% {
+    top: 100%;
+  }
+}
+
+/* ==========================================================================
+   2. EDITORIAL QUOTE
+   ========================================================================== */
+.quoteSection {
+  padding: clamp(96px, 16vw, 200px) var(--gutter);
+  display: flex;
+  justify-content: center;
+}
+
+.quoteText {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(1.8rem, 5.4vw, 3.6rem);
+  line-height: 1.3;
+  text-align: center;
+  max-width: 18ch;
+  color: var(--ink);
+}
+
+.quoteText span {
+  display: block;
+}
+
+/* ==========================================================================
+   3. OUR STORY — split layout
+   ========================================================================== */
+.split {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: stretch;
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: clamp(48px, 8vw, 80px) var(--gutter) clamp(96px, 14vw, 160px);
+  gap: clamp(40px, 6vw, 72px);
+}
+
+@media (min-width: 860px) {
+  .split {
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: clamp(56px, 7vw, 100px);
+  }
+
+  .splitReverse .splitMedia {
+    order: 2;
+  }
+
+  .splitReverse .splitContent {
+    order: 1;
+  }
+}
+
+.splitMedia {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--line);
+}
+
+.splitImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.2s var(--ease);
+}
+
+.splitMedia:hover .splitImage {
+  transform: scale(1.045);
+}
+
+.splitContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.splitHeading {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(1.9rem, 3.6vw, 2.75rem);
+  line-height: 1.2;
+  margin: 0 0 24px;
+  color: var(--ink);
+}
+
+.splitParagraph {
+  font-size: clamp(0.95rem, 1vw, 1.05rem);
+  line-height: 1.85;
+  color: #3a352c;
+  margin: 0 0 18px;
+  max-width: 54ch;
+}
+
+.splitParagraph:last-child {
+  margin-bottom: 0;
+}
+
+/* ==========================================================================
+   4. JOURNEY TIMELINE
+   Left: a left-aligned vertical timeline with a scroll-linked gold thread.
+   Right: a sticky framed photograph, always visible — no more empty side.
+   ========================================================================== */
+.journey {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: clamp(80px, 12vw, 140px) var(--gutter);
+}
+
+.journeyHeader {
+  text-align: center;
+  margin: 0 auto clamp(56px, 8vw, 96px);
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.journeyHeading {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(1.9rem, 3.6vw, 2.75rem);
+  margin: 0;
+}
+
+.journeyGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(56px, 8vw, 96px);
+}
+
+@media (min-width: 900px) {
+  .journeyGrid {
+    grid-template-columns: 1.05fr 0.95fr;
+    /* no align-items override here — default 'stretch' is what lets the
+       right column match the full height of the timeline, which is what
+       gives the sticky image room to pin for all five steps. */
+  }
+}
+
+/* ---- right: sticky framed photograph ---- */
+.journeySticky {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .journeySticky {
+    display: block;
+    /* Stretched by the grid to the full height of .journeyTrack. This is
+       the sticky element's containing block — it defines how far the
+       inner image can travel before it unpins and scrolls away with the
+       rest of the page. */
+  }
+}
+
+.journeyStickyInner {
+  position: sticky;
+  top: clamp(96px, 12vh, 150px);
+}
+
+/* ---- left: timeline ---- */
+.journeyTrack {
+  --indent: 34px;
+  position: relative;
+  padding-left: var(--indent);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(44px, 6vw, 72px);
+}
+
+.journeyTrack::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 0;
+  width: 1px;
+  background: var(--line);
+}
+
+.journeyThreadFill {
+  position: absolute;
+  top: 6px;
+  left: 0;
+  width: 1.5px;
+  background: var(--gold);
+  transform-origin: top;
+}
+
+.journeyItem {
+  position: relative;
+}
+
+.journeyDot {
+  position: absolute;
+  left: calc(-1 * var(--indent) - 4.5px);
+  top: 4px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--ivory);
+  border: 1.5px solid var(--gold);
+  flex-shrink: 0;
+}
+
+.journeyCard {
+  max-width: 440px;
+}
+
+.journeyOrder {
+  display: flex;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--gold-deep);
+  margin: 0 0 8px;
+}
+
+.journeyTitle {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(1.35rem, 2.2vw, 1.7rem);
+  margin: 0 0 10px;
+  color: var(--ink);
+}
+
+.journeyDescription {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: #3a352c;
+  margin: 0;
+}
+
+/* ---- right: sticky framed photograph ---- */
+.journeySticky {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .journeySticky {
+    display: block;
+    position: sticky;
+    top: clamp(96px, 12vh, 150px);
+  }
+}
+
+.journeyImageFrame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--line);
+}
+
+.journeyImageFrame::before,
+.journeyImageFrame::after {
+  content: "";
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid var(--gold);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.journeyImageFrame::before {
+  top: 14px;
+  left: 14px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.journeyImageFrame::after {
+  bottom: 14px;
+  right: 14px;
+  border-left: none;
+  border-top: none;
+}
+
+.journeyImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.2s var(--ease);
+}
+
+.journeyImageFrame:hover .journeyImage {
+  transform: scale(1.045);
+}
+
+.journeyMediaCaption {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.journeyMediaLine {
+  width: 36px;
+  height: 1px;
+  background: var(--gold);
+  flex-shrink: 0;
+}
+
+.journeyMediaText {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(1rem, 1.2vw, 1.15rem);
+  color: var(--ink);
+}
+
+/* ==========================================================================
+   5. CRAFTSMANSHIP
+   ========================================================================== */
+.featureList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(20px, 3vw, 36px);
+  margin-top: clamp(28px, 4vw, 40px);
+  padding-top: clamp(24px, 3vw, 32px);
+  border-top: 1px solid var(--line);
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  color: var(--ink);
+}
+
+.featureIcon {
+  color: var(--gold-deep);
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   6. IMAGE GALLERY STRIP
+   ========================================================================== */
+.gallerySection {
+  padding: clamp(80px, 12vw, 140px) 0;
+}
+
+.galleryHeader {
+  max-width: var(--container);
+  margin: 0 auto clamp(32px, 5vw, 48px);
+  padding: 0 var(--gutter);
+}
+
+.galleryTrack {
+  display: flex;
+  gap: clamp(14px, 2vw, 24px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px var(--gutter) 28px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold) transparent;
+}
+
+.galleryTrack::-webkit-scrollbar {
+  height: 4px;
+}
+
+.galleryTrack::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 4px;
+}
+
+.galleryTrack::-webkit-scrollbar-track {
+  background: var(--line);
+}
+
+.galleryItem {
+  position: relative;
+  flex: 0 0 auto;
+  width: clamp(240px, 32vw, 380px);
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  scroll-snap-align: start;
+  background: var(--line);
+}
+
+.galleryImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1s var(--ease);
+}
+
+.galleryItem:hover .galleryImage {
+  transform: scale(1.06);
+}
+
+.galleryCaption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 18px 20px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--ivory);
+  background: linear-gradient(180deg, transparent, rgba(21, 19, 15, 0.68));
+}
+
+/* ==========================================================================
+   7. FOUNDER PHILOSOPHY
+   ========================================================================== */
+.founder {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(80px, 12vw, 140px) var(--gutter);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.founderQuote {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0 0 36px;
+}
+
+.founderSignature {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(1.6rem, 2.6vw, 2rem);
+  color: var(--gold-deep);
+  margin: 0 0 6px;
+  position: relative;
+  padding-bottom: 14px;
+}
+
+.founderSignature::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 64px;
+  height: 1.5px;
+  background: var(--gold);
+}
+
+.founderTitle {
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mid);
+}
+
+/* ==========================================================================
+   8. LEGACY
+   ========================================================================== */
+.legacy {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: clamp(80px, 12vw, 140px) var(--gutter);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.legacyHeading {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  line-height: 1.2;
+  margin: 0 0 28px;
+  color: var(--ink);
+}
+
+.legacyParagraph {
+  font-size: clamp(1rem, 1.2vw, 1.15rem);
+  line-height: 1.85;
+  color: #3a352c;
+  max-width: 56ch;
+  margin: 0;
+}
+
+/* ==========================================================================
+   9. CALL TO ACTION
+   ========================================================================== */
+.cta {
+  padding: clamp(72px, 11vw, 120px) var(--gutter) clamp(110px, 15vw, 170px);
+  display: flex;
+  justify-content: center;
+  background: var(--ink);
+}
+
+.ctaButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: transparent;
+  color: var(--ivory);
+  border: 1px solid var(--gold);
+  padding: 18px 40px;
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), gap var(--transition);
+}
+
+.ctaButton:hover {
+  background: var(--gold);
+  color: var(--ink);
+  gap: 18px;
+}
+
+.ctaButton:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+}
+
+.ctaArrow {
+  display: inline-flex;
+  transition: transform var(--transition);
+  font-size: 15px;
+}
+
+.ctaButton:hover .ctaArrow {
+  transform: translateX(3px);
+}
+
+/* ==========================================================================
+   RESPONSIVE: tablet / mobile refinements
+   ========================================================================== */
+@media (max-width: 760px) {
+  .journeyItem {
+    padding-left: 26px;
+    border-left: 1.5px solid var(--line);
+    position: relative;
+  }
+
+  .journeyDot {
+    position: absolute;
+    left: -6.5px;
+    top: 4px;
+    margin: 0;
+  }
+
+  .journeyCard {
+    max-width: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .heroTagline {
+    max-width: 13ch;
+  }
+
+  .galleryItem {
+    width: 72vw;
+  }
+
+  .ctaButton {
+    padding: 16px 30px;
+    letter-spacing: 2px;
+  }
+}
+
+/* Ultra-wide screens: cap line lengths so the layout never feels stretched */
+@media (min-width: 1800px) {
+  .story {
+    --container: 1320px;
+  }
+
+  .heroTagline {
+    max-width: 20ch;
+  }
+}
