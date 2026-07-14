@@ -1,0 +1,880 @@
+Support.module.css /* src/components/Support.module.css */
+
+/* ==========================================================
+   THEME VARIABLES
+   ========================================================== */
+.supportPage {
+  --black: #0a0a0a;
+  --white: #ffffff;
+  --gold: #c9a96c;
+  --gold-light: #f5f0e8;
+  --gray-light: #f8f6f4;
+  --gray-mid: #999999;
+  --gray-border: #e8e3df;
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  min-height: 100vh;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: var(--white);
+  color: var(--black);
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  padding: 0 32px;
+  box-sizing: border-box;
+}
+
+.supportPage *,
+.supportPage *::before,
+.supportPage *::after {
+  box-sizing: border-box;
+}
+
+/* ==========================================================
+   CONTAINER
+   ========================================================== */
+.supportContainer {
+  padding: 30px 0 20px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* ==========================================================
+   HERO SECTION
+   ========================================================== */
+.heroSection {
+  text-align: center;
+  padding: 35px 20px 30px;
+  /* background: linear-gradient(180deg, #faf8f6 0%, #ffffff 100%); */
+  border-radius: 12px;
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.heroTitle {
+  font-size: 38px;
+  font-weight: 300;
+  letter-spacing: 2px;
+  margin: 0 0 12px;
+  color: var(--black);
+  line-height: 1.2;
+}
+
+.heroTitle::after {
+  content: "";
+  display: block;
+  width: 50px;
+  height: 2px;
+  background: var(--gold);
+  margin: 14px auto 0;
+}
+
+.heroSubtitle {
+  font-size: 15px;
+  color: #666;
+  max-width: 520px;
+  margin: 16px auto 0;
+  line-height: 1.7;
+}
+
+/* ==========================================================
+   SUPPORT OPTIONS - SMALLER CARDS
+   ========================================================== */
+.supportOptions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 25px;
+  /* max-width: 1000px; */
+  padding: 0 100px;
+}
+
+.supportCard {
+  text-align: center;
+  padding: 18px 10px;
+  background: var(--white);
+  border: 1px solid var(--gray-border);
+  border-radius: 8px;
+  transition: all var(--transition);
+}
+
+.supportCard:hover {
+  transform: translateY(-3px);
+  border-color: var(--black);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+.supportIconWrapper {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 8px;
+  border-radius: 50%;
+  background: var(--gray-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+
+.supportCard:hover .supportIconWrapper {
+  background: var(--black);
+}
+
+.supportIcon {
+  font-size: 22px;
+  color: var(--black);
+  transition: all var(--transition);
+}
+
+.supportCard:hover .supportIcon {
+  color: var(--white);
+}
+
+.supportCard h4 {
+  font-size: 15px;
+  font-weight: 550;
+  margin: 0 0 4px;
+  color: var(--black);
+}
+
+.supportCard p {
+  font-size: 12px;
+  color: #777;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ==========================================================
+   COMMITMENT SECTION - CLEANER
+   ========================================================== */
+.commitmentSection {
+  padding: 40px 0;
+  /* margin-bottom: 30px; */
+  border-top: 1px solid var(--gray-border);
+  border-bottom: 1px solid var(--gray-border);
+}
+
+.commitmentTitle {
+  font-size: 25px;
+  font-weight: 300;
+  letter-spacing: 2px;
+  text-align: center;
+  margin: 0 0 50px;
+  color: var(--black);
+}
+
+.commitmentTitle::after {
+  content: "";
+  display: block;
+  width: 35px;
+  height: 2px;
+  background: var(--gold);
+  margin: 8px auto 0;
+}
+
+.commitmentGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding: 0 130px;
+}
+
+.commitmentItem {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.commitmentIcon {
+  font-size: 25px;
+  color: var(--gold);
+  min-width: 24px;
+}
+
+.commitmentItem h4 {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0 0 5px;
+  color: var(--black);
+}
+
+.commitmentItem p {
+  font-size: 12px;
+  color: #777;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ==========================================================
+   SUPPORT GRID
+   ========================================================== */
+.supportGrid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 40px;
+  margin: 35px 18px;
+}
+
+/* ==========================================================
+   LEFT COLUMN - SUPPORT INFO
+   ========================================================== */
+.supportInfo {
+  padding-right: 20px;
+  width: 100%;
+}
+
+.sectionTitle {
+  font-size: 30px;
+  font-weight: 300;
+  letter-spacing: 2px;
+  margin: 0 0 10px;
+  color: var(--black);
+}
+
+.sectionSubtitle {
+  font-size: 13px;
+  color: #777;
+  line-height: 1.6;
+  margin: 0 0 28px;
+}
+
+.contactMethods {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.contactMethod {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  background: var(--gray-light);
+  border-radius: 8px;
+  transition: all var(--transition);
+  border: 1px solid transparent;
+}
+
+.contactMethod:hover {
+  background: var(--white);
+  border-color: var(--gray-border);
+  transform: translateX(4px);
+}
+
+.contactIconWrapper {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 50%;
+  background: var(--black);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.contactIcon {
+  font-size: 15px;
+  color: var(--white);
+}
+
+.contactContent h4 {
+  font-size: 14px;
+  font-weight: 550;
+  margin: 0 0 5px;
+  color: var(--black);
+}
+
+.contactContent p {
+  font-size: 13px;
+  color: #555;
+  margin: 0;
+}
+
+.contactTime {
+  font-size: 12px;
+  color: var(--gray-mid);
+  display: block;
+  margin-top: 2px;
+}
+
+/* Trust Badges */
+.trustBadges {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 25px;
+  background: var(--gray-light);
+  border-radius: 8px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.trustItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.trustIcon {
+  font-size: 18px;
+  color: var(--gold);
+}
+
+.trustItem span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+}
+
+.trustDivider {
+  width: 1px;
+  height: 20px;
+  background: var(--gray-border);
+}
+
+/* ==========================================================
+   RIGHT COLUMN - SUPPORT FORM
+   ========================================================== */
+.supportFormWrapper {
+  background: var(--white);
+  padding: 26px 30px;
+  border: 1px solid var(--gray-border);
+  border-radius: 12px;
+  transition: all var(--transition);
+  width: 100%;
+}
+
+.supportFormWrapper:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+}
+
+.formHeader {
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.formTitle {
+  font-size: 22px;
+  font-weight: 300;
+  letter-spacing: 2px;
+  margin: 0 0 4px;
+  color: var(--black);
+}
+
+.formSubtitle {
+  font-size: 13px;
+  color: #999;
+  margin: 0;
+}
+
+.supportForm {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.formLabel {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--black);
+  margin-bottom: 4px;
+}
+
+.formInput {
+  padding: 11px 14px;
+  border: 1px solid var(--gray-border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--black);
+  background: var(--white);
+  transition: all var(--transition);
+  outline: none;
+  width: 100%;
+}
+
+.formInput:focus {
+  border-color: var(--black);
+  box-shadow: 0 0 0 3px rgba(10, 10, 10, 0.04);
+}
+
+.formInput::placeholder {
+  color: #bbb;
+}
+
+.formInput select {
+  appearance: none;
+  cursor: pointer;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.inputError {
+  border-color: #dc3545;
+}
+
+.inputError:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.06);
+}
+
+.errorMessage {
+  font-size: 10px;
+  color: #dc3545;
+  margin-top: 2px;
+}
+
+.submitButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background: var(--black);
+  color: var(--white);
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--transition);
+  margin-top: 4px;
+  width: 100%;
+}
+
+.submitButton:hover {
+  background: #1a1a1a;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.submitButton:active {
+  transform: translateY(0);
+}
+
+.submitIcon {
+  font-size: 15px;
+  transition: transform var(--transition);
+}
+
+.submitButton:hover .submitIcon {
+  transform: translateX(4px);
+}
+
+/* ==========================================================
+   FAQ SECTION - SHORTER
+   ========================================================== */
+.faqSection {
+  padding: 30px 0 10px;
+  border-top: 1px solid var(--gray-border);
+  width: 100%;
+}
+
+.faqHeader {
+  text-align: center;
+  margin-bottom: 25px;
+  width: 100%;
+}
+
+.faqTitle {
+  font-size: 28px;
+  font-weight: 300;
+  letter-spacing: 2px;
+  margin: 0 0 8px;
+  color: var(--black);
+}
+
+.faqTitle::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 2px;
+  background: var(--gold);
+  margin: 10px auto 0;
+}
+
+.faqSubtitle {
+  font-size: 13px;
+  color: #777;
+  margin: 0;
+}
+
+.faqGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  width: 95%;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.faqItem {
+  display: flex;
+  gap: 14px;
+  padding: 16px 20px;
+  border: 1px solid var(--gray-border);
+  border-radius: 12px;
+  transition: all var(--transition);
+  background: var(--white);
+  align-items: flex-start;
+  width: 100%;
+}
+
+.faqItem:hover {
+  border-color: var(--black);
+  transform: translateX(4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.faqNumber {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold);
+  min-width: 28px;
+  line-height: 1.4;
+}
+
+.faqContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.faqContent h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--black);
+  margin: 0 0 4px;
+  line-height: 1.4;
+}
+
+.faqContent p {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #666;
+  margin: 0;
+  word-wrap: break-word;
+}
+
+/* ==========================================================
+   RESPONSIVE BREAKPOINTS
+   ========================================================== */
+@media (max-width: 1024px) {
+  .supportOptions {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .commitmentGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .supportGrid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .supportInfo {
+    padding-right: 0;
+  }
+
+  .heroTitle {
+    font-size: 34px;
+  }
+
+  .faqGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .supportPage {
+    padding: 0 20px;
+  }
+
+  .supportContainer {
+    padding: 20px 0 15px;
+  }
+
+  .heroSection {
+    padding: 30px 16px 16px;
+  }
+
+  .heroTitle {
+    font-size: 28px;
+  }
+
+  .heroSubtitle {
+    font-size: 14px;
+  }
+
+  .supportOptions {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 0 10px;
+  }
+
+  .supportCard {
+    padding: 12px 10px;
+  }
+
+  .supportCard h4 {
+    font-size: 11px;
+  }
+
+  .supportCard p {
+    font-size: 10px;
+  }
+
+  .supportIconWrapper {
+    width: 34px;
+    height: 34px;
+  }
+
+  .supportIcon {
+    font-size: 15px;
+  }
+
+  .commitmentGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    padding: 0 40px;
+  }
+
+  .commitmentTitle {
+    font-size: 18px;
+  }
+
+  .supportFormWrapper {
+    padding: 18px 18px 8px 18px;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .formTitle {
+    font-size: 17px;
+  }
+
+  .formInput {
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+
+  .textarea {
+    min-height: 60px;
+  }
+
+  .submitButton {
+    padding: 8px 20px;
+    font-size: 11px;
+  }
+
+  .sectionTitle {
+    font-size: 22px;
+  }
+
+  .faqGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .faqItem {
+    padding: 14px 16px;
+  }
+
+  .faqContent h4 {
+    font-size: 13px;
+  }
+
+  .faqContent p {
+    font-size: 12px;
+  }
+
+  .trustBadges {
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 12px 14px;
+    gap: 6px;
+  }
+
+  .trustDivider {
+    display: none;
+  }
+
+  .trustItem span {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .supportPage {
+    padding: 0 16px;
+  }
+
+  .supportContainer {
+    padding: 15px 0 10px;
+  }
+
+  .heroTitle {
+    font-size: 22px;
+    letter-spacing: 1px;
+  }
+
+  .heroTitle::after {
+    width: 30px;
+    margin-top: 10px;
+  }
+
+  .supportOptions {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 0 8px;
+  }
+
+  .supportCard {
+    padding: 10px 8px;
+  }
+
+  .supportCard h4 {
+    font-size: 10px;
+  }
+
+  .supportCard p {
+    font-size: 9px;
+  }
+
+  .supportIconWrapper {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 6px;
+  }
+
+  .supportIcon {
+    font-size: 13px;
+  }
+
+  .commitmentGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 0 25px;
+  }
+
+  .commitmentItem {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 4px;
+  }
+
+  .commitmentItem h4 {
+    font-size: 12px;
+  }
+
+  .commitmentItem p {
+    font-size: 11px;
+  }
+
+  .commitmentTitle {
+    font-size: 16px;
+  }
+
+  .supportFormWrapper {
+    padding: 14px 12px 6px 12px;
+  }
+
+  .formTitle {
+    font-size: 16px;
+  }
+
+  .formSubtitle {
+    font-size: 11px;
+  }
+
+  .formLabel {
+    font-size: 9px;
+  }
+
+  .formInput {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .textarea {
+    min-height: 50px;
+  }
+
+  .submitButton {
+    padding: 8px 16px;
+    font-size: 10px;
+  }
+
+  .contactMethod {
+    padding: 10px 12px;
+  }
+
+  .contactIconWrapper {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+  }
+
+  .contactIcon {
+    font-size: 13px;
+  }
+
+  .contactContent p {
+    font-size: 11px;
+  }
+
+  .faqItem {
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 14px;
+  }
+
+  .faqTitle {
+    font-size: 20px;
+  }
+
+  .faqContent h4 {
+    font-size: 13px;
+  }
+
+  .faqContent p {
+    font-size: 12px;
+  }
+
+  .trustBadges {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 12px;
+  }
+
+  .trustItem span {
+    font-size: 10px;
+  }
+}
