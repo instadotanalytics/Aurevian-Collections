@@ -65,11 +65,10 @@
 }
 
 .logoImage {
-<<<<<<< HEAD
+
   height: 50px;
-=======
   height: 48px;
->>>>>>> 5307d76148686f9bba46572b9309369c0560d405
+
   width: auto;
   object-fit: contain;
   display: block;
