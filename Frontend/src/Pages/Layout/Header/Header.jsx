@@ -1,4 +1,4 @@
- import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   FiSearch,
   FiHeart,
@@ -11,8 +11,8 @@ import {
 } from "react-icons/fi";
 import styles from "./Header.module.css";
 
-
 import AnnouncementBar from "./AnnouncementBar";
+import SearchPanel from "./Searchpanel";
 import {
   announcements,
   mainNav,
@@ -28,8 +28,21 @@ import {
 
 import logo from "../../../assets/Aurevianlogo.png";
 
-
 import { Link } from "react-router-dom";
+
+// NOTE: "Fashion Items" is a new mega-menu column requested for the Shop
+// menu. It isn't part of NavData.js yet, so it's defined locally here.
+// Feel free to move this into NavData.js and import it instead, the same
+// way shopCategories / shopQuickLinks / shopByStyle are imported.
+const fashionItems = [
+  { id: "fi-1", label: "Perfumes", path: "/fashion/perfumes" },
+  { id: "fi-2", label: "Watches", path: "/fashion/watches" },
+  { id: "fi-3", label: "Sarees", path: "/fashion/sarees" },
+  { id: "fi-4", label: "Sunglasses", path: "/fashion/sunglasses" },
+  { id: "fi-5", label: "Handbags", path: "/fashion/handbags" },
+  { id: "fi-6", label: "Wallets", path: "/fashion/wallets" },
+  { id: "fi-7", label: "Belts", path: "/fashion/belts" },
+];
 
 const Header = ({
   cartCount = 0,
@@ -44,9 +57,63 @@ const Header = ({
   const [searchOpen, setSearchOpen] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(null); // which mobile section is expanded
   const [accountOpen, setAccountOpen] = useState(false);
-  const [query, setQuery] = useState("");
   const accountRef = useRef(null);
   const searchRef = useRef(null);
+
+  // NOTE: the raw text-input state and submit handler that used to live
+  // here (`query` / `handleSearch`) have moved into SearchPanel.jsx,
+  // which now owns the entire search experience (history, live
+  // suggestions, keyboard nav). Header just renders <SearchPanel /> in
+  // the same two spots the old inline <form> used to live, and forwards
+  // the same `onSearchSubmit` prop it always accepted — so consumers of
+  // <Header onSearchSubmit={...} /> don't need to change anything.
+
+  // ---- Header height tracking ----
+  // The Shop / Gift Guide mega menus are positioned with `position: fixed`
+  // so they are anchored to the viewport instead of to whichever nav item
+  // triggered them. That's what stops them from being clipped on the left
+  // or right edge of the screen. To sit them flush under the header
+  // (announcement bar + top row combined), we measure the header's real
+  // rendered height and publish it as a CSS custom property (--header-h)
+  // on the <header> element itself. Header.module.css reads that variable
+  // for both the mega menu's `top` AND its `max-height`, so they can never
+  // disagree with the real header height.
+  //
+  // We use a ResizeObserver (not just a window `resize` listener) because
+  // the header's height can change for reasons that never fire a window
+  // resize event: the logo image finishing loading, web fonts swapping in,
+  // or the announcement bar wrapping onto a second line on a narrower
+  // tablet. A ResizeObserver catches all of these automatically, which is
+  // what keeps the mega menu correctly aligned to the header on every
+  // device instead of relying on a stale measurement.
+  const navbarRef = useRef(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+
+  useEffect(() => {
+    const node = navbarRef.current;
+    if (!node) return;
+
+    const updateHeaderHeight = () => {
+      setHeaderHeight(node.getBoundingClientRect().height);
+    };
+
+    updateHeaderHeight();
+
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(updateHeaderHeight);
+      observer.observe(node);
+      // Fallback for orientation changes on some older mobile browsers
+      window.addEventListener("orientationchange", updateHeaderHeight);
+      return () => {
+        observer.disconnect();
+        window.removeEventListener("orientationchange", updateHeaderHeight);
+      };
+    }
+
+    // Fallback for browsers without ResizeObserver support
+    window.addEventListener("resize", updateHeaderHeight);
+    return () => window.removeEventListener("resize", updateHeaderHeight);
+  }, []);
 
   // Close account/search dropdowns on outside click
   useEffect(() => {
@@ -83,17 +150,6 @@ const Header = ({
     };
   }, [mobileOpen]);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (onSearchSubmit) {
-      onSearchSubmit(query);
-    } else {
-      // Fallback for demo purposes — replace with real search routing
-      console.log("Search submitted:", query);
-    }
-    setSearchOpen(false);
-  };
-
   const toggleAccordion = (id) => {
     setOpenAccordion((prev) => (prev === id ? null : id));
   };
@@ -104,10 +160,31 @@ const Header = ({
   };
 
   return (
-    <header className={styles.navbar}>
+    <header
+      className={styles.navbar}
+      ref={navbarRef}
+      style={{ "--header-h": headerHeight ? `${headerHeight}px` : undefined }}
+    >
       <AnnouncementBar items={announcementItems || announcements} />
 
-      {/* ================= SINGLE ROW: logo | nav | icons ================= */}
+      {/* ================= SINGLE ROW: logo | nav | icons =================
+          Layout note: .topRow is a single flex row. .desktopNav and
+          .mainNav are `display: contents` in the CSS, which "flattens"
+          them so the logo and every nav link become direct flex children
+          of .topRow, spaced by `justify-content: space-between`.
+          .iconGroup stays a real flex box with its own `gap: 12px` so the
+          4 icons (search, wishlist, cart, account) stay evenly spaced from
+          each other regardless of what happens to the rest of the row.
+          See Header.module.css for details.
+
+          The Shop / Gift Guide mega menus below read their vertical
+          position from the `--header-h` CSS variable set on the <header>
+          tag (see the style prop above), instead of an inline `top` style
+          computed per-render. That variable is kept in sync with the
+          header's real rendered height via a ResizeObserver, so the menus
+          stay correctly aligned under the header on every device, even as
+          the header's height changes (announcement bar wrapping, logo
+          loading, font swaps, orientation changes). */}
       <div className={styles.topRow}>
         <button
           className={styles.hamburgerBtn}
@@ -118,10 +195,19 @@ const Header = ({
         </button>
 
         <a href={logoHref} className={styles.logo}>
-          <img src={logo} alt="Aurevian" className={styles.logoImage} />
+          <img
+            src={logo}
+            alt="Aurevian"
+            className={styles.logoImage}
+            onLoad={() => {
+              if (navbarRef.current) {
+                setHeaderHeight(navbarRef.current.getBoundingClientRect().height);
+              }
+            }}
+          />
         </a>
 
-        {/* ---- Desktop nav (center) ---- */}
+        {/* ---- Desktop nav ---- */}
         <nav className={styles.desktopNav} aria-label="Primary navigation">
           <ul className={styles.mainNav}>
             {mainNav.map((item) => {
@@ -147,42 +233,55 @@ const Header = ({
                     <div
                       className={`${styles.megaMenu} ${styles.megaMenuShop}`}
                     >
-                      <div className={styles.megaCol}>
-                        <h4>Shop by Category</h4>
-                        <ul>
-                          {shopCategories.map((c) => (
-                            <li key={c.id}>
-                              <a href={c.path}>{c.label}</a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className={styles.megaCol}>
-                        <h4>Quick Links</h4>
-                        <ul>
-                          {shopQuickLinks.map((c) => (
-                            <li key={c.id}>
-                              <a href={c.path}>{c.label}</a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className={styles.megaCol}>
-                        <h4>Shop by Style</h4>
-                        <ul>
-                          {shopByStyle.map((c) => (
-                            <li key={c.id}>
-                              <a href={c.path}>{c.label}</a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className={styles.megaBanner}>
-                        <span>New Season</span>
-                        <strong>
-                          Bridal &amp; Festive Edit — Up to 40% Off
-                        </strong>
-                        <a href="/collections/bridal">Shop the edit →</a>
+                      <div className={styles.megaMenuGrid}>
+                        <div className={styles.megaCol}>
+                          <h4>Category</h4>
+                          <ul>
+                            {shopCategories.map((c) => (
+                              <li key={c.id}>
+                                <a href={c.path}>{c.label}</a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className={styles.megaCol}>
+                          <h4>Quick Links</h4>
+                          <ul>
+                            {shopQuickLinks.map((c) => (
+                              <li key={c.id}>
+                                <a href={c.path}>{c.label}</a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className={styles.megaCol}>
+                          <h4>Shop by Style</h4>
+                          <ul>
+                            {shopByStyle.map((c) => (
+                              <li key={c.id}>
+                                <a href={c.path}>{c.label}</a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className={styles.megaCol}>
+                          <h4>Fashion Items</h4>
+                          <ul>
+                            {fashionItems.map((f) => (
+                              <li key={f.id}>
+                                <a href={f.path}>{f.label}</a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className={styles.megaBanner}>
+                          <span>New Season</span>
+                          <strong>Bridal &amp; Festive Edit</strong>
+                          <p className={styles.megaBannerOffer}>
+                            Up to 40% Off
+                          </p>
+                          <a href="/collections/bridal">Shop Now →</a>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -201,35 +300,37 @@ const Header = ({
                   {/* Gift Guide mega menu */}
                   {item.id === "gift-guide" && (
                     <div className={styles.megaMenu}>
-                      <div className={styles.megaCol}>
-                        <h4>By Recipient</h4>
-                        <ul>
-                          {giftGuide.byRecipient.map((g) => (
-                            <li key={g.id}>
-                              <a href={g.path}>{g.label}</a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className={styles.megaCol}>
-                        <h4>By Occasion</h4>
-                        <ul>
-                          {giftGuide.byOccasion.map((g) => (
-                            <li key={g.id}>
-                              <a href={g.path}>{g.label}</a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className={styles.megaCol}>
-                        <h4>By Budget</h4>
-                        <ul>
-                          {giftGuide.byBudget.map((g) => (
-                            <li key={g.id}>
-                              <a href={g.path}>{g.label}</a>
-                            </li>
-                          ))}
-                        </ul>
+                      <div className={styles.megaMenuFlex}>
+                        <div className={styles.megaCol}>
+                          <h4>By Recipient</h4>
+                          <ul>
+                            {giftGuide.byRecipient.map((g) => (
+                              <li key={g.id}>
+                                <a href={g.path}>{g.label}</a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className={styles.megaCol}>
+                          <h4>By Occasion</h4>
+                          <ul>
+                            {giftGuide.byOccasion.map((g) => (
+                              <li key={g.id}>
+                                <a href={g.path}>{g.label}</a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className={styles.megaCol}>
+                          <h4>By Budget</h4>
+                          <ul>
+                            {giftGuide.byBudget.map((g) => (
+                              <li key={g.id}>
+                                <a href={g.path}>{g.label}</a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -273,26 +374,22 @@ const Header = ({
               <FiSearch />
             </button>
 
+            {/* Search icon and this trigger/panel container are unchanged —
+                only the CONTENT inside .searchPanel is now the upgraded,
+                premium SearchPanel component (history, live suggestions,
+                keyboard nav, popular/trending sections, etc). */}
             <div
               className={`${styles.searchPanel} ${searchOpen ? styles.open : ""}`}
             >
-              <form className={styles.searchForm} onSubmit={handleSearch}>
-                <input
-                  type="text"
-                  placeholder="Search for earrings, necklaces, rings..."
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  aria-label="Search products"
-                  autoFocus={searchOpen}
-                />
-                <button
-                  type="submit"
-                  className={styles.searchIconBtn}
-                  aria-label="Submit search"
-                >
-                  <FiSearch />
-                </button>
-              </form>
+              <SearchPanel
+                styles={styles}
+                isOpen={searchOpen}
+                onClose={() => setSearchOpen(false)}
+                onSearchSubmit={onSearchSubmit}
+                variant="dropdown"
+                autoFocus={searchOpen}
+                inputId="aurevian-search-input-desktop"
+              />
             </div>
           </div>
 
@@ -369,25 +466,20 @@ const Header = ({
           </button>
         </div>
 
+        {/* Same reusable SearchPanel, in "inline" mode: no absolute
+            positioning, suggestions/history render directly beneath the
+            input in the drawer's normal scroll flow (see section 9 —
+            mobile support — in Header.module.css). */}
         <div className={styles.drawerSearch}>
-          <form
-            onSubmit={handleSearch}
-            style={{ display: "flex", width: "100%" }}
-          >
-            <input
-              type="text"
-              placeholder="Search jewellery..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            <button
-              type="submit"
-              className={styles.searchIconBtn}
-              aria-label="Search"
-            >
-              <FiSearch />
-            </button>
-          </form>
+          <SearchPanel
+            styles={styles}
+            isOpen={mobileOpen}
+            onClose={() => {}}
+            onSearchSubmit={onSearchSubmit}
+            variant="inline"
+            autoFocus={false}
+            inputId="aurevian-search-input-mobile"
+          />
         </div>
 
         <ul className={styles.drawerNav}>
@@ -422,7 +514,7 @@ const Header = ({
                     className={`${styles.drawerSubPanel} ${expanded ? styles.expanded : ""}`}
                   >
                     <div className={styles.drawerSubGroup}>
-                      <h5>Shop by Category</h5>
+                      <h5>Category</h5>
                       {shopCategories.map((c) => (
                         <a key={c.id} href={c.path} onClick={closeMobileMenu}>
                           {c.label}
@@ -434,6 +526,22 @@ const Header = ({
                       {shopQuickLinks.map((c) => (
                         <a key={c.id} href={c.path} onClick={closeMobileMenu}>
                           {c.label}
+                        </a>
+                      ))}
+                    </div>
+                    <div className={styles.drawerSubGroup}>
+                      <h5>Shop by Style</h5>
+                      {shopByStyle.map((c) => (
+                        <a key={c.id} href={c.path} onClick={closeMobileMenu}>
+                          {c.label}
+                        </a>
+                      ))}
+                    </div>
+                    <div className={styles.drawerSubGroup}>
+                      <h5>Fashion Items</h5>
+                      {fashionItems.map((f) => (
+                        <a key={f.id} href={f.path} onClick={closeMobileMenu}>
+                          {f.label}
                         </a>
                       ))}
                     </div>
