@@ -6,6 +6,8 @@ import WhyAurevian from "./Pages/About/WhyAurevian";
 import Contact from "./Pages/About/Contact";
 import Support from "./Pages/About/Support";
 import AboutUs from "./Pages/About/AboutUs";
+import Cart from "./Pages/Cart/Cart";
+import Like from "./Pages/like/like";
 
 
 
@@ -19,6 +21,9 @@ const App = () => {
         <Route path="/why-aurevian" element={<WhyAurevian />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/support" element={<Support />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/wishlist" element={<Like />} />
+
       </Routes>
     </div>
   );
