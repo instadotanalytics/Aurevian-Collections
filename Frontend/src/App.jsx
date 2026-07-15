@@ -20,6 +20,7 @@ import WhyAurevian from "./Pages/About/WhyAurevian";
 import Contact from "./Pages/About/Contact";
 import Support from "./Pages/About/Support";
 import AboutUs from "./Pages/About/AboutUs";
+import Franchise from "./Pages/About/Franchise";
 import Cart from "./Pages/Cart/Cart";
 import Wishlist from "./Pages/Wishlist/Wishlist.jsx";
 
@@ -123,6 +124,7 @@ const App = () => {
         <Route path="/why-aurevian" element={<WhyAurevian />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/support" element={<Support />} />
+        <Route path="/franchise" element={<Franchise />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/wishlist" element={<Wishlist />} />
 

@@ -1,3 +1,5 @@
+
+
 // Like.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -440,20 +442,9 @@ export default function Like() {
           {/* Header */}
           <header className={styles.header}>
             <div className={styles.headerLeft}>
-              <span className={styles.luxuryBadge}>
-                <FaHeart /> Saved Collection
-              </span>
               <h1 className={styles.title}>Your Wishlist</h1>
-              <p className={styles.subtitle}>
-                Every piece you've admired is waiting to become yours.
-              </p>
             </div>
-            {!isEmpty && (
-              <div className={styles.headerRight}>
-                <span className={styles.countValue}>{items.length}</span>
-                <span className={styles.countLabel}>Saved Pieces</span>
-              </div>
-            )}
+          
           </header>
 
           {isEmpty ? (
@@ -471,38 +462,11 @@ export default function Like() {
             </section>
           ) : (
             <>
-              {/* Stats */}
-              <section className={styles.statsRow}>
-                <StatCard
-                  icon={<FaHeart />}
-                  value={`${items.length} Saved`}
-                  label="Pieces you love"
-                />
-                <StatCard
-                  icon={<FaStar />}
-                  value="Premium"
-                  label="Certified jewellery"
-                />
-                <StatCard
-                  icon={<FiCheck />}
-                  value="Lifetime"
-                  label="Warranty included"
-                />
-              </section>
-
+              
               {/* Toolbar */}
               <section className={styles.toolbar}>
                 <div className={styles.toolbarLeft}>
-                  <button
-                    type="button"
-                    className={`${styles.filterToggle} ${
-                      filterOpen ? styles.filterToggleActive : ""
-                    }`}
-                    onClick={() => setFilterOpen((v) => !v)}
-                  >
-                    <FiSliders /> Filter
-                  </button>
-
+                
                   {filterOpen && (
                     <div className={styles.chipRow}>
                       {CATEGORIES.map((cat) => (
@@ -522,43 +486,9 @@ export default function Like() {
                 </div>
 
                 <div className={styles.toolbarRight}>
-                  <label className={styles.sortLabel}>
-                    Sort by
-                    <select
-                      className={styles.sortSelect}
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                    >
-                      {SORT_OPTIONS.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                
 
-                  <div className={styles.viewToggle}>
-                    <button
-                      type="button"
-                      className={`${styles.viewBtn} ${
-                        viewMode === "grid" ? styles.viewBtnActive : ""
-                      }`}
-                      onClick={() => setViewMode("grid")}
-                      aria-label="Grid view"
-                    >
-                      <FiGrid />
-                    </button>
-                    <button
-                      type="button"
-                      className={`${styles.viewBtn} ${
-                        viewMode === "list" ? styles.viewBtnActive : ""
-                      }`}
-                      onClick={() => setViewMode("list")}
-                      aria-label="List view"
-                    >
-                      <FiList />
-                    </button>
-                  </div>
+        
                 </div>
               </section>
 
@@ -635,24 +565,7 @@ export default function Like() {
             </div>
           </section>
 
-          {/* Features */}
-          <section className={styles.features}>
-            <FeatureCard
-              icon={<FiTruck />}
-              title="Free Shipping"
-              text="Complimentary delivery on every order above ₹999."
-            />
-            <FeatureCard
-              icon={<FiShield />}
-              title="Secure Payment"
-              text="Encrypted checkout, protected end to end."
-            />
-            <FeatureCard
-              icon={<FiRefreshCw />}
-              title="Easy Returns"
-              text="7-day hassle-free returns on all pieces."
-            />
-          </section>
+          
         </div>
 
         {/* Footer Banner */}
@@ -661,12 +574,6 @@ export default function Like() {
           <span className={`${styles.sparkle} ${styles.sparkle2}`} />
           <span className={`${styles.sparkle} ${styles.sparkle3}`} />
           <span className={`${styles.sparkle} ${styles.sparkle4}`} />
-          <div className={styles.footerContent}>
-            <h2 className={styles.footerTitle}>Luxury is Worth Waiting For</h2>
-            <p className={styles.footerText}>
-              Save your favourite jewellery and shop whenever you're ready.
-            </p>
-          </div>
         </section>
 
         {toast && (
