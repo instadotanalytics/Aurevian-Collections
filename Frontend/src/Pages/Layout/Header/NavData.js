@@ -38,7 +38,7 @@ export const mainNav = [
   { id: "home", label: "Home", path: "/" },
   { id: "shop", label: "Shop", path: "/shop", hasMegaMenu: true },
   { id: "collections", label: "Collections", path: "/collections", hasDropdown: true },
-  { id: "new-arrivals", label: "New Arrivals", path: "/new-arrivals" },
+  { id: "new-arrivals", label: "Become a Partner", path: "/become-a-partner" },
   { id: "gift-guide", label: "Gift Guide", path: "/gift-guide", hasMegaMenu: true },
   { id: "offers", label: "Offers", path: "/offers", hasDropdown: true },
   { id: "about", label: "About Us", path: "/about", hasDropdown: true },

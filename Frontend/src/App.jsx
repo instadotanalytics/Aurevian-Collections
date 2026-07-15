@@ -8,9 +8,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { fetchCurrentUser } from "./redux/slices/authSlice.js";
+import { fetchCurrentSuperAdmin } from "./redux/slices/superAdminSlice.js";
 
 // Components
 import PrivateRoute from "./Components/common/PrivateRoute.jsx";
+import SuperAdminRoute from "./Components/common/SuperAdminRoute.jsx";
 import Navbar from "./Pages/Layout/Header/Navbar.jsx";
 import LoadingScreen from "./Components/common/LoadingScreen.jsx";
 
@@ -23,8 +25,6 @@ import AboutUs from "./Pages/About/AboutUs";
 import Cart from "./Pages/Cart/Cart";
 import Wishlist from "./Pages/Wishlist/Wishlist.jsx";
 
-
-
 // ============================================
 // AUTHENTICATION PAGES
 // ============================================
@@ -33,6 +33,12 @@ import Register from "./Auth/Register.jsx";
 import VerifyOTP from "./Auth/VerifyOTP.jsx";
 import ForgotPassword from "./Auth/ForgotPassowrd";
 import ResetPassword from "./Auth/ResetPassword.jsx";
+import SuperAdminLogin from "./Pages/SuperAdmin/SuperAdminLogin.jsx";
+import SuperAdminDashboard from "./Pages/SuperAdmin/SuperAdminDashboard/SuperAdminDashboard.jsx";
+
+// ============================================
+// SUPER ADMIN PAGES
+// ============================================
 
 // ============================================
 // PROTECTED PAGES (Will be added later)
@@ -53,11 +59,16 @@ const ROUTES = {
   RESET_PASSWORD: "/reset-password",
   DASHBOARD: "/dashboard",
   PROFILE: "/profile",
+  SUPER_ADMIN_LOGIN: "/super-admin/login",
+  SUPER_ADMIN_DASHBOARD: "/super-admin/dashboard",
 };
 
 const App = () => {
   const dispatch = useDispatch();
   const { isLoading, isAuthenticated } = useSelector((state) => state.auth);
+  const { isLoading: superAdminLoading, isAuthenticated: isSuperAdmin } = useSelector(
+    (state) => state.superAdmin
+  );
 
   // Check authentication on app load
   useEffect(() => {
@@ -65,10 +76,15 @@ const App = () => {
     if (token) {
       dispatch(fetchCurrentUser());
     }
+
+    const superAdminToken = localStorage.getItem("superAdminToken");
+    if (superAdminToken) {
+      dispatch(fetchCurrentSuperAdmin());
+    }
   }, [dispatch]);
 
   // Show loading screen while checking authentication
-  if (isLoading) {
+  if (isLoading || superAdminLoading) {
     return <LoadingScreen message="Loading your account..." />;
   }
 
@@ -126,10 +142,8 @@ const App = () => {
         <Route path="/cart" element={<Cart />} />
         <Route path="/wishlist" element={<Wishlist />} />
 
-
-
         {/* ============================================
-            AUTH ROUTES - Redirect to dashboard if already logged in
+            AUTH ROUTES - Redirect to home if already logged in
             ============================================ */}
         <Route
           path={ROUTES.LOGIN}
@@ -159,6 +173,28 @@ const App = () => {
           path={ROUTES.RESET_PASSWORD}
           element={
             isAuthenticated ? <Navigate to="/" replace /> : <ResetPassword />
+          }
+        />
+
+        {/* ============================================
+            SUPER ADMIN ROUTES
+            ============================================ */}
+        <Route
+          path={ROUTES.SUPER_ADMIN_LOGIN}
+          element={
+            isSuperAdmin ? (
+              <Navigate to={ROUTES.SUPER_ADMIN_DASHBOARD} replace />
+            ) : (
+              <SuperAdminLogin/>
+            )
+          }
+        />
+        <Route
+          path={ROUTES.SUPER_ADMIN_DASHBOARD}
+          element={
+            <SuperAdminRoute>
+              <SuperAdminDashboard/>
+            </SuperAdminRoute>
           }
         />
 
