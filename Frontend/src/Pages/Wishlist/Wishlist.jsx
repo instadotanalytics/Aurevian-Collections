@@ -15,7 +15,7 @@ import {
   FiCheck,
 } from "react-icons/fi";
 import { FaHeart, FaStar, FaRegStar } from "react-icons/fa";
-import styles from "./Like.module.css";
+import styles from "./Wishlist.module.css";
 import Header from "../Layout/Header/Header";
 import Footer from "../Layout/Footer/Footer";
 
