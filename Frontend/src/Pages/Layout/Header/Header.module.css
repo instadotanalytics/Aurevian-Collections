@@ -1,6 +1,11 @@
-
 @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap");
 
+
+
+*{
+  margin: 0%;
+  padding: 0%;
+}
 /* ==========================================================
    THEME VARIABLES
    A warm, jewellery-house palette: ink instead of flat black,
@@ -106,18 +111,15 @@
   transform: scale(1.03);
 }
 
-/* --- Search (icon-triggered dropdown panel) ---
-   .searchForm is reused inside SearchPanel.jsx for BOTH the desktop
-   dropdown and the mobile inline panel, so its look stays identical
-   in both places. A leading icon (.searchFormLeadIcon) was added
-   in front of the input for the premium look — everything else
-   about this box (border, radius, focus ring) is unchanged. */
+/* --- Search form (reused inside SearchPanel.jsx for both the desktop
+   left-side panel and the mobile inline panel, so its look stays
+   identical in both places). --- */
 .searchForm {
   display: flex;
   align-items: center;
   gap: 8px;
   width: 100%;
-  max-width: 420px;
+  max-width: 480px;
   border: 1px solid var(--ink);
   border-radius: 30px;
   padding: 9px 8px 9px 16px;
@@ -178,43 +180,92 @@
   align-self: center;
 }
 
-/* .searchPanel is the original icon-triggered container — its trigger
-   (the search icon button) and open/close animation are UNCHANGED.
-   Only its width/padding were adjusted (padding moved onto the inner
-   .searchPanelBody, see the new "PREMIUM SEARCH PANEL" section below)
-   so the richer content — history, suggestions, chips — has room to
-   breathe and can scroll independently of the panel's own reveal
-   animation. */
+/* ==========================================================
+   SEARCH PANEL — slides in from the LEFT edge of the screen
+   and covers up to half the viewport width, instead of a small
+   dropdown under the search icon. `position: fixed` anchors it
+   to the viewport (not to .searchWrap), so it always starts
+   flush against the left edge regardless of where the search
+   icon sits in the header. It's full height (100vh) and slides
+   in/out with a transform, backed by .searchOverlay (below)
+   which dims the rest of the page and closes the panel on
+   click — same pattern as the mobile drawer's own overlay.
+   ========================================================== */
 .searchPanel {
-  position: absolute;
-  top: calc(100% + 18px);
-  right: -10px;
-  width: 384px;
-  max-width: 92vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 50vw;
+  max-width: 620px;
+  min-width: 320px;
   background: var(--panel);
   border: none;
-  border-top: 2px solid var(--gold);
-  border-radius: 0 0 12px 12px;
+  border-right: 2px solid var(--gold);
+  border-radius: 0;
   box-shadow:
-    0 28px 56px -16px rgba(21, 19, 15, 0.25),
-    0 6px 16px rgba(21, 19, 15, 0.06);
+    28px 0 56px -16px rgba(21, 19, 15, 0.25),
+    6px 0 16px rgba(21, 19, 15, 0.06);
   padding: 0;
-  opacity: 0;
+  opacity: 1;
   visibility: hidden;
-  transform: translateY(8px);
-  transition: all var(--transition);
-  z-index: 1100;
-  overflow: hidden;
+  transform: translateX(-100%);
+  transition:
+    transform var(--transition),
+    visibility var(--transition);
+  z-index: 1200;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .searchPanel.open {
-  opacity: 1;
   visibility: visible;
-  transform: translateY(0);
+  transform: translateX(0);
 }
 
 .searchPanel .searchForm {
   max-width: none;
+}
+
+.searchPanelCloseBtn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: var(--ink);
+  cursor: pointer;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition);
+  z-index: 2;
+}
+
+.searchPanelCloseBtn:hover {
+  background: var(--gold-soft);
+}
+
+/* Backdrop behind the search panel — dims the rest of the page while
+   the panel is open and closes it on click. */
+.searchOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(21, 19, 15, 0.55);
+  z-index: 1150;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition);
+}
+
+.searchOverlay.show {
+  opacity: 1;
+  visibility: visible;
 }
 
 /* --- Right icons ---
@@ -290,7 +341,11 @@
   background: var(--gold-soft);
 }
 
-/* --- Account dropdown --- */
+/* --- Account dropdown ---
+   Single, consolidated definition (a duplicate, differently-themed
+   copy of this block used to live further down the file and would
+   silently win/lose depending on source order — removed). Uses the
+   same gold/ivory theme variables as the rest of the header. */
 .accountWrap {
   position: relative;
   align-self: center;
@@ -303,13 +358,13 @@
   background: var(--panel);
   border: none;
   border-top: 2px solid var(--gold);
-  border-radius: 0 0 8px 8px;
-  min-width: 216px;
+  border-radius: 0 0 12px 12px;
+  min-width: 240px;
   max-width: 90vw;
   box-shadow:
     0 28px 56px -16px rgba(21, 19, 15, 0.25),
     0 6px 16px rgba(21, 19, 15, 0.06);
-  padding: 10px 0;
+  padding: 8px 0;
   opacity: 0;
   visibility: hidden;
   transform: translateY(8px);
@@ -317,7 +372,6 @@
   z-index: 1100;
 }
 
-.accountWrap:hover .accountDropdown,
 .accountDropdown.open {
   opacity: 1;
   visibility: visible;
@@ -346,13 +400,6 @@
 .accountDropdown button:hover {
   background: var(--gold-soft);
   padding-left: 24px;
-}
-
-.accountDropdown .logoutItem {
-  border-top: 1px solid var(--line);
-  margin-top: 6px;
-  font-weight: 600;
-  color: var(--gold-deep);
 }
 
 /* ==========================================================
@@ -811,12 +858,11 @@
   background: var(--gold-soft);
 }
 
-/* .drawerSearch used to contain its own inline <form>. It now just
-   hosts the shared <SearchPanel variant="inline" />, which renders
-   its own styled .searchForm (identical look to the desktop one) plus
-   the history/suggestions/chips content directly beneath it in the
-   drawer's normal scroll flow — no border/padding needed on this
-   wrapper anymore, SearchPanel supplies its own spacing. */
+/* .drawerSearch hosts the shared <SearchPanel variant="inline" />, which
+   renders its own styled .searchForm (identical look to the desktop one)
+   plus the history/suggestions/chips content directly beneath it in the
+   drawer's normal scroll flow — no border/padding needed on this wrapper,
+   SearchPanel supplies its own spacing. */
 .drawerSearch {
   margin: 18px 20px;
 }
@@ -928,19 +974,20 @@
 }
 
 /* ==========================================================
-   PREMIUM SEARCH PANEL (SearchPanel.jsx)
+   PREMIUM SEARCH PANEL CONTENT (SearchPanel.jsx)
    ==========================================================
-   Everything below is new. It styles the content that now lives
-   inside the existing .searchPanel (desktop) / .drawerSearch
-   (mobile) containers — the icon, trigger, and outer chrome
-   above are untouched.
+   Everything below styles the content that now lives inside the
+   left-side .searchPanel (desktop) / .drawerSearch (mobile)
+   containers.
 
    .searchPanelBody is the shared wrapper. Two layout variants:
-     .searchPanelDropdown — desktop: fixed max-height, its own
-        internal scroll, so the outer .searchPanel's open/close
-        animation never has to animate a changing height.
-     .searchPanelInline   — mobile: no max-height of its own; it
-        simply grows in the drawer's existing page-level scroll.
+     .searchPanelDropdown — desktop: now used for the left-side
+        panel. Fills the panel's full height with its own
+        internal scroll and leaves room at the top for the close
+        button (see padding-top below).
+     .searchPanelInline   — mobile: no fixed height of its own;
+        it simply grows in the drawer's existing page-level
+        scroll.
    ========================================================== */
 .searchPanelBody {
   display: flex;
@@ -948,8 +995,8 @@
 }
 
 .searchPanelDropdown {
-  padding: 18px;
-  max-height: min(70vh, 560px);
+  padding: 64px 28px 28px;
+  height: 100%;
   overflow-y: auto;
 }
 
@@ -1167,6 +1214,199 @@
 }
 
 /* ==========================================================
+   AUTHENTICATION UI (avatar, account dropdown user info, drawer
+   user card) — restyled to use the header's own theme variables
+   instead of hardcoded blue/purple colors, so it matches the
+   ivory/gold aesthetic used everywhere else.
+   ========================================================== */
+.avatarImage {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatarInitials {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-deep) 100%);
+  color: var(--ivory);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.accountUserInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.accountAvatar {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.accountAvatarImage {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.accountAvatarText {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-deep) 100%);
+  color: var(--ivory);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.accountUserName {
+  display: flex;
+  flex-direction: column;
+}
+
+.accountUserName strong {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.accountUserName span {
+  font-size: 12px;
+  color: var(--mid);
+}
+
+.accountDivider {
+  height: 1px;
+  background: var(--line);
+  margin: 6px 0;
+}
+
+.accountMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 13.5px;
+  transition: background var(--transition);
+}
+
+.accountMenuItem:hover {
+  background: var(--gold-soft);
+}
+
+.accountMenuItem svg {
+  font-size: 16px;
+  color: var(--mid);
+}
+
+.logoutItem {
+  border-top: 1px solid var(--line);
+  margin-top: 6px;
+  font-weight: 600;
+  color: var(--gold-deep);
+}
+
+.logoutItem svg {
+  color: var(--gold-deep);
+}
+
+.logoutItem:hover {
+  background: var(--gold-soft);
+}
+
+/* --- Mobile drawer user info card --- */
+.drawerUserInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+  margin: 0 4px 8px 4px;
+  background: var(--gold-soft);
+  border-radius: 8px;
+}
+
+.drawerUserAvatar {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.drawerUserAvatarImage {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.drawerUserAvatarText {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-deep) 100%);
+  color: var(--ivory);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.drawerUserName {
+  display: flex;
+  flex-direction: column;
+}
+
+.drawerUserName strong {
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.drawerUserName span {
+  font-size: 13px;
+  color: var(--mid);
+}
+
+.drawerLogoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  color: var(--gold-deep);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+  text-align: left;
+  transition: background var(--transition);
+  border-radius: 4px;
+}
+
+.drawerLogoutBtn:hover {
+  background: var(--gold-soft);
+}
+
+.drawerLogoutBtn svg {
+  font-size: 18px;
+}
+
+/* ==========================================================
    RESPONSIVE BREAKPOINTS
    ========================================================== */
 
@@ -1252,8 +1492,9 @@
     object-fit: contain;
   }
 
+  /* Search panel widens on tablets since there's less room to spare */
   .searchPanel {
-    right: -60px;
+    width: 70vw;
   }
 
   .accountDropdown {
@@ -1312,15 +1553,24 @@
   }
 }
 
-/* --- Search panel: larger touch targets + full-width layout on
-   small screens (mobile support requirement — section 9 of brief). --- */
+/* --- Search panel: on small phones "half the screen" isn't usable, so
+   the panel goes near-full-width instead. Larger touch targets for
+   suggestions/chips too (mobile support requirement). --- */
+@media (max-width: 640px) {
+  .searchPanel {
+    width: 88vw;
+    max-width: none;
+    min-width: 0;
+  }
+}
+
 @media (max-width: 480px) {
   .searchPanel {
-    width: calc(100vw - 24px);
+    width: 100vw;
   }
 
   .searchPanelDropdown {
-    padding: 14px;
+    padding: 60px 16px 20px;
   }
 
   .suggestionItem {
