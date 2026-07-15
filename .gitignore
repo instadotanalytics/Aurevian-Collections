@@ -1,0 +1,6 @@
+# Environment files
+Backend/.env
+Frontend/.env
+
+# Firebase Service Account
+Backend/firebase-service-account.json
