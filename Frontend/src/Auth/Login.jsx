@@ -27,9 +27,12 @@ const Login = () => {
     try {
       setIsLoading(true);
       await dispatch(loginWithEmail({ email, password })).unwrap();
-      
+
+      const user = await dispatch(loginWithEmail({ email, password })).unwrap();
+
       toast.success("Login successful! Welcome back.");
-      navigate("/dashboard");
+
+      navigate(`/`);
     } catch (error) {
       if (error?.requireVerification) {
         dispatch(setOTPSent(email));

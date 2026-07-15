@@ -1,41 +1,61 @@
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
 
 dotenv.config();
 
 class EmailService {
   constructor() {
     this.transporter = nodemailer.createTransport({
-      service: 'gmail',
+      service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
     });
+
+    this.transporter.verify((err, success) => {
+      if (err) {
+        console.error("❌ Gmail connection failed:", err);
+      } else {
+        console.log("✅ Gmail transporter is ready");
+      }
+    });
   }
 
   async sendEmail({ to, subject, html }) {
     try {
-      const mailOptions = {
-        from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+      const info = await this.transporter.sendMail({
+        from: `"Aurevian Collections" <${process.env.EMAIL_FROM}>`,
         to,
         subject,
         html,
-      };
+      });
 
-      const info = await this.transporter.sendMail(mailOptions);
-      console.log(`✅ Email sent to ${to}: ${info.messageId}`);
-      return { success: true, messageId: info.messageId };
-    } catch (error) {
-      console.error('❌ Email sending failed:', error.message);
-      return { success: false, error: error.message };
+      console.log("========== EMAIL INFO ==========");
+      console.log("Accepted:", info.accepted);
+      console.log("Rejected:", info.rejected);
+      console.log("Response:", info.response);
+      console.log("Message ID:", info.messageId);
+      console.log("================================");
+
+      return {
+        success: true,
+        info,
+      };
+    } catch (err) {
+      console.error(err);
+      return {
+        success: false,
+        error: err.message,
+      };
     }
   }
 
-  async sendOTPEmail(to, otp, type = 'verification') {
-    const subject = type === 'forgot_password' 
-      ? 'Reset Your Password - Aurevian Collections' 
-      : 'Verify Your Email - Aurevian Collections';
+  async sendOTPEmail(to, otp, type = "verification") {
+    const subject =
+      type === "forgot_password"
+        ? "Reset Your Password - Aurevian Collections"
+        : "Verify Your Email - Aurevian Collections";
 
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -45,12 +65,14 @@ class EmailService {
         </div>
         <div style="padding: 30px; background: white; border-radius: 0 0 10px 10px; border: 1px solid #eee;">
           <h2 style="color: #333; margin-top: 0;">
-            ${type === 'forgot_password' ? 'Reset Your Password' : 'Verify Your Email'}
+            ${type === "forgot_password" ? "Reset Your Password" : "Verify Your Email"}
           </h2>
           <p style="color: #666; line-height: 1.6;">
-            ${type === 'forgot_password' 
-              ? 'We received a request to reset your password. Use the OTP below to proceed.' 
-              : 'Welcome to Aurevian Collections! Please verify your email address using the OTP below.'}
+            ${
+              type === "forgot_password"
+                ? "We received a request to reset your password. Use the OTP below to proceed."
+                : "Welcome to Aurevian Collections! Please verify your email address using the OTP below."
+            }
           </p>
           <div style="text-align: center; padding: 20px; margin: 20px 0; background: #f0f4ff; border-radius: 8px; border: 2px dashed #667eea;">
             <h1 style="font-size: 32px; letter-spacing: 10px; color: #333; margin: 0;">${otp}</h1>
@@ -67,7 +89,7 @@ class EmailService {
   }
 
   async sendWelcomeEmail(to, name) {
-    const subject = 'Welcome to Aurevian Collections! ✨';
+    const subject = "Welcome to Aurevian Collections! ✨";
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px 10px 0 0;">
