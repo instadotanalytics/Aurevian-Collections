@@ -21,7 +21,7 @@ import Contact from "./Pages/About/Contact";
 import Support from "./Pages/About/Support";
 import AboutUs from "./Pages/About/AboutUs";
 import Cart from "./Pages/Cart/Cart";
-import Like from "./Pages/like/like";
+import Wishlist from "./Pages/Wishlist/Wishlist.jsx";
 
 
 
@@ -124,7 +124,7 @@ const App = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/support" element={<Support />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/wishlist" element={<Like />} />
+        <Route path="/wishlist" element={<Wishlist />} />
 
 
 

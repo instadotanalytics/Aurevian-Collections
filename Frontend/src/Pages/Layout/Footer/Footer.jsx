@@ -1,6 +1,8 @@
+
 import React, { useState } from "react";
-import { Mail, Phone, MapPin, ArrowRight, Gem } from "lucide-react";
+import { Mail, Phone, MapPin, ArrowRight } from "lucide-react";
 import styles from "./Footer.module.css";
+import logo from "../../../assets/Aurevianlogo.png";
 
 /* ------------------------------------------------------------------
  * Data (mirrors navData.js shape — swap for your real imports:
@@ -80,7 +82,14 @@ const YoutubeIcon = (props) => (
   </svg>
 );
 
-const socialIcons = [InstagramIcon, FacebookIcon, YoutubeIcon];
+const socialIcons = [
+  {
+    Icon: InstagramIcon,
+    href: "https://www.instagram.com/aureviancollections?igsh=bDc1NHBlcWJxeG5o&utm_source=qr",
+  },
+  { Icon: FacebookIcon, href: "#" },
+  { Icon: YoutubeIcon, href: "#" },
+];
 
 function ChainDivider() {
   const links = Array.from({ length: 40 });
@@ -128,10 +137,9 @@ export default function Footer() {
         <div className={styles.grid}>
           {/* Brand column */}
           <div className={styles.brandCol}>
-            <div className={styles.logoRow}>
-              <Gem size={22} strokeWidth={1.5} className={styles.gemIcon} />
-              <span className={styles.brandName}>AUREVIAN</span>
-            </div>
+            <a href="/" className={styles.logoRow}>
+              <img src={logo} alt="Aurevian" className={styles.logoImage} />
+            </a>
             <p className={styles.tagline}>
               Fine jewellery crafted for every story worth telling — timeless
               gold, modern lines, made to be handed down.
@@ -140,21 +148,27 @@ export default function Footer() {
             <div className={styles.contactList}>
               <div className={styles.contactItem}>
                 <Phone size={14} />
-                <span>+91 98765 43210</span>
+                <span>+91 6261478315</span>
               </div>
               <div className={styles.contactItem}>
                 <Mail size={14} />
-                <span>hello@aurevian.com</span>
+                <span>info.aurevian.switzerland@gmail.com</span>
               </div>
               <div className={styles.contactItem}>
                 <MapPin size={14} />
-                <span>Bhopal, Madhya Pradesh, India</span>
+                <span>Indore, Madhya Pradesh, India</span>
               </div>
             </div>
 
             <div className={styles.socialRow}>
-              {socialIcons.map((Icon, idx) => (
-                <a key={idx} href="#" className={styles.socialBtn}>
+              {socialIcons.map(({ Icon, href }, idx) => (
+                <a
+                  key={idx}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.socialBtn}
+                >
                   <Icon />
                 </a>
               ))}
