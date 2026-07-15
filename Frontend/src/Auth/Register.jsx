@@ -205,7 +205,7 @@ const Register = () => {
         </div>
 
         {/* Google Login */}
-        <GoogleLoginButton redirectTo="/dashboard" />
+        <GoogleLoginButton redirectTo="/" />
 
         {/* Login Link */}
         <p className={styles.footerText}>

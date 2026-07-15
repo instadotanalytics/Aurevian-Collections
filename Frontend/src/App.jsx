@@ -136,31 +136,31 @@ const App = () => {
         <Route
           path={ROUTES.LOGIN}
           element={
-            isAuthenticated ? <Navigate to={ROUTES.DASHBOARD} replace /> : <Login />
+            isAuthenticated ? <Navigate to="/" replace /> : <Login />
           }
         />
         <Route
           path={ROUTES.REGISTER}
           element={
-            isAuthenticated ? <Navigate to={ROUTES.DASHBOARD} replace /> : <Register />
+            isAuthenticated ? <Navigate to="/" replace /> : <Register />
           }
         />
         <Route
           path={ROUTES.VERIFY_OTP}
           element={
-            isAuthenticated ? <Navigate to={ROUTES.DASHBOARD} replace /> : <VerifyOTP />
+            isAuthenticated ? <Navigate to="/" replace /> : <VerifyOTP />
           }
         />
         <Route
           path={ROUTES.FORGOT_PASSWORD}
           element={
-            isAuthenticated ? <Navigate to={ROUTES.DASHBOARD} replace /> : <ForgotPassword />
+            isAuthenticated ? <Navigate to="/" replace /> : <ForgotPassword />
           }
         />
         <Route
           path={ROUTES.RESET_PASSWORD}
           element={
-            isAuthenticated ? <Navigate to={ROUTES.DASHBOARD} replace /> : <ResetPassword />
+            isAuthenticated ? <Navigate to="/" replace /> : <ResetPassword />
           }
         />
 

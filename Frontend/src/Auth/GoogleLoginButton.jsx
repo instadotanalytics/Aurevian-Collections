@@ -11,7 +11,7 @@ import {
 
 import { googleLogin } from "../api/authApi";
 
-const GoogleLoginButton = ({ redirectTo = "/dashboard" }) => {
+const GoogleLoginButton = ({ redirectTo = "/" }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
