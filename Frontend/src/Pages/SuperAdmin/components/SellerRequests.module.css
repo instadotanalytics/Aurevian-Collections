@@ -1,0 +1,492 @@
+/* src/Pages/SuperAdmin/SuperAdminDashboard/components/SellerRequests.module.css */
+
+.sellerRequests {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #999;
+  margin: 4px 0 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  background: #f5f6fa;
+  border-radius: 8px;
+  padding: 8px 14px;
+  border: 1px solid #e8e8e8;
+  transition: border-color 0.3s ease;
+}
+
+.searchBox:focus-within {
+  border-color: #c8a86e;
+}
+
+.searchIcon {
+  color: #999;
+  margin-right: 8px;
+}
+
+.searchInput {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  color: #333;
+  width: 200px;
+}
+
+.filterBox {
+  display: flex;
+  align-items: center;
+  background: #f5f6fa;
+  border-radius: 8px;
+  padding: 8px 14px;
+  border: 1px solid #e8e8e8;
+}
+
+.filterIcon {
+  color: #999;
+  margin-right: 8px;
+}
+
+.filterSelect {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+}
+
+/* Stats Row */
+.statsRow {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  padding: 16px;
+  background: #f8f6f4;
+  border-radius: 12px;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statNumber {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.statLabel {
+  font-size: 13px;
+  color: #999;
+}
+
+.pendingStat .statNumber { color: #f59e0b; }
+.approvedStat .statNumber { color: #10b981; }
+.rejectedStat .statNumber { color: #ef4444; }
+.suspendedStat .statNumber { color: #8b5cf6; }
+
+/* Table */
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table thead th {
+  text-align: left;
+  padding: 12px 16px;
+  font-weight: 600;
+  color: #666;
+  border-bottom: 2px solid #f0ebe6;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.table tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0ebe6;
+  vertical-align: middle;
+}
+
+.table tbody tr:hover {
+  background: #faf8f6;
+}
+
+/* Seller Info */
+.sellerInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sellerAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #c8a86e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.sellerAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sellerName {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.sellerId {
+  font-size: 12px;
+  color: #999;
+}
+
+/* Contact Info */
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contactInfo div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #666;
+}
+
+/* Store Info */
+.storeInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.storeInfo strong {
+  color: #1a1a1a;
+}
+
+.storeInfo span {
+  font-size: 12px;
+  color: #999;
+}
+
+/* Status Badge */
+.statusBadge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pending {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.approved {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.rejected {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.suspended {
+  background: #f5f3ff;
+  color: #5b21b6;
+}
+
+.underReview {
+  background: #ecfeff;
+  color: #0e7490;
+}
+
+/* Date Info */
+.dateInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #666;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 6px;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.actionBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.approveBtn {
+  background: #10b981;
+  color: white;
+}
+
+.approveBtn:hover:not(:disabled) {
+  background: #059669;
+}
+
+.rejectBtn {
+  background: #ef4444;
+  color: white;
+}
+
+.rejectBtn:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.suspendBtn {
+  background: #8b5cf6;
+  color: white;
+}
+
+.suspendBtn:hover:not(:disabled) {
+  background: #7c3aed;
+}
+
+.unsuspendBtn {
+  background: #06b6d4;
+  color: white;
+}
+
+.unsuspendBtn:hover:not(:disabled) {
+  background: #0891b2;
+}
+
+.viewBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  background: white;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.viewBtn:hover {
+  border-color: #c8a86e;
+  color: #c8a86e;
+}
+
+/* Empty State */
+.emptyRow td {
+  padding: 40px 0;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: #999;
+}
+
+.emptyState svg {
+  color: #ddd;
+}
+
+.emptyState p {
+  font-size: 16px;
+}
+
+/* Loading */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+  color: #999;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  font-size: 32px;
+  color: #c8a86e;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #f0ebe6;
+}
+
+.pageBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  background: white;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pageBtn:hover:not(.disabled) {
+  border-color: #c8a86e;
+  color: #c8a86e;
+}
+
+.pageBtn.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  font-size: 14px;
+  color: #666;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sellerRequests {
+    padding: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+  }
+
+  .headerActions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .searchBox {
+    width: 100%;
+  }
+
+  .searchInput {
+    width: 100%;
+  }
+
+  .filterBox {
+    width: 100%;
+  }
+
+  .filterSelect {
+    width: 100%;
+  }
+
+  .statsRow {
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .statItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .statNumber {
+    font-size: 16px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .actionButtons {
+    flex-wrap: wrap;
+  }
+
+  .actionBtn {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+}

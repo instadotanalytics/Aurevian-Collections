@@ -1,0 +1,122 @@
+/* src/Pages/Seller/SellerDashboard/components/RecentOrders.module.css */
+
+.recentOrders {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.viewAll {
+  font-size: 14px;
+  color: #c8a86e;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.viewAll:hover {
+  text-decoration: underline;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.emptyState p {
+  font-size: 16px;
+  color: #666;
+  margin: 0 0 5px;
+}
+
+.emptyState span {
+  font-size: 14px;
+  color: #999;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #f0ebe6;
+}
+
+.table td {
+  padding: 12px;
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px solid #f0ebe6;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover {
+  background: #f8f6f4;
+}
+
+.orderId {
+  font-weight: 600;
+  color: #c8a86e;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.processing {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.shipped {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.delivered {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}

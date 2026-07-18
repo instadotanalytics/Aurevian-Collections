@@ -1,11 +1,14 @@
+// Backend/controllers/superAdminController.js
+
+import Seller from '../models/Seller.js';
 import SuperAdmin from '../models/SuperAdmin.js';
-import superAdminService from '../services/superAdminService.js';
-import tokenService from '../services/tokenService.js';
+import emailService from '../services/emailService.js';
+import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
-/**
- * Super Admin Login
- */
+// ============================================
+// SUPER ADMIN LOGIN
+// ============================================
 export const superAdminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -17,49 +20,70 @@ export const superAdminLogin = async (req, res) => {
       });
     }
 
-    // Verify credentials
-    const result = await superAdminService.verifyCredentials(email, password);
-    if (!result.success) {
+    const admin = await SuperAdmin.findOne({ email }).select('+password');
+    if (!admin) {
       return res.status(401).json({
         success: false,
-        message: result.message
+        message: 'Invalid credentials'
       });
     }
 
-    const superAdmin = result.data;
+    const isPasswordValid = await bcrypt.compare(password, admin.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
+
+    if (!admin.isActive) {
+      return res.status(403).json({
+        success: false,
+        message: 'Account is deactivated'
+      });
+    }
 
     // Generate tokens
-    const { accessToken, refreshToken } = tokenService.generateTokens(superAdmin);
-    const expiresAt = tokenService.getTokenExpiry(refreshToken);
-    await superAdmin.addRefreshToken(refreshToken, expiresAt);
-    await superAdmin.addLoginHistory({
-      ipAddress: req.ip || req.headers['x-forwarded-for'] || req.connection?.remoteAddress,
-      userAgent: req.headers['user-agent'],
-      success: true,
+    const accessToken = jwt.sign(
+      { id: admin._id, role: 'super_admin' },
+      process.env.JWT_ACCESS_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    const refreshToken = jwt.sign(
+      { id: admin._id, role: 'super_admin' },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    admin.lastLogin = new Date();
+    admin.refreshToken = refreshToken;
+    admin.refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    await admin.save();
+
+    // Set cookies
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.cookie('superAdminToken', accessToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      maxAge: 24 * 60 * 60 * 1000,
+      path: '/'
     });
-
-    tokenService.setAuthCookies(res, accessToken, refreshToken);
-
-    const adminData = {
-      _id: superAdmin._id,
-      firstName: superAdmin.firstName,
-      lastName: superAdmin.lastName,
-      fullName: superAdmin.fullName,
-      email: superAdmin.email,
-      profileImage: superAdmin.profileImage,
-      role: superAdmin.role,
-      isSuperAdmin: superAdmin.isSuperAdmin,
-      isActive: superAdmin.isActive,
-      phone: superAdmin.phone,
-      permissions: superAdmin.permissions,
-      preferences: superAdmin.preferences,
-    };
 
     return res.status(200).json({
       success: true,
-      message: 'Super Admin login successful',
-      data: adminData,
-      token: accessToken,
+      message: 'Login successful',
+      data: {
+        id: admin._id,
+        firstName: admin.firstName,
+        lastName: admin.lastName,
+        fullName: admin.fullName,
+        email: admin.email,
+        role: admin.role,
+        profileImage: admin.profileImage
+      },
+      token: accessToken
     });
 
   } catch (error) {
@@ -72,74 +96,73 @@ export const superAdminLogin = async (req, res) => {
   }
 };
 
-/**
- * Get Current Super Admin
- */
+// ============================================
+// GET CURRENT SUPER ADMIN
+// ============================================
 export const getCurrentSuperAdmin = async (req, res) => {
   try {
-    const superAdmin = await SuperAdmin.findById(req.user.id)
-      .select('-refreshTokens -loginHistory -__v -password');
-
-    if (!superAdmin) {
+    const admin = await SuperAdmin.findById(req.admin.id)
+      .select('-password -refreshToken -refreshTokenExpiry');
+    
+    if (!admin) {
       return res.status(404).json({
         success: false,
-        message: 'Super Admin not found'
+        message: 'Admin not found'
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: 'Super Admin retrieved successfully',
-      data: superAdmin,
+      data: admin
     });
 
   } catch (error) {
-    console.error('❌ Get current super admin error:', error);
+    console.error('❌ Get current admin error:', error);
     return res.status(500).json({
       success: false,
-      message: 'Failed to get super admin',
+      message: 'Failed to get admin',
       error: error.message
     });
   }
 };
 
-/**
- * Update Super Admin Profile
- */
+// ============================================
+// UPDATE SUPER ADMIN PROFILE
+// ============================================
 export const updateSuperAdminProfile = async (req, res) => {
   try {
-    const { firstName, lastName, phone, preferences } = req.body;
-    const superAdminId = req.user.id;
+    const adminId = req.admin.id;
+    const { firstName, lastName, phone, profileImage, preferences } = req.body;
 
-    const superAdmin = await SuperAdmin.findById(superAdminId);
-    if (!superAdmin) {
+    const admin = await SuperAdmin.findById(adminId);
+    if (!admin) {
       return res.status(404).json({
         success: false,
-        message: 'Super Admin not found'
+        message: 'Admin not found'
       });
     }
 
-    // Update fields
-    if (firstName) superAdmin.firstName = firstName;
-    if (lastName) superAdmin.lastName = lastName;
+    if (firstName) admin.firstName = firstName;
+    if (lastName) admin.lastName = lastName;
     if (firstName || lastName) {
-      superAdmin.fullName = `${superAdmin.firstName} ${superAdmin.lastName}`.trim();
+      admin.fullName = `${admin.firstName} ${admin.lastName}`.trim();
     }
-    if (phone) superAdmin.phone = phone;
+    if (phone) admin.phone = phone;
+    if (profileImage) admin.profileImage = profileImage;
     if (preferences) {
-      superAdmin.preferences = { ...superAdmin.preferences, ...preferences };
+      admin.preferences = { ...admin.preferences, ...preferences };
     }
 
-    await superAdmin.save();
+    await admin.save();
 
     return res.status(200).json({
       success: true,
       message: 'Profile updated successfully',
-      data: superAdmin,
+      data: admin
     });
 
   } catch (error) {
-    console.error('❌ Update super admin error:', error);
+    console.error('❌ Update admin profile error:', error);
     return res.status(500).json({
       success: false,
       message: 'Failed to update profile',
@@ -148,13 +171,13 @@ export const updateSuperAdminProfile = async (req, res) => {
   }
 };
 
-/**
- * Change Super Admin Password
- */
+// ============================================
+// CHANGE SUPER ADMIN PASSWORD
+// ============================================
 export const changeSuperAdminPassword = async (req, res) => {
   try {
+    const adminId = req.admin.id;
     const { currentPassword, newPassword } = req.body;
-    const superAdminId = req.user.id;
 
     if (!currentPassword || !newPassword) {
       return res.status(400).json({
@@ -170,16 +193,15 @@ export const changeSuperAdminPassword = async (req, res) => {
       });
     }
 
-    const superAdmin = await SuperAdmin.findById(superAdminId).select('+password');
-    if (!superAdmin) {
+    const admin = await SuperAdmin.findById(adminId).select('+password');
+    if (!admin) {
       return res.status(404).json({
         success: false,
-        message: 'Super Admin not found'
+        message: 'Admin not found'
       });
     }
 
-    // Verify current password
-    const isPasswordValid = await bcrypt.compare(currentPassword, superAdmin.password);
+    const isPasswordValid = await bcrypt.compare(currentPassword, admin.password);
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
@@ -187,14 +209,14 @@ export const changeSuperAdminPassword = async (req, res) => {
       });
     }
 
-    // Hash new password
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-    superAdmin.password = hashedPassword;
-    await superAdmin.save();
+    admin.password = await bcrypt.hash(newPassword, salt);
+    await admin.save();
 
-    // Clear all refresh tokens for security
-    await superAdmin.clearRefreshTokens();
+    // Clear refresh tokens for security
+    admin.refreshToken = undefined;
+    admin.refreshTokenExpiry = undefined;
+    await admin.save();
 
     return res.status(200).json({
       success: true,
@@ -211,32 +233,23 @@ export const changeSuperAdminPassword = async (req, res) => {
   }
 };
 
-/**
- * Logout Super Admin
- */
+// ============================================
+// SUPER ADMIN LOGOUT
+// ============================================
 export const superAdminLogout = async (req, res) => {
   try {
-    const refreshToken = req.signedCookies?.refreshToken;
-
-    if (refreshToken) {
-      try {
-        const decoded = tokenService.decodeToken(refreshToken);
-        if (decoded && decoded.id) {
-          const superAdmin = await SuperAdmin.findById(decoded.id);
-          if (superAdmin) {
-            await superAdmin.removeRefreshToken(refreshToken);
-          }
-        }
-      } catch (error) {
-        console.error('Error removing refresh token:', error);
-      }
+    const adminId = req.admin?.id;
+    if (adminId) {
+      await SuperAdmin.findByIdAndUpdate(adminId, {
+        $unset: { refreshToken: 1, refreshTokenExpiry: 1 }
+      });
     }
 
-    tokenService.clearAuthCookies(res);
+    res.clearCookie('superAdminToken', { path: '/' });
 
     return res.status(200).json({
       success: true,
-      message: 'Logged out successfully',
+      message: 'Logged out successfully'
     });
 
   } catch (error) {
@@ -249,12 +262,12 @@ export const superAdminLogout = async (req, res) => {
   }
 };
 
-/**
- * Refresh Super Admin Token
- */
+// ============================================
+// REFRESH SUPER ADMIN TOKEN
+// ============================================
 export const refreshSuperAdminToken = async (req, res) => {
   try {
-    const refreshToken = req.signedCookies?.refreshToken || req.body.refreshToken;
+    const refreshToken = req.cookies?.superAdminRefreshToken || req.body.refreshToken;
 
     if (!refreshToken) {
       return res.status(401).json({
@@ -263,36 +276,52 @@ export const refreshSuperAdminToken = async (req, res) => {
       });
     }
 
-    const decoded = tokenService.verifyRefreshToken(refreshToken);
-    const superAdmin = await SuperAdmin.findById(decoded.id);
-    if (!superAdmin || !superAdmin.isActive) {
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    const admin = await SuperAdmin.findById(decoded.id);
+
+    if (!admin || admin.refreshToken !== refreshToken) {
       return res.status(401).json({
         success: false,
         message: 'Invalid refresh token'
       });
     }
 
-    const tokenExists = superAdmin.refreshTokens.some(rt => rt.token === refreshToken);
-    if (!tokenExists) {
-      return res.status(401).json({
-        success: false,
-        message: 'Refresh token not found'
-      });
-    }
+    const accessToken = jwt.sign(
+      { id: admin._id, role: 'super_admin' },
+      process.env.JWT_ACCESS_SECRET,
+      { expiresIn: '1d' }
+    );
 
-    const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-      tokenService.generateTokens(superAdmin);
+    const newRefreshToken = jwt.sign(
+      { id: admin._id, role: 'super_admin' },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: '7d' }
+    );
 
-    await superAdmin.removeRefreshToken(refreshToken);
-    const newExpiresAt = tokenService.getTokenExpiry(newRefreshToken);
-    await superAdmin.addRefreshToken(newRefreshToken, newExpiresAt);
+    admin.refreshToken = newRefreshToken;
+    admin.refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    await admin.save();
 
-    tokenService.setAuthCookies(res, newAccessToken, newRefreshToken);
+    res.cookie('superAdminToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 24 * 60 * 60 * 1000,
+      path: '/'
+    });
+
+    res.cookie('superAdminRefreshToken', newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/'
+    });
 
     return res.status(200).json({
       success: true,
       message: 'Token refreshed successfully',
-      token: newAccessToken,
+      token: accessToken
     });
 
   } catch (error) {
@@ -305,25 +334,430 @@ export const refreshSuperAdminToken = async (req, res) => {
   }
 };
 
-/**
- * Get All Super Admins (Super Admin only)
- */
-export const getAllSuperAdmins = async (req, res) => {
+// ============================================
+// GET ALL SELLER REQUESTS (For Super Admin)
+// ============================================
+export const getAllSellerRequests = async (req, res) => {
   try {
-    const superAdmins = await SuperAdmin.find()
-      .select('-refreshTokens -loginHistory -__v -password');
+    const { status, page = 1, limit = 20, search } = req.query;
+
+    const query = {};
+    if (status && status !== 'all') query.status = status;
+    if (search) {
+      query.$or = [
+        { email: { $regex: search, $options: 'i' } },
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { fullName: { $regex: search, $options: 'i' } },
+        { 'storeInfo.storeName': { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const [sellers, total] = await Promise.all([
+      // ✅ FIXED: removed "-otp" — schema's select:false on otp.email.code /
+      // otp.phone.code / expiresAt already excludes those nested fields
+      // automatically. Explicitly excluding the parent "-otp" too caused a
+      // MongoDB "Path collision" error (can't exclude a field and a nested
+      // path under it at the same time).
+      Seller.find(query)
+        .select('-password -refreshToken -refreshTokenExpiry -__v')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit)),
+      Seller.countDocuments(query)
+    ]);
+
+    // Get all stats
+    const [totalSellers, pending, approved, rejected, suspended, underReview] = await Promise.all([
+      Seller.countDocuments(),
+      Seller.countDocuments({ status: 'pending' }),
+      Seller.countDocuments({ status: 'approved' }),
+      Seller.countDocuments({ status: 'rejected' }),
+      Seller.countDocuments({ status: 'suspended' }),
+      Seller.countDocuments({ status: 'under_review' })
+    ]);
+
+    const stats = {
+      total: totalSellers,
+      pending,
+      approved,
+      rejected,
+      suspended,
+      underReview
+    };
 
     return res.status(200).json({
       success: true,
-      message: 'Super Admins retrieved successfully',
-      data: superAdmins,
+      data: sellers,
+      stats,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
     });
 
   } catch (error) {
-    console.error('❌ Get all super admins error:', error);
+    console.error('❌ Get seller requests error:', error);
     return res.status(500).json({
       success: false,
-      message: 'Failed to get super admins',
+      message: 'Failed to fetch seller requests',
+      error: error.message
+    });
+  }
+};
+
+// ============================================
+// GET SELLER DETAILS (For Super Admin)
+// ============================================
+export const getSellerDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // ✅ FIXED: same "-otp" path collision fix as above
+    const seller = await Seller.findById(id)
+      .select('-password -refreshToken -refreshTokenExpiry -__v');
+
+    if (!seller) {
+      return res.status(404).json({
+        success: false,
+        message: 'Seller not found'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: seller
+    });
+
+  } catch (error) {
+    console.error('❌ Get seller details error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to fetch seller details',
+      error: error.message
+    });
+  }
+};
+
+// ============================================
+// APPROVE SELLER
+// ============================================
+export const approveSeller = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const adminId = req.admin.id;
+
+    const seller = await Seller.findById(id);
+    if (!seller) {
+      return res.status(404).json({
+        success: false,
+        message: 'Seller not found'
+      });
+    }
+
+    if (seller.status === 'approved') {
+      return res.status(400).json({
+        success: false,
+        message: 'Seller already approved'
+      });
+    }
+
+    // Update seller status
+    seller.status = 'approved';
+    seller.isVerified = true;
+    seller.isActive = true;
+    seller.approvedAt = new Date();
+    seller.statusUpdatedBy = adminId;
+    seller.statusUpdatedAt = new Date();
+    seller.verification.kycStatus = 'verified';
+    seller.verification.kycVerifiedAt = new Date();
+
+    await seller.save();
+
+    // Send approval email with login link
+    const loginLink = `${process.env.CLIENT_URL}/seller/login`;
+    await emailService.sendSellerApprovalEmail(
+      seller.email,
+      seller.firstName,
+      seller.storeInfo.storeName,
+      loginLink
+    );
+
+    // Add to stats
+    seller.stats = seller.stats || {};
+    await seller.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Seller approved successfully',
+      data: seller
+    });
+
+  } catch (error) {
+    console.error('❌ Approve seller error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to approve seller',
+      error: error.message
+    });
+  }
+};
+
+// ============================================
+// REJECT SELLER
+// ============================================
+export const rejectSeller = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+    const adminId = req.admin.id;
+
+    if (!reason) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a rejection reason'
+      });
+    }
+
+    const seller = await Seller.findById(id);
+    if (!seller) {
+      return res.status(404).json({
+        success: false,
+        message: 'Seller not found'
+      });
+    }
+
+    if (seller.status === 'rejected') {
+      return res.status(400).json({
+        success: false,
+        message: 'Seller already rejected'
+      });
+    }
+
+    // Update seller status
+    seller.status = 'rejected';
+    seller.isVerified = false;
+    seller.isActive = false;
+    seller.rejectedAt = new Date();
+    seller.rejectedReason = reason;
+    seller.statusUpdatedBy = adminId;
+    seller.statusUpdatedAt = new Date();
+    seller.verification.kycStatus = 'rejected';
+    seller.verification.kycRejectedAt = new Date();
+    seller.verification.kycRejectionReason = reason;
+
+    await seller.save();
+
+    // Send rejection email
+    await emailService.sendSellerRejectionEmail(
+      seller.email,
+      seller.firstName,
+      seller.storeInfo.storeName,
+      reason
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'Seller rejected successfully',
+      data: seller
+    });
+
+  } catch (error) {
+    console.error('❌ Reject seller error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to reject seller',
+      error: error.message
+    });
+  }
+};
+
+// ============================================
+// SUSPEND SELLER
+// ============================================
+export const suspendSeller = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason, suspendedUntil } = req.body;
+    const adminId = req.admin.id;
+
+    if (!reason) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a suspension reason'
+      });
+    }
+
+    const seller = await Seller.findById(id);
+    if (!seller) {
+      return res.status(404).json({
+        success: false,
+        message: 'Seller not found'
+      });
+    }
+
+    if (seller.status === 'suspended') {
+      return res.status(400).json({
+        success: false,
+        message: 'Seller already suspended'
+      });
+    }
+
+    // Update seller status
+    seller.status = 'suspended';
+    seller.isActive = false;
+    seller.suspendedAt = new Date();
+    seller.suspendedReason = reason;
+    seller.suspendedUntil = suspendedUntil ? new Date(suspendedUntil) : null;
+    seller.statusUpdatedBy = adminId;
+    seller.statusUpdatedAt = new Date();
+
+    await seller.save();
+
+    // Send suspension email
+    await emailService.sendSellerSuspensionEmail(
+      seller.email,
+      seller.firstName,
+      seller.storeInfo.storeName,
+      reason
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'Seller suspended successfully',
+      data: seller
+    });
+
+  } catch (error) {
+    console.error('❌ Suspend seller error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to suspend seller',
+      error: error.message
+    });
+  }
+};
+
+// ============================================
+// UNSUSPEND SELLER
+// ============================================
+export const unsuspendSeller = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const adminId = req.admin.id;
+
+    const seller = await Seller.findById(id);
+    if (!seller) {
+      return res.status(404).json({
+        success: false,
+        message: 'Seller not found'
+      });
+    }
+
+    if (seller.status !== 'suspended') {
+      return res.status(400).json({
+        success: false,
+        message: 'Seller is not suspended'
+      });
+    }
+
+    // Update seller status
+    seller.status = 'approved';
+    seller.isActive = true;
+    seller.suspendedAt = null;
+    seller.suspendedReason = null;
+    seller.suspendedUntil = null;
+    seller.statusUpdatedBy = adminId;
+    seller.statusUpdatedAt = new Date();
+
+    await seller.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Seller unsuspended successfully',
+      data: seller
+    });
+
+  } catch (error) {
+    console.error('❌ Unsuspend seller error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to unsuspend seller',
+      error: error.message
+    });
+  }
+};
+
+// ============================================
+// GET SELLER STATS
+// ============================================
+export const getSellerStats = async (req, res) => {
+  try {
+    const stats = {
+      total: await Seller.countDocuments(),
+      pending: await Seller.countDocuments({ status: 'pending' }),
+      approved: await Seller.countDocuments({ status: 'approved' }),
+      rejected: await Seller.countDocuments({ status: 'rejected' }),
+      suspended: await Seller.countDocuments({ status: 'suspended' }),
+      underReview: await Seller.countDocuments({ status: 'under_review' }),
+      verified: await Seller.countDocuments({ isVerified: true }),
+      active: await Seller.countDocuments({ isActive: true })
+    };
+
+    return res.status(200).json({
+      success: true,
+      data: stats
+    });
+
+  } catch (error) {
+    console.error('❌ Get seller stats error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to get seller stats',
+      error: error.message
+    });
+  }
+};
+
+// ============================================
+// DELETE SELLER (Soft Delete)
+// ============================================
+export const deleteSeller = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const adminId = req.admin.id;
+
+    const seller = await Seller.findById(id);
+    if (!seller) {
+      return res.status(404).json({
+        success: false,
+        message: 'Seller not found'
+      });
+    }
+
+    seller.isDeleted = true;
+    seller.deletedAt = new Date();
+    seller.isActive = false;
+    seller.status = 'deleted';
+    seller.statusUpdatedBy = adminId;
+    seller.statusUpdatedAt = new Date();
+
+    await seller.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Seller deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('❌ Delete seller error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to delete seller',
       error: error.message
     });
   }

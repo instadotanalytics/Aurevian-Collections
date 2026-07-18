@@ -1,0 +1,904 @@
+/* src/Pages/SuperAdmin/SuperAdminDashboard/components/SellerDetails.module.css */
+
+.sellerDetails {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   Error Container
+   ============================================ */
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+}
+
+.errorIcon {
+  font-size: 48px;
+  color: #ef4444;
+}
+
+.errorContainer h3 {
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.closeBtn {
+  padding: 10px 24px;
+  background: #c8a86e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.3s ease;
+}
+
+.closeBtn:hover {
+  background: #b8944a;
+}
+
+/* ============================================
+   Header
+   ============================================ */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.backBtn:hover {
+  background: #f0ebe6;
+  color: #1a1a1a;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.headerRight {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.statusBadge {
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.statusBadge.pending {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.statusBadge.approved {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.statusBadge.rejected {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.statusBadge.suspended {
+  background: #f5f3ff;
+  color: #5b21b6;
+}
+
+.statusBadge.underReview {
+  background: #ecfeff;
+  color: #0e7490;
+}
+
+.statusBadge.deleted {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.kycBadge {
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.kycBadge.kycPending {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.kycBadge.kycSubmitted {
+  background: #e0e7ff;
+  color: #1e40af;
+}
+
+.kycBadge.kycUnderReview {
+  background: #ecfeff;
+  color: #0e7490;
+}
+
+.kycBadge.kycVerified {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.kycBadge.kycRejected {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+/* ============================================
+   Profile Section
+   ============================================ */
+.profileSection {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background: #f8f6f4;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.profileAvatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #c8a86e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 32px;
+  font-weight: 600;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.profileAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profileInfo {
+  flex: 1;
+}
+
+.profileName {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 4px;
+}
+
+.profileEmail,
+.profilePhone,
+.profileStore {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #666;
+  margin: 4px 0;
+}
+
+.profileEmail svg,
+.profilePhone svg,
+.profileStore svg {
+  color: #c8a86e;
+}
+
+.profileActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ============================================
+   Action Buttons
+   ============================================ */
+.statusActions {
+  display: flex;
+  gap: 8px;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.actionBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.approveBtn {
+  background: #10b981;
+  color: white;
+}
+
+.approveBtn:hover:not(:disabled) {
+  background: #059669;
+}
+
+.rejectBtn {
+  background: #ef4444;
+  color: white;
+}
+
+.rejectBtn:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.suspendBtn {
+  background: #8b5cf6;
+  color: white;
+}
+
+.suspendBtn:hover:not(:disabled) {
+  background: #7c3aed;
+}
+
+.unsuspendBtn {
+  background: #06b6d4;
+  color: white;
+}
+
+.unsuspendBtn:hover:not(:disabled) {
+  background: #0891b2;
+}
+
+.editBtn {
+  background: #c8a86e;
+  color: white;
+}
+
+.editBtn:hover:not(:disabled) {
+  background: #b8944a;
+}
+
+/* ============================================
+   Stats Grid
+   ============================================ */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.statCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f8f6f4;
+  border-radius: 12px;
+}
+
+.statIcon {
+  font-size: 24px;
+  color: #c8a86e;
+}
+
+.statInfo {
+  flex: 1;
+}
+
+.statValue {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.statLabel {
+  display: block;
+  font-size: 12px;
+  color: #999;
+}
+
+/* ============================================
+   Details Grid
+   ============================================ */
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.detailsCard {
+  background: #f8f6f4;
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.detailsTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e8e2d5;
+}
+
+.detailsTitle svg {
+  color: #c8a86e;
+}
+
+.detailsContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  gap: 12px;
+}
+
+.detailLabel {
+  font-size: 13px;
+  color: #999;
+  font-weight: 500;
+  min-width: 100px;
+}
+
+.detailValue {
+  font-size: 14px;
+  color: #333;
+  text-align: right;
+  word-break: break-word;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.detailIcon {
+  color: #c8a86e;
+  font-size: 14px;
+}
+
+/* ============================================
+   Edit Inputs
+   ============================================ */
+.editInput {
+  padding: 4px 8px;
+  border: 2px solid #e8e2d5;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  width: 100%;
+  max-width: 200px;
+  background: white;
+}
+
+.editInput:focus {
+  outline: none;
+  border-color: #c8a86e;
+}
+
+.editTextarea {
+  padding: 8px;
+  border: 2px solid #e8e2d5;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  width: 100%;
+  resize: vertical;
+  background: white;
+}
+
+.editTextarea:focus {
+  outline: none;
+  border-color: #c8a86e;
+}
+
+/* ============================================
+   Document Links
+   ============================================ */
+.documentLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.documentLinks a {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid #e8e2d5;
+  border-radius: 6px;
+  color: #c8a86e;
+  text-decoration: none;
+  font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+.documentLinks a:hover {
+  border-color: #c8a86e;
+  background: #f8f6f4;
+}
+
+/* ============================================
+   Timeline
+   ============================================ */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.timelineItem {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.timelineDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #d1d5db;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.timelineDot.approved {
+  background: #10b981;
+}
+
+.timelineDot.rejected {
+  background: #ef4444;
+}
+
+.timelineDot.suspended {
+  background: #8b5cf6;
+}
+
+.timelineDot.updated {
+  background: #c8a86e;
+}
+
+.timelineContent {
+  flex: 1;
+}
+
+.timelineLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
+  display: block;
+}
+
+.timelineDate {
+  font-size: 12px;
+  color: #999;
+}
+
+.timelineReason {
+  font-size: 13px;
+  color: #666;
+  margin: 4px 0 0;
+  font-style: italic;
+}
+
+/* ============================================
+   Edit Actions
+   ============================================ */
+.editActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 2px solid #f0ebe6;
+  margin-top: 8px;
+}
+
+.cancelEditBtn {
+  padding: 10px 24px;
+  background: #f0ebe6;
+  color: #666;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.3s ease;
+}
+
+.cancelEditBtn:hover {
+  background: #e0d8d0;
+}
+
+.saveEditBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background: #c8a86e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.saveEditBtn:hover:not(:disabled) {
+  background: #b8944a;
+}
+
+.saveEditBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   Modals
+   ============================================ */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modalContent {
+  background: white;
+  border-radius: 16px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0ebe6;
+}
+
+.modalHeader h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #1a1a1a;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #999;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.modalClose:hover {
+  color: #1a1a1a;
+}
+
+.modalBody {
+  padding: 24px;
+}
+
+.modalBody p {
+  margin: 0 0 12px;
+  color: #666;
+}
+
+.modalTextarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e8e2d5;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.modalTextarea:focus {
+  outline: none;
+  border-color: #c8a86e;
+}
+
+.modalField {
+  margin-top: 16px;
+}
+
+.modalField label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.modalInput {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e8e2d5;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.modalInput:focus {
+  outline: none;
+  border-color: #c8a86e;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #f0ebe6;
+}
+
+.modalCancel {
+  padding: 10px 20px;
+  background: #f0ebe6;
+  color: #666;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.3s ease;
+}
+
+.modalCancel:hover {
+  background: #e0d8d0;
+}
+
+.modalConfirm {
+  padding: 10px 20px;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.modalConfirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.modalConfirm.rejectBtn {
+  background: #ef4444;
+}
+
+.modalConfirm.rejectBtn:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.modalConfirm.suspendBtn {
+  background: #8b5cf6;
+}
+
+.modalConfirm.suspendBtn:hover:not(:disabled) {
+  background: #7c3aed;
+}
+
+/* ============================================
+   Spinner
+   ============================================ */
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 1024px) {
+  .detailsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .sellerDetails {
+    padding: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profileSection {
+    flex-direction: column;
+    text-align: center;
+    padding: 16px;
+  }
+
+  .profileInfo {
+    text-align: center;
+  }
+
+  .profileEmail,
+  .profilePhone,
+  .profileStore {
+    justify-content: center;
+  }
+
+  .profileActions {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .statusActions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .actionBtn {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .detailRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .detailValue {
+    text-align: left;
+    justify-content: flex-start;
+  }
+
+  .editInput {
+    max-width: 100%;
+  }
+
+  .modalContent {
+    margin: 20px;
+    max-height: 80vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .headerRight {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .profileAvatar {
+    width: 64px;
+    height: 64px;
+    font-size: 24px;
+  }
+
+  .profileName {
+    font-size: 18px;
+  }
+
+  .editActions {
+    flex-direction: column;
+  }
+
+  .cancelEditBtn,
+  .saveEditBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .modalFooter {
+    flex-direction: column;
+  }
+
+  .modalCancel,
+  .modalConfirm {
+    width: 100%;
+    justify-content: center;
+  }
+}

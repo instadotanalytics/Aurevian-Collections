@@ -1,99 +1,92 @@
-import tokenService from '../services/tokenService.js';
+// Backend/middleware/superAdminAuth.js
+
+import jwt from 'jsonwebtoken';
 import SuperAdmin from '../models/SuperAdmin.js';
 
-/**
- * Protect Super Admin routes
- */
 export const protectSuperAdmin = async (req, res, next) => {
   try {
-    let token = req.signedCookies?.accessToken;
+    let token;
 
-    if (!token) {
-      const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        token = authHeader.substring(7);
-      }
+    // Check Authorization header
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
+    // Check cookie
+    if (!token && req.cookies?.superAdminToken) {
+      token = req.cookies.superAdminToken;
     }
 
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'Access token required. Please login as Super Admin.'
+        message: 'Not authorized, no token provided'
       });
     }
 
-    let decoded;
-    try {
-      decoded = tokenService.verifyAccessToken(token);
-    } catch (error) {
-      if (error.message === 'Access token expired') {
-        return res.status(401).json({
-          success: false,
-          message: 'Access token expired',
-          code: 'TOKEN_EXPIRED'
-        });
-      }
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid access token',
-        code: 'INVALID_TOKEN'
-      });
-    }
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
 
-    // Check if user is Super Admin
-    const superAdmin = await SuperAdmin.findById(decoded.id)
-      .select('-refreshTokens -__v -password -loginHistory');
-
-    if (!superAdmin) {
-      return res.status(401).json({
-        success: false,
-        message: 'Super Admin not found',
-        code: 'USER_NOT_FOUND'
-      });
-    }
-
-    if (!superAdmin.isActive) {
+    // Check if it's super admin
+    if (decoded.role !== 'super_admin') {
       return res.status(403).json({
         success: false,
-        message: 'Account is deactivated',
-        code: 'ACCOUNT_DEACTIVATED'
+        message: 'Access denied. Super Admin only.'
       });
     }
 
-    // Check if user has super admin role
-    if (superAdmin.role !== 'super_admin' && !superAdmin.isSuperAdmin) {
+    // Get admin
+    const admin = await SuperAdmin.findById(decoded.id)
+      .select('-password -refreshToken -refreshTokenExpiry');
+    
+    if (!admin) {
+      return res.status(401).json({
+        success: false,
+        message: 'Admin not found'
+      });
+    }
+
+    if (!admin.isActive) {
       return res.status(403).json({
         success: false,
-        message: 'Super Admin access required',
-        code: 'ACCESS_DENIED'
+        message: 'Account is deactivated'
       });
     }
 
-    req.user = superAdmin;
+    req.admin = admin;
     next();
 
   } catch (error) {
-    console.error('❌ Super Admin auth middleware error:', error);
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token'
+      });
+    }
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({
+        success: false,
+        message: 'Token expired'
+      });
+    }
+    console.error('❌ Auth middleware error:', error);
     return res.status(500).json({
       success: false,
-      message: 'Authentication failed',
-      error: error.message
+      message: 'Server error during authentication'
     });
   }
 };
 
-/**
- * Check if user is Super Admin
- */
+// Optional: Check if user is Super Admin
 export const isSuperAdmin = (req, res, next) => {
-  if (!req.user) {
+  if (!req.admin) {
     return res.status(401).json({
       success: false,
       message: 'Authentication required'
     });
   }
 
-  if (req.user.role !== 'super_admin' && !req.user.isSuperAdmin) {
+  if (req.admin.role !== 'super_admin') {
     return res.status(403).json({
       success: false,
       message: 'Super Admin access required'

@@ -1,31 +1,30 @@
-import dotenv from 'dotenv';
+// config/cors.js
 
+import dotenv from 'dotenv';
 dotenv.config();
+
+const allowedOrigins = [
+  process.env.CLIENT_URL || 'http://localhost:5173',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'http://localhost:5000',
+];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    // Allow all in development
+    if (!origin) {
+      return callback(null, true);
+    }
     if (process.env.NODE_ENV === 'development') {
       return callback(null, true);
     }
-    
-    const allowedOrigins = [
-      process.env.CLIENT_URL || 'http://localhost:5173',
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'http://localhost:3000',
-      'https://aurevian-collections.vercel.app',
-      'https://aurevian-collections.web.app',
-    ];
-    
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       console.warn(`❌ CORS blocked origin: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error(`Not allowed by CORS: ${origin}`));
     }
   },
   credentials: true,
