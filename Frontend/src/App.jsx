@@ -86,6 +86,25 @@ const ROUTES = {
   BECOME_A_PARTNER: "/become-a-partner",
 };
 
+// ============================================
+// LAYOUT COMPONENTS
+// ============================================
+
+// ✅ Layout with Header
+const LayoutWithHeader = ({ children }) => (
+  <>
+    <Navbar />
+    {children}
+  </>
+);
+
+// ✅ Layout without Header
+const LayoutWithoutHeader = ({ children }) => (
+  <>
+    {children}
+  </>
+);
+
 const App = () => {
   const dispatch = useDispatch();
   const { isLoading, isAuthenticated } = useSelector((state) => state.auth);
@@ -153,64 +172,158 @@ const App = () => {
         }}
       />
 
-      {/* Navbar - Shows user profile if authenticated */}
-      <Navbar />
-
-      {/* ============================================
-          WRAPPER WITH SELLER AUTH PROVIDER
-          ============================================ */}
-      {/* <SellerAuthProvider> */}
+      <SellerAuthProvider>
         <Routes>
           {/* ============================================
-              PUBLIC ROUTES - Accessible without authentication
+              PUBLIC ROUTES - WITH HEADER
               ============================================ */}
-          <Route path={ROUTES.HOME} element={<Home />} />
-          <Route path={ROUTES.ABOUT} element={<AboutUs />} />
-          <Route path="/AboutUs" element={<AboutUs />} />
-          <Route path="/why-aurevian" element={<WhyAurevian />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/support" element={<Support />} />
-          <Route path="/franchise" element={<Franchise />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/wishlist" element={<Wishlist />} />
-          <Route path={ROUTES.BECOME_A_PARTNER} element={<BecomePartner />} />
+          <Route
+            path={ROUTES.HOME}
+            element={
+              <LayoutWithHeader>
+                <Home />
+              </LayoutWithHeader>
+            }
+          />
+          <Route
+            path={ROUTES.ABOUT}
+            element={
+              <LayoutWithHeader>
+                <AboutUs />
+              </LayoutWithHeader>
+            }
+          />
+          <Route
+            path="/AboutUs"
+            element={
+              <LayoutWithHeader>
+                <AboutUs />
+              </LayoutWithHeader>
+            }
+          />
+          <Route
+            path="/why-aurevian"
+            element={
+              <LayoutWithHeader>
+                <WhyAurevian />
+              </LayoutWithHeader>
+            }
+          />
+          <Route
+            path="/contact"
+            element={
+              <LayoutWithHeader>
+                <Contact />
+              </LayoutWithHeader>
+            }
+          />
+          <Route
+            path="/support"
+            element={
+              <LayoutWithHeader>
+                <Support />
+              </LayoutWithHeader>
+            }
+          />
+          <Route
+            path="/franchise"
+            element={
+              <LayoutWithHeader>
+                <Franchise />
+              </LayoutWithHeader>
+            }
+          />
+          <Route
+            path="/cart"
+            element={
+              <LayoutWithHeader>
+                <Cart />
+              </LayoutWithHeader>
+            }
+          />
+          <Route
+            path="/wishlist"
+            element={
+              <LayoutWithHeader>
+                <Wishlist />
+              </LayoutWithHeader>
+            }
+          />
+          <Route
+            path={ROUTES.BECOME_A_PARTNER}
+            element={
+              <LayoutWithHeader>
+                <BecomePartner />
+              </LayoutWithHeader>
+            }
+          />
 
           {/* ============================================
-              AUTH ROUTES - Redirect to home if already logged in
+              AUTH ROUTES - WITHOUT HEADER
               ============================================ */}
           <Route
             path={ROUTES.LOGIN}
             element={
-              isAuthenticated ? <Navigate to="/" replace /> : <Login />
+              isAuthenticated ? (
+                <Navigate to="/" replace />
+              ) : (
+                <LayoutWithoutHeader>
+                  <Login />
+                </LayoutWithoutHeader>
+              )
             }
           />
           <Route
             path={ROUTES.REGISTER}
             element={
-              isAuthenticated ? <Navigate to="/" replace /> : <Register />
+              isAuthenticated ? (
+                <Navigate to="/" replace />
+              ) : (
+                <LayoutWithoutHeader>
+                  <Register />
+                </LayoutWithoutHeader>
+              )
             }
           />
           <Route
             path={ROUTES.VERIFY_OTP}
             element={
-              isAuthenticated ? <Navigate to="/" replace /> : <VerifyOTP />
+              isAuthenticated ? (
+                <Navigate to="/" replace />
+              ) : (
+                <LayoutWithoutHeader>
+                  <VerifyOTP />
+                </LayoutWithoutHeader>
+              )
             }
           />
           <Route
             path={ROUTES.FORGOT_PASSWORD}
             element={
-              isAuthenticated ? <Navigate to="/" replace /> : <ForgotPassword />
+              isAuthenticated ? (
+                <Navigate to="/" replace />
+              ) : (
+                <LayoutWithoutHeader>
+                  <ForgotPassword />
+                </LayoutWithoutHeader>
+              )
             }
           />
           <Route
             path={ROUTES.RESET_PASSWORD}
             element={
-              isAuthenticated ? <Navigate to="/" replace /> : <ResetPassword />
+              isAuthenticated ? (
+                <Navigate to="/" replace />
+              ) : (
+                <LayoutWithoutHeader>
+                  <ResetPassword />
+                </LayoutWithoutHeader>
+              )
             }
           />
 
           {/* ============================================
-              SUPER ADMIN ROUTES
+              SUPER ADMIN ROUTES - WITHOUT HEADER
               ============================================ */}
           <Route
             path={ROUTES.SUPER_ADMIN_LOGIN}
@@ -218,7 +331,9 @@ const App = () => {
               isSuperAdmin ? (
                 <Navigate to={ROUTES.SUPER_ADMIN_DASHBOARD} replace />
               ) : (
-                <SuperAdminLogin />
+                <LayoutWithoutHeader>
+                  <SuperAdminLogin />
+                </LayoutWithoutHeader>
               )
             }
           />
@@ -226,13 +341,15 @@ const App = () => {
             path={ROUTES.SUPER_ADMIN_DASHBOARD}
             element={
               <SuperAdminRoute>
-                <SuperAdminDashboard />
+                <LayoutWithoutHeader>
+                  <SuperAdminDashboard />
+                </LayoutWithoutHeader>
               </SuperAdminRoute>
             }
           />
 
           {/* ============================================
-              SELLER ROUTES - Public
+              SELLER ROUTES - WITHOUT HEADER (Auth Pages)
               ============================================ */}
           <Route
             path={ROUTES.SELLER_LOGIN}
@@ -240,7 +357,9 @@ const App = () => {
               isSeller && seller?.status === 'approved' ? (
                 <Navigate to={ROUTES.SELLER_DASHBOARD} replace />
               ) : (
-                <SellerLogin />
+                <LayoutWithoutHeader>
+                  <SellerLogin />
+                </LayoutWithoutHeader>
               )
             }
           />
@@ -250,39 +369,101 @@ const App = () => {
               isSeller && seller?.status === 'approved' ? (
                 <Navigate to={ROUTES.SELLER_DASHBOARD} replace />
               ) : (
-                <SellerRegister />
+                <LayoutWithoutHeader>
+                  <SellerRegister />
+                </LayoutWithoutHeader>
               )
             }
           />
           <Route
             path={ROUTES.SELLER_VERIFY_OTP}
-            element={<SellerVerifyOTP />}
+            element={
+              <LayoutWithoutHeader>
+                <SellerVerifyOTP />
+              </LayoutWithoutHeader>
+            }
           />
 
           {/* ============================================
-              SELLER ROUTES - Protected
+              SELLER ROUTES - WITH HEADER (Protected)
               ============================================ */}
           <Route
             path={ROUTES.SELLER_DASHBOARD}
             element={
               <SellerRoute>
-                <SellerDashboard />
+                <LayoutWithHeader>
+                  <SellerDashboard />
+                </LayoutWithHeader>
+              </SellerRoute>
+            }
+          />
+          <Route
+            path={ROUTES.SELLER_PROFILE}
+            element={
+              <SellerRoute>
+                <LayoutWithHeader>
+                  <div className="p-8 text-center">
+                    <h1 className="text-3xl font-bold text-gray-800">Seller Profile</h1>
+                    <p className="text-gray-600 mt-2">Manage your seller profile</p>
+                  </div>
+                </LayoutWithHeader>
+              </SellerRoute>
+            }
+          />
+          <Route
+            path={ROUTES.SELLER_DOCUMENTS}
+            element={
+              <SellerRoute>
+                <LayoutWithHeader>
+                  <div className="p-8 text-center">
+                    <h1 className="text-3xl font-bold text-gray-800">Documents</h1>
+                    <p className="text-gray-600 mt-2">Manage your documents</p>
+                  </div>
+                </LayoutWithHeader>
+              </SellerRoute>
+            }
+          />
+          <Route
+            path={ROUTES.SELLER_ORDERS}
+            element={
+              <SellerRoute>
+                <LayoutWithHeader>
+                  <div className="p-8 text-center">
+                    <h1 className="text-3xl font-bold text-gray-800">Orders</h1>
+                    <p className="text-gray-600 mt-2">View your orders</p>
+                  </div>
+                </LayoutWithHeader>
+              </SellerRoute>
+            }
+          />
+          <Route
+            path={ROUTES.SELLER_PRODUCTS}
+            element={
+              <SellerRoute>
+                <LayoutWithHeader>
+                  <div className="p-8 text-center">
+                    <h1 className="text-3xl font-bold text-gray-800">Products</h1>
+                    <p className="text-gray-600 mt-2">Manage your products</p>
+                  </div>
+                </LayoutWithHeader>
               </SellerRoute>
             }
           />
 
           {/* ============================================
-              PROTECTED ROUTES - Require authentication
+              USER PROTECTED ROUTES - WITH HEADER
               ============================================ */}
           <Route
             path={ROUTES.DASHBOARD}
             element={
               <PrivateRoute>
-                <div className="p-8 text-center">
-                  <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
-                  <p className="text-gray-600 mt-2">Welcome to your dashboard!</p>
-                  <p className="text-gray-500 mt-4">(Dashboard page coming soon...)</p>
-                </div>
+                <LayoutWithHeader>
+                  <div className="p-8 text-center">
+                    <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
+                    <p className="text-gray-600 mt-2">Welcome to your dashboard!</p>
+                    <p className="text-gray-500 mt-4">(Dashboard page coming soon...)</p>
+                  </div>
+                </LayoutWithHeader>
               </PrivateRoute>
             }
           />
@@ -290,11 +471,13 @@ const App = () => {
             path={ROUTES.PROFILE}
             element={
               <PrivateRoute>
-                <div className="p-8 text-center">
-                  <h1 className="text-3xl font-bold text-gray-800">Profile</h1>
-                  <p className="text-gray-600 mt-2">Manage your profile</p>
-                  <p className="text-gray-500 mt-4">(Profile page coming soon...)</p>
-                </div>
+                <LayoutWithHeader>
+                  <div className="p-8 text-center">
+                    <h1 className="text-3xl font-bold text-gray-800">Profile</h1>
+                    <p className="text-gray-600 mt-2">Manage your profile</p>
+                    <p className="text-gray-500 mt-4">(Profile page coming soon...)</p>
+                  </div>
+                </LayoutWithHeader>
               </PrivateRoute>
             }
           />
@@ -305,7 +488,7 @@ const App = () => {
           <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
 
         </Routes>
-      {/* </SellerAuthProvider> */}
+      </SellerAuthProvider>
     </div>
   );
 };

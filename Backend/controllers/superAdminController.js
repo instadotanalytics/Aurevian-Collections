@@ -20,7 +20,10 @@ export const superAdminLogin = async (req, res) => {
       });
     }
 
-    const admin = await SuperAdmin.findOne({ email }).select('+password');
+    const admin = await SuperAdmin.findOne({ 
+      email: email.toLowerCase() 
+    }).select('+password');
+
     if (!admin) {
       return res.status(401).json({
         success: false,
@@ -43,11 +46,10 @@ export const superAdminLogin = async (req, res) => {
       });
     }
 
-    // Generate tokens
     const accessToken = jwt.sign(
       { id: admin._id, role: 'super_admin' },
       process.env.JWT_ACCESS_SECRET,
-      { expiresIn: '1d' }
+      { expiresIn: '24h' }
     );
 
     const refreshToken = jwt.sign(
@@ -61,7 +63,6 @@ export const superAdminLogin = async (req, res) => {
     admin.refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     await admin.save();
 
-    // Set cookies
     const isProduction = process.env.NODE_ENV === 'production';
     res.cookie('superAdminToken', accessToken, {
       httpOnly: true,
@@ -71,18 +72,21 @@ export const superAdminLogin = async (req, res) => {
       path: '/'
     });
 
+    const adminData = {
+      id: admin._id,
+      firstName: admin.firstName,
+      lastName: admin.lastName,
+      fullName: admin.fullName,
+      email: admin.email,
+      role: admin.role,
+      profileImage: admin.profileImage,
+      isActive: admin.isActive
+    };
+
     return res.status(200).json({
       success: true,
       message: 'Login successful',
-      data: {
-        id: admin._id,
-        firstName: admin.firstName,
-        lastName: admin.lastName,
-        fullName: admin.fullName,
-        email: admin.email,
-        role: admin.role,
-        profileImage: admin.profileImage
-      },
+      data: adminData,
       token: accessToken
     });
 
@@ -132,7 +136,7 @@ export const getCurrentSuperAdmin = async (req, res) => {
 export const updateSuperAdminProfile = async (req, res) => {
   try {
     const adminId = req.admin.id;
-    const { firstName, lastName, phone, profileImage, preferences } = req.body;
+    const { firstName, lastName, phone, profileImage } = req.body;
 
     const admin = await SuperAdmin.findById(adminId);
     if (!admin) {
@@ -149,9 +153,6 @@ export const updateSuperAdminProfile = async (req, res) => {
     }
     if (phone) admin.phone = phone;
     if (profileImage) admin.profileImage = profileImage;
-    if (preferences) {
-      admin.preferences = { ...admin.preferences, ...preferences };
-    }
 
     await admin.save();
 
@@ -213,7 +214,6 @@ export const changeSuperAdminPassword = async (req, res) => {
     admin.password = await bcrypt.hash(newPassword, salt);
     await admin.save();
 
-    // Clear refresh tokens for security
     admin.refreshToken = undefined;
     admin.refreshTokenExpiry = undefined;
     await admin.save();
@@ -289,7 +289,7 @@ export const refreshSuperAdminToken = async (req, res) => {
     const accessToken = jwt.sign(
       { id: admin._id, role: 'super_admin' },
       process.env.JWT_ACCESS_SECRET,
-      { expiresIn: '1d' }
+      { expiresIn: '24h' }
     );
 
     const newRefreshToken = jwt.sign(
@@ -310,14 +310,6 @@ export const refreshSuperAdminToken = async (req, res) => {
       path: '/'
     });
 
-    res.cookie('superAdminRefreshToken', newRefreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: '/'
-    });
-
     return res.status(200).json({
       success: true,
       message: 'Token refreshed successfully',
@@ -335,7 +327,7 @@ export const refreshSuperAdminToken = async (req, res) => {
 };
 
 // ============================================
-// GET ALL SELLER REQUESTS (For Super Admin)
+// GET ALL SELLER REQUESTS
 // ============================================
 export const getAllSellerRequests = async (req, res) => {
   try {
@@ -356,11 +348,6 @@ export const getAllSellerRequests = async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     const [sellers, total] = await Promise.all([
-      // ✅ FIXED: removed "-otp" — schema's select:false on otp.email.code /
-      // otp.phone.code / expiresAt already excludes those nested fields
-      // automatically. Explicitly excluding the parent "-otp" too caused a
-      // MongoDB "Path collision" error (can't exclude a field and a nested
-      // path under it at the same time).
       Seller.find(query)
         .select('-password -refreshToken -refreshTokenExpiry -__v')
         .sort({ createdAt: -1 })
@@ -369,23 +356,13 @@ export const getAllSellerRequests = async (req, res) => {
       Seller.countDocuments(query)
     ]);
 
-    // Get all stats
-    const [totalSellers, pending, approved, rejected, suspended, underReview] = await Promise.all([
-      Seller.countDocuments(),
-      Seller.countDocuments({ status: 'pending' }),
-      Seller.countDocuments({ status: 'approved' }),
-      Seller.countDocuments({ status: 'rejected' }),
-      Seller.countDocuments({ status: 'suspended' }),
-      Seller.countDocuments({ status: 'under_review' })
-    ]);
-
     const stats = {
-      total: totalSellers,
-      pending,
-      approved,
-      rejected,
-      suspended,
-      underReview
+      total: await Seller.countDocuments(),
+      pending: await Seller.countDocuments({ status: 'pending' }),
+      approved: await Seller.countDocuments({ status: 'approved' }),
+      rejected: await Seller.countDocuments({ status: 'rejected' }),
+      suspended: await Seller.countDocuments({ status: 'suspended' }),
+      underReview: await Seller.countDocuments({ status: 'under_review' })
     };
 
     return res.status(200).json({
@@ -411,13 +388,12 @@ export const getAllSellerRequests = async (req, res) => {
 };
 
 // ============================================
-// GET SELLER DETAILS (For Super Admin)
+// GET SELLER DETAILS
 // ============================================
 export const getSellerDetails = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // ✅ FIXED: same "-otp" path collision fix as above
     const seller = await Seller.findById(id)
       .select('-password -refreshToken -refreshTokenExpiry -__v');
 
@@ -466,7 +442,6 @@ export const approveSeller = async (req, res) => {
       });
     }
 
-    // Update seller status
     seller.status = 'approved';
     seller.isVerified = true;
     seller.isActive = true;
@@ -478,7 +453,6 @@ export const approveSeller = async (req, res) => {
 
     await seller.save();
 
-    // Send approval email with login link
     const loginLink = `${process.env.CLIENT_URL}/seller/login`;
     await emailService.sendSellerApprovalEmail(
       seller.email,
@@ -486,10 +460,6 @@ export const approveSeller = async (req, res) => {
       seller.storeInfo.storeName,
       loginLink
     );
-
-    // Add to stats
-    seller.stats = seller.stats || {};
-    await seller.save();
 
     return res.status(200).json({
       success: true,
@@ -538,7 +508,6 @@ export const rejectSeller = async (req, res) => {
       });
     }
 
-    // Update seller status
     seller.status = 'rejected';
     seller.isVerified = false;
     seller.isActive = false;
@@ -552,7 +521,6 @@ export const rejectSeller = async (req, res) => {
 
     await seller.save();
 
-    // Send rejection email
     await emailService.sendSellerRejectionEmail(
       seller.email,
       seller.firstName,
@@ -607,7 +575,6 @@ export const suspendSeller = async (req, res) => {
       });
     }
 
-    // Update seller status
     seller.status = 'suspended';
     seller.isActive = false;
     seller.suspendedAt = new Date();
@@ -618,7 +585,6 @@ export const suspendSeller = async (req, res) => {
 
     await seller.save();
 
-    // Send suspension email
     await emailService.sendSellerSuspensionEmail(
       seller.email,
       seller.firstName,
@@ -665,7 +631,6 @@ export const unsuspendSeller = async (req, res) => {
       });
     }
 
-    // Update seller status
     seller.status = 'approved';
     seller.isActive = true;
     seller.suspendedAt = null;
@@ -724,7 +689,7 @@ export const getSellerStats = async (req, res) => {
 };
 
 // ============================================
-// DELETE SELLER (Soft Delete)
+// DELETE SELLER
 // ============================================
 export const deleteSeller = async (req, res) => {
   try {

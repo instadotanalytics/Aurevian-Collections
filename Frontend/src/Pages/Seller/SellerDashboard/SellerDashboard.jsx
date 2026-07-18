@@ -12,7 +12,6 @@ import RecentOrders from './components/RecentOrders';
 import RecentActivities from './components/RecentActivities';
 import QuickActions from './components/QuickActions';
 import styles from './SellerDashboard.module.css';
-import LoadingScreen from '../../Layout/LoadingScreen/Loadingscreen';
 
 const SellerDashboard = () => {
   const dispatch = useDispatch();
@@ -30,7 +29,7 @@ const SellerDashboard = () => {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.spinner}></div>
-        <p><LoadingScreen/></p>
+        <p>Loading dashboard...</p>
       </div>
     );
   }

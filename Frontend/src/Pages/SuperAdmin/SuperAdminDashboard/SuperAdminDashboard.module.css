@@ -1,13 +1,10 @@
 /* src/Pages/SuperAdmin/SuperAdminDashboard/SuperAdminDashboard.module.css */
 
-/* ============================================
-   CONTAINER
-   ============================================ */
 .dashboardContainer {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #f0f2f5;
+  background: #0f0e0d;
 }
 
 /* ============================================
@@ -19,12 +16,11 @@
   align-items: center;
   padding: 0 24px;
   height: 70px;
-  background: #ffffff;
-  border-bottom: 1px solid #e8e8e8;
+  background: #1a1a1a;
+  border-bottom: 1px solid #2a2a2a;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .headerLeft {
@@ -40,7 +36,11 @@
   border: none;
   cursor: pointer;
   padding: 8px;
-  color: #333;
+  color: #aaa;
+}
+
+.menuToggle:hover {
+  color: #c8a86e;
 }
 
 .sidebarToggle {
@@ -48,7 +48,11 @@
   border: none;
   cursor: pointer;
   padding: 8px;
-  color: #333;
+  color: #aaa;
+}
+
+.sidebarToggle:hover {
+  color: #c8a86e;
 }
 
 .headerLogo {
@@ -65,23 +69,29 @@
 .logoText {
   font-size: 18px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #fff;
   letter-spacing: 0.5px;
 }
 
 .headerSearch {
   display: flex;
   align-items: center;
-  background: #f5f6fa;
+  background: #2a2a2a;
   border-radius: 8px;
   padding: 8px 14px;
   margin-left: 20px;
   flex: 1;
   max-width: 400px;
+  border: 1px solid #333;
+  transition: border-color 0.3s ease;
+}
+
+.headerSearch:focus-within {
+  border-color: #c8a86e;
 }
 
 .searchIcon {
-  color: #999;
+  color: #666;
   margin-right: 10px;
 }
 
@@ -90,12 +100,12 @@
   background: transparent;
   outline: none;
   font-size: 14px;
-  color: #333;
+  color: #fff;
   width: 100%;
 }
 
 .searchInput::placeholder {
-  color: #aaa;
+  color: #555;
 }
 
 .headerRight {
@@ -110,7 +120,12 @@
   border: none;
   cursor: pointer;
   padding: 8px;
-  color: #333;
+  color: #aaa;
+  transition: color 0.3s ease;
+}
+
+.notificationBtn:hover {
+  color: #c8a86e;
 }
 
 .notificationBadge {
@@ -135,14 +150,14 @@
   gap: 12px;
   padding: 4px 12px 4px 4px;
   border-radius: 30px;
-  background: #f5f6fa;
+  background: #2a2a2a;
 }
 
 .avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #c8a86e;
+  background: linear-gradient(135deg, #c8a86e, #a0804a);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -166,19 +181,19 @@
 .adminName {
   font-size: 13px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #fff;
 }
 
 .adminRole {
   font-size: 11px;
-  color: #999;
+  color: #888;
 }
 
 .logoutBtn {
   background: none;
   border: none;
   cursor: pointer;
-  color: #999;
+  color: #888;
   padding: 4px;
   transition: color 0.3s ease;
 }
@@ -188,7 +203,7 @@
 }
 
 /* ============================================
-   MAIN CONTENT
+   SIDEBAR
    ============================================ */
 .mainContent {
   display: flex;
@@ -196,13 +211,10 @@
   overflow: hidden;
 }
 
-/* ============================================
-   SIDEBAR
-   ============================================ */
 .sidebar {
   width: 260px;
-  background: #ffffff;
-  border-right: 1px solid #e8e8e8;
+  background: #1a1a1a;
+  border-right: 1px solid #2a2a2a;
   display: flex;
   flex-direction: column;
   transition: width 0.3s ease, transform 0.3s ease;
@@ -227,6 +239,20 @@
   overflow-y: auto;
 }
 
+.sidebarNav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebarNav::-webkit-scrollbar-track {
+  background: #2a2a2a;
+  border-radius: 4px;
+}
+
+.sidebarNav::-webkit-scrollbar-thumb {
+  background: #c8a86e;
+  border-radius: 4px;
+}
+
 .navItem {
   display: flex;
   align-items: center;
@@ -237,7 +263,7 @@
   border: none;
   cursor: pointer;
   width: 100%;
-  color: #666;
+  color: #888;
   font-size: 14px;
   font-weight: 500;
   transition: all 0.3s ease;
@@ -246,12 +272,12 @@
 }
 
 .navItem:hover {
-  background: #f5f6fa;
-  color: #1a1a1a;
+  background: #2a2a2a;
+  color: #fff;
 }
 
 .navItem.active {
-  background: #f0ebe6;
+  background: #2a2a2a;
   color: #c8a86e;
 }
 
@@ -282,7 +308,7 @@
 
 .sidebarFooter {
   padding: 16px 12px;
-  border-top: 1px solid #e8e8e8;
+  border-top: 1px solid #2a2a2a;
 }
 
 .sidebarUser {
@@ -298,7 +324,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #c8a86e;
+  background: linear-gradient(135deg, #c8a86e, #a0804a);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -321,13 +347,13 @@
 .sidebarUserName {
   font-size: 13px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #fff;
   display: block;
 }
 
 .sidebarUserRole {
   font-size: 11px;
-  color: #999;
+  color: #888;
 }
 
 .sidebar.closed .sidebarUserInfo {
@@ -351,7 +377,7 @@
 }
 
 .sidebarLogout:hover {
-  background: #fef2f2;
+  background: #2a1a1a;
 }
 
 .sidebar.closed .sidebarLogout span {
@@ -366,7 +392,7 @@
   padding: 24px;
   overflow-y: auto;
   height: calc(100vh - 70px);
-  transition: margin-left 0.3s ease;
+  background: #0f0e0d;
 }
 
 .contentArea.expanded {
@@ -384,10 +410,11 @@
   justify-content: center;
   min-height: 400px;
   font-size: 18px;
-  color: #999;
-  background: white;
+  color: #555;
+  background: #1a1a1a;
   border-radius: 16px;
   padding: 40px;
+  border: 1px solid #2a2a2a;
 }
 
 /* ============================================
@@ -399,7 +426,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.6);
   z-index: 50;
   display: none;
 }
@@ -485,5 +512,36 @@
     width: 32px;
     height: 32px;
     font-size: 12px;
+  }
+
+  .placeholderContent {
+    padding: 20px;
+    font-size: 16px;
+  }
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .dashboardContainer {
+    background: #0f0e0d;
+  }
+
+  .topHeader {
+    background: #1a1a1a;
+    border-bottom-color: #2a2a2a;
+  }
+
+  .sidebar {
+    background: #1a1a1a;
+    border-right-color: #2a2a2a;
+  }
+
+  .contentArea {
+    background: #0f0e0d;
+  }
+
+  .placeholderContent {
+    background: #1a1a1a;
+    border-color: #2a2a2a;
   }
 }

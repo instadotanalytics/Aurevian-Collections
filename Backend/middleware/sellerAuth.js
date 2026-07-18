@@ -1,4 +1,4 @@
-// middleware/sellerAuth.js
+// Backend/middleware/sellerAuth.js
 
 import jwt from 'jsonwebtoken';
 import Seller from '../models/Seller.js';
@@ -28,7 +28,7 @@ export const protectSeller = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
 
     // Get seller
-    const seller = await Seller.findById(decoded.id).select('-password -refreshToken');
+    const seller = await Seller.findById(decoded.id).select('-password -refreshToken -otp');
     if (!seller) {
       return res.status(401).json({
         success: false,
@@ -72,5 +72,35 @@ export const protectSeller = async (req, res, next) => {
       success: false,
       message: 'Server error during authentication'
     });
+  }
+};
+
+export const optionalSellerAuth = async (req, res, next) => {
+  try {
+    let token;
+
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (!token && req.cookies?.sellerAccessToken) {
+      token = req.cookies.sellerAccessToken;
+    }
+
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+        const seller = await Seller.findById(decoded.id).select('-password -refreshToken -otp');
+        if (seller && seller.isActive && seller.status === 'approved') {
+          req.seller = seller;
+        }
+      } catch (err) {
+        // Ignore token errors
+      }
+    }
+
+    next();
+  } catch (error) {
+    next();
   }
 };

@@ -136,7 +136,9 @@
   gap: 25px;
 }
 
-/* Responsive */
+/* ============================================
+   Responsive
+   ============================================ */
 @media (max-width: 992px) {
   .mainContent {
     grid-template-columns: 1fr;
@@ -177,5 +179,40 @@
   .addProductBtn {
     width: 100%;
     text-align: center;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .dashboard {
+    background: #1a1a1a;
+  }
+
+  .welcome {
+    color: #ffffff;
+  }
+
+  .subtitle {
+    color: #aaa;
+  }
+
+  .storeStatus {
+    background: #2d2d2d;
+  }
+
+  .statusText {
+    color: #ddd;
+  }
+
+  .addProductBtn {
+    background: #c8a86e;
+  }
+
+  .addProductBtn:hover {
+    background: #b8944a;
+  }
+
+  .loadingContainer p {
+    color: #aaa;
   }
 }
