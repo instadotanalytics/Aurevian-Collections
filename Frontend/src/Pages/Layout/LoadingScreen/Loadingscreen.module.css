@@ -1,0 +1,196 @@
+/* src/Components/common/LoadingScreen.module.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&display=swap');
+
+.page {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  background:
+    radial-gradient(ellipse at 50% 40%, #faf6ec 0%, #f1ead9 100%);
+  overflow: hidden;
+}
+
+/* Soft breathing halo behind the logo, like light pooling under a spotlight */
+.halo {
+  position: absolute;
+  width: min(60vw, 480px);
+  height: min(60vw, 480px);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(239, 217, 166, 0.55) 0%,
+    rgba(239, 217, 166, 0.18) 45%,
+    rgba(239, 217, 166, 0) 72%
+  );
+  filter: blur(2px);
+  animation: breathe 3.6s ease-in-out infinite;
+}
+
+.logoWrap {
+  position: relative;
+  width: min(72vw, 320px);
+  isolation: isolate;
+  animation: riseIn 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.logo {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 6px 18px rgba(140, 106, 34, 0.18));
+}
+
+/* Gold foil catching light — a diagonal shimmer band sweeping across the wordmark */
+.shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 40%,
+    rgba(255, 246, 221, 0.85) 50%,
+    transparent 60%
+  );
+  mix-blend-mode: soft-light;
+  background-size: 250% 250%;
+  background-position: -40% -40%;
+  animation: sweep 2.8s ease-in-out infinite;
+  animation-delay: 500ms;
+}
+
+.rule {
+  width: 46px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #c89b3c,
+    transparent
+  );
+  animation: widen 900ms 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.caption {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #6b5b3e;
+  animation: fadeUp 900ms 450ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.dots {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: 2px;
+}
+
+.dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #c89b3c;
+  animation: dotPulse 1.4s ease-in-out infinite;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+/* ============================================
+   KEYFRAMES
+   ============================================ */
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(0.94);
+    opacity: 0.75;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+}
+
+@keyframes sweep {
+  0% {
+    background-position: -40% -40%;
+  }
+  100% {
+    background-position: 140% 140%;
+  }
+}
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes widen {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    width: 46px;
+    opacity: 1;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dotPulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .halo,
+  .shimmer,
+  .dot {
+    animation: none;
+  }
+  .logoWrap,
+  .rule,
+  .caption {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

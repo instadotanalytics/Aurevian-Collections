@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { verifyEmailOTP, verifyPhoneOTP, resendOTP, fetchCurrentSeller } from '../../../redux/slices/sellerSlice';
 import toast from 'react-hot-toast';
 import styles from './SellerVerifyOTP.module.css';
+import LoadingScreen from '../../Layout/LoadingScreen/Loadingscreen';
 
 const SellerVerifyOTP = () => {
   const navigate = useNavigate();
@@ -204,7 +205,7 @@ const SellerVerifyOTP = () => {
       <div className={styles.page}>
         <div className={styles.container}>
           <div className={styles.card}>
-            <h1 className={styles.title}>Loading...</h1>
+            <h1 className={styles.title}><LoadingScreen/></h1>
             <p className={styles.subtitle}>Please wait while we fetch your details</p>
           </div>
         </div>
