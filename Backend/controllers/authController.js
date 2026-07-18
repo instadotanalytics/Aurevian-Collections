@@ -1,3 +1,5 @@
+// Backend/controllers/authController.js
+
 import firebaseAdmin from '../config/firebase-admin.js';
 import User from '../models/User.js';
 import tokenService from '../services/tokenService.js';
@@ -5,12 +7,14 @@ import otpService from '../services/otpService.js';
 import emailService from '../services/emailService.js';
 import bcrypt from 'bcryptjs';
 
+// ============================================
+// GOOGLE LOGIN WITH FIREBASE
+// ============================================
 export const googleLogin = async (req, res) => {
   try {
     const { idToken } = req.body;
     
     if (!idToken) {
-      console.log('❌ No ID token provided');
       return res.status(400).json({ 
         success: false, 
         message: 'ID token is required' 
@@ -19,7 +23,6 @@ export const googleLogin = async (req, res) => {
 
     console.log('🔑 Google login attempt');
 
-    // Try to verify token with Firebase
     let decodedToken;
     try {
       decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
@@ -27,7 +30,6 @@ export const googleLogin = async (req, res) => {
     } catch (error) {
       console.error('❌ Firebase verification failed:', error.message);
       
-      // In development, use mock login
       if (process.env.NODE_ENV === 'development') {
         console.log('⚠️ Using mock login in development mode');
         return handleMockLogin(req, res);
@@ -40,27 +42,27 @@ export const googleLogin = async (req, res) => {
       });
     }
 
-    // Get user from Firebase
     let firebaseUser;
     try {
       firebaseUser = await firebaseAdmin.auth().getUser(decodedToken.uid);
       console.log('👤 Firebase user found:', firebaseUser.email);
     } catch (userError) {
       console.error('❌ Firebase user fetch failed:', userError.message);
-      return res.status(404).json({ 
-        success: false, 
-        message: 'User not found in Firebase' 
-      });
+      firebaseUser = {
+        uid: decodedToken.uid,
+        email: decodedToken.email,
+        displayName: decodedToken.name || 'User',
+        photoURL: decodedToken.picture || null,
+        emailVerified: decodedToken.email_verified || false,
+      };
     }
 
-    // Find or create user in database
     let user;
     try {
       user = await User.findOrCreateFromFirebase(firebaseUser);
       console.log('✅ User processed:', user.email);
     } catch (dbError) {
       console.error('❌ Database error:', dbError.message);
-      console.error('Stack:', dbError.stack);
       return res.status(500).json({ 
         success: false, 
         message: 'Failed to process user data',
@@ -68,7 +70,6 @@ export const googleLogin = async (req, res) => {
       });
     }
 
-    // Check if user is active
     if (!user.isActive) {
       return res.status(403).json({ 
         success: false, 
@@ -76,12 +77,11 @@ export const googleLogin = async (req, res) => {
       });
     }
 
-    // Generate tokens
     const { accessToken, refreshToken } = tokenService.generateTokens(user);
     const expiresAt = tokenService.getTokenExpiry(refreshToken);
     await user.addRefreshToken(refreshToken, expiresAt);
     await user.addLoginHistory({
-      ipAddress: req.ip || req.headers['x-forwarded-for'] || req.connection?.remoteAddress,
+      ipAddress: req.ip || req.headers['x-forwarded-for'],
       userAgent: req.headers['user-agent'],
       success: true,
     });
@@ -101,6 +101,7 @@ export const googleLogin = async (req, res) => {
       isActive: user.isActive,
       phone: user.phone,
       preferences: user.preferences,
+      authProvider: user.authProvider,
     };
 
     return res.status(200).json({
@@ -112,7 +113,6 @@ export const googleLogin = async (req, res) => {
 
   } catch (error) {
     console.error('❌ Google login error:', error);
-    console.error('Stack:', error.stack);
     return res.status(500).json({ 
       success: false, 
       message: 'Authentication failed', 
@@ -128,36 +128,44 @@ const handleMockLogin = async (req, res) => {
   try {
     console.log('🔧 Mock login in progress...');
     
-    // Create a mock user
-    const mockUser = {
-      _id: 'mock_' + Date.now(),
-      firstName: 'Test',
-      lastName: 'User',
-      fullName: 'Test User',
-      email: 'test@example.com',
-      profileImage: null,
-      avatar: null,
-      role: 'user',
-      isVerified: true,
-      isActive: true,
-      phone: null,
-      preferences: {
-        newsletter: false,
-        notifications: true,
-        language: 'en',
-        currency: 'CHF'
-      }
-    };
+    let user = await User.findOne({ email: 'test@example.com' });
+    if (!user) {
+      user = new User({
+        firstName: 'Test',
+        lastName: 'User',
+        fullName: 'Test User',
+        email: 'test@example.com',
+        authProvider: 'google',
+        isVerified: true,
+        isActive: true,
+        role: 'customer',
+      });
+      await user.save();
+    }
 
-    const { accessToken, refreshToken } = tokenService.generateTokens(mockUser);
+    const { accessToken, refreshToken } = tokenService.generateTokens(user);
+    const expiresAt = tokenService.getTokenExpiry(refreshToken);
+    await user.addRefreshToken(refreshToken, expiresAt);
     tokenService.setAuthCookies(res, accessToken, refreshToken);
 
-    console.log('✅ Mock login successful for:', mockUser.email);
+    const userData = {
+      _id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      fullName: user.fullName,
+      email: user.email,
+      profileImage: user.profileImage,
+      avatar: user.avatar,
+      role: user.role,
+      isVerified: user.isVerified,
+      isActive: user.isActive,
+      phone: user.phone,
+    };
 
     return res.status(200).json({
       success: true,
       message: 'Login successful (Mock mode)',
-      data: mockUser,
+      data: userData,
       token: accessToken,
     });
   } catch (error) {
@@ -171,7 +179,7 @@ const handleMockLogin = async (req, res) => {
 };
 
 // ============================================
-// OTHER AUTH CONTROLLERS...
+// REGISTER
 // ============================================
 export const register = async (req, res) => {
   try {
@@ -181,7 +189,7 @@ export const register = async (req, res) => {
       return res.status(400).json({ success: false, message: 'All fields are required' });
     }
 
-    let user = await User.findByEmail(email);
+    let user = await User.findOne({ email: email.toLowerCase() });
     if (user) {
       return res.status(400).json({ success: false, message: 'User already exists' });
     }
@@ -223,6 +231,9 @@ export const register = async (req, res) => {
   }
 };
 
+// ============================================
+// VERIFY OTP
+// ============================================
 export const verifyOTP = async (req, res) => {
   try {
     const { email, otp, type = 'email' } = req.body;
@@ -231,7 +242,7 @@ export const verifyOTP = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Email and OTP are required' });
     }
 
-    const user = await User.findByEmail(email);
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
@@ -268,6 +279,9 @@ export const verifyOTP = async (req, res) => {
   }
 };
 
+// ============================================
+// RESEND OTP
+// ============================================
 export const resendOTP = async (req, res) => {
   try {
     const { email } = req.body;
@@ -276,7 +290,7 @@ export const resendOTP = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Email is required' });
     }
 
-    const user = await User.findByEmail(email);
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
@@ -300,6 +314,9 @@ export const resendOTP = async (req, res) => {
   }
 };
 
+// ============================================
+// LOGIN WITH EMAIL
+// ============================================
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -308,7 +325,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Email and password are required' });
     }
 
-    const user = await User.findByEmail(email).select('+password');
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
@@ -338,7 +355,7 @@ export const login = async (req, res) => {
     const expiresAt = tokenService.getTokenExpiry(refreshToken);
     await user.addRefreshToken(refreshToken, expiresAt);
     await user.addLoginHistory({
-      ipAddress: req.ip || req.headers['x-forwarded-for'] || req.connection?.remoteAddress,
+      ipAddress: req.ip || req.headers['x-forwarded-for'],
       userAgent: req.headers['user-agent'],
       success: true,
     });
@@ -373,6 +390,9 @@ export const login = async (req, res) => {
   }
 };
 
+// ============================================
+// FORGOT PASSWORD
+// ============================================
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -381,7 +401,7 @@ export const forgotPassword = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Email is required' });
     }
 
-    const user = await User.findByEmail(email);
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(200).json({
         success: true,
@@ -408,6 +428,9 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
+// ============================================
+// RESET PASSWORD
+// ============================================
 export const resetPassword = async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
@@ -420,7 +443,7 @@ export const resetPassword = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
     }
 
-    const user = await User.findByEmail(email);
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
@@ -449,9 +472,12 @@ export const resetPassword = async (req, res) => {
   }
 };
 
+// ============================================
+// REFRESH ACCESS TOKEN
+// ============================================
 export const refreshAccessToken = async (req, res) => {
   try {
-    const refreshToken = req.signedCookies?.refreshToken || req.body.refreshToken;
+    const refreshToken = req.cookies?.refreshToken || req.body.refreshToken;
 
     if (!refreshToken) {
       return res.status(401).json({ success: false, message: 'Refresh token required' });
@@ -463,7 +489,7 @@ export const refreshAccessToken = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid refresh token' });
     }
 
-    const tokenExists = user.refreshTokens.some(rt => rt.token === refreshToken);
+    const tokenExists = user.refreshTokens?.some(rt => rt.token === refreshToken);
     if (!tokenExists) {
       return res.status(401).json({ success: false, message: 'Refresh token not found' });
     }
@@ -489,9 +515,12 @@ export const refreshAccessToken = async (req, res) => {
   }
 };
 
+// ============================================
+// LOGOUT
+// ============================================
 export const logout = async (req, res) => {
   try {
-    const refreshToken = req.signedCookies?.refreshToken;
+    const refreshToken = req.cookies?.refreshToken;
 
     if (refreshToken) {
       try {
@@ -520,6 +549,9 @@ export const logout = async (req, res) => {
   }
 };
 
+// ============================================
+// GET CURRENT USER
+// ============================================
 export const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id)

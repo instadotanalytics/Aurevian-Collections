@@ -1,9 +1,11 @@
+// Backend/middleware/auth.js
+
 import tokenService from '../services/tokenService.js';
 import User from '../models/User.js';
 
 export const protect = async (req, res, next) => {
   try {
-    let token = req.signedCookies?.accessToken;
+    let token = req.cookies?.accessToken;
     
     if (!token) {
       const authHeader = req.headers.authorization;
@@ -72,7 +74,7 @@ export const admin = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ success: false, message: 'Authentication required' });
   }
-  if (req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+  if (req.user.role !== 'admin' && req.user.role !== 'super-admin') {
     return res.status(403).json({ success: false, message: 'Admin access required' });
   }
   next();
@@ -82,7 +84,7 @@ export const seller = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ success: false, message: 'Authentication required' });
   }
-  if (req.user.role !== 'seller' && req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+  if (req.user.role !== 'seller' && req.user.role !== 'admin' && req.user.role !== 'super-admin') {
     return res.status(403).json({ success: false, message: 'Seller access required' });
   }
   next();

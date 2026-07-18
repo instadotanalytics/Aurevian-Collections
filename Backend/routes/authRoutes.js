@@ -1,3 +1,5 @@
+// Backend/routes/authRoutes.js
+
 import express from 'express';
 import { 
   googleLogin,
@@ -15,7 +17,9 @@ import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Public routes
+// ============================================
+// PUBLIC ROUTES
+// ============================================
 router.post('/google', googleLogin);
 router.post('/register', register);
 router.post('/verify-otp', verifyOTP);
@@ -26,7 +30,9 @@ router.post('/reset-password', resetPassword);
 router.post('/refresh', refreshAccessToken);
 router.post('/logout', logout);
 
-// Protected routes
+// ============================================
+// PROTECTED ROUTES
+// ============================================
 router.get('/me', protect, getMe);
 
 export default router;

@@ -1,0 +1,80 @@
+/* src/Components/Auth/GoogleLoginButton.module.css */
+
+.googleBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 20px;
+  background-color: #ffffff;
+  color: #1a1a1a;
+  border: 2px solid #e8e2d5;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 52px;
+  font-family: inherit;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.googleBtn:hover:not(:disabled) {
+  border-color: #4285f4;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(66, 133, 244, 0.15);
+  background: #faf8f6;
+}
+
+.googleBtn:active:not(:disabled) {
+  transform: translateY(0px);
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.1);
+}
+
+.googleBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.googleIcon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.googleBtn span {
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  color: #1a1a1a;
+}
+
+@media (max-width: 768px) {
+  .googleBtn {
+    padding: 12px 16px;
+    min-height: 48px;
+    font-size: 15px;
+    border-radius: 10px;
+  }
+  .googleBtn span {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .googleBtn {
+    padding: 10px 14px;
+    min-height: 44px;
+    font-size: 14px;
+    border-radius: 8px;
+  }
+  .googleIcon {
+    width: 20px;
+    height: 20px;
+  }
+  .googleBtn span {
+    font-size: 14px;
+  }
+}

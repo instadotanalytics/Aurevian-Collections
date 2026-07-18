@@ -50,7 +50,7 @@ const SuperAdminDashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.superAdmin);
-  
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState('dashboard');
   const [selectedSeller, setSelectedSeller] = useState(null);
@@ -103,7 +103,7 @@ const SuperAdminDashboard = () => {
   ];
 
   const renderContent = () => {
-    switch(activeMenu) {
+    switch (activeMenu) {
       case 'dashboard':
         return <DashboardOverview />;
       case 'sellers':
@@ -130,13 +130,13 @@ const SuperAdminDashboard = () => {
           ============================================ */}
       <header className={styles.topHeader}>
         <div className={styles.headerLeft}>
-          <button 
+          <button
             className={styles.menuToggle}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <FiMenu size={24} />
           </button>
-          <button 
+          <button
             className={styles.sidebarToggle}
             onClick={() => setSidebarOpen(!sidebarOpen)}
           >
@@ -148,9 +148,9 @@ const SuperAdminDashboard = () => {
           </div>
           <div className={styles.headerSearch}>
             <FiSearch className={styles.searchIcon} />
-            <input 
-              type="text" 
-              placeholder="Search..." 
+            <input
+              type="text"
+              placeholder="Search..."
               className={styles.searchInput}
             />
           </div>

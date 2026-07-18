@@ -1,43 +1,55 @@
-import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
+// src/Components/Auth/GoogleLoginButton.jsx
 
-import {
-  auth,
-  googleProvider,
-  signInWithPopup,
-} from "./firebase/firebaseConfig"; // <-- adjust path if needed
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { auth } from '../Auth/firebase/firebaseConfig';
+import { loginWithGoogle } from '../redux/slices/authSlice';
+import toast from 'react-hot-toast';
+import styles from './GoogleLoginButton.module.css';
 
-import { googleLogin } from "../api/authApi";
-
-const GoogleLoginButton = ({ redirectTo = "/" }) => {
-  const navigate = useNavigate();
+const GoogleLoginButton = ({ 
+  label = "Continue with Google", 
+  className = "", 
+  redirectTo = "/dashboard" 
+}) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
+      
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
 
-      // Google popup
-      const result = await signInWithPopup(auth, googleProvider);
-
-      // Firebase ID Token
-      const idToken = await result.user.getIdToken();
-
-      // Send token to backend
-      const response = await googleLogin(idToken);
-
-      if (!response.success) {
-        throw new Error(response.message);
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const idToken = await user.getIdToken();
+      
+      const response = await dispatch(loginWithGoogle(idToken)).unwrap();
+      
+      if (response.success) {
+        toast.success('Google login successful!');
+        navigate(redirectTo);
+      } else {
+        toast.error(response.message || 'Login failed');
       }
-
-      toast.success("Google login successful!");
-      navigate(redirectTo);
-    } catch (err) {
-      console.error(err);
-      toast.error(err.message || "Google Login Failed");
+      
+    } catch (error) {
+      console.error('Google login error:', error);
+      
+      if (error.code === 'auth/popup-closed-by-user') {
+        toast.error('Login cancelled');
+      } else if (error.code === 'auth/network-request-failed') {
+        toast.error('Network error. Please check your connection.');
+      } else {
+        toast.error(error.message || 'Google login failed');
+      }
     } finally {
       setLoading(false);
     }
@@ -48,9 +60,15 @@ const GoogleLoginButton = ({ redirectTo = "/" }) => {
       type="button"
       onClick={handleGoogleLogin}
       disabled={loading}
-      className="google-login-btn"
+      className={`${styles.googleBtn} ${className}`}
     >
-      {loading ? "Signing in..." : "Continue with Google"}
+      <svg className={styles.googleIcon} viewBox="0 0 48 48">
+        <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+        <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+        <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+        <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+      </svg>
+      <span>{loading ? 'Signing in...' : label}</span>
     </button>
   );
 };
