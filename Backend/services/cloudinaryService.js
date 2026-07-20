@@ -1,8 +1,8 @@
-// services/cloudinaryService.js
+// Backend/services/cloudinaryService.js
 
 import { v2 as cloudinary } from 'cloudinary';
 import dotenv from 'dotenv';
-import fs from 'fs';
+import { Readable } from 'stream';
 
 dotenv.config();
 
@@ -15,30 +15,33 @@ cloudinary.config({
 
 class CloudinaryService {
   /**
-   * Upload file to Cloudinary
+   * Upload buffer directly to Cloudinary (No local file saving)
    */
-  async uploadFile(filePath, folder = 'sellers', options = {}) {
+  async uploadBuffer(buffer, folder = 'banners', options = {}) {
     try {
-      if (!filePath) {
-        throw new Error('No file path provided');
+      if (!buffer) {
+        throw new Error('No buffer provided');
       }
 
-      const result = await cloudinary.uploader.upload(filePath, {
-        folder: `aurevian/${folder}`,
-        resource_type: 'auto',
-        ...options
+      const result = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: `aurevian/${folder}`,
+            resource_type: 'auto',
+            ...options
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        
+        // Convert buffer to stream and upload
+        const stream = Readable.from(buffer);
+        stream.pipe(uploadStream);
       });
 
-      // Delete local file after upload
-      try {
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
-      } catch (err) {
-        console.log('Error deleting local file:', err.message);
-      }
-
-      console.log(`✅ File uploaded to Cloudinary: ${result.public_id}`);
+      console.log(`✅ Banner uploaded to Cloudinary: ${result.public_id}`);
       return {
         success: true,
         url: result.secure_url,
@@ -46,40 +49,16 @@ class CloudinaryService {
         format: result.format,
         bytes: result.bytes,
         width: result.width,
-        height: result.height
+        height: result.height,
+        createdAt: result.created_at,
+        assetId: result.asset_id
       };
     } catch (error) {
       console.error('❌ Cloudinary upload error:', error.message);
-      
-      // Delete local file even if upload fails
-      try {
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
-      } catch (err) {
-        console.log('Error deleting local file:', err.message);
-      }
-
       return {
         success: false,
         error: error.message
       };
-    }
-  }
-
-  /**
-   * Upload multiple files
-   */
-  async uploadMultipleFiles(files, folder = 'sellers') {
-    try {
-      const uploadPromises = files.map(file => 
-        this.uploadFile(file.path, folder)
-      );
-      const results = await Promise.all(uploadPromises);
-      return results;
-    } catch (error) {
-      console.error('❌ Cloudinary multiple upload error:', error.message);
-      return [];
     }
   }
 
@@ -93,11 +72,21 @@ class CloudinaryService {
       }
 
       const result = await cloudinary.uploader.destroy(publicId);
-      console.log(`✅ File deleted from Cloudinary: ${publicId}`);
-      return {
-        success: result.result === 'ok',
-        result
-      };
+      
+      if (result.result === 'ok') {
+        console.log(`✅ File deleted from Cloudinary: ${publicId}`);
+        return {
+          success: true,
+          result: result
+        };
+      } else {
+        console.log(`⚠️ File deletion result: ${result.result} for ${publicId}`);
+        return {
+          success: false,
+          result: result,
+          error: `Deletion failed with result: ${result.result}`
+        };
+      }
     } catch (error) {
       console.error('❌ Cloudinary delete error:', error.message);
       return {
