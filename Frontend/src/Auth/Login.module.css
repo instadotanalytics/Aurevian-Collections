@@ -1,100 +1,377 @@
-/* Container */
-.container {
+
+/* Login.module.css — Aurevian premium landing page */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Jost:wght@300;400;500;600&display=swap');
+
+/* ==========================================================
+   Page wrapper - fixes header alignment
+========================================================== */
+.pageWrapper {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
-  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #faf5ff 100%);
+  background: linear-gradient(180deg, #fbf6ee 0%, #fdfaf4 100%);
+}
+
+/* ==========================================================
+   Tokens + universal box-sizing
+========================================================== */
+.page {
+  --ivory: #fbf6ee;
+  --cream: #f4ecdc;
+  --champagne: #e8d3a0;
+  --gold-1: #c9a24b;
+  --gold-2: #f0dba0;
+  --gold-deep: #9c7a2e;
+  --ink: #2b2620;
+  --ink-soft: #6e6355;
+  --white: #ffffff;
+  --border: #e7dcc5;
+  --gold-gradient: linear-gradient(135deg, #f0dba0 0%, #c9a24b 55%, #9c7a2e 100%);
+
+  font-family: 'Jost', sans-serif;
+  color: var(--ink);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Fixes inputs/cards overflowing their containers */
+.page :global(*),
+.page :global(*::before),
+.page :global(*::after) {
+  box-sizing: border-box;
+}
+
+/* ==========================================================
+   HERO
+========================================================== */
+.hero {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 60px 24px;
+  overflow: hidden;
+  scroll-margin-top: 76px;
+  min-height: calc(100vh - 76px);
+}
+
+.heroDecor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
+}
+
+.blob1 {
+  width: 360px;
+  height: 360px;
+  top: -80px;
+  left: -100px;
+  background: radial-gradient(circle, var(--gold-2), transparent 70%);
+}
+
+.blob2 {
+  width: 300px;
+  height: 300px;
+  bottom: -60px;
+  right: -80px;
+  background: radial-gradient(circle, var(--champagne), transparent 70%);
+}
+
+.blob3 {
+  width: 200px;
+  height: 200px;
+  top: 40%;
+  left: 45%;
+  background: radial-gradient(circle, var(--gold-1), transparent 70%);
+  opacity: 0.18;
+}
+
+.heroInner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1150px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.heroLeft {
+  flex: 1 1 520px;
+  min-width: 0;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.heroRight {
+  flex: 1 1 420px;
+  max-width: 440px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* ---------- Hero text ---------- */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--gold-deep);
+  background: rgba(201, 162, 75, 0.1);
+  border: 1px solid rgba(201, 162, 75, 0.25);
+  padding: 6px 16px;
+  border-radius: 50px;
+  margin-bottom: 18px;
+  animation: fadeUp 0.7s ease both;
+}
+
+.heroTitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  font-size: clamp(32px, 4.2vw, 56px);
+  line-height: 1.12;
+  margin: 0 0 18px;
+  color: var(--ink);
+  animation: fadeUp 0.7s ease 0.1s both;
+}
+
+.heroHighlight {
+  background: var(--gold-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.heroDesc {
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--ink-soft);
+  max-width: 480px;
+  margin: 0 0 28px;
+  font-weight: 300;
+  animation: fadeUp 0.7s ease 0.2s both;
+}
+
+.heroCtas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 36px;
+  animation: fadeUp 0.7s ease 0.3s both;
+}
+
+.ctaPrimary,
+.ctaSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 30px;
+  border-radius: 50px;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease,
+    background 0.35s ease, color 0.35s ease;
+}
+
+.ctaPrimary {
+  background: var(--gold-gradient);
+  color: #2b2005;
+  box-shadow: 0 10px 24px rgba(201, 162, 75, 0.35);
+}
+
+.ctaPrimary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 34px rgba(201, 162, 75, 0.45);
+}
+
+.ctaSecondary {
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--border);
+}
+
+.ctaSecondary:hover {
+  border-color: var(--gold-1);
+  color: var(--gold-deep);
+  transform: translateY(-3px);
+}
+
+/* ---------- Hero feature row (glassmorphism) ---------- */
+.heroFeatures {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  width: 100%;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  animation: fadeUp 0.7s ease 0.4s both;
+}
+
+.heroFeatureCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 16px 10px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(201, 162, 75, 0.2);
+  box-shadow: 0 8px 24px rgba(43, 38, 32, 0.05);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+}
+
+.heroFeatureCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 32px rgba(201, 162, 75, 0.18);
+}
+
+.heroFeatureIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  background: var(--gold-gradient);
+  color: #fff;
+  font-size: 15px;
+  flex-shrink: 0;
 }
 
-/* Card */
+.heroFeatureTitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.heroFeatureText {
+  font-size: 10.5px;
+  color: var(--ink-soft);
+}
+
+/* ==========================================================
+   LOGIN CARD (glass) — compact
+========================================================== */
 .card {
-  max-width: 28rem;
   width: 100%;
-  background: white;
-  border-radius: 1.5rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(201, 162, 75, 0.25);
+  border-radius: 24px;
+  padding: 26px 28px;
+  box-shadow: 0 24px 60px rgba(43, 38, 32, 0.14);
+  animation: fadeUp 0.7s ease 0.15s both;
 }
 
-/* Back Button */
-.backButton {
-  display: inline-flex;
+.cardLogo {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  color: #6b7280;
-  font-size: 0.875rem;
-  text-decoration: none;
-  transition: color 0.2s;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.85rem;
 }
 
-.backButton:hover {
-  color: #1f2937;
+.cardLogoImage {
+  height: 42px;
+  width: auto;
+  max-width: 160px;
+  object-fit: contain;
 }
 
-/* Header */
 .header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.25rem;
 }
 
 .title {
-  font-size: 1.875rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.55rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--ink);
+  margin: 0;
 }
 
 .subtitle {
-  color: #6b7280;
-  margin-top: 0.5rem;
+  color: var(--ink-soft);
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
 }
 
-/* Form */
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.8rem;
+  width: 100%;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.3rem;
+  width: 100%;
 }
 
 .label {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--ink);
 }
 
 .inputWrapper {
   position: relative;
+  width: 100%;
 }
 
 .inputIcon {
   position: absolute;
-  left: 0.75rem;
+  left: 0.85rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: var(--gold-1);
+  pointer-events: none;
 }
 
 .input {
   width: 100%;
-  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  transition: all 0.2s;
+  padding: 0.62rem 2.6rem 0.62rem 2.5rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-family: 'Jost', sans-serif;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--ink);
+  transition: all 0.2s ease;
   outline: none;
 }
 
 .input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  border-color: var(--gold-1);
+  box-shadow: 0 0 0 3px rgba(201, 162, 75, 0.18);
 }
 
 .input:disabled {
@@ -109,29 +386,31 @@
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: #9ca3af;
+  color: var(--ink-soft);
   cursor: pointer;
   padding: 0;
-  transition: color 0.2s;
+  display: flex;
+  transition: color 0.2s ease;
 }
 
 .eyeButton:hover {
-  color: #4b5563;
+  color: var(--gold-deep);
 }
 
-/* Options Row */
 .optionsRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .checkboxLabel {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: #4b5563;
+  gap: 0.4rem;
+  color: var(--ink-soft);
   cursor: pointer;
 }
 
@@ -139,38 +418,38 @@
   width: 1rem;
   height: 1rem;
   border-radius: 0.25rem;
-  border: 1px solid #d1d5db;
-  accent-color: #3b82f6;
+  border: 1px solid var(--border);
+  accent-color: var(--gold-1);
   cursor: pointer;
 }
 
 .forgotLink {
-  color: #3b82f6;
+  color: var(--gold-deep);
   text-decoration: none;
   font-weight: 500;
-  transition: color 0.2s;
+  transition: color 0.2s ease;
 }
 
 .forgotLink:hover {
-  color: #2563eb;
+  color: var(--ink);
 }
 
-/* Submit Button */
 .submitButton {
   width: 100%;
-  background: linear-gradient(135deg, #3b82f6 0%, #7c3aed 100%);
-  color: white;
-  padding: 0.75rem;
+  background: var(--gold-gradient);
+  color: #2b2005;
+  padding: 0.72rem;
   border: none;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  font-weight: 500;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
 }
 
 .submitButton:hover:not(:disabled) {
-  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 12px 26px rgba(201, 162, 75, 0.35);
   transform: translateY(-1px);
 }
 
@@ -179,10 +458,9 @@
   cursor: not-allowed;
 }
 
-/* Divider */
 .divider {
   position: relative;
-  margin: 1.5rem 0;
+  margin: 1.1rem 0;
   text-align: center;
 }
 
@@ -193,49 +471,557 @@
   top: 50%;
   width: 100%;
   height: 1px;
-  background: #e5e7eb;
+  background: var(--border);
 }
 
 .divider span {
   position: relative;
-  background: white;
+  background: rgba(255, 255, 255, 0.001);
   padding: 0 1rem;
-  font-size: 0.875rem;
-  color: #6b7280;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
 }
 
-/* Footer */
 .footerText {
   text-align: center;
-  margin-top: 1.5rem;
-  font-size: 0.875rem;
-  color: #4b5563;
+  margin-top: 1rem;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
 }
 
 .footerLink {
-  color: #3b82f6;
+  color: var(--gold-deep);
   text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s;
+  font-weight: 600;
+  transition: color 0.2s ease;
 }
 
 .footerLink:hover {
-  color: #2563eb;
+  color: var(--ink);
 }
 
-/* Responsive */
+/* ==========================================================
+   WHY AUREVIAN — editorial, non-boxed layout
+========================================================== */
+.whySection {
+  position: relative;
+  background: var(--cream);
+  padding: 100px 24px;
+  scroll-margin-top: 76px;
+}
+
+.whySection::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 8% 15%, rgba(201, 162, 75, 0.14), transparent 45%),
+    radial-gradient(circle at 92% 85%, rgba(201, 162, 75, 0.12), transparent 45%);
+  pointer-events: none;
+}
+
+.whyInner {
+  position: relative;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.whyIntro {
+  max-width: 640px;
+  margin: 0 auto 72px;
+  text-align: center;
+}
+
+.whyEyebrow {
+  display: inline-block;
+  font-size: 12px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--gold-deep);
+  margin-bottom: 14px;
+}
+
+.whyTitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(32px, 4.5vw, 48px);
+  font-weight: 700;
+  margin: 0 0 16px;
+  color: var(--ink);
+  position: relative;
+  display: inline-block;
+}
+
+.whyTitle::after {
+  content: '';
+  display: block;
+  width: 70px;
+  height: 2px;
+  margin: 18px auto 0;
+  background: var(--gold-gradient);
+}
+
+.whySubtitle {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  margin: 0;
+  font-weight: 300;
+}
+
+/* ---------- Numbered showcase rows ---------- */
+.whyShowcase {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 56px;
+  row-gap: 0;
+}
+
+.whyRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 28px 0;
+  border-bottom: 1px solid var(--border);
+  transition: padding-left 0.3s ease;
+}
+
+.whyRow:hover {
+  padding-left: 8px;
+}
+
+.whyIndex {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 34px;
+  font-weight: 600;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--gold-1);
+  line-height: 1;
+  flex-shrink: 0;
+  width: 40px;
+}
+
+.whyRowIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gold-gradient);
+  color: #fff;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.whyRowContent {
+  min-width: 0;
+}
+
+.whyRowTitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: var(--ink);
+}
+
+.whyRowText {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/* ==========================================================
+   CRAFTSMANSHIP — image left, content right
+========================================================== */
+.craftSection {
+  position: relative;
+  background: var(--ivory);
+  padding: 200px 24px;
+  overflow: hidden;
+}
+
+.craftInner {
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 125px;
+}
+
+.craftImageWrap {
+  position: relative;
+  flex: 1 1 420px;
+  max-width: 460px;
+}
+
+.craftImageFrame {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  box-shadow: 0 30px 60px rgba(43, 38, 32, 0.18);
+  border: 1px solid rgba(201, 162, 75, 0.3);
+}
+
+.craftImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.craftAccentTop,
+.craftAccentBottom {
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  border: 2px solid var(--gold-1);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.craftAccentTop {
+  top: -18px;
+  left: -18px;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 16px 0 0 0;
+}
+
+.craftAccentBottom {
+  bottom: -18px;
+  right: -18px;
+  border-left: none;
+  border-top: none;
+  border-radius: 0 0 16px 0;
+}
+
+.craftContent {
+  flex: 1 1 420px;
+  min-width: 0;
+}
+
+.craftEyebrow {
+  display: inline-block;
+  font-size: 12px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--gold-deep);
+  margin-bottom: 16px;
+}
+
+.craftTitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(30px, 4vw, 44px);
+  font-weight: 700;
+  line-height: 1.18;
+  color: var(--ink);
+  margin: 0 0 20px;
+}
+
+.craftDesc {
+  font-size: 15.5px;
+  line-height: 1.75;
+  color: var(--ink-soft);
+  font-weight: 300;
+  max-width: 480px;
+  margin: 0 0 28px;
+}
+
+.craftList {
+  list-style: none;
+  margin: 0 0 34px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.craftListItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  font-size: 14.5px;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.craftCheck {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gold-gradient);
+  color: #fff;
+  font-size: 13px;
+  margin-top: 1px;
+}
+
+.craftCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 32px;
+  border-radius: 50px;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 500;
+  text-decoration: none;
+  color: #2b2005;
+  background: var(--gold-gradient);
+  box-shadow: 0 10px 24px rgba(201, 162, 75, 0.35);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+}
+
+.craftCta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 34px rgba(201, 162, 75, 0.45);
+}
+
+/* ==========================================================
+   ANIMATIONS
+========================================================== */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eyebrow,
+  .heroTitle,
+  .heroDesc,
+  .heroCtas,
+  .heroFeatures,
+  .card,
+  .whyRow {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ==========================================================
+   FOCUS VISIBILITY
+========================================================== */
+.ctaPrimary:focus-visible,
+.ctaSecondary:focus-visible,
+.craftCta:focus-visible,
+.submitButton:focus-visible,
+.eyeButton:focus-visible,
+.forgotLink:focus-visible,
+.footerLink:focus-visible,
+.input:focus-visible {
+  outline: 2px solid var(--gold-1);
+  outline-offset: 2px;
+}
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+/* Large desktops / laptops */
+@media (max-width: 1180px) {
+  .heroInner {
+    max-width: 100%;
+  }
+
+  .card {
+    max-width: 380px;
+  }
+
+  .craftInner {
+    gap: 48px;
+  }
+}
+
+/* Tablets — stack hero, keep why-section 2-col */
+@media (max-width: 1023px) {
+  .heroInner {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .heroLeft {
+    max-width: 640px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .heroRight {
+    width: 100%;
+    max-width: 100%;
+    justify-content: center;
+  }
+
+  .card {
+    max-width: 420px;
+  }
+
+  .heroDesc {
+    max-width: 560px;
+  }
+
+  .heroCtas {
+    justify-content: center;
+  }
+
+  .whyShowcase {
+    column-gap: 36px;
+  }
+
+  .craftInner {
+    flex-direction: column;
+    gap: 40px;
+    text-align: center;
+  }
+
+  .craftImageWrap {
+    max-width: 380px;
+  }
+
+  .craftDesc {
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .craftListItem {
+    text-align: left;
+  }
+}
+
+/* Stats + why-rows: always two per row from tablet down to the smallest phones */
+@media (max-width: 1023px) {
+  .whyRow {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    padding: 20px 8px;
+  }
+
+  .whyIndex {
+    width: auto;
+  }
+
+  .whyRowContent {
+    width: 100%;
+  }
+}
+
+/* Small tablets / large phones */
+@media (max-width: 768px) {
+  .hero {
+    min-height: auto;
+    padding: 40px 16px 60px;
+  }
+
+  .heroFeatures {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .whySection {
+    padding: 72px 16px;
+  }
+
+  .whyIntro {
+    margin-bottom: 48px;
+  }
+
+  .whyShowcase {
+    column-gap: 20px;
+  }
+
+  .craftSection {
+    padding: 72px 16px;
+  }
+
+  .craftImageWrap {
+    max-width: 320px;
+  }
+
+  .craftAccentTop,
+  .craftAccentBottom {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+/* Phones */
 @media (max-width: 640px) {
   .card {
-    padding: 1.5rem;
+    max-width: 100%;
+    padding: 22px 20px;
+    border-radius: 20px;
   }
 
   .title {
-    font-size: 1.5rem;
+    font-size: 1.35rem;
   }
 
   .optionsRow {
     flex-direction: column;
     gap: 0.5rem;
     align-items: flex-start;
+  }
+
+  .whyRow {
+    gap: 14px;
+    padding: 22px 0;
+  }
+
+  .whyIndex {
+    font-size: 26px;
+    width: 30px;
+  }
+
+  .whyRowIcon {
+    width: 38px;
+    height: 38px;
+    font-size: 15px;
+  }
+
+  .craftList {
+    gap: 14px;
+  }
+
+  .craftListItem {
+    font-size: 13.5px;
+  }
+
+  .craftCta {
+    width: 100%;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .hero {
+    padding: 30px 16px;
+  }
+
+  .craftImageWrap {
+    max-width: 100%;
+  }
+
+  .craftAccentTop,
+  .craftAccentBottom {
+    display: none;
   }
 }
