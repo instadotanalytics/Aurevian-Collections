@@ -1,113 +1,206 @@
 // src/Pages/Seller/SellerDashboard/SellerDashboard.jsx
 
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { 
-  fetchSellerDashboard, 
-  fetchRecentOrders, 
-  fetchRecentActivities 
-} from '../../../redux/slices/sellerSlice';
-import StatsCard from './components/StatsCard';
-import RecentOrders from './components/RecentOrders';
-import RecentActivities from './components/RecentActivities';
-import QuickActions from './components/QuickActions';
-import styles from './SellerDashboard.module.css';
+import React, { useState, useEffect } from "react";
+import {
+  FiHome,
+  FiPackage,
+  FiShoppingBag,
+  FiDollarSign,
+  FiUsers,
+  FiMessageSquare,
+  FiSettings,
+  FiLogOut,
+  FiMenu,
+  FiX,
+  FiShield,
+  FiBell,
+  FiSearch,
+} from "react-icons/fi";
+
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
+import styles from "./SellerDashboard.module.css";
+
+import DashboardOverview from "./components/DashboardOverview";
 
 const SellerDashboard = () => {
-  const dispatch = useDispatch();
-  const { seller, dashboardStats, recentOrders, recentActivities, isLoading } = useSelector(
-    (state) => state.seller
-  );
+  const navigate = useNavigate();
+  const { seller } = useSelector((state) => state.seller);
+
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeMenu, setActiveMenu] = useState("dashboard");
 
   useEffect(() => {
-    dispatch(fetchSellerDashboard());
-    dispatch(fetchRecentOrders());
-    dispatch(fetchRecentActivities());
-  }, [dispatch]);
+    const handleResize = () => {
+      if (window.innerWidth < 768) setSidebarOpen(false);
+      else setSidebarOpen(true);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-  if (isLoading) {
-    return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.spinner}></div>
-        <p>Loading dashboard...</p>
-      </div>
-    );
-  }
+  const menuItems = [
+    { id: "dashboard", label: "Dashboard", icon: FiHome },
+    { id: "products", label: "Products", icon: FiPackage },
+    { id: "orders", label: "Orders", icon: FiShoppingBag },
+    { id: "earnings", label: "Earnings", icon: FiDollarSign },
+    { id: "customers", label: "Customers", icon: FiUsers },
+    { id: "reviews", label: "Reviews", icon: FiMessageSquare },
+    { id: "settings", label: "Settings", icon: FiSettings },
+  ];
+
+  const renderContent = () => {
+    switch (activeMenu) {
+      case "dashboard":
+        return <DashboardOverview />;
+      default:
+        return (
+          <div className={styles.placeholderContent}>
+            {activeMenu} Page Coming Soon
+          </div>
+        );
+    }
+  };
 
   return (
-    <div className={styles.dashboard}>
-      {/* Welcome Header */}
-      <div className={styles.header}>
-        <div>
-          <h1 className={styles.welcome}>
-            Welcome back, {seller?.firstName || 'Seller'}! 👋
-          </h1>
-          <p className={styles.subtitle}>
-            Here's what's happening with your store today.
-          </p>
-        </div>
-        <div className={styles.headerActions}>
-          <button className={styles.addProductBtn}>
-            + Add New Product
+    <div className={styles.dashboardContainer}>
+      <header className={styles.topHeader}>
+        <div className={styles.headerLeft}>
+          <button
+            className={styles.menuToggle}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <FiMenu size={24} />
           </button>
-          <div className={styles.storeStatus}>
-            <span className={`${styles.statusDot} ${seller?.status === 'approved' ? styles.active : styles.pending}`}></span>
-            <span className={styles.statusText}>
-              {seller?.status === 'approved' ? 'Store Active' : 'Pending Verification'}
-            </span>
+
+          <button
+            className={styles.sidebarToggle}
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          >
+            {sidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+          </button>
+
+          <div className={styles.headerLogo}>
+            <FiShield className={styles.logoIcon} />
+            <span className={styles.logoText}>Seller Panel</span>
+          </div>
+
+          <div className={styles.headerSearch}>
+            <FiSearch className={styles.searchIcon} />
+            <input
+              type="text"
+              placeholder="Search..."
+              className={styles.searchInput}
+            />
           </div>
         </div>
-      </div>
 
-      {/* Stats Cards */}
-      <div className={styles.statsGrid}>
-        <StatsCard 
-          title="Total Products"
-          value={dashboardStats?.totalProducts || 0}
-          icon="📦"
-          color="#6366f1"
-        />
-        <StatsCard 
-          title="Total Orders"
-          value={dashboardStats?.totalOrders || 0}
-          icon="🛍️"
-          color="#f59e0b"
-        />
-        <StatsCard 
-          title="Total Revenue"
-          value={`$${dashboardStats?.totalRevenue || 0}`}
-          icon="💰"
-          color="#10b981"
-        />
-        <StatsCard 
-          title="Total Sales"
-          value={dashboardStats?.totalSales || 0}
-          icon="📈"
-          color="#ec4899"
-        />
-        <StatsCard 
-          title="Rating"
-          value={dashboardStats?.rating?.toFixed(1) || '0.0'}
-          icon="⭐"
-          color="#8b5cf6"
-        />
-        <StatsCard 
-          title="Wallet Balance"
-          value={`$${dashboardStats?.walletBalance || 0}`}
-          icon="💳"
-          color="#06b6d4"
-        />
-      </div>
+        <div className={styles.headerRight}>
+          <button className={styles.notificationBtn}>
+            <FiBell size={20} />
+            <span className={styles.notificationBadge}>0</span>
+          </button>
 
-      {/* Main Content */}
+          <div className={styles.adminProfile}>
+            <div className={styles.avatar}>
+              {seller?.profileImage ? (
+                <img src={seller.profileImage} alt="Seller" />
+              ) : (
+                <span>{seller?.firstName?.charAt(0) || "S"}</span>
+              )}
+            </div>
+
+            <div className={styles.adminInfo}>
+              <span className={styles.adminName}>
+                {seller?.firstName || "Seller"} {seller?.lastName || ""}
+              </span>
+              <span className={styles.adminRole}>Seller</span>
+            </div>
+
+            <button
+              onClick={() => navigate("/seller/login")}
+              className={styles.logoutBtn}
+            >
+              <FiLogOut size={18} />
+            </button>
+          </div>
+        </div>
+      </header>
+
       <div className={styles.mainContent}>
-        <div className={styles.leftColumn}>
-          <RecentOrders orders={recentOrders} />
-        </div>
-        <div className={styles.rightColumn}>
-          <QuickActions />
-          <RecentActivities activities={recentActivities} />
-        </div>
+        <aside
+          className={`${styles.sidebar} ${
+            sidebarOpen ? styles.open : styles.closed
+          } ${mobileMenuOpen ? styles.mobileOpen : ""}`}
+        >
+          <div className={styles.sidebarNav}>
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setActiveMenu(item.id);
+                  setMobileMenuOpen(false);
+                }}
+                className={`${styles.navItem} ${
+                  activeMenu === item.id ? styles.active : ""
+                }`}
+              >
+                <item.icon className={styles.navIcon} />
+                <span className={styles.navLabel}>{item.label}</span>
+                {activeMenu === item.id && (
+                  <div className={styles.activeIndicator} />
+                )}
+              </button>
+            ))}
+          </div>
+
+          <div className={styles.sidebarFooter}>
+            <div className={styles.sidebarUser}>
+              <div className={styles.sidebarAvatar}>
+                {seller?.profileImage ? (
+                  <img src={seller.profileImage} alt="Seller" />
+                ) : (
+                  <span>{seller?.firstName?.charAt(0) || "S"}</span>
+                )}
+              </div>
+
+              {sidebarOpen && (
+                <div className={styles.sidebarUserInfo}>
+                  <span className={styles.sidebarUserName}>
+                    {seller?.firstName} {seller?.lastName}
+                  </span>
+                  <span className={styles.sidebarUserRole}>Seller</span>
+                </div>
+              )}
+            </div>
+
+            <button
+              className={styles.sidebarLogout}
+              onClick={() => navigate("/seller/login")}
+            >
+              <FiLogOut size={18} />
+              {sidebarOpen && <span>Logout</span>}
+            </button>
+          </div>
+        </aside>
+
+        {mobileMenuOpen && (
+          <div
+            className={styles.overlay}
+            onClick={() => setMobileMenuOpen(false)}
+          />
+        )}
+
+        <main
+          className={`${styles.contentArea} ${
+            !sidebarOpen ? styles.expanded : ""
+          }`}
+        >
+          <div className={styles.contentWrapper}>{renderContent()}</div>
+        </main>
       </div>
     </div>
   );

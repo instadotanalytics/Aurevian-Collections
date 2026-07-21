@@ -297,6 +297,9 @@ const initialState = {
   seller: null,
   isAuthenticated: false,
   isLoading: false,
+  dashboardLoading: false,
+  ordersLoading: false,
+  activitiesLoading: false,
   error: null,
   status: "idle", // idle | loading | succeeded | failed
   dashboardStats: null,
@@ -429,11 +432,10 @@ const sellerSlice = createSlice({
       // DASHBOARD STATS
       // ============================================
       .addCase(fetchSellerDashboard.pending, (state) => {
-        state.isLoading = true;
-        state.status = "loading";
+        state.dashboardLoading = true;
       })
       .addCase(fetchSellerDashboard.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.dashboardLoading = false;
         state.dashboardStats = action.payload;
         state.status = "succeeded";
       })

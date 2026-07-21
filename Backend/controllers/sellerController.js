@@ -14,13 +14,13 @@ const generateTokens = (sellerId) => {
   const accessToken = jwt.sign(
     { id: sellerId, role: "seller" },
     process.env.JWT_ACCESS_SECRET,
-    { expiresIn: "15m" }
+    { expiresIn: "15m" },
   );
 
   const refreshToken = jwt.sign(
     { id: sellerId, role: "seller" },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: "30d" }
+    { expiresIn: "30d" },
   );
 
   return { accessToken, refreshToken };
@@ -51,9 +51,22 @@ export const registerSeller = async (req, res) => {
       gstNumber,
     } = req.body;
 
-    console.log("📝 Registration request:", { firstName, lastName, email, storeName, phone });
+    console.log("📝 Registration request:", {
+      firstName,
+      lastName,
+      email,
+      storeName,
+      phone,
+    });
 
-    if (!firstName || !lastName || !email || !phone || !password || !storeName) {
+    if (
+      !firstName ||
+      !lastName ||
+      !email ||
+      !phone ||
+      !password ||
+      !storeName
+    ) {
       return res.status(400).json({
         success: false,
         message: "Please fill all required fields",
@@ -69,7 +82,7 @@ export const registerSeller = async (req, res) => {
 
     // Check existing seller
     let existingSeller = await Seller.findOne({
-      email: { $regex: new RegExp(`^${email}$`, 'i') },
+      email: { $regex: new RegExp(`^${email}$`, "i") },
       isVerified: true,
     });
     if (existingSeller) {
@@ -92,7 +105,7 @@ export const registerSeller = async (req, res) => {
 
     // Check temporary seller
     let tempSeller = await Seller.findOne({
-      email: { $regex: new RegExp(`^${email}$`, 'i') },
+      email: { $regex: new RegExp(`^${email}$`, "i") },
       isVerified: false,
     });
 
@@ -104,7 +117,9 @@ export const registerSeller = async (req, res) => {
       tempSeller.phone = phone.trim();
       tempSeller.password = password;
       tempSeller.storeInfo.storeName = storeName.trim();
-      tempSeller.storeInfo.storeSlug = storeName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+      tempSeller.storeInfo.storeSlug = storeName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-");
       tempSeller.storeInfo.website = website || "";
       tempSeller.storeInfo.socialLinks = socialLinks || {};
       tempSeller.brandName = brandName || "";
@@ -128,7 +143,9 @@ export const registerSeller = async (req, res) => {
       tempSeller.documents.aadhaarNumber = aadhaarNumber?.trim() || "";
       tempSeller.documents.gstNumber = gstNumber?.trim().toUpperCase() || null;
       tempSeller.verification.termsAccepted = termsAccepted || false;
-      tempSeller.verification.termsAcceptedAt = termsAccepted ? new Date() : null;
+      tempSeller.verification.termsAcceptedAt = termsAccepted
+        ? new Date()
+        : null;
       tempSeller.verification.kycStatus = "pending";
       tempSeller.status = "pending";
 
@@ -204,10 +221,17 @@ export const registerSeller = async (req, res) => {
     // sends, and stores the code on Twilio's side. We don't generate
     // or store our own code for phone anymore.
     const phoneOtpResult = await otpService.sendOTP(phone, "phone");
+
     if (!phoneOtpResult.success) {
       console.error("❌ Failed to send phone OTP:", phoneOtpResult.error);
+
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send phone OTP",
+      });
     }
-    console.log("✅ Phone OTP sent to:", phone);
+
+    console.log("✅ Phone OTP sent:", phone);
 
     return res.status(201).json({
       success: true,
@@ -250,7 +274,7 @@ export const verifyEmailOTP = async (req, res) => {
     }
 
     const seller = await Seller.findOne({
-      email: { $regex: new RegExp(`^${email}$`, 'i') },
+      email: { $regex: new RegExp(`^${email}$`, "i") },
     }).select("+otp.email.code +otp.email.expiresAt");
 
     if (!seller) {
@@ -283,7 +307,7 @@ export const verifyEmailOTP = async (req, res) => {
         seller.email,
         seller.firstName,
         seller.storeInfo.storeName,
-        `${process.env.CLIENT_URL}/seller/login`
+        `${process.env.CLIENT_URL}/seller/login`,
       );
       console.log("✅ Approval email sent to:", seller.email);
     }
@@ -355,7 +379,7 @@ export const verifyPhoneOTP = async (req, res) => {
         seller.email,
         seller.firstName,
         seller.storeInfo.storeName,
-        `${process.env.CLIENT_URL}/seller/login`
+        `${process.env.CLIENT_URL}/seller/login`,
       );
       console.log("✅ Approval email sent to:", seller.email);
     }
@@ -396,7 +420,7 @@ export const resendOTP = async (req, res) => {
     let seller;
     if (type === "email") {
       seller = await Seller.findOne({
-        email: { $regex: new RegExp(`^${contact}$`, 'i') },
+        email: { $regex: new RegExp(`^${contact}$`, "i") },
       });
     } else if (type === "phone") {
       seller = await Seller.findOne({ phone: contact });
@@ -466,7 +490,7 @@ export const sellerLogin = async (req, res) => {
     }
 
     const seller = await Seller.findOne({
-      email: { $regex: new RegExp(`^${email}$`, 'i') },
+      email: { $regex: new RegExp(`^${email}$`, "i") },
     }).select("+password");
 
     if (!seller) {
@@ -495,7 +519,8 @@ export const sellerLogin = async (req, res) => {
     if (seller.status === "pending") {
       return res.status(403).json({
         success: false,
-        message: "Your account is pending approval. Please wait for verification (within 24 hours).",
+        message:
+          "Your account is pending approval. Please wait for verification (within 24 hours).",
         status: "pending",
       });
     }
@@ -577,7 +602,7 @@ export const sellerLogin = async (req, res) => {
 export const getCurrentSeller = async (req, res) => {
   try {
     const seller = await Seller.findById(req.seller._id).select(
-      "-password -refreshToken -refreshTokenExpiry"
+      "-password -refreshToken -refreshTokenExpiry",
     );
 
     if (!seller) {
@@ -667,7 +692,7 @@ export const refreshSellerToken = async (req, res) => {
     }
 
     const { accessToken, refreshToken: newRefreshToken } = generateTokens(
-      seller._id
+      seller._id,
     );
 
     seller.refreshToken = newRefreshToken;
@@ -890,8 +915,11 @@ export const uploadSellerDocuments = async (req, res) => {
       });
     }
 
-    const cleanPan = panNumber.trim().toUpperCase().replace(/\s/g, '');
-    if (cleanPan.length !== 10 || !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(cleanPan)) {
+    const cleanPan = panNumber.trim().toUpperCase().replace(/\s/g, "");
+    if (
+      cleanPan.length !== 10 ||
+      !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(cleanPan)
+    ) {
       return res.status(400).json({
         success: false,
         message: "Please enter a valid PAN number (e.g., ABCDE1234F)",
@@ -906,7 +934,7 @@ export const uploadSellerDocuments = async (req, res) => {
       });
     }
 
-    const cleanAadhaar = aadhaarNumber.trim().replace(/\s/g, '');
+    const cleanAadhaar = aadhaarNumber.trim().replace(/\s/g, "");
     if (cleanAadhaar.length !== 12 || !/^[0-9]{12}$/.test(cleanAadhaar)) {
       return res.status(400).json({
         success: false,
@@ -945,7 +973,7 @@ export const uploadSellerDocuments = async (req, res) => {
       if (files && files[field] && files[field][0]) {
         const result = await cloudinaryService.uploadFile(
           files[field][0].path,
-          `sellers/${sellerId}/documents`
+          `sellers/${sellerId}/documents`,
         );
         if (result.success) {
           uploadResults[field] = result.url;
@@ -957,7 +985,9 @@ export const uploadSellerDocuments = async (req, res) => {
     // Update documents
     seller.documents.panNumber = cleanPan;
     seller.documents.aadhaarNumber = cleanAadhaar;
-    seller.documents.gstNumber = gstNumber ? gstNumber.trim().toUpperCase() : null;
+    seller.documents.gstNumber = gstNumber
+      ? gstNumber.trim().toUpperCase()
+      : null;
 
     seller.verification.kycStatus = "submitted";
     seller.verification.kycSubmittedAt = new Date();
@@ -1080,7 +1110,7 @@ export const verifyAadhaarCard = async (req, res) => {
 export const getVerificationStatus = async (req, res) => {
   try {
     const seller = await Seller.findById(req.seller._id).select(
-      "documents verification status emailVerified phoneVerified"
+      "documents verification status emailVerified phoneVerified",
     );
 
     if (!seller) {
