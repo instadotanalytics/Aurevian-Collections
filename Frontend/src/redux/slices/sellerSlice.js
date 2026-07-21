@@ -7,6 +7,20 @@ import toast from "react-hot-toast";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 // ============================================
+// HELPERS
+// ============================================
+
+/**
+ * Returns the KYC status for a seller object regardless of which
+ * endpoint populated it. `sellerLogin` returns kycStatus at the top
+ * level (seller.kycStatus), while `fetchCurrentSeller`/`getCurrentSeller`
+ * returns the full document with it nested at seller.verification.kycStatus.
+ * This normalizes both shapes.
+ */
+export const getKycStatus = (seller) =>
+  seller?.kyc?.status || seller?.kycStatus || "not_submitted";
+
+// ============================================
 // ASYNC THUNKS
 // ============================================
 
@@ -23,7 +37,6 @@ export const registerSeller = createAsyncThunk(
         // Store email and phone for OTP verification
         localStorage.setItem("sellerEmail", sellerData.email);
         localStorage.setItem("sellerPhone", sellerData.phone);
-        // ✅ REMOVED: toast.success from here - will be shown in component
         return response.data.data;
       }
     } catch (error) {
@@ -177,7 +190,7 @@ export const updateSellerProfile = createAsyncThunk(
   },
 );
 
-// Upload Documents
+// Upload Documents (KYC)
 export const uploadSellerDocuments = createAsyncThunk(
   "seller/uploadDocuments",
   async (formData, { rejectWithValue }) => {
@@ -195,6 +208,7 @@ export const uploadSellerDocuments = createAsyncThunk(
       );
       if (response.data.success) {
         toast.success("Documents uploaded successfully!");
+        // Controller returns: { documents, kycStatus, status }
         return response.data.data;
       }
     } catch (error) {
@@ -202,6 +216,29 @@ export const uploadSellerDocuments = createAsyncThunk(
         error.response?.data?.message || "Failed to upload documents";
       toast.error(message);
       return rejectWithValue(message);
+    }
+  },
+);
+
+// Get Verification Status
+export const fetchVerificationStatus = createAsyncThunk(
+  "seller/fetchVerificationStatus",
+  async (_, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("sellerAccessToken");
+      const response = await axios.get(
+        `${API_URL}/seller/verification-status`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      if (response.data.success) {
+        return response.data.data;
+      }
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch verification status",
+      );
     }
   },
 );
@@ -306,6 +343,7 @@ const initialState = {
   recentOrders: [],
   recentActivities: [],
   registrationData: null,
+  verificationStatus: null,
 };
 
 const sellerSlice = createSlice({
@@ -409,7 +447,7 @@ const sellerSlice = createSlice({
       })
 
       // ============================================
-      // UPLOAD DOCUMENTS
+      // UPLOAD DOCUMENTS (KYC)
       // ============================================
       .addCase(uploadSellerDocuments.pending, (state) => {
         state.isLoading = true;
@@ -417,8 +455,16 @@ const sellerSlice = createSlice({
       })
       .addCase(uploadSellerDocuments.fulfilled, (state, action) => {
         state.isLoading = false;
+        // action.payload = { documents, kycStatus, status } from controller
         if (state.seller) {
-          state.seller.documents = action.payload;
+          state.seller.documents = action.payload.documents;
+
+          if (!state.seller.verification) {
+            state.seller.verification = {};
+          }
+          state.seller.verification.kycStatus = action.payload.kycStatus;
+          state.seller.kycStatus = action.payload.kycStatus; // keep top-level in sync too
+          state.seller.status = action.payload.status;
         }
         state.status = "succeeded";
       })
@@ -426,6 +472,13 @@ const sellerSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
         state.status = "failed";
+      })
+
+      // ============================================
+      // VERIFICATION STATUS
+      // ============================================
+      .addCase(fetchVerificationStatus.fulfilled, (state, action) => {
+        state.verificationStatus = action.payload;
       })
 
       // ============================================

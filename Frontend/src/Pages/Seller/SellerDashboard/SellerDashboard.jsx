@@ -22,20 +22,26 @@ import { useNavigate } from "react-router-dom";
 
 import styles from "./SellerDashboard.module.css";
 
+// Components
 import DashboardOverview from "./components/DashboardOverview";
 
 const SellerDashboard = () => {
   const navigate = useNavigate();
+
   const { seller } = useSelector((state) => state.seller);
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("dashboard");
 
+  // Handle window resize for responsive sidebar (same as SuperAdmin)
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 768) setSidebarOpen(false);
-      else setSidebarOpen(true);
+      if (window.innerWidth < 768) {
+        setSidebarOpen(false);
+      } else {
+        setSidebarOpen(true);
+      }
     };
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -56,6 +62,7 @@ const SellerDashboard = () => {
     switch (activeMenu) {
       case "dashboard":
         return <DashboardOverview />;
+
       default:
         return (
           <div className={styles.placeholderContent}>
@@ -67,6 +74,7 @@ const SellerDashboard = () => {
 
   return (
     <div className={styles.dashboardContainer}>
+      {/* TOP HEADER */}
       <header className={styles.topHeader}>
         <div className={styles.headerLeft}>
           <button
@@ -130,7 +138,9 @@ const SellerDashboard = () => {
         </div>
       </header>
 
+      {/* MAIN CONTENT */}
       <div className={styles.mainContent}>
+        {/* Sidebar */}
         <aside
           className={`${styles.sidebar} ${
             sidebarOpen ? styles.open : styles.closed
@@ -187,6 +197,7 @@ const SellerDashboard = () => {
           </div>
         </aside>
 
+        {/* Mobile Overlay */}
         {mobileMenuOpen && (
           <div
             className={styles.overlay}
@@ -194,6 +205,7 @@ const SellerDashboard = () => {
           />
         )}
 
+        {/* Content */}
         <main
           className={`${styles.contentArea} ${
             !sidebarOpen ? styles.expanded : ""

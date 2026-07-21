@@ -60,6 +60,8 @@ import SellerVerifyOTP from "./Pages/Seller/SellerAuth/SellerVerifyOTP.jsx";
 import BlogList from "./Pages/UserBlog/BlogList.jsx";
 import BlogDetail from "./Pages/UserBlog/BlogDetail.jsx";
 
+import SellerKYC from "./Pages/Seller/SellerKYC/SellerKYC";
+
 // ============================================
 // ROUTES CONSTANTS
 // ============================================
@@ -82,6 +84,7 @@ const ROUTES = {
   SELLER_DASHBOARD: "/seller/dashboard",
   SELLER_PROFILE: "/seller/profile",
   SELLER_DOCUMENTS: "/seller/documents",
+  SELLER_KYC: "/seller/kyc", // ✅ NEW
   SELLER_ORDERS: "/seller/orders",
   SELLER_PRODUCTS: "/seller/products",
   BECOME_A_PARTNER: "/become-a-partner",
@@ -418,6 +421,14 @@ const App = () => {
                 <LayoutWithoutHeader>
                   <SellerDashboard />
                 </LayoutWithoutHeader>
+              </SellerRoute>
+            }
+          />
+          <Route
+            path="/seller/kyc"
+            element={
+              <SellerRoute>
+                <SellerKYC />
               </SellerRoute>
             }
           />

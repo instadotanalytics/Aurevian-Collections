@@ -1,6 +1,7 @@
 // src/Pages/Seller/SellerDashboard/components/DashboardOverview.jsx
 
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { FiAlertTriangle, FiArrowRight, FiCheckCircle } from "react-icons/fi";
 
@@ -9,18 +10,29 @@ import RecentOrders from "./RecentOrders";
 import RecentActivities from "./RecentActivities";
 import QuickActions from "./QuickActions";
 
+import {
+  fetchSellerDashboard,
+  fetchRecentOrders,
+  fetchRecentActivities,
+  getKycStatus,
+} from "../../../../redux/slices/sellerSlice";
+
 import styles from "./DashboardOverview.module.css";
 
-const DashboardOverview = ({
-  seller,
-  dashboardStats,
-  recentOrders,
-  recentActivities,
-}) => {
-  // Treat seller as KYC-verified only if explicitly marked so.
-  // Adjust this check to match your actual seller schema field.
-  const isKycVerified =
-    seller?.kycStatus === "verified" || seller?.isKycVerified === true;
+const DashboardOverview = () => {
+  const dispatch = useDispatch();
+
+  const { seller, dashboardStats, recentOrders, recentActivities } =
+    useSelector((state) => state.seller);
+
+  useEffect(() => {
+    dispatch(fetchSellerDashboard());
+    dispatch(fetchRecentOrders());
+    dispatch(fetchRecentActivities());
+  }, [dispatch]);
+
+  const kycStatus = getKycStatus(seller);
+  const isKycVerified = kycStatus === "verified";
 
   return (
     <div className={styles.dashboardOverview}>
@@ -45,7 +57,11 @@ const DashboardOverview = ({
           </div>
 
           <Link to="/seller/kyc" className={styles.kycBtn}>
-            Complete your KYC
+            {kycStatus === "submitted" || kycStatus === "under_review"
+              ? "Check KYC Status"
+              : kycStatus === "rejected"
+                ? "Resubmit KYC"
+                : "Complete your KYC"}
             <FiArrowRight />
           </Link>
         </div>
