@@ -1,3 +1,4 @@
+
 // src/Pages/UserBlog/BlogList.jsx
 
 import React, { useEffect, useState } from 'react';
@@ -62,28 +63,39 @@ const BlogList = () => {
     );
   }
 
+  // Split the first article out so it can be rendered as the large,
+  // Vogue-style featured piece. Everything else keeps its original order.
+  const [featuredBlog, ...restBlogs] = blogs || [];
+
   return (
     <div className={styles.blogPage}>
       <div className={styles.container}>
-        {/* Header */}
-        <div className={styles.header}>
-          <span className={styles.headerTag}>Latest from Aurevian Journal</span>
-          <h1>Discover the latest trends, guides, and stories from the world of fine jewellery</h1>
-          
-          {/* Search */}
-          <form onSubmit={handleSearch} className={styles.searchForm}>
-            <div className={styles.searchWrapper}>
-              <FiSearch className={styles.searchIcon} />
-              <input
-                type="text"
-                placeholder="Search articles..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className={styles.searchInput}
-              />
-            </div>
-            <button type="submit" className={styles.searchBtn}>Search</button>
-          </form>
+        {/* Hero / Header */}
+        <div className={styles.hero}>
+          <div className={styles.header}>
+            <span className={styles.headerTag}>Aurevian Journal</span>
+            <h1>Discover the latest trends, guides, and stories from the world of fine jewellery</h1>
+            <p className={styles.heroSubtitle}>
+              Curated reading on craftsmanship, diamonds and the art of fine jewellery — for those who
+              appreciate the story behind every piece.
+            </p>
+
+            {/* Search */}
+            <form onSubmit={handleSearch} className={styles.searchForm}>
+              <div className={styles.searchWrapper}>
+                <FiSearch className={styles.searchIcon} />
+                <input
+                  type="text"
+                  placeholder="Search articles..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className={styles.searchInput}
+                  aria-label="Search articles"
+                />
+              </div>
+              <button type="submit" className={styles.searchBtn}>Search</button>
+            </form>
+          </div>
         </div>
 
         {/* Categories */}
@@ -93,21 +105,69 @@ const BlogList = () => {
               key={cat}
               className={`${styles.categoryBtn} ${selectedCategory === cat ? styles.active : ''}`}
               onClick={() => handleCategoryChange(cat)}
+              aria-pressed={selectedCategory === cat}
             >
               {cat === 'all' ? 'All' : cat.charAt(0).toUpperCase() + cat.slice(1)}
             </button>
           ))}
         </div>
 
-        {/* Blog List - Horizontal Layout */}
+        {/* Blog List */}
         {blogs && blogs.length > 0 ? (
           <>
+            {/* Featured Article */}
+            {featuredBlog && (
+              <Link to={`/blog/${featuredBlog.slug}`} className={styles.featured}>
+                <div className={styles.featuredImageWrap}>
+                  <img
+                    src={featuredBlog.featuredImage?.url}
+                    alt={featuredBlog.featuredImage?.alt || featuredBlog.title}
+                    loading="eager"
+                  />
+                  <span className={styles.featuredBadge}>Featured</span>
+                </div>
+                <div className={styles.featuredBody}>
+                  <span className={styles.featuredEyebrow}>{featuredBlog.category}</span>
+                  <h2 className={styles.featuredTitle}>{featuredBlog.title}</h2>
+                  <p className={styles.featuredExcerpt}>{featuredBlog.excerpt}</p>
+                  <div className={styles.featuredMeta}>
+                    <span>
+                      <FiCalendar size={14} />
+                      {formatDate(featuredBlog.publishedAt)}
+                    </span>
+                    <span>
+                      <FiClock size={14} />
+                      {featuredBlog.readingTime || 1} min read
+                    </span>
+                    <span>
+                      <FiEye size={14} />
+                      {featuredBlog.views || 0}
+                    </span>
+                  </div>
+                  <span className={styles.readBtn}>
+                    Read Article <FiArrowRight />
+                  </span>
+                </div>
+              </Link>
+            )}
+
+            {/* Remaining Articles — alternating magazine layout */}
             <div className={styles.blogList}>
-              {blogs.map((blog, index) => (
-                <Link to={`/blog/${blog.slug}`} key={blog._id} className={styles.blogRow}>
-                  {/* Left Side - Content */}
-                  <div className={styles.blogContent}>
-                    <span className={styles.blogCategory}>{blog.category}</span>
+              {restBlogs.map((blog, index) => (
+                <Link
+                  to={`/blog/${blog.slug}`}
+                  key={blog._id}
+                  className={`${styles.magazineCard} ${index % 2 === 1 ? styles.reverse : ''}`}
+                >
+                  <div className={styles.magazineImage}>
+                    <img
+                      src={blog.featuredImage?.url}
+                      alt={blog.featuredImage?.alt || blog.title}
+                      loading="lazy"
+                    />
+                    <span className={styles.categoryBadge}>{blog.category}</span>
+                  </div>
+                  <div className={styles.magazineContent}>
                     <h2 className={styles.blogTitle}>{blog.title}</h2>
                     <p className={styles.blogExcerpt}>{blog.excerpt}</p>
                     <div className={styles.blogMeta}>
@@ -124,14 +184,9 @@ const BlogList = () => {
                         {blog.views || 0}
                       </span>
                     </div>
-                  </div>
-                  {/* Right Side - Image */}
-                  <div className={styles.blogImage}>
-                    <img 
-                      src={blog.featuredImage?.url} 
-                      alt={blog.featuredImage?.alt || blog.title} 
-                      loading="lazy"
-                    />
+                    <span className={styles.readBtn}>
+                      Read Article <FiArrowRight />
+                    </span>
                   </div>
                 </Link>
               ))}

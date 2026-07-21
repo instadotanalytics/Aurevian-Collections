@@ -1,17 +1,35 @@
+
 // src/Pages/Blog/BlogDetail.jsx
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Helmet } from 'react-helmet-async'; // ✅ Import Helmet
 import { fetchBlogBySlug } from '../../redux/slices/blogSlice';
-import { FiCalendar, FiClock, FiEye, FiUser, FiArrowLeft, FiShare2, FiBookmark } from 'react-icons/fi';
+import {
+  FiCalendar,
+  FiClock,
+  FiEye,
+  FiUser,
+  FiArrowLeft,
+  FiShare2,
+  FiBookmark,
+  FiCopy,
+  FiArrowRight,
+  FiCheck,
+} from 'react-icons/fi';
 import styles from './BlogDetail.module.css';
 
 const BlogDetail = () => {
   const { slug } = useParams();
   const dispatch = useDispatch();
   const { currentBlog, isLoading } = useSelector((state) => state.blogs);
+
+  // Reading progress bar state
+  const [readProgress, setReadProgress] = useState(0);
+  // Floating share panel state
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   useEffect(() => {
     if (slug) {
@@ -20,6 +38,37 @@ const BlogDetail = () => {
     // Scroll to top on page load
     window.scrollTo(0, 0);
   }, [dispatch, slug]);
+
+  // ✅ Sticky reading progress bar — tracks scroll position, no change to data flow
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 0;
+      setReadProgress(progress);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleShare = () => {
+    navigator.share?.({
+      title: currentBlog?.title,
+      text: currentBlog?.excerpt,
+      url: window.location.href,
+    });
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard?.writeText(window.location.href);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
+
+  const handleBookmark = () => {
+    setIsBookmarked((prev) => !prev);
+  };
 
   if (isLoading) {
     return (
@@ -121,6 +170,50 @@ const BlogDetail = () => {
         {JSON.stringify(jsonLdSchema)}
       </script>
 
+      {/* Sticky Reading Progress Bar */}
+      <div className={styles.progressTrack} aria-hidden="true">
+        <div className={styles.progressFill} style={{ width: `${readProgress}%` }} />
+      </div>
+
+      {/* Floating Share Panel — Desktop */}
+      <div className={styles.floatingShare}>
+        <button className={styles.floatingBtn} onClick={handleShare} aria-label="Share article">
+          <FiShare2 />
+          <span className={styles.tooltip}>Share</span>
+        </button>
+        <button className={styles.floatingBtn} onClick={handleCopyLink} aria-label="Copy link">
+          {linkCopied ? <FiCheck /> : <FiCopy />}
+          <span className={styles.tooltip}>{linkCopied ? 'Copied!' : 'Copy Link'}</span>
+        </button>
+        <button
+          className={`${styles.floatingBtn} ${isBookmarked ? styles.bookmarked : ''}`}
+          onClick={handleBookmark}
+          aria-label="Bookmark article"
+          aria-pressed={isBookmarked}
+        >
+          <FiBookmark />
+          <span className={styles.tooltip}>{isBookmarked ? 'Bookmarked' : 'Bookmark'}</span>
+        </button>
+      </div>
+
+      {/* Floating Share — Mobile */}
+      <div className={styles.mobileShare}>
+        <button className={styles.floatingBtn} onClick={handleShare} aria-label="Share article">
+          <FiShare2 />
+        </button>
+        <button className={styles.floatingBtn} onClick={handleCopyLink} aria-label="Copy link">
+          {linkCopied ? <FiCheck /> : <FiCopy />}
+        </button>
+        <button
+          className={`${styles.floatingBtn} ${isBookmarked ? styles.bookmarked : ''}`}
+          onClick={handleBookmark}
+          aria-label="Bookmark article"
+          aria-pressed={isBookmarked}
+        >
+          <FiBookmark />
+        </button>
+      </div>
+
       {/* Blog Content */}
       <article className={styles.blogDetail}>
         <div className={styles.container}>
@@ -128,41 +221,32 @@ const BlogDetail = () => {
             <FiArrowLeft /> Back to Articles
           </Link>
 
-          {/* Header */}
-          <header className={styles.header}>
-            <span className={styles.category}>{currentBlog.category}</span>
-            <h1>{currentBlog.title}</h1>
-            <div className={styles.meta}>
-              <span><FiUser /> {currentBlog.authorName}</span>
-              <span><FiCalendar /> {currentBlog.formattedDate}</span>
-              <span><FiClock /> {currentBlog.readingTime || 1} min read</span>
-              <span><FiEye /> {currentBlog.views || 0} views</span>
+          {/* Hero */}
+          <div className={styles.hero}>
+            <img
+              src={currentBlog.featuredImage?.url}
+              alt={currentBlog.featuredImage?.alt || currentBlog.title}
+              loading="eager"
+            />
+            <span className={styles.heroCategory}>{currentBlog.category}</span>
+            <div className={styles.heroOverlay}>
+              <h1 className={styles.heroTitle}>{currentBlog.title}</h1>
             </div>
-            
-            {/* Social Share Buttons */}
+          </div>
+
+          {/* Meta */}
+          <div className={styles.meta}>
+            <span><FiUser /> {currentBlog.authorName}</span>
+            <span><FiCalendar /> {currentBlog.formattedDate}</span>
+            <span><FiClock /> {currentBlog.readingTime || 1} min read</span>
+            <span><FiEye /> {currentBlog.views || 0} views</span>
+
+            {/* Social Share Button (kept for compatibility) */}
             <div className={styles.socialShare}>
-              <button 
-                onClick={() => {
-                  navigator.share?.({
-                    title: currentBlog.title,
-                    text: currentBlog.excerpt,
-                    url: window.location.href
-                  });
-                }}
-                className={styles.shareBtn}
-              >
+              <button onClick={handleShare} className={styles.shareBtn}>
                 <FiShare2 /> Share
               </button>
             </div>
-          </header>
-
-          {/* Featured Image */}
-          <div className={styles.featuredImage}>
-            <img 
-              src={currentBlog.featuredImage?.url} 
-              alt={currentBlog.featuredImage?.alt || currentBlog.title} 
-              loading="eager"
-            />
           </div>
 
           {/* Content */}
@@ -174,7 +258,7 @@ const BlogDetail = () => {
           {/* Tags */}
           {currentBlog.tags && currentBlog.tags.length > 0 && (
             <div className={styles.tags}>
-              <h3>Tags:</h3>
+              <h3>Tags</h3>
               <div className={styles.tagList}>
                 {currentBlog.tags.map((tag) => (
                   <Link key={tag} to={`/blog?tag=${tag}`} className={styles.tag}>
@@ -207,8 +291,15 @@ const BlogDetail = () => {
               <div className={styles.relatedGrid}>
                 {currentBlog.relatedPosts.map((post) => (
                   <Link key={post._id} to={`/blog/${post.slug}`} className={styles.relatedCard}>
-                    <img src={post.featuredImage?.url} alt={post.title} />
-                    <h4>{post.title}</h4>
+                    <div className={styles.relatedImageWrap}>
+                      <img src={post.featuredImage?.url} alt={post.title} />
+                    </div>
+                    <div className={styles.relatedCardBody}>
+                      <h4>{post.title}</h4>
+                      <span className={styles.relatedArrow}>
+                        Read Article <FiArrowRight />
+                      </span>
+                    </div>
                   </Link>
                 ))}
               </div>
