@@ -17,11 +17,8 @@ import {
   getRecentOrders,
   getRecentActivities,
   uploadSellerDocuments,
-  verifyPanCard,
-  verifyAadhaarCard,
   getVerificationStatus,
 } from "../controllers/sellerController.js";
-
 import { protectSeller } from "../middleware/sellerAuth.js";
 
 const router = express.Router();
@@ -73,7 +70,7 @@ console.log("🔧 Setting up seller routes...");
 router.post("/register", registerSeller);
 router.post("/verify-email", verifyEmailOTP);
 router.post("/verify-phone", verifyPhoneOTP);
-router.post("/resend-otp", resendOTP); // ✅ FIXED: now uses the real controller
+router.post("/resend-otp", resendOTP);
 router.post("/login", sellerLogin);
 router.post("/refresh", refreshSellerToken);
 router.post("/logout", sellerLogout);
@@ -83,11 +80,9 @@ router.post("/logout", sellerLogout);
 // ============================================
 router.use(protectSeller);
 
-// Profile Routes
 router.get("/me", getCurrentSeller);
 router.put("/profile", updateSellerProfile);
 
-// Dashboard Routes
 router.get("/dashboard", getSellerDashboard);
 router.get("/orders/recent", getRecentOrders);
 router.get("/activities/recent", getRecentActivities);
@@ -113,11 +108,11 @@ router.post(
   uploadSellerDocuments,
 );
 
-// ============================================
-// SUPER ADMIN ROUTES - Document Verification
-// ============================================
-router.put("/verify-pan/:sellerId", verifyPanCard);
-router.put("/verify-aadhaar/:sellerId", verifyAadhaarCard);
+// NOTE: Admin-only KYC/document verification routes (verify-pan,
+// verify-aadhaar, verify-kyc) were moved to superAdminRoutes.js
+// and are now protected by protectSuperAdmin instead of protectSeller.
+// They no longer live here — a logged-in seller must never be able
+// to hit an endpoint that verifies KYC.
 
 console.log("✅ Seller routes configured successfully");
 console.log("  📌 POST   /api/seller/register");
@@ -127,5 +122,7 @@ console.log("  📌 POST   /api/seller/resend-otp");
 console.log("  📌 POST   /api/seller/login");
 console.log("  📌 GET    /api/seller/me");
 console.log("  📌 GET    /api/seller/dashboard");
+console.log("  📌 POST   /api/seller/upload-documents");
+console.log("  📌 GET    /api/seller/verification-status");
 
 export default router;

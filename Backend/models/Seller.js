@@ -1,5 +1,3 @@
-// models/Seller.js
-
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
@@ -111,48 +109,28 @@ const sellerSchema = new mongoose.Schema(
     // DOCUMENTS - PAN, AADHAAR, GST
     // ============================================
     documents: {
-      // PAN Card - Required
       panNumber: {
         type: String,
         trim: true,
-        match: [/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, "Please enter a valid PAN number"],
+        match: [
+          /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
+          "Please enter a valid PAN number",
+        ],
       },
-      panCard: {
-        type: String,
-        default: null,
-      },
-      panVerified: {
-        type: Boolean,
-        default: false,
-      },
+      panCard: { type: String, default: null },
+      panVerified: { type: Boolean, default: false },
 
-      // Aadhaar Card - Required
       aadhaarNumber: {
         type: String,
         trim: true,
         match: [/^[0-9]{12}$/, "Please enter a valid 12-digit Aadhaar number"],
       },
-      aadhaarCard: {
-        type: String,
-        default: null,
-      },
-      aadhaarVerified: {
-        type: Boolean,
-        default: false,
-      },
+      aadhaarCard: { type: String, default: null },
+      aadhaarVerified: { type: Boolean, default: false },
 
-      // GST Number - Optional
-      gstNumber: {
-        type: String,
-        trim: true,
-        default: null,
-      },
-      gstCertificate: {
-        type: String,
-        default: null,
-      },
+      gstNumber: { type: String, trim: true, default: null },
+      gstCertificate: { type: String, default: null },
 
-      // Other Documents - Optional
       businessRegistrationCertificate: { type: String, default: null },
       tradeLicense: { type: String, default: null },
       cancelledCheque: { type: String, default: null },
@@ -243,26 +221,33 @@ const sellerSchema = new mongoose.Schema(
     },
 
     // ============================================
-    // VERIFICATION STATUS
+    // KYC — fully independent from account status/isVerified.
+    // Only ever changed by: seller submitting documents, or an
+    // admin explicitly approving/rejecting KYC via updateKycStatus().
+    // NEVER touched by account approval/suspension logic.
     // ============================================
-    verification: {
-      kycStatus: {
+    kyc: {
+      status: {
         type: String,
         enum: [
-          "not_submitted",
-          "pending",
-          "submitted",
-          "under_review",
-          "verified",
-          "rejected",
+          "not_submitted", // seller has never submitted anything
+          "submitted", // seller submitted, awaiting admin review
+          "under_review", // admin has started reviewing
+          "verified", // admin approved
+          "rejected", // admin rejected
         ],
         default: "not_submitted",
       },
-      kycSubmittedAt: { type: Date },
-      kycReviewedAt: { type: Date },
-      kycVerifiedAt: { type: Date },
-      kycRejectedAt: { type: Date },
-      kycRejectionReason: { type: String, trim: true },
+      submittedAt: { type: Date, default: null },
+      reviewedAt: { type: Date, default: null },
+      verifiedAt: { type: Date, default: null },
+      rejectedAt: { type: Date, default: null },
+      rejectionReason: { type: String, trim: true, default: null },
+      reviewedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "SuperAdmin",
+        default: null,
+      },
 
       documentStatus: {
         panCard: {
@@ -280,11 +265,6 @@ const sellerSchema = new mongoose.Schema(
           enum: ["pending", "verified", "rejected", "not_required"],
           default: "not_required",
         },
-        businessRegistration: {
-          type: String,
-          enum: ["pending", "verified", "rejected"],
-          default: "pending",
-        },
         bankDetails: {
           type: String,
           enum: ["pending", "verified", "rejected"],
@@ -293,7 +273,7 @@ const sellerSchema = new mongoose.Schema(
       },
 
       termsAccepted: { type: Boolean, default: false },
-      termsAcceptedAt: { type: Date },
+      termsAcceptedAt: { type: Date, default: null },
     },
 
     // ============================================
@@ -380,21 +360,23 @@ const sellerSchema = new mongoose.Schema(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
+  },
 );
 
 // ============================================
 // PRE-SAVE MIDDLEWARE
 // ============================================
 sellerSchema.pre("save", async function () {
-  // Hash password if modified
   if (this.isModified("password") && this.password) {
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
   }
 
-  // Auto-generate full name
-  if (this.isModified("firstName") || this.isModified("lastName") || !this.fullName) {
+  if (
+    this.isModified("firstName") ||
+    this.isModified("lastName") ||
+    !this.fullName
+  ) {
     if (this.firstName && this.lastName) {
       this.fullName = `${this.firstName} ${this.lastName}`.trim();
     } else if (this.firstName) {
@@ -404,7 +386,6 @@ sellerSchema.pre("save", async function () {
     }
   }
 
-  // Generate store slug
   if (this.storeInfo?.storeName && !this.storeInfo.storeSlug) {
     this.storeInfo.storeSlug = this.storeInfo.storeName
       .toLowerCase()
@@ -412,23 +393,10 @@ sellerSchema.pre("save", async function () {
       .replace(/^-+|-+$/g, "");
   }
 
-  // Ensure contact method
   if (!this.email && !this.phone) {
     throw new Error("User must have either email or phone");
   }
 });
-
-// ✅ REMOVED the destructive post("save") hook that was wiping
-// doc.otp / doc.password / doc.refreshToken after every save.
-// This was corrupting OTPs during registration because
-// registerSeller() calls .save() multiple times in a row
-// (create → setEmailOTP → setPhoneOTP), and wiping `otp` in
-// between those calls caused each subsequent save to overwrite
-// the whole otp object, erasing the previously-stored OTP.
-//
-// It's also unnecessary: password, refreshToken, and otp.*.code /
-// otp.*.expiresAt already have `select: false` in the schema above,
-// so they're excluded from query results and toJSON output by default.
 
 // ============================================
 // INDEXES
@@ -438,7 +406,7 @@ sellerSchema.index({ phone: 1 });
 sellerSchema.index({ "storeInfo.storeName": 1 });
 sellerSchema.index({ "storeInfo.storeSlug": 1 });
 sellerSchema.index({ status: 1, isActive: 1 });
-sellerSchema.index({ "verification.kycStatus": 1 });
+sellerSchema.index({ "kyc.status": 1 });
 sellerSchema.index({ "documents.panNumber": 1 });
 sellerSchema.index({ "documents.aadhaarNumber": 1 });
 
@@ -464,17 +432,11 @@ sellerSchema.virtual("initials").get(function () {
 // METHODS
 // ============================================
 
-/**
- * Compare password
- */
 sellerSchema.methods.comparePassword = async function (candidatePassword) {
   if (!this.password) return false;
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-/**
- * Set Email OTP
- */
 sellerSchema.methods.setEmailOTP = function (otpCode, expiryMinutes = 10) {
   this.otp.email.code = otpCode;
   this.otp.email.expiresAt = new Date(Date.now() + expiryMinutes * 60 * 1000);
@@ -482,9 +444,6 @@ sellerSchema.methods.setEmailOTP = function (otpCode, expiryMinutes = 10) {
   return this.save();
 };
 
-/**
- * Set Phone OTP
- */
 sellerSchema.methods.setPhoneOTP = function (otpCode, expiryMinutes = 10) {
   this.otp.phone.code = otpCode;
   this.otp.phone.expiresAt = new Date(Date.now() + expiryMinutes * 60 * 1000);
@@ -492,9 +451,6 @@ sellerSchema.methods.setPhoneOTP = function (otpCode, expiryMinutes = 10) {
   return this.save();
 };
 
-/**
- * Verify Email OTP
- */
 sellerSchema.methods.verifyEmailOTP = function (otpCode) {
   if (!this.otp.email.code) return false;
   if (this.otp.email.code !== otpCode) return false;
@@ -507,9 +463,6 @@ sellerSchema.methods.verifyEmailOTP = function (otpCode) {
   return true;
 };
 
-/**
- * Verify Phone OTP
- */
 sellerSchema.methods.verifyPhoneOTP = function (otpCode) {
   if (!this.otp.phone.code) return false;
   if (this.otp.phone.code !== otpCode) return false;
@@ -523,12 +476,13 @@ sellerSchema.methods.verifyPhoneOTP = function (otpCode) {
 };
 
 /**
- * Update seller status
+ * Update ACCOUNT status (login access). Does NOT touch KYC —
+ * use updateKycStatus() separately for that.
  */
 sellerSchema.methods.updateStatus = async function (
   status,
   reason = null,
-  updatedBy = null
+  updatedBy = null,
 ) {
   this.status = status;
   this.statusUpdatedAt = new Date();
@@ -542,16 +496,11 @@ sellerSchema.methods.updateStatus = async function (
     this.isVerified = true;
     this.isActive = true;
     this.approvedAt = new Date();
-    this.verification.kycStatus = "verified";
-    this.verification.kycVerifiedAt = new Date();
   } else if (status === "rejected") {
     this.isVerified = false;
     this.isActive = false;
     this.rejectedAt = new Date();
     if (reason) this.rejectedReason = reason;
-    this.verification.kycStatus = "rejected";
-    this.verification.kycRejectedAt = new Date();
-    this.verification.kycRejectionReason = reason;
   } else if (status === "suspended") {
     this.isActive = false;
     this.suspendedAt = new Date();
@@ -559,22 +508,43 @@ sellerSchema.methods.updateStatus = async function (
   } else if (status === "pending") {
     this.isActive = true;
     this.isVerified = false;
-    this.verification.kycStatus = "pending";
-  } else if (status === "under_review") {
-    this.verification.kycStatus = "under_review";
-    this.verification.kycReviewedAt = new Date();
   }
 
   return this.save();
 };
 
 /**
- * Add login history
+ * Update KYC status — completely separate from account approval.
  */
+sellerSchema.methods.updateKycStatus = async function (
+  status,
+  reason = null,
+  reviewedBy = null,
+) {
+  this.kyc.status = status;
+  this.kyc.reviewedAt = new Date();
+  this.kyc.reviewedBy = reviewedBy;
+
+  if (status === "verified") {
+    this.kyc.verifiedAt = new Date();
+    this.kyc.rejectionReason = null;
+    this.kyc.documentStatus.panCard = "verified";
+    this.kyc.documentStatus.aadhaarCard = "verified";
+    if (this.documents?.gstNumber)
+      this.kyc.documentStatus.gstCertificate = "verified";
+    this.kyc.documentStatus.bankDetails = "verified";
+  } else if (status === "rejected") {
+    this.kyc.rejectedAt = new Date();
+    this.kyc.rejectionReason = reason || "Documents did not pass verification";
+  }
+
+  return this.save();
+};
+
 sellerSchema.methods.addLoginHistory = async function (
   ipAddress,
   userAgent,
-  success = true
+  success = true,
 ) {
   this.loginHistory.push({
     timestamp: new Date(),
@@ -589,13 +559,13 @@ sellerSchema.methods.addLoginHistory = async function (
   return this.save();
 };
 
-/**
- * Update seller stats
- */
 sellerSchema.methods.updateStats = async function (data) {
-  if (data.totalProducts !== undefined) this.stats.totalProducts += data.totalProducts;
-  if (data.totalOrders !== undefined) this.stats.totalOrders += data.totalOrders;
-  if (data.totalRevenue !== undefined) this.stats.totalRevenue += data.totalRevenue;
+  if (data.totalProducts !== undefined)
+    this.stats.totalProducts += data.totalProducts;
+  if (data.totalOrders !== undefined)
+    this.stats.totalOrders += data.totalOrders;
+  if (data.totalRevenue !== undefined)
+    this.stats.totalRevenue += data.totalRevenue;
   if (data.totalSales !== undefined) this.stats.totalSales += data.totalSales;
   return this.save();
 };
@@ -604,39 +574,30 @@ sellerSchema.methods.updateStats = async function (data) {
 // STATIC METHODS
 // ============================================
 
-/**
- * Find seller by email (case insensitive)
- */
 sellerSchema.statics.findByEmail = function (email) {
-  return this.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
+  return this.findOne({ email: { $regex: new RegExp(`^${email}$`, "i") } });
 };
 
-/**
- * Find seller by PAN number
- */
 sellerSchema.statics.findByPan = function (panNumber) {
   return this.findOne({ "documents.panNumber": panNumber });
 };
 
-/**
- * Find seller by Aadhaar number
- */
 sellerSchema.statics.findByAadhaar = function (aadhaarNumber) {
   return this.findOne({ "documents.aadhaarNumber": aadhaarNumber });
 };
 
-/**
- * Get pending sellers
- */
 sellerSchema.statics.getPendingSellers = function () {
   return this.find({ status: "pending" }).sort({ createdAt: 1 });
 };
 
-/**
- * Get approved sellers
- */
 sellerSchema.statics.getApprovedSellers = function () {
   return this.find({ status: "approved", isActive: true });
+};
+
+sellerSchema.statics.getPendingKycSellers = function () {
+  return this.find({
+    "kyc.status": { $in: ["submitted", "under_review"] },
+  }).sort({ "kyc.submittedAt": 1 });
 };
 
 const Seller = mongoose.model("Seller", sellerSchema);

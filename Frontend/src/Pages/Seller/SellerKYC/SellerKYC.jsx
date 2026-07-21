@@ -67,6 +67,7 @@ const SellerKYC = () => {
   const isVerified = kycStatus === "verified";
   const isReadOnly =
     isVerified || kycStatus === "submitted" || kycStatus === "under_review";
+  const isResubmission = kycStatus === "rejected";
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -90,6 +91,26 @@ const SellerKYC = () => {
       !form.ifscCode
     ) {
       toast.error("Please fill all required bank details");
+      return;
+    }
+
+    // Document upload is mandatory — block submission if missing
+    if (!files.panCard) {
+      toast.error("Please upload your PAN card");
+      return;
+    }
+    if (!files.aadhaarCard) {
+      toast.error("Please upload your Aadhaar card");
+      return;
+    }
+    if (!files.cancelledCheque) {
+      toast.error("Please upload a cancelled cheque or bank statement");
+      return;
+    }
+    if (form.gstNumber && !files.gstCertificate) {
+      toast.error(
+        "You've entered a GST number — please upload the GST certificate too",
+      );
       return;
     }
 
@@ -145,7 +166,10 @@ const SellerKYC = () => {
                 Reason: {verificationStatus.kycRejectionReason}
               </p>
             )}
-            <p>Please correct the details below and resubmit.</p>
+            <p>
+              Please correct the details below and resubmit, including all
+              documents.
+            </p>
           </div>
         </div>
       );
@@ -156,6 +180,26 @@ const SellerKYC = () => {
       </div>
     );
   };
+
+  const FileField = ({ name, label, required }) => (
+    <div className={styles.field}>
+      <label>
+        {label} {required && <span className={styles.required}>*</span>}
+      </label>
+      <label className={styles.fileDrop}>
+        <input
+          type="file"
+          name={name}
+          accept="image/*,.pdf"
+          onChange={handleFile}
+          className={styles.fileInput}
+        />
+        <span className={styles.fileDropText}>
+          {files[name] ? files[name].name : "Click to upload (image or PDF)"}
+        </span>
+      </label>
+    </div>
+  );
 
   return (
     <div className={styles.kycPage}>
@@ -173,13 +217,22 @@ const SellerKYC = () => {
 
       {statusBanner()}
 
+      {isResubmission && !isReadOnly && (
+        <p className={styles.resubmitNote}>
+          Note: for security reasons, previously uploaded documents can't be
+          carried over — please re-upload all required files below.
+        </p>
+      )}
+
       <form onSubmit={handleSubmit} className={styles.form}>
         <fieldset disabled={isReadOnly} className={styles.fieldset}>
           <h3 className={styles.sectionTitle}>Identity documents</h3>
 
           <div className={styles.grid2}>
             <div className={styles.field}>
-              <label>PAN number *</label>
+              <label>
+                PAN number <span className={styles.required}>*</span>
+              </label>
               <input
                 type="text"
                 name="panNumber"
@@ -190,18 +243,12 @@ const SellerKYC = () => {
                 required
               />
             </div>
-            <div className={styles.field}>
-              <label>Upload PAN card</label>
-              <input
-                type="file"
-                name="panCard"
-                accept="image/*,.pdf"
-                onChange={handleFile}
-              />
-            </div>
+            <FileField name="panCard" label="Upload PAN card" required />
 
             <div className={styles.field}>
-              <label>Aadhaar number *</label>
+              <label>
+                Aadhaar number <span className={styles.required}>*</span>
+              </label>
               <input
                 type="text"
                 name="aadhaarNumber"
@@ -212,15 +259,11 @@ const SellerKYC = () => {
                 required
               />
             </div>
-            <div className={styles.field}>
-              <label>Upload Aadhaar card</label>
-              <input
-                type="file"
-                name="aadhaarCard"
-                accept="image/*,.pdf"
-                onChange={handleFile}
-              />
-            </div>
+            <FileField
+              name="aadhaarCard"
+              label="Upload Aadhaar card"
+              required
+            />
 
             <div className={styles.field}>
               <label>GST number (optional)</label>
@@ -232,22 +275,20 @@ const SellerKYC = () => {
                 onChange={handleChange}
               />
             </div>
-            <div className={styles.field}>
-              <label>Upload GST certificate</label>
-              <input
-                type="file"
-                name="gstCertificate"
-                accept="image/*,.pdf"
-                onChange={handleFile}
-              />
-            </div>
+            <FileField
+              name="gstCertificate"
+              label="Upload GST certificate"
+              required={!!form.gstNumber}
+            />
           </div>
 
           <h3 className={styles.sectionTitle}>Bank details</h3>
 
           <div className={styles.grid2}>
             <div className={styles.field}>
-              <label>Account holder name *</label>
+              <label>
+                Account holder name <span className={styles.required}>*</span>
+              </label>
               <input
                 type="text"
                 name="accountHolderName"
@@ -257,7 +298,9 @@ const SellerKYC = () => {
               />
             </div>
             <div className={styles.field}>
-              <label>Bank name *</label>
+              <label>
+                Bank name <span className={styles.required}>*</span>
+              </label>
               <input
                 type="text"
                 name="bankName"
@@ -267,7 +310,9 @@ const SellerKYC = () => {
               />
             </div>
             <div className={styles.field}>
-              <label>Account number *</label>
+              <label>
+                Account number <span className={styles.required}>*</span>
+              </label>
               <input
                 type="text"
                 name="accountNumber"
@@ -277,7 +322,9 @@ const SellerKYC = () => {
               />
             </div>
             <div className={styles.field}>
-              <label>IFSC code *</label>
+              <label>
+                IFSC code <span className={styles.required}>*</span>
+              </label>
               <input
                 type="text"
                 name="ifscCode"
@@ -295,15 +342,11 @@ const SellerKYC = () => {
                 onChange={handleChange}
               />
             </div>
-            <div className={styles.field}>
-              <label>Cancelled cheque / bank statement</label>
-              <input
-                type="file"
-                name="cancelledCheque"
-                accept="image/*,.pdf"
-                onChange={handleFile}
-              />
-            </div>
+            <FileField
+              name="cancelledCheque"
+              label="Cancelled cheque / bank statement"
+              required
+            />
           </div>
 
           {!isReadOnly && (

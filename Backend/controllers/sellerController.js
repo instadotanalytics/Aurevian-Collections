@@ -1,5 +1,3 @@
-// Backend/controllers/sellerController.js
-
 import Seller from "../models/Seller.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
@@ -67,50 +65,49 @@ export const registerSeller = async (req, res) => {
       !password ||
       !storeName
     ) {
-      return res.status(400).json({
-        success: false,
-        message: "Please fill all required fields",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Please fill all required fields" });
     }
 
     if (password.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: "Password must be at least 6 characters",
-      });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Password must be at least 6 characters",
+        });
     }
 
-    // Check existing seller
     let existingSeller = await Seller.findOne({
       email: { $regex: new RegExp(`^${email}$`, "i") },
       isVerified: true,
     });
     if (existingSeller) {
-      return res.status(400).json({
-        success: false,
-        message: "Seller already exists with this email",
-      });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Seller already exists with this email",
+        });
     }
 
-    existingSeller = await Seller.findOne({
-      phone,
-      isVerified: true,
-    });
+    existingSeller = await Seller.findOne({ phone, isVerified: true });
     if (existingSeller) {
-      return res.status(400).json({
-        success: false,
-        message: "Seller already exists with this phone number",
-      });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Seller already exists with this phone number",
+        });
     }
 
-    // Check temporary seller
     let tempSeller = await Seller.findOne({
       email: { $regex: new RegExp(`^${email}$`, "i") },
       isVerified: false,
     });
 
     if (tempSeller) {
-      // Update existing temp seller
       tempSeller.firstName = firstName.trim();
       tempSeller.lastName = lastName.trim();
       tempSeller.fullName = `${firstName} ${lastName}`.trim();
@@ -142,17 +139,14 @@ export const registerSeller = async (req, res) => {
       tempSeller.documents.panNumber = panNumber?.trim().toUpperCase() || "";
       tempSeller.documents.aadhaarNumber = aadhaarNumber?.trim() || "";
       tempSeller.documents.gstNumber = gstNumber?.trim().toUpperCase() || null;
-      tempSeller.verification.termsAccepted = termsAccepted || false;
-      tempSeller.verification.termsAcceptedAt = termsAccepted
-        ? new Date()
-        : null;
-      tempSeller.verification.kycStatus = "pending";
+      tempSeller.kyc.termsAccepted = termsAccepted || false;
+      tempSeller.kyc.termsAcceptedAt = termsAccepted ? new Date() : null;
+      tempSeller.kyc.status = "not_submitted";
       tempSeller.status = "pending";
 
       await tempSeller.save();
       console.log("✅ Temporary seller updated:", tempSeller._id);
     } else {
-      // Create new temporary seller
       const sellerData = {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
@@ -192,10 +186,10 @@ export const registerSeller = async (req, res) => {
           panVerified: false,
           aadhaarVerified: false,
         },
-        verification: {
+        kyc: {
           termsAccepted: termsAccepted || false,
           termsAcceptedAt: termsAccepted ? new Date() : null,
-          kycStatus: "pending",
+          status: "not_submitted",
         },
         status: "pending",
         isActive: true,
@@ -211,24 +205,18 @@ export const registerSeller = async (req, res) => {
       tempSeller = seller;
     }
 
-    // Generate email OTP (our own app-generated code, emailed manually)
     const emailOTP = Math.floor(100000 + Math.random() * 900000).toString();
     await tempSeller.setEmailOTP(emailOTP);
     await otpService.sendOTP(email, "email", emailOTP);
     console.log("✅ Email OTP sent to:", email);
 
-    // ✅ Phone OTP is fully owned by Twilio Verify — it generates,
-    // sends, and stores the code on Twilio's side. We don't generate
-    // or store our own code for phone anymore.
     const phoneOtpResult = await otpService.sendOTP(phone, "phone");
 
     if (!phoneOtpResult.success) {
       console.error("❌ Failed to send phone OTP:", phoneOtpResult.error);
-
-      return res.status(500).json({
-        success: false,
-        message: "Failed to send phone OTP",
-      });
+      return res
+        .status(500)
+        .json({ success: false, message: "Failed to send phone OTP" });
     }
 
     console.log("✅ Phone OTP sent:", phone);
@@ -251,11 +239,13 @@ export const registerSeller = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Registration error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Registration failed",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Registration failed",
+        error: error.message,
+      });
   }
 };
 
@@ -267,10 +257,9 @@ export const verifyEmailOTP = async (req, res) => {
     const { email, otp } = req.body;
 
     if (!email || !otp) {
-      return res.status(400).json({
-        success: false,
-        message: "Email and OTP are required",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Email and OTP are required" });
     }
 
     const seller = await Seller.findOne({
@@ -278,30 +267,26 @@ export const verifyEmailOTP = async (req, res) => {
     }).select("+otp.email.code +otp.email.expiresAt");
 
     if (!seller) {
-      return res.status(404).json({
-        success: false,
-        message: "Seller not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
     if (seller.emailVerified) {
-      return res.status(400).json({
-        success: false,
-        message: "Email already verified",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Email already verified" });
     }
 
     const result = await seller.verifyEmailOTP(otp);
     if (!result) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid or expired OTP",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid or expired OTP" });
     }
 
     await seller.save();
 
-    // Check if both verified
     if (seller.emailVerified && seller.phoneVerified) {
       await emailService.sendSellerApprovalEmail(
         seller.email,
@@ -323,11 +308,13 @@ export const verifyEmailOTP = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Email verification error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Email verification failed",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Email verification failed",
+        error: error.message,
+      });
   }
 };
 
@@ -339,41 +326,35 @@ export const verifyPhoneOTP = async (req, res) => {
     const { phone, otp } = req.body;
 
     if (!phone || !otp) {
-      return res.status(400).json({
-        success: false,
-        message: "Phone and OTP are required",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Phone and OTP are required" });
     }
 
     const seller = await Seller.findOne({ phone });
 
     if (!seller) {
-      return res.status(404).json({
-        success: false,
-        message: "Seller not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
     if (seller.phoneVerified) {
-      return res.status(400).json({
-        success: false,
-        message: "Phone already verified",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Phone already verified" });
     }
 
-    // ✅ Verify against Twilio, not our own DB — Twilio owns this OTP
     const isValid = await otpService.verifyPhoneOTP(phone, otp);
     if (!isValid) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid or expired OTP",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid or expired OTP" });
     }
 
     seller.phoneVerified = true;
     await seller.save();
 
-    // Check if both verified
     if (seller.emailVerified && seller.phoneVerified) {
       await emailService.sendSellerApprovalEmail(
         seller.email,
@@ -395,11 +376,13 @@ export const verifyPhoneOTP = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Phone verification error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Phone verification failed",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Phone verification failed",
+        error: error.message,
+      });
   }
 };
 
@@ -411,10 +394,9 @@ export const resendOTP = async (req, res) => {
     const { contact, type } = req.body;
 
     if (!contact || !type) {
-      return res.status(400).json({
-        success: false,
-        message: "Contact and type are required",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Contact and type are required" });
     }
 
     let seller;
@@ -425,31 +407,27 @@ export const resendOTP = async (req, res) => {
     } else if (type === "phone") {
       seller = await Seller.findOne({ phone: contact });
     } else {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid type. Use email or phone",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid type. Use email or phone" });
     }
 
     if (!seller) {
-      return res.status(404).json({
-        success: false,
-        message: "Seller not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
     if (type === "email" && seller.emailVerified) {
-      return res.status(400).json({
-        success: false,
-        message: "Email already verified",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Email already verified" });
     }
 
     if (type === "phone" && seller.phoneVerified) {
-      return res.status(400).json({
-        success: false,
-        message: "Phone already verified",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Phone already verified" });
     }
 
     if (type === "email") {
@@ -457,21 +435,21 @@ export const resendOTP = async (req, res) => {
       await seller.setEmailOTP(newOTP);
       await otpService.sendOTP(contact, "email", newOTP);
     } else if (type === "phone") {
-      // ✅ Twilio generates and owns the phone code — don't create one ourselves
       await otpService.sendOTP(contact, "phone");
     }
 
-    return res.status(200).json({
-      success: true,
-      message: `OTP resent to ${type} successfully`,
-    });
+    return res
+      .status(200)
+      .json({ success: true, message: `OTP resent to ${type} successfully` });
   } catch (error) {
     console.error("❌ Resend OTP error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to resend OTP",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to resend OTP",
+        error: error.message,
+      });
   }
 };
 
@@ -483,10 +461,9 @@ export const sellerLogin = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Email and password are required",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Email and password are required" });
     }
 
     const seller = await Seller.findOne({
@@ -494,26 +471,29 @@ export const sellerLogin = async (req, res) => {
     }).select("+password");
 
     if (!seller) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid credentials",
-      });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
     }
 
     if (!seller.emailVerified) {
-      return res.status(403).json({
-        success: false,
-        message: "Please verify your email first",
-        requiresVerification: "email",
-      });
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "Please verify your email first",
+          requiresVerification: "email",
+        });
     }
 
     if (!seller.phoneVerified) {
-      return res.status(403).json({
-        success: false,
-        message: "Please verify your phone first",
-        requiresVerification: "phone",
-      });
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "Please verify your phone first",
+          requiresVerification: "phone",
+        });
     }
 
     if (seller.status === "pending") {
@@ -542,19 +522,17 @@ export const sellerLogin = async (req, res) => {
     }
 
     if (!seller.isActive) {
-      return res.status(403).json({
-        success: false,
-        message: "Account is deactivated",
-      });
+      return res
+        .status(403)
+        .json({ success: false, message: "Account is deactivated" });
     }
 
     const isPasswordValid = await seller.comparePassword(password);
     if (!isPasswordValid) {
       await seller.addLoginHistory(req.ip, req.headers["user-agent"], false);
-      return res.status(401).json({
-        success: false,
-        message: "Invalid credentials",
-      });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
     }
 
     await seller.addLoginHistory(req.ip, req.headers["user-agent"], true);
@@ -577,7 +555,7 @@ export const sellerLogin = async (req, res) => {
       isVerified: seller.isVerified,
       emailVerified: seller.emailVerified,
       phoneVerified: seller.phoneVerified,
-      kycStatus: seller.verification?.kycStatus || "not_submitted",
+      kycStatus: seller.kyc?.status || "not_submitted",
     };
 
     return res.status(200).json({
@@ -588,11 +566,9 @@ export const sellerLogin = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Seller login error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Login failed",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({ success: false, message: "Login failed", error: error.message });
   }
 };
 
@@ -606,23 +582,21 @@ export const getCurrentSeller = async (req, res) => {
     );
 
     if (!seller) {
-      return res.status(404).json({
-        success: false,
-        message: "Seller not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
-    return res.status(200).json({
-      success: true,
-      data: seller,
-    });
+    return res.status(200).json({ success: true, data: seller });
   } catch (error) {
     console.error("❌ Get seller error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to get seller",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to get seller",
+        error: error.message,
+      });
   }
 };
 
@@ -653,17 +627,14 @@ export const sellerLogout = async (req, res) => {
       path: "/",
     });
 
-    return res.status(200).json({
-      success: true,
-      message: "Logged out successfully",
-    });
+    return res
+      .status(200)
+      .json({ success: true, message: "Logged out successfully" });
   } catch (error) {
     console.error("❌ Logout error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Logout failed",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({ success: false, message: "Logout failed", error: error.message });
   }
 };
 
@@ -675,20 +646,18 @@ export const refreshSellerToken = async (req, res) => {
     const refreshToken = req.cookies?.sellerRefreshToken;
 
     if (!refreshToken) {
-      return res.status(401).json({
-        success: false,
-        message: "Refresh token required",
-      });
+      return res
+        .status(401)
+        .json({ success: false, message: "Refresh token required" });
     }
 
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     const seller = await Seller.findById(decoded.id);
 
     if (!seller || seller.refreshToken !== refreshToken) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid refresh token",
-      });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid refresh token" });
     }
 
     const { accessToken, refreshToken: newRefreshToken } = generateTokens(
@@ -716,18 +685,22 @@ export const refreshSellerToken = async (req, res) => {
       path: "/",
     });
 
-    return res.status(200).json({
-      success: true,
-      message: "Token refreshed successfully",
-      data: { accessToken },
-    });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Token refreshed successfully",
+        data: { accessToken },
+      });
   } catch (error) {
     console.error("❌ Refresh token error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to refresh token",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to refresh token",
+        error: error.message,
+      });
   }
 };
 
@@ -738,10 +711,9 @@ export const getSellerDashboard = async (req, res) => {
   try {
     const seller = await Seller.findById(req.seller._id);
     if (!seller) {
-      return res.status(404).json({
-        success: false,
-        message: "Seller not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
     const stats = {
@@ -754,22 +726,21 @@ export const getSellerDashboard = async (req, res) => {
       walletBalance: seller.stats?.walletBalance || 0,
       status: seller.status,
       isVerified: seller.isVerified,
-      kycStatus: seller.verification?.kycStatus || "not_submitted",
+      kycStatus: seller.kyc?.status || "not_submitted",
       emailVerified: seller.emailVerified,
       phoneVerified: seller.phoneVerified,
     };
 
-    return res.status(200).json({
-      success: true,
-      data: stats,
-    });
+    return res.status(200).json({ success: true, data: stats });
   } catch (error) {
     console.error("❌ Get dashboard error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to get dashboard data",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to get dashboard data",
+        error: error.message,
+      });
   }
 };
 
@@ -808,17 +779,16 @@ export const getRecentOrders = async (req, res) => {
       },
     ];
 
-    return res.status(200).json({
-      success: true,
-      data: orders,
-    });
+    return res.status(200).json({ success: true, data: orders });
   } catch (error) {
     console.error("❌ Get orders error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to get orders",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to get orders",
+        error: error.message,
+      });
   }
 };
 
@@ -832,10 +802,9 @@ export const updateSellerProfile = async (req, res) => {
 
     const seller = await Seller.findById(sellerId);
     if (!seller) {
-      return res.status(404).json({
-        success: false,
-        message: "Seller not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
     const allowedFields = [
@@ -875,99 +844,133 @@ export const updateSellerProfile = async (req, res) => {
 
     await seller.save();
 
-    return res.status(200).json({
-      success: true,
-      message: "Profile updated successfully",
-      data: seller,
-    });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Profile updated successfully",
+        data: seller,
+      });
   } catch (error) {
     console.error("❌ Update seller error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to update profile",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to update profile",
+        error: error.message,
+      });
   }
 };
 
 // ============================================
-// 12. UPLOAD SELLER DOCUMENTS
+// 12. UPLOAD SELLER DOCUMENTS (Full KYC submit)
 // ============================================
 export const uploadSellerDocuments = async (req, res) => {
   try {
     const sellerId = req.seller._id;
-    const { panNumber, aadhaarNumber, gstNumber } = req.body;
+    const { panNumber, aadhaarNumber, gstNumber, bankDetails } = req.body;
     const files = req.files;
 
     const seller = await Seller.findById(sellerId);
     if (!seller) {
-      return res.status(404).json({
-        success: false,
-        message: "Seller not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
-    // Validate PAN
     if (!panNumber) {
-      return res.status(400).json({
-        success: false,
-        message: "PAN number is required",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "PAN number is required" });
     }
-
     const cleanPan = panNumber.trim().toUpperCase().replace(/\s/g, "");
     if (
       cleanPan.length !== 10 ||
       !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(cleanPan)
     ) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter a valid PAN number (e.g., ABCDE1234F)",
-      });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Please enter a valid PAN number (e.g., ABCDE1234F)",
+        });
     }
 
-    // Validate Aadhaar
     if (!aadhaarNumber) {
-      return res.status(400).json({
-        success: false,
-        message: "Aadhaar number is required",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Aadhaar number is required" });
     }
-
     const cleanAadhaar = aadhaarNumber.trim().replace(/\s/g, "");
     if (cleanAadhaar.length !== 12 || !/^[0-9]{12}$/.test(cleanAadhaar)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter a valid 12-digit Aadhaar number",
-      });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Please enter a valid 12-digit Aadhaar number",
+        });
     }
 
-    // Check if PAN already exists
     const existingPan = await Seller.findOne({
       "documents.panNumber": cleanPan,
       _id: { $ne: sellerId },
     });
     if (existingPan) {
-      return res.status(400).json({
-        success: false,
-        message: "PAN number already registered with another seller",
-      });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "PAN number already registered with another seller",
+        });
     }
-
     const existingAadhaar = await Seller.findOne({
       "documents.aadhaarNumber": cleanAadhaar,
       _id: { $ne: sellerId },
     });
     if (existingAadhaar) {
-      return res.status(400).json({
-        success: false,
-        message: "Aadhaar number already registered with another seller",
-      });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Aadhaar number already registered with another seller",
+        });
     }
 
-    // Upload documents to Cloudinary
-    const uploadResults = {};
-    const documentFields = ["panCard", "aadhaarCard", "gstCertificate"];
+    let parsedBankDetails = null;
+    if (bankDetails) {
+      try {
+        parsedBankDetails =
+          typeof bankDetails === "string"
+            ? JSON.parse(bankDetails)
+            : bankDetails;
+      } catch (e) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid bank details format" });
+      }
+
+      if (
+        !parsedBankDetails.accountHolderName ||
+        !parsedBankDetails.bankName ||
+        !parsedBankDetails.accountNumber ||
+        !parsedBankDetails.ifscCode
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Account holder name, bank name, account number and IFSC code are required",
+        });
+      }
+    }
+
+    const documentFields = [
+      "panCard",
+      "aadhaarCard",
+      "gstCertificate",
+      "cancelledCheque",
+      "bankStatement",
+    ];
 
     for (const field of documentFields) {
       if (files && files[field] && files[field][0]) {
@@ -976,148 +979,75 @@ export const uploadSellerDocuments = async (req, res) => {
           `sellers/${sellerId}/documents`,
         );
         if (result.success) {
-          uploadResults[field] = result.url;
           seller.documents[field] = result.url;
         }
       }
     }
 
-    // Update documents
     seller.documents.panNumber = cleanPan;
     seller.documents.aadhaarNumber = cleanAadhaar;
     seller.documents.gstNumber = gstNumber
       ? gstNumber.trim().toUpperCase()
       : null;
 
-    seller.verification.kycStatus = "submitted";
-    seller.verification.kycSubmittedAt = new Date();
-    seller.status = "under_review";
+    if (parsedBankDetails) {
+      seller.bankDetails = {
+        ...seller.bankDetails,
+        accountHolderName: parsedBankDetails.accountHolderName.trim(),
+        bankName: parsedBankDetails.bankName.trim(),
+        accountNumber: parsedBankDetails.accountNumber.trim(),
+        ifscCode: parsedBankDetails.ifscCode.trim().toUpperCase(),
+        upiId: parsedBankDetails.upiId?.trim() || "",
+      };
+      seller.kyc.documentStatus.bankDetails = "pending";
+    }
+
+    seller.kyc.documentStatus.panCard = "pending";
+    seller.kyc.documentStatus.aadhaarCard = "pending";
+    if (seller.documents.gstNumber) {
+      seller.kyc.documentStatus.gstCertificate = "pending";
+    }
+    seller.kyc.status = "submitted";
+    seller.kyc.submittedAt = new Date();
+    seller.kyc.rejectionReason = null;
 
     await seller.save();
 
     return res.status(200).json({
       success: true,
-      message: "Documents uploaded successfully! Your KYC is under review.",
+      message: "KYC submitted successfully! Your documents are under review.",
       data: {
         documents: seller.documents,
-        kycStatus: seller.verification.kycStatus,
-        status: seller.status,
+        bankDetails: seller.bankDetails,
+        kycStatus: seller.kyc.status,
+        documentStatus: seller.kyc.documentStatus,
       },
     });
   } catch (error) {
-    console.error("❌ Document upload error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Document upload failed",
-      error: error.message,
-    });
-  }
-};
-
-// ============================================
-// 13. VERIFY PAN CARD (Admin)
-// ============================================
-export const verifyPanCard = async (req, res) => {
-  try {
-    const { sellerId } = req.params;
-    const { status, reason } = req.body;
-
-    const seller = await Seller.findById(sellerId);
-    if (!seller) {
-      return res.status(404).json({
+    console.error("❌ KYC submit error:", error);
+    return res
+      .status(500)
+      .json({
         success: false,
-        message: "Seller not found",
+        message: "KYC submission failed",
+        error: error.message,
       });
-    }
-
-    if (status === "verified") {
-      seller.documents.panVerified = true;
-      seller.verification.documentStatus.panCard = "verified";
-    } else if (status === "rejected") {
-      seller.documents.panVerified = false;
-      seller.verification.documentStatus.panCard = "rejected";
-      if (reason) seller.verification.kycRejectionReason = reason;
-    }
-
-    await seller.save();
-
-    return res.status(200).json({
-      success: true,
-      message: `PAN card ${status} successfully`,
-      data: {
-        panVerified: seller.documents.panVerified,
-        documentStatus: seller.verification.documentStatus,
-      },
-    });
-  } catch (error) {
-    console.error("❌ PAN verification error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "PAN verification failed",
-      error: error.message,
-    });
   }
 };
 
 // ============================================
-// 14. VERIFY AADHAAR CARD (Admin)
-// ============================================
-export const verifyAadhaarCard = async (req, res) => {
-  try {
-    const { sellerId } = req.params;
-    const { status, reason } = req.body;
-
-    const seller = await Seller.findById(sellerId);
-    if (!seller) {
-      return res.status(404).json({
-        success: false,
-        message: "Seller not found",
-      });
-    }
-
-    if (status === "verified") {
-      seller.documents.aadhaarVerified = true;
-      seller.verification.documentStatus.aadhaarCard = "verified";
-    } else if (status === "rejected") {
-      seller.documents.aadhaarVerified = false;
-      seller.verification.documentStatus.aadhaarCard = "rejected";
-      if (reason) seller.verification.kycRejectionReason = reason;
-    }
-
-    await seller.save();
-
-    return res.status(200).json({
-      success: true,
-      message: `Aadhaar card ${status} successfully`,
-      data: {
-        aadhaarVerified: seller.documents.aadhaarVerified,
-        documentStatus: seller.verification.documentStatus,
-      },
-    });
-  } catch (error) {
-    console.error("❌ Aadhaar verification error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Aadhaar verification failed",
-      error: error.message,
-    });
-  }
-};
-
-// ============================================
-// 15. GET VERIFICATION STATUS
+// 13. GET VERIFICATION STATUS (full KYC details for prefill)
 // ============================================
 export const getVerificationStatus = async (req, res) => {
   try {
     const seller = await Seller.findById(req.seller._id).select(
-      "documents verification status emailVerified phoneVerified",
+      "documents bankDetails kyc status emailVerified phoneVerified",
     );
 
     if (!seller) {
-      return res.status(404).json({
-        success: false,
-        message: "Seller not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
     return res.status(200).json({
@@ -1125,26 +1055,28 @@ export const getVerificationStatus = async (req, res) => {
       data: {
         emailVerified: seller.emailVerified,
         phoneVerified: seller.phoneVerified,
-        panVerified: seller.documents?.panVerified || false,
-        aadhaarVerified: seller.documents?.aadhaarVerified || false,
-        kycStatus: seller.verification?.kycStatus || "not_submitted",
-        documentStatus: seller.verification?.documentStatus || {},
-        status: seller.status,
-        isVerified: seller.isVerified,
+        kycStatus: seller.kyc?.status || "not_submitted",
+        kycRejectionReason: seller.kyc?.rejectionReason || null,
+        documentStatus: seller.kyc?.documentStatus || {},
+        accountStatus: seller.status,
+        documents: seller.documents || {},
+        bankDetails: seller.bankDetails || {},
       },
     });
   } catch (error) {
     console.error("❌ Get verification status error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to get verification status",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to get verification status",
+        error: error.message,
+      });
   }
 };
 
 // ============================================
-// 16. GET RECENT ACTIVITIES
+// 14. GET RECENT ACTIVITIES
 // ============================================
 export const getRecentActivities = async (req, res) => {
   try {
@@ -1172,16 +1104,15 @@ export const getRecentActivities = async (req, res) => {
       },
     ];
 
-    return res.status(200).json({
-      success: true,
-      data: activities,
-    });
+    return res.status(200).json({ success: true, data: activities });
   } catch (error) {
     console.error("❌ Get activities error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to get activities",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to get activities",
+        error: error.message,
+      });
   }
 };
