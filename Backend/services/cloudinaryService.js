@@ -7,7 +7,10 @@ import fs from "fs";
 
 dotenv.config();
 
-// Cloudinary Configuration
+/* ==========================================================
+   Cloudinary Configuration
+========================================================== */
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -15,9 +18,10 @@ cloudinary.config({
 });
 
 class CloudinaryService {
-  /**
-   * Upload buffer directly to Cloudinary (No local file saving)
-   */
+  /* ==========================================================
+     Upload Buffer (Memory Storage)
+  ========================================================== */
+
   async uploadBuffer(buffer, folder = "banners", options = {}) {
     try {
       if (!buffer) {
@@ -37,25 +41,25 @@ class CloudinaryService {
           },
         );
 
-        // Convert buffer to stream and upload
-        const stream = Readable.from(buffer);
-        stream.pipe(uploadStream);
+        Readable.from(buffer).pipe(uploadStream);
       });
 
-      console.log(`✅ Banner uploaded to Cloudinary: ${result.public_id}`);
+      console.log(`✅ Uploaded: ${result.public_id}`);
+
       return {
         success: true,
         url: result.secure_url,
         publicId: result.public_id,
+        assetId: result.asset_id,
         format: result.format,
         bytes: result.bytes,
         width: result.width,
         height: result.height,
         createdAt: result.created_at,
-        assetId: result.asset_id,
       };
     } catch (error) {
-      console.error("❌ Cloudinary upload error:", error.message);
+      console.error("❌ Cloudinary Upload Error:", error.message);
+
       return {
         success: false,
         error: error.message,
@@ -63,15 +67,18 @@ class CloudinaryService {
     }
   }
 
-  /**
-   * Upload a file from a local disk path (used with multer diskStorage,
-   * e.g. seller KYC documents). Deletes the local temp file afterward
-   * regardless of whether the upload succeeded or failed.
-   */
+  /* ==========================================================
+     Upload Local File (Disk Storage)
+  ========================================================== */
+
   async uploadFile(filePath, folder = "documents", options = {}) {
     try {
       if (!filePath) {
-        throw new Error("No filePath provided");
+        throw new Error("No file path provided");
+      }
+
+      if (!fs.existsSync(filePath)) {
+        throw new Error(`File not found: ${filePath}`);
       }
 
       const result = await cloudinary.uploader.upload(filePath, {
@@ -80,41 +87,42 @@ class CloudinaryService {
         ...options,
       });
 
-      console.log(`✅ File uploaded to Cloudinary: ${result.public_id}`);
+      console.log(`✅ Uploaded: ${result.public_id}`);
 
       return {
         success: true,
         url: result.secure_url,
         publicId: result.public_id,
+        assetId: result.asset_id,
         format: result.format,
         bytes: result.bytes,
         width: result.width,
         height: result.height,
         createdAt: result.created_at,
-        assetId: result.asset_id,
       };
     } catch (error) {
-      console.error("❌ Cloudinary upload error:", error.message);
+      console.error("❌ Cloudinary Upload Error:", error.message);
+
       return {
         success: false,
         error: error.message,
       };
     } finally {
-      fs.unlink(filePath, (err) => {
-        if (err && err.code !== "ENOENT") {
-          console.error(
-            "⚠️ Failed to delete temp file:",
-            filePath,
-            err.message,
-          );
+      if (filePath && fs.existsSync(filePath)) {
+        try {
+          fs.unlinkSync(filePath);
+          console.log(`🗑 Deleted temp file: ${filePath}`);
+        } catch (err) {
+          console.error("Failed to delete temp file:", err.message);
         }
-      });
+      }
     }
   }
 
-  /**
-   * Delete file from Cloudinary
-   */
+  /* ==========================================================
+     Delete Single File
+  ========================================================== */
+
   async deleteFile(publicId) {
     try {
       if (!publicId) {
@@ -124,23 +132,22 @@ class CloudinaryService {
       const result = await cloudinary.uploader.destroy(publicId);
 
       if (result.result === "ok") {
-        console.log(`✅ File deleted from Cloudinary: ${publicId}`);
+        console.log(`✅ Deleted: ${publicId}`);
+
         return {
           success: true,
-          result: result,
-        };
-      } else {
-        console.log(
-          `⚠️ File deletion result: ${result.result} for ${publicId}`,
-        );
-        return {
-          success: false,
-          result: result,
-          error: `Deletion failed with result: ${result.result}`,
+          result,
         };
       }
+
+      return {
+        success: false,
+        result,
+        error: result.result,
+      };
     } catch (error) {
-      console.error("❌ Cloudinary delete error:", error.message);
+      console.error("❌ Delete Error:", error.message);
+
       return {
         success: false,
         error: error.message,
@@ -148,9 +155,38 @@ class CloudinaryService {
     }
   }
 
-  /**
-   * Get optimized URL
-   */
+  /* ==========================================================
+     Delete Multiple Files
+  ========================================================== */
+
+  async deleteMultipleFiles(publicIds) {
+    try {
+      if (!Array.isArray(publicIds) || publicIds.length === 0) {
+        throw new Error("No publicIds provided");
+      }
+
+      const results = await Promise.all(
+        publicIds.map((id) => this.deleteFile(id)),
+      );
+
+      return {
+        success: true,
+        results,
+      };
+    } catch (error) {
+      console.error("❌ Delete Multiple Error:", error.message);
+
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /* ==========================================================
+     Optimized URL
+  ========================================================== */
+
   getOptimizedUrl(publicId, options = {}) {
     if (!publicId) return null;
 
@@ -161,20 +197,69 @@ class CloudinaryService {
     });
   }
 
-  /**
-   * Get thumbnail URL
-   */
+  /* ==========================================================
+     Thumbnail URL
+  ========================================================== */
+
   getThumbnailUrl(publicId, width = 200, height = 200) {
     if (!publicId) return null;
 
     return cloudinary.url(publicId, {
       fetch_format: "auto",
       quality: "auto",
-      width: width,
-      height: height,
+      width,
+      height,
       crop: "fill",
       gravity: "auto",
     });
+  }
+
+  /* ==========================================================
+     Custom Transformation URL
+  ========================================================== */
+
+  getTransformedUrl(publicId, transformations = {}) {
+    if (!publicId) return null;
+
+    return cloudinary.url(publicId, {
+      fetch_format: "auto",
+      quality: "auto",
+      ...transformations,
+    });
+  }
+
+  /* ==========================================================
+     Extract Public ID
+  ========================================================== */
+
+  extractPublicId(url) {
+    if (!url) return null;
+
+    try {
+      const uploadIndex = url.indexOf("upload/");
+
+      if (uploadIndex === -1) return null;
+
+      let path = url.substring(uploadIndex + 7);
+
+      const versionMatch = path.match(/^v\d+\//);
+
+      if (versionMatch) {
+        path = path.substring(versionMatch[0].length);
+      }
+
+      const extensionIndex = path.lastIndexOf(".");
+
+      if (extensionIndex !== -1) {
+        path = path.substring(0, extensionIndex);
+      }
+
+      return path;
+    } catch (error) {
+      console.error("Extract Public ID Error:", error);
+
+      return null;
+    }
   }
 }
 
