@@ -22,6 +22,7 @@ import authRoutes from './routes/authRoutes.js';
 import superAdminRoutes from './routes/superAdminRoutes.js';
 import sellerRoutes from './routes/sellerRoutes.js';
 import bannerRoutes from './routes/bannerRoutes.js';
+import userProfileRoutes from './routes/userProfileRoutes.js'; // <-- NEW
 
 // ============================================
 // IMPORT SERVICES
@@ -158,6 +159,7 @@ app.get('/api', (req, res) => {
       seller: '/api/seller',
       blog: '/api/blog',
       banners: '/api/banners',
+      userProfile: '/api/user-profile',
       health: '/health'
     },
     documentation: 'Contact support for API documentation'
@@ -172,12 +174,14 @@ console.log('  📌 /api/auth - Authentication routes');
 console.log('  📌 /api/super-admin - Super Admin routes');
 console.log('  📌 /api/seller - Seller routes');
 console.log('  📌 /api/banners - Banner Management routes');
+console.log('  📌 /api/user-profile - User Profile routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/seller', sellerRoutes);
 app.use('/api/banners', bannerRoutes);
 app.use('/api/blog', blogRoutes);
+app.use('/api', userProfileRoutes); // User Profile routes
 
 // ============================================
 // 404 NOT FOUND HANDLER
@@ -236,7 +240,7 @@ app.use((err, req, res, next) => {
     if (err.code === 'LIMIT_FILE_SIZE') {
       return res.status(400).json({
         success: false,
-        message: 'File too large. Maximum size is 10MB.',
+        message: 'File too large. Maximum size is 5MB.',
       });
     }
     if (err.code === 'LIMIT_UNEXPECTED_FILE') {
@@ -299,17 +303,16 @@ const server = app.listen(PORT, () => {
   console.log('  🔹 /api/super-admin - Super Admin');
   console.log('  🔹 /api/seller - Seller');
   console.log('  🔹 /api/banners - Banner Management');
+  console.log('  🔹 /api/user-profile - User Profile Management');
+  console.log('  🔹 /api/blog - Blog Management');
   console.log('  🔹 /health - Health Check');
   console.log('  🔹 /api - API Info');
   console.log('='.repeat(60));
-  console.log('  📌 /api/blog - Blog Management');
-
 });
 
 // ============================================
 // GRACEFUL SHUTDOWN
 // ============================================
-
 process.on('unhandledRejection', (err) => {
   console.error('❌ Unhandled Rejection:', err);
   server.close(() => {

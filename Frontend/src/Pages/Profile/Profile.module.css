@@ -1,0 +1,1151 @@
+/* src/Pages/Profile/Profile.module.css */
+
+/* ============================================
+   Container
+   ============================================ */
+.pageWrapper {
+  min-height: 100vh;
+  background: #f8f6f4;
+}
+
+.profilePage {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ============================================
+   Loading
+   ============================================ */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 20px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #c8a86e;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================
+   Profile Header
+   ============================================ */
+.profileHeader {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.avatarSection {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.avatarWrapper {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #c8a86e;
+}
+
+.avatarPlaceholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c8a86e, #b8944a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 600;
+  color: white;
+  border: 3px solid #c8a86e;
+}
+
+.avatarUploadBtn {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  background: #c8a86e;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  padding: 0;
+}
+
+.avatarUploadBtn:hover {
+  background: #b8944a;
+}
+
+.avatarUploadBtn label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.uploadConfirmBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  white-space: nowrap;
+}
+
+.uploadConfirmBtn:hover {
+  background: #059669;
+}
+
+.userInfo {
+  flex: 1;
+  min-width: 150px;
+}
+
+.userName {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 4px;
+}
+
+.userEmail {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 2px;
+}
+
+.userPhone {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 8px;
+}
+
+.userBadge {
+  display: inline-block;
+  padding: 2px 12px;
+  background: #f0ebe6;
+  color: #666;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #fee2e2;
+  color: #dc2626;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.logoutBtn:hover {
+  background: #fecaca;
+}
+
+/* ============================================
+   Tabs
+   ============================================ */
+.tabsContainer {
+  display: flex;
+  gap: 4px;
+  background: white;
+  border-radius: 12px;
+  padding: 6px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow-x: auto;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.tab:hover {
+  background: #f8f6f4;
+  color: #1a1a1a;
+}
+
+.activeTab {
+  background: #c8a86e;
+  color: white;
+}
+
+.activeTab:hover {
+  background: #b8944a;
+}
+
+/* ============================================
+   Content Area
+   ============================================ */
+.contentArea {
+  background: white;
+  border-radius: 16px;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  min-height: 400px;
+  overflow: hidden;
+}
+
+/* ============================================
+   Tab Content
+   ============================================ */
+.tabContent {
+  padding: 30px;
+}
+
+.tabHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.tabHeader h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.editBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background: #c8a86e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.editBtn:hover {
+  background: #b8944a;
+}
+
+.orderCount {
+  font-size: 14px;
+  color: #999;
+  background: #f8f6f4;
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+
+/* ============================================
+   Profile Info (View Mode)
+   ============================================ */
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.infoRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  background: #fafaf8;
+  border-radius: 10px;
+}
+
+.infoLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.infoValue {
+  font-size: 16px;
+  color: #1a1a1a;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* ============================================
+   Profile Form (Edit Mode)
+   ============================================ */
+.profileForm {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formGroup label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.formGroup input,
+.formGroup textarea,
+.formGroup select {
+  padding: 10px 14px;
+  border: 1px solid #e0ddd8;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.3s ease;
+  background: #fafaf8;
+  width: 100%;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus,
+.formGroup select:focus {
+  outline: none;
+  border-color: #c8a86e;
+  box-shadow: 0 0 0 3px rgba(200, 168, 110, 0.1);
+}
+
+.formGroup input:disabled {
+  background: #f0ebe6;
+  cursor: not-allowed;
+}
+
+.formGroup textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.formActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.saveBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 32px;
+  background: #c8a86e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.saveBtn:hover {
+  background: #b8944a;
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancelBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 32px;
+  background: #f0ebe6;
+  color: #666;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.cancelBtn:hover {
+  background: #e5dfd8;
+}
+
+/* ============================================
+   Orders Section
+   ============================================ */
+.ordersList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.orderCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #fafaf8;
+  border-radius: 10px;
+  border: 1px solid #f0ebe6;
+  transition: all 0.3s ease;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.orderCard:hover {
+  border-color: #c8a86e;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.orderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.orderHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.orderId {
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 14px;
+}
+
+.orderStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.statusDelivered {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.statusProcessing {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.statusShipped {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.statusPending {
+  background: #fed7aa;
+  color: #9a3412;
+}
+
+.statusCancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.orderMeta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.orderMeta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #999;
+}
+
+.orderTotal {
+  font-weight: 700;
+  color: #1a1a1a;
+  font-size: 16px;
+}
+
+.orderDetailsBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  background: #f0ebe6;
+  color: #666;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.orderDetailsBtn:hover {
+  background: #e5dfd8;
+}
+
+/* ============================================
+   Wishlist Section
+   ============================================ */
+.wishlistGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.wishlistItem {
+  background: #fafaf8;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 1px solid #f0ebe6;
+}
+
+.wishlistItem:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-color: #c8a86e;
+}
+
+.wishlistImage {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  background: #f0ebe6;
+}
+
+.wishlistInfo {
+  padding: 12px 14px;
+}
+
+.wishlistName {
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 14px;
+  margin: 0 0 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wishlistPrice {
+  color: #c8a86e;
+  font-weight: 600;
+  font-size: 15px;
+  margin: 4px 0 8px;
+}
+
+.wishlistActions {
+  display: flex;
+  gap: 8px;
+}
+
+.wishlistActions button {
+  flex: 1;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.wishlistCartBtn {
+  background: #c8a86e;
+  color: white;
+}
+
+.wishlistCartBtn:hover {
+  background: #b8944a;
+}
+
+.wishlistRemoveBtn {
+  background: #fee2e2;
+  color: #dc2626;
+  flex: 0 0 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wishlistRemoveBtn:hover {
+  background: #fecaca;
+}
+
+/* ============================================
+   Settings Section
+   ============================================ */
+.settingsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settingsItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #f0ebe6;
+  gap: 20px;
+}
+
+.settingsItem:last-child {
+  border-bottom: none;
+}
+
+.settingsLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.settingsLabel span:first-child {
+  font-weight: 500;
+  color: #1a1a1a;
+  font-size: 14px;
+}
+
+.settingsLabel span:last-child {
+  font-size: 13px;
+  color: #999;
+}
+
+.settingsToggle {
+  position: relative;
+  width: 48px;
+  height: 26px;
+  background: #ddd;
+  border-radius: 13px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  flex-shrink: 0;
+}
+
+.settingsToggle.active {
+  background: #c8a86e;
+}
+
+.settingsToggle::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.settingsToggle.active::after {
+  transform: translateX(22px);
+}
+
+.settingsToggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   Danger Zone
+   ============================================ */
+.dangerZone {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px solid #fee2e2;
+}
+
+.dangerZone h3 {
+  color: #dc2626;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.dangerItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #fef2f2;
+  border-radius: 10px;
+  border: 1px solid #fecaca;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.dangerItem h4 {
+  margin: 0 0 4px;
+  color: #dc2626;
+  font-size: 14px;
+}
+
+.dangerItem p {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.deleteAccountBtn {
+  padding: 8px 20px;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  flex-shrink: 0;
+}
+
+.deleteAccountBtn:hover {
+  background: #b91c1c;
+}
+
+/* ============================================
+   Empty State
+   ============================================ */
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.emptyState svg {
+  color: #ddd;
+  margin-bottom: 16px;
+}
+
+.emptyState h3 {
+  font-size: 18px;
+  color: #333;
+  margin: 0 0 8px;
+}
+
+.emptyState p {
+  font-size: 14px;
+  margin: 0 0 20px;
+}
+
+.shopBtn {
+  display: inline-block;
+  padding: 10px 32px;
+  background: #c8a86e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.shopBtn:hover {
+  background: #b8944a;
+}
+
+/* ============================================
+   Primary Button (for login redirect)
+   ============================================ */
+.primaryBtn {
+  padding: 10px 32px;
+  background: #c8a86e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  margin-top: 12px;
+}
+
+.primaryBtn:hover {
+  background: #b8944a;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 768px) {
+  .profileHeader {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .avatarSection {
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .userInfo {
+    text-align: center;
+  }
+
+  .logoutBtn {
+    justify-content: center;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+
+  .tabsContainer {
+    gap: 2px;
+    padding: 4px;
+  }
+
+  .tab {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  .wishlistGrid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .tabContent {
+    padding: 20px;
+  }
+
+  .orderCard {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .orderInfo {
+    min-width: 0;
+  }
+
+  .orderHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .orderMeta {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .orderDetailsBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .infoRow {
+    grid-template-columns: 1fr;
+  }
+
+  .dangerItem {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .deleteAccountBtn {
+    width: 100%;
+  }
+
+  .settingsItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profilePage {
+    padding: 20px 12px;
+  }
+
+  .avatarWrapper {
+    width: 60px;
+    height: 60px;
+  }
+
+  .avatarPlaceholder {
+    font-size: 24px;
+  }
+
+  .avatarUploadBtn {
+    width: 22px;
+    height: 22px;
+  }
+
+  .userName {
+    font-size: 20px;
+  }
+
+  .tab {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .wishlistGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .tabContent {
+    padding: 16px;
+  }
+
+  .formActions {
+    flex-direction: column;
+  }
+
+  .saveBtn,
+  .cancelBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tabHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .editBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Add these to Profile.module.css */
+
+/* Address Form */
+.addressForm {
+  background: #fafaf8;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #e0ddd8;
+}
+
+/* Address Card */
+.addressCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px 20px;
+  background: #fafaf8;
+  border-radius: 10px;
+  border: 1px solid #f0ebe6;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+}
+
+.addressCard:hover {
+  border-color: #c8a86e;
+}
+
+.addressHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.addressName {
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 14px;
+}
+
+.addressDefault {
+  display: inline-block;
+  padding: 2px 10px;
+  background: #d1fae5;
+  color: #065f46;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.addressLine {
+  color: #666;
+  font-size: 14px;
+  margin: 2px 0;
+  line-height: 1.5;
+}
+
+.addressPhone {
+  color: #999;
+  font-size: 13px;
+  margin: 4px 0 0;
+}
+
+.addressActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.addressDefaultBtn {
+  padding: 4px 12px;
+  background: #f0ebe6;
+  color: #666;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.addressDefaultBtn:hover {
+  background: #c8a86e;
+  color: white;
+}
+
+.addressDeleteBtn {
+  padding: 4px 12px;
+  background: #fee2e2;
+  color: #dc2626;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.addressDeleteBtn:hover {
+  background: #fecaca;
+}
+
+.addressList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .addressCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .addressActions {
+    width: 100%;
+  }
+  
+  .addressDefaultBtn,
+  .addressDeleteBtn {
+    flex: 1;
+    text-align: center;
+  }
+}

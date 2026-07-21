@@ -59,6 +59,8 @@ import SellerVerifyOTP from "./Pages/Seller/SellerAuth/SellerVerifyOTP.jsx";
 // ============================================
 import BlogList from "./Pages/UserBlog/BlogList.jsx";
 import BlogDetail from "./Pages/UserBlog/BlogDetail.jsx";
+import Profile from "./Pages/Profile/Profile.jsx";
+
 
 // ============================================
 // ROUTES CONSTANTS
@@ -509,17 +511,9 @@ const App = () => {
             path={ROUTES.PROFILE}
             element={
               <PrivateRoute>
-                <LayoutWithHeader>
-                  <div className="p-8 text-center">
-                    <h1 className="text-3xl font-bold text-gray-800">
-                      Profile
-                    </h1>
-                    <p className="text-gray-600 mt-2">Manage your profile</p>
-                    <p className="text-gray-500 mt-4">
-                      (Profile page coming soon...)
-                    </p>
-                  </div>
-                </LayoutWithHeader>
+              
+                <Profile/>
+              
               </PrivateRoute>
             }
           />
