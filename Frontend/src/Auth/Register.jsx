@@ -50,6 +50,15 @@ const PERKS = [
   },
 ];
 
+/* ------------------------------------------------------------------
+   Static content — short highlights shown beside the hero copy
+------------------------------------------------------------------- */
+const HERO_HIGHLIGHTS = [
+  { icon: <FiStar />, text: "Curated, limited-run collections" },
+  { icon: <FiHeart />, text: "A wishlist that remembers what you love" },
+  { icon: <FiTruck />, text: "Tracked delivery, every step of the way" },
+];
+
 const Register = () => {
   const [formData, setFormData] = useState({
     firstName: "",
@@ -116,33 +125,48 @@ const Register = () => {
           </div>
 
           <div className={styles.heroInner}>
-            {/* ---------- Left: image ---------- */}
+            {/* ---------- Left: editorial text content ---------- */}
             <div className={styles.heroLeft}>
-              <div className={styles.heroImageWrap}>
-                <div className={styles.heroImageFrame}>
-                
-                </div>
-                <span className={styles.heroAccentTop} aria-hidden="true" />
-                <span className={styles.heroAccentBottom} aria-hidden="true" />
+              <div className={styles.heroContent}>
+                <span className={styles.heroEyebrow}>Welcome to Aurevian</span>
 
-                <div className={styles.heroCaption}>
-                  <span className={styles.heroEyebrow}>Join Aurevian</span>
-                  <h2 className={styles.heroCaptionTitle}>
-                    Your Story In Gold Starts Here
-                  </h2>
-                </div>
+                <h1 className={styles.heroHeading}>
+                  Your Story In
+                  <span className={styles.heroHeadingAccent}> Gold</span>
+                  <br />
+                  Starts Here
+                </h1>
+
+                <p className={styles.heroText}>
+                  A place built for those who notice detail — the weight of a
+                  clasp, the warmth of a finish, the quiet of good design.
+                  Create your account and step into a wardrobe of pieces
+                  chosen to be kept, not just worn.
+                </p>
+
+                <ul className={styles.heroHighlights}>
+                  {HERO_HIGHLIGHTS.map((item) => (
+                    <li key={item.text} className={styles.heroHighlightItem}>
+                      <span className={styles.heroHighlightIcon}>{item.icon}</span>
+                      <span className={styles.heroHighlightText}>{item.text}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <figure className={styles.heroQuote}>
+                  <span className={styles.heroQuoteMark} aria-hidden="true">
+                    "
+                  </span>
+                  <blockquote className={styles.heroQuoteText}>
+                    Every piece has a story. Yours is about to begin.
+                  </blockquote>
+                </figure>
               </div>
             </div>
 
             {/* ---------- Right: register form ---------- */}
             <div className={styles.heroRight}>
               <div className={styles.card}>
-                {/* Back Button */}
-                <Link to="/login" className={styles.backButton}>
-                  <FiArrowLeft />
-                  <span>Back to Login</span>
-                </Link>
-
                 {/* Logo */}
                 <div className={styles.cardLogo}>
                   <img src={logo} alt="Aurevian" className={styles.cardLogoImage} />
@@ -150,7 +174,7 @@ const Register = () => {
 
                 {/* Header */}
                 <div className={styles.header}>
-                  <h1 className={styles.title}>Create Account ✨</h1>
+                  <h2 className={styles.title}>Create Account</h2>
                   <p className={styles.subtitle}>Join Aurevian Collections today</p>
                 </div>
 
@@ -158,7 +182,7 @@ const Register = () => {
                 <form onSubmit={handleSubmit} className={styles.form}>
                   <div className={styles.row}>
                     <div className={styles.formGroup}>
-                      <label className={styles.label}>First Name *</label>
+                      <label className={styles.label}>First Name</label>
                       <div className={styles.inputWrapper}>
                         <FiUser className={styles.inputIcon} />
                         <input
@@ -167,14 +191,14 @@ const Register = () => {
                           value={formData.firstName}
                           onChange={handleChange}
                           className={styles.input}
-                          placeholder="John"
+                          placeholder="First Name"
                           required
                           disabled={isLoading}
                         />
                       </div>
                     </div>
                     <div className={styles.formGroup}>
-                      <label className={styles.label}>Last Name *</label>
+                      <label className={styles.label}>Last Name</label>
                       <div className={styles.inputWrapper}>
                         <input
                           type="text"
@@ -182,7 +206,7 @@ const Register = () => {
                           value={formData.lastName}
                           onChange={handleChange}
                           className={`${styles.input} ${styles.inputNoIcon}`}
-                          placeholder="Doe"
+                          placeholder="Last Name"
                           required
                           disabled={isLoading}
                         />
@@ -191,7 +215,7 @@ const Register = () => {
                   </div>
 
                   <div className={styles.formGroup}>
-                    <label className={styles.label}>Email Address *</label>
+                    <label className={styles.label}>Email Address</label>
                     <div className={styles.inputWrapper}>
                       <FiMail className={styles.inputIcon} />
                       <input
@@ -200,7 +224,7 @@ const Register = () => {
                         value={formData.email}
                         onChange={handleChange}
                         className={styles.input}
-                        placeholder="john@example.com"
+                        placeholder="name@example.com"
                         required
                         disabled={isLoading}
                       />
@@ -217,59 +241,67 @@ const Register = () => {
                         value={formData.phone}
                         onChange={handleChange}
                         className={styles.input}
-                        placeholder="+41 123 456 789"
+                        placeholder="Enter Your number"
                         disabled={isLoading}
                       />
                     </div>
                   </div>
 
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>Password *</label>
-                    <div className={styles.inputWrapper}>
-                      <FiLock className={styles.inputIcon} />
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        className={styles.input}
-                        placeholder="••••••••"
-                        required
-                        disabled={isLoading}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className={styles.eyeButton}
-                        aria-label={showPassword ? "Hide password" : "Show password"}
-                      >
-                        {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
-                      </button>
+                  <div className={styles.row}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>Password</label>
+                      <div className={styles.inputWrapper}>
+                        <FiLock className={styles.inputIcon} />
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          value={formData.password}
+                          onChange={handleChange}
+                          className={styles.input}
+                          placeholder="••••••••"
+                          required
+                          disabled={isLoading}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className={styles.eyeButton}
+                          aria-label={showPassword ? "Hide password" : "Show password"}
+                        >
+                          {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                        </button>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>Confirm Password *</label>
-                    <div className={styles.inputWrapper}>
-                      <FiLock className={styles.inputIcon} />
-                      <input
-                        type={showConfirmPassword ? "text" : "password"}
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        className={styles.input}
-                        placeholder="••••••••"
-                        required
-                        disabled={isLoading}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className={styles.eyeButton}
-                        aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-                      >
-                        {showConfirmPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
-                      </button>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>Confirm Password</label>
+                      <div className={styles.inputWrapper}>
+                        <FiLock className={styles.inputIcon} />
+                        <input
+                          type={showConfirmPassword ? "text" : "password"}
+                          name="confirmPassword"
+                          value={formData.confirmPassword}
+                          onChange={handleChange}
+                          className={styles.input}
+                          placeholder="••••••••"
+                          required
+                          disabled={isLoading}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className={styles.eyeButton}
+                          aria-label={
+                            showConfirmPassword ? "Hide password" : "Show password"
+                          }
+                        >
+                          {showConfirmPassword ? (
+                            <FiEyeOff size={18} />
+                          ) : (
+                            <FiEye size={18} />
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -318,13 +350,8 @@ const Register = () => {
             </div>
 
             <div className={styles.perksGrid}>
-              {PERKS.map((perk, i) => (
-                <div
-                  className={`${styles.perkCard} ${
-                    i % 2 === 1 ? styles.perkCardOffset : ""
-                  }`}
-                  key={perk.title}
-                >
+              {PERKS.map((perk) => (
+                <div className={styles.perkCard} key={perk.title}>
                   <span className={styles.perkRing}>
                     <span className={styles.perkIcon}>{perk.icon}</span>
                   </span>

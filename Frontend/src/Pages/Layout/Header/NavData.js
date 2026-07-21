@@ -145,7 +145,7 @@ export const accountDropdown = [
 // About Us dropdown
 export const aboutDropdown = [
   { id: "about-us", label: "About Us", path: "/about" },
-  { id: "blogs", label: "Blogs", path: "/blogs" },
+  { id: "blogs", label: "Blogs", path: "/blog" },
   { id: "contact", label: "Contact", path: "/contact" },
   { id: "support", label: "Support", path: "/support" },
   { id: "stories", label: "Stories", path: "/stories" },

@@ -99,7 +99,7 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 1150px;
+  max-width: 1130px;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -297,9 +297,9 @@
 }
 
 .cardLogoImage {
-  height: 42px;
+  height: 50px;
   width: auto;
-  max-width: 160px;
+  max-width: 180px;
   object-fit: contain;
 }
 

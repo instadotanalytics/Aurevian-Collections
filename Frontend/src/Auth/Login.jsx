@@ -189,7 +189,7 @@ const Login = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className={styles.input}
-                        placeholder="john@example.com"
+                        placeholder="name@example.com"
                         required
                         disabled={isLoading || authLoading}
                       />

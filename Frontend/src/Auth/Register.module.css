@@ -10,6 +10,8 @@
   flex-direction: column;
   min-height: 100vh;
   background: linear-gradient(180deg, #fbf6ee 0%, #fdfaf4 100%);
+  overflow-x: hidden;
+  width: 100%;
 }
 
 /* ==========================================================
@@ -34,6 +36,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 /* Fixes inputs/cards overflowing their containers */
@@ -44,7 +48,7 @@
 }
 
 /* ==========================================================
-   HERO — image left, form right
+   HERO — editorial text left, form right
 ========================================================== */
 .hero {
   position: relative;
@@ -55,6 +59,7 @@
   overflow: hidden;
   scroll-margin-top: var(--header-height);
   min-height: calc(100vh - var(--header-height));
+  width: 100%;
 }
 
 .heroDecor {
@@ -91,98 +96,149 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 1150px;
+  max-width: 1130px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 56px;
+  gap: 32px;
 }
 
 .heroLeft {
   flex: 1 1 480px;
-  max-width: 480px;
+  max-width: 500px;
   min-width: 0;
 }
 
 .heroRight {
-  flex: 1 1 420px;
-  max-width: 440px;
+  flex: 1 1 400px;
+  max-width: 420px;
+  min-width: 0;
+  width: 100%;
   display: flex;
   justify-content: flex-end;
   align-items: center;
 }
 
-/* ---------- Hero image ---------- */
-.heroImageWrap {
+/* ---------- Hero editorial content ---------- */
+.heroContent {
   position: relative;
   width: 100%;
   animation: fadeUp 0.7s ease both;
 }
 
-.heroImageFrame {
-  position: relative;
-  border-radius: 24px;
-  overflow: hidden;
-  aspect-ratio: 4 / 5;
-  box-shadow: 0 30px 60px rgba(43, 38, 32, 0.18);
-  border: 1px solid rgba(201, 162, 75, 0.3);
-}
-
-.heroImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.heroAccentTop,
-.heroAccentBottom {
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  border: 2px solid var(--gold-1);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.heroAccentTop {
-  top: -16px;
-  left: -16px;
-  border-right: none;
-  border-bottom: none;
-  border-radius: 16px 0 0 0;
-}
-
-.heroAccentBottom {
-  bottom: -16px;
-  right: -16px;
-  border-left: none;
-  border-top: none;
-  border-radius: 0 0 16px 0;
-}
-
-.heroCaption {
-  margin-top: 28px;
-}
-
 .heroEyebrow {
   display: inline-block;
   font-size: 12px;
-  letter-spacing: 0.25em;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
   font-weight: 500;
   color: var(--gold-deep);
-  margin-bottom: 10px;
+  margin-bottom: 18px;
 }
 
-.heroCaptionTitle {
+.heroHeading {
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(22px, 2.4vw, 28px);
+  font-size: clamp(30px, 4.6vw, 56px);
   font-weight: 600;
+  line-height: 1.12;
   color: var(--ink);
+  margin: 0 0 22px;
+  letter-spacing: -0.01em;
+}
+
+.heroHeadingAccent {
+  font-style: italic;
+  font-weight: 700;
+  background: var(--gold-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.heroText {
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--ink-soft);
+  font-weight: 300;
+  max-width: 440px;
+  margin: 0 0 30px;
+}
+
+/* ---------- Hero highlights (icon + text rows) ----------
+   Rendered as a column that is centered as a whole block,
+   while each row stays left-aligned internally so the icon
+   circles always sit in a single straight vertical line,
+   regardless of how long each line of text is. */
+.heroHighlights {
+  list-style: none;
+  margin: 0 0 34px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  width: 100%;
+}
+
+.heroHighlightItem {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  width: 100%;
+  font-size: 14.5px;
+  color: var(--ink);
+  font-weight: 400;
+  text-align: left;
+}
+
+.heroHighlightIcon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(201, 162, 75, 0.45);
+  color: var(--gold-deep);
+  background: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.heroHighlightText {
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: 1.4;
+}
+
+.heroQuote {
+  position: relative;
   margin: 0;
-  line-height: 1.3;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  max-width: 420px;
+}
+
+.heroQuoteMark {
+  display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 42px;
+  line-height: 1;
+  color: var(--gold-1);
+  margin-bottom: 4px;
+}
+
+.heroQuoteText {
+  margin: 0;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 19px;
+  line-height: 1.5;
+  color: var(--ink);
+  font-weight: 500;
 }
 
 /* ==========================================================
@@ -190,12 +246,12 @@
 ========================================================== */
 .card {
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(201, 162, 75, 0.25);
-  border-radius: 24px;
-  padding: 28px 30px;
+  border-radius: 20px;
+  padding: 22px 24px;
   box-shadow: 0 24px 60px rgba(43, 38, 32, 0.14);
   animation: fadeUp 0.7s ease 0.15s both;
 }
@@ -203,12 +259,12 @@
 .backButton {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
   color: var(--ink-soft);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   text-decoration: none;
   transition: color 0.2s ease;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .backButton:hover {
@@ -219,24 +275,24 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .cardLogoImage {
-  height: 40px;
+  height: 50px;
   width: auto;
-  max-width: 160px;
+  max-width: 180px;
   object-fit: contain;
 }
 
 .header {
   text-align: center;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.9rem;
 }
 
 .title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.55rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: var(--ink);
   margin: 0;
@@ -244,35 +300,35 @@
 
 .subtitle {
   color: var(--ink-soft);
-  margin-top: 0.3rem;
-  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
 }
 
 /* ---------- Form ---------- */
 .form {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.65rem;
   width: 100%;
 }
 
 .row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.7rem;
+  gap: 0.6rem;
   width: 100%;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.25rem;
   width: 100%;
   min-width: 0;
 }
 
 .label {
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   font-weight: 500;
   color: var(--ink);
 }
@@ -284,19 +340,20 @@
 
 .inputIcon {
   position: absolute;
-  left: 0.85rem;
+  left: 0.78rem;
   top: 50%;
   transform: translateY(-50%);
   color: var(--gold-1);
   pointer-events: none;
+  font-size: 15px;
 }
 
 .input {
   width: 100%;
-  padding: 0.62rem 2.6rem 0.62rem 2.5rem;
+  padding: 0.52rem 2.3rem 0.52rem 2.3rem;
   border: 1px solid var(--border);
-  border-radius: 10px;
-  font-size: 0.92rem;
+  border-radius: 9px;
+  font-size: 0.86rem;
   font-family: 'Jost', sans-serif;
   background: rgba(255, 255, 255, 0.7);
   color: var(--ink);
@@ -305,7 +362,7 @@
 }
 
 .inputNoIcon {
-  padding-left: 0.9rem;
+  padding-left: 0.85rem;
 }
 
 .input:focus {
@@ -320,7 +377,7 @@
 
 .eyeButton {
   position: absolute;
-  right: 0.7rem;
+  right: 0.65rem;
   top: 50%;
   transform: translateY(-50%);
   background: none;
@@ -340,15 +397,15 @@
   width: 100%;
   background: var(--gold-gradient);
   color: #2b2005;
-  padding: 0.72rem;
+  padding: 0.62rem;
   border: none;
-  border-radius: 10px;
-  font-size: 0.95rem;
+  border-radius: 9px;
+  font-size: 0.9rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 0.2rem;
+  margin-top: 0.15rem;
 }
 
 .submitButton:hover:not(:disabled) {
@@ -363,7 +420,7 @@
 
 .divider {
   position: relative;
-  margin: 1.1rem 0;
+  margin: 0.9rem 0;
   text-align: center;
 }
 
@@ -380,15 +437,15 @@
 .divider span {
   position: relative;
   background: rgba(255, 255, 255, 0.001);
-  padding: 0 1rem;
-  font-size: 0.8rem;
+  padding: 0 0.9rem;
+  font-size: 0.76rem;
   color: var(--ink-soft);
 }
 
 .footerText {
   text-align: center;
-  margin-top: 1rem;
-  font-size: 0.82rem;
+  margin-top: 0.8rem;
+  font-size: 0.78rem;
   color: var(--ink-soft);
 }
 
@@ -404,7 +461,7 @@
 }
 
 /* ==========================================================
-   MEMBER BENEFITS — classy, unique 100vh section
+   MEMBER BENEFITS — classy, static (no hover), fully responsive
 ========================================================== */
 .perksSection {
   position: relative;
@@ -414,6 +471,7 @@
   background: var(--cream);
   padding: 100px 24px;
   overflow: hidden;
+  width: 100%;
 }
 
 .perksSection::before {
@@ -476,11 +534,12 @@
   font-weight: 300;
 }
 
-/* ---------- Perk cards — staggered, glass, unique ---------- */
+/* ---------- Perk cards — even single row, no hover motion ---------- */
 .perksGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 28px;
+  align-items: stretch;
 }
 
 .perkCard {
@@ -491,22 +550,11 @@
   border-radius: 22px;
   padding: 40px 26px 32px;
   text-align: center;
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease,
-    border-color 0.4s ease;
-}
-
-.perkCard:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 24px 48px rgba(43, 38, 32, 0.12);
-  border-color: var(--gold-1);
-}
-
-.perkCardOffset {
-  transform: translateY(28px);
-}
-
-.perkCardOffset:hover {
-  transform: translateY(18px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  min-width: 0;
 }
 
 .perkRing {
@@ -519,6 +567,7 @@
   background: rgba(255, 255, 255, 0.6);
   border: 1.5px solid var(--gold-1);
   margin-bottom: 20px;
+  flex: none;
 }
 
 .perkIcon {
@@ -546,6 +595,7 @@
   line-height: 1.65;
   color: var(--ink-soft);
   margin: 0;
+  flex: 1;
 }
 
 /* ==========================================================
@@ -563,15 +613,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .heroImageWrap,
-  .card,
-  .perkCard {
+  .heroContent,
+  .card {
     animation: none !important;
     transition: none !important;
-  }
-
-  .perkCardOffset {
-    transform: none;
   }
 }
 
@@ -591,6 +636,18 @@
    RESPONSIVE
 ========================================================== */
 
+/* Large desktops */
+@media (min-width: 1440px) {
+  .heroInner {
+    max-width: 1280px;
+    gap: 72px;
+  }
+
+  .perksInner {
+    max-width: 1280px;
+  }
+}
+
 /* Laptops */
 @media (max-width: 1180px) {
   .heroInner {
@@ -603,16 +660,52 @@
   }
 }
 
-/* Tablets — stack hero image above form */
+/* Tablets — stack hero content above form */
 @media (max-width: 1023px) {
   .heroInner {
     flex-direction: column;
-    gap: 44px;
+    gap: 40px;
   }
 
   .heroLeft {
-    max-width: 460px;
+    max-width: 560px;
     width: 100%;
+    text-align: center;
+  }
+
+  .heroContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .heroText {
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Keep the highlight block centered as a group, but let each
+     row stay left-aligned internally so the icons line up in a
+     single straight column instead of drifting left/right based
+     on how long each line of text is. */
+  .heroHighlights {
+    align-items: flex-start;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .heroHighlightItem {
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .heroQuote {
+    max-width: 480px;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .heroRight {
@@ -622,19 +715,11 @@
   }
 
   .card {
-    max-width: 440px;
+    max-width: 420px;
   }
 
   .perksGrid {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .perkCardOffset {
-    transform: none;
-  }
-
-  .perkCardOffset:hover {
-    transform: translateY(-10px);
   }
 }
 
@@ -645,65 +730,250 @@
     padding: 40px 16px 56px;
   }
 
-  .heroImageFrame {
-    aspect-ratio: 16 / 10;
-  }
-
-  .heroAccentTop,
-  .heroAccentBottom {
-    width: 56px;
-    height: 56px;
+  .heroHeading {
+    font-size: clamp(26px, 6vw, 38px);
   }
 
   .perksSection {
     min-height: auto;
-    padding: 72px 16px;
+    padding: 64px 16px;
   }
 
   .perksIntro {
-    margin-bottom: 48px;
-  }
-}
-
-/* Phones */
-@media (max-width: 640px) {
-  .card {
-    max-width: 100%;
-    padding: 22px 20px;
-    border-radius: 20px;
-  }
-
-  .title {
-    font-size: 1.35rem;
-  }
-
-  .row {
-    grid-template-columns: 1fr;
-    gap: 0.85rem;
+    margin-bottom: 40px;
   }
 
   .perksGrid {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-
-  .heroCaptionTitle {
-    font-size: 20px;
-  }
-}
-
-/* Small phones */
-@media (max-width: 480px) {
-  .hero {
-    padding: 30px 16px;
-  }
-
-  .heroAccentTop,
-  .heroAccentBottom {
-    display: none;
+    gap: 16px;
   }
 
   .perkCard {
-    padding: 32px 20px 26px;
+    padding: 28px 18px 22px;
+    border-radius: 18px;
+  }
+}
+
+/* Phones — everything centered, form full width, 2 perk cards per row */
+@media (max-width: 640px) {
+  .heroInner {
+    gap: 32px;
+  }
+
+  .card {
+    max-width: 100%;
+    width: 100%;
+    padding: 20px 18px;
+    border-radius: 18px;
+  }
+
+  .heroRight {
+    padding: 0 4px;
+  }
+
+  .title {
+    font-size: 1.25rem;
+  }
+
+  .row {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .input {
+    padding: 0.5rem 1.9rem 0.5rem 2.1rem;
+    font-size: 0.82rem;
+  }
+
+  .inputIcon {
+    left: 0.65rem;
+    font-size: 14px;
+  }
+
+  .eyeButton {
+    right: 0.5rem;
+  }
+
+  .heroHighlights {
+    gap: 10px;
+    margin-bottom: 26px;
+    /* re-confirm centered-as-a-block / left-aligned-rows on small phones */
+    width: fit-content;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .heroHighlightItem {
+    font-size: 13.5px;
+  }
+
+  .heroHighlightIcon {
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+  }
+
+  .heroQuoteText {
+    font-size: 17px;
+  }
+
+  .heroText {
+    font-size: 14.5px;
+    margin-bottom: 22px;
+  }
+
+  /* --- Member benefit / stat cards: 2 per row on mobile --- */
+  .perksGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .perkCard {
+    padding: 22px 14px 18px;
+    border-radius: 16px;
+  }
+
+  .perkRing {
+    width: 52px;
+    height: 52px;
+    margin-bottom: 14px;
+  }
+
+  .perkIcon {
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
+  }
+
+  .perkTitle {
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+
+  .perkText {
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+}
+
+/* Small phones — keep 2 columns, just tighten spacing further */
+@media (max-width: 480px) {
+  .hero {
+    padding: 28px 14px;
+  }
+
+  .heroHeading {
+    font-size: 24px;
+  }
+
+  .heroEyebrow {
+    font-size: 11px;
+  }
+
+  .heroText {
+    font-size: 14px;
+  }
+
+  .heroHighlightItem {
+    font-size: 12.5px;
+    gap: 10px;
+  }
+
+  .heroHighlightIcon {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+
+  .card {
+    padding: 18px 14px;
+  }
+
+  .row {
+    gap: 0.45rem;
+  }
+
+  .formGroup {
+    gap: 0.2rem;
+  }
+
+  .label {
+    font-size: 0.72rem;
+  }
+
+  .input {
+    padding: 0.48rem 1.7rem 0.48rem 1.9rem;
+    font-size: 0.78rem;
+    border-radius: 8px;
+  }
+
+  .inputIcon {
+    left: 0.55rem;
+    font-size: 13px;
+  }
+
+  .submitButton {
+    font-size: 0.85rem;
+    padding: 0.58rem;
+  }
+
+  .perksGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .perkCard {
+    padding: 18px 10px 16px;
+    border-radius: 14px;
+  }
+
+  .perkRing {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 10px;
+  }
+
+  .perkIcon {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+  }
+
+  .perkTitle {
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+
+  .perkText {
+    font-size: 11.5px;
+    line-height: 1.5;
+  }
+}
+
+/* Very small phones (≤360px) — extra tight but still 2 per row */
+@media (max-width: 360px) {
+  .row {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.35rem;
+  }
+
+  .heroHighlightItem {
+    gap: 8px;
+  }
+
+  .perksGrid {
+    gap: 8px;
+  }
+
+  .perkCard {
+    padding: 14px 8px 12px;
+  }
+
+  .perkTitle {
+    font-size: 13px;
+  }
+
+  .perkText {
+    font-size: 11px;
   }
 }

@@ -1,4 +1,4 @@
-// index.js
+// Backend/index.js
 
 import express from 'express';
 import dotenv from 'dotenv';
@@ -13,6 +13,7 @@ import rateLimit from 'express-rate-limit';
 import connectDB from './config/db.js';
 import corsOptions from './config/cors.js';
 import configurePassport from './config/passport.js';
+import blogRoutes from './routes/blogRoutes.js';
 
 // ============================================
 // IMPORT ROUTES
@@ -20,6 +21,7 @@ import configurePassport from './config/passport.js';
 import authRoutes from './routes/authRoutes.js';
 import superAdminRoutes from './routes/superAdminRoutes.js';
 import sellerRoutes from './routes/sellerRoutes.js';
+import bannerRoutes from './routes/bannerRoutes.js';
 
 // ============================================
 // IMPORT SERVICES
@@ -102,7 +104,7 @@ const sessionConfig = {
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    maxAge: 24 * 60 * 60 * 1000,
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
   },
   store: MongoStore.create({
@@ -143,18 +145,6 @@ app.get('/health', (req, res) => {
 });
 
 // ============================================
-// API ROUTES
-// ============================================
-console.log('\n🔗 Registering routes:');
-console.log('  📌 /api/auth - Authentication routes');
-console.log('  📌 /api/super-admin - Super Admin routes');
-console.log('  📌 /api/seller - Seller routes');
-
-app.use('/api/auth', authRoutes);
-app.use('/api/super-admin', superAdminRoutes);
-app.use('/api/seller', sellerRoutes);
-
-// ============================================
 // API INFO ENDPOINT
 // ============================================
 app.get('/api', (req, res) => {
@@ -166,11 +156,28 @@ app.get('/api', (req, res) => {
       auth: '/api/auth',
       superAdmin: '/api/super-admin',
       seller: '/api/seller',
+      blog: '/api/blog',
+      banners: '/api/banners',
       health: '/health'
     },
     documentation: 'Contact support for API documentation'
   });
 });
+
+// ============================================
+// API ROUTES
+// ============================================
+console.log('\n🔗 Registering routes:');
+console.log('  📌 /api/auth - Authentication routes');
+console.log('  📌 /api/super-admin - Super Admin routes');
+console.log('  📌 /api/seller - Seller routes');
+console.log('  📌 /api/banners - Banner Management routes');
+
+app.use('/api/auth', authRoutes);
+app.use('/api/super-admin', superAdminRoutes);
+app.use('/api/seller', sellerRoutes);
+app.use('/api/banners', bannerRoutes);
+app.use('/api/blog', blogRoutes);
 
 // ============================================
 // 404 NOT FOUND HANDLER
@@ -229,7 +236,7 @@ app.use((err, req, res, next) => {
     if (err.code === 'LIMIT_FILE_SIZE') {
       return res.status(400).json({
         success: false,
-        message: 'File too large. Maximum size is 5MB.',
+        message: 'File too large. Maximum size is 10MB.',
       });
     }
     if (err.code === 'LIMIT_UNEXPECTED_FILE') {
@@ -238,6 +245,25 @@ app.use((err, req, res, next) => {
         message: 'Unexpected file field.',
       });
     }
+    if (err.code === 'LIMIT_FILE_COUNT') {
+      return res.status(400).json({
+        success: false,
+        message: 'Too many files.',
+      });
+    }
+    return res.status(400).json({
+      success: false,
+      message: `Upload error: ${err.message}`,
+    });
+  }
+
+  // Cloudinary errors
+  if (err.message && err.message.includes('Cloudinary')) {
+    return res.status(500).json({
+      success: false,
+      message: 'Image upload service error. Please try again.',
+      error: err.message,
+    });
   }
 
   const statusCode = err.statusCode || 500;
@@ -272,16 +298,18 @@ const server = app.listen(PORT, () => {
   console.log('  🔹 /api/auth - Authentication');
   console.log('  🔹 /api/super-admin - Super Admin');
   console.log('  🔹 /api/seller - Seller');
+  console.log('  🔹 /api/banners - Banner Management');
   console.log('  🔹 /health - Health Check');
   console.log('  🔹 /api - API Info');
   console.log('='.repeat(60));
+  console.log('  📌 /api/blog - Blog Management');
+
 });
 
 // ============================================
 // GRACEFUL SHUTDOWN
 // ============================================
 
-// Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
   console.error('❌ Unhandled Rejection:', err);
   server.close(() => {
@@ -290,7 +318,6 @@ process.on('unhandledRejection', (err) => {
   });
 });
 
-// Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
   console.error('❌ Uncaught Exception:', err);
   server.close(() => {
@@ -299,7 +326,6 @@ process.on('uncaughtException', (err) => {
   });
 });
 
-// Handle SIGTERM
 process.on('SIGTERM', () => {
   console.log('👋 SIGTERM received. Closing server...');
   server.close(() => {
@@ -308,7 +334,6 @@ process.on('SIGTERM', () => {
   });
 });
 
-// Handle SIGINT (Ctrl+C)
 process.on('SIGINT', () => {
   console.log('\n👋 SIGINT received. Closing server...');
   server.close(() => {
