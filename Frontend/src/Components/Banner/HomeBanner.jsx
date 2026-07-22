@@ -10,11 +10,27 @@ const HomeBanner = () => {
   const { activeBanners, isLoading, error } = useSelector((state) => state.banners);
   const [currentIndex, setCurrentIndex] = useState(0);
   const autoPlayRef = useRef(null);
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   // Fetch active banners on mount
   useEffect(() => {
     dispatch(fetchActiveBanners());
   }, [dispatch]);
+
+  // Simulate loading progress
+  useEffect(() => {
+    if (isLoading) {
+      const interval = setInterval(() => {
+        setLoadingProgress(prev => {
+          if (prev >= 95) return 95;
+          return prev + Math.random() * 15;
+        });
+      }, 200);
+      return () => clearInterval(interval);
+    } else {
+      setLoadingProgress(100);
+    }
+  }, [isLoading]);
 
   // Debug logging
   useEffect(() => {
@@ -65,13 +81,60 @@ const HomeBanner = () => {
     startTimer();
   };
 
-  // Loading state
+  // ✅ Beautiful Loading State
   if (isLoading) {
     return (
       <div className={styles.bannerContainer}>
-        <div className={styles.loadingState}>
-          <div className={styles.loadingSpinner}></div>
-          <p>Loading banners...</p>
+        <div className={styles.loadingOverlay}>
+          {/* Background shimmer effect */}
+          <div className={styles.loadingBackground}></div>
+          
+          {/* Content */}
+          <div className={styles.loadingContent}>
+            {/* Brand Logo */}
+            <div className={styles.loadingLogo}>
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <circle cx="24" cy="24" r="22" stroke="#106b47" strokeWidth="1.5" opacity="0.2"/>
+                <circle cx="24" cy="24" r="22" stroke="#106b47" strokeWidth="1.5" 
+                  strokeDasharray="138.23" strokeDashoffset="138.23"
+                  className={styles.loadingLogoCircle}
+                />
+                <path d="M24 14 L28 22 L36 22 L30 28 L32 36 L24 30 L16 36 L18 28 L12 22 L20 22 L24 14Z" 
+                  fill="#106b47" opacity="0.6" className={styles.loadingLogoDiamond}
+                />
+              </svg>
+              <span className={styles.loadingBrandName}>Aurevian</span>
+            </div>
+
+            {/* Loading Text */}
+            <div className={styles.loadingTextWrapper}>
+              <p className={styles.loadingMainText}>Curating Elegance</p>
+              <div className={styles.loadingDots}>
+                <span className={styles.dot1}>.</span>
+                <span className={styles.dot2}>.</span>
+                <span className={styles.dot3}>.</span>
+              </div>
+            </div>
+
+            {/* Sub Text */}
+            <p className={styles.loadingSubText}>Discover our finest collection</p>
+
+            {/* Progress Bar */}
+            <div className={styles.loadingProgressWrapper}>
+              <div className={styles.loadingProgressBar}>
+                <div 
+                  className={styles.loadingProgressFill}
+                  style={{ width: `${Math.min(loadingProgress, 100)}%` }}
+                ></div>
+              </div>
+              <span className={styles.loadingProgressText}>
+                {Math.round(Math.min(loadingProgress, 100))}%
+              </span>
+            </div>
+
+            {/* Glimmer Effect */}
+            <div className={styles.loadingGlimmer}></div>
+          </div>
         </div>
       </div>
     );
@@ -136,7 +199,6 @@ const HomeBanner = () => {
                 rgba(244,249,246,0.15) 70%,
                 rgba(244,249,246,0) 100%
               ), url(${slide.image?.url || slide.image})`,
-              // ✅ Removed transform for parallax effect
             }}
           >
             <div

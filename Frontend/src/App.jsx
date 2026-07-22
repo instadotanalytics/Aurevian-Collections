@@ -53,6 +53,8 @@ import BecomePartner from "./Pages/Seller/BecomePartner.jsx";
 import SellerLogin from "./Pages/Seller/SellerAuth/SellerLogin.jsx";
 import SellerRegister from "./Pages/Seller/SellerAuth/SellerRegister.jsx";
 import SellerVerifyOTP from "./Pages/Seller/SellerAuth/SellerVerifyOTP.jsx";
+import SellerForgotPassword from './Pages/Seller/SellerAuth/SellerForgotPassword';
+import SellerResetPassword from './Pages/Seller/SellerAuth/SellerResetPassword';
 
 // ============================================
 // BLOG PAGES ✅
@@ -60,7 +62,6 @@ import SellerVerifyOTP from "./Pages/Seller/SellerAuth/SellerVerifyOTP.jsx";
 import BlogList from "./Pages/UserBlog/BlogList.jsx";
 import BlogDetail from "./Pages/UserBlog/BlogDetail.jsx";
 import Profile from "./Pages/Profile/Profile.jsx";
-
 
 import SellerKYC from "./Pages/Seller/SellerKYC/SellerKYC";
 
@@ -75,7 +76,7 @@ const ROUTES = {
   VERIFY_OTP: "/verify-otp",
   FORGOT_PASSWORD: "/forgot-password",
   RESET_PASSWORD: "/reset-password",
-  DASHBOARD: "/dashboard",
+  DASHBOARD: "/",
   PROFILE: "/profile",
   SUPER_ADMIN_LOGIN: "/super-admin/login",
   SUPER_ADMIN_DASHBOARD: "/super-admin/dashboard",
@@ -86,9 +87,11 @@ const ROUTES = {
   SELLER_DASHBOARD: "/seller/dashboard",
   SELLER_PROFILE: "/seller/profile",
   SELLER_DOCUMENTS: "/seller/documents",
-  SELLER_KYC: "/seller/kyc", // ✅ NEW
+  SELLER_KYC: "/seller/kyc",
   SELLER_ORDERS: "/seller/orders",
   SELLER_PRODUCTS: "/seller/products",
+  SELLER_FORGOT_PASSWORD: "/seller/forgot-password", // ✅ ADDED
+  SELLER_RESET_PASSWORD: "/seller/reset-password/:token", // ✅ ADDED
   BECOME_A_PARTNER: "/become-a-partner",
   // Blog Routes
   BLOG: "/blog",
@@ -314,6 +317,7 @@ const App = () => {
               )
             }
           />
+
           <Route
             path={ROUTES.VERIFY_OTP}
             element={
@@ -409,6 +413,24 @@ const App = () => {
             element={
               <LayoutWithoutHeader>
                 <SellerVerifyOTP />
+              </LayoutWithoutHeader>
+            }
+          />
+
+          {/* ✅ SELLER FORGOT PASSWORD ROUTES - WITHOUT HEADER */}
+          <Route
+            path={ROUTES.SELLER_FORGOT_PASSWORD}
+            element={
+              <LayoutWithoutHeader>
+                <SellerForgotPassword />
+              </LayoutWithoutHeader>
+            }
+          />
+          <Route
+            path={ROUTES.SELLER_RESET_PASSWORD}
+            element={
+              <LayoutWithoutHeader>
+                <SellerResetPassword />
               </LayoutWithoutHeader>
             }
           />
@@ -522,9 +544,7 @@ const App = () => {
             path={ROUTES.PROFILE}
             element={
               <PrivateRoute>
-              
-                <Profile/>
-              
+                <Profile />
               </PrivateRoute>
             }
           />

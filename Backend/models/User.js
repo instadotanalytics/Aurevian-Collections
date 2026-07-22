@@ -1,3 +1,5 @@
+// backend/models/User.js
+
 import mongoose from 'mongoose';
 import validator from 'validator';
 
@@ -26,7 +28,8 @@ const userSchema = new mongoose.Schema({
   },
   firebaseUid: { 
     type: String,
-    sparse: true
+    sparse: true,
+    unique: true
   },
   authProvider: { 
     type: String, 
@@ -45,14 +48,52 @@ const userSchema = new mongoose.Schema({
     type: String, 
     default: null 
   },
+  // ✅ PHONE FIELD - NO UNIQUE, WITH DEFAULT UNIQUE VALUE
   phone: { 
     type: String, 
-    trim: true, 
+    trim: true,
+    // ✅ Instead of null, use a unique default value for Google users
+    default: function() {
+      if (this.authProvider === 'google') {
+        return `google_${this.firebaseUid || Date.now()}`;
+      }
+      return null;
+    },
+    sparse: true
+  },
+  gender: { 
+    type: String, 
+    enum: ['male', 'female', 'other', ''], 
+    default: '' 
+  },
+  dateOfBirth: { 
+    type: Date, 
     default: null 
   },
+  address: {
+    street: { type: String, default: '' },
+    city: { type: String, default: '' },
+    state: { type: String, default: '' },
+    pincode: { type: String, default: '' },
+    country: { type: String, default: 'India' }
+  },
+  addresses: [{
+    name: { type: String, required: true },
+    street: { type: String, required: true },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    pincode: { type: String, required: true },
+    country: { type: String, default: 'India' },
+    phone: { type: String, required: true },
+    isDefault: { type: Boolean, default: false }
+  }],
+  wishlist: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product'
+  }],
   role: { 
     type: String, 
-    enum: ['user', 'seller', 'super_admin'], 
+    enum: ['user', 'seller', 'admin', 'super_admin'], 
     default: 'user' 
   },
   isVerified: { 
@@ -102,6 +143,11 @@ const userSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now },
   }],
   preferences: {
+    emailNotifications: { type: Boolean, default: true },
+    orderUpdates: { type: Boolean, default: true },
+    promotionalEmails: { type: Boolean, default: false },
+    darkMode: { type: Boolean, default: false },
+    twoFactorAuth: { type: Boolean, default: false },
     newsletter: { type: Boolean, default: false },
     notifications: { type: Boolean, default: true },
     language: { type: String, default: 'en' },
@@ -118,6 +164,9 @@ userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ firebaseUid: 1 }, { unique: true, sparse: true });
 userSchema.index({ role: 1, isActive: 1 });
 userSchema.index({ createdAt: -1 });
+userSchema.index({ 'address.pincode': 1 });
+// ✅ Phone index remains but now with unique values
+userSchema.index({ phone: 1 }, { sparse: true });
 
 // ============================================
 // VIRTUALS
@@ -134,27 +183,8 @@ userSchema.virtual('displayName').get(function() {
 });
 
 // ============================================
-// ✅ PRE-SAVE MIDDLEWARE - SIMPLIFIED FIX
+// ✅ NO PRE-SAVE MIDDLEWARE
 // ============================================
-// userSchema.pre('save', function(next) {
-  // Set fullName from firstName and lastName
-//   if (this.firstName || this.lastName) {
-//     this.fullName = `${this.firstName || ''} ${this.lastName || ''}`.trim();
-//   }
-  
-  // If fullName is provided but firstName/lastName are not
-//   if (this.fullName && !this.firstName) {
-//     const parts = this.fullName.split(' ');
-//     this.firstName = parts[0] || '';
-//     this.lastName = parts.slice(1).join(' ') || '';
-//   }
-  
-//   next();
-// });
-
-userSchema.pre("save", function () {
-  console.log("🔥 PRE SAVE EXECUTED");
-});
 
 // ============================================
 // METHODS
@@ -227,12 +257,15 @@ userSchema.statics.findOrCreateFromFirebase = async function(firebaseUser) {
       console.log('👤 User not found, creating new...');
       
       const nameParts = firebaseUser.displayName ? firebaseUser.displayName.split(' ') : ['User', ''];
+      const fullName = firebaseUser.displayName || `${nameParts[0] || 'User'} ${nameParts.slice(1).join(' ') || ''}`;
       
-      // Create user object without saving yet
+      // ✅ Generate unique phone for Google users
+      const uniquePhone = `google_${firebaseUser.uid}_${Date.now()}`;
+      
       user = new this({
         firstName: nameParts[0] || 'User',
         lastName: nameParts.slice(1).join(' ') || '',
-        fullName: firebaseUser.displayName || `${nameParts[0] || 'User'} ${nameParts.slice(1).join(' ') || ''}`,
+        fullName: fullName,
         email: firebaseUser.email,
         firebaseUid: firebaseUser.uid,
         profileImage: firebaseUser.photoURL || null,
@@ -241,24 +274,44 @@ userSchema.statics.findOrCreateFromFirebase = async function(firebaseUser) {
         isVerified: firebaseUser.emailVerified || false,
         emailVerified: firebaseUser.emailVerified || false,
         lastLogin: new Date(),
+        phone: uniquePhone, // ✅ Unique phone for Google users
+        gender: '',
+        dateOfBirth: null,
+        address: {
+          street: '',
+          city: '',
+          state: '',
+          pincode: '',
+          country: 'India'
+        },
+        addresses: [],
+        wishlist: [],
+        preferences: {
+          emailNotifications: true,
+          orderUpdates: true,
+          promotionalEmails: false,
+          darkMode: false,
+          twoFactorAuth: false,
+          newsletter: false,
+          notifications: true,
+          language: 'en',
+          currency: 'CHF'
+        }
       });
       
-      // Save user
       await user.save();
       console.log(`✅ New user created: ${user.email}`);
       
-      // Add welcome notification
       await user.addNotification({
         type: 'welcome',
         title: 'Welcome to Aurevian Collections!',
         message: `Welcome ${user.firstName}! We're excited to have you on board.`,
-        link: '/dashboard',
+        link: '/',
       });
       
     } else {
       console.log('👤 User found, updating...');
       
-      // Update existing user
       if (firebaseUser.displayName && !user.fullName) {
         const parts = firebaseUser.displayName.split(' ');
         user.firstName = parts[0] || user.firstName;

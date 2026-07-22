@@ -1,9 +1,12 @@
+// backend/controllers/sellerController.js
+
 import Seller from "../models/Seller.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import otpService from "../services/otpService.js";
 import emailService from "../services/emailService.js";
 import cloudinaryService from "../services/cloudinaryService.js";
+import crypto from "crypto";
 
 // ============================================
 // GENERATE TOKENS
@@ -79,20 +82,65 @@ export const registerSeller = async (req, res) => {
         });
     }
 
+    // ✅ Check if seller exists
     let existingSeller = await Seller.findOne({
       email: { $regex: new RegExp(`^${email}$`, "i") },
-      isVerified: true,
     });
+    
     if (existingSeller) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Seller already exists with this email",
-        });
+      if (existingSeller.isVerified) {
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message: "Seller already exists with this email",
+          });
+      }
+      
+      // ✅ If not verified, update existing unverified seller
+      existingSeller.firstName = firstName.trim();
+      existingSeller.lastName = lastName.trim();
+      existingSeller.fullName = `${firstName} ${lastName}`.trim();
+      existingSeller.phone = phone.trim();
+      
+      // ✅ Hash password before saving
+      const salt = await bcrypt.genSalt(12);
+      existingSeller.password = await bcrypt.hash(password, salt);
+      
+      existingSeller.storeInfo.storeName = storeName.trim();
+      existingSeller.storeInfo.storeSlug = storeName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-");
+      existingSeller.status = "pending";
+      
+      await existingSeller.save();
+      console.log("✅ Existing seller updated:", existingSeller._id);
+      
+      // ✅ Send OTP
+      const emailOTP = Math.floor(100000 + Math.random() * 900000).toString();
+      await existingSeller.setEmailOTP(emailOTP);
+      await otpService.sendOTP(email, "email", emailOTP);
+      
+      return res.status(200).json({
+        success: true,
+        message: "OTP sent! Please verify your email.",
+        data: {
+          _id: existingSeller._id,
+          email: existingSeller.email,
+          phone: existingSeller.phone,
+          emailVerified: existingSeller.emailVerified,
+          phoneVerified: existingSeller.phoneVerified,
+          status: existingSeller.status,
+        },
+        requiresVerification: {
+          email: !existingSeller.emailVerified,
+          phone: !existingSeller.phoneVerified,
+        },
+      });
     }
 
-    existingSeller = await Seller.findOne({ phone, isVerified: true });
+    // ✅ Check phone
+    existingSeller = await Seller.findOne({ phone });
     if (existingSeller) {
       return res
         .status(400)
@@ -102,139 +150,92 @@ export const registerSeller = async (req, res) => {
         });
     }
 
-    let tempSeller = await Seller.findOne({
-      email: { $regex: new RegExp(`^${email}$`, "i") },
-      isVerified: false,
-    });
+    // ✅ Hash password
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    if (tempSeller) {
-      tempSeller.firstName = firstName.trim();
-      tempSeller.lastName = lastName.trim();
-      tempSeller.fullName = `${firstName} ${lastName}`.trim();
-      tempSeller.phone = phone.trim();
-      tempSeller.password = password;
-      tempSeller.storeInfo.storeName = storeName.trim();
-      tempSeller.storeInfo.storeSlug = storeName
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-");
-      tempSeller.storeInfo.website = website || "";
-      tempSeller.storeInfo.socialLinks = socialLinks || {};
-      tempSeller.brandName = brandName || "";
-      tempSeller.businessDescription = businessDescription || "";
-      tempSeller.productCategories = productCategories || [];
-      tempSeller.businessAddress = {
+    // ✅ Create new seller
+    const sellerData = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      fullName: `${firstName} ${lastName}`.trim(),
+      email: email.toLowerCase().trim(),
+      phone: phone.trim(),
+      password: hashedPassword, // ✅ Store hashed password
+      storeInfo: {
+        storeName: storeName.trim(),
+        storeSlug: storeName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        website: website || "",
+        socialLinks: socialLinks || {},
+      },
+      brandName: brandName || "",
+      businessDescription: businessDescription || "",
+      productCategories: productCategories || [],
+      businessAddress: {
         street: businessAddress?.street || "",
         city: businessAddress?.city || "",
         state: businessAddress?.state || "",
         pincode: businessAddress?.pincode || "",
         country: businessAddress?.country || "Switzerland",
-      };
-      tempSeller.bankDetails = {
+      },
+      bankDetails: {
         accountHolderName: bankDetails?.accountHolderName || "",
         bankName: bankDetails?.bankName || "",
         accountNumber: bankDetails?.accountNumber || "",
         ifscCode: bankDetails?.ifscCode || "",
         upiId: bankDetails?.upiId || "",
-      };
-      tempSeller.documents.panNumber = panNumber?.trim().toUpperCase() || "";
-      tempSeller.documents.aadhaarNumber = aadhaarNumber?.trim() || "";
-      tempSeller.documents.gstNumber = gstNumber?.trim().toUpperCase() || null;
-      tempSeller.kyc.termsAccepted = termsAccepted || false;
-      tempSeller.kyc.termsAcceptedAt = termsAccepted ? new Date() : null;
-      tempSeller.kyc.status = "not_submitted";
-      tempSeller.status = "pending";
+      },
+      documents: {
+        panNumber: panNumber?.trim().toUpperCase() || "",
+        aadhaarNumber: aadhaarNumber?.trim() || "",
+        gstNumber: gstNumber?.trim().toUpperCase() || null,
+        panCard: null,
+        aadhaarCard: null,
+        panVerified: false,
+        aadhaarVerified: false,
+      },
+      kyc: {
+        termsAccepted: termsAccepted || false,
+        termsAcceptedAt: termsAccepted ? new Date() : null,
+        status: "not_submitted",
+      },
+      status: "pending",
+      isActive: true,
+      isVerified: false,
+      emailVerified: false,
+      phoneVerified: false,
+      registrationDate: new Date(),
+    };
 
-      await tempSeller.save();
-      console.log("✅ Temporary seller updated:", tempSeller._id);
-    } else {
-      const sellerData = {
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        fullName: `${firstName} ${lastName}`.trim(),
-        email: email.toLowerCase().trim(),
-        phone: phone.trim(),
-        password: password,
-        storeInfo: {
-          storeName: storeName.trim(),
-          storeSlug: storeName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-          website: website || "",
-          socialLinks: socialLinks || {},
-        },
-        brandName: brandName || "",
-        businessDescription: businessDescription || "",
-        productCategories: productCategories || [],
-        businessAddress: {
-          street: businessAddress?.street || "",
-          city: businessAddress?.city || "",
-          state: businessAddress?.state || "",
-          pincode: businessAddress?.pincode || "",
-          country: businessAddress?.country || "Switzerland",
-        },
-        bankDetails: {
-          accountHolderName: bankDetails?.accountHolderName || "",
-          bankName: bankDetails?.bankName || "",
-          accountNumber: bankDetails?.accountNumber || "",
-          ifscCode: bankDetails?.ifscCode || "",
-          upiId: bankDetails?.upiId || "",
-        },
-        documents: {
-          panNumber: panNumber?.trim().toUpperCase() || "",
-          aadhaarNumber: aadhaarNumber?.trim() || "",
-          gstNumber: gstNumber?.trim().toUpperCase() || null,
-          panCard: null,
-          aadhaarCard: null,
-          panVerified: false,
-          aadhaarVerified: false,
-        },
-        kyc: {
-          termsAccepted: termsAccepted || false,
-          termsAcceptedAt: termsAccepted ? new Date() : null,
-          status: "not_submitted",
-        },
-        status: "pending",
-        isActive: true,
-        isVerified: false,
-        emailVerified: false,
-        phoneVerified: false,
-        registrationDate: new Date(),
-      };
+    const seller = new Seller(sellerData);
+    await seller.save();
+    console.log("✅ New seller created:", seller._id);
 
-      const seller = new Seller(sellerData);
-      await seller.save();
-      console.log("✅ Temporary seller created:", seller._id);
-      tempSeller = seller;
-    }
-
+    // ✅ Send OTP
     const emailOTP = Math.floor(100000 + Math.random() * 900000).toString();
-    await tempSeller.setEmailOTP(emailOTP);
+    await seller.setEmailOTP(emailOTP);
     await otpService.sendOTP(email, "email", emailOTP);
     console.log("✅ Email OTP sent to:", email);
 
     const phoneOtpResult = await otpService.sendOTP(phone, "phone");
-
     if (!phoneOtpResult.success) {
       console.error("❌ Failed to send phone OTP:", phoneOtpResult.error);
-      return res
-        .status(500)
-        .json({ success: false, message: "Failed to send phone OTP" });
     }
-
-    console.log("✅ Phone OTP sent:", phone);
 
     return res.status(201).json({
       success: true,
       message: "OTP sent! Please verify your email and phone.",
       data: {
-        _id: tempSeller._id,
-        email: tempSeller.email,
-        phone: tempSeller.phone,
-        emailVerified: tempSeller.emailVerified,
-        phoneVerified: tempSeller.phoneVerified,
-        status: tempSeller.status,
+        _id: seller._id,
+        email: seller.email,
+        phone: seller.phone,
+        emailVerified: seller.emailVerified,
+        phoneVerified: seller.phoneVerified,
+        status: seller.status,
       },
       requiresVerification: {
-        email: !tempSeller.emailVerified,
-        phone: !tempSeller.phoneVerified,
+        email: !seller.emailVerified,
+        phone: !seller.phoneVerified,
       },
     });
   } catch (error) {
@@ -461,46 +462,43 @@ export const sellerLogin = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Email and password are required" });
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required"
+      });
     }
 
     const seller = await Seller.findOne({
       email: { $regex: new RegExp(`^${email}$`, "i") },
-    }).select("+password");
+    }).select("+password +refreshToken +refreshTokenExpiry");
 
     if (!seller) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid credentials" });
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials"
+      });
     }
 
     if (!seller.emailVerified) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "Please verify your email first",
-          requiresVerification: "email",
-        });
+      return res.status(403).json({
+        success: false,
+        message: "Please verify your email first",
+        requiresVerification: "email",
+      });
     }
 
     if (!seller.phoneVerified) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "Please verify your phone first",
-          requiresVerification: "phone",
-        });
+      return res.status(403).json({
+        success: false,
+        message: "Please verify your phone first",
+        requiresVerification: "phone",
+      });
     }
 
     if (seller.status === "pending") {
       return res.status(403).json({
         success: false,
-        message:
-          "Your account is pending approval. Please wait for verification (within 24 hours).",
+        message: "Your account is pending approval. Please wait for verification (within 24 hours).",
         status: "pending",
       });
     }
@@ -522,26 +520,32 @@ export const sellerLogin = async (req, res) => {
     }
 
     if (!seller.isActive) {
-      return res
-        .status(403)
-        .json({ success: false, message: "Account is deactivated" });
+      return res.status(403).json({
+        success: false,
+        message: "Account is deactivated"
+      });
     }
 
+    // ✅ Compare password
     const isPasswordValid = await seller.comparePassword(password);
     if (!isPasswordValid) {
       await seller.addLoginHistory(req.ip, req.headers["user-agent"], false);
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid credentials" });
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials"
+      });
     }
 
     await seller.addLoginHistory(req.ip, req.headers["user-agent"], true);
 
+    // ✅ Generate tokens
     const { accessToken, refreshToken } = generateTokens(seller._id);
 
-    seller.refreshToken = refreshToken;
-    seller.refreshTokenExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    await seller.save();
+    // ✅ Update refresh token - using findByIdAndUpdate
+    await Seller.findByIdAndUpdate(seller._id, {
+      refreshToken: refreshToken,
+      refreshTokenExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    });
 
     const sellerData = {
       _id: seller._id,
@@ -566,9 +570,11 @@ export const sellerLogin = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Seller login error:", error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Login failed", error: error.message });
+    return res.status(500).json({
+      success: false,
+      message: "Login failed",
+      error: error.message,
+    });
   }
 };
 
@@ -614,6 +620,7 @@ export const sellerLogout = async (req, res) => {
     }
 
     const isProduction = process.env.NODE_ENV === "production";
+    
     res.clearCookie("sellerAccessToken", {
       httpOnly: true,
       secure: isProduction,
@@ -864,7 +871,7 @@ export const updateSellerProfile = async (req, res) => {
 };
 
 // ============================================
-// 12. UPLOAD SELLER DOCUMENTS (Full KYC submit)
+// 12. UPLOAD SELLER DOCUMENTS
 // ============================================
 export const uploadSellerDocuments = async (req, res) => {
   try {
@@ -1036,7 +1043,7 @@ export const uploadSellerDocuments = async (req, res) => {
 };
 
 // ============================================
-// 13. GET VERIFICATION STATUS (full KYC details for prefill)
+// 13. GET VERIFICATION STATUS
 // ============================================
 export const getVerificationStatus = async (req, res) => {
   try {
@@ -1114,5 +1121,177 @@ export const getRecentActivities = async (req, res) => {
         message: "Failed to get activities",
         error: error.message,
       });
+  }
+};
+
+
+
+// backend/controllers/sellerController.js (sellerForgotPassword function)
+
+export const sellerForgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide your email address"
+      });
+    }
+
+    const seller = await Seller.findOne({ 
+      email: { $regex: new RegExp(`^${email}$`, "i") } 
+    });
+
+    if (!seller) {
+      return res.status(404).json({
+        success: false,
+        message: "No seller found with this email address"
+      });
+    }
+
+    if (!seller.isActive) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is deactivated. Please contact support."
+      });
+    }
+
+    if (seller.status === "suspended") {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is suspended. Please contact support."
+      });
+    }
+
+    // ✅ Generate reset token
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    
+    // ✅ Update directly with findOneAndUpdate (bypasses pre-save issues)
+    await Seller.findByIdAndUpdate(seller._id, {
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: Date.now() + 10 * 60 * 1000
+    });
+
+    const resetUrl = `${process.env.CLIENT_URL}/seller/reset-password/${resetToken}`;
+
+    try {
+      await emailService.sendSellerResetPasswordEmail(
+        seller.email,
+        seller.firstName,
+        resetUrl
+      );
+      
+      console.log('✅ Password reset email sent to:', seller.email);
+      
+      return res.status(200).json({
+        success: true,
+        message: "Password reset link sent to your email. Please check your inbox."
+      });
+    } catch (emailError) {
+      console.error('❌ Email send error:', emailError);
+      
+      // ✅ Clear token if email fails
+      await Seller.findByIdAndUpdate(seller._id, {
+        resetPasswordToken: undefined,
+        resetPasswordExpire: undefined
+      });
+      
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send reset email. Please try again."
+      });
+    }
+  } catch (error) {
+    console.error('❌ Forgot password error:', error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to process request",
+      error: error.message
+    });
+  }
+};
+// ============================================
+// 16. SELLER RESET PASSWORD (ADD THIS)
+// ============================================
+export const sellerResetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password, confirmPassword } = req.body;
+
+    if (!password || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide password and confirm password"
+      });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match"
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters"
+      });
+    }
+
+    // ✅ Hash the token
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    // ✅ Find seller with valid token
+    const seller = await Seller.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: Date.now() }
+    });
+
+    if (!seller) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired reset token. Please request a new one."
+      });
+    }
+
+    // ✅ Hash the new password
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // ✅ Update using findByIdAndUpdate (bypasses pre-save)
+    await Seller.findByIdAndUpdate(seller._id, {
+      password: hashedPassword,
+      resetPasswordToken: undefined,
+      resetPasswordExpire: undefined
+    });
+
+    // ✅ Send confirmation email
+    try {
+      await emailService.sendSellerPasswordResetConfirmation(
+        seller.email,
+        seller.firstName
+      );
+      console.log('✅ Password reset confirmation sent to:', seller.email);
+    } catch (emailError) {
+      console.error('❌ Confirmation email error:', emailError);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successfully! You can now login with your new password."
+    });
+  } catch (error) {
+    console.error('❌ Reset password error:', error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to reset password",
+      error: error.message
+    });
   }
 };

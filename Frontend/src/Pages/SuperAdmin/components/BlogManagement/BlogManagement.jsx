@@ -26,7 +26,8 @@ import {
   FiImage,
   FiLoader,
   FiCheckCircle,
-  FiAlertCircle
+  FiAlertCircle,
+  FiRefreshCw
 } from 'react-icons/fi';
 import styles from './BlogManagement.module.css';
 
@@ -69,10 +70,29 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
     'fashion', 'care', 'trends', 'culture', 'sustainability', 'other'
   ];
 
-  // Fetch blogs on mount and when filters change
+  // ✅ Fix: Fetch blogs with proper dependency
   useEffect(() => {
     fetchBlogs();
-  }, [currentPage, filterStatus, selectedCategory, searchTerm]);
+  }, [currentPage, filterStatus, selectedCategory, searchTerm, activeTab]);
+
+  // ✅ Fix: Clear error on unmount
+  useEffect(() => {
+    return () => {
+      dispatch(clearBlogError());
+      dispatch(clearCurrentBlog());
+    };
+  }, [dispatch]);
+
+  // ✅ Fix: Handle activeTab changes
+  useEffect(() => {
+    if (activeTab === 'blog-drafts') {
+      setFilterStatus('draft');
+    } else if (activeTab === 'blog-published') {
+      setFilterStatus('published');
+    } else {
+      setFilterStatus('all');
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     if (error) {
@@ -85,10 +105,19 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
     const params = {
       page: currentPage,
       limit: 10,
-      status: filterStatus !== 'all' ? filterStatus : undefined,
-      category: selectedCategory !== 'all' ? selectedCategory : undefined,
     };
-    if (searchTerm) params.search = searchTerm;
+    
+    // ✅ Fix: Only add filters if they have values
+    if (filterStatus && filterStatus !== 'all') {
+      params.status = filterStatus;
+    }
+    if (selectedCategory && selectedCategory !== 'all') {
+      params.category = selectedCategory;
+    }
+    if (searchTerm && searchTerm.trim()) {
+      params.search = searchTerm.trim();
+    }
+
     dispatch(fetchAllBlogsAdmin(params));
   };
 
@@ -158,10 +187,6 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
       toast.error('Content is required');
       return;
     }
-    if (!formData.featuredImage && !editingBlog) {
-      toast.error('Featured image is required');
-      return;
-    }
 
     try {
       const formDataToSend = new FormData();
@@ -169,7 +194,11 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
       formDataToSend.append('excerpt', formData.excerpt);
       formDataToSend.append('content', formData.content);
       formDataToSend.append('category', formData.category);
-      formDataToSend.append('tags', JSON.stringify(formData.tags.split(',').map(t => t.trim()).filter(Boolean)));
+      
+      // ✅ Fix: Handle tags properly
+      const tagsArray = formData.tags.split(',').map(t => t.trim()).filter(Boolean);
+      formDataToSend.append('tags', JSON.stringify(tagsArray));
+      
       formDataToSend.append('status', formData.status);
       formDataToSend.append('isFeatured', formData.isFeatured);
       formDataToSend.append('isTrending', formData.isTrending);
@@ -191,6 +220,11 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
         })).unwrap();
         toast.success('Blog updated successfully!');
       } else {
+        // ✅ Fix: Only require image for new blogs
+        if (!formData.featuredImage) {
+          toast.error('Featured image is required for new blog');
+          return;
+        }
         result = await dispatch(createBlog(formDataToSend)).unwrap();
         toast.success('Blog created successfully!');
       }
@@ -243,6 +277,11 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
     resetForm();
   };
 
+  const handleRefresh = () => {
+    fetchBlogs();
+    toast.success('Refreshed!');
+  };
+
   const getStatusBadge = (status) => {
     const statusMap = {
       published: { label: 'Published', className: styles.published },
@@ -256,7 +295,6 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
     return category.charAt(0).toUpperCase() + category.slice(1);
   };
 
-  // Format date
   const formatDate = (date) => {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString('en-US', {
@@ -266,17 +304,15 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
     });
   };
 
-  // Determine what to show based on activeTab
-  const getFilterStatus = () => {
-    switch (activeTab) {
-      case 'blog-drafts':
-        return 'draft';
-      case 'blog-published':
-        return 'published';
-      default:
-        return filterStatus;
-    }
-  };
+  // ✅ Fix: Loading state
+  if (isLoading && !blogs) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.spinner}></div>
+        <p>Loading blogs...</p>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -287,6 +323,13 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
           <p>Create and manage your blog posts</p>
         </div>
         <div className={styles.headerActions}>
+          <button 
+            className={styles.refreshBtn}
+            onClick={handleRefresh}
+            title="Refresh"
+          >
+            <FiRefreshCw />
+          </button>
           <button 
             className={styles.createBtn}
             onClick={() => {
@@ -299,7 +342,7 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
         </div>
       </div>
 
-      {/* Stats */}
+      {/* ✅ Fix: Stats with safe check */}
       {stats && (
         <div className={styles.statsGrid}>
           <div className={`${styles.statCard} ${styles.total}`}>
@@ -379,11 +422,17 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
                 {blogs.map((blog) => (
                   <tr key={blog._id}>
                     <td className={styles.imageCell}>
-                      <img src={blog.featuredImage?.url} alt={blog.title} />
+                      {blog.featuredImage?.url ? (
+                        <img src={blog.featuredImage.url} alt={blog.title} />
+                      ) : (
+                        <div className={styles.noImage}>No Image</div>
+                      )}
                     </td>
                     <td className={styles.titleCell}>
                       <div className={styles.title}>{blog.title}</div>
-                      <div className={styles.excerpt}>{blog.excerpt?.substring(0, 80)}...</div>
+                      <div className={styles.excerpt}>
+                        {blog.excerpt?.substring(0, 80)}...
+                      </div>
                     </td>
                     <td>
                       <span className={styles.categoryCell}>
@@ -404,16 +453,25 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
                     </td>
                     <td className={styles.actionsCell}>
                       <button 
+                        className={`${styles.actionBtn} ${styles.view}`}
+                        onClick={() => window.open(`/blog/${blog.slug}`, '_blank')}
+                        title="View"
+                      >
+                        <FiEye />
+                      </button>
+                      <button 
                         className={`${styles.actionBtn} ${styles.edit}`}
                         onClick={() => handleEdit(blog)}
+                        title="Edit"
                       >
-                        <FiEdit /> Edit
+                        <FiEdit />
                       </button>
                       <button 
                         className={`${styles.actionBtn} ${styles.delete}`}
                         onClick={() => handleDelete(blog._id)}
+                        title="Delete"
                       >
-                        <FiTrash2 /> Delete
+                        <FiTrash2 />
                       </button>
                     </td>
                   </tr>

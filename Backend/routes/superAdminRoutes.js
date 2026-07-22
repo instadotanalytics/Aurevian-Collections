@@ -29,9 +29,19 @@ router.post("/login", superAdminLogin);
 router.post("/refresh", refreshSuperAdminToken);
 
 // ============================================
-// PROTECTED ROUTES
+// PROTECTED ROUTES - All require authentication
 // ============================================
 router.use(protectSuperAdmin);
+
+// ✅ ADD THIS - Verify token route
+router.get("/verify-token", (req, res) => {
+  console.log('✅ Token verified for admin:', req.admin._id);
+  res.status(200).json({
+    success: true,
+    message: "Token is valid",
+    admin: req.admin,
+  });
+});
 
 router.get("/me", getCurrentSuperAdmin);
 router.put("/profile", updateSuperAdminProfile);

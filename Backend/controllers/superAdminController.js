@@ -9,6 +9,8 @@ import bcrypt from "bcryptjs";
 // ============================================
 // SUPER ADMIN LOGIN
 // ============================================
+// Backend/controllers/superAdminController.js (Login part)
+
 export const superAdminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -46,29 +48,32 @@ export const superAdminLogin = async (req, res) => {
       });
     }
 
+    // Generate tokens with longer expiry
     const accessToken = jwt.sign(
       { id: admin._id, role: "super_admin" },
       process.env.JWT_ACCESS_SECRET,
-      { expiresIn: "24h" },
+      { expiresIn: "7d" }, // Increased to 7 days
     );
 
     const refreshToken = jwt.sign(
       { id: admin._id, role: "super_admin" },
       process.env.JWT_REFRESH_SECRET,
-      { expiresIn: "7d" },
+      { expiresIn: "30d" },
     );
 
     admin.lastLogin = new Date();
     admin.refreshToken = refreshToken;
-    admin.refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    admin.refreshTokenExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     await admin.save();
 
     const isProduction = process.env.NODE_ENV === "production";
+    
+    // Set cookie with longer expiry
     res.cookie("superAdminToken", accessToken, {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? "none" : "lax",
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: "/",
     });
 
@@ -87,7 +92,7 @@ export const superAdminLogin = async (req, res) => {
       success: true,
       message: "Login successful",
       data: adminData,
-      token: accessToken,
+      token: accessToken, // Send token in response
     });
   } catch (error) {
     console.error("❌ Super Admin login error:", error);
@@ -581,12 +586,20 @@ export const suspendSeller = async (req, res) => {
 
     await seller.save();
 
-    await emailService.sendSellerSuspensionEmail(
-      seller.email,
-      seller.firstName,
-      seller.storeInfo.storeName,
-      reason,
-    );
+    // ✅ FIX: Use correct function name - sendSellerSuspendedEmail (with 'd')
+    // Also wrap in try-catch so email failure doesn't break the operation
+    try {
+      await emailService.sendSellerSuspendedEmail(
+        seller.email,
+        seller.firstName,
+        seller.storeInfo.storeName,
+        reason,
+      );
+      console.log('✅ Suspension email sent to:', seller.email);
+    } catch (emailError) {
+      console.error('❌ Failed to send suspension email:', emailError.message);
+      // Don't fail the request if email fails
+    }
 
     return res.status(200).json({
       success: true,
@@ -602,6 +615,7 @@ export const suspendSeller = async (req, res) => {
     });
   }
 };
+
 
 // ============================================
 // UNSUSPEND SELLER

@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+// src/Pages/SuperAdmin/SuperAdminLogin/SuperAdminLogin.jsx
+
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
-import { superAdminLogin } from "../../redux/slices/superAdminSlice.js";
+import { superAdminLogin } from "../../redux/slices/superAdminSlice";
 import toast from "react-hot-toast";
 import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowLeft, FiShield } from "react-icons/fi";
 import styles from "./SuperAdminLogin.module.css";
@@ -13,7 +15,14 @@ const SuperAdminLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoading: authLoading } = useSelector((state) => state.superAdmin);
+  const { isAuthenticated, isLoading: authLoading } = useSelector((state) => state.superAdmin);
+
+  // ✅ If already authenticated, redirect to dashboard
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/super-admin/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,10 +34,12 @@ const SuperAdminLogin = () => {
 
     try {
       setIsLoading(true);
-      await dispatch(superAdminLogin({ email, password })).unwrap();
+      const result = await dispatch(superAdminLogin({ email, password })).unwrap();
+      console.log('✅ Login successful:', result);
       toast.success("Welcome Super Admin!");
       navigate("/super-admin/dashboard");
     } catch (error) {
+      console.error('❌ Login error:', error);
       toast.error(error.message || "Login failed");
     } finally {
       setIsLoading(false);

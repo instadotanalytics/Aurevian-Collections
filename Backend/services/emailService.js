@@ -1,4 +1,4 @@
-// Backend/services/emailService.js
+// backend/services/emailService.js
 
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
@@ -27,7 +27,7 @@ class EmailService {
   async sendEmail({ to, subject, html }) {
     try {
       const info = await this.transporter.sendMail({
-        from: `"Aurevian Collections" <${process.env.EMAIL_FROM}>`,
+        from: `"Aurevian Collections" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
         to,
         subject,
         html,
@@ -54,9 +54,133 @@ class EmailService {
   }
 
   // ============================================
+  // SELLER RESET PASSWORD EMAIL
+  // ============================================
+  async sendSellerResetPasswordEmail(to, name, resetUrl) {
+    const subject = "🔐 Reset Your Password - Aurevian Collections";
+    
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Reset Password</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f8f6f4; }
+          .container { max-width: 600px; margin: 20px auto; padding: 0; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; }
+          .header { text-align: center; padding: 30px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+          .header h1 { margin: 0; font-size: 28px; }
+          .header p { margin: 5px 0 0; opacity: 0.9; }
+          .content { padding: 30px; }
+          .greeting { font-size: 18px; color: #1a1a1a; margin-bottom: 10px; }
+          .message { color: #666; line-height: 1.8; margin-bottom: 20px; }
+          .btn { display: inline-block; padding: 14px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; }
+          .btn:hover { opacity: 0.9; }
+          .footer { text-align: center; padding: 20px; color: #999; font-size: 13px; border-top: 1px solid #eee; }
+          .warning-box { background: #fffbeb; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #fcd34d; }
+          .warning-box p { margin: 0; color: #92400e; font-size: 14px; }
+          .expiry-note { color: #999; font-size: 14px; text-align: center; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🔐 Reset Password</h1>
+            <p>Secure Password Reset Request</p>
+          </div>
+          <div class="content">
+            <p class="greeting">Dear ${name},</p>
+            <p class="message">
+              We received a request to reset your password for your seller account on <strong>Aurevian Collections</strong>.
+            </p>
+            <p class="message">
+              Click the button below to reset your password. This link will expire in <strong>10 minutes</strong>.
+            </p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetUrl}" class="btn">Reset Password →</a>
+            </div>
+            <div class="warning-box">
+              <p>⚠️ If you didn't request this password reset, please ignore this email and contact our support team immediately.</p>
+            </div>
+            <p class="expiry-note">
+              For security reasons, this link will expire in 10 minutes.
+            </p>
+          </div>
+          <div class="footer">
+            <p>© ${new Date().getFullYear()} Aurevian Collections. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    return this.sendEmail({ to, subject, html });
+  }
+
+  // ============================================
+  // SELLER PASSWORD RESET CONFIRMATION
+  // ============================================
+  async sendSellerPasswordResetConfirmation(to, name) {
+    const subject = "✅ Password Reset Successful - Aurevian Collections";
+    
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Password Reset Successful</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f8f6f4; }
+          .container { max-width: 600px; margin: 20px auto; padding: 0; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; }
+          .header { text-align: center; padding: 30px 20px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; }
+          .header h1 { margin: 0; font-size: 28px; }
+          .header p { margin: 5px 0 0; opacity: 0.9; }
+          .content { padding: 30px; }
+          .greeting { font-size: 18px; color: #1a1a1a; margin-bottom: 10px; }
+          .message { color: #666; line-height: 1.8; margin-bottom: 20px; }
+          .btn { display: inline-block; padding: 14px 40px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; }
+          .btn:hover { opacity: 0.9; }
+          .footer { text-align: center; padding: 20px; color: #999; font-size: 13px; border-top: 1px solid #eee; }
+          .security-note { color: #999; font-size: 14px; text-align: center; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>✅ Password Reset Successful</h1>
+            <p>Your password has been updated</p>
+          </div>
+          <div class="content">
+            <p class="greeting">Dear ${name},</p>
+            <p class="message">
+              Your password has been successfully reset for your seller account on <strong>Aurevian Collections</strong>.
+            </p>
+            <p class="message">
+              If you did not initiate this password reset, please contact our support team immediately.
+            </p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${process.env.CLIENT_URL}/seller/login" class="btn">Login to Your Account →</a>
+            </div>
+            <p class="security-note">
+              For security, we recommend changing your password regularly.
+            </p>
+          </div>
+          <div class="footer">
+            <p>© ${new Date().getFullYear()} Aurevian Collections. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    return this.sendEmail({ to, subject, html });
+  }
+
+  // ============================================
   // OTP EMAILS
   // ============================================
-
   async sendOTPEmail(to, otp, type = "verification") {
     const subject =
       type === "forgot_password"
@@ -97,7 +221,6 @@ class EmailService {
   // ============================================
   // WELCOME EMAIL
   // ============================================
-
   async sendWelcomeEmail(to, name) {
     const subject = "Welcome to Aurevian Collections! ✨";
     const html = `
@@ -125,9 +248,8 @@ class EmailService {
   }
 
   // ============================================
-  // SELLER APPROVAL EMAIL (24 Hours Verification)
+  // SELLER APPROVAL EMAIL (Under Review - 24 Hours)
   // ============================================
-
   async sendSellerApprovalEmail(to, name, storeName, loginLink) {
     const subject = '📋 Seller Account Under Review - Aurevian Collections';
     
@@ -207,7 +329,6 @@ class EmailService {
   // ============================================
   // SELLER APPROVED EMAIL
   // ============================================
-
   async sendSellerApprovedEmail(to, name, storeName, loginLink) {
     const subject = '🎉 Seller Account Approved - Aurevian Collections';
     
@@ -275,7 +396,6 @@ class EmailService {
   // ============================================
   // SELLER REJECTED EMAIL
   // ============================================
-
   async sendSellerRejectedEmail(to, name, storeName, reason) {
     const subject = 'Seller Account Update - Aurevian Collections';
     
@@ -294,6 +414,8 @@ class EmailService {
           .greeting { font-size: 18px; color: #1a1a1a; margin-bottom: 10px; }
           .message { color: #666; line-height: 1.8; margin-bottom: 20px; }
           .footer { text-align: center; padding: 20px; color: #999; font-size: 13px; border-top: 1px solid #eee; }
+          .rejection-box { background: #fef2f2; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #fca5a5; }
+          .rejection-box p { margin: 0; color: #991b1b; }
         </style>
       </head>
       <body>
@@ -307,9 +429,9 @@ class EmailService {
             <p class="message">
               We have reviewed your seller application for <strong>"${storeName}"</strong>.
             </p>
-            <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #fca5a5;">
-              <p style="margin: 0; color: #991b1b; font-weight: 600;">❌ Status: Rejected</p>
-              ${reason ? `<p style="margin: 10px 0 0; color: #991b1b; font-size: 14px;"><strong>Reason:</strong> ${reason}</p>` : ''}
+            <div class="rejection-box">
+              <p style="font-weight: 600;">❌ Status: Rejected</p>
+              ${reason ? `<p style="margin-top: 10px;"><strong>Reason:</strong> ${reason}</p>` : ''}
             </div>
             <p style="color: #666; line-height: 1.6;">
               You can reapply with corrected information after addressing the above issues.
@@ -332,7 +454,6 @@ class EmailService {
   // ============================================
   // SELLER SUSPENDED EMAIL
   // ============================================
-
   async sendSellerSuspendedEmail(to, name, storeName, reason) {
     const subject = '⚠️ Account Suspended - Aurevian Collections';
     
@@ -351,6 +472,8 @@ class EmailService {
           .greeting { font-size: 18px; color: #1a1a1a; margin-bottom: 10px; }
           .message { color: #666; line-height: 1.8; margin-bottom: 20px; }
           .footer { text-align: center; padding: 20px; color: #999; font-size: 13px; border-top: 1px solid #eee; }
+          .suspension-box { background: #fffbeb; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #fcd34d; }
+          .suspension-box p { margin: 0; color: #92400e; }
         </style>
       </head>
       <body>
@@ -364,9 +487,9 @@ class EmailService {
             <p class="message">
               Your seller account for <strong>"${storeName}"</strong> has been <strong style="color: #F59E0B;">suspended</strong>.
             </p>
-            <div style="background: #fffbeb; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #fcd34d;">
-              <p style="margin: 0; color: #92400e; font-weight: 600;">⚠️ Reason:</p>
-              <p style="margin: 10px 0 0; color: #92400e;">${reason || 'Violation of terms and conditions'}</p>
+            <div class="suspension-box">
+              <p style="font-weight: 600;">⚠️ Reason:</p>
+              <p>${reason || 'Violation of terms and conditions'}</p>
             </div>
             <p style="color: #666; line-height: 1.6;">
               Please contact our support team for more information and to resolve this issue.

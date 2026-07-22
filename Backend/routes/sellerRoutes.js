@@ -1,4 +1,4 @@
-// Backend/routes/sellerRoutes.js
+// backend/routes/sellerRoutes.js
 
 import express from "express";
 import multer from "multer";
@@ -18,6 +18,8 @@ import {
   getRecentActivities,
   uploadSellerDocuments,
   getVerificationStatus,
+  sellerForgotPassword,
+  sellerResetPassword,
 } from "../controllers/sellerController.js";
 import { protectSeller } from "../middleware/sellerAuth.js";
 
@@ -75,6 +77,10 @@ router.post("/login", sellerLogin);
 router.post("/refresh", refreshSellerToken);
 router.post("/logout", sellerLogout);
 
+// ✅ ADD THESE ROUTES
+router.post("/forgot-password", sellerForgotPassword);
+router.post("/reset-password/:token", sellerResetPassword);
+
 // ============================================
 // PROTECTED ROUTES - Authentication required
 // ============================================
@@ -108,18 +114,14 @@ router.post(
   uploadSellerDocuments,
 );
 
-// NOTE: Admin-only KYC/document verification routes (verify-pan,
-// verify-aadhaar, verify-kyc) were moved to superAdminRoutes.js
-// and are now protected by protectSuperAdmin instead of protectSeller.
-// They no longer live here — a logged-in seller must never be able
-// to hit an endpoint that verifies KYC.
-
 console.log("✅ Seller routes configured successfully");
 console.log("  📌 POST   /api/seller/register");
 console.log("  📌 POST   /api/seller/verify-email");
 console.log("  📌 POST   /api/seller/verify-phone");
 console.log("  📌 POST   /api/seller/resend-otp");
 console.log("  📌 POST   /api/seller/login");
+console.log("  📌 POST   /api/seller/forgot-password");
+console.log("  📌 POST   /api/seller/reset-password/:token");
 console.log("  📌 GET    /api/seller/me");
 console.log("  📌 GET    /api/seller/dashboard");
 console.log("  📌 POST   /api/seller/upload-documents");

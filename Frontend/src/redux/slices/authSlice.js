@@ -1,3 +1,5 @@
+// src/redux/slices/authSlice.js
+
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
   googleLogin as googleLoginAPI,
@@ -27,17 +29,45 @@ const initialState = {
 // Async Thunks
 // ============================================
 
+// ✅ FIXED: Google Login
 export const loginWithGoogle = createAsyncThunk(
   "auth/googleLogin",
   async (idToken, { rejectWithValue }) => {
     try {
       const response = await googleLoginAPI(idToken);
+      console.log('📊 Google login response:', response);
+      
+      // ✅ Check if response has success field
       if (response.success) {
-        return response.data;
+        // ✅ Save token if exists
+        if (response.token) {
+          localStorage.setItem(AUTH_CONFIG.ACCESS_TOKEN_KEY, response.token);
+        }
+        // ✅ Save user if exists
+        if (response.data) {
+          localStorage.setItem(AUTH_CONFIG.USER_KEY, JSON.stringify(response.data));
+        }
+        // ✅ Return full response with success
+        return response;
       }
-      return rejectWithValue(response.message);
+      
+      // ✅ If response has data but no success field, treat as success
+      if (response.data && !response.success) {
+        if (response.token) {
+          localStorage.setItem(AUTH_CONFIG.ACCESS_TOKEN_KEY, response.token);
+        }
+        if (response.data) {
+          localStorage.setItem(AUTH_CONFIG.USER_KEY, JSON.stringify(response.data));
+        }
+        return { success: true, data: response.data, token: response.token };
+      }
+      
+      return rejectWithValue(response.message || "Google login failed");
     } catch (error) {
-      return rejectWithValue(error.message || "Login failed");
+      console.error('❌ Google login error:', error);
+      return rejectWithValue(
+        error.response?.data?.message || error.message || "Failed to login with Google"
+      );
     }
   }
 );
@@ -208,7 +238,7 @@ const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Google Login
+    // ✅ FIXED: Google Login
     builder
       .addCase(loginWithGoogle.pending, (state) => {
         state.isLoading = true;
@@ -216,15 +246,34 @@ const authSlice = createSlice({
       })
       .addCase(loginWithGoogle.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload;
         state.isAuthenticated = true;
         state.error = null;
         state.requireVerification = false;
+        
+        // ✅ Extract user data properly
+        if (action.payload?.data) {
+          state.user = action.payload.data;
+          localStorage.setItem(AUTH_CONFIG.USER_KEY, JSON.stringify(action.payload.data));
+        } else if (action.payload?.user) {
+          state.user = action.payload.user;
+          localStorage.setItem(AUTH_CONFIG.USER_KEY, JSON.stringify(action.payload.user));
+        } else if (action.payload) {
+          state.user = action.payload;
+          localStorage.setItem(AUTH_CONFIG.USER_KEY, JSON.stringify(action.payload));
+        }
+        
+        // ✅ Save token
+        if (action.payload?.token) {
+          localStorage.setItem(AUTH_CONFIG.ACCESS_TOKEN_KEY, action.payload.token);
+        }
       })
       .addCase(loginWithGoogle.rejected, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = false;
-        state.error = action.payload || "Login failed";
+        state.error = action.payload || "Google login failed";
+        state.user = null;
+        localStorage.removeItem(AUTH_CONFIG.USER_KEY);
+        localStorage.removeItem(AUTH_CONFIG.ACCESS_TOKEN_KEY);
       });
 
     // Register
@@ -368,6 +417,8 @@ const authSlice = createSlice({
         state.otpSent = false;
         state.emailForOTP = null;
         state.requireVerification = false;
+        localStorage.removeItem(AUTH_CONFIG.USER_KEY);
+        localStorage.removeItem(AUTH_CONFIG.ACCESS_TOKEN_KEY);
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.isLoading = false;

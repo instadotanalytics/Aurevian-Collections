@@ -17,15 +17,20 @@ import {
   FiSearch,
 } from "react-icons/fi";
 
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 import styles from "./SellerDashboard.module.css";
 
 // Components
 import DashboardOverview from "./components/DashboardOverview";
 
+// ✅ Import seller logout action
+import { sellerLogout } from "../../../redux/slices/sellerSlice";
+
 const SellerDashboard = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const { seller } = useSelector((state) => state.seller);
@@ -34,7 +39,7 @@ const SellerDashboard = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("dashboard");
 
-  // Handle window resize for responsive sidebar (same as SuperAdmin)
+  // Handle window resize for responsive sidebar
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
@@ -47,6 +52,29 @@ const SellerDashboard = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // ✅ Handle Logout
+  const handleLogout = async () => {
+    try {
+      // Show loading toast
+      const loadingToast = toast.loading('Logging out...');
+      
+      // Call logout API via Redux
+      const result = await dispatch(sellerLogout()).unwrap();
+      
+      toast.dismiss(loadingToast);
+      toast.success('Logged out successfully');
+      
+      // Redirect to seller login page
+      navigate('/seller/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error(error.message || 'Logout failed');
+      
+      // Even if API fails, clear local data and redirect
+      navigate('/seller/login');
+    }
+  };
 
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: FiHome },
@@ -128,8 +156,9 @@ const SellerDashboard = () => {
               <span className={styles.adminRole}>Seller</span>
             </div>
 
+            {/* ✅ Fix: Use handleLogout instead of direct navigate */}
             <button
-              onClick={() => navigate("/seller/login")}
+              onClick={handleLogout}
               className={styles.logoutBtn}
             >
               <FiLogOut size={18} />
@@ -187,9 +216,10 @@ const SellerDashboard = () => {
               )}
             </div>
 
+            {/* ✅ Fix: Use handleLogout instead of direct navigate */}
             <button
               className={styles.sidebarLogout}
-              onClick={() => navigate("/seller/login")}
+              onClick={handleLogout}
             >
               <FiLogOut size={18} />
               {sidebarOpen && <span>Logout</span>}
