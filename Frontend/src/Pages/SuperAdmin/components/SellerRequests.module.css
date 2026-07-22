@@ -4,7 +4,7 @@
   background: #ffffff;
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 /* Header */
@@ -115,10 +115,18 @@
   color: #999;
 }
 
-.pendingStat .statNumber { color: #f59e0b; }
-.approvedStat .statNumber { color: #10b981; }
-.rejectedStat .statNumber { color: #ef4444; }
-.suspendedStat .statNumber { color: #8b5cf6; }
+.pendingStat .statNumber {
+  color: #f59e0b;
+}
+.approvedStat .statNumber {
+  color: #10b981;
+}
+.rejectedStat .statNumber {
+  color: #ef4444;
+}
+.suspendedStat .statNumber {
+  color: #8b5cf6;
+}
 
 /* Table */
 .tableWrapper {
@@ -388,8 +396,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Pagination */
@@ -489,4 +501,20 @@
     font-size: 11px;
     padding: 4px 10px;
   }
+}
+
+.kycReason {
+  font-size: 12px;
+  color: #f87171;
+  margin-top: 4px;
+}
+
+.kycVerifiedNote {
+  font-size: 13px;
+  color: #34d399;
+}
+
+.kycWaitingNote {
+  font-size: 13px;
+  color: #94a3b8;
 }

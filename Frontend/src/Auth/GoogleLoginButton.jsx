@@ -4,7 +4,9 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+// ✅ Fix: Correct path for firebase config
 import { auth } from '../Auth/firebase/firebaseConfig';
+// ✅ Fix: Correct path for auth slice
 import { loginWithGoogle } from '../redux/slices/authSlice';
 import toast from 'react-hot-toast';
 import styles from './GoogleLoginButton.module.css';
@@ -12,7 +14,7 @@ import styles from './GoogleLoginButton.module.css';
 const GoogleLoginButton = ({ 
   label = "Continue with Google", 
   className = "", 
-  redirectTo = "/dashboard" 
+  redirectTo = "/" 
 }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -21,6 +23,8 @@ const GoogleLoginButton = ({
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
+      
+      console.log('🔑 Starting Google login...');
       
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({
@@ -31,24 +35,34 @@ const GoogleLoginButton = ({
       const user = result.user;
       const idToken = await user.getIdToken();
       
+      console.log('✅ Firebase token received, sending to backend...');
+      
       const response = await dispatch(loginWithGoogle(idToken)).unwrap();
       
-      if (response.success) {
-        toast.success('Google login successful!');
+      console.log('📊 Backend response:', response);
+      
+      // ✅ Check if login was successful
+      if (response && (response.success || response.data)) {
+        toast.success('Welcome! Login successful.');
         navigate(redirectTo);
       } else {
-        toast.error(response.message || 'Login failed');
+        toast.error(response?.message || 'Login failed. Please try again.');
       }
       
     } catch (error) {
-      console.error('Google login error:', error);
+      console.error('❌ Google login error:', error);
       
-      if (error.code === 'auth/popup-closed-by-user') {
+      // ✅ Better error handling
+      if (typeof error === 'string') {
+        toast.error(error);
+      } else if (error?.message) {
+        toast.error(error.message);
+      } else if (error?.code === 'auth/popup-closed-by-user') {
         toast.error('Login cancelled');
-      } else if (error.code === 'auth/network-request-failed') {
+      } else if (error?.code === 'auth/network-request-failed') {
         toast.error('Network error. Please check your connection.');
       } else {
-        toast.error(error.message || 'Google login failed');
+        toast.error('Google login failed. Please try again.');
       }
     } finally {
       setLoading(false);

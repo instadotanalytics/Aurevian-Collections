@@ -1,8 +1,8 @@
 // Backend/services/otpService.js
 
-import twilio from 'twilio';
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
+import twilio from "twilio";
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -12,46 +12,59 @@ class OTPService {
     try {
       this.twilioClient = twilio(
         process.env.TWILIO_ACCOUNT_SID,
-        process.env.TWILIO_AUTH_TOKEN
+        process.env.TWILIO_AUTH_TOKEN,
       );
-      this.twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
     } catch (error) {
-      console.log('⚠️ Twilio not configured:', error.message);
+      console.log("⚠️ Twilio not configured:", error.message);
     }
 
     // Nodemailer
     this.emailTransporter = nodemailer.createTransport({
-      service: 'gmail',
+      service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
     });
+
     this.emailFrom = process.env.EMAIL_FROM || process.env.EMAIL_USER;
   }
 
+  // ============================================
+  // Generate Email OTP
+  // ============================================
+
   generateOTP(length = 6) {
-    let otp = '';
+    let otp = "";
+
     for (let i = 0; i < length; i++) {
       otp += Math.floor(Math.random() * 10);
     }
+
     return otp;
   }
 
-  async sendEmailOTP(email, otp, type = 'verification') {
+  // ============================================
+  // Send Email OTP
+  // ============================================
+
+  async sendEmailOTP(email, otp, type = "verification") {
     try {
-      const subject = type === 'forgot_password'
-        ? 'Reset Your Password - Aurevian Collections'
-        : 'Verify Your Email - Aurevian Collections';
+      const subject =
+        type === "forgot_password"
+          ? "Reset Your Password - Aurevian Collections"
+          : "Verify Your Email - Aurevian Collections";
 
       const html = `
-        <div style="font-family: Arial; max-width: 500px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-          <h2 style="color: #c8a86e;">Aurevian Collections</h2>
-          <p>Your OTP code is:</p>
-          <h1 style="font-size: 32px; letter-spacing: 5px; color: #333;">${otp}</h1>
-          <p>This OTP will expire in 10 minutes.</p>
-          <p style="color: #999; font-size: 12px;">If you didn't request this, please ignore this email.</p>
-        </div>
+      <div style="font-family:Arial;padding:20px">
+        <h2>Aurevian Collections</h2>
+
+        <p>Your OTP is:</p>
+
+        <h1 style="letter-spacing:6px">${otp}</h1>
+
+        <p>This OTP expires in 10 minutes.</p>
+      </div>
       `;
 
       const info = await this.emailTransporter.sendMail({
@@ -66,7 +79,8 @@ class OTPService {
         messageId: info.messageId,
       };
     } catch (error) {
-      console.error('❌ Email OTP error:', error.message);
+      console.error("❌ Email OTP error:", error.message);
+
       return {
         success: false,
         error: error.message,
@@ -74,78 +88,154 @@ class OTPService {
     }
   }
 
-  async sendPhoneOTP(phone, otp) {
+  // ============================================
+  // Send Phone OTP (Twilio Verify)
+  // ============================================
+
+  async sendPhoneOTP(phone) {
     try {
       if (!this.twilioClient) {
-        console.log('⚠️ Twilio not available, skipping SMS');
-        return { success: false, error: 'Twilio not configured' };
+        return {
+          success: false,
+          error: "Twilio not configured",
+        };
       }
 
       let phoneNumber = phone.trim();
-      if (!phoneNumber.startsWith('+')) {
-        phoneNumber = '+91' + phoneNumber;
+
+      if (!phoneNumber.startsWith("+")) {
+        phoneNumber = "+91" + phoneNumber;
       }
 
-      const message = await this.twilioClient.messages.create({
-        body: `Your Aurevian OTP is: ${otp}. Valid for 10 minutes.`,
-        to: phoneNumber,
-        from: this.twilioPhoneNumber,
-      });
+      const verification = await this.twilioClient.verify.v2
+        .services(process.env.TWILIO_VERIFY_SERVICE_SID)
+        .verifications.create({
+          to: phoneNumber,
+          channel: "sms",
+        });
 
       return {
         success: true,
-        sid: message.sid,
+        sid: verification.sid,
+        status: verification.status,
       };
     } catch (error) {
-      console.error('❌ Phone OTP error:', error.message);
+      console.error("❌ Phone OTP error:", error.message);
+
       return {
         success: false,
         error: error.message,
       };
     }
   }
+
+  // ============================================
+  // Verify Phone OTP
+  // ============================================
+
+  async verifyPhoneOTP(phone, otp) {
+    try {
+      if (!this.twilioClient) {
+        return false;
+      }
+
+      let phoneNumber = phone.trim();
+
+      if (!phoneNumber.startsWith("+")) {
+        phoneNumber = "+91" + phoneNumber;
+      }
+
+      const verification = await this.twilioClient.verify.v2
+        .services(process.env.TWILIO_VERIFY_SERVICE_SID)
+        .verificationChecks.create({
+          to: phoneNumber,
+          code: otp,
+        });
+
+      return verification.status === "approved";
+    } catch (error) {
+      console.error("❌ Phone Verification Error:", error.message);
+      return false;
+    }
+  }
+
+  // ============================================
+  // Common Sender
+  // ============================================
 
   async sendOTP(contact, type, otp = null) {
     const generatedOTP = otp || this.generateOTP();
 
-    if (type === 'email') {
+    if (type === "email") {
       return await this.sendEmailOTP(contact, generatedOTP);
     }
-    if (type === 'phone') {
-      return await this.sendPhoneOTP(contact, generatedOTP);
+
+    if (type === "phone") {
+      return await this.sendPhoneOTP(contact);
     }
+
     return {
       success: false,
-      message: 'Invalid OTP type',
+      message: "Invalid OTP type",
     };
   }
 
-  async storeOTP(user, otp, type = 'email') {
+  // ============================================
+  // Store Email OTP
+  // ============================================
+
+  async storeOTP(user, otp, type = "email") {
     user.otp = {
       code: otp,
-      type: type,
+      type,
       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
       verified: false,
     };
+
     return await user.save();
   }
 
+  // ============================================
+  // Verify Email OTP
+  // ============================================
+
   async verifyOTP(user, otp) {
     if (!user.otp || !user.otp.code) {
-      return { valid: false, message: 'No OTP found' };
+      return {
+        valid: false,
+        message: "No OTP found",
+      };
     }
+
     if (user.otp.code !== otp) {
-      return { valid: false, message: 'Invalid OTP' };
+      return {
+        valid: false,
+        message: "Invalid OTP",
+      };
     }
+
     if (user.otp.expiresAt < new Date()) {
-      return { valid: false, message: 'OTP expired' };
+      return {
+        valid: false,
+        message: "OTP expired",
+      };
     }
+
     user.otp.verified = true;
     user.otp.code = undefined;
     user.otp.expiresAt = undefined;
+
     await user.save();
-    return { valid: true, message: 'OTP verified' };
+
+    return {
+      valid: true,
+      message: "OTP verified",
+    };
   }
+
+  // ============================================
+  // Clear OTP
+  // ============================================
 
   async clearOTP(user) {
     user.otp = {
@@ -154,11 +244,12 @@ class OTPService {
       expiresAt: undefined,
       verified: false,
     };
+
     return await user.save();
   }
 
-  async sendOTPviaSMS(phone, otp) {
-    return await this.sendPhoneOTP(phone, otp);
+  async sendOTPviaSMS(phone) {
+    return await this.sendPhoneOTP(phone);
   }
 }
 

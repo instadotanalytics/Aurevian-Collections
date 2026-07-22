@@ -191,6 +191,7 @@ const SellerLogin = () => {
                 />
                 <span>Remember me</span>
               </label>
+              {/* ✅ FORGOT PASSWORD LINK */}
               <Link to="/seller/forgot-password" className={styles.forgotLink}>
                 Forgot password?
               </Link>

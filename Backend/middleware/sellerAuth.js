@@ -28,7 +28,18 @@ export const protectSeller = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
 
     // Get seller
-    const seller = await Seller.findById(decoded.id).select('-password -refreshToken -otp');
+    // NOTE: Do NOT add "-otp" here. The Seller schema already marks
+    // otp.email.code / otp.email.expiresAt / otp.phone.code / otp.phone.expiresAt
+    // as select: false. Excluding the whole "otp" object on top of that
+    // creates a conflicting projection (parent + child paths both excluded),
+    // which Mongo rejects with "Path collision at otp.email.code" (error 31249).
+    // If you also want otp.email.verified / otp.phone.verified hidden, exclude
+    // those exact leaf paths instead (see commented alternative below).
+    const seller = await Seller.findById(decoded.id).select('-password -refreshToken');
+    // Alternative if you also want the verified flags hidden:
+    // const seller = await Seller.findById(decoded.id)
+    //   .select('-password -refreshToken -otp.email.verified -otp.phone.verified');
+
     if (!seller) {
       return res.status(401).json({
         success: false,
@@ -90,7 +101,9 @@ export const optionalSellerAuth = async (req, res, next) => {
     if (token) {
       try {
         const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
-        const seller = await Seller.findById(decoded.id).select('-password -refreshToken -otp');
+        // Same fix as protectSeller: don't exclude the whole "otp" object,
+        // it collides with the schema-level select:false on its subfields.
+        const seller = await Seller.findById(decoded.id).select('-password -refreshToken');
         if (seller && seller.isActive && seller.status === 'approved') {
           req.seller = seller;
         }

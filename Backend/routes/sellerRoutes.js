@@ -1,4 +1,4 @@
-// Backend/routes/sellerRoutes.js
+// backend/routes/sellerRoutes.js
 
 import express from "express";
 import multer from "multer";
@@ -17,11 +17,10 @@ import {
   getRecentOrders,
   getRecentActivities,
   uploadSellerDocuments,
-  verifyPanCard,
-  verifyAadhaarCard,
   getVerificationStatus,
+  sellerForgotPassword,
+  sellerResetPassword,
 } from "../controllers/sellerController.js";
-
 import { protectSeller } from "../middleware/sellerAuth.js";
 
 const router = express.Router();
@@ -73,21 +72,23 @@ console.log("🔧 Setting up seller routes...");
 router.post("/register", registerSeller);
 router.post("/verify-email", verifyEmailOTP);
 router.post("/verify-phone", verifyPhoneOTP);
-router.post("/resend-otp", resendOTP); // ✅ FIXED: now uses the real controller
+router.post("/resend-otp", resendOTP);
 router.post("/login", sellerLogin);
 router.post("/refresh", refreshSellerToken);
 router.post("/logout", sellerLogout);
+
+// ✅ ADD THESE ROUTES
+router.post("/forgot-password", sellerForgotPassword);
+router.post("/reset-password/:token", sellerResetPassword);
 
 // ============================================
 // PROTECTED ROUTES - Authentication required
 // ============================================
 router.use(protectSeller);
 
-// Profile Routes
 router.get("/me", getCurrentSeller);
 router.put("/profile", updateSellerProfile);
 
-// Dashboard Routes
 router.get("/dashboard", getSellerDashboard);
 router.get("/orders/recent", getRecentOrders);
 router.get("/activities/recent", getRecentActivities);
@@ -113,19 +114,17 @@ router.post(
   uploadSellerDocuments,
 );
 
-// ============================================
-// SUPER ADMIN ROUTES - Document Verification
-// ============================================
-router.put("/verify-pan/:sellerId", verifyPanCard);
-router.put("/verify-aadhaar/:sellerId", verifyAadhaarCard);
-
 console.log("✅ Seller routes configured successfully");
 console.log("  📌 POST   /api/seller/register");
 console.log("  📌 POST   /api/seller/verify-email");
 console.log("  📌 POST   /api/seller/verify-phone");
 console.log("  📌 POST   /api/seller/resend-otp");
 console.log("  📌 POST   /api/seller/login");
+console.log("  📌 POST   /api/seller/forgot-password");
+console.log("  📌 POST   /api/seller/reset-password/:token");
 console.log("  📌 GET    /api/seller/me");
 console.log("  📌 GET    /api/seller/dashboard");
+console.log("  📌 POST   /api/seller/upload-documents");
+console.log("  📌 GET    /api/seller/verification-status");
 
 export default router;

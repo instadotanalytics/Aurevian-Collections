@@ -1,6 +1,5 @@
-
 /* Register.module.css — Aurevian account creation page */
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Jost:wght@300;400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Jost:wght@300;400;500;600&display=swap");
 
 /* ==========================================================
    Page wrapper — keeps header, content, footer stacked properly
@@ -28,16 +27,18 @@
   --ink-soft: #6e6355;
   --white: #ffffff;
   --border: #e7dcc5;
-  --header-height: 76px;
-  --gold-gradient: linear-gradient(135deg, #f0dba0 0%, #c9a24b 55%, #9c7a2e 100%);
+  --gold-gradient: linear-gradient(
+    135deg,
+    #f0dba0 0%,
+    #f0dba0 55%,
+    #f0dba0 100%
+  );
 
-  font-family: 'Jost', sans-serif;
+  font-family: "Jost", sans-serif;
   color: var(--ink);
   flex: 1;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  overflow-x: hidden;
 }
 
 /* Fixes inputs/cards overflowing their containers */
@@ -96,7 +97,7 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 1130px;
+  max-width: 1500px;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -138,7 +139,7 @@
 }
 
 .heroHeading {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: "Cormorant Garamond", serif;
   font-size: clamp(30px, 4.6vw, 56px);
   font-weight: 600;
   line-height: 1.12;
@@ -224,7 +225,7 @@
 
 .heroQuoteMark {
   display: block;
-  font-family: 'Cormorant Garamond', serif;
+  font-family: "Cormorant Garamond", serif;
   font-size: 42px;
   line-height: 1;
   color: var(--gold-1);
@@ -233,7 +234,7 @@
 
 .heroQuoteText {
   margin: 0;
-  font-family: 'Cormorant Garamond', serif;
+  font-family: "Cormorant Garamond", serif;
   font-style: italic;
   font-size: 19px;
   line-height: 1.5;
@@ -291,7 +292,7 @@
 }
 
 .title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: "Cormorant Garamond", serif;
   font-size: 1.4rem;
   font-weight: 700;
   color: var(--ink);
@@ -346,19 +347,37 @@
   color: var(--gold-1);
   pointer-events: none;
   font-size: 15px;
+  z-index: 2;
 }
 
 .input {
   width: 100%;
   padding: 0.52rem 2.3rem 0.52rem 2.3rem;
-  border: 1px solid var(--border);
+  border: 1px solid #d1c9b8;
   border-radius: 9px;
   font-size: 0.86rem;
-  font-family: 'Jost', sans-serif;
-  background: rgba(255, 255, 255, 0.7);
+  font-family: "Jost", sans-serif;
+  background: #ffffff;
   color: var(--ink);
   transition: all 0.2s ease;
   outline: none;
+}
+
+/* Remove autofill background */
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus,
+.input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: var(--ink) !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+/* Remove autofill background for Firefox */
+.input:autofill {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
 }
 
 .inputNoIcon {
@@ -368,6 +387,7 @@
 .input:focus {
   border-color: var(--gold-1);
   box-shadow: 0 0 0 3px rgba(201, 162, 75, 0.18);
+  background: #ffffff;
 }
 
 .input:disabled {
@@ -387,6 +407,7 @@
   padding: 0;
   display: flex;
   transition: color 0.2s ease;
+  z-index: 2;
 }
 
 .eyeButton:hover {
@@ -425,7 +446,7 @@
 }
 
 .divider::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 50%;
@@ -475,12 +496,20 @@
 }
 
 .perksSection::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 10% 20%, rgba(201, 162, 75, 0.14), transparent 45%),
-    radial-gradient(circle at 90% 80%, rgba(201, 162, 75, 0.12), transparent 45%);
+    radial-gradient(
+      circle at 10% 20%,
+      rgba(201, 162, 75, 0.14),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 90% 80%,
+      rgba(201, 162, 75, 0.12),
+      transparent 45%
+    );
   pointer-events: none;
 }
 
@@ -508,7 +537,7 @@
 }
 
 .perksTitle {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: "Cormorant Garamond", serif;
   font-size: clamp(32px, 4.5vw, 48px);
   font-weight: 700;
   margin: 0 0 16px;
@@ -518,7 +547,7 @@
 }
 
 .perksTitle::after {
-  content: '';
+  content: "";
   display: block;
   width: 70px;
   height: 2px;
@@ -583,7 +612,7 @@
 }
 
 .perkTitle {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: "Cormorant Garamond", serif;
   font-size: 19px;
   font-weight: 600;
   margin: 0 0 10px;
@@ -628,7 +657,6 @@
 .backButton:focus-visible,
 .footerLink:focus-visible,
 .input:focus-visible {
-  outline: 2px solid var(--gold-1);
   outline-offset: 2px;
 }
 
@@ -639,7 +667,7 @@
 /* Large desktops */
 @media (min-width: 1440px) {
   .heroInner {
-    max-width: 1280px;
+    max-width: 1130px;
     gap: 72px;
   }
 

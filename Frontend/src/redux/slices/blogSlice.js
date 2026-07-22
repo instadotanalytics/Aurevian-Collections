@@ -100,7 +100,17 @@ export const fetchAllBlogsAdmin = createAsyncThunk(
 
       const response = await api.get(`/blog/admin/all?${params.toString()}`);
       if (response.data.success) {
-        return response.data;
+        // ✅ Make sure to return stats from response
+        return {
+          data: response.data.data,
+          pagination: response.data.pagination,
+          stats: response.data.stats || {
+            total: response.data.data?.length || 0,
+            published: response.data.data?.filter(b => b.status === 'published').length || 0,
+            draft: response.data.data?.filter(b => b.status === 'draft').length || 0,
+            archived: response.data.data?.filter(b => b.status === 'archived').length || 0,
+          }
+        };
       }
       return rejectWithValue(response.data.message);
     } catch (error) {
@@ -263,6 +273,25 @@ const blogSlice = createSlice({
         state.error = action.payload;
       });
 
+    // ✅ FIX: Fetch All Blogs Admin
+    builder
+      .addCase(fetchAllBlogsAdmin.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllBlogsAdmin.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.blogs = action.payload.data;
+        state.pagination = action.payload.pagination;
+        state.stats = action.payload.stats; // ✅ SET STATS
+        state.error = null;
+      })
+      .addCase(fetchAllBlogsAdmin.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+        state.stats = null;
+      });
+
     // Create Blog
     builder
       .addCase(createBlog.pending, (state) => {
@@ -274,6 +303,15 @@ const blogSlice = createSlice({
         state.blogs = [action.payload, ...state.blogs];
         state.currentBlog = action.payload;
         state.error = null;
+        // ✅ Update stats
+        if (state.stats) {
+          state.stats.total = (state.stats.total || 0) + 1;
+          if (action.payload.status === 'published') {
+            state.stats.published = (state.stats.published || 0) + 1;
+          } else if (action.payload.status === 'draft') {
+            state.stats.draft = (state.stats.draft || 0) + 1;
+          }
+        }
       })
       .addCase(createBlog.rejected, (state, action) => {
         state.isUploading = false;
@@ -294,6 +332,9 @@ const blogSlice = createSlice({
         }
         state.currentBlog = action.payload;
         state.error = null;
+        // ✅ Update stats
+        // Refetch stats
+        // We'll let the next fetchAllBlogsAdmin call update stats
       })
       .addCase(updateBlog.rejected, (state, action) => {
         state.isUploading = false;
@@ -303,11 +344,26 @@ const blogSlice = createSlice({
     // Delete Blog
     builder
       .addCase(deleteBlog.fulfilled, (state, action) => {
+        const deletedBlog = state.blogs.find((b) => b._id === action.payload);
         state.blogs = state.blogs.filter((b) => b._id !== action.payload);
         if (state.currentBlog?._id === action.payload) {
           state.currentBlog = null;
         }
         state.error = null;
+        // ✅ Update stats
+        if (state.stats && deletedBlog) {
+          state.stats.total = Math.max(0, (state.stats.total || 0) - 1);
+          if (deletedBlog.status === 'published') {
+            state.stats.published = Math.max(0, (state.stats.published || 0) - 1);
+          } else if (deletedBlog.status === 'draft') {
+            state.stats.draft = Math.max(0, (state.stats.draft || 0) - 1);
+          } else if (deletedBlog.status === 'archived') {
+            state.stats.archived = Math.max(0, (state.stats.archived || 0) - 1);
+          }
+        }
+      })
+      .addCase(deleteBlog.rejected, (state, action) => {
+        state.error = action.payload;
       });
   },
 });

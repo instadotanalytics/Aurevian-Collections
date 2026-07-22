@@ -1,4 +1,4 @@
-// Backend/controllers/sellerController.js
+// backend/controllers/sellerController.js
 
 import Seller from "../models/Seller.js";
 import jwt from "jsonwebtoken";
@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import otpService from "../services/otpService.js";
 import emailService from "../services/emailService.js";
 import cloudinaryService from "../services/cloudinaryService.js";
+import crypto from "crypto";
 
 // ============================================
 // GENERATE TOKENS
@@ -14,13 +15,13 @@ const generateTokens = (sellerId) => {
   const accessToken = jwt.sign(
     { id: sellerId, role: "seller" },
     process.env.JWT_ACCESS_SECRET,
-    { expiresIn: "15m" }
+    { expiresIn: "15m" },
   );
 
   const refreshToken = jwt.sign(
     { id: sellerId, role: "seller" },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: "30d" }
+    { expiresIn: "30d" },
   );
 
   return { accessToken, refreshToken };
@@ -51,187 +52,201 @@ export const registerSeller = async (req, res) => {
       gstNumber,
     } = req.body;
 
-    console.log("📝 Registration request:", { firstName, lastName, email, storeName, phone });
+    console.log("📝 Registration request:", {
+      firstName,
+      lastName,
+      email,
+      storeName,
+      phone,
+    });
 
-    if (!firstName || !lastName || !email || !phone || !password || !storeName) {
-      return res.status(400).json({
-        success: false,
-        message: "Please fill all required fields",
-      });
+    if (
+      !firstName ||
+      !lastName ||
+      !email ||
+      !phone ||
+      !password ||
+      !storeName
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Please fill all required fields" });
     }
 
     if (password.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: "Password must be at least 6 characters",
-      });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Password must be at least 6 characters",
+        });
     }
 
-    // Check existing seller
+    // ✅ Check if seller exists
     let existingSeller = await Seller.findOne({
-      email: { $regex: new RegExp(`^${email}$`, 'i') },
-      isVerified: true,
+      email: { $regex: new RegExp(`^${email}$`, "i") },
     });
+    
     if (existingSeller) {
-      return res.status(400).json({
-        success: false,
-        message: "Seller already exists with this email",
+      if (existingSeller.isVerified) {
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message: "Seller already exists with this email",
+          });
+      }
+      
+      // ✅ If not verified, update existing unverified seller
+      existingSeller.firstName = firstName.trim();
+      existingSeller.lastName = lastName.trim();
+      existingSeller.fullName = `${firstName} ${lastName}`.trim();
+      existingSeller.phone = phone.trim();
+      
+      // ✅ Hash password before saving
+      const salt = await bcrypt.genSalt(12);
+      existingSeller.password = await bcrypt.hash(password, salt);
+      
+      existingSeller.storeInfo.storeName = storeName.trim();
+      existingSeller.storeInfo.storeSlug = storeName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-");
+      existingSeller.status = "pending";
+      
+      await existingSeller.save();
+      console.log("✅ Existing seller updated:", existingSeller._id);
+      
+      // ✅ Send OTP
+      const emailOTP = Math.floor(100000 + Math.random() * 900000).toString();
+      await existingSeller.setEmailOTP(emailOTP);
+      await otpService.sendOTP(email, "email", emailOTP);
+      
+      return res.status(200).json({
+        success: true,
+        message: "OTP sent! Please verify your email.",
+        data: {
+          _id: existingSeller._id,
+          email: existingSeller.email,
+          phone: existingSeller.phone,
+          emailVerified: existingSeller.emailVerified,
+          phoneVerified: existingSeller.phoneVerified,
+          status: existingSeller.status,
+        },
+        requiresVerification: {
+          email: !existingSeller.emailVerified,
+          phone: !existingSeller.phoneVerified,
+        },
       });
     }
 
-    existingSeller = await Seller.findOne({
-      phone,
-      isVerified: true,
-    });
+    // ✅ Check phone
+    existingSeller = await Seller.findOne({ phone });
     if (existingSeller) {
-      return res.status(400).json({
-        success: false,
-        message: "Seller already exists with this phone number",
-      });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Seller already exists with this phone number",
+        });
     }
 
-    // Check temporary seller
-    let tempSeller = await Seller.findOne({
-      email: { $regex: new RegExp(`^${email}$`, 'i') },
-      isVerified: false,
-    });
+    // ✅ Hash password
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    if (tempSeller) {
-      // Update existing temp seller
-      tempSeller.firstName = firstName.trim();
-      tempSeller.lastName = lastName.trim();
-      tempSeller.fullName = `${firstName} ${lastName}`.trim();
-      tempSeller.phone = phone.trim();
-      tempSeller.password = password;
-      tempSeller.storeInfo.storeName = storeName.trim();
-      tempSeller.storeInfo.storeSlug = storeName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-      tempSeller.storeInfo.website = website || "";
-      tempSeller.storeInfo.socialLinks = socialLinks || {};
-      tempSeller.brandName = brandName || "";
-      tempSeller.businessDescription = businessDescription || "";
-      tempSeller.productCategories = productCategories || [];
-      tempSeller.businessAddress = {
+    // ✅ Create new seller
+    const sellerData = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      fullName: `${firstName} ${lastName}`.trim(),
+      email: email.toLowerCase().trim(),
+      phone: phone.trim(),
+      password: hashedPassword, // ✅ Store hashed password
+      storeInfo: {
+        storeName: storeName.trim(),
+        storeSlug: storeName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        website: website || "",
+        socialLinks: socialLinks || {},
+      },
+      brandName: brandName || "",
+      businessDescription: businessDescription || "",
+      productCategories: productCategories || [],
+      businessAddress: {
         street: businessAddress?.street || "",
         city: businessAddress?.city || "",
         state: businessAddress?.state || "",
         pincode: businessAddress?.pincode || "",
         country: businessAddress?.country || "Switzerland",
-      };
-      tempSeller.bankDetails = {
+      },
+      bankDetails: {
         accountHolderName: bankDetails?.accountHolderName || "",
         bankName: bankDetails?.bankName || "",
         accountNumber: bankDetails?.accountNumber || "",
         ifscCode: bankDetails?.ifscCode || "",
         upiId: bankDetails?.upiId || "",
-      };
-      tempSeller.documents.panNumber = panNumber?.trim().toUpperCase() || "";
-      tempSeller.documents.aadhaarNumber = aadhaarNumber?.trim() || "";
-      tempSeller.documents.gstNumber = gstNumber?.trim().toUpperCase() || null;
-      tempSeller.verification.termsAccepted = termsAccepted || false;
-      tempSeller.verification.termsAcceptedAt = termsAccepted ? new Date() : null;
-      tempSeller.verification.kycStatus = "pending";
-      tempSeller.status = "pending";
+      },
+      documents: {
+        panNumber: panNumber?.trim().toUpperCase() || "",
+        aadhaarNumber: aadhaarNumber?.trim() || "",
+        gstNumber: gstNumber?.trim().toUpperCase() || null,
+        panCard: null,
+        aadhaarCard: null,
+        panVerified: false,
+        aadhaarVerified: false,
+      },
+      kyc: {
+        termsAccepted: termsAccepted || false,
+        termsAcceptedAt: termsAccepted ? new Date() : null,
+        status: "not_submitted",
+      },
+      status: "pending",
+      isActive: true,
+      isVerified: false,
+      emailVerified: false,
+      phoneVerified: false,
+      registrationDate: new Date(),
+    };
 
-      await tempSeller.save();
-      console.log("✅ Temporary seller updated:", tempSeller._id);
-    } else {
-      // Create new temporary seller
-      const sellerData = {
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        fullName: `${firstName} ${lastName}`.trim(),
-        email: email.toLowerCase().trim(),
-        phone: phone.trim(),
-        password: password,
-        storeInfo: {
-          storeName: storeName.trim(),
-          storeSlug: storeName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-          website: website || "",
-          socialLinks: socialLinks || {},
-        },
-        brandName: brandName || "",
-        businessDescription: businessDescription || "",
-        productCategories: productCategories || [],
-        businessAddress: {
-          street: businessAddress?.street || "",
-          city: businessAddress?.city || "",
-          state: businessAddress?.state || "",
-          pincode: businessAddress?.pincode || "",
-          country: businessAddress?.country || "Switzerland",
-        },
-        bankDetails: {
-          accountHolderName: bankDetails?.accountHolderName || "",
-          bankName: bankDetails?.bankName || "",
-          accountNumber: bankDetails?.accountNumber || "",
-          ifscCode: bankDetails?.ifscCode || "",
-          upiId: bankDetails?.upiId || "",
-        },
-        documents: {
-          panNumber: panNumber?.trim().toUpperCase() || "",
-          aadhaarNumber: aadhaarNumber?.trim() || "",
-          gstNumber: gstNumber?.trim().toUpperCase() || null,
-          panCard: null,
-          aadhaarCard: null,
-          panVerified: false,
-          aadhaarVerified: false,
-        },
-        verification: {
-          termsAccepted: termsAccepted || false,
-          termsAcceptedAt: termsAccepted ? new Date() : null,
-          kycStatus: "pending",
-        },
-        status: "pending",
-        isActive: true,
-        isVerified: false,
-        emailVerified: false,
-        phoneVerified: false,
-        registrationDate: new Date(),
-      };
+    const seller = new Seller(sellerData);
+    await seller.save();
+    console.log("✅ New seller created:", seller._id);
 
-      const seller = new Seller(sellerData);
-      await seller.save();
-      console.log("✅ Temporary seller created:", seller._id);
-      tempSeller = seller;
-    }
-
-    // Generate email OTP (our own app-generated code, emailed manually)
+    // ✅ Send OTP
     const emailOTP = Math.floor(100000 + Math.random() * 900000).toString();
-    await tempSeller.setEmailOTP(emailOTP);
+    await seller.setEmailOTP(emailOTP);
     await otpService.sendOTP(email, "email", emailOTP);
     console.log("✅ Email OTP sent to:", email);
 
-    // ✅ Phone OTP is fully owned by Twilio Verify — it generates,
-    // sends, and stores the code on Twilio's side. We don't generate
-    // or store our own code for phone anymore.
     const phoneOtpResult = await otpService.sendOTP(phone, "phone");
     if (!phoneOtpResult.success) {
       console.error("❌ Failed to send phone OTP:", phoneOtpResult.error);
     }
-    console.log("✅ Phone OTP sent to:", phone);
 
     return res.status(201).json({
       success: true,
       message: "OTP sent! Please verify your email and phone.",
       data: {
-        _id: tempSeller._id,
-        email: tempSeller.email,
-        phone: tempSeller.phone,
-        emailVerified: tempSeller.emailVerified,
-        phoneVerified: tempSeller.phoneVerified,
-        status: tempSeller.status,
+        _id: seller._id,
+        email: seller.email,
+        phone: seller.phone,
+        emailVerified: seller.emailVerified,
+        phoneVerified: seller.phoneVerified,
+        status: seller.status,
       },
       requiresVerification: {
-        email: !tempSeller.emailVerified,
-        phone: !tempSeller.phoneVerified,
+        email: !seller.emailVerified,
+        phone: !seller.phoneVerified,
       },
     });
   } catch (error) {
     console.error("❌ Registration error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Registration failed",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Registration failed",
+        error: error.message,
+      });
   }
 };
 
@@ -243,47 +258,42 @@ export const verifyEmailOTP = async (req, res) => {
     const { email, otp } = req.body;
 
     if (!email || !otp) {
-      return res.status(400).json({
-        success: false,
-        message: "Email and OTP are required",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Email and OTP are required" });
     }
 
     const seller = await Seller.findOne({
-      email: { $regex: new RegExp(`^${email}$`, 'i') },
+      email: { $regex: new RegExp(`^${email}$`, "i") },
     }).select("+otp.email.code +otp.email.expiresAt");
 
     if (!seller) {
-      return res.status(404).json({
-        success: false,
-        message: "Seller not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
     if (seller.emailVerified) {
-      return res.status(400).json({
-        success: false,
-        message: "Email already verified",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Email already verified" });
     }
 
     const result = await seller.verifyEmailOTP(otp);
     if (!result) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid or expired OTP",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid or expired OTP" });
     }
 
     await seller.save();
 
-    // Check if both verified
     if (seller.emailVerified && seller.phoneVerified) {
       await emailService.sendSellerApprovalEmail(
         seller.email,
         seller.firstName,
         seller.storeInfo.storeName,
-        `${process.env.CLIENT_URL}/seller/login`
+        `${process.env.CLIENT_URL}/seller/login`,
       );
       console.log("✅ Approval email sent to:", seller.email);
     }
@@ -299,11 +309,13 @@ export const verifyEmailOTP = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Email verification error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Email verification failed",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Email verification failed",
+        error: error.message,
+      });
   }
 };
 
@@ -315,47 +327,41 @@ export const verifyPhoneOTP = async (req, res) => {
     const { phone, otp } = req.body;
 
     if (!phone || !otp) {
-      return res.status(400).json({
-        success: false,
-        message: "Phone and OTP are required",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Phone and OTP are required" });
     }
 
     const seller = await Seller.findOne({ phone });
 
     if (!seller) {
-      return res.status(404).json({
-        success: false,
-        message: "Seller not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
     if (seller.phoneVerified) {
-      return res.status(400).json({
-        success: false,
-        message: "Phone already verified",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Phone already verified" });
     }
 
-    // ✅ Verify against Twilio, not our own DB — Twilio owns this OTP
     const isValid = await otpService.verifyPhoneOTP(phone, otp);
     if (!isValid) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid or expired OTP",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid or expired OTP" });
     }
 
     seller.phoneVerified = true;
     await seller.save();
 
-    // Check if both verified
     if (seller.emailVerified && seller.phoneVerified) {
       await emailService.sendSellerApprovalEmail(
         seller.email,
         seller.firstName,
         seller.storeInfo.storeName,
-        `${process.env.CLIENT_URL}/seller/login`
+        `${process.env.CLIENT_URL}/seller/login`,
       );
       console.log("✅ Approval email sent to:", seller.email);
     }
@@ -371,11 +377,13 @@ export const verifyPhoneOTP = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Phone verification error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Phone verification failed",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Phone verification failed",
+        error: error.message,
+      });
   }
 };
 
@@ -387,45 +395,40 @@ export const resendOTP = async (req, res) => {
     const { contact, type } = req.body;
 
     if (!contact || !type) {
-      return res.status(400).json({
-        success: false,
-        message: "Contact and type are required",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Contact and type are required" });
     }
 
     let seller;
     if (type === "email") {
       seller = await Seller.findOne({
-        email: { $regex: new RegExp(`^${contact}$`, 'i') },
+        email: { $regex: new RegExp(`^${contact}$`, "i") },
       });
     } else if (type === "phone") {
       seller = await Seller.findOne({ phone: contact });
     } else {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid type. Use email or phone",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid type. Use email or phone" });
     }
 
     if (!seller) {
-      return res.status(404).json({
-        success: false,
-        message: "Seller not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
     if (type === "email" && seller.emailVerified) {
-      return res.status(400).json({
-        success: false,
-        message: "Email already verified",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Email already verified" });
     }
 
     if (type === "phone" && seller.phoneVerified) {
-      return res.status(400).json({
-        success: false,
-        message: "Phone already verified",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Phone already verified" });
     }
 
     if (type === "email") {
@@ -433,21 +436,21 @@ export const resendOTP = async (req, res) => {
       await seller.setEmailOTP(newOTP);
       await otpService.sendOTP(contact, "email", newOTP);
     } else if (type === "phone") {
-      // ✅ Twilio generates and owns the phone code — don't create one ourselves
       await otpService.sendOTP(contact, "phone");
     }
 
-    return res.status(200).json({
-      success: true,
-      message: `OTP resent to ${type} successfully`,
-    });
+    return res
+      .status(200)
+      .json({ success: true, message: `OTP resent to ${type} successfully` });
   } catch (error) {
     console.error("❌ Resend OTP error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to resend OTP",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to resend OTP",
+        error: error.message,
+      });
   }
 };
 
@@ -461,18 +464,18 @@ export const sellerLogin = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Email and password are required",
+        message: "Email and password are required"
       });
     }
 
     const seller = await Seller.findOne({
-      email: { $regex: new RegExp(`^${email}$`, 'i') },
-    }).select("+password");
+      email: { $regex: new RegExp(`^${email}$`, "i") },
+    }).select("+password +refreshToken +refreshTokenExpiry");
 
     if (!seller) {
       return res.status(401).json({
         success: false,
-        message: "Invalid credentials",
+        message: "Invalid credentials"
       });
     }
 
@@ -519,26 +522,30 @@ export const sellerLogin = async (req, res) => {
     if (!seller.isActive) {
       return res.status(403).json({
         success: false,
-        message: "Account is deactivated",
+        message: "Account is deactivated"
       });
     }
 
+    // ✅ Compare password
     const isPasswordValid = await seller.comparePassword(password);
     if (!isPasswordValid) {
       await seller.addLoginHistory(req.ip, req.headers["user-agent"], false);
       return res.status(401).json({
         success: false,
-        message: "Invalid credentials",
+        message: "Invalid credentials"
       });
     }
 
     await seller.addLoginHistory(req.ip, req.headers["user-agent"], true);
 
+    // ✅ Generate tokens
     const { accessToken, refreshToken } = generateTokens(seller._id);
 
-    seller.refreshToken = refreshToken;
-    seller.refreshTokenExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    await seller.save();
+    // ✅ Update refresh token - using findByIdAndUpdate
+    await Seller.findByIdAndUpdate(seller._id, {
+      refreshToken: refreshToken,
+      refreshTokenExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    });
 
     const sellerData = {
       _id: seller._id,
@@ -552,7 +559,7 @@ export const sellerLogin = async (req, res) => {
       isVerified: seller.isVerified,
       emailVerified: seller.emailVerified,
       phoneVerified: seller.phoneVerified,
-      kycStatus: seller.verification?.kycStatus || "not_submitted",
+      kycStatus: seller.kyc?.status || "not_submitted",
     };
 
     return res.status(200).json({
@@ -577,27 +584,25 @@ export const sellerLogin = async (req, res) => {
 export const getCurrentSeller = async (req, res) => {
   try {
     const seller = await Seller.findById(req.seller._id).select(
-      "-password -refreshToken -refreshTokenExpiry"
+      "-password -refreshToken -refreshTokenExpiry",
     );
 
     if (!seller) {
-      return res.status(404).json({
-        success: false,
-        message: "Seller not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
-    return res.status(200).json({
-      success: true,
-      data: seller,
-    });
+    return res.status(200).json({ success: true, data: seller });
   } catch (error) {
     console.error("❌ Get seller error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to get seller",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to get seller",
+        error: error.message,
+      });
   }
 };
 
@@ -615,6 +620,7 @@ export const sellerLogout = async (req, res) => {
     }
 
     const isProduction = process.env.NODE_ENV === "production";
+    
     res.clearCookie("sellerAccessToken", {
       httpOnly: true,
       secure: isProduction,
@@ -628,17 +634,14 @@ export const sellerLogout = async (req, res) => {
       path: "/",
     });
 
-    return res.status(200).json({
-      success: true,
-      message: "Logged out successfully",
-    });
+    return res
+      .status(200)
+      .json({ success: true, message: "Logged out successfully" });
   } catch (error) {
     console.error("❌ Logout error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Logout failed",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({ success: false, message: "Logout failed", error: error.message });
   }
 };
 
@@ -650,24 +653,22 @@ export const refreshSellerToken = async (req, res) => {
     const refreshToken = req.cookies?.sellerRefreshToken;
 
     if (!refreshToken) {
-      return res.status(401).json({
-        success: false,
-        message: "Refresh token required",
-      });
+      return res
+        .status(401)
+        .json({ success: false, message: "Refresh token required" });
     }
 
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     const seller = await Seller.findById(decoded.id);
 
     if (!seller || seller.refreshToken !== refreshToken) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid refresh token",
-      });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid refresh token" });
     }
 
     const { accessToken, refreshToken: newRefreshToken } = generateTokens(
-      seller._id
+      seller._id,
     );
 
     seller.refreshToken = newRefreshToken;
@@ -691,18 +692,22 @@ export const refreshSellerToken = async (req, res) => {
       path: "/",
     });
 
-    return res.status(200).json({
-      success: true,
-      message: "Token refreshed successfully",
-      data: { accessToken },
-    });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Token refreshed successfully",
+        data: { accessToken },
+      });
   } catch (error) {
     console.error("❌ Refresh token error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to refresh token",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to refresh token",
+        error: error.message,
+      });
   }
 };
 
@@ -713,10 +718,9 @@ export const getSellerDashboard = async (req, res) => {
   try {
     const seller = await Seller.findById(req.seller._id);
     if (!seller) {
-      return res.status(404).json({
-        success: false,
-        message: "Seller not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
     const stats = {
@@ -729,22 +733,21 @@ export const getSellerDashboard = async (req, res) => {
       walletBalance: seller.stats?.walletBalance || 0,
       status: seller.status,
       isVerified: seller.isVerified,
-      kycStatus: seller.verification?.kycStatus || "not_submitted",
+      kycStatus: seller.kyc?.status || "not_submitted",
       emailVerified: seller.emailVerified,
       phoneVerified: seller.phoneVerified,
     };
 
-    return res.status(200).json({
-      success: true,
-      data: stats,
-    });
+    return res.status(200).json({ success: true, data: stats });
   } catch (error) {
     console.error("❌ Get dashboard error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to get dashboard data",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to get dashboard data",
+        error: error.message,
+      });
   }
 };
 
@@ -783,17 +786,16 @@ export const getRecentOrders = async (req, res) => {
       },
     ];
 
-    return res.status(200).json({
-      success: true,
-      data: orders,
-    });
+    return res.status(200).json({ success: true, data: orders });
   } catch (error) {
     console.error("❌ Get orders error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to get orders",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to get orders",
+        error: error.message,
+      });
   }
 };
 
@@ -807,10 +809,9 @@ export const updateSellerProfile = async (req, res) => {
 
     const seller = await Seller.findById(sellerId);
     if (!seller) {
-      return res.status(404).json({
-        success: false,
-        message: "Seller not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
     const allowedFields = [
@@ -850,18 +851,22 @@ export const updateSellerProfile = async (req, res) => {
 
     await seller.save();
 
-    return res.status(200).json({
-      success: true,
-      message: "Profile updated successfully",
-      data: seller,
-    });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Profile updated successfully",
+        data: seller,
+      });
   } catch (error) {
     console.error("❌ Update seller error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to update profile",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to update profile",
+        error: error.message,
+      });
   }
 };
 
@@ -871,223 +876,185 @@ export const updateSellerProfile = async (req, res) => {
 export const uploadSellerDocuments = async (req, res) => {
   try {
     const sellerId = req.seller._id;
-    const { panNumber, aadhaarNumber, gstNumber } = req.body;
+    const { panNumber, aadhaarNumber, gstNumber, bankDetails } = req.body;
     const files = req.files;
 
     const seller = await Seller.findById(sellerId);
     if (!seller) {
-      return res.status(404).json({
-        success: false,
-        message: "Seller not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
-    // Validate PAN
     if (!panNumber) {
-      return res.status(400).json({
-        success: false,
-        message: "PAN number is required",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "PAN number is required" });
+    }
+    const cleanPan = panNumber.trim().toUpperCase().replace(/\s/g, "");
+    if (
+      cleanPan.length !== 10 ||
+      !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(cleanPan)
+    ) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Please enter a valid PAN number (e.g., ABCDE1234F)",
+        });
     }
 
-    const cleanPan = panNumber.trim().toUpperCase().replace(/\s/g, '');
-    if (cleanPan.length !== 10 || !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(cleanPan)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter a valid PAN number (e.g., ABCDE1234F)",
-      });
-    }
-
-    // Validate Aadhaar
     if (!aadhaarNumber) {
-      return res.status(400).json({
-        success: false,
-        message: "Aadhaar number is required",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Aadhaar number is required" });
     }
-
-    const cleanAadhaar = aadhaarNumber.trim().replace(/\s/g, '');
+    const cleanAadhaar = aadhaarNumber.trim().replace(/\s/g, "");
     if (cleanAadhaar.length !== 12 || !/^[0-9]{12}$/.test(cleanAadhaar)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter a valid 12-digit Aadhaar number",
-      });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Please enter a valid 12-digit Aadhaar number",
+        });
     }
 
-    // Check if PAN already exists
     const existingPan = await Seller.findOne({
       "documents.panNumber": cleanPan,
       _id: { $ne: sellerId },
     });
     if (existingPan) {
-      return res.status(400).json({
-        success: false,
-        message: "PAN number already registered with another seller",
-      });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "PAN number already registered with another seller",
+        });
     }
-
     const existingAadhaar = await Seller.findOne({
       "documents.aadhaarNumber": cleanAadhaar,
       _id: { $ne: sellerId },
     });
     if (existingAadhaar) {
-      return res.status(400).json({
-        success: false,
-        message: "Aadhaar number already registered with another seller",
-      });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Aadhaar number already registered with another seller",
+        });
     }
 
-    // Upload documents to Cloudinary
-    const uploadResults = {};
-    const documentFields = ["panCard", "aadhaarCard", "gstCertificate"];
+    let parsedBankDetails = null;
+    if (bankDetails) {
+      try {
+        parsedBankDetails =
+          typeof bankDetails === "string"
+            ? JSON.parse(bankDetails)
+            : bankDetails;
+      } catch (e) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid bank details format" });
+      }
+
+      if (
+        !parsedBankDetails.accountHolderName ||
+        !parsedBankDetails.bankName ||
+        !parsedBankDetails.accountNumber ||
+        !parsedBankDetails.ifscCode
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Account holder name, bank name, account number and IFSC code are required",
+        });
+      }
+    }
+
+    const documentFields = [
+      "panCard",
+      "aadhaarCard",
+      "gstCertificate",
+      "cancelledCheque",
+      "bankStatement",
+    ];
 
     for (const field of documentFields) {
       if (files && files[field] && files[field][0]) {
         const result = await cloudinaryService.uploadFile(
           files[field][0].path,
-          `sellers/${sellerId}/documents`
+          `sellers/${sellerId}/documents`,
         );
         if (result.success) {
-          uploadResults[field] = result.url;
           seller.documents[field] = result.url;
         }
       }
     }
 
-    // Update documents
     seller.documents.panNumber = cleanPan;
     seller.documents.aadhaarNumber = cleanAadhaar;
-    seller.documents.gstNumber = gstNumber ? gstNumber.trim().toUpperCase() : null;
+    seller.documents.gstNumber = gstNumber
+      ? gstNumber.trim().toUpperCase()
+      : null;
 
-    seller.verification.kycStatus = "submitted";
-    seller.verification.kycSubmittedAt = new Date();
-    seller.status = "under_review";
+    if (parsedBankDetails) {
+      seller.bankDetails = {
+        ...seller.bankDetails,
+        accountHolderName: parsedBankDetails.accountHolderName.trim(),
+        bankName: parsedBankDetails.bankName.trim(),
+        accountNumber: parsedBankDetails.accountNumber.trim(),
+        ifscCode: parsedBankDetails.ifscCode.trim().toUpperCase(),
+        upiId: parsedBankDetails.upiId?.trim() || "",
+      };
+      seller.kyc.documentStatus.bankDetails = "pending";
+    }
+
+    seller.kyc.documentStatus.panCard = "pending";
+    seller.kyc.documentStatus.aadhaarCard = "pending";
+    if (seller.documents.gstNumber) {
+      seller.kyc.documentStatus.gstCertificate = "pending";
+    }
+    seller.kyc.status = "submitted";
+    seller.kyc.submittedAt = new Date();
+    seller.kyc.rejectionReason = null;
 
     await seller.save();
 
     return res.status(200).json({
       success: true,
-      message: "Documents uploaded successfully! Your KYC is under review.",
+      message: "KYC submitted successfully! Your documents are under review.",
       data: {
         documents: seller.documents,
-        kycStatus: seller.verification.kycStatus,
-        status: seller.status,
+        bankDetails: seller.bankDetails,
+        kycStatus: seller.kyc.status,
+        documentStatus: seller.kyc.documentStatus,
       },
     });
   } catch (error) {
-    console.error("❌ Document upload error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Document upload failed",
-      error: error.message,
-    });
-  }
-};
-
-// ============================================
-// 13. VERIFY PAN CARD (Admin)
-// ============================================
-export const verifyPanCard = async (req, res) => {
-  try {
-    const { sellerId } = req.params;
-    const { status, reason } = req.body;
-
-    const seller = await Seller.findById(sellerId);
-    if (!seller) {
-      return res.status(404).json({
+    console.error("❌ KYC submit error:", error);
+    return res
+      .status(500)
+      .json({
         success: false,
-        message: "Seller not found",
+        message: "KYC submission failed",
+        error: error.message,
       });
-    }
-
-    if (status === "verified") {
-      seller.documents.panVerified = true;
-      seller.verification.documentStatus.panCard = "verified";
-    } else if (status === "rejected") {
-      seller.documents.panVerified = false;
-      seller.verification.documentStatus.panCard = "rejected";
-      if (reason) seller.verification.kycRejectionReason = reason;
-    }
-
-    await seller.save();
-
-    return res.status(200).json({
-      success: true,
-      message: `PAN card ${status} successfully`,
-      data: {
-        panVerified: seller.documents.panVerified,
-        documentStatus: seller.verification.documentStatus,
-      },
-    });
-  } catch (error) {
-    console.error("❌ PAN verification error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "PAN verification failed",
-      error: error.message,
-    });
   }
 };
 
 // ============================================
-// 14. VERIFY AADHAAR CARD (Admin)
-// ============================================
-export const verifyAadhaarCard = async (req, res) => {
-  try {
-    const { sellerId } = req.params;
-    const { status, reason } = req.body;
-
-    const seller = await Seller.findById(sellerId);
-    if (!seller) {
-      return res.status(404).json({
-        success: false,
-        message: "Seller not found",
-      });
-    }
-
-    if (status === "verified") {
-      seller.documents.aadhaarVerified = true;
-      seller.verification.documentStatus.aadhaarCard = "verified";
-    } else if (status === "rejected") {
-      seller.documents.aadhaarVerified = false;
-      seller.verification.documentStatus.aadhaarCard = "rejected";
-      if (reason) seller.verification.kycRejectionReason = reason;
-    }
-
-    await seller.save();
-
-    return res.status(200).json({
-      success: true,
-      message: `Aadhaar card ${status} successfully`,
-      data: {
-        aadhaarVerified: seller.documents.aadhaarVerified,
-        documentStatus: seller.verification.documentStatus,
-      },
-    });
-  } catch (error) {
-    console.error("❌ Aadhaar verification error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Aadhaar verification failed",
-      error: error.message,
-    });
-  }
-};
-
-// ============================================
-// 15. GET VERIFICATION STATUS
+// 13. GET VERIFICATION STATUS
 // ============================================
 export const getVerificationStatus = async (req, res) => {
   try {
     const seller = await Seller.findById(req.seller._id).select(
-      "documents verification status emailVerified phoneVerified"
+      "documents bankDetails kyc status emailVerified phoneVerified",
     );
 
     if (!seller) {
-      return res.status(404).json({
-        success: false,
-        message: "Seller not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
     return res.status(200).json({
@@ -1095,26 +1062,28 @@ export const getVerificationStatus = async (req, res) => {
       data: {
         emailVerified: seller.emailVerified,
         phoneVerified: seller.phoneVerified,
-        panVerified: seller.documents?.panVerified || false,
-        aadhaarVerified: seller.documents?.aadhaarVerified || false,
-        kycStatus: seller.verification?.kycStatus || "not_submitted",
-        documentStatus: seller.verification?.documentStatus || {},
-        status: seller.status,
-        isVerified: seller.isVerified,
+        kycStatus: seller.kyc?.status || "not_submitted",
+        kycRejectionReason: seller.kyc?.rejectionReason || null,
+        documentStatus: seller.kyc?.documentStatus || {},
+        accountStatus: seller.status,
+        documents: seller.documents || {},
+        bankDetails: seller.bankDetails || {},
       },
     });
   } catch (error) {
     console.error("❌ Get verification status error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to get verification status",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to get verification status",
+        error: error.message,
+      });
   }
 };
 
 // ============================================
-// 16. GET RECENT ACTIVITIES
+// 14. GET RECENT ACTIVITIES
 // ============================================
 export const getRecentActivities = async (req, res) => {
   try {
@@ -1142,16 +1111,187 @@ export const getRecentActivities = async (req, res) => {
       },
     ];
 
-    return res.status(200).json({
-      success: true,
-      data: activities,
-    });
+    return res.status(200).json({ success: true, data: activities });
   } catch (error) {
     console.error("❌ Get activities error:", error);
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to get activities",
+        error: error.message,
+      });
+  }
+};
+
+
+
+// backend/controllers/sellerController.js (sellerForgotPassword function)
+
+export const sellerForgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide your email address"
+      });
+    }
+
+    const seller = await Seller.findOne({ 
+      email: { $regex: new RegExp(`^${email}$`, "i") } 
+    });
+
+    if (!seller) {
+      return res.status(404).json({
+        success: false,
+        message: "No seller found with this email address"
+      });
+    }
+
+    if (!seller.isActive) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is deactivated. Please contact support."
+      });
+    }
+
+    if (seller.status === "suspended") {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is suspended. Please contact support."
+      });
+    }
+
+    // ✅ Generate reset token
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    
+    // ✅ Update directly with findOneAndUpdate (bypasses pre-save issues)
+    await Seller.findByIdAndUpdate(seller._id, {
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: Date.now() + 10 * 60 * 1000
+    });
+
+    const resetUrl = `${process.env.CLIENT_URL}/seller/reset-password/${resetToken}`;
+
+    try {
+      await emailService.sendSellerResetPasswordEmail(
+        seller.email,
+        seller.firstName,
+        resetUrl
+      );
+      
+      console.log('✅ Password reset email sent to:', seller.email);
+      
+      return res.status(200).json({
+        success: true,
+        message: "Password reset link sent to your email. Please check your inbox."
+      });
+    } catch (emailError) {
+      console.error('❌ Email send error:', emailError);
+      
+      // ✅ Clear token if email fails
+      await Seller.findByIdAndUpdate(seller._id, {
+        resetPasswordToken: undefined,
+        resetPasswordExpire: undefined
+      });
+      
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send reset email. Please try again."
+      });
+    }
+  } catch (error) {
+    console.error('❌ Forgot password error:', error);
     return res.status(500).json({
       success: false,
-      message: "Failed to get activities",
-      error: error.message,
+      message: "Failed to process request",
+      error: error.message
+    });
+  }
+};
+// ============================================
+// 16. SELLER RESET PASSWORD (ADD THIS)
+// ============================================
+export const sellerResetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password, confirmPassword } = req.body;
+
+    if (!password || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide password and confirm password"
+      });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match"
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters"
+      });
+    }
+
+    // ✅ Hash the token
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    // ✅ Find seller with valid token
+    const seller = await Seller.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: Date.now() }
+    });
+
+    if (!seller) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired reset token. Please request a new one."
+      });
+    }
+
+    // ✅ Hash the new password
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // ✅ Update using findByIdAndUpdate (bypasses pre-save)
+    await Seller.findByIdAndUpdate(seller._id, {
+      password: hashedPassword,
+      resetPasswordToken: undefined,
+      resetPasswordExpire: undefined
+    });
+
+    // ✅ Send confirmation email
+    try {
+      await emailService.sendSellerPasswordResetConfirmation(
+        seller.email,
+        seller.firstName
+      );
+      console.log('✅ Password reset confirmation sent to:', seller.email);
+    } catch (emailError) {
+      console.error('❌ Confirmation email error:', emailError);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successfully! You can now login with your new password."
+    });
+  } catch (error) {
+    console.error('❌ Reset password error:', error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to reset password",
+      error: error.message
     });
   }
 };
