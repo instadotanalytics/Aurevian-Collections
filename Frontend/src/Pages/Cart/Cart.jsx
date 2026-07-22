@@ -117,6 +117,7 @@ const Cart = () => {
 
   return (
     <>
+    <Header/>
       <div className={styles.cartPage}>
         {/* Hero Section */}
         <section className={styles.heroSection}>
