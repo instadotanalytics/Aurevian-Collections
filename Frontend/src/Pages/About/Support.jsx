@@ -30,7 +30,7 @@ import {
 } from "react-icons/fi";
 import { FaRupeeSign, FaRegGem } from "react-icons/fa";
 import styles from "./Support.module.css";
-import Header from "../Layout/Header/Header";
+// import Header from "../Layout/Header/Header";
 import Footer from "../Layout/Footer/Footer";
 import Contactimg from "../../assets/ContactImage.png";
 
@@ -87,6 +87,7 @@ const Support = () => {
 
   return (
     <>
+      {/* <Header /> */}
       <div className={styles.supportPage}>
         <div className={styles.supportContainer}>
           {/* Hero Section with Background Image */}

@@ -739,3 +739,87 @@
     --av-container-pad: 12px;
   }
 }
+
+/* src/Pages/UserBlog/BlogList.module.css - Add these styles */
+
+/* ✅ Clear button in search */
+.clearBtn {
+  position: absolute;
+  right: 120px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.clearBtn:hover {
+  color: #333;
+  background: rgba(0,0,0,0.05);
+}
+
+/* ✅ Search info bar */
+.searchInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(212, 184, 120, 0.08);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(212, 184, 120, 0.15);
+}
+
+.searchInfo span {
+  font-size: 14px;
+  color: var(--av-text-soft);
+}
+
+.searchInfo strong {
+  color: var(--av-primary);
+}
+
+.clearSearchBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--av-text-soft);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.clearSearchBtn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+/* ✅ Responsive adjustments */
+@media (max-width: 768px) {
+  .clearBtn {
+    right: 100px;
+  }
+  
+  .searchInfo {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .clearBtn {
+    right: 80px;
+  }
+}

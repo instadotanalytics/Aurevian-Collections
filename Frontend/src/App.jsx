@@ -248,9 +248,9 @@ const App = () => {
           <Route
             path="/cart"
             element={
-              <LayoutWithHeader>
+            
                 <Cart />
-              </LayoutWithHeader>
+            
             }
           />
           <Route
