@@ -16,13 +16,13 @@ const BlogList = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   const categories = [
-    'all', 'jewellery', 'diamonds', 'gold', 'bridal', 
+    'all', 'jewellery', 'diamonds', 'gold', 'bridal',
     'fashion', 'care', 'trends', 'culture', 'sustainability'
   ];
 
   useEffect(() => {
-    dispatch(fetchBlogs({ 
-      page: currentPage, 
+    dispatch(fetchBlogs({
+      page: currentPage,
       limit: 6,
       category: selectedCategory !== 'all' ? selectedCategory : undefined,
       search: searchTerm || undefined
@@ -32,8 +32,8 @@ const BlogList = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     setCurrentPage(1);
-    dispatch(fetchBlogs({ 
-      page: 1, 
+    dispatch(fetchBlogs({
+      page: 1,
       limit: 6,
       category: selectedCategory !== 'all' ? selectedCategory : undefined,
       search: searchTerm || undefined
@@ -63,10 +63,6 @@ const BlogList = () => {
     );
   }
 
-  // Split the first article out so it can be rendered as the large,
-  // Vogue-style featured piece. Everything else keeps its original order.
-  const [featuredBlog, ...restBlogs] = blogs || [];
-
   return (
     <div className={styles.blogPage}>
       <div className={styles.container}>
@@ -92,8 +88,8 @@ const BlogList = () => {
                   className={styles.searchInput}
                   aria-label="Search articles"
                 />
-              </div>
               <button type="submit" className={styles.searchBtn}>Search</button>
+              </div>
             </form>
           </div>
         </div>
@@ -112,75 +108,44 @@ const BlogList = () => {
           ))}
         </div>
 
-        {/* Blog List */}
+        {/* Blog List — image-first cards, 3 columns desktop / 2 columns mobile
+            (see .blogGrid in BlogList.module.css for the responsive rules) */}
         {blogs && blogs.length > 0 ? (
           <>
-            {/* Featured Article */}
-            {featuredBlog && (
-              <Link to={`/blog/${featuredBlog.slug}`} className={styles.featured}>
-                <div className={styles.featuredImageWrap}>
-                  <img
-                    src={featuredBlog.featuredImage?.url}
-                    alt={featuredBlog.featuredImage?.alt || featuredBlog.title}
-                    loading="eager"
-                  />
-                  <span className={styles.featuredBadge}>Featured</span>
-                </div>
-                <div className={styles.featuredBody}>
-                  <span className={styles.featuredEyebrow}>{featuredBlog.category}</span>
-                  <h2 className={styles.featuredTitle}>{featuredBlog.title}</h2>
-                  <p className={styles.featuredExcerpt}>{featuredBlog.excerpt}</p>
-                  <div className={styles.featuredMeta}>
-                    <span>
-                      <FiCalendar size={14} />
-                      {formatDate(featuredBlog.publishedAt)}
-                    </span>
-                    <span>
-                      <FiClock size={14} />
-                      {featuredBlog.readingTime || 1} min read
-                    </span>
-                    <span>
-                      <FiEye size={14} />
-                      {featuredBlog.views || 0}
-                    </span>
-                  </div>
-                  <span className={styles.readBtn}>
-                    Read Article <FiArrowRight />
-                  </span>
-                </div>
-              </Link>
-            )}
-
-            {/* Remaining Articles — alternating magazine layout */}
-            <div className={styles.blogList}>
-              {restBlogs.map((blog, index) => (
+            <div className={styles.blogGrid}>
+              {blogs.map((blog, index) => (
                 <Link
                   to={`/blog/${blog.slug}`}
                   key={blog._id}
-                  className={`${styles.magazineCard} ${index % 2 === 1 ? styles.reverse : ''}`}
+                  className={styles.blogCard}
                 >
-                  <div className={styles.magazineImage}>
+                  <div className={styles.cardImage}>
                     <img
                       src={blog.featuredImage?.url}
                       alt={blog.featuredImage?.alt || blog.title}
-                      loading="lazy"
+                      loading={index === 0 ? 'eager' : 'lazy'}
                     />
-                    <span className={styles.categoryBadge}>{blog.category}</span>
                   </div>
-                  <div className={styles.magazineContent}>
-                    <h2 className={styles.blogTitle}>{blog.title}</h2>
-                    <p className={styles.blogExcerpt}>{blog.excerpt}</p>
-                    <div className={styles.blogMeta}>
-                      <span>
-                        <FiCalendar size={14} />
+
+                  <div className={styles.cardContent}>
+                    {/* Category + date now sit BELOW the photo, not on top
+                        of it — no more text overlaid on the image. */}
+                    <div className={styles.cardBadgeRow}>
+                      <span className={styles.cardCategory}>{blog.category}</span>
+                      <span className={styles.cardDate}>
+                        <FiCalendar size={11} />
                         {formatDate(blog.publishedAt)}
                       </span>
+                    </div>
+                    <h2 className={styles.cardTitle}>{blog.title}</h2>
+                    <p className={styles.cardExcerpt}>{blog.excerpt}</p>
+                    <div className={styles.cardMeta}>
                       <span>
-                        <FiClock size={14} />
+                        <FiClock size={13} />
                         {blog.readingTime || 1} min read
                       </span>
                       <span>
-                        <FiEye size={14} />
+                        <FiEye size={13} />
                         {blog.views || 0}
                       </span>
                     </div>

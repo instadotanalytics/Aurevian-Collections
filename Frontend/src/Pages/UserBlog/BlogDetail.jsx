@@ -123,10 +123,10 @@ const BlogDetail = () => {
         <title>{currentBlog.seo?.metaTitle || currentBlog.title}</title>
         <meta name="description" content={currentBlog.seo?.metaDescription || currentBlog.excerpt} />
         <meta name="keywords" content={currentBlog.seo?.metaKeywords || currentBlog.tags?.join(', ')} />
-        
+
         {/* Canonical URL */}
         <link rel="canonical" href={currentBlog.seo?.canonicalUrl || `https://aurevian.com/blog/${currentBlog.slug}`} />
-        
+
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="article" />
         <meta property="og:url" content={`https://aurevian.com/blog/${currentBlog.slug}`} />
@@ -143,7 +143,7 @@ const BlogDetail = () => {
         {currentBlog.tags?.map((tag) => (
           <meta key={tag} property="article:tag" content={tag} />
         ))}
-        
+
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:url" content={`https://aurevian.com/blog/${currentBlog.slug}`} />
@@ -152,17 +152,17 @@ const BlogDetail = () => {
         <meta name="twitter:image" content={currentBlog.seo?.openGraph?.image || currentBlog.featuredImage?.url} />
         <meta name="twitter:site" content="@Aurevian" />
         <meta name="twitter:creator" content="@Aurevian" />
-        
+
         {/* Additional SEO */}
         <meta name="robots" content={currentBlog.seo?.noIndex ? 'noindex' : 'index, follow'} />
         <meta name="googlebot" content={currentBlog.seo?.noIndex ? 'noindex' : 'index, follow'} />
         <meta name="author" content={currentBlog.authorName} />
-        
+
         {/* Viewport */}
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        
+
         {/* Theme Color */}
-        <meta name="theme-color" content="#106b47" />
+        <meta name="theme-color" content="#9c7d3f" />
       </Helmet>
 
       {/* ✅ JSON-LD Schema Script */}
@@ -221,17 +221,19 @@ const BlogDetail = () => {
             <FiArrowLeft /> Back to Articles
           </Link>
 
-          {/* Hero */}
+          {/* Hero — image only, no text/badge overlay */}
           <div className={styles.hero}>
             <img
               src={currentBlog.featuredImage?.url}
               alt={currentBlog.featuredImage?.alt || currentBlog.title}
               loading="eager"
             />
-            <span className={styles.heroCategory}>{currentBlog.category}</span>
-            <div className={styles.heroOverlay}>
-              <h1 className={styles.heroTitle}>{currentBlog.title}</h1>
-            </div>
+          </div>
+
+          {/* Title — below the image, plain heading, no hover, smaller size */}
+          <div className={styles.titleBlock}>
+            <span className={styles.titleCategory}>{currentBlog.category}</span>
+            <h1 className={styles.heroTitle}>{currentBlog.title}</h1>
           </div>
 
           {/* Meta */}
@@ -250,9 +252,9 @@ const BlogDetail = () => {
           </div>
 
           {/* Content */}
-          <div 
-            className={styles.content} 
-            dangerouslySetInnerHTML={{ __html: currentBlog.content }} 
+          <div
+            className={styles.content}
+            dangerouslySetInnerHTML={{ __html: currentBlog.content }}
           />
 
           {/* Tags */}

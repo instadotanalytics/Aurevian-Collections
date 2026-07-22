@@ -3,16 +3,29 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Jost:wght@300;400;500;600&display=swap');
 
 :root {
-  --av-primary: #106b47;
-  --av-primary-deep: #0b4e34;
-  --av-gold: #c8a86e;
-  --av-gold-deep: #a0804a;
-  --av-bg: #faf9f7;
-  --av-text: #0a2216;
-  --av-text-soft: #6b8a7d;
-  --av-border: rgba(16, 107, 71, 0.08);
-  --av-shadow-soft: 0 10px 40px rgba(10, 34, 22, 0.06);
-  --av-shadow-lift: 0 24px 60px rgba(10, 34, 22, 0.14);
+  /* ===== Aurevian bronze / gold palette — no green ===== */
+  --av-primary: #9c7d3f;
+  --av-primary-deep: #7c6129;
+  --av-gold: #d4b878;
+  --av-gold-deep: #b3924f;
+  --av-bg: #faf7f1;
+  --av-text: #2a2116;
+  --av-text-soft: #8f8268;
+  --av-border: rgba(156, 125, 63, 0.14);
+  --av-shadow-soft: 0 10px 40px rgba(42, 33, 22, 0.07);
+  --av-shadow-lift: 0 24px 60px rgba(42, 33, 22, 0.16);
+
+  /* ==========================================================
+     CONTAINER WIDTH — MUST MATCH Header.module.css EXACTLY
+     This was drifting to 1160px, one edit off the header's real
+     .topRow max-width of 1200px — even 40px of mismatch is
+     visible as content that doesn't quite line up with the logo.
+     Locked back to 1200px / 24px padding (stepping to 16px /
+     12px at the header's own 992px / 380px breakpoints) so every
+     edge tracks the header at any viewport width.
+     ========================================================== */
+  --av-container-max: 1200px;
+  --av-container-pad: 24px;
 }
 
 * {
@@ -20,17 +33,22 @@
 }
 
 .blogDetail {
-  padding: 0 20px 100px;
+  /* No side padding here — .container below owns left/right
+     padding so it can match the header's padding exactly. Only
+     vertical (bottom) spacing stays on the page wrapper. */
+  padding: 0 0 100px;
   background: var(--av-bg);
   min-height: 100vh;
   font-family: 'Jost', sans-serif;
   color: var(--av-text);
   position: relative;
+  overflow-x: hidden;
 }
 
 .container {
-  max-width: 900px;
+  max-width: var(--av-container-max);
   margin: 0 auto;
+  padding: 0 var(--av-container-pad);
   position: relative;
 }
 
@@ -75,17 +93,19 @@
 }
 
 /* ============================================
-   HERO
+   HERO — image only, no text/badge overlay
+   Spans the full container width (same left/right edges as
+   the header row).
    ============================================ */
 .hero {
   position: relative;
   width: 100%;
-  height: 500px;
+  height: clamp(260px, 42vw, 500px);
   border-radius: 24px;
   overflow: hidden;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
   box-shadow: var(--av-shadow-lift);
-  background: #e8f0ed;
+  background: #efe8d8;
   animation: avFadeUp 0.8s ease both;
 }
 
@@ -93,43 +113,42 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
 }
 
-.heroOverlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(10, 34, 22, 0) 40%, rgba(10, 34, 22, 0.78) 100%);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 48px;
+/* ============================================
+   TITLE BLOCK — below image, plain, no hover
+   ============================================ */
+.titleBlock {
+  margin: 0 0 32px;
+  max-width: 900px;
+  animation: avFadeUp 0.8s ease 0.1s both;
 }
 
-.heroCategory {
-  position: absolute;
-  top: 24px;
-  left: 24px;
-  padding: 7px 18px;
-  background: rgba(250, 249, 247, 0.92);
-  backdrop-filter: blur(8px);
-  color: var(--av-primary);
-  font-size: 11px;
-  font-weight: 600;
+.titleCategory {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
-  border-radius: 999px;
+  letter-spacing: 2px;
+  color: var(--av-gold-deep);
+  margin-bottom: 12px;
 }
 
+/* Tight line-height for a clean 2-line title, left-aligned flush
+   with the header logo above it via .container. */
 .heroTitle {
   font-family: 'Playfair Display', serif;
   font-weight: 600;
-  font-size: clamp(28px, 4vw, 48px);
-  line-height: 1.18;
-  color: #ffffff;
+  font-size: clamp(26px, 3.4vw, 38px);
+  line-height: 1.14;
+  letter-spacing: -0.01em;
+  color: var(--av-text);
   margin: 0;
-  max-width: 780px;
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
+  text-decoration: none;
+  border: none;
+  background: none;
 }
 
 /* ============================================
@@ -188,11 +207,13 @@
 
 /* ============================================
    FLOATING SHARE PANEL — DESKTOP
+   Anchored relative to the container's edge (same math the
+   header uses), so it stays aligned with the content column.
    ============================================ */
 .floatingShare {
   position: fixed;
   top: 50%;
-  left: max(24px, calc(50% - 560px));
+  left: max(24px, calc(50% - (var(--av-container-max) / 2) - 56px));
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
@@ -227,7 +248,7 @@
   color: #fff;
   border-color: var(--av-primary);
   transform: translateY(-3px) scale(1.06);
-  box-shadow: 0 10px 22px rgba(16, 107, 71, 0.28);
+  box-shadow: 0 10px 22px rgba(156, 125, 63, 0.3);
 }
 
 .floatingBtn.bookmarked {
@@ -270,7 +291,7 @@
   font-weight: 300;
   line-height: 1.9;
   color: var(--av-text);
-  max-width: 760px;
+  max-width: 1060px;
   margin: 0 auto 56px;
 }
 
@@ -292,6 +313,10 @@
   float: left;
   line-height: 0.8;
   margin: 10px 12px 0 0;
+}
+
+.content h1 {
+  line-height: 40px;
 }
 
 .content h2 {
@@ -357,14 +382,14 @@
 }
 
 .content blockquote::before {
-  content: '“';
+  content: '\201C';
   position: absolute;
   left: -6px;
   top: -18px;
   font-family: 'Playfair Display', serif;
   font-size: 64px;
   color: var(--av-gold);
-  opacity: 0.5;
+  opacity: 0.55;
 }
 
 .content table {
@@ -457,7 +482,7 @@
   gap: 24px;
   max-width: 760px;
   margin: 0 auto 56px;
-  background: linear-gradient(135deg, #ffffff 0%, #f6f4ef 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #f6f1e6 100%);
   padding: 32px 40px;
   border-radius: 20px;
   box-shadow: var(--av-shadow-soft);
@@ -474,7 +499,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 20px rgba(16, 107, 71, 0.22);
+  box-shadow: 0 8px 20px rgba(156, 125, 63, 0.3);
 }
 
 .authorAvatar img {
@@ -509,7 +534,7 @@
    RELATED POSTS
    ============================================ */
 .relatedPosts {
-  max-width: 900px;
+  max-width: 100%;
   margin: 0 auto;
 }
 
@@ -536,7 +561,7 @@
   text-decoration: none;
   color: inherit;
   transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 0 6px 20px rgba(10, 34, 22, 0.05);
+  box-shadow: 0 6px 20px rgba(42, 33, 22, 0.06);
   border: 1px solid var(--av-border);
 }
 
@@ -547,12 +572,15 @@
 
 .relatedImageWrap {
   overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: #f2ede2;
 }
 
 .relatedCard img {
   width: 100%;
-  height: 170px;
+  height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
   transition: transform 0.7s ease;
 }
@@ -653,7 +681,7 @@
 
 .notFound a:hover {
   background: var(--av-gold-deep);
-  box-shadow: 0 10px 24px rgba(200, 168, 110, 0.3);
+  box-shadow: 0 10px 24px rgba(200, 162, 83, 0.35);
 }
 
 /* ============================================
@@ -688,22 +716,23 @@
   outline-offset: 2px;
 }
 
-/* ============================================
+/* ==========================================================
    RESPONSIVE
-   ============================================ */
+   Breakpoints (992 / 768 / 480 / 380) mirror the ones used in
+   Header.module.css, and the container's side padding steps
+   down at the SAME points the header's does (24px → 16px →
+   12px), so the content edges track the header's edges at
+   every viewport width instead of just on desktop.
+   ========================================================== */
 
 /* Tablet */
 @media (max-width: 992px) {
+  :root {
+    --av-container-pad: 16px;
+  }
+
   .floatingShare {
     display: none;
-  }
-
-  .hero {
-    height: 400px;
-  }
-
-  .heroOverlay {
-    padding: 32px;
   }
 
   .content {
@@ -718,7 +747,7 @@
 /* Mobile */
 @media (max-width: 768px) {
   .blogDetail {
-    padding: 0 16px 100px;
+    padding: 0 0 100px;
   }
 
   .backBtn {
@@ -726,17 +755,16 @@
   }
 
   .hero {
-    height: 300px;
     border-radius: 16px;
+    margin-bottom: 22px;
   }
 
-  .heroOverlay {
-    padding: 22px;
+  .titleBlock {
+    margin-bottom: 24px;
   }
 
-  .heroCategory {
-    top: 16px;
-    left: 16px;
+  .heroTitle {
+    line-height: 1.18;
   }
 
   .meta {
@@ -815,8 +843,8 @@
 
 /* Small Phones */
 @media (max-width: 480px) {
-  .hero {
-    height: 240px;
+  .heroTitle {
+    font-size: clamp(22px, 6vw, 28px);
   }
 
   .content {
@@ -840,22 +868,18 @@
     font-size: 24px;
   }
 
-  .tags,
-  .authorBio {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-
   .tag {
     font-size: 12px;
     padding: 6px 14px;
   }
 
-  .relatedCard img {
-    height: 150px;
-  }
-
   .relatedCard h4 {
     font-size: 15px;
+  }
+}
+
+@media (max-width: 380px) {
+  :root {
+    --av-container-pad: 12px;
   }
 }
