@@ -18,7 +18,7 @@ import {
   FiLock,
 } from "react-icons/fi";
 import styles from "./Support.module.css";
-import Header from "../Layout/Header/Header";
+// import Header from "../Layout/Header/Header";
 import Footer from "../Layout/Footer/Footer";
 
 const Support = () => {
@@ -149,7 +149,7 @@ const Support = () => {
 
   return (
     <>
-      <Header />
+      {/* <Header /> */}
       <div className={styles.supportPage}>
         <div className={styles.supportContainer}>
           {/* Hero Section */}
