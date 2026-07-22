@@ -108,42 +108,47 @@
 .statsBar {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 2.5rem;
+  justify-content: space-evenly;
+  gap: 2rem;
   background: linear-gradient(135deg, #fcf9f5 0%, #f8f2ea 100%);
-  padding: 1.2rem 2rem;
+  padding: 1rem 2rem;
   border-radius: 12px;
   margin-bottom: 2rem;
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
+  flex-wrap: wrap;
 }
 
 .statItem {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.6rem;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .statNumber {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: var(--dark);
+  white-space: nowrap;
 }
 
 .rupeeIcon {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   margin-right: 0.1rem;
 }
 
 .statLabel {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--gray);
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .statDivider {
   width: 1px;
-  height: 35px;
+  height: 30px;
   background: var(--border);
 }
 
@@ -153,7 +158,7 @@
 .cartContainer {
   display: flex;
   gap: 2rem;
-  align-items: flex-start;
+  /* align-items: flex-start; */
 }
 
 .cartItemsSection {
@@ -171,35 +176,21 @@
 .tableHeader {
   display: grid;
   grid-template-columns: 1fr 130px 105px 115px 50px;
-  padding: 1.2rem 1.5rem;
+  padding: 1rem 1.5rem;
   background: var(--gold-gradient);
   border-bottom: 1px solid var(--border);
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #fff;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.thProduct {
-  text-align: left;
-}
-
-.thPrice {
-  text-align: center;
-}
-
-.thQuantity {
-  text-align: center;
-}
-
-.thSubtotal {
-  text-align: center;
-}
-
-.thAction {
-  text-align: center;
-}
+.thProduct { text-align: left; }
+.thPrice { text-align: center; }
+.thQuantity { text-align: center; }
+.thSubtotal { text-align: center; }
+.thAction { text-align: center; }
 
 /* ============================================
    CART CARD
@@ -218,14 +209,29 @@
 }
 
 .cardContent {
-  display: grid;
-  grid-template-columns: 1fr 120px 100px 100px 50px;
   padding: 1.2rem 1.5rem;
+}
+
+/* ============================================
+   DESKTOP VIEW
+   ============================================ */
+.desktopView {
+  display: grid;
+  grid-template-columns: 1fr 130px 105px 115px 50px;
   align-items: center;
   gap: 0.5rem;
 }
 
-/* Product Cell */
+/* ============================================
+   MOBILE VIEW - Hidden on Desktop
+   ============================================ */
+.mobileView {
+  display: none;
+}
+
+/* ============================================
+   PRODUCT CELL
+   ============================================ */
 .productCell {
   display: flex;
   gap: 1rem;
@@ -256,7 +262,7 @@
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 600;
   text-transform: uppercase;
 }
@@ -301,7 +307,9 @@
   font-weight: 500;
 }
 
-/* Price Cell */
+/* ============================================
+   PRICE CELL
+   ============================================ */
 .priceCell {
   text-align: center;
 }
@@ -336,7 +344,9 @@
   font-weight: 600;
 }
 
-/* Quantity Cell */
+/* ============================================
+   QUANTITY CELL
+   ============================================ */
 .quantityCell {
   display: flex;
   justify-content: center;
@@ -382,7 +392,9 @@
   color: var(--dark);
 }
 
-/* Subtotal Cell */
+/* ============================================
+   SUBTOTAL CELL
+   ============================================ */
 .subtotalCell {
   text-align: center;
 }
@@ -393,7 +405,9 @@
   color: var(--dark);
 }
 
-/* Action Cell */
+/* ============================================
+   ACTION CELL / REMOVE BUTTON
+   ============================================ */
 .actionCell {
   text-align: center;
 }
@@ -417,6 +431,10 @@
   color: #c62828;
   background: #fce4ec;
   transform: rotate(90deg);
+}
+
+.removeButtonMobile {
+  display: none;
 }
 
 /* ============================================
@@ -566,22 +584,6 @@
 }
 
 /* ============================================
-   LOYALTY BADGE
-   ============================================ */
-.loyaltyBadge {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.8rem;
-  margin-top: 1rem;
-  background: var(--gold-light);
-  border-radius: 8px;
-  font-size: 0.8rem;
-  color: var(--gold-dark);
-  font-weight: 500;
-}
-
-/* ============================================
    WHY AUREVIAN SECTION
    ============================================ */
 .whyAurevian {
@@ -665,7 +667,6 @@
   height: 350px;
   border-radius: 10px;
   overflow: hidden;
-  /* background: linear-gradient(135deg, #fcf9f5 0%, #f8f2ea 100%); */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -683,27 +684,6 @@
 
 .whyImage:hover .whyImageLogo {
   transform: scale(1.05);
-}
-
-.whyButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.7rem 2rem;
-  background: transparent;
-  color: var(--gold-dark);
-  border: 1px solid var(--gold);
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition);
-  margin-top: 0.5rem;
-}
-
-.whyButton:hover {
-  background: var(--gold);
-  color: white;
 }
 
 /* ============================================
@@ -767,7 +747,7 @@
 }
 
 /* ============================================
-   RESPONSIVE
+   RESPONSIVE - FIXED MOBILE LAYOUT
    ============================================ */
 @media (max-width: 1024px) {
   .cartContainer {
@@ -784,40 +764,100 @@
     display: none;
   }
 
-  .cardContent {
-    grid-template-columns: 1fr;
-    gap: 0.8rem;
-    padding: 1rem;
+  .desktopView {
+    display: none;
   }
 
-  .productCell {
-    flex-direction: row;
+  .mobileView {
+    display: block;
   }
 
-  .priceCell {
-    text-align: left;
+  .removeButtonMobile {
     display: flex;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--gray);
+    cursor: pointer;
+    transition: var(--transition);
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .removeButtonMobile:hover {
+    border-color: #c62828;
+    color: #c62828;
+    background: #fce4ec;
+  }
+
+  .mobileTopRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     gap: 0.8rem;
+  }
+
+  .mobileBottomRow {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--border);
+    margin-top: 0.5rem;
+  }
+
+  .mobilePriceRow {
+    display: flex;
     align-items: center;
   }
 
-  .priceWrapper {
+  .mobilePriceRow .priceCell {
+    text-align: left;
+    width: 100%;
+  }
+
+  .mobilePriceRow .priceWrapper {
     flex-direction: row;
-    gap: 0.5rem;
-    align-items: center;
     flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.4rem;
   }
 
-  .quantityCell {
+  .mobileQuantityRow {
+    display: flex;
+    align-items: center;
+  }
+
+  .mobileQuantityRow .quantityCell {
     justify-content: flex-start;
   }
 
-  .subtotalCell {
-    text-align: left;
+  .mobileSubtotalRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
   }
 
-  .actionCell {
-    text-align: left;
+  .subtotalLabel {
+    font-size: 0.85rem;
+    color: var(--gray);
+    font-weight: 500;
+  }
+
+  .mobileSubtotalRow .subtotalPrice {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--dark);
+  }
+
+  .productCell {
+    flex: 1;
   }
 
   .whyContent {
@@ -833,10 +873,6 @@
   .whyImage {
     height: 250px;
   }
-
-  .whyButton {
-    justify-content: center;
-  }
 }
 
 @media (max-width: 768px) {
@@ -849,7 +885,6 @@
   }
 
   .statsBar {
-    flex-wrap: wrap;
     gap: 0.8rem;
     padding: 0.8rem 1rem;
   }
@@ -861,56 +896,48 @@
   .statItem {
     flex: 1;
     justify-content: center;
-    min-width: 70px;
+    min-width: 60px;
   }
 
   .statNumber {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
 
-  .productCell {
-    flex-direction: column;
-    align-items: flex-start;
+  .statLabel {
+    font-size: 0.7rem;
   }
 
   .imageWrapper {
-    width: 100%;
-    height: 150px;
+    width: 70px;
+    height: 70px;
   }
 
-  .priceCell {
-    flex-wrap: wrap;
+  .productName {
+    font-size: 0.85rem;
   }
 
-  .cartCard {
-    padding: 0;
+  .productVariant {
+    font-size: 0.75rem;
   }
 
-  .trustSection {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-
-  .trustCard {
-    flex: 1;
-    min-width: 100px;
+  .productSize {
+    font-size: 0.7rem;
   }
 
   .whyTitle {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
   }
 
   .whyAurevian {
     padding: 2rem 1.5rem;
   }
 
-  .whyRight {
-    flex: 1;
-    width: 100%;
-  }
-
   .whyImage {
     height: 200px;
+  }
+
+  .summaryCard {
+    padding: 1rem;
   }
 }
 
@@ -923,25 +950,55 @@
     padding: 2rem 1rem 1.5rem;
   }
 
+  .heroBadge {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.8rem;
+  }
+
   .statsBar {
-    gap: 0.5rem;
-    padding: 0.6rem 0.8rem;
+    gap: 0.4rem;
+    padding: 0.6rem;
   }
 
   .statNumber {
-    font-size: 0.95rem;
+    font-size: 0.8rem;
   }
 
   .statLabel {
-    font-size: 0.65rem;
+    font-size: 0.55rem;
+  }
+
+  .cardContent {
+    padding: 0.8rem;
+  }
+
+  .imageWrapper {
+    width: 60px;
+    height: 60px;
   }
 
   .productName {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+  }
+
+  .productVariant {
+    font-size: 0.7rem;
+  }
+
+  .productSize {
+    font-size: 0.65rem;
   }
 
   .currentPrice {
     font-size: 0.85rem;
+  }
+
+  .oldPrice {
+    font-size: 0.65rem;
+  }
+
+  .savings {
+    font-size: 0.6rem;
   }
 
   .quantityControls {
@@ -949,18 +1006,22 @@
   }
 
   .quantityButton {
-    width: 26px;
-    height: 26px;
-    font-size: 0.7rem;
+    width: 24px;
+    height: 24px;
+    font-size: 0.65rem;
   }
 
   .quantityValue {
-    min-width: 24px;
-    font-size: 0.8rem;
+    min-width: 20px;
+    font-size: 0.75rem;
   }
 
-  .summaryCard {
-    padding: 1rem;
+  .mobileSubtotalRow .subtotalPrice {
+    font-size: 0.85rem;
+  }
+
+  .subtotalLabel {
+    font-size: 0.75rem;
   }
 
   .totalAmount {
@@ -968,16 +1029,16 @@
   }
 
   .checkoutButton {
-    font-size: 0.9rem;
-    padding: 0.6rem;
+    font-size: 0.85rem;
+    padding: 0.7rem;
   }
 
   .whyTitle {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
   }
 
   .whyDesc {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
 
   .whyImage {
@@ -989,30 +1050,50 @@
     padding: 1.5rem 1rem;
   }
 
-  .whyRight {
-    flex: 1;
-    width: 100%;
-  }
-
-  .loyaltyBadge {
-    font-size: 0.7rem;
-    padding: 0.6rem;
-  }
-
   .trustCard {
     padding: 0.4rem 0.6rem;
   }
 
   .trustInfo h4 {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
   }
 
   .trustInfo p {
     font-size: 0.6rem;
   }
 
-  .removeButton {
+  .summaryCard {
+    padding: 0.8rem;
+  }
+
+  .summaryTitle {
+    font-size: 1.1rem;
+  }
+
+  .summaryRow {
+    font-size: 0.8rem;
+    padding: 0.4rem 0;
+  }
+
+  .totalLabel {
+    font-size: 0.95rem;
+  }
+
+  .totalAmount {
+    font-size: 1.1rem;
+  }
+
+  .mobileBottomRow {
+    gap: 0.4rem;
+  }
+
+  .removeButtonMobile {
     width: 28px;
     height: 28px;
+  }
+
+  .removeButtonMobile svg {
+    width: 14px;
+    height: 14px;
   }
 }

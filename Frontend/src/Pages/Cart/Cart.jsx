@@ -96,7 +96,6 @@ const Cart = () => {
   if (cartItems.length === 0) {
     return (
       <>
-        {/* <Header /> */}
         <div className={styles.cartPage}>
           <div className={styles.emptyContainer}>
             <div className={styles.emptyIconWrapper}>
@@ -118,7 +117,6 @@ const Cart = () => {
 
   return (
     <>
-      {/* <Header /> */}
       <div className={styles.cartPage}>
         {/* Hero Section */}
         <section className={styles.heroSection}>
@@ -133,7 +131,7 @@ const Cart = () => {
           </div>
         </section>
 
-        {/* Stats Bar - More Aurevian Friendly */}
+        {/* Stats Bar */}
         <div className={styles.statsBar}>
           <div className={styles.statItem}>
             <span className={styles.statNumber}>{cartItems.length}</span>
@@ -168,7 +166,7 @@ const Cart = () => {
         <div className={styles.cartContainer}>
           {/* Cart Items */}
           <div className={styles.cartItemsSection}>
-            {/* Table Header */}
+            {/* Table Header - Desktop only */}
             <div className={styles.tableHeader}>
               <div className={styles.thProduct}>Product</div>
               <div className={styles.thPrice}>Price</div>
@@ -180,92 +178,182 @@ const Cart = () => {
             {cartItems.map((item) => (
               <div key={item.id} className={styles.cartCard}>
                 <div className={styles.cardContent}>
-                  {/* Product Info with Image */}
-                  <div className={styles.productCell}>
-                    <div className={styles.imageWrapper}>
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className={styles.productImage}
-                        loading="lazy"
-                      />
-                      {!item.available && (
-                        <div className={styles.outOfStockOverlay}>
-                          <span>Out of Stock</span>
+                  {/* Desktop View */}
+                  <div className={styles.desktopView}>
+                    <div className={styles.productCell}>
+                      <div className={styles.imageWrapper}>
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className={styles.productImage}
+                          loading="lazy"
+                        />
+                        {!item.available && (
+                          <div className={styles.outOfStockOverlay}>
+                            <span>Out of Stock</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className={styles.productInfo}>
+                        <h3 className={styles.productName}>{item.name}</h3>
+                        <p className={styles.productVariant}>{item.variant}</p>
+                        <p className={styles.productSize}>{item.size}</p>
+                        <div className={styles.availability}>
+                          {item.available ? (
+                            <span className={styles.inStock}>✓ In Stock</span>
+                          ) : (
+                            <span className={styles.outOfStock}>✕ Out of Stock</span>
+                          )}
                         </div>
-                      )}
+                      </div>
                     </div>
-                    <div className={styles.productInfo}>
-                      <h3 className={styles.productName}>{item.name}</h3>
-                      <p className={styles.productVariant}>{item.variant}</p>
-                      <p className={styles.productSize}>{item.size}</p>
-                      <div className={styles.availability}>
-                        {item.available ? (
-                          <span className={styles.inStock}>✓ In Stock</span>
-                        ) : (
-                          <span className={styles.outOfStock}>✕ Out of Stock</span>
+
+                    <div className={styles.priceCell}>
+                      <div className={styles.priceWrapper}>
+                        <span className={styles.currentPrice}>
+                          <FaRupeeSign className={styles.rupeeIconSmall} />
+                          {item.price.toLocaleString('en-IN')}
+                        </span>
+                        {item.oldPrice && (
+                          <>
+                            <span className={styles.oldPrice}>
+                              <FaRupeeSign className={styles.rupeeIconSmall} />
+                              {item.oldPrice.toLocaleString('en-IN')}
+                            </span>
+                            <span className={styles.savings}>
+                              Save {Math.round(((item.oldPrice - item.price) / item.oldPrice) * 100)}%
+                            </span>
+                          </>
                         )}
                       </div>
                     </div>
-                  </div>
 
-                  {/* Price */}
-                  <div className={styles.priceCell}>
-                    <div className={styles.priceWrapper}>
-                      <span className={styles.currentPrice}>
+                    <div className={styles.quantityCell}>
+                      <div className={styles.quantityControls}>
+                        <button
+                          className={styles.quantityButton}
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          disabled={item.quantity <= 1}
+                        >
+                          <FiMinus />
+                        </button>
+                        <span className={styles.quantityValue}>{item.quantity}</span>
+                        <button
+                          className={styles.quantityButton}
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        >
+                          <FiPlus />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className={styles.subtotalCell}>
+                      <span className={styles.subtotalPrice}>
                         <FaRupeeSign className={styles.rupeeIconSmall} />
-                        {item.price.toLocaleString('en-IN')}
+                        {(item.price * item.quantity).toLocaleString('en-IN')}
                       </span>
-                      {item.oldPrice && (
-                        <>
-                          <span className={styles.oldPrice}>
-                            <FaRupeeSign className={styles.rupeeIconSmall} />
-                            {item.oldPrice.toLocaleString('en-IN')}
-                          </span>
-                          <span className={styles.savings}>
-                            Save {Math.round(((item.oldPrice - item.price) / item.oldPrice) * 100)}%
-                          </span>
-                        </>
-                      )}
                     </div>
-                  </div>
 
-                  {/* Quantity Controls */}
-                  <div className={styles.quantityCell}>
-                    <div className={styles.quantityControls}>
+                    <div className={styles.actionCell}>
                       <button
-                        className={styles.quantityButton}
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        disabled={item.quantity <= 1}
+                        className={styles.removeButton}
+                        onClick={() => removeItem(item.id)}
                       >
-                        <FiMinus />
-                      </button>
-                      <span className={styles.quantityValue}>{item.quantity}</span>
-                      <button
-                        className={styles.quantityButton}
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      >
-                        <FiPlus />
+                        <FiX />
                       </button>
                     </div>
                   </div>
 
-                  {/* Subtotal */}
-                  <div className={styles.subtotalCell}>
-                    <span className={styles.subtotalPrice}>
-                      <FaRupeeSign className={styles.rupeeIconSmall} />
-                      {(item.price * item.quantity).toLocaleString('en-IN')}
-                    </span>
-                  </div>
+                  {/* Mobile View */}
+                  <div className={styles.mobileView}>
+                    <div className={styles.mobileTopRow}>
+                      <div className={styles.productCell}>
+                        <div className={styles.imageWrapper}>
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className={styles.productImage}
+                            loading="lazy"
+                          />
+                          {!item.available && (
+                            <div className={styles.outOfStockOverlay}>
+                              <span>Out of Stock</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className={styles.productInfo}>
+                          <h3 className={styles.productName}>{item.name}</h3>
+                          <p className={styles.productVariant}>{item.variant}</p>
+                          <p className={styles.productSize}>{item.size}</p>
+                          <div className={styles.availability}>
+                            {item.available ? (
+                              <span className={styles.inStock}>✓ In Stock</span>
+                            ) : (
+                              <span className={styles.outOfStock}>✕ Out of Stock</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        className={styles.removeButtonMobile}
+                        onClick={() => removeItem(item.id)}
+                      >
+                        <FiX />
+                      </button>
+                    </div>
 
-                  {/* Remove Button */}
-                  <div className={styles.actionCell}>
-                    <button
-                      className={styles.removeButton}
-                      onClick={() => removeItem(item.id)}
-                    >
-                      <FiX />
-                    </button>
+                    <div className={styles.mobileBottomRow}>
+                      <div className={styles.mobilePriceRow}>
+                        <div className={styles.priceCell}>
+                          <div className={styles.priceWrapper}>
+                            <span className={styles.currentPrice}>
+                              <FaRupeeSign className={styles.rupeeIconSmall} />
+                              {item.price.toLocaleString('en-IN')}
+                            </span>
+                            {item.oldPrice && (
+                              <span className={styles.oldPrice}>
+                                <FaRupeeSign className={styles.rupeeIconSmall} />
+                                {item.oldPrice.toLocaleString('en-IN')}
+                              </span>
+                            )}
+                            {item.oldPrice && (
+                              <span className={styles.savings}>
+                                Save {Math.round(((item.oldPrice - item.price) / item.oldPrice) * 100)}%
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className={styles.mobileQuantityRow}>
+                        <div className={styles.quantityCell}>
+                          <div className={styles.quantityControls}>
+                            <button
+                              className={styles.quantityButton}
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              disabled={item.quantity <= 1}
+                            >
+                              <FiMinus />
+                            </button>
+                            <span className={styles.quantityValue}>{item.quantity}</span>
+                            <button
+                              className={styles.quantityButton}
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            >
+                              <FiPlus />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className={styles.mobileSubtotalRow}>
+                        <span className={styles.subtotalLabel}>Subtotal:</span>
+                        <span className={styles.subtotalPrice}>
+                          <FaRupeeSign className={styles.rupeeIconSmall} />
+                          {(item.price * item.quantity).toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -307,7 +395,6 @@ const Cart = () => {
                 Proceed to Checkout
               </button>
 
-              {/* Trust Section */}
               <div className={styles.trustSection}>
                 <div className={styles.trustCard}>
                   <FiTruck className={styles.trustIcon} />
@@ -331,29 +418,24 @@ const Cart = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Loyalty Badge */}
-              
             </div>
           </div>
         </div>
 
-        {/* Why Aurevian Section - With Logo */}
+        {/* Why Aurevian Section */}
         <section className={styles.whyAurevian}>
           <div className={styles.whyContent}>
             <div className={styles.whyLeft}>
               <span className={styles.whyBadge}>✦ Aurevian Promise</span>
-              <h2 className={styles.whyTitle}>Gold-Plated Confidence,
-                <br />Worn Every Day
-              </h2>
+              <h2 className={styles.whyTitle}>Gold-Plated Confidence,<br />Worn Every Day</h2>
               <p className={styles.whyDesc}>
-               Aurevian designs jewellery for the days that don't wait for an occasion.
-Every piece is crafted to be lived in, loved, and worn with confidence.
+                Aurevian designs jewellery for the days that don't wait for an occasion.
+                Every piece is crafted to be lived in, loved, and worn with confidence.
               </p>
               <p className={styles.whyDesc}>
-                Timeless Craftsmanship - Designed to last a lifetime
-Everyday Luxury - Fine jewellery for real life
-Confidence Guaranteed - Wear it, love it, live in it
+                Timeless Craftsmanship - Designed to last a lifetime<br />
+                Everyday Luxury - Fine jewellery for real life<br />
+                Confidence Guaranteed - Wear it, love it, live in it
               </p>
             </div>
             <div className={styles.whyRight}>

@@ -281,9 +281,7 @@ const Wishlist = () => {
             Every Aurevian piece is designed to become part of your story.
             Save it today and own it tomorrow.
           </p>
-          <button className={styles.bannerBtn}>
-            Continue Shopping <FaChevronRight />
-          </button>
+         
         </div>
       </div>
       <Footer/>

@@ -38,11 +38,12 @@
   background: var(--gold-gradient);
   color: white;
   text-align: center;
-  padding: 0.6rem 1rem;
+  padding: 1rem;
   font-size: 0.8rem;
   font-weight: 500;
   letter-spacing: 1.5px;
   text-transform: uppercase;
+  /* margin: 1rem auto; */
 }
 
 /* ============================================
@@ -396,7 +397,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1.5rem;
+  padding: 0.7rem 1.5rem;
   background: var(--gold-gradient);
   color: white;
   border: none;
@@ -415,8 +416,9 @@
 .removeSelected {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  padding: 0.5rem 1.5rem;
+  padding: 0.7rem 1.5rem;
   background: transparent;
   color: #c62828;
   border: 1px solid #c62828;
@@ -538,6 +540,7 @@
   border-top: 1px solid var(--gold);
   position: relative;
   overflow: hidden;
+  margin-bottom: 1rem;
 }
 
 .bottomBanner::before {
