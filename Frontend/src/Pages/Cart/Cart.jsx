@@ -1,26 +1,26 @@
-// Cart.jsx
+// src/Pages/Cart/Cart.jsx
 import React, { useState, useMemo } from 'react';
 import styles from './Cart.module.css';
 import Header from '../Layout/Header/Header';
 import Footer from '../Layout/Footer/Footer';
-import { 
-  FiShoppingBag, 
-  FiX, 
-  FiMinus, 
-  FiPlus, 
-  FiArrowLeft,
+import {
+  FiShoppingBag,
+  FiX,
+  FiMinus,
+  FiPlus,
   FiTruck,
   FiShield,
   FiRefreshCw,
   FiHeart,
-  FiStar,
-  FiAward
+  FiAward,
+  FiChevronRight,
+  FiHome
 } from 'react-icons/fi';
-import { FaHeart } from 'react-icons/fa';
+import { FaRupeeSign, FaGem } from 'react-icons/fa';
+import logo from "../../assets/Aurevianlogo.png";
 
 // Main Cart Component
 const Cart = () => {
-  // Mock data - replace with your actual data/state
   const [cartItems, setCartItems] = useState([
     {
       id: 1,
@@ -54,26 +54,27 @@ const Cart = () => {
       quantity: 1,
       available: false,
       image: 'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&q=80&auto=format&fit=crop',
-    }
+    },
+    {
+      id: 4,
+      name: 'Pearl Stud Earrings',
+      variant: '18K Gold Plated',
+      size: 'One Size',
+      price: 1299,
+      oldPrice: 1599,
+      quantity: 1,
+      available: true,
+      image: 'https://images.unsplash.com/photo-1591369822096-ffd1406f2e9a?w=600&q=80&auto=format&fit=crop',
+    },
   ]);
 
-  const [promoCode, setPromoCode] = useState('');
-  const [promoApplied, setPromoApplied] = useState(false);
-  const [promoError, setPromoError] = useState('');
-
-  // Existing calculations - DO NOT MODIFY
   const subtotal = useMemo(() => {
     return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
   }, [cartItems]);
 
-  const discount = useMemo(() => {
-    return promoApplied ? subtotal * 0.1 : 0;
-  }, [subtotal, promoApplied]);
+  const shipping = subtotal > 5000 ? 0 : 49;
+  const total = subtotal + shipping;
 
-  const shipping = subtotal > 500 ? 0 : 25;
-  const total = subtotal - discount + shipping;
-
-  // Existing functions - DO NOT MODIFY
   const updateQuantity = (id, newQuantity) => {
     if (newQuantity < 1) return;
     setCartItems(items =>
@@ -87,17 +88,7 @@ const Cart = () => {
     setCartItems(items => items.filter(item => item.id !== id));
   };
 
-  const applyPromo = () => {
-    if (promoCode.toUpperCase() === 'AUREVIAN10') {
-      setPromoApplied(true);
-      setPromoError('');
-    } else {
-      setPromoError('Invalid promo code');
-    }
-  };
-
   const handleCheckout = () => {
-    // Existing checkout logic
     alert('Proceeding to checkout...');
   };
 
@@ -105,7 +96,7 @@ const Cart = () => {
   if (cartItems.length === 0) {
     return (
       <>
-        <Header />
+        {/* <Header /> */}
         <div className={styles.cartPage}>
           <div className={styles.emptyContainer}>
             <div className={styles.emptyIconWrapper}>
@@ -127,22 +118,22 @@ const Cart = () => {
 
   return (
     <>
-      <Header />
+      {/* <Header /> */}
       <div className={styles.cartPage}>
         {/* Hero Section */}
         <section className={styles.heroSection}>
           <div className={styles.heroContent}>
             <span className={styles.heroBadge}>
-              <FiHeart /> Luxury Shopping
+              <FiHeart className={styles.heroBadgeIcon} /> Your Curated Collection
             </span>
-            <h1 className={styles.heroTitle}>Your Shopping Bag</h1>
+            <h1 className={styles.heroTitle}>Shopping Bag</h1>
             <p className={styles.heroDescription}>
-              Review your carefully selected jewellery pieces before checkout.
+              Timeless elegance, crafted for you. Review your precious pieces.
             </p>
           </div>
         </section>
 
-        {/* Stats Bar */}
+        {/* Stats Bar - More Aurevian Friendly */}
         <div className={styles.statsBar}>
           <div className={styles.statItem}>
             <span className={styles.statNumber}>{cartItems.length}</span>
@@ -150,15 +141,26 @@ const Cart = () => {
           </div>
           <div className={styles.statDivider} />
           <div className={styles.statItem}>
-            <span className={styles.statNumber}>${subtotal.toFixed(0)}</span>
+            <span className={styles.statNumber}>
+              <FaRupeeSign className={styles.rupeeIcon} />
+              {subtotal.toLocaleString('en-IN')}
+            </span>
             <span className={styles.statLabel}>Subtotal</span>
           </div>
           <div className={styles.statDivider} />
           <div className={styles.statItem}>
             <span className={styles.statNumber}>
-              {shipping === 0 ? '✓' : `$${shipping}`}
+              {shipping === 0 ? '✓ Free' : `₹${shipping}`}
             </span>
             <span className={styles.statLabel}>Shipping</span>
+          </div>
+          <div className={styles.statDivider} />
+          <div className={styles.statItem}>
+            <span className={styles.statNumber}>
+              <FaRupeeSign className={styles.rupeeIcon} />
+              {total.toLocaleString('en-IN')}
+            </span>
+            <span className={styles.statLabel}>Total</span>
           </div>
         </div>
 
@@ -166,63 +168,60 @@ const Cart = () => {
         <div className={styles.cartContainer}>
           {/* Cart Items */}
           <div className={styles.cartItemsSection}>
+            {/* Table Header */}
+            <div className={styles.tableHeader}>
+              <div className={styles.thProduct}>Product</div>
+              <div className={styles.thPrice}>Price</div>
+              <div className={styles.thQuantity}>Quantity</div>
+              <div className={styles.thSubtotal}>Subtotal</div>
+              <div className={styles.thAction}></div>
+            </div>
+
             {cartItems.map((item) => (
               <div key={item.id} className={styles.cartCard}>
                 <div className={styles.cardContent}>
-                  {/* Image */}
-                  <div className={styles.imageWrapper}>
-                    <img 
-                      src={item.image} 
-                      alt={item.name}
-                      className={styles.productImage}
-                      loading="lazy"
-                    />
-                    {!item.available && (
-                      <div className={styles.outOfStockOverlay}>
-                        <span>Out of Stock</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Product Info */}
-                  <div className={styles.productInfo}>
-                    <h3 className={styles.productName}>{item.name}</h3>
-                    <p className={styles.productVariant}>{item.variant}</p>
-                    <p className={styles.productSize}>{item.size}</p>
-                    <div className={styles.availability}>
-                      {item.available ? (
-                        <span className={styles.inStock}>In Stock</span>
-                      ) : (
-                        <span className={styles.outOfStock}>Out of Stock</span>
+                  {/* Product Info with Image */}
+                  <div className={styles.productCell}>
+                    <div className={styles.imageWrapper}>
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className={styles.productImage}
+                        loading="lazy"
+                      />
+                      {!item.available && (
+                        <div className={styles.outOfStockOverlay}>
+                          <span>Out of Stock</span>
+                        </div>
                       )}
+                    </div>
+                    <div className={styles.productInfo}>
+                      <h3 className={styles.productName}>{item.name}</h3>
+                      <p className={styles.productVariant}>{item.variant}</p>
+                      <p className={styles.productSize}>{item.size}</p>
+                      <div className={styles.availability}>
+                        {item.available ? (
+                          <span className={styles.inStock}>✓ In Stock</span>
+                        ) : (
+                          <span className={styles.outOfStock}>✕ Out of Stock</span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Quantity Controls */}
-                  <div className={styles.quantityControls}>
-                    <button
-                      className={styles.quantityButton}
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      disabled={item.quantity <= 1}
-                    >
-                      <FiMinus />
-                    </button>
-                    <span className={styles.quantityValue}>{item.quantity}</span>
-                    <button
-                      className={styles.quantityButton}
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    >
-                      <FiPlus />
-                    </button>
-                  </div>
-
                   {/* Price */}
-                  <div className={styles.priceSection}>
+                  <div className={styles.priceCell}>
                     <div className={styles.priceWrapper}>
-                      <span className={styles.currentPrice}>${item.price}</span>
+                      <span className={styles.currentPrice}>
+                        <FaRupeeSign className={styles.rupeeIconSmall} />
+                        {item.price.toLocaleString('en-IN')}
+                      </span>
                       {item.oldPrice && (
                         <>
-                          <span className={styles.oldPrice}>${item.oldPrice}</span>
+                          <span className={styles.oldPrice}>
+                            <FaRupeeSign className={styles.rupeeIconSmall} />
+                            {item.oldPrice.toLocaleString('en-IN')}
+                          </span>
                           <span className={styles.savings}>
                             Save {Math.round(((item.oldPrice - item.price) / item.oldPrice) * 100)}%
                           </span>
@@ -231,71 +230,77 @@ const Cart = () => {
                     </div>
                   </div>
 
+                  {/* Quantity Controls */}
+                  <div className={styles.quantityCell}>
+                    <div className={styles.quantityControls}>
+                      <button
+                        className={styles.quantityButton}
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        disabled={item.quantity <= 1}
+                      >
+                        <FiMinus />
+                      </button>
+                      <span className={styles.quantityValue}>{item.quantity}</span>
+                      <button
+                        className={styles.quantityButton}
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      >
+                        <FiPlus />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Subtotal */}
+                  <div className={styles.subtotalCell}>
+                    <span className={styles.subtotalPrice}>
+                      <FaRupeeSign className={styles.rupeeIconSmall} />
+                      {(item.price * item.quantity).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+
                   {/* Remove Button */}
-                  <button
-                    className={styles.removeButton}
-                    onClick={() => removeItem(item.id)}
-                  >
-                    <FiX /> Remove
-                  </button>
+                  <div className={styles.actionCell}>
+                    <button
+                      className={styles.removeButton}
+                      onClick={() => removeItem(item.id)}
+                    >
+                      <FiX />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
-
-            {/* Continue Shopping */}
-            <button className={styles.continueShopping}>
-              <FiArrowLeft /> Continue Shopping
-            </button>
           </div>
 
           {/* Order Summary */}
           <div className={styles.orderSummary}>
             <div className={styles.summaryCard}>
-              <h3 className={styles.summaryTitle}>Order Summary</h3>
-              
-              <div className={styles.summaryRow}>
-                <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
-              </div>
-              
-              {discount > 0 && (
-                <div className={styles.summaryRow}>
-                  <span>Discount</span>
-                  <span className={styles.discountAmount}>-${discount.toFixed(2)}</span>
-                </div>
-              )}
-              
-              <div className={styles.summaryRow}>
-                <span>Shipping</span>
-                <span>{shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`}</span>
+              <div className={styles.summaryHeader}>
+                <FaGem className={styles.summaryIcon} />
+                <h3 className={styles.summaryTitle}>Order Summary</h3>
               </div>
 
-              {/* Promo Code */}
-              <div className={styles.promoSection}>
-                <div className={styles.promoInputWrapper}>
-                  <input
-                    type="text"
-                    className={styles.promoInput}
-                    placeholder="Enter promo code"
-                    value={promoCode}
-                    onChange={(e) => setPromoCode(e.target.value)}
-                  />
-                  <button
-                    className={styles.promoButton}
-                    onClick={applyPromo}
-                  >
-                    Apply
-                  </button>
-                </div>
-                {promoError && <span className={styles.promoError}>{promoError}</span>}
-                {promoApplied && <span className={styles.promoSuccess}>✓ Promo applied!</span>}
+              <div className={styles.summaryRow}>
+                <span>Items ({cartItems.reduce((acc, item) => acc + item.quantity, 0)})</span>
+                <span>
+                  <FaRupeeSign className={styles.rupeeIconSmall} />
+                  {subtotal.toLocaleString('en-IN')}
+                </span>
+              </div>
+
+              <div className={styles.summaryRow}>
+                <span>Shipping</span>
+                <span>{shipping === 0 ? 'Free' : `₹${shipping}`}</span>
               </div>
 
               <div className={styles.divider} />
 
               <div className={styles.totalRow}>
                 <span className={styles.totalLabel}>Total</span>
-                <span className={styles.totalAmount}>${total.toFixed(2)}</span>
+                <span className={styles.totalAmount}>
+                  <FaRupeeSign className={styles.rupeeIconLarge} />
+                  {total.toLocaleString('en-IN')}
+                </span>
               </div>
 
               <button className={styles.checkoutButton} onClick={handleCheckout}>
@@ -305,30 +310,59 @@ const Cart = () => {
               {/* Trust Section */}
               <div className={styles.trustSection}>
                 <div className={styles.trustCard}>
-                  <FiTruck />
-                  <h4>Free Shipping</h4>
-                  <p>On orders over $500</p>
+                  <FiTruck className={styles.trustIcon} />
+                  <div className={styles.trustInfo}>
+                    <h4>Free Shipping</h4>
+                    <p>Free shipping for order above ₹5000</p>
+                  </div>
                 </div>
                 <div className={styles.trustCard}>
-                  <FiShield />
-                  <h4>Secure Payment</h4>
-                  <p>256-bit encryption</p>
+                  <FiShield className={styles.trustIcon} />
+                  <div className={styles.trustInfo}>
+                    <h4>Flexible Payment</h4>
+                    <p>Multiple secure payment options</p>
+                  </div>
                 </div>
                 <div className={styles.trustCard}>
-                  <FiRefreshCw />
-                  <h4>Easy Returns</h4>
-                  <p>30-day policy</p>
+                  <FiRefreshCw className={styles.trustIcon} />
+                  <div className={styles.trustInfo}>
+                    <h4>24x7 Support</h4>
+                    <p>We support online all days</p>
+                  </div>
                 </div>
               </div>
 
               {/* Loyalty Badge */}
-              <div className={styles.loyaltyBadge}>
-                <FiAward />
-                <span>Earn rewards on every purchase</span>
-              </div>
+              
             </div>
           </div>
         </div>
+
+        {/* Why Aurevian Section - With Logo */}
+        <section className={styles.whyAurevian}>
+          <div className={styles.whyContent}>
+            <div className={styles.whyLeft}>
+              <span className={styles.whyBadge}>✦ Aurevian Promise</span>
+              <h2 className={styles.whyTitle}>Gold-Plated Confidence,
+                <br />Worn Every Day
+              </h2>
+              <p className={styles.whyDesc}>
+               Aurevian designs jewellery for the days that don't wait for an occasion.
+Every piece is crafted to be lived in, loved, and worn with confidence.
+              </p>
+              <p className={styles.whyDesc}>
+                Timeless Craftsmanship - Designed to last a lifetime
+Everyday Luxury - Fine jewellery for real life
+Confidence Guaranteed - Wear it, love it, live in it
+              </p>
+            </div>
+            <div className={styles.whyRight}>
+              <div className={styles.whyImage}>
+                <img src={logo} alt="Aurevian Logo" className={styles.whyImageLogo} />
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
       <Footer />
     </>
