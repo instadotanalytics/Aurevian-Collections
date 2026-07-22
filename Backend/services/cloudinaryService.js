@@ -229,7 +229,7 @@ class CloudinaryService {
   }
 
   /* ==========================================================
-     Extract Public ID
+     Extract Public ID from URL
   ========================================================== */
 
   extractPublicId(url) {
@@ -242,12 +242,14 @@ class CloudinaryService {
 
       let path = url.substring(uploadIndex + 7);
 
+      // Remove version prefix if present
       const versionMatch = path.match(/^v\d+\//);
 
       if (versionMatch) {
         path = path.substring(versionMatch[0].length);
       }
 
+      // Remove file extension
       const extensionIndex = path.lastIndexOf(".");
 
       if (extensionIndex !== -1) {
@@ -260,6 +262,110 @@ class CloudinaryService {
 
       return null;
     }
+  }
+
+  /* ==========================================================
+     Extract Public ID from Object (Helper)
+  ========================================================== */
+
+  extractPublicIdFromObject(imageObject) {
+    if (!imageObject) return null;
+
+    // If it's a string (old format), extract from URL
+    if (typeof imageObject === "string") {
+      return this.extractPublicId(imageObject);
+    }
+
+    // If it's an object with publicId
+    if (imageObject.publicId) {
+      return imageObject.publicId;
+    }
+
+    // If it has url but no publicId, extract from URL
+    if (imageObject.url) {
+      return this.extractPublicId(imageObject.url);
+    }
+
+    return null;
+  }
+
+  /* ==========================================================
+     Get Image Data (Helper)
+  ========================================================== */
+
+  getImageData(imageObject) {
+    if (!imageObject) {
+      return {
+        url: null,
+        publicId: null,
+      };
+    }
+
+    // If it's a string (old format), treat as URL
+    if (typeof imageObject === "string") {
+      return {
+        url: imageObject,
+        publicId: this.extractPublicId(imageObject),
+      };
+    }
+
+    // If it's an object with url and publicId
+    if (imageObject.url || imageObject.publicId) {
+      return {
+        url: imageObject.url || null,
+        publicId: imageObject.publicId || this.extractPublicId(imageObject.url),
+      };
+    }
+
+    return {
+      url: null,
+      publicId: null,
+    };
+  }
+
+  /* ==========================================================
+     Normalize Image Data (for consistent storage)
+  ========================================================== */
+
+  normalizeImageData(imageData) {
+    if (!imageData) {
+      return {
+        url: null,
+        publicId: null,
+      };
+    }
+
+    // If it's a string (URL)
+    if (typeof imageData === "string") {
+      return {
+        url: imageData,
+        publicId: this.extractPublicId(imageData),
+      };
+    }
+
+    // If it's an object
+    if (typeof imageData === "object") {
+      return {
+        url: imageData.url || null,
+        publicId: imageData.publicId || this.extractPublicId(imageData.url),
+      };
+    }
+
+    return {
+      url: null,
+      publicId: null,
+    };
+  }
+
+  /* ==========================================================
+     Create Null Image Data
+  ========================================================== */
+
+  getNullImageData() {
+    return {
+      url: null,
+      publicId: null,
+    };
   }
 }
 

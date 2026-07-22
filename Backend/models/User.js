@@ -3,28 +3,304 @@
 import mongoose from 'mongoose';
 import validator from 'validator';
 
-const userSchema = new mongoose.Schema({
-  firstName: { 
-    type: String, 
-    required: [true, 'First name is required'], 
-    trim: true 
+import mongoose from "mongoose";
+import validator from "validator";
+
+// ============================================
+// ADDRESS SUB SCHEMA
+// ============================================
+
+const addressSchema = new mongoose.Schema(
+  {
+    recipientName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    phone: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    alternatePhone: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    addressType: {
+      type: String,
+      enum: ["Home", "Work", "Office", "Other"],
+      default: "Home",
+      set: (v) =>
+        v ? v.charAt(0).toUpperCase() + v.slice(1).toLowerCase() : v,
+    },
+
+    house: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    apartment: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    street: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    landmark: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    area: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    city: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    state: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    country: {
+      type: String,
+      default: "India",
+      trim: true,
+    },
+
+    pincode: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    deliveryInstructions: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    isDefault: {
+      type: Boolean,
+      default: false,
+    },
   },
-  lastName: { 
-    type: String, 
-    required: [true, 'Last name is required'], 
-    trim: true 
+  {
+    timestamps: true,
   },
-  fullName: { 
-    type: String, 
-    required: [true, 'Full name is required'], 
-    trim: true 
+);
+
+// ============================================
+// MAIN USER SCHEMA
+// ============================================
+
+const userSchema = new mongoose.Schema(
+  {
+    firstName: {
+      type: String,
+      required: [true, "First name is required"],
+      trim: true,
+    },
+    lastName: {
+      type: String,
+      required: [true, "Last name is required"],
+      trim: true,
+    },
+    fullName: {
+      type: String,
+      required: [true, "Full name is required"],
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      lowercase: true,
+      trim: true,
+      validate: [validator.isEmail, "Please provide a valid email"],
+    },
+    firebaseUid: {
+      type: String,
+      sparse: true,
+    },
+    authProvider: {
+      type: String,
+      enum: ["google", "email", "phone"],
+      default: "email",
+    },
+    password: {
+      type: String,
+      select: false,
+    },
+    profileImage: {
+      url: {
+        type: String,
+        default: null,
+      },
+      publicId: {
+        type: String,
+        default: null,
+      },
+    },
+    avatar: {
+      url: {
+        type: String,
+        default: null,
+      },
+      publicId: {
+        type: String,
+        default: null,
+      },
+    },
+    phone: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    gender: {
+      type: String,
+      enum: ["Male", "Female", "Other", "Prefer not to say"],
+      default: "Prefer not to say",
+    },
+    dateOfBirth: {
+      type: Date,
+      default: null,
+    },
+    role: {
+      type: String,
+      enum: ["user", "seller", "super_admin"],
+      default: "user",
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    phoneVerified: {
+      type: Boolean,
+      default: false,
+    },
+    lastLogin: {
+      type: Date,
+      default: null,
+    },
+    memberSince: {
+      type: Date,
+      default: Date.now,
+    },
+    rewardPoints: {
+      type: Number,
+      default: 0,
+    },
+    totalSpent: {
+      type: Number,
+      default: 0,
+    },
+    totalOrders: {
+      type: Number,
+      default: 0,
+    },
+    profileCompletion: {
+      type: Number,
+      default: 20,
+    },
+    loginHistory: [
+      {
+        timestamp: { type: Date, default: Date.now },
+        ipAddress: { type: String },
+        userAgent: { type: String },
+        success: { type: Boolean, default: true },
+      },
+    ],
+    otp: {
+      code: { type: String },
+      type: { type: String, enum: ["email", "phone", "forgot_password"] },
+      expiresAt: { type: Date },
+      verified: { type: Boolean, default: false },
+      createdAt: { type: Date, default: Date.now },
+    },
+    refreshTokens: [
+      {
+        token: { type: String, required: true },
+        expiresAt: { type: Date, required: true },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
+    notifications: [
+      {
+        type: {
+          type: String,
+          enum: ["order", "promotion", "system", "welcome"],
+        },
+        title: { type: String, required: true },
+        message: { type: String, required: true },
+        isRead: { type: Boolean, default: false },
+        link: { type: String },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
+    preferences: {
+      emailNotifications: {
+        type: Boolean,
+        default: true,
+      },
+      orderUpdates: {
+        type: Boolean,
+        default: true,
+      },
+      promotionalEmails: {
+        type: Boolean,
+        default: false,
+      },
+      twoFactorAuth: {
+        type: Boolean,
+        default: false,
+      },
+      darkMode: {
+        type: Boolean,
+        default: false,
+      },
+      newsletter: {
+        type: Boolean,
+        default: false,
+      },
+      language: {
+        type: String,
+        default: "en",
+      },
+      currency: {
+        type: String,
+        default: "INR",
+      },
+    },
+    addresses: [addressSchema],
   },
-  email: { 
-    type: String, 
-    required: [true, 'Email is required'],
-    lowercase: true,
-    trim: true,
-    validate: [validator.isEmail, 'Please provide a valid email']
+  {
+    timestamps: true,
   },
   firebaseUid: { 
     type: String,
@@ -153,7 +429,7 @@ const userSchema = new mongoose.Schema({
     language: { type: String, default: 'en' },
     currency: { type: String, default: 'CHF' },
   },
-}, { 
+   { 
   timestamps: true 
 });
 
@@ -171,26 +447,79 @@ userSchema.index({ phone: 1 }, { sparse: true });
 // ============================================
 // VIRTUALS
 // ============================================
-userSchema.virtual('initials').get(function() {
+userSchema.virtual("initials").get(function () {
   if (this.firstName && this.lastName) {
     return `${this.firstName.charAt(0)}${this.lastName.charAt(0)}`.toUpperCase();
   }
-  return this.firstName?.charAt(0)?.toUpperCase() || 'U';
+  return this.firstName?.charAt(0)?.toUpperCase() || "U";
 });
 
-userSchema.virtual('displayName').get(function() {
-  return this.fullName || `${this.firstName || ''} ${this.lastName || ''}`.trim() || 'User';
+userSchema.virtual("displayName").get(function () {
+  return (
+    this.fullName ||
+    `${this.firstName || ""} ${this.lastName || ""}`.trim() ||
+    "User"
+  );
+});
+
+userSchema.virtual("profileImageUrl").get(function () {
+  return this.profileImage?.url || this.avatar?.url || null;
+});
+
+userSchema.virtual("defaultAddress").get(function () {
+  return this.addresses?.find((address) => address.isDefault);
 });
 
 // ============================================
 // ✅ NO PRE-SAVE MIDDLEWARE
 // ============================================
+// JSON & OBJECT CONFIGURATION
+// ============================================
+userSchema.set("toJSON", {
+  virtuals: true,
+});
+
+userSchema.set("toObject", {
+  virtuals: true,
+});
+
+// ============================================
+// PRE-SAVE MIDDLEWARE
+// ============================================
+userSchema.pre("save", function () {
+  // Set fullName from firstName and lastName
+  if (this.firstName || this.lastName) {
+    this.fullName = `${this.firstName || ""} ${this.lastName || ""}`.trim();
+  }
+
+  // If fullName exists but firstName doesn't
+  if (this.fullName && !this.firstName) {
+    const parts = this.fullName.trim().split(/\s+/);
+    this.firstName = parts[0] || "";
+    this.lastName = parts.slice(1).join(" ");
+  }
+
+  // Calculate profile completion
+  let completion = 20;
+
+  if (this.phone) completion += 15;
+  if (this.gender && this.gender !== "Prefer not to say") completion += 10;
+  if (this.dateOfBirth) completion += 10;
+  if (this.avatar?.url) completion += 15;
+  if (this.addresses?.length) completion += 30;
+
+  this.profileCompletion = Math.min(completion, 100);
+
+  if (!this.memberSince) {
+    this.memberSince = this.createdAt || new Date();
+  }
+});
 
 // ============================================
 // METHODS
 // ============================================
 
-userSchema.methods.addLoginHistory = async function(data) {
+userSchema.methods.addLoginHistory = async function (data) {
   this.loginHistory.push({
     timestamp: data.timestamp || new Date(),
     ipAddress: data.ipAddress,
@@ -204,7 +533,7 @@ userSchema.methods.addLoginHistory = async function(data) {
   return this.save();
 };
 
-userSchema.methods.addRefreshToken = async function(token, expiresAt) {
+userSchema.methods.addRefreshToken = async function (token, expiresAt) {
   this.refreshTokens.push({ token, expiresAt });
   if (this.refreshTokens.length > 10) {
     this.refreshTokens = this.refreshTokens.slice(-10);
@@ -212,17 +541,17 @@ userSchema.methods.addRefreshToken = async function(token, expiresAt) {
   return this.save();
 };
 
-userSchema.methods.removeRefreshToken = async function(token) {
-  this.refreshTokens = this.refreshTokens.filter(rt => rt.token !== token);
+userSchema.methods.removeRefreshToken = async function (token) {
+  this.refreshTokens = this.refreshTokens.filter((rt) => rt.token !== token);
   return this.save();
 };
 
-userSchema.methods.clearRefreshTokens = async function() {
+userSchema.methods.clearRefreshTokens = async function () {
   this.refreshTokens = [];
   return this.save();
 };
 
-userSchema.methods.addNotification = async function(notification) {
+userSchema.methods.addNotification = async function (notification) {
   this.notifications.push({
     type: notification.type,
     title: notification.title,
@@ -239,20 +568,20 @@ userSchema.methods.addNotification = async function(notification) {
 // STATIC METHODS
 // ============================================
 
-userSchema.statics.findByEmail = function(email) {
+userSchema.statics.findByEmail = function (email) {
   return this.findOne({ email: email.toLowerCase() });
 };
 
-userSchema.statics.findByFirebaseUid = function(uid) {
+userSchema.statics.findByFirebaseUid = function (uid) {
   return this.findOne({ firebaseUid: uid });
 };
 
-userSchema.statics.findOrCreateFromFirebase = async function(firebaseUser) {
+userSchema.statics.findOrCreateFromFirebase = async function (firebaseUser) {
   try {
-    console.log('🔍 Finding user with firebaseUid:', firebaseUser.uid);
-    
+    console.log("🔍 Finding user with firebaseUid:", firebaseUser.uid);
+
     let user = await this.findOne({ firebaseUid: firebaseUser.uid });
-    
+
     if (!user) {
       console.log('👤 User not found, creating new...');
       
@@ -266,11 +595,30 @@ userSchema.statics.findOrCreateFromFirebase = async function(firebaseUser) {
         firstName: nameParts[0] || 'User',
         lastName: nameParts.slice(1).join(' ') || '',
         fullName: fullName,
+      console.log("👤 User not found, creating new...");
+
+      const nameParts = firebaseUser.displayName
+        ? firebaseUser.displayName.split(" ")
+        : ["User", ""];
+
+      // Create user object without saving yet
+      user = new this({
+        firstName: nameParts[0] || "User",
+        lastName: nameParts.slice(1).join(" ") || "",
+        fullName:
+          firebaseUser.displayName ||
+          `${nameParts[0] || "User"} ${nameParts.slice(1).join(" ") || ""}`,
         email: firebaseUser.email,
         firebaseUid: firebaseUser.uid,
-        profileImage: firebaseUser.photoURL || null,
-        avatar: firebaseUser.photoURL || null,
-        authProvider: 'google',
+        profileImage: {
+          url: firebaseUser.photoURL || null,
+          publicId: null,
+        },
+        avatar: {
+          url: firebaseUser.photoURL || null,
+          publicId: null,
+        },
+        authProvider: "google",
         isVerified: firebaseUser.emailVerified || false,
         emailVerified: firebaseUser.emailVerified || false,
         lastLogin: new Date(),
@@ -301,44 +649,68 @@ userSchema.statics.findOrCreateFromFirebase = async function(firebaseUser) {
       
       await user.save();
       console.log(`✅ New user created: ${user.email}`);
-      
+        memberSince: new Date(),
+        profileCompletion: 20,
+      });
+
+      // Save user
+      await user.save();
+      console.log(`✅ New user created: ${user.email}`);
+
+      // Add welcome notification
       await user.addNotification({
-        type: 'welcome',
-        title: 'Welcome to Aurevian Collections!',
+        type: "welcome",
+        title: "Welcome to Aurevian Collections!",
         message: `Welcome ${user.firstName}! We're excited to have you on board.`,
         link: '/',
+        link: "/dashboard",
       });
-      
     } else {
       console.log('👤 User found, updating...');
       
       if (firebaseUser.displayName && !user.fullName) {
         const parts = firebaseUser.displayName.split(' ');
+      console.log("👤 User found, updating...");
+
+      // Update existing user - Fix for display name
+      if (firebaseUser.displayName) {
+        const parts = firebaseUser.displayName.split(" ");
         user.firstName = parts[0] || user.firstName;
-        user.lastName = parts.slice(1).join(' ') || user.lastName;
+        user.lastName = parts.slice(1).join(" ") || user.lastName;
         user.fullName = firebaseUser.displayName;
       }
-      if (firebaseUser.photoURL && !user.profileImage) {
-        user.profileImage = firebaseUser.photoURL;
-        user.avatar = firebaseUser.photoURL;
+
+      // Update photo every login to keep in sync with Google
+      if (firebaseUser.photoURL) {
+        user.profileImage = {
+          url: firebaseUser.photoURL,
+          publicId: user.profileImage?.publicId || null,
+        };
+
+        user.avatar = {
+          url: firebaseUser.photoURL,
+          publicId: user.avatar?.publicId || null,
+        };
       }
+
       if (firebaseUser.emailVerified) {
         user.emailVerified = true;
         user.isVerified = true;
       }
+
       user.lastLogin = new Date();
-      
+
       await user.save();
       console.log(`✅ User updated: ${user.email}`);
     }
-    
+
     return user;
   } catch (error) {
-    console.error('❌ Error in findOrCreateFromFirebase:', error.message);
-    console.error('Stack:', error.stack);
+    console.error("❌ Error in findOrCreateFromFirebase:", error.message);
+    console.error("Stack:", error.stack);
     throw error;
   }
 };
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 export default User;

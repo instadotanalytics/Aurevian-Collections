@@ -4,8 +4,9 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slices/authSlice.js";
 import superAdminReducer from "./slices/superAdminSlice.js";
 import sellerReducer from "./slices/sellerSlice.js";
-import bannerReducer from './slices/bannerSlice.js';
-import blogReducer from './slices/blogSlice.js'; // ✅ ADD BLOG REDUCER
+import bannerReducer from "./slices/bannerSlice.js";
+import blogReducer from "./slices/blogSlice.js";
+import profileReducer from "./slices/profileSlice.js"; // ✅ ADD PROFILE REDUCER
 
 export const store = configureStore({
   reducer: {
@@ -13,7 +14,8 @@ export const store = configureStore({
     superAdmin: superAdminReducer,
     seller: sellerReducer,
     banners: bannerReducer,
-    blogs: blogReducer, // ✅ ADD BLOG REDUCER HERE
+    blogs: blogReducer,
+    profile: profileReducer, // ✅ ADD PROFILE REDUCER HERE
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -23,11 +25,11 @@ export const store = configureStore({
           // Auth actions
           "auth/login/fulfilled",
           "auth/logout",
-          
+
           // Super Admin actions
           "superAdmin/login/fulfilled",
           "superAdmin/logout",
-          
+
           // Seller actions
           "seller/login/fulfilled",
           "seller/logout",
@@ -36,7 +38,7 @@ export const store = configureStore({
           "seller/updateProfile/fulfilled",
           "seller/uploadDocuments/fulfilled",
           "seller/fetchDashboard/fulfilled",
-          
+
           // Banner actions
           "banners/fetchActive/fulfilled",
           "banners/fetchAll/fulfilled",
@@ -49,8 +51,8 @@ export const store = configureStore({
           "banners/delete/fulfilled",
           "banners/toggle/fulfilled",
           "banners/updateOrder/fulfilled",
-          
-          // ✅ Blog actions
+
+          // Blog actions
           "blogs/fetchAll/fulfilled",
           "blogs/fetchAll/pending",
           "blogs/fetchAll/rejected",
@@ -72,8 +74,40 @@ export const store = configureStore({
           "blogs/delete/fulfilled",
           "blogs/delete/pending",
           "blogs/delete/rejected",
+
+          // Profile actions
+          "profile/fetchProfile/fulfilled",
+          "profile/fetchProfile/pending",
+          "profile/fetchProfile/rejected",
+          "profile/updateProfile/fulfilled",
+          "profile/updateProfile/pending",
+          "profile/updateProfile/rejected",
+          "profile/uploadAvatar/fulfilled",
+          "profile/uploadAvatar/pending",
+          "profile/uploadAvatar/rejected",
+          "profile/addAddress/fulfilled",
+          "profile/addAddress/pending",
+          "profile/addAddress/rejected",
+          "profile/updateAddress/fulfilled",
+          "profile/updateAddress/pending",
+          "profile/updateAddress/rejected",
+          "profile/deleteAddress/fulfilled",
+          "profile/deleteAddress/pending",
+          "profile/deleteAddress/rejected",
+          "profile/fetchOrders/fulfilled",
+          "profile/fetchOrders/pending",
+          "profile/fetchOrders/rejected",
+          "profile/fetchWishlist/fulfilled",
+          "profile/fetchWishlist/pending",
+          "profile/fetchWishlist/rejected",
+          "profile/removeWishlist/fulfilled",
+          "profile/removeWishlist/pending",
+          "profile/removeWishlist/rejected",
+          "profile/updatePreferences/fulfilled",
+          "profile/updatePreferences/pending",
+          "profile/updatePreferences/rejected",
         ],
-        
+
         // ✅ Ignore these action paths
         ignoredActionPaths: [
           "payload.createdAt",
@@ -92,7 +126,7 @@ export const store = configureStore({
           "payload.publishedAt",
           "meta.arg", // Fix for FormData serialization
         ],
-        
+
         // ✅ Ignore these paths in state
         ignoredPaths: [
           // Seller paths
@@ -107,7 +141,7 @@ export const store = configureStore({
           "seller.dashboardStats",
           "seller.recentOrders",
           "seller.recentActivities",
-          
+
           // Banner paths
           "banners.banners.*.createdAt",
           "banners.banners.*.updatedAt",
@@ -121,8 +155,8 @@ export const store = configureStore({
           "banners.selectedBanner.updatedAt",
           "banners.selectedBanner.startDate",
           "banners.selectedBanner.endDate",
-          
-          // ✅ Blog paths
+
+          // Blog paths
           "blogs.blogs.*.createdAt",
           "blogs.blogs.*.updatedAt",
           "blogs.blogs.*.publishedAt",
@@ -133,6 +167,18 @@ export const store = configureStore({
           "blogs.searchResults.*.updatedAt",
           "blogs.searchResults.*.publishedAt",
           "blogs.stats",
+
+          // Profile paths
+          "profile.profile.createdAt",
+          "profile.profile.updatedAt",
+          "profile.profile.lastLogin",
+          "profile.profile.dateOfBirth",
+          "profile.profile.createdAt",
+          "profile.orders.*.createdAt",
+          "profile.orders.*.updatedAt",
+          "profile.orders.*.deliveredAt",
+          "profile.orders.*.shippedAt",
+          "profile.orders.*.confirmedAt",
         ],
       },
     }),

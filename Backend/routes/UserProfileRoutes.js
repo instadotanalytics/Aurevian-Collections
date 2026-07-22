@@ -1,10 +1,10 @@
 // Backend/routes/userProfileRoutes.js
 
-import express from 'express';
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
-import { protect } from '../middleware/auth.js';
+import express from "express";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import { protect } from "../middleware/auth.js";
 import {
   getUserProfile,
   updateUserProfile,
@@ -17,8 +17,8 @@ import {
   updateUserAddress,
   deleteUserAddress,
   updateUserPreferences,
-  changeUserPassword
-} from '../controllers/userProfileController.js';
+  changeUserPassword,
+} from "../controllers/userProfileController.js";
 
 const router = express.Router();
 
@@ -27,75 +27,80 @@ const router = express.Router();
 // ============================================
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadDir = 'uploads/avatars';
+    const uploadDir = "uploads/avatars";
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `avatar-${req.user._id}-${uniqueSuffix}${path.extname(file.originalname)}`);
-  }
+    const userId = req.user?._id || "unknown";
+    cb(
+      null,
+      `avatar-${userId}-${Date.now()}${path.extname(file.originalname)}`,
+    );
+  },
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png|gif|webp/;
-  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = allowedTypes.test(file.mimetype);
-  
-  if (mimetype && extname) {
-    return cb(null, true);
+  const allowedMimeTypes = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+  ];
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    cb(null, true);
   } else {
-    cb(new Error('Only image files are allowed (jpeg, jpg, png, gif, webp)'));
+    cb(new Error("Only image files are allowed (jpeg, jpg, png, gif, webp)"));
   }
 };
 
 const upload = multer({
-  storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-  fileFilter: fileFilter
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter,
 });
 
+const handleMulterError = (err, req, res, next) => {
+  if (err) {
+    return res.status(400).json({ success: false, message: err.message });
+  }
+  next();
+};
+
+const uploadAvatar = upload.fields([
+  { name: "avatar", maxCount: 1 },
+  { name: "profileImage", maxCount: 1 },
+]);
+
 // ============================================
-// ALL ROUTES ARE PROTECTED
+// ALL ROUTES ARE PROTECTED (self only — req.user from JWT)
 // ============================================
 router.use(protect);
 
-// ============================================
-// USER PROFILE ROUTES
-// ============================================
+router.get("/user-profile/me", getUserProfile);
+router.put("/user-profile", updateUserProfile);
 
-// Get user profile
-router.get('/user-profile/:userId', getUserProfile);
+router.post(
+  "/user-profile/avatar",
+  uploadAvatar,
+  handleMulterError,
+  uploadProfileAvatar,
+);
+router.delete("/user-profile/avatar", deleteProfileAvatar);
 
-// Update user profile
-router.put('/user-profile/:userId', updateUserProfile);
+router.delete("/user-profile", deleteUserAccount);
 
-// Upload profile photo
-router.post('/user-profile/:userId/avatar', upload.single('avatar'), uploadProfileAvatar);
+router.get("/user-profile/orders", getUserOrders);
+router.get("/user-profile/wishlist", getUserWishlist);
 
-// Delete profile photo
-router.delete('/user-profile/:userId/avatar', deleteProfileAvatar);
+router.post("/user-profile/addresses", addUserAddress);
+router.put("/user-profile/addresses/:addressId", updateUserAddress);
+router.delete("/user-profile/addresses/:addressId", deleteUserAddress);
 
-// Delete user account
-router.delete('/user-profile/:userId', deleteUserAccount);
-
-// Get user orders
-router.get('/user-profile/:userId/orders', getUserOrders);
-
-// Get user wishlist
-router.get('/user-profile/:userId/wishlist', getUserWishlist);
-
-// Address routes
-router.post('/user-profile/:userId/addresses', addUserAddress);
-router.put('/user-profile/:userId/addresses/:addressId', updateUserAddress);
-router.delete('/user-profile/:userId/addresses/:addressId', deleteUserAddress);
-
-// Preferences
-router.put('/user-profile/:userId/preferences', updateUserPreferences);
-
-// Change password
-router.put('/user-profile/:userId/change-password', changeUserPassword);
+router.put("/user-profile/preferences", updateUserPreferences);
+router.put("/user-profile/change-password", changeUserPassword);
 
 export default router;
