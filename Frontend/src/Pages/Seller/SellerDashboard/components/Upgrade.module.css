@@ -1,0 +1,223 @@
+/* src/Pages/Seller/SellerDashboard/components/Upgrade.module.css */
+
+.upgradeContainer {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.upgradeHeader {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.upgradeTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.headerIcon {
+  color: #6366f1;
+  font-size: 2.5rem;
+}
+
+.upgradeSubtitle {
+  color: #6b7280;
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+}
+
+.plansGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.planCard {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 2px solid #e5e7eb;
+  position: relative;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.planCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.planCard.popular {
+  border-color: #6366f1;
+  background: linear-gradient(135deg, #faf5ff 0%, #ffffff 100%);
+}
+
+.planCard.current {
+  border-color: #10b981;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+}
+
+.popularBadge {
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  padding: 4px 16px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.currentBadge {
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 4px 16px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.planHeader {
+  margin-bottom: 1.5rem;
+}
+
+.planName {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.planPrice {
+  margin-top: 0.5rem;
+}
+
+.price {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.planCard.popular .price {
+  color: #6366f1;
+}
+
+.featuresList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+  flex-grow: 1;
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  color: #4b5563;
+  font-size: 0.95rem;
+}
+
+.checkIcon {
+  color: #10b981;
+  flex-shrink: 0;
+  font-size: 1rem;
+}
+
+.upgradeBtn {
+  width: 100%;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #e5e7eb;
+  color: #6b7280;
+}
+
+.upgradeBtn:not(:disabled):hover {
+  transform: scale(1.02);
+}
+
+.upgradeBtn.currentBtn {
+  background: #10b981;
+  color: white;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.upgradeBtn.popularBtn {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+}
+
+.upgradeBtn.popularBtn:hover {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.upgradeBtn:not(.currentBtn):not(.popularBtn):hover {
+  background: #d1d5db;
+}
+
+.upgradeFooter {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.footerText {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.contactLink {
+  color: #6366f1;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.contactLink:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .upgradeContainer {
+    padding: 1rem;
+  }
+
+  .upgradeTitle {
+    font-size: 2rem;
+  }
+
+  .plansGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .planCard {
+    padding: 1.5rem;
+  }
+
+  .price {
+    font-size: 1.75rem;
+  }
+}

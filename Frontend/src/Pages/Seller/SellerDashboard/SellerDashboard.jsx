@@ -15,6 +15,7 @@ import {
   FiShield,
   FiBell,
   FiSearch,
+  FiTrendingUp, // ✅ Import upgrade icon
 } from "react-icons/fi";
 
 import { useSelector, useDispatch } from "react-redux";
@@ -25,6 +26,7 @@ import styles from "./SellerDashboard.module.css";
 
 // Components
 import DashboardOverview from "./components/DashboardOverview";
+import Upgrade from "./components/Upgrade"; // ✅ Import Upgrade component
 
 // ✅ Import seller logout action
 import { sellerLogout } from "../../../redux/slices/sellerSlice";
@@ -84,12 +86,18 @@ const SellerDashboard = () => {
     { id: "customers", label: "Customers", icon: FiUsers },
     { id: "reviews", label: "Reviews", icon: FiMessageSquare },
     { id: "settings", label: "Settings", icon: FiSettings },
+    // ✅ Add Upgrade menu item
+    { id: "upgrade", label: "Upgrade", icon: FiTrendingUp },
   ];
 
   const renderContent = () => {
     switch (activeMenu) {
       case "dashboard":
         return <DashboardOverview />;
+      
+      // ✅ Add Upgrade case
+      case "upgrade":
+        return <Upgrade />;
 
       default:
         return (
