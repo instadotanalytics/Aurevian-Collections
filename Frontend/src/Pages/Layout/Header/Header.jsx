@@ -76,6 +76,17 @@ const Header = ({
   const navigate = useNavigate();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
 
+  // Google (and any future OAuth) logins store the picture as a nested
+  // object on the user document — { url, publicId } — for both
+  // `profileImage` and `avatar` (see backend/models/User.js). Read it
+  // through this single helper everywhere in this component instead of
+  // assuming `user.profileImage` is already a URL string; that mismatch
+  // was silently breaking every avatar render if you look for
+  // `user.profileImage` truthiness alone (an object is always truthy,
+  // so it passed the check but produced a broken <img src="[object
+  // Object]">).
+  const avatarUrl = user?.profileImage?.url || user?.avatar?.url || null;
+
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -214,11 +225,11 @@ const Header = ({
   // Account dropdown items with icons
   const accountMenuItems = isAuthenticated
     ? [
-        { icon: FiUserIcon, label: "Profile", path: "/profile" },
-        { icon: FiOrders, label: "My Orders", path: "/orders" },
-        { icon: FiHeart, label: "Wishlist", path: "/wishlist" },
-        { icon: FiSettings, label: "Settings", path: "/settings" },
-      ]
+      { icon: FiUserIcon, label: "Profile", path: "/profile" },
+      { icon: FiOrders, label: "My Orders", path: "/orders" },
+      { icon: FiHeart, label: "Wishlist", path: "/wishlist" },
+      { icon: FiSettings, label: "Settings", path: "/settings" },
+    ]
     : [];
 
   return (
@@ -484,9 +495,9 @@ const Header = ({
               aria-expanded={accountOpen}
               onClick={() => setAccountOpen((p) => !p)}
             >
-              {isAuthenticated && user?.profileImage ? (
+              {isAuthenticated && avatarUrl ? (
                 <img
-                  src={user.profileImage}
+                  src={avatarUrl}
                   alt={user.fullName || "User"}
                   className={styles.avatarImage}
                 />
@@ -507,9 +518,9 @@ const Header = ({
                   {/* User Info */}
                   <div className={styles.accountUserInfo}>
                     <div className={styles.accountAvatar}>
-                      {user.profileImage ? (
+                      {avatarUrl ? (
                         <img
-                          src={user.profileImage}
+                          src={avatarUrl}
                           alt={user.fullName}
                           className={styles.accountAvatarImage}
                         />
@@ -610,7 +621,7 @@ const Header = ({
           <SearchPanel
             styles={styles}
             isOpen={mobileOpen}
-            onClose={() => {}}
+            onClose={() => { }}
             onSearchSubmit={onSearchSubmit}
             variant="inline"
             autoFocus={false}
@@ -623,9 +634,9 @@ const Header = ({
         {isAuthenticated && user && (
           <div className={styles.drawerUserInfo}>
             <div className={styles.drawerUserAvatar}>
-              {user.profileImage ? (
+              {avatarUrl ? (
                 <img
-                  src={user.profileImage}
+                  src={avatarUrl}
                   alt={user.fullName}
                   className={styles.drawerUserAvatarImage}
                 />
@@ -793,15 +804,13 @@ const Header = ({
             >
               Account
               <FiChevronRight
-                className={`${styles.drawerChevron} ${
-                  openAccordion === "account" ? styles.rotated : ""
-                }`}
+                className={`${styles.drawerChevron} ${openAccordion === "account" ? styles.rotated : ""
+                  }`}
               />
             </button>
             <div
-              className={`${styles.drawerSubPanel} ${
-                openAccordion === "account" ? styles.expanded : ""
-              }`}
+              className={`${styles.drawerSubPanel} ${openAccordion === "account" ? styles.expanded : ""
+                }`}
             >
               <div className={styles.drawerSubGroup}>
                 {isAuthenticated ? (

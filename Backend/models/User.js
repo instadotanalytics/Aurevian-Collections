@@ -311,8 +311,10 @@ const userSchema = new mongoose.Schema(
 // ============================================
 // INDEXES
 // ============================================
+// NOTE: firebaseUid already declares `unique: true` on the field itself above,
+// which auto-creates its index — the old explicit userSchema.index({ firebaseUid: 1 })
+// call has been removed to stop the duplicate-index warning.
 userSchema.index({ email: 1 }, { unique: true });
-userSchema.index({ firebaseUid: 1 }, { unique: true, sparse: true });
 userSchema.index({ role: 1, isActive: 1 });
 userSchema.index({ createdAt: -1 });
 userSchema.index({ phone: 1 }, { sparse: true });
@@ -357,6 +359,16 @@ userSchema.set("toObject", {
 // ============================================
 // PRE-SAVE MIDDLEWARE
 // ============================================
+
+// Safety net: normalize any invalid/empty gender value to a valid enum option
+// before the built-in validators run. This protects against legacy documents
+// or any future code path that might set gender to "" or null.
+userSchema.pre("validate", function () {
+  if (!this.gender || this.gender.trim() === "") {
+    this.gender = "Prefer not to say";
+  }
+});
+
 userSchema.pre("save", function () {
   // Set fullName from firstName and lastName
   if (this.firstName || this.lastName) {
@@ -494,7 +506,7 @@ userSchema.statics.findOrCreateFromFirebase = async function (firebaseUser) {
         type: "welcome",
         title: "Welcome to Aurevian Collections!",
         message: `Welcome ${user.firstName}! We're excited to have you on board.`,
-        link: "/dashboard",
+        link: "/",
       });
     } else {
       console.log("👤 User found, updating...");

@@ -23,7 +23,7 @@ const sellerSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: function () {
-        return `${this.firstName || ''} ${this.lastName || ''}`.trim();
+        return `${this.firstName || ""} ${this.lastName || ""}`.trim();
       },
     },
     brandName: {
@@ -98,21 +98,21 @@ const sellerSchema = new mongoose.Schema(
     // ============================================
     resetPasswordToken: {
       type: String,
-      select: false
+      select: false,
     },
     resetPasswordExpire: {
       type: Date,
-      select: false
+      select: false,
     },
 
     // ============================================
     // BUSINESS ADDRESS
     // ============================================
     businessAddress: {
-      street: { type: String, trim: true, default: '' },
-      city: { type: String, trim: true, default: '' },
-      state: { type: String, trim: true, default: '' },
-      pincode: { type: String, trim: true, default: '' },
+      street: { type: String, trim: true, default: "" },
+      city: { type: String, trim: true, default: "" },
+      state: { type: String, trim: true, default: "" },
+      pincode: { type: String, trim: true, default: "" },
       country: { type: String, default: "Switzerland" },
     },
 
@@ -120,10 +120,10 @@ const sellerSchema = new mongoose.Schema(
     // DOCUMENTS
     // ============================================
     documents: {
-      panNumber: { type: String, trim: true, default: '' },
+      panNumber: { type: String, trim: true, default: "" },
       panCard: { type: String, default: null },
       panVerified: { type: Boolean, default: false },
-      aadhaarNumber: { type: String, trim: true, default: '' },
+      aadhaarNumber: { type: String, trim: true, default: "" },
       aadhaarCard: { type: String, default: null },
       aadhaarVerified: { type: Boolean, default: false },
       gstNumber: { type: String, trim: true, default: null },
@@ -141,13 +141,13 @@ const sellerSchema = new mongoose.Schema(
     // BANK DETAILS
     // ============================================
     bankDetails: {
-      accountHolderName: { type: String, trim: true, default: '' },
-      bankName: { type: String, trim: true, default: '' },
-      accountNumber: { type: String, trim: true, default: '' },
-      ifscCode: { type: String, trim: true, default: '' },
-      upiId: { type: String, trim: true, default: '' },
-      swiftCode: { type: String, trim: true, default: '' },
-      iban: { type: String, trim: true, default: '' },
+      accountHolderName: { type: String, trim: true, default: "" },
+      bankName: { type: String, trim: true, default: "" },
+      accountNumber: { type: String, trim: true, default: "" },
+      ifscCode: { type: String, trim: true, default: "" },
+      upiId: { type: String, trim: true, default: "" },
+      swiftCode: { type: String, trim: true, default: "" },
+      iban: { type: String, trim: true, default: "" },
     },
 
     // ============================================
@@ -165,20 +165,22 @@ const sellerSchema = new mongoose.Schema(
         trim: true,
         unique: true,
         lowercase: true,
-        default: function() {
-          return this.storeName?.toLowerCase().replace(/[^a-z0-9]+/g, "-") || '';
-        }
+        default: function () {
+          return (
+            this.storeName?.toLowerCase().replace(/[^a-z0-9]+/g, "-") || ""
+          );
+        },
       },
       storeBanner: { type: String, default: null },
       storeLogo: { type: String, default: null },
       socialLinks: {
-        facebook: { type: String, trim: true, default: '' },
-        instagram: { type: String, trim: true, default: '' },
-        twitter: { type: String, trim: true, default: '' },
-        youtube: { type: String, trim: true, default: '' },
-        linkedin: { type: String, trim: true, default: '' },
+        facebook: { type: String, trim: true, default: "" },
+        instagram: { type: String, trim: true, default: "" },
+        twitter: { type: String, trim: true, default: "" },
+        youtube: { type: String, trim: true, default: "" },
+        linkedin: { type: String, trim: true, default: "" },
       },
-      website: { type: String, trim: true, default: '' },
+      website: { type: String, trim: true, default: "" },
     },
 
     // ============================================
@@ -188,9 +190,16 @@ const sellerSchema = new mongoose.Schema(
       {
         type: String,
         enum: [
-          "jewelry", "rings", "necklaces", "earrings",
-          "bracelets", "watches", "perfume", "sunglasses",
-          "bags", "other"
+          "jewelry",
+          "rings",
+          "necklaces",
+          "earrings",
+          "bracelets",
+          "watches",
+          "perfume",
+          "sunglasses",
+          "bags",
+          "other",
         ],
       },
     ],
@@ -200,7 +209,7 @@ const sellerSchema = new mongoose.Schema(
     // SHIPPING DETAILS
     // ============================================
     shippingDetails: {
-      courierPreference: { type: String, trim: true, default: '' },
+      courierPreference: { type: String, trim: true, default: "" },
       processingTime: {
         type: String,
         enum: ["1-2 days", "2-3 days", "3-5 days", "5-7 days"],
@@ -219,7 +228,13 @@ const sellerSchema = new mongoose.Schema(
     kyc: {
       status: {
         type: String,
-        enum: ["not_submitted", "submitted", "under_review", "verified", "rejected"],
+        enum: [
+          "not_submitted",
+          "submitted",
+          "under_review",
+          "verified",
+          "rejected",
+        ],
         default: "not_submitted",
       },
       submittedAt: { type: Date, default: null },
@@ -315,8 +330,8 @@ const sellerSchema = new mongoose.Schema(
     loginHistory: [
       {
         timestamp: { type: Date, default: Date.now },
-        ipAddress: { type: String, default: '' },
-        userAgent: { type: String, default: '' },
+        ipAddress: { type: String, default: "" },
+        userAgent: { type: String, default: "" },
         success: { type: Boolean, default: true },
       },
     ],
@@ -343,16 +358,17 @@ const sellerSchema = new mongoose.Schema(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
+  },
 );
 
 // ============================================
 // INDEXES
 // ============================================
-sellerSchema.index({ email: 1 });
-sellerSchema.index({ phone: 1 });
-sellerSchema.index({ "storeInfo.storeName": 1 });
-sellerSchema.index({ "storeInfo.storeSlug": 1 });
+// NOTE: email, phone, storeInfo.storeName, and storeInfo.storeSlug all already
+// declare `unique: true` on their field definitions above, which auto-creates
+// their indexes. The old explicit index calls for those four fields have been
+// removed to stop the duplicate-index warnings. Only non-unique compound/
+// lookup indexes remain below.
 sellerSchema.index({ status: 1, isActive: 1 });
 sellerSchema.index({ "kyc.status": 1 });
 sellerSchema.index({ "documents.panNumber": 1 });
@@ -362,7 +378,11 @@ sellerSchema.index({ "documents.aadhaarNumber": 1 });
 // VIRTUALS
 // ============================================
 sellerSchema.virtual("displayName").get(function () {
-  return this.fullName || `${this.firstName || ''} ${this.lastName || ''}`.trim() || "Seller";
+  return (
+    this.fullName ||
+    `${this.firstName || ""} ${this.lastName || ""}`.trim() ||
+    "Seller"
+  );
 });
 
 sellerSchema.virtual("initials").get(function () {
@@ -375,23 +395,23 @@ sellerSchema.virtual("initials").get(function () {
 // ============================================
 // ✅ GET RESET PASSWORD TOKEN
 // ============================================
-sellerSchema.methods.getResetPasswordToken = function() {
-  const resetToken = crypto.randomBytes(20).toString('hex');
-  
+sellerSchema.methods.getResetPasswordToken = function () {
+  const resetToken = crypto.randomBytes(20).toString("hex");
+
   this.resetPasswordToken = crypto
-    .createHash('sha256')
+    .createHash("sha256")
     .update(resetToken)
-    .digest('hex');
-  
+    .digest("hex");
+
   this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
-  
+
   return resetToken;
 };
 
 // ============================================
 // ✅ COMPARE PASSWORD
 // ============================================
-sellerSchema.methods.comparePassword = async function(candidatePassword) {
+sellerSchema.methods.comparePassword = async function (candidatePassword) {
   if (!this.password) return false;
   return await bcrypt.compare(candidatePassword, this.password);
 };
@@ -438,12 +458,16 @@ sellerSchema.methods.verifyPhoneOTP = function (otpCode) {
 // ============================================
 // STATUS METHODS
 // ============================================
-sellerSchema.methods.updateStatus = async function (status, reason = null, updatedBy = null) {
+sellerSchema.methods.updateStatus = async function (
+  status,
+  reason = null,
+  updatedBy = null,
+) {
   this.status = status;
   this.statusUpdatedAt = new Date();
   this.statusUpdatedBy = updatedBy;
   if (reason) this.statusReason = reason;
-  
+
   if (status === "approved") {
     this.isVerified = true;
     this.isActive = true;
@@ -464,17 +488,22 @@ sellerSchema.methods.updateStatus = async function (status, reason = null, updat
   return this.save();
 };
 
-sellerSchema.methods.updateKycStatus = async function (status, reason = null, reviewedBy = null) {
+sellerSchema.methods.updateKycStatus = async function (
+  status,
+  reason = null,
+  reviewedBy = null,
+) {
   this.kyc.status = status;
   this.kyc.reviewedAt = new Date();
   this.kyc.reviewedBy = reviewedBy;
-  
+
   if (status === "verified") {
     this.kyc.verifiedAt = new Date();
     this.kyc.rejectionReason = null;
     this.kyc.documentStatus.panCard = "verified";
     this.kyc.documentStatus.aadhaarCard = "verified";
-    if (this.documents?.gstNumber) this.kyc.documentStatus.gstCertificate = "verified";
+    if (this.documents?.gstNumber)
+      this.kyc.documentStatus.gstCertificate = "verified";
     this.kyc.documentStatus.bankDetails = "verified";
   } else if (status === "rejected") {
     this.kyc.rejectedAt = new Date();
@@ -486,22 +515,30 @@ sellerSchema.methods.updateKycStatus = async function (status, reason = null, re
 // ============================================
 // LOGIN HISTORY
 // ============================================
-sellerSchema.methods.addLoginHistory = async function (ipAddress, userAgent, success = true) {
+sellerSchema.methods.addLoginHistory = async function (
+  ipAddress,
+  userAgent,
+  success = true,
+) {
   this.loginHistory.push({
     timestamp: new Date(),
     ipAddress,
     userAgent,
     success,
   });
-  if (this.loginHistory.length > 50) this.loginHistory = this.loginHistory.slice(-50);
+  if (this.loginHistory.length > 50)
+    this.loginHistory = this.loginHistory.slice(-50);
   this.lastLogin = success ? new Date() : this.lastLogin;
   return this.save();
 };
 
 sellerSchema.methods.updateStats = async function (data) {
-  if (data.totalProducts !== undefined) this.stats.totalProducts += data.totalProducts;
-  if (data.totalOrders !== undefined) this.stats.totalOrders += data.totalOrders;
-  if (data.totalRevenue !== undefined) this.stats.totalRevenue += data.totalRevenue;
+  if (data.totalProducts !== undefined)
+    this.stats.totalProducts += data.totalProducts;
+  if (data.totalOrders !== undefined)
+    this.stats.totalOrders += data.totalOrders;
+  if (data.totalRevenue !== undefined)
+    this.stats.totalRevenue += data.totalRevenue;
   if (data.totalSales !== undefined) this.stats.totalSales += data.totalSales;
   return this.save();
 };
@@ -534,7 +571,9 @@ sellerSchema.statics.getApprovedSellers = function () {
 };
 
 sellerSchema.statics.getPendingKycSellers = function () {
-  return this.find({ "kyc.status": { $in: ["submitted", "under_review"] } }).sort({ "kyc.submittedAt": 1 });
+  return this.find({
+    "kyc.status": { $in: ["submitted", "under_review"] },
+  }).sort({ "kyc.submittedAt": 1 });
 };
 
 const Seller = mongoose.model("Seller", sellerSchema);
