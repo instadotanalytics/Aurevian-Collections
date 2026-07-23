@@ -10,7 +10,7 @@ import {
   FiMessageCircle,
 } from "react-icons/fi";
 import styles from "./Contact.module.css";
-import Header from "../Layout/Header/Header";
+
 import Footer from "../Layout/Footer/Footer";
 import Contactimg from "../../assets/ContactImage.png"
 
@@ -106,7 +106,7 @@ const Contact = () => {
 
   return (
     <>
-      <Header />
+   
       <div className={styles.contactPage}>
         <div className={styles.contactContainer}>
           {/* Hero Section */}

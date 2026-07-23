@@ -1,23 +1,10 @@
 // src/Components/Auth/GoogleLoginButton.jsx
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-// ✅ Fix: Correct path for firebase config
-import { auth } from '../Auth/firebase/firebaseConfig';
-// ✅ Fix: Correct path for auth slice
-import { loginWithGoogle } from '../redux/slices/authSlice';
-import toast from 'react-hot-toast';
-import styles from './GoogleLoginButton.module.css';
 
-const GoogleLoginButton = ({ 
-  label = "Continue with Google", 
-  className = "", 
-  redirectTo = "/" 
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+// src/auth/GoogleLoginButton.jsx
 import { auth } from "../Auth/firebase/firebaseConfig";
 import { loginWithGoogle } from "../redux/slices/authSlice";
 import toast from "react-hot-toast";
@@ -35,8 +22,8 @@ const GoogleLoginButton = ({
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
-      
-      console.log('🔑 Starting Google login...');
+
+      console.log("🔑 Starting Google login...");
 
       // Create Google Provider
       const provider = new GoogleAuthProvider();
@@ -48,56 +35,35 @@ const GoogleLoginButton = ({
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       const idToken = await user.getIdToken();
-      
-      console.log('✅ Firebase token received, sending to backend...');
-      
+
+      console.log("✅ Firebase token received, sending to backend...");
+
+      // Login to Backend
       const response = await dispatch(loginWithGoogle(idToken)).unwrap();
-      
-      console.log('📊 Backend response:', response);
-      
-      // ✅ Check if login was successful
+
+      console.log("📊 Backend response:", response);
+
+      // Check if login was successful
       if (response && (response.success || response.data)) {
-        toast.success('Welcome! Login successful.');
+        toast.success("Welcome! Login successful.");
         navigate(redirectTo);
       } else {
-        toast.error(response?.message || 'Login failed. Please try again.');
+        toast.error(response?.message || "Login failed. Please try again.");
       }
-      
     } catch (error) {
-      console.error('❌ Google login error:', error);
-      
-      // ✅ Better error handling
-      if (typeof error === 'string') {
+      console.error("❌ Google login error:", error);
+
+      // Better error handling
+      if (typeof error === "string") {
         toast.error(error);
       } else if (error?.message) {
         toast.error(error.message);
-      } else if (error?.code === 'auth/popup-closed-by-user') {
-        toast.error('Login cancelled');
-      } else if (error?.code === 'auth/network-request-failed') {
-        toast.error('Network error. Please check your connection.');
-      } else {
-        toast.error('Google login failed. Please try again.');
-
-      // Get Firebase ID Token
-      const idToken = await result.user.getIdToken();
-
-      // Login to Backend
-      await dispatch(loginWithGoogle(idToken)).unwrap();
-
-      // Success
-      toast.success("Google login successful!");
-      navigate(redirectTo);
-    } catch (error) {
-      console.error("Google Login Error:", error);
-
-      if (error.code === "auth/popup-closed-by-user") {
-        toast.error("Login cancelled.");
-      } else if (error.code === "auth/network-request-failed") {
+      } else if (error?.code === "auth/popup-closed-by-user") {
+        toast.error("Login cancelled");
+      } else if (error?.code === "auth/network-request-failed") {
         toast.error("Network error. Please check your connection.");
-      } else if (error.message) {
-        toast.error(error.message);
       } else {
-        toast.error("Google login failed.");
+        toast.error("Google login failed. Please try again.");
       }
     } finally {
       setLoading(false);

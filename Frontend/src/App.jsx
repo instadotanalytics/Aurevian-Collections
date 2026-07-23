@@ -33,7 +33,7 @@ import AboutUs from "./Pages/About/AboutUs";
 import Franchise from "./Pages/About/Franchise";
 import Cart from "./Pages/Cart/Cart";
 import Wishlist from "./Pages/Wishlist/Wishlist.jsx";
-
+import Story from "./Pages/About/Story";
 // ============================================
 // AUTHENTICATION PAGES
 // ============================================
@@ -78,6 +78,7 @@ const ROUTES = {
   RESET_PASSWORD: "/reset-password",
   DASHBOARD: "/",
   PROFILE: "/profile",
+  STORY: "/stories",
   SUPER_ADMIN_LOGIN: "/super-admin/login",
   SUPER_ADMIN_DASHBOARD: "/super-admin/dashboard",
   // Seller Routes
@@ -214,6 +215,14 @@ const App = () => {
             }
           />
           <Route
+            path="/stories"
+            element={
+              <LayoutWithHeader>
+                <Story />
+              </LayoutWithHeader>
+            }
+          />
+          <Route
             path="/why-aurevian"
             element={
               <LayoutWithHeader>
@@ -248,9 +257,9 @@ const App = () => {
           <Route
             path="/cart"
             element={
-              <LayoutWithHeader>
+            
                 <Cart />
-              </LayoutWithHeader>
+            
             }
           />
           <Route
