@@ -1,8 +1,5 @@
 // backend/models/User.js
 
-import mongoose from 'mongoose';
-import validator from 'validator';
-
 import mongoose from "mongoose";
 import validator from "validator";
 
@@ -139,6 +136,7 @@ const userSchema = new mongoose.Schema(
     firebaseUid: {
       type: String,
       sparse: true,
+      unique: true,
     },
     authProvider: {
       type: String,
@@ -298,140 +296,17 @@ const userSchema = new mongoose.Schema(
       },
     },
     addresses: [addressSchema],
+    wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
   },
   {
     timestamps: true,
   },
-  firebaseUid: { 
-    type: String,
-    sparse: true,
-    unique: true
-  },
-  authProvider: { 
-    type: String, 
-    enum: ['google', 'email', 'phone'], 
-    default: 'email' 
-  },
-  password: { 
-    type: String, 
-    select: false 
-  },
-  profileImage: { 
-    type: String, 
-    default: null 
-  },
-  avatar: { 
-    type: String, 
-    default: null 
-  },
-  // ✅ PHONE FIELD - NO UNIQUE, WITH DEFAULT UNIQUE VALUE
-  phone: { 
-    type: String, 
-    trim: true,
-    // ✅ Instead of null, use a unique default value for Google users
-    default: function() {
-      if (this.authProvider === 'google') {
-        return `google_${this.firebaseUid || Date.now()}`;
-      }
-      return null;
-    },
-    sparse: true
-  },
-  gender: { 
-    type: String, 
-    enum: ['male', 'female', 'other', ''], 
-    default: '' 
-  },
-  dateOfBirth: { 
-    type: Date, 
-    default: null 
-  },
-  address: {
-    street: { type: String, default: '' },
-    city: { type: String, default: '' },
-    state: { type: String, default: '' },
-    pincode: { type: String, default: '' },
-    country: { type: String, default: 'India' }
-  },
-  addresses: [{
-    name: { type: String, required: true },
-    street: { type: String, required: true },
-    city: { type: String, required: true },
-    state: { type: String, required: true },
-    pincode: { type: String, required: true },
-    country: { type: String, default: 'India' },
-    phone: { type: String, required: true },
-    isDefault: { type: Boolean, default: false }
-  }],
-  wishlist: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product'
-  }],
-  role: { 
-    type: String, 
-    enum: ['user', 'seller', 'admin', 'super_admin'], 
-    default: 'user' 
-  },
-  isVerified: { 
-    type: Boolean, 
-    default: false 
-  },
-  isActive: { 
-    type: Boolean, 
-    default: true 
-  },
-  emailVerified: { 
-    type: Boolean, 
-    default: false 
-  },
-  phoneVerified: { 
-    type: Boolean, 
-    default: false 
-  },
-  lastLogin: { 
-    type: Date, 
-    default: null 
-  },
-  loginHistory: [{
-    timestamp: { type: Date, default: Date.now },
-    ipAddress: { type: String },
-    userAgent: { type: String },
-    success: { type: Boolean, default: true },
-  }],
-  otp: {
-    code: { type: String },
-    type: { type: String, enum: ['email', 'phone', 'forgot_password'] },
-    expiresAt: { type: Date },
-    verified: { type: Boolean, default: false },
-    createdAt: { type: Date, default: Date.now },
-  },
-  refreshTokens: [{
-    token: { type: String, required: true },
-    expiresAt: { type: Date, required: true },
-    createdAt: { type: Date, default: Date.now },
-  }],
-  notifications: [{
-    type: { type: String, enum: ['order', 'promotion', 'system', 'welcome'] },
-    title: { type: String, required: true },
-    message: { type: String, required: true },
-    isRead: { type: Boolean, default: false },
-    link: { type: String },
-    createdAt: { type: Date, default: Date.now },
-  }],
-  preferences: {
-    emailNotifications: { type: Boolean, default: true },
-    orderUpdates: { type: Boolean, default: true },
-    promotionalEmails: { type: Boolean, default: false },
-    darkMode: { type: Boolean, default: false },
-    twoFactorAuth: { type: Boolean, default: false },
-    newsletter: { type: Boolean, default: false },
-    notifications: { type: Boolean, default: true },
-    language: { type: String, default: 'en' },
-    currency: { type: String, default: 'CHF' },
-  },
-   { 
-  timestamps: true 
-});
+);
 
 // ============================================
 // INDEXES
@@ -440,8 +315,6 @@ userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ firebaseUid: 1 }, { unique: true, sparse: true });
 userSchema.index({ role: 1, isActive: 1 });
 userSchema.index({ createdAt: -1 });
-userSchema.index({ 'address.pincode': 1 });
-// ✅ Phone index remains but now with unique values
 userSchema.index({ phone: 1 }, { sparse: true });
 
 // ============================================
@@ -470,8 +343,6 @@ userSchema.virtual("defaultAddress").get(function () {
   return this.addresses?.find((address) => address.isDefault);
 });
 
-// ============================================
-// ✅ NO PRE-SAVE MIDDLEWARE
 // ============================================
 // JSON & OBJECT CONFIGURATION
 // ============================================
@@ -583,18 +454,6 @@ userSchema.statics.findOrCreateFromFirebase = async function (firebaseUser) {
     let user = await this.findOne({ firebaseUid: firebaseUser.uid });
 
     if (!user) {
-      console.log('👤 User not found, creating new...');
-      
-      const nameParts = firebaseUser.displayName ? firebaseUser.displayName.split(' ') : ['User', ''];
-      const fullName = firebaseUser.displayName || `${nameParts[0] || 'User'} ${nameParts.slice(1).join(' ') || ''}`;
-      
-      // ✅ Generate unique phone for Google users
-      const uniquePhone = `google_${firebaseUser.uid}_${Date.now()}`;
-      
-      user = new this({
-        firstName: nameParts[0] || 'User',
-        lastName: nameParts.slice(1).join(' ') || '',
-        fullName: fullName,
       console.log("👤 User not found, creating new...");
 
       const nameParts = firebaseUser.displayName
@@ -622,33 +481,6 @@ userSchema.statics.findOrCreateFromFirebase = async function (firebaseUser) {
         isVerified: firebaseUser.emailVerified || false,
         emailVerified: firebaseUser.emailVerified || false,
         lastLogin: new Date(),
-        phone: uniquePhone, // ✅ Unique phone for Google users
-        gender: '',
-        dateOfBirth: null,
-        address: {
-          street: '',
-          city: '',
-          state: '',
-          pincode: '',
-          country: 'India'
-        },
-        addresses: [],
-        wishlist: [],
-        preferences: {
-          emailNotifications: true,
-          orderUpdates: true,
-          promotionalEmails: false,
-          darkMode: false,
-          twoFactorAuth: false,
-          newsletter: false,
-          notifications: true,
-          language: 'en',
-          currency: 'CHF'
-        }
-      });
-      
-      await user.save();
-      console.log(`✅ New user created: ${user.email}`);
         memberSince: new Date(),
         profileCompletion: 20,
       });
@@ -662,14 +494,9 @@ userSchema.statics.findOrCreateFromFirebase = async function (firebaseUser) {
         type: "welcome",
         title: "Welcome to Aurevian Collections!",
         message: `Welcome ${user.firstName}! We're excited to have you on board.`,
-        link: '/',
         link: "/dashboard",
       });
     } else {
-      console.log('👤 User found, updating...');
-      
-      if (firebaseUser.displayName && !user.fullName) {
-        const parts = firebaseUser.displayName.split(' ');
       console.log("👤 User found, updating...");
 
       // Update existing user - Fix for display name
