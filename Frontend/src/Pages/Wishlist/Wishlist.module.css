@@ -469,6 +469,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: var(--transition);
+  text-decoration: none;
 }
 
 .exploreBtn:hover {

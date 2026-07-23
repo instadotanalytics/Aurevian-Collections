@@ -1,5 +1,6 @@
 // src/Pages/Wishlist/Wishlist.jsx
 import React, { useState } from "react";
+import { useNavigate,Link } from "react-router-dom";
 import {
   FaHeart,
   FaStar,
@@ -63,6 +64,7 @@ const wishlistData = [
 ];
 
 const Wishlist = () => {
+  const navigate = useNavigate();
   const [wishlist, setWishlist] = useState(wishlistData);
   const [selectedItems, setSelectedItems] = useState([]);
   const [quantities, setQuantities] = useState({});
@@ -91,6 +93,10 @@ const Wishlist = () => {
       ...prev,
       [id]: Math.max(1, (prev[id] || 1) + change)
     }));
+  };
+
+  const handleExploreCollection = () => {
+    navigate("/");
   };
 
   const renderStars = (rating) => {
@@ -141,7 +147,15 @@ const Wishlist = () => {
             <FaHeart className={styles.emptyHeart} />
             <h2>Your wishlist is empty</h2>
             <p>Start adding your favourite jewellery pieces</p>
-            <button className={styles.exploreBtn}>Explore Collection</button>
+            {/* <button 
+              className={styles.exploreBtn} 
+              onClick={handleExploreCollection}
+            > */}
+              <Link to="/" className={styles.exploreBtn}>
+  Explore Collection
+</Link>
+              
+            {/* </button> */}
           </div>
         ) : (
           wishlist.map((item) => (
@@ -281,7 +295,6 @@ const Wishlist = () => {
             Every Aurevian piece is designed to become part of your story.
             Save it today and own it tomorrow.
           </p>
-         
         </div>
       </div>
       <Footer/>
