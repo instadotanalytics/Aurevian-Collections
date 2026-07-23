@@ -32,7 +32,7 @@ import { FaRupeeSign, FaRegGem } from "react-icons/fa";
 import styles from "./Support.module.css";
 // import Header from "../Layout/Header/Header";
 import Footer from "../Layout/Footer/Footer";
-import Contactimg from "../../assets/ContactImage.png";
+import Contactimg from "../../assets/supportbanner.png";
 
 const Support = () => {
   const [openFaq, setOpenFaq] = useState(null);
