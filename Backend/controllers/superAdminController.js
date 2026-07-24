@@ -3,6 +3,7 @@
 import Seller from "../models/Seller.js";
 import SuperAdmin from "../models/SuperAdmin.js";
 import emailService from "../services/emailService.js";
+import Subscription from "../models/Subscription.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
@@ -67,7 +68,7 @@ export const superAdminLogin = async (req, res) => {
     await admin.save();
 
     const isProduction = process.env.NODE_ENV === "production";
-    
+
     // Set cookie with longer expiry
     res.cookie("superAdminToken", accessToken, {
       httpOnly: true,
@@ -481,6 +482,123 @@ export const approveSeller = async (req, res) => {
 };
 
 // ============================================
+// GET ALL PAYMENTS (subscription orders across all sellers)
+// ============================================
+export const getAllPayments = async (req, res) => {
+  try {
+    const { status, planId, page = 1, limit = 20, search } = req.query;
+
+    const query = {};
+    if (status && status !== "all") query.status = status;
+    if (planId && planId !== "all") query.planId = planId;
+
+    if (search) {
+      const matchingSellers = await Seller.find({
+        $or: [
+          { email: { $regex: search, $options: "i" } },
+          { fullName: { $regex: search, $options: "i" } },
+          { "storeInfo.storeName": { $regex: search, $options: "i" } },
+        ],
+      }).select("_id");
+      query.seller = { $in: matchingSellers.map((s) => s._id) };
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const [payments, total] = await Promise.all([
+      Subscription.find(query)
+        .populate(
+          "seller",
+          "firstName lastName fullName email storeInfo.storeName",
+        )
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit)),
+      Subscription.countDocuments(query),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      data: payments,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit)),
+      },
+    });
+  } catch (error) {
+    console.error("❌ Get all payments error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch payments",
+      error: error.message,
+    });
+  }
+};
+
+// ============================================
+// GET PAYMENT STATS (revenue + breakdowns)
+// ============================================
+export const getPaymentStats = async (req, res) => {
+  try {
+    const [revenueAgg] = await Subscription.aggregate([
+      { $match: { status: "paid" } },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: "$amount" },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const [statusCounts, planCounts] = await Promise.all([
+      Subscription.aggregate([
+        { $group: { _id: "$status", count: { $sum: 1 } } },
+      ]),
+      Subscription.aggregate([
+        { $match: { status: "paid" } },
+        {
+          $group: {
+            _id: "$planId",
+            count: { $sum: 1 },
+            revenue: { $sum: "$amount" },
+          },
+        },
+      ]),
+    ]);
+
+    const byStatus = {};
+    statusCounts.forEach((s) => {
+      byStatus[s._id] = s.count;
+    });
+
+    const byPlan = {};
+    planCounts.forEach((p) => {
+      byPlan[p._id] = { count: p.count, revenue: p.revenue };
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        totalRevenue: revenueAgg?.totalRevenue || 0,
+        totalPaidOrders: revenueAgg?.count || 0,
+        byStatus,
+        byPlan,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Get payment stats error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch payment stats",
+      error: error.message,
+    });
+  }
+};
+
+// ============================================
 // REJECT SELLER (account/login access only — does NOT touch KYC)
 // ============================================
 export const rejectSeller = async (req, res) => {
@@ -595,9 +713,9 @@ export const suspendSeller = async (req, res) => {
         seller.storeInfo.storeName,
         reason,
       );
-      console.log('✅ Suspension email sent to:', seller.email);
+      console.log("✅ Suspension email sent to:", seller.email);
     } catch (emailError) {
-      console.error('❌ Failed to send suspension email:', emailError.message);
+      console.error("❌ Failed to send suspension email:", emailError.message);
       // Don't fail the request if email fails
     }
 
@@ -615,7 +733,6 @@ export const suspendSeller = async (req, res) => {
     });
   }
 };
-
 
 // ============================================
 // UNSUSPEND SELLER

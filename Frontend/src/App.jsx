@@ -383,6 +383,26 @@ const App = () => {
               </SuperAdminRoute>
             }
           />
+          <Route
+            path={`${ROUTES.SUPER_ADMIN_DASHBOARD}/seller-details/:id`}
+            element={
+              <SuperAdminRoute>
+                <LayoutWithoutHeader>
+                  <SuperAdminDashboard />
+                </LayoutWithoutHeader>
+              </SuperAdminRoute>
+            }
+          />
+          <Route
+            path={`${ROUTES.SUPER_ADMIN_DASHBOARD}/:section`}
+            element={
+              <SuperAdminRoute>
+                <LayoutWithoutHeader>
+                  <SuperAdminDashboard />
+                </LayoutWithoutHeader>
+              </SuperAdminRoute>
+            }
+          />
 
           {/* ============================================
                 SELLER ROUTES - WITHOUT HEADER (Auth Pages)

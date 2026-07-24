@@ -1,4 +1,6 @@
-// Backend/index.js
+import dns from 'dns';
+
+dns.setServers(['8.8.8.8']);// Backend/index.js
 
 import "dotenv/config";
 

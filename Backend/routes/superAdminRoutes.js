@@ -17,6 +17,8 @@ import {
   verifySellerKyc,
   getSellerStats,
   deleteSeller,
+  getAllPayments,
+  getPaymentStats,
 } from "../controllers/superAdminController.js";
 import { protectSuperAdmin } from "../middleware/superAdminAuth.js";
 
@@ -33,9 +35,8 @@ router.post("/refresh", refreshSuperAdminToken);
 // ============================================
 router.use(protectSuperAdmin);
 
-// ✅ ADD THIS - Verify token route
 router.get("/verify-token", (req, res) => {
-  console.log('✅ Token verified for admin:', req.admin._id);
+  console.log("✅ Token verified for admin:", req.admin._id);
   res.status(200).json({
     success: true,
     message: "Token is valid",
@@ -57,5 +58,11 @@ router.put("/sellers/:id/suspend", suspendSeller);
 router.put("/sellers/:id/unsuspend", unsuspendSeller);
 router.put("/sellers/:id/verify-kyc", verifySellerKyc);
 router.delete("/sellers/:id", deleteSeller);
+
+// ============================================
+// PAYMENTS
+// ============================================
+router.get("/payments", getAllPayments);
+router.get("/payments/stats", getPaymentStats);
 
 export default router;
