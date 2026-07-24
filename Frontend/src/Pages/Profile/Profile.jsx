@@ -12,6 +12,7 @@ import {
   FiLogOut,
   FiCamera,
   FiCheck,
+  FiGift, // ✅ Add this
 } from "react-icons/fi";
 import { logoutUser } from "../../redux/slices/authSlice";
 import {
@@ -29,6 +30,7 @@ import AddressTab from "./tabs/AddressTab";
 import OrdersTab from "./tabs/OrdersTab";
 import WishlistTab from "./tabs/WishlistTab";
 import SettingsTab from "./tabs/SettingsTab";
+import ReferralTab from "./tabs/ReferralTab"; // ✅ Import ReferralTab
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -133,6 +135,7 @@ const Profile = () => {
     { id: "address", label: "Address", icon: <FiMapPin /> },
     { id: "orders", label: "Orders", icon: <FiPackage /> },
     { id: "wishlist", label: "Wishlist", icon: <FiHeart /> },
+    { id: "referrals", label: "Referrals", icon: <FiGift /> }, // ✅ Add Referral Tab
     { id: "settings", label: "Settings", icon: <FiSettings /> },
   ];
 
@@ -226,6 +229,7 @@ const Profile = () => {
             {activeTab === "address" && <AddressTab />}
             {activeTab === "orders" && <OrdersTab />}
             {activeTab === "wishlist" && <WishlistTab />}
+            {activeTab === "referrals" && <ReferralTab />} {/* ✅ Add ReferralTab */}
             {activeTab === "settings" && <SettingsTab />}
           </div>
         </div>

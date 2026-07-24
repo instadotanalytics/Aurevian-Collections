@@ -1,6 +1,6 @@
 // src/Pages/Profile/tabs/OverviewTab.jsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   FiEdit2,
@@ -19,8 +19,16 @@ import {
   FiCheckCircle,
   FiAward,
   FiAlertCircle,
+  FiGift,
+  FiCopy,
+  FiShare2,
+  FiUsers,
+  FiTrendingUp,
+  FiLoader,
+  FiCheck, // ✅ Added
 } from "react-icons/fi";
 import { updateProfile } from "../../../redux/slices/profileSlice";
+import axios from "axios";
 import toast from "react-hot-toast";
 import styles from "../Profile.module.css";
 
@@ -30,6 +38,17 @@ const OverviewTab = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [formErrors, setFormErrors] = useState({});
+
+  // Referral state
+  const [referralCode, setReferralCode] = useState("");
+  const [referralStats, setReferralStats] = useState({
+    totalReferrals: 0,
+    rewardsEarned: 0,
+    pendingRewards: 0,
+  });
+  const [loadingReferral, setLoadingReferral] = useState(true);
+  const [copied, setCopied] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: profile?.firstName || "",
@@ -54,6 +73,100 @@ const OverviewTab = () => {
       country: "India",
     },
   });
+
+  // Fetch referral data on mount
+  useEffect(() => {
+    if (profile?._id) {
+      fetchReferralData();
+    }
+  }, [profile?._id]);
+
+  // Fetch referral data
+  const fetchReferralData = async () => {
+    setLoadingReferral(true);
+    try {
+      const codeResponse = await axios.get("/api/referrals/my-code", {
+        withCredentials: true,
+      });
+
+      if (codeResponse.data.success) {
+        setReferralCode(codeResponse.data.data.code);
+      }
+
+      const statsResponse = await axios.get("/api/referrals/my-stats", {
+        withCredentials: true,
+      });
+
+      if (statsResponse.data.success) {
+        setReferralStats(statsResponse.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching referral data:", error);
+      if (error.response?.status === 404) {
+        setReferralCode("");
+      }
+    } finally {
+      setLoadingReferral(false);
+    }
+  };
+
+  // Generate referral code
+  const generateReferralCode = async () => {
+    setGenerating(true);
+    try {
+      const response = await axios.post(
+        "/api/referrals/generate",
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (response.data.success) {
+        setReferralCode(response.data.data.code);
+        toast.success("🎉 Referral code generated successfully!");
+        await fetchReferralData();
+      }
+    } catch (error) {
+      console.error("Error generating referral code:", error);
+      toast.error(error.response?.data?.message || "Failed to generate referral code");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  // Copy referral link
+  const copyReferralLink = () => {
+    const referralLink = `${window.location.origin}/signup?ref=${referralCode}`;
+    navigator.clipboard.writeText(referralLink);
+    setCopied(true);
+    toast.success("📋 Referral link copied!");
+    setTimeout(() => setCopied(false), 3000);
+  };
+
+  // Share referral link
+  const shareReferralLink = async () => {
+    const referralLink = `${window.location.origin}/signup?ref=${referralCode}`;
+    const shareData = {
+      title: "Join Aurevian Collections",
+      text: `🎉 Use my referral code ${referralCode} and get exciting discounts on your first order!`,
+      url: referralLink,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        toast.success("✅ Shared successfully!");
+      } else {
+        copyReferralLink();
+      }
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        console.error("Error sharing:", error);
+        toast.error("Failed to share");
+      }
+    }
+  };
 
   // Calculate profile completion
   const calculateCompletion = () => {
@@ -104,7 +217,6 @@ const OverviewTab = () => {
   const validate = () => {
     const errors = {};
 
-    // First Name validation
     if (!formData.firstName.trim()) {
       errors.firstName = "First name is required";
     } else if (formData.firstName.length > 40) {
@@ -113,7 +225,6 @@ const OverviewTab = () => {
       errors.firstName = "First name should contain only alphabets";
     }
 
-    // Last Name validation
     if (!formData.lastName.trim()) {
       errors.lastName = "Last name is required";
     } else if (formData.lastName.length > 40) {
@@ -122,19 +233,16 @@ const OverviewTab = () => {
       errors.lastName = "Last name should contain only alphabets";
     }
 
-    // Phone validation
     if (!formData.phone) {
       errors.phone = "Mobile number is required";
     } else if (!/^[0-9]{10}$/.test(formData.phone)) {
       errors.phone = "Must be 10 digits";
     }
 
-    // Gender validation
     if (!formData.gender) {
       errors.gender = "Please select a gender";
     }
 
-    // Date of Birth validation
     if (!formData.dateOfBirth) {
       errors.dateOfBirth = "Date of birth is required";
     } else {
@@ -173,7 +281,6 @@ const OverviewTab = () => {
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
-    // Clear error for this field
     if (formErrors[name]) {
       setFormErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -250,6 +357,112 @@ const OverviewTab = () => {
             </>
           )}
         </p>
+      </div>
+
+      {/* ============================================
+          REFERRAL SECTION
+          ============================================ */}
+      <div className={styles.referralCard}>
+        <div className={styles.referralHeader}>
+          <h3>
+            <FiGift className={styles.sectionIcon} />
+            Refer & Earn
+          </h3>
+          <span className={styles.referralBadge}>Active</span>
+        </div>
+
+        <p className={styles.referralSubtext}>
+          Share your referral code and earn rewards when your friends make their
+          first purchase! 🎉
+        </p>
+
+        {loadingReferral ? (
+          <div className={styles.loadingReferral}>
+            <FiLoader className={styles.spinner} />
+            Loading referral code...
+          </div>
+        ) : (
+          <>
+            <div className={styles.referralCodeBox}>
+              <div className={styles.codeDisplay}>
+                <span className={styles.codeLabel}>Your Referral Code</span>
+                <div className={styles.codeValue}>
+                  {referralCode || "No code generated"}
+                  {!referralCode && !generating && (
+                    <button
+                      className={styles.generateCodeBtn}
+                      onClick={generateReferralCode}
+                    >
+                      Generate
+                    </button>
+                  )}
+                  {generating && (
+                    <span className={styles.generatingText}>
+                      <FiLoader className={styles.spinnerSmall} /> Generating...
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {referralCode && (
+                <div className={styles.referralActions}>
+                  <button
+                    className={styles.copyBtn}
+                    onClick={copyReferralLink}
+                  >
+                    {copied ? <FiCheck /> : <FiCopy />}
+                    {copied ? "Copied!" : "Copy"}
+                  </button>
+                  <button
+                    className={styles.shareBtn}
+                    onClick={shareReferralLink}
+                  >
+                    <FiShare2 />
+                    Share
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className={styles.referralStats}>
+              <div className={styles.statItem}>
+                <FiUsers className={styles.statIcon} />
+                <div>
+                  <span className={styles.statLabel}>Total Referrals</span>
+                  <span className={styles.statValue}>
+                    {referralStats.totalReferrals || 0}
+                  </span>
+                </div>
+              </div>
+              <div className={styles.statItem}>
+                <FiDollarSign className={styles.statIcon} />
+                <div>
+                  <span className={styles.statLabel}>Rewards Earned</span>
+                  <span className={styles.statValue}>
+                    ₹{referralStats.rewardsEarned || 0}
+                  </span>
+                </div>
+              </div>
+              <div className={styles.statItem}>
+                <FiClock className={styles.statIcon} />
+                <div>
+                  <span className={styles.statLabel}>Pending Rewards</span>
+                  <span className={styles.statValue}>
+                    ₹{referralStats.pendingRewards || 0}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        <div className={styles.referralFooter}>
+          <FiTrendingUp className={styles.footerIcon} />
+          <span>
+            Earn <strong>₹{profile?.referralReward || 50}</strong> for every
+            friend who makes a purchase!
+          </span>
+        </div>
       </div>
 
       {/* Personal Information */}

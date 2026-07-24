@@ -1,8 +1,9 @@
-// Backend/middleware/auth.js
+// backend/middleware/auth.js
 
 import tokenService from "../services/tokenService.js";
 import User from "../models/User.js";
 
+// ✅ Export as 'protect' (main export)
 export const protect = async (req, res, next) => {
   try {
     let token = req.cookies?.accessToken;
@@ -71,6 +72,9 @@ export const protect = async (req, res, next) => {
   }
 };
 
+// ✅ Alias for 'protect' to maintain compatibility
+export const authenticate = protect;
+
 export const admin = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({
@@ -89,6 +93,9 @@ export const admin = (req, res, next) => {
 
   next();
 };
+
+// ✅ Alias for 'admin' to maintain compatibility
+export const isAdmin = admin;
 
 export const seller = (req, res, next) => {
   if (!req.user) {
@@ -112,3 +119,6 @@ export const seller = (req, res, next) => {
 
   next();
 };
+
+// ✅ Alias for 'seller' to maintain compatibility
+export const isSeller = seller;

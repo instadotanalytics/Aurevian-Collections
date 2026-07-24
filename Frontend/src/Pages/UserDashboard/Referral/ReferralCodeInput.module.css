@@ -1,0 +1,289 @@
+/* src/components/Checkout/ReferralCodeInput.module.css */
+.referralContainer {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin: 1rem 0;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.referralHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.giftIcon {
+  color: #f59e0b;
+  font-size: 1.25rem;
+}
+
+.referralTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Not Eligible Message */
+.notEligibleMessage {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.infoIcon {
+  color: #3b82f6;
+  font-size: 1.1rem;
+}
+
+/* Input Group */
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.inputWrapper {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.codeInput {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background: #f8fafc;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.codeInput:focus {
+  outline: none;
+  border-color: #6366f1;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.codeInput:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.codeInput::placeholder {
+  text-transform: none;
+  font-weight: 400;
+  letter-spacing: normal;
+  color: #94a3b8;
+}
+
+.applyButton {
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  min-width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.applyButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.applyButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Validation Message */
+.validationMessage {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  animation: slideIn 0.3s ease;
+}
+
+.validationMessage.success {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.validationMessage.error {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.messageIcon {
+  font-size: 1rem;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Discount Preview */
+.discountPreview {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  border: 1px solid #e2e8f0;
+  animation: slideIn 0.3s ease;
+}
+
+.discountDetail {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.discountDetail .highlight {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+/* Applied Code */
+.appliedCode {
+  background: #f0fdf4;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  border: 2px solid #86efac;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  animation: slideIn 0.3s ease;
+}
+
+.appliedCodeContent {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.appliedIcon {
+  color: #16a34a;
+  font-size: 1.1rem;
+}
+
+.appliedText {
+  font-weight: 600;
+  color: #16a34a;
+  font-size: 0.95rem;
+}
+
+.appliedCodeActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.codeTag {
+  background: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #1e293b;
+  border: 1px solid #86efac;
+  letter-spacing: 1px;
+}
+
+.removeButton {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: none;
+  border: none;
+  color: #dc2626;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.removeButton:hover {
+  background: #fef2f2;
+}
+
+/* Spinner */
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .referralContainer {
+    padding: 1rem;
+  }
+
+  .inputWrapper {
+    flex-direction: column;
+  }
+
+  .codeInput {
+    width: 100%;
+  }
+
+  .applyButton {
+    width: 100%;
+  }
+
+  .discountDetail {
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .appliedCodeActions {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+}
