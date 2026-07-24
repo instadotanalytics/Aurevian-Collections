@@ -617,7 +617,7 @@ const Header = ({
             positioning, suggestions/history render directly beneath the
             input in the drawer's normal scroll flow (see section 9 —
             mobile support — in Header.module.css). */}
-        <div className={styles.drawerSearch}>
+        {/* <div className={styles.drawerSearch}>
           <SearchPanel
             styles={styles}
             isOpen={mobileOpen}
@@ -628,7 +628,7 @@ const Header = ({
             inputId="aurevian-search-input-mobile"
             recentSearches={defaultRecentSearches}
           />
-        </div>
+        </div> */}
 
         {/* User info in mobile drawer */}
         {isAuthenticated && user && (
