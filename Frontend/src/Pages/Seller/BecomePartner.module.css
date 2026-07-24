@@ -145,31 +145,31 @@
   margin-top: 2px;
 }
 
+/* ============================================
+   Hero Image
+   ============================================ */
 .heroImage {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.imagePlaceholder {
-  width: 100%;
-  max-width: 500px;
-  aspect-ratio: 1;
-  background: linear-gradient(135deg, #f8f6f4 0%, #e8e2d5 100%);
   border-radius: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: 64px;
-  color: #c8a86e;
+  overflow: hidden;
+  min-height: 400px;
+  max-width: 500px;
+  background: linear-gradient(135deg, #f8f6f4 0%, #e8e2d5 100%);
 }
 
-.imagePlaceholder p {
-  font-size: 18px;
-  color: #666;
-  margin-top: 16px;
+.heroImageImg {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.heroImageImg:hover {
+  transform: scale(1.02);
 }
 
 /* ============================================
@@ -504,6 +504,12 @@
 
   .heroImage {
     width: 100%;
+    max-width: 100%;
+    min-height: 300px;
+  }
+
+  .heroImageImg {
+    min-height: 300px;
   }
 
   .featuresGrid {
@@ -544,6 +550,14 @@
     gap: 16px;
   }
 
+  .heroImage {
+    min-height: 250px;
+  }
+
+  .heroImageImg {
+    min-height: 250px;
+  }
+
   .featuresGrid {
     grid-template-columns: 1fr;
   }
@@ -580,6 +594,14 @@
     justify-content: center;
   }
 
+  .heroImage {
+    min-height: 200px;
+  }
+
+  .heroImageImg {
+    min-height: 200px;
+  }
+
   .featureCard {
     padding: 20px;
   }
@@ -587,5 +609,13 @@
   .ctaBtn {
     width: 100%;
     justify-content: center;
+  }
+
+  .testimonialCard {
+    padding: 24px;
+  }
+
+  .testimonialQuote {
+    font-size: 16px;
   }
 }

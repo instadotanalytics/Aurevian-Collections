@@ -4,6 +4,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowRight, FiShield, FiTruck, FiTrendingUp, FiUsers, FiAward, FiCheckCircle } from 'react-icons/fi';
 import styles from './BecomePartner.module.css';
+import Contactimg from "../../assets/partner.png";
 
 const BecomePartner = () => {
   const features = [
@@ -87,10 +88,7 @@ const BecomePartner = () => {
           </div>
         </div>
         <div className={styles.heroImage}>
-          <div className={styles.imagePlaceholder}>
-            <span>✨</span>
-            <p>Luxury Jewellery</p>
-          </div>
+          <img src={Contactimg} alt="Luxury Jewellery" className={styles.heroImageImg} />
         </div>
       </section>
 
