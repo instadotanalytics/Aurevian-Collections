@@ -1,9 +1,7 @@
 import dns from "dns";
-
-dns.setServers(["8.8.8.8"]); // Backend/index.js
+dns.setServers(["8.8.8.8"]);
 
 import "dotenv/config";
-
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -17,6 +15,7 @@ import connectDB from "./config/db.js";
 import corsOptions from "./config/cors.js";
 import configurePassport from "./config/passport.js";
 import blogRoutes from "./routes/blogRoutes.js";
+import supportRoutes from "./routes/supportRoutes.js";
 
 // ============================================
 // IMPORT ROUTES
@@ -36,11 +35,6 @@ import walletRoutes from "./routes/walletRoutes.js";
 // IMPORT SERVICES
 // ============================================
 import superAdminService from "./services/superAdminService.js";
-
-// ============================================
-// ENVIRONMENT CONFIGURATION
-// ============================================
-// dotenv.config();
 
 // ============================================
 // INITIALIZE SUPER ADMIN ON STARTUP
@@ -171,6 +165,7 @@ app.get("/api", (req, res) => {
       userProfile: "/api/user-profile",
       referrals: "/api/referrals",
       wallet: "/api/wallet",
+      support: "/api/support",
       health: "/health",
     },
     documentation: "Contact support for API documentation",
@@ -184,15 +179,15 @@ console.log("\n🔗 Registering routes:");
 console.log("  📌 /api/auth - Authentication routes");
 console.log("  📌 /api/super-admin - Super Admin routes");
 console.log("  📌 /api/seller - Seller routes");
-console.log(
-  "  📌 /api/seller/subscription - Seller Upgrade/Subscription routes",
-);
+console.log("  📌 /api/seller/subscription - Seller Upgrade/Subscription routes");
 console.log("  📌 /api/banners - Banner Management routes");
 console.log("  📌 /api/user-profile - User Profile routes");
 console.log("  📌 /api/blog - Blog Management routes");
 console.log("  📌 /api/referrals - Referral Code routes");
 console.log("  📌 /api/wallet - Wallet Management routes");
+console.log("  📌 /api/support - Support Ticket routes");
 
+// ✅ MOUNT ALL ROUTES
 app.use("/api/auth", authRoutes);
 app.use("/api/super-admin", superAdminRoutes);
 app.use("/api/seller", sellerRoutes);
@@ -200,10 +195,9 @@ app.use("/api/seller/subscription", subscriptionRoutes);
 app.use("/api/banners", bannerRoutes);
 app.use("/api/blog", blogRoutes);
 app.use("/api", userProfileRoutes);
-
-// ✅ MOUNT REFERRAL AND WALLET ROUTES
 app.use("/api/referrals", referralRoutes);
 app.use("/api/wallet", walletRoutes);
+app.use("/api/support", supportRoutes); // ✅ Support routes mounted
 
 // ============================================
 // 404 NOT FOUND HANDLER
@@ -312,30 +306,14 @@ const server = app.listen(PORT, () => {
   console.log("=".repeat(60));
   console.log(`📍 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(`🔗 Port: ${PORT}`);
-  console.log(
-    `🔗 Client URL: ${process.env.CLIENT_URL || "http://localhost:5173"}`,
-  );
-  console.log(
-    `🔑 Google OAuth: ${process.env.GOOGLE_CLIENT_ID ? "✅ Configured" : "❌ Not configured"}`,
-  );
-  console.log(
-    `🔐 JWT Secret: ${process.env.JWT_ACCESS_SECRET ? "✅ Configured" : "❌ Not configured"}`,
-  );
-  console.log(
-    `📊 MongoDB: ${process.env.MONGODB_URI ? "✅ Configured" : "❌ Not configured"}`,
-  );
-  console.log(
-    `📧 Email Service: ${process.env.EMAIL_USER ? "✅ Configured" : "❌ Not configured"}`,
-  );
-  console.log(
-    `📱 Twilio Service: ${process.env.TWILIO_ACCOUNT_SID ? "✅ Configured" : "❌ Not configured"}`,
-  );
-  console.log(
-    `☁️ Cloudinary: ${process.env.CLOUDINARY_CLOUD_NAME ? "✅ Configured" : "❌ Not configured"}`,
-  );
-  console.log(
-    `💳 Razorpay: ${process.env.RAZORPAY_KEY_ID ? "✅ Configured" : "⚠️  Not configured (mock mode)"}`,
-  );
+  console.log(`🔗 Client URL: ${process.env.CLIENT_URL || "http://localhost:5173"}`);
+  console.log(`🔑 Google OAuth: ${process.env.GOOGLE_CLIENT_ID ? "✅ Configured" : "❌ Not configured"}`);
+  console.log(`🔐 JWT Secret: ${process.env.JWT_ACCESS_SECRET ? "✅ Configured" : "❌ Not configured"}`);
+  console.log(`📊 MongoDB: ${process.env.MONGODB_URI ? "✅ Configured" : "❌ Not configured"}`);
+  console.log(`📧 Email Service: ${process.env.EMAIL_USER ? "✅ Configured" : "❌ Not configured"}`);
+  console.log(`📱 Twilio Service: ${process.env.TWILIO_ACCOUNT_SID ? "✅ Configured" : "❌ Not configured"}`);
+  console.log(`☁️ Cloudinary: ${process.env.CLOUDINARY_CLOUD_NAME ? "✅ Configured" : "❌ Not configured"}`);
+  console.log(`💳 Razorpay: ${process.env.RAZORPAY_KEY_ID ? "✅ Configured" : "⚠️  Not configured (mock mode)"}`);
   console.log("=".repeat(60));
   console.log("📌 Available Routes:");
   console.log("  🔹 /api/auth - Authentication");
@@ -347,6 +325,7 @@ const server = app.listen(PORT, () => {
   console.log("  🔹 /api/blog - Blog Management");
   console.log("  🔹 /api/referrals - Referral Code Management");
   console.log("  🔹 /api/wallet - Wallet Management");
+  console.log("  🔹 /api/support - Support Ticket Management"); // ✅ Added
   console.log("  🔹 /health - Health Check");
   console.log("  🔹 /api - API Info");
   console.log("=".repeat(60));

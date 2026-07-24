@@ -1,41 +1,35 @@
 // src/components/Support.jsx
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   FiMail,
   FiPhone,
   FiMessageCircle,
   FiClock,
-  FiCheckCircle,
-  FiPackage,
+  FiHeadphones,
+  FiPlus,
+  FiMinus,
+  FiLoader,
   FiShield,
   FiTruck,
   FiRefreshCw,
-  FiStar,
-  FiHeadphones,
-  FiAward,
-  FiGlobe,
-  FiLock,
-  FiPlus,
-  FiMinus,
-  FiChevronRight,
-  FiMapPin,
-  FiSend,
-  FiBookOpen,
-  FiHelpCircle,
-  FiUser,
-  FiShoppingBag,
-  FiCreditCard,
-  FiHeart,
-  FiPhoneCall,
 } from "react-icons/fi";
-import { FaRupeeSign, FaRegGem } from "react-icons/fa";
+import { FaRegGem } from "react-icons/fa";
 import styles from "./Support.module.css";
-// import Header from "../Layout/Header/Header";
 import Footer from "../Layout/Footer/Footer";
-import Contactimg from "../../assets/ContactImage.png";
+import toast from "react-hot-toast";
+import { createSupportTicket, clearSupportError, clearSupportSuccess } from "../../redux/slices/supportSlice";
 
 const Support = () => {
+  const dispatch = useDispatch();
+  const { loading, success, error } = useSelector((state) => state.support);
+
   const [openFaq, setOpenFaq] = useState(null);
+  const [subjectLength, setSubjectLength] = useState(0);
+  const [messageLength, setMessageLength] = useState(0);
+  const MAX_SUBJECT_LENGTH = 200;
+  const MAX_MESSAGE_LENGTH = 5000;
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -50,13 +44,87 @@ const Support = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    if (name === "subject") {
+      setSubjectLength(value.length);
+    }
+    if (name === "message") {
+      setMessageLength(value.length);
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Form submitted:", formData);
-    setFormData({ name: "", email: "", subject: "", message: "" });
+  // ============================================
+  // ✅ TRUNCATE SUBJECT IF TOO LONG
+  // ============================================
+  const truncateSubject = (subject) => {
+    if (subject.length > MAX_SUBJECT_LENGTH) {
+      return subject.substring(0, MAX_SUBJECT_LENGTH);
+    }
+    return subject;
   };
+
+  // ============================================
+  // ✅ HANDLE FORM SUBMIT
+  // ============================================
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    // ✅ Truncate subject if too long
+    const ticketData = {
+      ...formData,
+      subject: truncateSubject(formData.subject),
+    };
+
+    try {
+      const result = await dispatch(createSupportTicket(ticketData)).unwrap();
+      
+      if (result.success) {
+        toast.success("✅ Ticket created successfully! We'll get back to you within 24 hours.");
+        
+        setFormData({
+          name: "",
+          email: "",
+          subject: "",
+          message: "",
+        });
+        setSubjectLength(0);
+        setMessageLength(0);
+        setOpenFaq(null);
+        
+        setTimeout(() => {
+          dispatch(clearSupportSuccess());
+        }, 3000);
+      }
+    } catch (error) {
+      toast.error(error || "Failed to create ticket. Please try again.");
+    }
+  };
+
+  // Clear error on unmount
+  useEffect(() => {
+    return () => {
+      dispatch(clearSupportError());
+    };
+  }, [dispatch]);
+
+  // Show error toast if any
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch(clearSupportError());
+    }
+  }, [error, dispatch]);
 
   const faqs = [
     {
@@ -87,10 +155,9 @@ const Support = () => {
 
   return (
     <>
-      {/* <Header /> */}
       <div className={styles.supportPage}>
         <div className={styles.supportContainer}>
-          {/* Hero Section with Background Image */}
+          {/* Hero Section */}
           <div className={styles.heroSection}>
             <div className={styles.heroOverlay}></div>
             <div className={styles.heroContent}>
@@ -186,6 +253,7 @@ const Support = () => {
                     onChange={handleChange}
                     className={styles.formInput}
                     required
+                    disabled={loading}
                   />
                 </div>
                 <div className={styles.formGroup}>
@@ -197,6 +265,7 @@ const Support = () => {
                     onChange={handleChange}
                     className={styles.formInput}
                     required
+                    disabled={loading}
                   />
                 </div>
                 <div className={styles.formGroup}>
@@ -207,7 +276,14 @@ const Support = () => {
                     value={formData.subject}
                     onChange={handleChange}
                     className={styles.formInput}
+                    maxLength={MAX_SUBJECT_LENGTH}
+                    disabled={loading}
                   />
+                  <div className={styles.charCounter}>
+                    <span className={subjectLength > MAX_SUBJECT_LENGTH ? styles.exceeded : ""}>
+                      {subjectLength}/{MAX_SUBJECT_LENGTH}
+                    </span>
+                  </div>
                 </div>
                 <div className={styles.formGroup}>
                   <textarea
@@ -218,10 +294,28 @@ const Support = () => {
                     className={styles.formTextarea}
                     rows="4"
                     required
+                    disabled={loading}
+                    maxLength={MAX_MESSAGE_LENGTH}
                   />
+                  <div className={styles.charCounter}>
+                    <span className={messageLength > MAX_MESSAGE_LENGTH ? styles.exceeded : ""}>
+                      {messageLength}/{MAX_MESSAGE_LENGTH}
+                    </span>
+                  </div>
                 </div>
-                <button type="submit" className={styles.submitBtn}>
-                  SEND MESSAGE
+                <button 
+                  type="submit" 
+                  className={styles.submitBtn}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <FiLoader className={styles.spinner} />
+                      SENDING...
+                    </>
+                  ) : (
+                    "SEND MESSAGE"
+                  )}
                 </button>
               </form>
             </div>

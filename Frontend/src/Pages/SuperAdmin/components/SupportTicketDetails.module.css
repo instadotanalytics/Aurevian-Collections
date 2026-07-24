@@ -1,0 +1,654 @@
+/* src/Pages/SuperAdmin/components/SupportManagement/SupportTicketDetails.module.css */
+
+/* ============================================
+   MODAL OVERLAY
+   ============================================ */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   MODAL CONTENT
+   ============================================ */
+.modalContent {
+  background: white;
+  border-radius: 16px;
+  max-width: 750px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 2rem;
+  animation: slideUp 0.3s ease;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Custom Scrollbar */
+.modalContent::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modalContent::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.modalContent::-webkit-scrollbar-thumb {
+  background: #6366f1;
+  border-radius: 10px;
+}
+
+.modalContent::-webkit-scrollbar-thumb:hover {
+  background: #4f46e5;
+}
+
+/* ============================================
+   MODAL HEADER
+   ============================================ */
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.closeBtn:hover {
+  color: #1e293b;
+  background: #f1f5f9;
+  transform: rotate(90deg);
+}
+
+/* ============================================
+   TICKET INFO
+   ============================================ */
+.ticketInfo {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.35rem 0;
+  color: #1e293b;
+  font-size: 0.9rem;
+}
+
+.infoRow:not(:last-child) {
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 0.5rem;
+}
+
+.infoRow svg {
+  color: #64748b;
+  flex-shrink: 0;
+  font-size: 1rem;
+}
+
+.infoRow strong {
+  color: #1e293b;
+}
+
+.email {
+  color: #64748b;
+  margin-left: 0.5rem;
+  font-size: 0.85rem;
+}
+
+/* Status & Priority Badges in Info */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.statusBadge.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.statusBadge.in-progress {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.statusBadge.resolved {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.statusBadge.closed {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.priorityBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.priorityBadge.urgent {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.priorityBadge.high {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.priorityBadge.medium {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.priorityBadge.low {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* ============================================
+   MESSAGE SECTION
+   ============================================ */
+.messageSection {
+  margin-bottom: 1.5rem;
+}
+
+.messageSection h4 {
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.messageSection h4::before {
+  content: "📝";
+}
+
+.messageContent {
+  background: #f8fafc;
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  font-size: 0.95rem;
+}
+
+/* ============================================
+   REPLIES SECTION
+   ============================================ */
+.repliesSection {
+  margin-bottom: 1.5rem;
+}
+
+.repliesSection h4 {
+  color: #1e293b;
+  margin: 0 0 0.75rem 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.repliesSection h4::before {
+  content: "💬";
+}
+
+.replyItem {
+  background: #f8fafc;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.replyItem:last-child {
+  margin-bottom: 0;
+}
+
+.replyItem:hover {
+  border-color: #c7d2fe;
+  background: #faf5ff;
+}
+
+.replyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.replyAdmin {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  color: #4f46e5;
+  font-size: 0.85rem;
+}
+
+.replyAdmin svg {
+  font-size: 0.9rem;
+}
+
+.replyDate {
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+.replyMessage {
+  color: #1e293b;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  padding-left: 0.5rem;
+  border-left: 3px solid #6366f1;
+  padding-left: 0.75rem;
+}
+
+/* ============================================
+   REPLY SECTION
+   ============================================ */
+.replySection {
+  border-top: 2px solid #f1f5f9;
+  padding-top: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.replySection h4 {
+  color: #1e293b;
+  margin: 0 0 0.75rem 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.replySection h4::before {
+  content: "✏️";
+}
+
+.replyTextarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  resize: vertical;
+  background: white;
+  transition: all 0.3s ease;
+  min-height: 100px;
+  line-height: 1.6;
+}
+
+.replyTextarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.replyTextarea::placeholder {
+  color: #94a3b8;
+}
+
+.sendReplyBtn {
+  margin-top: 0.75rem;
+  padding: 0.6rem 2rem;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sendReplyBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+}
+
+.sendReplyBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 768px) {
+  .modalContent {
+    padding: 1.25rem;
+    max-width: 100%;
+    margin: 0.5rem;
+    max-height: 95vh;
+  }
+
+  .modalHeader h2 {
+    font-size: 1.1rem;
+  }
+
+  .infoRow {
+    font-size: 0.8rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .infoRow svg {
+    font-size: 0.85rem;
+  }
+
+  .ticketInfo {
+    padding: 0.75rem;
+  }
+
+  .messageContent {
+    font-size: 0.85rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .replyTextarea {
+    font-size: 0.85rem;
+    min-height: 80px;
+  }
+
+  .sendReplyBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .replyHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .replyAdmin {
+    font-size: 0.8rem;
+  }
+
+  .replyDate {
+    font-size: 0.7rem;
+  }
+
+  .replyMessage {
+    font-size: 0.85rem;
+    padding-left: 0.5rem;
+  }
+
+  .replyItem {
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modalContent {
+    padding: 1rem;
+    margin: 0.25rem;
+    border-radius: 12px;
+  }
+
+  .modalHeader {
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .modalHeader h2 {
+    font-size: 0.95rem;
+  }
+
+  .closeBtn {
+    font-size: 1.2rem;
+  }
+
+  .infoRow {
+    font-size: 0.75rem;
+    padding: 0.25rem 0;
+  }
+
+  .statusBadge {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.6rem;
+  }
+
+  .priorityBadge {
+    font-size: 0.6rem;
+    padding: 0.15rem 0.5rem;
+  }
+
+  .messageContent {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .replyTextarea {
+    font-size: 0.8rem;
+    min-height: 60px;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .replySection h4 {
+    font-size: 0.85rem;
+  }
+
+  .repliesSection h4 {
+    font-size: 0.85rem;
+  }
+
+  .messageSection h4 {
+    font-size: 0.85rem;
+  }
+
+  .sendReplyBtn {
+    font-size: 0.8rem;
+    padding: 0.5rem 1.5rem;
+  }
+}
+
+/* ============================================
+   DARK MODE SUPPORT (Optional)
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+  .modalContent {
+    background: #1e293b;
+  }
+
+  .modalHeader h2 {
+    color: #f1f5f9;
+  }
+
+  .modalHeader {
+    border-bottom-color: #334155;
+  }
+
+  .closeBtn {
+    color: #94a3b8;
+  }
+
+  .closeBtn:hover {
+    color: #f1f5f9;
+    background: #334155;
+  }
+
+  .ticketInfo {
+    background: #0f172a;
+    border-color: #334155;
+  }
+
+  .infoRow {
+    color: #e2e8f0;
+  }
+
+  .infoRow svg {
+    color: #94a3b8;
+  }
+
+  .email {
+    color: #94a3b8;
+  }
+
+  .infoRow:not(:last-child) {
+    border-bottom-color: #334155;
+  }
+
+  .messageContent {
+    background: #0f172a;
+    border-color: #334155;
+    color: #e2e8f0;
+  }
+
+  .replyItem {
+    background: #0f172a;
+    border-color: #334155;
+  }
+
+  .replyItem:hover {
+    border-color: #6366f1;
+    background: #1e293b;
+  }
+
+  .replyAdmin {
+    color: #818cf8;
+  }
+
+  .replyMessage {
+    color: #e2e8f0;
+    border-left-color: #6366f1;
+  }
+
+  .replyDate {
+    color: #64748b;
+  }
+
+  .replySection {
+    border-top-color: #334155;
+  }
+
+  .replyTextarea {
+    background: #0f172a;
+    border-color: #334155;
+    color: #e2e8f0;
+  }
+
+  .replyTextarea:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  }
+
+  .replyTextarea::placeholder {
+    color: #64748b;
+  }
+
+  .replySection h4,
+  .repliesSection h4,
+  .messageSection h4 {
+    color: #e2e8f0;
+  }
+
+  .modalContent::-webkit-scrollbar-track {
+    background: #0f172a;
+  }
+
+  .modalContent::-webkit-scrollbar-thumb {
+    background: #6366f1;
+  }
+}

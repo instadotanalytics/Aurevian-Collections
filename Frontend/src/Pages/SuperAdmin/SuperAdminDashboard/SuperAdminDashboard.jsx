@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+
 import {
   FiHome,
   FiUsers,
@@ -61,6 +62,8 @@ import RecentActivities from "../components/RecentActivities";
 import BannerManagement from "../components/BannerManagement/BannerManagement";
 import BlogManagement from "../components/BlogManagement/BlogManagement";
 import PaymentsManagement from "../components/PaymentsManagement/PaymentsManagement";
+import SupportManagement from "../components/SupportManagement";
+ // ✅ Correct import
 
 const SuperAdminDashboard = () => {
   const dispatch = useDispatch();
@@ -249,6 +252,12 @@ const SuperAdminDashboard = () => {
       isSubMenu: false,
     },
     {
+      id: "support",
+      label: "Support Tickets",
+      icon: FiMessageSquare,
+      isSubMenu: false,
+    },
+    {
       id: "settings",
       label: "Settings",
       icon: FiSettings,
@@ -298,6 +307,8 @@ const SuperAdminDashboard = () => {
         );
       case "banners":
         return <BannerManagement />;
+      case "support":
+        return <SupportManagement/>;
       case "settings":
         return (
           <div className={styles.placeholderContent}>Settings Coming Soon</div>

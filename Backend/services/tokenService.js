@@ -1,4 +1,4 @@
-// Backend/services/tokenService.js
+// backend/services/tokenService.js
 
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
@@ -11,6 +11,8 @@ class TokenService {
       id: user._id || user.id,
       email: user.email,
       role: user.role || 'customer',
+      // ✅ Add this to identify super admin
+      isSuperAdmin: user.isSuperAdmin || user.role === 'super_admin',
     };
 
     const accessToken = jwt.sign(

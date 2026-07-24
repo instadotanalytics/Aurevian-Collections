@@ -8,6 +8,7 @@ import bannerReducer from "./slices/bannerSlice.js";
 import blogReducer from "./slices/blogSlice.js";
 import profileReducer from "./slices/profileSlice.js"; // ✅ ADD PROFILE REDUCER
 import sellerSubscriptionReducer from "./slices/sellerSubscriptionSlice.js"; // ✅ ADD SUBSCRIPTION REDUCER
+import supportReducer from "./slices/supportSlice";
 
 export const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ export const store = configureStore({
     blogs: blogReducer,
     profile: profileReducer, // ✅ ADD PROFILE REDUCER HERE
     sellerSubscription: sellerSubscriptionReducer, // ✅ ADD SUBSCRIPTION REDUCER HERE
+    support: supportReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
