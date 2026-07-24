@@ -1,6 +1,6 @@
-import dns from 'dns';
+import dns from "dns";
 
-dns.setServers(['8.8.8.8']);// Backend/index.js
+dns.setServers(["8.8.8.8"]); // Backend/index.js
 
 import "dotenv/config";
 
@@ -25,8 +25,12 @@ import authRoutes from "./routes/authRoutes.js";
 import superAdminRoutes from "./routes/superAdminRoutes.js";
 import sellerRoutes from "./routes/sellerRoutes.js";
 import bannerRoutes from "./routes/bannerRoutes.js";
-import userProfileRoutes from "./routes/userProfileRoutes.js"; // <-- NEW
-import subscriptionRoutes from "./routes/subscriptionRoutes.js"; // ✅ NEW - Seller Upgrade/Subscription
+import userProfileRoutes from "./routes/userProfileRoutes.js";
+import subscriptionRoutes from "./routes/subscriptionRoutes.js";
+
+// ✅ IMPORT REFERRAL AND WALLET ROUTES
+import referralRoutes from "./routes/referralRoutes.js";
+import walletRoutes from "./routes/walletRoutes.js";
 
 // ============================================
 // IMPORT SERVICES
@@ -165,6 +169,8 @@ app.get("/api", (req, res) => {
       blog: "/api/blog",
       banners: "/api/banners",
       userProfile: "/api/user-profile",
+      referrals: "/api/referrals",
+      wallet: "/api/wallet",
       health: "/health",
     },
     documentation: "Contact support for API documentation",
@@ -183,14 +189,21 @@ console.log(
 );
 console.log("  📌 /api/banners - Banner Management routes");
 console.log("  📌 /api/user-profile - User Profile routes");
+console.log("  📌 /api/blog - Blog Management routes");
+console.log("  📌 /api/referrals - Referral Code routes");
+console.log("  📌 /api/wallet - Wallet Management routes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/super-admin", superAdminRoutes);
 app.use("/api/seller", sellerRoutes);
-app.use("/api/seller/subscription", subscriptionRoutes); // ✅ NEW
+app.use("/api/seller/subscription", subscriptionRoutes);
 app.use("/api/banners", bannerRoutes);
 app.use("/api/blog", blogRoutes);
-app.use("/api", userProfileRoutes); // User Profile routes
+app.use("/api", userProfileRoutes);
+
+// ✅ MOUNT REFERRAL AND WALLET ROUTES
+app.use("/api/referrals", referralRoutes);
+app.use("/api/wallet", walletRoutes);
 
 // ============================================
 // 404 NOT FOUND HANDLER
@@ -332,6 +345,8 @@ const server = app.listen(PORT, () => {
   console.log("  🔹 /api/banners - Banner Management");
   console.log("  🔹 /api/user-profile - User Profile Management");
   console.log("  🔹 /api/blog - Blog Management");
+  console.log("  🔹 /api/referrals - Referral Code Management");
+  console.log("  🔹 /api/wallet - Wallet Management");
   console.log("  🔹 /health - Health Check");
   console.log("  🔹 /api - API Info");
   console.log("=".repeat(60));

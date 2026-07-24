@@ -1,0 +1,468 @@
+/* src/Pages/Profile/tabs/ReferralTab.module.css */
+
+.referralTab {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Loading */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Hero Section */
+.referralHero {
+  text-align: center;
+  padding: 2.5rem 2rem;
+  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 50%, #faf5ff 100%);
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  border: 1px solid #e9d5ff;
+}
+
+.heroIcon {
+  font-size: 4rem;
+  color: #f59e0b;
+  margin-bottom: 0.5rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.referralHero h2 {
+  font-size: 2rem;
+  color: #1e293b;
+  margin: 0.5rem 0;
+}
+
+.referralHero p {
+  color: #64748b;
+  max-width: 550px;
+  margin: 0 auto;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* Main Card */
+.referralMainCard {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+}
+
+/* Referral Code Section */
+.referralCodeSection {
+  text-align: center;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 2rem;
+}
+
+.referralCodeSection h3 {
+  font-size: 1.1rem;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+}
+
+.noCodeContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 2px dashed #d1d5db;
+}
+
+.noCodeIcon {
+  font-size: 2.5rem;
+  color: #94a3b8;
+}
+
+.noCodeContainer p {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.generateBtn {
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.generateBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+}
+
+.generateBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.referralCodeDisplay {
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 2px dashed #d1d5db;
+  margin-bottom: 1.5rem;
+}
+
+.referralCodeDisplay .code {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #6366f1;
+  letter-spacing: 6px;
+  font-family: monospace;
+}
+
+.referralLinkBox {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.referralLinkInput {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  background: #f8fafc;
+  color: #1e293b;
+  cursor: text;
+  font-family: monospace;
+}
+
+.referralLinkInput:focus {
+  outline: none;
+  border-color: #6366f1;
+  background: white;
+}
+
+.copyLinkBtn {
+  padding: 0.75rem 1.5rem;
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1.1rem;
+}
+
+.copyLinkBtn:hover {
+  background: #4f46e5;
+  transform: scale(1.05);
+}
+
+.shareButtons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.shareWhatsApp,
+.shareEmail,
+.shareLink {
+  padding: 0.6rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.shareWhatsApp {
+  background: #25d366;
+  color: white;
+}
+
+.shareWhatsApp:hover {
+  background: #128c7e;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
+
+.shareEmail {
+  background: #ea4335;
+  color: white;
+}
+
+.shareEmail:hover {
+  background: #c5221f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(234, 67, 53, 0.3);
+}
+
+.shareLink {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.shareLink:hover {
+  background: #cbd5e1;
+  transform: translateY(-2px);
+}
+
+/* Stats Section */
+.referralStatsSection {
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 2rem;
+}
+
+.referralStatsSection h3 {
+  font-size: 1.1rem;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.statBox {
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.statBox:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.statIcon {
+  font-size: 1.5rem;
+  color: #6366f1;
+}
+
+.statBox .statNumber {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.statBox .statLabel {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* How It Works */
+.howItWorks {
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 2rem;
+}
+
+.howItWorks h3 {
+  font-size: 1.1rem;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.step:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.stepNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.stepContent h4 {
+  font-size: 0.95rem;
+  color: #1e293b;
+  margin-bottom: 0.25rem;
+}
+
+.stepContent p {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Benefits Section */
+.benefitsSection h3 {
+  font-size: 1.1rem;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.benefitsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.benefitItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f0fdf4;
+  border-radius: 12px;
+  border: 1px solid #86efac;
+}
+
+.benefitIcon {
+  font-size: 1.5rem;
+  color: #16a34a;
+  margin-top: 0.25rem;
+}
+
+.benefitItem h4 {
+  font-size: 0.95rem;
+  color: #1e293b;
+  margin-bottom: 0.25rem;
+}
+
+.benefitItem p {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .referralHero {
+    padding: 2rem 1rem;
+  }
+
+  .referralHero h2 {
+    font-size: 1.5rem;
+  }
+
+  .referralHero p {
+    font-size: 0.9rem;
+  }
+
+  .referralMainCard {
+    padding: 1rem;
+  }
+
+  .referralCodeDisplay .code {
+    font-size: 1.8rem;
+    letter-spacing: 4px;
+  }
+
+  .referralLinkBox {
+    flex-direction: column;
+  }
+
+  .shareButtons {
+    flex-direction: column;
+  }
+
+  .shareWhatsApp,
+  .shareEmail,
+  .shareLink {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .steps {
+    grid-template-columns: 1fr;
+  }
+
+  .benefitsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .referralHero .heroIcon {
+    font-size: 3rem;
+  }
+
+  .referralCodeDisplay .code {
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+  }
+
+  .statBox .statNumber {
+    font-size: 1.5rem;
+  }
+}
