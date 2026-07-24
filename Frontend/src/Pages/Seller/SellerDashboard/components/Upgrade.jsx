@@ -1,164 +1,61 @@
 // src/Pages/Seller/SellerDashboard/components/Upgrade.jsx
 
-import React, { useState } from 'react';
-import styles from './Upgrade.module.css';
-import { 
-  FiStar, 
-  FiShield, 
-  FiZap, 
-  FiTrendingUp, 
-  FiCheck, 
-  FiX,
-  FiAward,
-  FiDollarSign,
-  FiPackage,
-  FiHome,
-  FiImage,
-  FiVideo,
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import styles from "./Upgrade.module.css";
+import {
+  FiStar,
+  FiCheck,
   FiClock,
   FiPercent,
-  FiBarChart2,
-  FiMessageCircle,
-  FiUsers,
-  FiMail,
-  FiBell,
-  FiSmartphone,
-  FiDatabase,
-  FiAperture,
-  FiCpu,
-  FiHeadphones,
-  FiEdit,
-  FiRefreshCw,
-  FiArrowUp,
-  FiStar as FiStarSolid
-} from 'react-icons/fi';
-import toast from 'react-hot-toast';
+  FiTrendingUp,
+  FiLoader,
+  FiXCircle,
+} from "react-icons/fi";
+import {
+  fetchPlans,
+  fetchCurrentSubscription,
+  cancelSubscriptionPlan,
+} from "../../../../redux/slices/sellerSubscriptionSlice";
+
+const formatLimit = (value) => (value === -1 ? "Unlimited" : value);
 
 const Upgrade = () => {
-  const [selectedPlan, setSelectedPlan] = useState(null);
-  const [showComparison, setShowComparison] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { plans, current, loading } = useSelector(
+    (state) => state.sellerSubscription,
+  );
 
-  const plans = [
-    {
-      id: 'free',
-      name: 'FREE',
-      icon: '🟢',
-      price: '₹0',
-      period: '/ Month',
-      bestFor: 'New sellers',
-      features: [
-        '50 Products',
-        'Basic Dashboard',
-        'Basic Store',
-        '5 Images per Product',
-        '7 Days Settlement',
-        '12% Commission',
-        'Basic Sales Report',
-        'Customer Reviews',
-        'Order Management'
-      ],
-      isCurrent: true,
-      commission: '12%',
-      settlement: '7 Days'
-    },
-    {
-      id: 'silver',
-      name: 'SILVER',
-      icon: '🩶',
-      price: '₹499',
-      period: '/ Month',
-      bestFor: 'Growing sellers',
-      badge: 'Silver Verified Badge',
-      features: [
-        '300 Products',
-        'Silver Verified Badge',
-        'Better Search Ranking',
-        'Premium Store Design',
-        '8 Images per Product',
-        'Product Video Upload',
-        'Advanced Analytics',
-        '5 Coupons per Month',
-        'Festival Sale Access',
-        'Chat Support',
-        '10% Commission',
-        '5 Days Settlement'
-      ],
-      isCurrent: false,
-      commission: '10%',
-      settlement: '5 Days'
-    },
-    {
-      id: 'gold',
-      name: 'GOLD',
-      icon: '🥇',
-      price: '₹999',
-      period: '/ Month',
-      bestFor: 'Professional Businesses',
-      badge: '⭐ Recommended',
-      features: [
-        '1000 Products',
-        'Gold Verified Badge',
-        'Homepage Featured Products',
-        '360° Product Images',
-        'Unlimited Coupons',
-        'Sponsored Products',
-        'Flash Sale Participation',
-        'Push Notifications',
-        'Email Marketing',
-        'Advanced Reports',
-        '8% Commission',
-        '2 Days Settlement',
-        'Phone Support'
-      ],
-      isCurrent: false,
-      isPopular: true,
-      commission: '8%',
-      settlement: '2 Days'
-    },
-    {
-      id: 'platinum',
-      name: 'PLATINUM',
-      icon: '💎',
-      price: '₹1999',
-      period: '/ Month',
-      bestFor: 'Large Brands',
-      features: [
-        'Unlimited Products',
-        'Platinum Badge',
-        'Highest Search Ranking',
-        'Homepage Featured Daily',
-        'Custom Store Design',
-        '15 Images + Unlimited Videos',
-        'WhatsApp Marketing',
-        'AI Sales Analytics',
-        'Dedicated Account Manager',
-        'API Access',
-        'Early New Features',
-        '5% Commission',
-        '24-Hour Settlement',
-        'Premium Customer Support'
-      ],
-      isCurrent: false,
-      commission: '5%',
-      settlement: '24-Hour'
-    }
-  ];
+  useEffect(() => {
+    dispatch(fetchPlans());
+    dispatch(fetchCurrentSubscription());
+  }, [dispatch]);
 
   const handleUpgrade = (planId) => {
-    if (planId === 'free') {
-      toast.success('You are already on the Free plan!');
-      return;
-    }
-    
-    setSelectedPlan(planId);
-    toast.loading(`Processing ${plans.find(p => p.id === planId)?.name} plan upgrade...`);
-    
-    // Simulate API call
-    setTimeout(() => {
-      toast.dismiss();
-      toast.success(`Successfully upgraded to ${plans.find(p => p.id === planId)?.name} plan!`);
-    }, 2000);
+    if (planId === "free") return;
+    navigate(`/seller/payment/${planId}`);
   };
+
+  const handleCancel = () => {
+    if (
+      window.confirm(
+        "Are you sure you want to cancel your subscription? You'll be moved to the Free plan immediately and lose your current plan's benefits right away.",
+      )
+    ) {
+      dispatch(cancelSubscriptionPlan());
+    }
+  };
+
+  if (loading && plans.length === 0) {
+    return (
+      <div className={styles.loadingState}>
+        <FiLoader className={styles.spinner} />
+        <p>Loading subscription plans...</p>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.upgradeContainer}>
@@ -166,21 +63,48 @@ const Upgrade = () => {
       <div className={styles.upgradeHeader}>
         <h1 className={styles.upgradeTitle}>
           <FiTrendingUp className={styles.headerIcon} />
-          Become a Super Seller 🚀
+          Become a Super Seller
         </h1>
-        <p className={styles.upgradeSubtitle}>Choose your plan and unlock premium features</p>
+        <p className={styles.upgradeSubtitle}>
+          Choose the plan that fits your business and unlock premium selling
+          tools
+        </p>
       </div>
+
+      {/* Active plan banner */}
+      {current?.subscriptionStatus === "active" &&
+        current?.plan?.id !== "free" && (
+          <div className={styles.currentPlanBanner}>
+            <div className={styles.bannerText}>
+              <span className={styles.bannerLabel}>Active plan</span>
+              <strong className={styles.bannerPlanName}>
+                {current.plan.name}
+              </strong>
+              {current.subscriptionExpiresAt && (
+                <span className={styles.bannerExpiry}>
+                  Expires on{" "}
+                  {new Date(current.subscriptionExpiresAt).toLocaleDateString()}
+                </span>
+              )}
+            </div>
+            <button className={styles.cancelLink} onClick={handleCancel}>
+              <FiXCircle /> Cancel plan
+            </button>
+          </div>
+        )}
 
       {/* Plans Grid */}
       <div className={styles.plansGrid}>
         {plans.map((plan) => (
-          <div 
-            key={plan.id} 
-            className={`${styles.planCard} ${plan.isPopular ? styles.popular : ''} ${plan.isCurrent ? styles.current : ''}`}
+          <div
+            key={plan.id}
+            className={`${styles.planCard} ${
+              plan.isPopular ? styles.popular : ""
+            } ${plan.isCurrent ? styles.current : ""}`}
           >
-            {plan.isPopular && (
+            {plan.isPopular && !plan.isCurrent && (
               <div className={styles.popularBadge}>
-                <FiStar /> {plan.badge}
+                <FiStar /> Recommended
               </div>
             )}
             {plan.isCurrent && (
@@ -190,14 +114,14 @@ const Upgrade = () => {
             )}
 
             <div className={styles.planIcon}>{plan.icon}</div>
-            
+
             <div className={styles.planHeader}>
               <h3 className={styles.planName}>{plan.name}</h3>
               <div className={styles.planPrice}>
-                <span className={styles.price}>{plan.price}</span>
-                <span className={styles.period}>{plan.period}</span>
+                <span className={styles.price}>{plan.priceDisplay}</span>
+                <span className={styles.period}>/ Month</span>
               </div>
-              <span className={styles.bestFor}>Best For: {plan.bestFor}</span>
+              <span className={styles.bestFor}>Best for: {plan.bestFor}</span>
             </div>
 
             <ul className={styles.featuresList}>
@@ -212,19 +136,21 @@ const Upgrade = () => {
             <div className={styles.planFooter}>
               <div className={styles.planStats}>
                 <span className={styles.statItem}>
-                  <FiPercent /> {plan.commission}
+                  <FiPercent /> {plan.commissionRate}%
                 </span>
                 <span className={styles.statItem}>
-                  <FiClock /> {plan.settlement}
+                  <FiClock /> {plan.settlementDays}d settlement
                 </span>
               </div>
 
-              <button 
-                className={`${styles.upgradeBtn} ${plan.isCurrent ? styles.currentBtn : ''} ${plan.isPopular ? styles.popularBtn : ''}`}
+              <button
+                className={`${styles.upgradeBtn} ${
+                  plan.isCurrent ? styles.currentBtn : ""
+                } ${plan.isPopular ? styles.popularBtn : ""}`}
                 onClick={() => handleUpgrade(plan.id)}
-                disabled={plan.isCurrent}
+                disabled={plan.isCurrent || plan.id === "free"}
               >
-                {plan.isCurrent ? 'Current Plan' : 'Upgrade Now'}
+                {plan.isCurrent ? "Current Plan" : "Upgrade Now"}
               </button>
             </div>
           </div>
@@ -232,152 +158,55 @@ const Upgrade = () => {
       </div>
 
       {/* Feature Comparison Table */}
-      <button 
-        className={styles.compareToggle}
-        onClick={() => setShowComparison(!showComparison)}
-      >
-        {showComparison ? 'Hide Detailed Comparison' : 'Show Detailed Comparison'}
-      </button>
-
-      {showComparison && (
-        <div className={styles.comparisonTable}>
-          <h2>📊 Detailed Feature Comparison</h2>
-          <div className={styles.tableWrapper}>
-            <table>
-              <thead>
-                <tr>
-                  <th>Features</th>
-                  <th>🟢 FREE</th>
-                  <th>🩶 SILVER</th>
-                  <th>🥇 GOLD</th>
-                  <th>💎 PLATINUM</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Products</td>
-                  <td>50</td>
-                  <td>300</td>
-                  <td>1000</td>
-                  <td>Unlimited</td>
-                </tr>
-                <tr>
-                  <td>Verified Badge</td>
-                  <td>❌</td>
-                  <td>✅ Silver</td>
-                  <td>✅ Gold</td>
-                  <td>✅ Platinum</td>
-                </tr>
-                <tr>
-                  <td>Search Ranking</td>
-                  <td>Basic</td>
-                  <td>Better</td>
-                  <td>Premium</td>
-                  <td>Highest</td>
-                </tr>
-                <tr>
-                  <td>Store Design</td>
-                  <td>Basic</td>
-                  <td>Premium</td>
-                  <td>Premium+</td>
-                  <td>Custom</td>
-                </tr>
-                <tr>
-                  <td>Images per Product</td>
-                  <td>5</td>
-                  <td>8</td>
-                  <td>10</td>
-                  <td>15 + Videos</td>
-                </tr>
-                <tr>
-                  <td>Product Videos</td>
-                  <td>❌</td>
-                  <td>✅</td>
-                  <td>✅</td>
-                  <td>✅ Unlimited</td>
-                </tr>
-                <tr>
-                  <td>Homepage Featured</td>
-                  <td>❌</td>
-                  <td>❌</td>
-                  <td>✅</td>
-                  <td>✅ Daily</td>
-                </tr>
-                <tr>
-                  <td>360° Images</td>
-                  <td>❌</td>
-                  <td>❌</td>
-                  <td>✅</td>
-                  <td>✅</td>
-                </tr>
-                <tr>
-                  <td>Coupons</td>
-                  <td>0</td>
-                  <td>5/Month</td>
-                  <td>Unlimited</td>
-                  <td>Unlimited</td>
-                </tr>
-                <tr>
-                  <td>Sponsored Products</td>
-                  <td>❌</td>
-                  <td>❌</td>
-                  <td>✅</td>
-                  <td>✅</td>
-                </tr>
-                <tr>
-                  <td>Flash Sale</td>
-                  <td>❌</td>
-                  <td>❌</td>
-                  <td>✅</td>
-                  <td>✅</td>
-                </tr>
-                <tr>
-                  <td>Analytics</td>
-                  <td>Basic</td>
-                  <td>Advanced</td>
-                  <td>Advanced</td>
-                  <td>AI Powered</td>
-                </tr>
-                <tr>
-                  <td>Marketing Tools</td>
-                  <td>❌</td>
-                  <td>❌</td>
-                  <td>Email + Push</td>
-                  <td>WhatsApp + Email</td>
-                </tr>
-                <tr>
-                  <td>Dedicated Manager</td>
-                  <td>❌</td>
-                  <td>❌</td>
-                  <td>❌</td>
-                  <td>✅</td>
-                </tr>
-                <tr>
-                  <td>Commission</td>
-                  <td>12%</td>
-                  <td>10%</td>
-                  <td>8%</td>
-                  <td>5%</td>
-                </tr>
-                <tr>
-                  <td>Settlement</td>
-                  <td>7 Days</td>
-                  <td>5 Days</td>
-                  <td>2 Days</td>
-                  <td>24 Hours</td>
-                </tr>
-                <tr>
-                  <td>Support</td>
-                  <td>Email</td>
-                  <td>Chat</td>
-                  <td>Phone</td>
-                  <td>Premium</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+      <div className={styles.comparisonTable}>
+        <h2>📊 Detailed Feature Comparison</h2>
+        <div className={styles.tableWrapper}>
+          <table>
+            <thead>
+              <tr>
+                <th>Features</th>
+                {plans.map((plan) => (
+                  <th key={plan.id}>
+                    {plan.icon} {plan.name}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Products</td>
+                {plans.map((plan) => (
+                  <td key={plan.id}>{formatLimit(plan.productLimit)}</td>
+                ))}
+              </tr>
+              <tr>
+                <td>Images per Product</td>
+                {plans.map((plan) => (
+                  <td key={plan.id}>{plan.imagesPerProduct}</td>
+                ))}
+              </tr>
+              <tr>
+                <td>Commission</td>
+                {plans.map((plan) => (
+                  <td key={plan.id}>{plan.commissionRate}%</td>
+                ))}
+              </tr>
+              <tr>
+                <td>Settlement</td>
+                {plans.map((plan) => (
+                  <td key={plan.id}>{plan.settlementDays} Day(s)</td>
+                ))}
+              </tr>
+              <tr>
+                <td>Support</td>
+                {plans.map((plan) => (
+                  <td key={plan.id}>{plan.supportLevel}</td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
     </div>
   );
 };

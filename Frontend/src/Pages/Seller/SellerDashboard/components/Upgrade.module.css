@@ -8,10 +8,36 @@
   min-height: 100vh;
 }
 
+/* Loading State */
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 6rem 1rem;
+  color: #64748b;
+}
+
+.spinner {
+  font-size: 2.5rem;
+  color: #6366f1;
+  animation: upgradeSpin 1s linear infinite;
+}
+
+@keyframes upgradeSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Header */
 .upgradeHeader {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
 }
 
 .upgradeTitle {
@@ -33,6 +59,65 @@
   color: #64748b;
   font-size: 1.2rem;
   margin-top: 0.5rem;
+}
+
+/* Active Plan Banner */
+.currentPlanBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%);
+  border: 2px solid #10b981;
+  border-radius: 16px;
+  padding: 1.25rem 1.75rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.bannerText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.bannerLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #059669;
+}
+
+.bannerPlanName {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.bannerExpiry {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.cancelLink {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: 1.5px solid #ef4444;
+  color: #ef4444;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelLink:hover {
+  background: #ef4444;
+  color: white;
 }
 
 /* Plans Grid */
@@ -223,6 +308,11 @@
   color: #94a3b8;
 }
 
+.upgradeBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 .upgradeBtn:not(:disabled):hover {
   transform: scale(1.02);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -231,8 +321,6 @@
 .upgradeBtn.currentBtn {
   background: #10b981;
   color: white;
-  cursor: not-allowed;
-  opacity: 0.7;
 }
 
 .upgradeBtn.popularBtn {
@@ -240,36 +328,17 @@
   color: white;
 }
 
-.upgradeBtn.popularBtn:hover {
+.upgradeBtn.popularBtn:not(:disabled):hover {
   background: linear-gradient(135deg, #d97706, #b45309);
   box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
 }
 
-.upgradeBtn:not(.currentBtn):not(.popularBtn):hover {
+.upgradeBtn:not(.currentBtn):not(.popularBtn):not(:disabled):hover {
   background: #cbd5e1;
   color: #1e293b;
 }
 
 /* Comparison Table */
-.compareToggle {
-  display: block;
-  margin: 2rem auto;
-  padding: 0.75rem 2rem;
-  background: white;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #1e293b;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.compareToggle:hover {
-  background: #f1f5f9;
-  transform: translateY(-2px);
-}
-
 .comparisonTable {
   margin-top: 2rem;
   background: white;
@@ -303,6 +372,7 @@ thead th {
   font-weight: 700;
   color: #1e293b;
   border-bottom: 2px solid #e2e8f0;
+  white-space: nowrap;
 }
 
 thead th:first-child {
@@ -359,6 +429,11 @@ tbody td:not(:first-child) {
 
   .price {
     font-size: 1.5rem;
+  }
+
+  .currentPlanBanner {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .comparisonTable {

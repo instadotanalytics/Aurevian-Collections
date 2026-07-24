@@ -53,8 +53,9 @@ import BecomePartner from "./Pages/Seller/BecomePartner.jsx";
 import SellerLogin from "./Pages/Seller/SellerAuth/SellerLogin.jsx";
 import SellerRegister from "./Pages/Seller/SellerAuth/SellerRegister.jsx";
 import SellerVerifyOTP from "./Pages/Seller/SellerAuth/SellerVerifyOTP.jsx";
-import SellerForgotPassword from './Pages/Seller/SellerAuth/SellerForgotPassword';
-import SellerResetPassword from './Pages/Seller/SellerAuth/SellerResetPassword';
+import SellerForgotPassword from "./Pages/Seller/SellerAuth/SellerForgotPassword";
+import SellerResetPassword from "./Pages/Seller/SellerAuth/SellerResetPassword";
+import SellerPayment from "./Pages/Seller/SellerPayment/SellerPayment.jsx";
 
 // ============================================
 // BLOG PAGES ✅
@@ -254,14 +255,7 @@ const App = () => {
               </LayoutWithHeader>
             }
           />
-          <Route
-            path="/cart"
-            element={
-            
-                <Cart />
-            
-            }
-          />
+          <Route path="/cart" element={<Cart />} />
           <Route
             path="/wishlist"
             element={
@@ -521,6 +515,17 @@ const App = () => {
                     </h1>
                     <p className="text-gray-600 mt-2">Manage your products</p>
                   </div>
+                </LayoutWithoutHeader>
+              </SellerRoute>
+            }
+          />
+
+          <Route
+            path="/seller/payment/:planId"
+            element={
+              <SellerRoute>
+                <LayoutWithoutHeader>
+                  <SellerPayment />
                 </LayoutWithoutHeader>
               </SellerRoute>
             }

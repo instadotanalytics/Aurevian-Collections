@@ -291,6 +291,50 @@ const sellerSchema = new mongoose.Schema(
     },
 
     // ============================================
+    // SUBSCRIPTION
+    // ============================================
+
+    subscription: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Subscription",
+      default: null,
+    },
+
+    // ✅ NEW: exact plan tracking (drives the Upgrade page's "current plan" state)
+    subscriptionPlanId: {
+      type: String,
+      enum: ["free", "silver", "gold", "platinum"],
+      default: "free",
+    },
+
+    sellerLevel: {
+      type: String,
+      enum: ["basic", "pro", "business"],
+      default: "basic",
+    },
+
+    isSuperSeller: {
+      type: Boolean,
+      default: false,
+    },
+
+    subscriptionStatus: {
+      type: String,
+      enum: ["inactive", "active", "expired", "cancelled"],
+      default: "inactive",
+    },
+
+    subscriptionStartedAt: {
+      type: Date,
+      default: null,
+    },
+
+    subscriptionExpiresAt: {
+      type: Date,
+      default: null,
+    },
+
+    // ============================================
     // ACCOUNT STATUS
     // ============================================
     role: {
@@ -373,6 +417,7 @@ sellerSchema.index({ status: 1, isActive: 1 });
 sellerSchema.index({ "kyc.status": 1 });
 sellerSchema.index({ "documents.panNumber": 1 });
 sellerSchema.index({ "documents.aadhaarNumber": 1 });
+sellerSchema.index({ subscriptionPlanId: 1, subscriptionStatus: 1 });
 
 // ============================================
 // VIRTUALS

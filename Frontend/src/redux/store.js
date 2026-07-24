@@ -7,6 +7,7 @@ import sellerReducer from "./slices/sellerSlice.js";
 import bannerReducer from "./slices/bannerSlice.js";
 import blogReducer from "./slices/blogSlice.js";
 import profileReducer from "./slices/profileSlice.js"; // ✅ ADD PROFILE REDUCER
+import sellerSubscriptionReducer from "./slices/sellerSubscriptionSlice.js"; // ✅ ADD SUBSCRIPTION REDUCER
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     banners: bannerReducer,
     blogs: blogReducer,
     profile: profileReducer, // ✅ ADD PROFILE REDUCER HERE
+    sellerSubscription: sellerSubscriptionReducer, // ✅ ADD SUBSCRIPTION REDUCER HERE
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -106,6 +108,23 @@ export const store = configureStore({
           "profile/updatePreferences/fulfilled",
           "profile/updatePreferences/pending",
           "profile/updatePreferences/rejected",
+
+          // Seller Subscription actions
+          "sellerSubscription/fetchPlans/fulfilled",
+          "sellerSubscription/fetchPlans/pending",
+          "sellerSubscription/fetchPlans/rejected",
+          "sellerSubscription/fetchCurrent/fulfilled",
+          "sellerSubscription/fetchCurrent/pending",
+          "sellerSubscription/fetchCurrent/rejected",
+          "sellerSubscription/fetchHistory/fulfilled",
+          "sellerSubscription/fetchHistory/pending",
+          "sellerSubscription/fetchHistory/rejected",
+          "sellerSubscription/upgradePlan/fulfilled",
+          "sellerSubscription/upgradePlan/pending",
+          "sellerSubscription/upgradePlan/rejected",
+          "sellerSubscription/cancel/fulfilled",
+          "sellerSubscription/cancel/pending",
+          "sellerSubscription/cancel/rejected",
         ],
 
         // ✅ Ignore these action paths
@@ -124,6 +143,14 @@ export const store = configureStore({
           "payload.endDate",
           "payload.publishedAt",
           "payload.publishedAt",
+          "payload.subscriptionStartedAt",
+          "payload.subscriptionExpiresAt",
+          "payload.plan.startDate",
+          "payload.plan.endDate",
+          "payload.lastOrder.createdAt",
+          "payload.lastOrder.updatedAt",
+          "payload.lastOrder.startDate",
+          "payload.lastOrder.endDate",
           "meta.arg", // Fix for FormData serialization
         ],
 
@@ -179,6 +206,18 @@ export const store = configureStore({
           "profile.orders.*.deliveredAt",
           "profile.orders.*.shippedAt",
           "profile.orders.*.confirmedAt",
+
+          // Seller Subscription paths
+          "sellerSubscription.current.subscriptionStartedAt",
+          "sellerSubscription.current.subscriptionExpiresAt",
+          "sellerSubscription.current.lastOrder.createdAt",
+          "sellerSubscription.current.lastOrder.updatedAt",
+          "sellerSubscription.current.lastOrder.startDate",
+          "sellerSubscription.current.lastOrder.endDate",
+          "sellerSubscription.history.*.createdAt",
+          "sellerSubscription.history.*.updatedAt",
+          "sellerSubscription.history.*.startDate",
+          "sellerSubscription.history.*.endDate",
         ],
       },
     }),
