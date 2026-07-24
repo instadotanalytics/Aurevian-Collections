@@ -7,6 +7,9 @@ import { sellerLogin, clearSellerError } from '../../../redux/slices/sellerSlice
 import { FiMail, FiLock, FiEye, FiEyeOff, FiAlertCircle } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import styles from './SellerLogin.module.css';
+import LoginImage from "../../../assets/b1.png";
+import Header from "../../Layout/Header/Header"
+import Footer from "../../Layout/Footer/Footer"
 
 const SellerLogin = () => {
   const navigate = useNavigate();
@@ -122,111 +125,124 @@ const SellerLogin = () => {
   };
 
   return (
+    <>
+    <Header/>
     <div className={styles.page}>
       <div className={styles.container}>
         <div className={styles.card}>
-          <div className={styles.header}>
-            <h1 className={styles.title}>Seller Login</h1>
-            <p className={styles.subtitle}>Welcome back! Login to your seller dashboard</p>
+          {/* Left Side - Image */}
+          <div className={styles.leftPanel}>
+            <div className={styles.imageWrapper}>
+              <img src={LoginImage} alt="Aurevian Seller Login" className={styles.sideImage} />
+            </div>
           </div>
 
-          {(localError || error) && (
-            <div className={styles.errorBanner}>
-              <FiAlertCircle className={styles.errorIcon} />
-              <span>{localError || error}</span>
+          {/* Right Side - Form */}
+          <div className={styles.rightPanel}>
+            <div className={styles.header}>
+              <h1 className={styles.title}>Welcome Back</h1>
+              <p className={styles.subtitle}>Login to your seller dashboard</p>
             </div>
-          )}
 
-          <form onSubmit={handleSubmit} className={styles.form}>
-            <div className={styles.field}>
-              <label htmlFor="email">Email Address</label>
-              <div className={styles.inputWrapper}>
-                <FiMail className={styles.inputIcon} />
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="seller@example.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                  autoComplete="email"
-                />
+            {(localError || error) && (
+              <div className={styles.errorBanner}>
+                <FiAlertCircle className={styles.errorIcon} />
+                <span>{localError || error}</span>
               </div>
-            </div>
+            )}
 
-            <div className={styles.field}>
-              <label htmlFor="password">Password</label>
-              <div className={styles.inputWrapper}>
-                <FiLock className={styles.inputIcon} />
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                  autoComplete="current-password"
-                />
-                <button
-                  type="button"
-                  className={styles.visibilityBtn}
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <FiEyeOff /> : <FiEye />}
-                </button>
+            <form onSubmit={handleSubmit} className={styles.form}>
+              <div className={styles.field}>
+                <label htmlFor="email">Email Address</label>
+                <div className={styles.inputWrapper}>
+                  <FiMail className={styles.inputIcon} />
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="seller@example.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    disabled={isLoading}
+                    autoComplete="email"
+                  />
+                </div>
               </div>
+
+              <div className={styles.field}>
+                <label htmlFor="password">Password</label>
+                <div className={styles.inputWrapper}>
+                  <FiLock className={styles.inputIcon} />
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Enter your password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    disabled={isLoading}
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    className={styles.visibilityBtn}
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                  </button>
+                </div>
+              </div>
+
+              <div className={styles.options}>
+                <label className={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
+                    name="remember"
+                    checked={formData.remember}
+                    onChange={handleChange}
+                    disabled={isLoading}
+                  />
+                  <span>Remember me</span>
+                </label>
+                <Link to="/seller/forgot-password" className={styles.forgotLink}>
+                  Forgot password?
+                </Link>
+              </div>
+
+              <button 
+                type="submit" 
+                className={styles.primaryBtn}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Logging in...' : 'Login'}
+              </button>
+            </form>
+
+            <div className={styles.divider}>
+              <span>New to Aurevian?</span>
             </div>
 
-            <div className={styles.options}>
-              <label className={styles.checkboxLabel}>
-                <input
-                  type="checkbox"
-                  name="remember"
-                  checked={formData.remember}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                />
-                <span>Remember me</span>
-              </label>
-              {/* ✅ FORGOT PASSWORD LINK */}
-              <Link to="/seller/forgot-password" className={styles.forgotLink}>
-                Forgot password?
+            <div className={styles.footer}>
+              <Link to="/seller/register" className={styles.registerLink}>
+                Register as a Seller
+              </Link>
+              <Link to="/become-a-partner" className={styles.backLink}>
+                ← Back to Become a Partner
               </Link>
             </div>
 
-            <button 
-              type="submit" 
-              className={styles.primaryBtn}
-              disabled={isLoading}
-            >
-              {isLoading ? 'Logging in...' : 'Login'}
-            </button>
-          </form>
-
-          <div className={styles.divider}>
-            <span>New to Aurevian?</span>
-          </div>
-
-          <div className={styles.footer}>
-            <Link to="/seller/register" className={styles.registerLink}>
-              Register as a Seller
-            </Link>
-            <Link to="/become-a-partner" className={styles.backLink}>
-              ← Back to Become a Partner
-            </Link>
-          </div>
-
-          <div className={styles.customerLogin}>
-            <p>
-              Are you a customer? <Link to="/login">Login here</Link>
-            </p>
+            <div className={styles.customerLogin}>
+              <p>
+                Are you a customer? <Link to="/login">Login here</Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </div>
+    <Footer/>
+    </>
   );
 };
 
