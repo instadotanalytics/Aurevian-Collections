@@ -1,8 +1,9 @@
-// backend/controllers/subscriptionController.js
+// backend/controllers/subscriptionController.js — full updated file
 
 import Subscription from "../models/Subscription.js";
 import Seller from "../models/Seller.js";
 import razorpayService from "../services/razorpayService.js";
+import emailService from "../services/emailService.js";
 import {
   SUBSCRIPTION_PLANS,
   PLAN_ORDER,
@@ -10,12 +11,78 @@ import {
   isValidPlan,
 } from "../config/subscriptionPlans.js";
 
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const MIN_PAYABLE_AMOUNT = 100; // ₹1 floor so Razorpay never sees a ₹0 order
+
+// ============================================
+// Auto-expire a seller's paid plan once endDate has passed.
+// ============================================
+const expireIfNeeded = async (seller) => {
+  const isPaidPlan =
+    seller.subscriptionPlanId && seller.subscriptionPlanId !== "free";
+  const isExpired =
+    seller.subscriptionExpiresAt &&
+    new Date(seller.subscriptionExpiresAt).getTime() <= Date.now();
+
+  if (!isPaidPlan || !isExpired) return seller;
+
+  const freePlan = getPlan("free");
+
+  await Subscription.updateMany(
+    { seller: seller._id, status: "paid", endDate: { $lte: new Date() } },
+    { $set: { status: "expired" } },
+  );
+
+  await Seller.findByIdAndUpdate(seller._id, {
+    subscriptionPlanId: "free",
+    sellerLevel: freePlan.sellerLevel,
+    isSuperSeller: freePlan.isSuperSeller,
+    subscriptionStatus: "inactive",
+    subscriptionStartedAt: null,
+    subscriptionExpiresAt: null,
+    subscription: null,
+  });
+
+  seller.subscriptionPlanId = "free";
+  seller.subscriptionStatus = "inactive";
+  seller.subscriptionStartedAt = null;
+  seller.subscriptionExpiresAt = null;
+
+  return seller;
+};
+
+// ============================================
+// Prorated credit for the unused portion of the seller's current
+// active plan, applied toward whatever they're switching to.
+// ============================================
+const calculateProratedCredit = (activeSubscription) => {
+  if (!activeSubscription || !activeSubscription.endDate) return 0;
+
+  const remainingMs =
+    new Date(activeSubscription.endDate).getTime() - Date.now();
+  if (remainingMs <= 0) return 0;
+
+  const currentPlan = getPlan(activeSubscription.planId);
+  if (!currentPlan || !currentPlan.durationDays) return 0;
+
+  const remainingDays = remainingMs / MS_PER_DAY;
+  const dailyRate = currentPlan.price / currentPlan.durationDays;
+  const credit = Math.round(dailyRate * remainingDays);
+
+  return Math.min(credit, currentPlan.price);
+};
+
 // ============================================
 // 1. GET ALL PLANS (marks the seller's current plan)
 // ============================================
 export const getPlans = async (req, res) => {
   try {
-    const currentPlanId = req.seller?.subscriptionPlanId || "free";
+    let currentPlanId = "free";
+
+    if (req.seller) {
+      const seller = await expireIfNeeded(req.seller);
+      currentPlanId = seller.subscriptionPlanId || "free";
+    }
 
     const plans = PLAN_ORDER.map((id) => ({
       ...SUBSCRIPTION_PLANS[id],
@@ -42,7 +109,7 @@ export const getPlans = async (req, res) => {
 // ============================================
 export const getCurrentSubscription = async (req, res) => {
   try {
-    const seller = await Seller.findById(req.seller._id).select(
+    let seller = await Seller.findById(req.seller._id).select(
       "subscriptionPlanId subscriptionStatus subscriptionStartedAt subscriptionExpiresAt sellerLevel isSuperSeller",
     );
 
@@ -51,6 +118,8 @@ export const getCurrentSubscription = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Seller not found" });
     }
+
+    seller = await expireIfNeeded(seller);
 
     const lastOrder = await Subscription.getActiveForSeller(seller._id);
     const plan = getPlan(seller.subscriptionPlanId || "free");
@@ -78,7 +147,7 @@ export const getCurrentSubscription = async (req, res) => {
 };
 
 // ============================================
-// 3. CREATE SUBSCRIPTION ORDER (Razorpay)
+// 3. CREATE SUBSCRIPTION ORDER (Razorpay) — with proration
 // ============================================
 export const createSubscriptionOrder = async (req, res) => {
   try {
@@ -98,7 +167,7 @@ export const createSubscriptionOrder = async (req, res) => {
     }
 
     const plan = getPlan(planId);
-    const seller = req.seller;
+    let seller = await expireIfNeeded(req.seller);
 
     if (
       seller.subscriptionPlanId === planId &&
@@ -112,10 +181,22 @@ export const createSubscriptionOrder = async (req, res) => {
       });
     }
 
+    const activeSubscription = await Subscription.getActiveForSeller(
+      seller._id,
+    );
+    const creditApplied = activeSubscription
+      ? calculateProratedCredit(activeSubscription)
+      : 0;
+
+    const payableAmount = Math.max(
+      plan.price - creditApplied,
+      MIN_PAYABLE_AMOUNT,
+    );
+
     const receipt = `sub_${seller._id}_${Date.now()}`.slice(0, 40);
 
     const orderResult = await razorpayService.createOrder({
-      amount: plan.price,
+      amount: payableAmount,
       currency: "INR",
       receipt,
       notes: { sellerId: seller._id.toString(), planId },
@@ -133,7 +214,10 @@ export const createSubscriptionOrder = async (req, res) => {
       seller: seller._id,
       planId,
       planName: plan.name,
-      amount: plan.price,
+      originalAmount: plan.price,
+      creditApplied,
+      previousPlanId: activeSubscription ? activeSubscription.planId : null,
+      amount: payableAmount,
       currency: "INR",
       status: "created",
       razorpayOrderId: orderResult.order.id,
@@ -141,7 +225,7 @@ export const createSubscriptionOrder = async (req, res) => {
     });
 
     console.log(
-      `📝 Subscription order created for seller ${seller._id}: ${plan.name} (${orderResult.mock ? "MOCK" : "LIVE"})`,
+      `📝 Subscription order created for seller ${seller._id}: ${plan.name} (${orderResult.mock ? "MOCK" : "LIVE"})${creditApplied ? ` with ₹${(creditApplied / 100).toFixed(2)} credit applied` : ""}`,
     );
 
     return res.status(201).json({
@@ -150,7 +234,9 @@ export const createSubscriptionOrder = async (req, res) => {
       data: {
         subscriptionId: subscription._id,
         orderId: orderResult.order.id,
-        amount: plan.price,
+        amount: payableAmount,
+        originalAmount: plan.price,
+        creditApplied,
         currency: "INR",
         keyId: process.env.RAZORPAY_KEY_ID || null,
         isMockPayment: !!orderResult.mock,
@@ -244,19 +330,48 @@ export const verifySubscriptionPayment = async (req, res) => {
     subscription.endDate = endDate;
     await subscription.save();
 
-    await Seller.findByIdAndUpdate(req.seller._id, {
-      subscriptionPlanId: plan.id,
-      sellerLevel: plan.sellerLevel,
-      isSuperSeller: plan.isSuperSeller,
-      subscriptionStatus: "active",
-      subscriptionStartedAt: startDate,
-      subscriptionExpiresAt: endDate,
-      subscription: subscription._id,
-    });
+    await Subscription.updateMany(
+      {
+        seller: req.seller._id,
+        status: "paid",
+        _id: { $ne: subscription._id },
+        endDate: { $gt: new Date() },
+      },
+      { $set: { status: "superseded" } },
+    );
+
+    const updatedSeller = await Seller.findByIdAndUpdate(
+      req.seller._id,
+      {
+        subscriptionPlanId: plan.id,
+        sellerLevel: plan.sellerLevel,
+        isSuperSeller: plan.isSuperSeller,
+        subscriptionStatus: "active",
+        subscriptionStartedAt: startDate,
+        subscriptionExpiresAt: endDate,
+        subscription: subscription._id,
+      },
+      { new: true },
+    ).select("email firstName lastName fullName");
 
     console.log(
       `✅ Seller ${req.seller._id} upgraded to ${plan.name} until ${endDate.toISOString()}`,
     );
+
+    // ✅ Fire-and-forget congratulations email — never block the response on it
+    if (updatedSeller?.email) {
+      emailService
+        .sendSellerSubscriptionEmail(
+          updatedSeller.email,
+          updatedSeller.fullName || updatedSeller.firstName || "Seller",
+          plan.name,
+          endDate,
+          `${process.env.CLIENT_URL}/seller/dashboard`,
+        )
+        .catch((err) =>
+          console.error("❌ Subscription congrats email failed:", err.message),
+        );
+    }
 
     return res.status(200).json({
       success: true,
@@ -291,47 +406,14 @@ export const getSubscriptionHistory = async (req, res) => {
 };
 
 // ============================================
-// 6. CANCEL SUBSCRIPTION (immediate downgrade to Free)
+// 6. CANCEL SUBSCRIPTION — disabled.
+// Subscriptions run for their full paid duration and auto-expire to
+// Free on their own; there is no manual cancellation path.
 // ============================================
 export const cancelSubscription = async (req, res) => {
-  try {
-    const seller = req.seller;
-
-    if (!seller.subscriptionPlanId || seller.subscriptionPlanId === "free") {
-      return res
-        .status(400)
-        .json({ success: false, message: "You are already on the Free plan" });
-    }
-
-    // Mark any active paid subscription record as cancelled
-    await Subscription.updateMany(
-      { seller: seller._id, status: "paid", endDate: { $gt: new Date() } },
-      { $set: { status: "cancelled" } },
-    );
-
-    // Immediately revert seller to Free plan and clear paid-plan benefits
-    const freePlan = getPlan("free");
-    await Seller.findByIdAndUpdate(seller._id, {
-      subscriptionPlanId: "free",
-      sellerLevel: freePlan.sellerLevel,
-      isSuperSeller: freePlan.isSuperSeller,
-      subscriptionStatus: "inactive",
-      subscriptionStartedAt: null,
-      subscriptionExpiresAt: null,
-      subscription: null,
-    });
-
-    return res.status(200).json({
-      success: true,
-      message:
-        "Your subscription has been cancelled. You've been moved to the Free plan.",
-    });
-  } catch (error) {
-    console.error("❌ Cancel subscription error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to cancel subscription",
-      error: error.message,
-    });
-  }
+  return res.status(400).json({
+    success: false,
+    message:
+      "Subscriptions can't be cancelled manually. Your plan stays active until it expires, then automatically moves to Free.",
+  });
 };

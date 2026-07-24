@@ -268,13 +268,21 @@ const SellerPayment = () => {
               <span>Plan price</span>
               <span>{plan.priceDisplay}</span>
             </div>
+            {order.creditApplied > 0 && (
+              <div className={`${styles.priceRow} ${styles.creditRow}`}>
+                <span>Credit from current plan</span>
+                <span>
+                  −₹{(order.creditApplied / 100).toLocaleString("en-IN")}
+                </span>
+              </div>
+            )}
             <div className={styles.priceRow}>
               <span>Taxes &amp; fees</span>
               <span>Included</span>
             </div>
             <div className={`${styles.priceRow} ${styles.totalRow}`}>
               <span>Total due today</span>
-              <span>{plan.priceDisplay}</span>
+              <span>₹{(order.amount / 100).toLocaleString("en-IN")}</span>
             </div>
           </div>
 
@@ -382,7 +390,7 @@ const SellerPayment = () => {
               </>
             ) : (
               <>
-                <FiLock /> Pay {plan.priceDisplay}
+                <FiLock /> Pay ₹{(order.amount / 100).toLocaleString("en-IN")}
               </>
             )}
           </button>

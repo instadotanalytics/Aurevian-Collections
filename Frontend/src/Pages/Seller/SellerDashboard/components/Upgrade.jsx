@@ -1,4 +1,4 @@
-// src/Pages/Seller/SellerDashboard/components/Upgrade.jsx
+// src/Pages/Seller/SellerDashboard/components/Upgrade.jsx — full file
 
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,12 +11,11 @@ import {
   FiPercent,
   FiTrendingUp,
   FiLoader,
-  FiXCircle,
+  FiInfo,
 } from "react-icons/fi";
 import {
   fetchPlans,
   fetchCurrentSubscription,
-  cancelSubscriptionPlan,
 } from "../../../../redux/slices/sellerSubscriptionSlice";
 
 const formatLimit = (value) => (value === -1 ? "Unlimited" : value);
@@ -33,19 +32,12 @@ const Upgrade = () => {
     dispatch(fetchCurrentSubscription());
   }, [dispatch]);
 
+  const hasActivePaidPlan =
+    current?.subscriptionStatus === "active" && current?.plan?.id !== "free";
+
   const handleUpgrade = (planId) => {
     if (planId === "free") return;
     navigate(`/seller/payment/${planId}`);
-  };
-
-  const handleCancel = () => {
-    if (
-      window.confirm(
-        "Are you sure you want to cancel your subscription? You'll be moved to the Free plan immediately and lose your current plan's benefits right away.",
-      )
-    ) {
-      dispatch(cancelSubscriptionPlan());
-    }
   };
 
   if (loading && plans.length === 0) {
@@ -71,27 +63,34 @@ const Upgrade = () => {
         </p>
       </div>
 
-      {/* Active plan banner */}
-      {current?.subscriptionStatus === "active" &&
-        current?.plan?.id !== "free" && (
-          <div className={styles.currentPlanBanner}>
-            <div className={styles.bannerText}>
-              <span className={styles.bannerLabel}>Active plan</span>
-              <strong className={styles.bannerPlanName}>
-                {current.plan.name}
-              </strong>
-              {current.subscriptionExpiresAt && (
-                <span className={styles.bannerExpiry}>
-                  Expires on{" "}
-                  {new Date(current.subscriptionExpiresAt).toLocaleDateString()}
-                </span>
-              )}
-            </div>
-            <button className={styles.cancelLink} onClick={handleCancel}>
-              <FiXCircle /> Cancel plan
-            </button>
+      {/* Active plan banner — informational only, no cancel action */}
+      {hasActivePaidPlan && (
+        <div className={styles.currentPlanBanner}>
+          <div className={styles.bannerText}>
+            <span className={styles.bannerLabel}>Active plan</span>
+            <strong className={styles.bannerPlanName}>
+              {current.plan.name}
+            </strong>
+            {current.subscriptionExpiresAt && (
+              <span className={styles.bannerExpiry}>
+                Valid until{" "}
+                {new Date(current.subscriptionExpiresAt).toLocaleDateString()}
+              </span>
+            )}
           </div>
-        )}
+        </div>
+      )}
+
+      {/* Proration note for existing paid sellers */}
+      {hasActivePaidPlan && (
+        <div className={styles.prorationNote}>
+          <FiInfo />
+          <span>
+            Switching plans? We automatically credit the unused value of your
+            current plan toward the new one — you only pay the difference.
+          </span>
+        </div>
+      )}
 
       {/* Plans Grid */}
       <div className={styles.plansGrid}>
@@ -150,7 +149,11 @@ const Upgrade = () => {
                 onClick={() => handleUpgrade(plan.id)}
                 disabled={plan.isCurrent || plan.id === "free"}
               >
-                {plan.isCurrent ? "Current Plan" : "Upgrade Now"}
+                {plan.isCurrent
+                  ? "Current Plan"
+                  : hasActivePaidPlan
+                    ? "Switch Plan"
+                    : "Upgrade Now"}
               </button>
             </div>
           </div>

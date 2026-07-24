@@ -1,4 +1,4 @@
-// backend/routes/subscriptionRoutes.js
+// backend/routes/subscriptionRoutes.js — full file (cancel route kept for the disabled endpoint, no reactivate)
 
 import express from "express";
 import {
@@ -13,7 +13,6 @@ import { protectSeller } from "../middleware/sellerAuth.js";
 
 const router = express.Router();
 
-// All subscription routes require a logged-in seller
 router.use(protectSeller);
 
 router.get("/plans", getPlans);
@@ -29,6 +28,6 @@ console.log("  📌 GET    /api/seller/subscription/current");
 console.log("  📌 POST   /api/seller/subscription/create-order");
 console.log("  📌 POST   /api/seller/subscription/verify-payment");
 console.log("  📌 GET    /api/seller/subscription/history");
-console.log("  📌 POST   /api/seller/subscription/cancel");
+console.log("  📌 POST   /api/seller/subscription/cancel (disabled)");
 
 export default router;

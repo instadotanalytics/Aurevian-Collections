@@ -334,6 +334,16 @@ const sellerSchema = new mongoose.Schema(
       default: null,
     },
 
+    // ✅ NEW: scheduled (end-of-period) cancellation instead of instant downgrade
+    cancelAtPeriodEnd: {
+      type: Boolean,
+      default: false,
+    },
+    cancelRequestedAt: {
+      type: Date,
+      default: null,
+    },
+
     // ============================================
     // ACCOUNT STATUS
     // ============================================
