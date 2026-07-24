@@ -1,13 +1,3 @@
-import dns from "dns";
-<<<<<<< HEAD
-dns.setServers(["8.8.8.8"]);
-=======
-
-dns.setServers(["8.8.8.8"]); // Backend/index.js
-import dns from 'dns';
-
-dns.setServers(['8.8.8.8']);// Backend/index.js
->>>>>>> 67fe217e0abc6a4afd6e9ae4b897caabb4396cde
 
 import "dotenv/config";
 import express from "express";
