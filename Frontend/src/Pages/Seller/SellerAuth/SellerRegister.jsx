@@ -4,9 +4,36 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerSeller, resendOTP } from '../../../redux/slices/sellerSlice';
-import { FiArrowLeft, FiArrowRight, FiCheck, FiUser, FiMail, FiPhone, FiLock, FiShoppingBag, FiMapPin, FiCreditCard, FiShield, FiAward, FiUpload } from 'react-icons/fi';
+import { 
+  FiArrowLeft, 
+  FiArrowRight, 
+  FiCheck, 
+  FiUser, 
+  FiMail, 
+  FiPhone, 
+  FiLock, 
+  FiShoppingBag, 
+  FiMapPin, 
+  FiCreditCard, 
+  FiShield, 
+  FiAward, 
+  FiUpload,
+  FiTrendingUp,
+  FiUsers,
+  FiStar
+} from 'react-icons/fi';
+import { FaGem } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import styles from './SellerRegister.module.css';
+import Header from "../../Layout/Header/Header"
+import Footer from "../../Layout/Footer/Footer"
+
+// Import step images
+import Step1Image from "../../..//assets/Aurevianlogo.png";
+import Step2Image from "../../../assets/b1.png";
+import Step3Image from "../../../assets/Aurevianlogo.png";
+import Step4Image from "../../../assets/b1.png";
+import Step5Image from "../../../assets/Aurevianlogo.png";
 
 const SellerRegister = () => {
   const navigate = useNavigate();
@@ -17,6 +44,44 @@ const SellerRegister = () => {
   const [loading, setLoading] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
+
+  // Step images mapping
+  const stepImages = {
+    1: Step1Image,
+    2: Step2Image,
+    3: Step3Image,
+    4: Step4Image,
+    5: Step5Image,
+  };
+
+  // Step information
+  const stepInfo = {
+    1: {
+      title: 'Personal Information',
+      description: 'Fill your personal details',
+      icon: <FiUser />,
+    },
+    2: {
+      title: 'PAN Card Details',
+      description: 'Enter your PAN card details',
+      icon: <FiShield />,
+    },
+    3: {
+      title: 'Aadhaar Card Details',
+      description: 'Enter your Aadhaar card details',
+      icon: <FiAward />,
+    },
+    4: {
+      title: 'Store & GST Details',
+      description: 'Tell us about your store',
+      icon: <FiShoppingBag />,
+    },
+    5: {
+      title: 'Review & Submit',
+      description: 'Review your information',
+      icon: <FiCheck />,
+    },
+  };
 
   // ============================================
   // FORM DATA
@@ -87,9 +152,22 @@ const SellerRegister = () => {
     { value: 'other', label: '📦 Other' },
   ];
 
-  const countryOptions = [
-    'Switzerland', 'India', 'USA', 'UK', 'France', 'Italy', 
-    'Germany', 'Spain', 'Australia', 'Canada', 'Dubai', 'Singapore'
+  const trustFeatures = [
+    {
+      icon: <FiShield />,
+      title: 'Trusted Platform',
+      description: 'Secure & Reliable Marketplace'
+    },
+    {
+      icon: <FiTrendingUp />,
+      title: 'Grow Your Business',
+      description: 'Reach Luxury Customers Worldwide'
+    },
+    {
+      icon: <FiStar />,
+      title: 'More Sales, More Success',
+      description: "We're here to help you grow"
+    }
   ];
 
   // OTP Timer
@@ -167,7 +245,7 @@ const SellerRegister = () => {
   };
 
   // ============================================
-  // VALIDATION - FIXED
+  // VALIDATION
   // ============================================
   const validateStep = (step) => {
     const newErrors = {};
@@ -193,7 +271,6 @@ const SellerRegister = () => {
       if (!formData.panNumber) {
         newErrors.panNumber = 'PAN number is required';
       } else {
-        // ✅ FIX: Remove spaces, auto uppercase, check length
         const cleanPan = formData.panNumber.trim().toUpperCase().replace(/\s/g, '');
         if (cleanPan.length !== 10) {
           newErrors.panNumber = 'PAN number must be exactly 10 characters';
@@ -325,12 +402,13 @@ const SellerRegister = () => {
   const renderStepIndicator = () => {
     const steps = [
       { label: 'Personal', icon: <FiUser /> },
-      { label: 'PAN Card', icon: <FiShield /> },
+      { label: 'PAN', icon: <FiShield /> },
       { label: 'Aadhaar', icon: <FiAward /> },
       { label: 'Store', icon: <FiShoppingBag /> },
       { label: 'Review', icon: <FiCheck /> },
     ];
     return (
+     
       <div className={styles.stepIndicator}>
         {steps.map((step, index) => (
           <div key={index} className={styles.stepItem}>
@@ -405,7 +483,7 @@ const SellerRegister = () => {
   );
 
   // ============================================
-  // STEP 2: PAN CARD - FIXED
+  // STEP 2: PAN CARD
   // ============================================
   const renderPanCard = () => (
     <div className={styles.stepContent}>
@@ -419,7 +497,6 @@ const SellerRegister = () => {
           placeholder="ABCDE1234F"
           value={formData.panNumber}
           onChange={(e) => {
-            // ✅ Auto uppercase and remove spaces
             const value = e.target.value.toUpperCase().replace(/\s/g, '');
             setFormData(prev => ({ ...prev, panNumber: value }));
             if (errors.panNumber) {
@@ -431,12 +508,8 @@ const SellerRegister = () => {
         />
         {errors.panNumber && <span className={styles.errorText}>{errors.panNumber}</span>}
         <small className={styles.hint}>Format: 5 letters + 4 digits + 1 letter (e.g., ABCDE1234F)</small>
-        {/* ✅ Show validation status */}
         {formData.panNumber && formData.panNumber.length === 10 && /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.panNumber) && (
           <span className={styles.validText}>✅ Valid PAN format</span>
-        )}
-        {formData.panNumber && formData.panNumber.length === 10 && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.panNumber) && (
-          <span className={styles.invalidText}>❌ Invalid PAN format</span>
         )}
       </div>
 
@@ -453,7 +526,7 @@ const SellerRegister = () => {
               <>
                 <FiUpload className={styles.uploadIcon} />
                 <p>Click to upload PAN card image</p>
-                <span>Supported: JPG, PNG, PDF (Max 5MB)</span>
+                <span>JPG, PNG, PDF (Max 5MB)</span>
               </>
             )}
             <input type="file" name="panCard" accept="image/*,.pdf" onChange={handleChange} className={styles.fileInput} />
@@ -465,7 +538,7 @@ const SellerRegister = () => {
   );
 
   // ============================================
-  // STEP 3: AADHAAR CARD - FIXED
+  // STEP 3: AADHAAR CARD
   // ============================================
   const renderAadhaarCard = () => (
     <div className={styles.stepContent}>
@@ -493,9 +566,6 @@ const SellerRegister = () => {
         {formData.aadhaarNumber && formData.aadhaarNumber.length === 12 && /^[0-9]{12}$/.test(formData.aadhaarNumber) && (
           <span className={styles.validText}>✅ Valid Aadhaar format</span>
         )}
-        {formData.aadhaarNumber && formData.aadhaarNumber.length === 12 && !/^[0-9]{12}$/.test(formData.aadhaarNumber) && (
-          <span className={styles.invalidText}>❌ Invalid Aadhaar format</span>
-        )}
       </div>
 
       <div className={styles.formGroup}>
@@ -511,7 +581,7 @@ const SellerRegister = () => {
               <>
                 <FiUpload className={styles.uploadIcon} />
                 <p>Click to upload Aadhaar card image</p>
-                <span>Supported: JPG, PNG, PDF (Max 5MB)</span>
+                <span>JPG, PNG, PDF (Max 5MB)</span>
               </>
             )}
             <input type="file" name="aadhaarCard" accept="image/*,.pdf" onChange={handleChange} className={styles.fileInput} />
@@ -543,7 +613,7 @@ const SellerRegister = () => {
 
       <div className={styles.formGroup}>
         <label>Business Description</label>
-        <textarea name="businessDescription" placeholder="Tell us about your jewellery business..." value={formData.businessDescription} onChange={handleChange} rows={3} />
+        <textarea name="businessDescription" placeholder="Tell us about your jewellery business..." value={formData.businessDescription} onChange={handleChange} rows={2} />
       </div>
 
       <div className={styles.formGroup}>
@@ -573,7 +643,7 @@ const SellerRegister = () => {
               <>
                 <FiUpload className={styles.uploadIcon} />
                 <p>Click to upload GST certificate (optional)</p>
-                <span>Supported: JPG, PNG, PDF (Max 5MB)</span>
+                <span>JPG, PNG, PDF (Max 5MB)</span>
               </>
             )}
             <input type="file" name="gstCertificate" accept="image/*,.pdf" onChange={handleChange} className={styles.fileInput} />
@@ -603,9 +673,6 @@ const SellerRegister = () => {
         <div className={styles.socialLinks}>
           <input placeholder="Facebook URL" value={formData.socialLinks.facebook} onChange={(e) => handleSocialLink('facebook', e.target.value)} />
           <input placeholder="Instagram URL" value={formData.socialLinks.instagram} onChange={(e) => handleSocialLink('instagram', e.target.value)} />
-          <input placeholder="Twitter URL" value={formData.socialLinks.twitter} onChange={(e) => handleSocialLink('twitter', e.target.value)} />
-          <input placeholder="YouTube URL" value={formData.socialLinks.youtube} onChange={(e) => handleSocialLink('youtube', e.target.value)} />
-          <input placeholder="LinkedIn URL" value={formData.socialLinks.linkedin} onChange={(e) => handleSocialLink('linkedin', e.target.value)} />
         </div>
       </div>
     </div>
@@ -641,18 +708,7 @@ const SellerRegister = () => {
         <h4>Store Information</h4>
         <div className={styles.reviewGrid}>
           <div><strong>Store:</strong> {formData.storeName}</div>
-          <div><strong>Brand:</strong> {formData.brandName || 'N/A'}</div>
           <div><strong>Categories:</strong> {formData.productCategories.join(', ')}</div>
-        </div>
-      </div>
-
-      <div className={styles.reviewSection}>
-        <h4>Business Address</h4>
-        <div className={styles.reviewGrid}>
-          <div><strong>Address:</strong> {formData.businessAddress.street}</div>
-          <div><strong>City:</strong> {formData.businessAddress.city}</div>
-          <div><strong>State:</strong> {formData.businessAddress.state}</div>
-          <div><strong>Pincode:</strong> {formData.businessAddress.pincode}</div>
         </div>
       </div>
 
@@ -669,39 +725,77 @@ const SellerRegister = () => {
   // MAIN RENDER
   // ============================================
   return (
+     <>
+    <Header/>
     <div className={styles.page}>
       <div className={styles.container}>
         <div className={styles.card}>
-          <div className={styles.header}>
-            <h1 className={styles.title}>Become a Seller</h1>
-            <p className={styles.subtitle}>Complete your registration to start selling</p>
+          {/* Left Side - Image changes with step */}
+          <div className={styles.leftPanel}>
+            <div className={styles.imageWrapper}>
+              <img 
+                src={stepImages[currentStep]} 
+                alt={`Step ${currentStep} - ${stepInfo[currentStep].title}`} 
+                className={styles.sideImage} 
+              />
+            </div>
           </div>
 
-          {renderStepIndicator()}
-
-          <form onSubmit={handleSubmit} className={styles.form}>
-            {renderStepContent()}
-
-            <div className={styles.navigation}>
-              {currentStep > 1 && (
-                <button type="button" onClick={handlePrevious} className={styles.prevBtn} disabled={loading}>
-                  <FiArrowLeft /> Back
-                </button>
-              )}
-
-              <button type="submit" className={styles.nextBtn} disabled={loading}>
-                {loading ? 'Submitting...' : currentStep === 5 ? 'Submit' : 'Next'}
-                {currentStep < 5 && <FiArrowRight />}
-              </button>
+          {/* Right Side - Form */}
+          <div className={styles.rightPanel}>
+            <div className={styles.header}>
+              <h1 className={styles.title}>Become a Seller</h1>
+              <p className={styles.subtitle}>Complete your registration to start selling on Aurevian</p>
             </div>
-          </form>
 
-          <div className={styles.footer}>
-            <p>Already have an account? <Link to="/seller/login">Login here</Link></p>
+            {renderStepIndicator()}
+
+            <form onSubmit={handleSubmit} className={styles.form}>
+              {renderStepContent()}
+
+              <div className={styles.navigation}>
+                {currentStep > 1 && (
+                  <button type="button" onClick={handlePrevious} className={styles.prevBtn} disabled={loading}>
+                    <FiArrowLeft /> Back
+                  </button>
+                )}
+
+                <button type="submit" className={styles.nextBtn} disabled={loading}>
+                  {loading ? 'Submitting...' : currentStep === 5 ? 'Submit Application' : 'Next Step'}
+                  {currentStep < 5 && <FiArrowRight />}
+                </button>
+              </div>
+            </form>
+
+            {/* Trust Features */}
+            {/* <div className={styles.trustFeatures}>
+              <div className={styles.trustHeader}>
+                <FaGem className={styles.trustHeaderIcon} />
+                <span>Join 500+ successful sellers</span>
+              </div>
+              <p className={styles.trustSubtext}>and grow your jewellery business with Aurevian.</p>
+              <div className={styles.trustGrid}>
+                {trustFeatures.map((feature, index) => (
+                  <div key={index} className={styles.trustItem}>
+                    <div className={styles.trustItemIcon}>{feature.icon}</div>
+                    <div>
+                      <h4>{feature.title}</h4>
+                      <p>{feature.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div> */}
+
+            <div className={styles.footer}>
+              <p>Already have an account? <Link to="/seller/login">Sign in here</Link></p>
+            </div>
           </div>
         </div>
       </div>
     </div>
+    <Footer/>
+        </>
   );
 };
 

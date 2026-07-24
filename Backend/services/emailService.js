@@ -58,7 +58,7 @@ class EmailService {
   // ============================================
   async sendSellerResetPasswordEmail(to, name, resetUrl) {
     const subject = "🔐 Reset Your Password - Aurevian Collections";
-    
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -123,7 +123,7 @@ class EmailService {
   // ============================================
   async sendSellerPasswordResetConfirmation(to, name) {
     const subject = "✅ Password Reset Successful - Aurevian Collections";
-    
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -251,8 +251,8 @@ class EmailService {
   // SELLER APPROVAL EMAIL (Under Review - 24 Hours)
   // ============================================
   async sendSellerApprovalEmail(to, name, storeName, loginLink) {
-    const subject = '📋 Seller Account Under Review - Aurevian Collections';
-    
+    const subject = "📋 Seller Account Under Review - Aurevian Collections";
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -330,8 +330,8 @@ class EmailService {
   // SELLER APPROVED EMAIL
   // ============================================
   async sendSellerApprovedEmail(to, name, storeName, loginLink) {
-    const subject = '🎉 Seller Account Approved - Aurevian Collections';
-    
+    const subject = "🎉 Seller Account Approved - Aurevian Collections";
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -394,11 +394,79 @@ class EmailService {
   }
 
   // ============================================
+  // SELLER SUBSCRIPTION UPGRADE EMAIL
+  // ============================================
+  async sendSellerSubscriptionEmail(
+    to,
+    name,
+    planName,
+    expiryDate,
+    dashboardLink,
+  ) {
+    const subject = `🎉 Congratulations! You're now a ${planName} Seller - Aurevian Collections`;
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Subscription Confirmed</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f8f6f4; }
+          .container { max-width: 600px; margin: 20px auto; padding: 0; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; }
+          .header { text-align: center; padding: 30px 20px; background: linear-gradient(135deg, #c8a86e 0%, #a0804a 100%); color: white; }
+          .header h1 { margin: 0; font-size: 28px; }
+          .header p { margin: 5px 0 0; opacity: 0.9; }
+          .content { padding: 30px; }
+          .greeting { font-size: 18px; color: #1a1a1a; margin-bottom: 10px; }
+          .message { color: #666; line-height: 1.8; margin-bottom: 20px; }
+          .plan-box { background: #fdf8f0; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e8d5b5; text-align: center; }
+          .plan-box .plan-name { font-size: 22px; font-weight: 700; color: #a0804a; margin: 0 0 6px; }
+          .plan-box .plan-expiry { color: #92400e; font-size: 14px; margin: 0; }
+          .btn { display: inline-block; padding: 14px 40px; background: linear-gradient(135deg, #c8a86e 0%, #a0804a 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; }
+          .footer { text-align: center; padding: 20px; color: #999; font-size: 13px; border-top: 1px solid #eee; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🎉 Congratulations!</h1>
+            <p>Your seller plan has been upgraded</p>
+          </div>
+          <div class="content">
+            <p class="greeting">Dear ${name},</p>
+            <p class="message">
+              You've successfully become a <strong>${planName} Seller</strong> on <strong>Aurevian Collections</strong>! Your new benefits — better visibility, lower commission — are active right now.
+            </p>
+            <div class="plan-box">
+              <p class="plan-name">${planName} Plan</p>
+              ${expiryDate ? `<p class="plan-expiry">Valid until ${new Date(expiryDate).toLocaleDateString()}</p>` : ""}
+            </div>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${dashboardLink}" class="btn">Go to Dashboard →</a>
+            </div>
+            <p style="color: #999; font-size: 14px; text-align: center; margin-top: 20px;">
+              Thank you for growing your business with us.
+            </p>
+          </div>
+          <div class="footer">
+            <p>© ${new Date().getFullYear()} Aurevian Collections. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    return this.sendEmail({ to, subject, html });
+  }
+
+  // ============================================
   // SELLER REJECTED EMAIL
   // ============================================
   async sendSellerRejectedEmail(to, name, storeName, reason) {
-    const subject = 'Seller Account Update - Aurevian Collections';
-    
+    const subject = "Seller Account Update - Aurevian Collections";
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -431,7 +499,7 @@ class EmailService {
             </p>
             <div class="rejection-box">
               <p style="font-weight: 600;">❌ Status: Rejected</p>
-              ${reason ? `<p style="margin-top: 10px;"><strong>Reason:</strong> ${reason}</p>` : ''}
+              ${reason ? `<p style="margin-top: 10px;"><strong>Reason:</strong> ${reason}</p>` : ""}
             </div>
             <p style="color: #666; line-height: 1.6;">
               You can reapply with corrected information after addressing the above issues.
@@ -455,8 +523,8 @@ class EmailService {
   // SELLER SUSPENDED EMAIL
   // ============================================
   async sendSellerSuspendedEmail(to, name, storeName, reason) {
-    const subject = '⚠️ Account Suspended - Aurevian Collections';
-    
+    const subject = "⚠️ Account Suspended - Aurevian Collections";
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -489,7 +557,7 @@ class EmailService {
             </p>
             <div class="suspension-box">
               <p style="font-weight: 600;">⚠️ Reason:</p>
-              <p>${reason || 'Violation of terms and conditions'}</p>
+              <p>${reason || "Violation of terms and conditions"}</p>
             </div>
             <p style="color: #666; line-height: 1.6;">
               Please contact our support team for more information and to resolve this issue.

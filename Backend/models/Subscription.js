@@ -19,8 +19,24 @@ const subscriptionSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    // ✅ Full plan price before any prorated credit
+    originalAmount: {
+      type: Number,
+      default: 0,
+    },
+    // ✅ Credit carried over from the previous active plan's unused validity
+    creditApplied: {
+      type: Number,
+      default: 0,
+    },
+    // ✅ Plan the seller was upgrading/switching FROM, if any
+    previousPlanId: {
+      type: String,
+      enum: ["free", "silver", "gold", "platinum", null],
+      default: null,
+    },
     amount: {
-      type: Number, // in paise
+      type: Number, // in paise — actual payable amount after credit
       required: true,
     },
     currency: {
@@ -29,7 +45,7 @@ const subscriptionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["created", "paid", "failed", "cancelled", "expired"],
+      enum: ["created", "paid", "failed", "cancelled", "expired", "superseded"],
       default: "created",
     },
     razorpayOrderId: {

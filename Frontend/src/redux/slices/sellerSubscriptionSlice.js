@@ -126,27 +126,6 @@ export const verifySubscriptionPayment = createAsyncThunk(
   },
 );
 
-export const cancelSubscriptionPlan = createAsyncThunk(
-  "sellerSubscription/cancel",
-  async (_, { rejectWithValue, dispatch }) => {
-    try {
-      const { data } = await axios.post(
-        `${API_URL}/seller/subscription/cancel`,
-        {},
-        { headers: authHeader() },
-      );
-      toast.success(data.message);
-      dispatch(fetchCurrentSubscription());
-      return data;
-    } catch (error) {
-      const message =
-        error.response?.data?.message || "Failed to cancel subscription";
-      toast.error(message);
-      return rejectWithValue(message);
-    }
-  },
-);
-
 // ============================================
 // SLICE
 // ============================================
@@ -161,7 +140,7 @@ const sellerSubscriptionSlice = createSlice({
     error: null,
 
     // Payment-page specific state
-    order: null, // { subscriptionId, orderId, amount, currency, keyId, isMockPayment, plan }
+    order: null, // { subscriptionId, orderId, amount, originalAmount, creditApplied, currency, keyId, isMockPayment, plan }
     orderStatus: "idle", // idle | creating | ready | error
     paymentStatus: "idle", // idle | processing | success | failed
     paymentResult: null, // { plan, startDate, endDate }

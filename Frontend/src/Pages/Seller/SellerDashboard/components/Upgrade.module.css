@@ -100,26 +100,6 @@
   color: #64748b;
 }
 
-.cancelLink {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: transparent;
-  border: 1.5px solid #ef4444;
-  color: #ef4444;
-  font-weight: 600;
-  font-size: 0.85rem;
-  padding: 0.5rem 1rem;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.cancelLink:hover {
-  background: #ef4444;
-  color: white;
-}
-
 /* Plans Grid */
 .plansGrid {
   display: grid;
@@ -464,4 +444,25 @@ tbody td:not(:first-child) {
     gap: 0.5rem;
     align-items: center;
   }
+}
+
+/* Append to src/Pages/Seller/SellerDashboard/components/Upgrade.module.css */
+
+.prorationNote {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  color: #4338ca;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.75rem 1.1rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.prorationNote svg {
+  flex-shrink: 0;
+  font-size: 1.1rem;
 }

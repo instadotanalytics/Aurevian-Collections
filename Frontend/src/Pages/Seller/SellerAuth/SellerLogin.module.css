@@ -1,5 +1,8 @@
 /* src/Pages/Seller/SellerLogin.module.css */
 
+/* ============================================
+   PAGE CONTAINER
+   ============================================ */
 .page {
   min-height: 100vh;
   display: flex;
@@ -11,33 +14,84 @@
 
 .container {
   width: 100%;
-  max-width: 420px;
-}
-
-.card {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 40px 32px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  max-width: 1100px;
 }
 
 /* ============================================
-   Header
+   CARD - Two Column Layout
+   ============================================ */
+.card {
+  display: flex;
+  background: #ffffff;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.08);
+  height: 600px;
+  max-height: 80vh;
+  border: 1px solid rgba(212, 175, 55, 0.08);
+}
+
+/* ============================================
+   LEFT PANEL - Image
+   ============================================ */
+.leftPanel {
+  flex: 0 0 50%;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d1f14 100%);
+  height: 100%;
+}
+
+.imageWrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.sideImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.imageWrapper:hover .sideImage {
+  transform: scale(1.02);
+}
+
+/* ============================================
+   RIGHT PANEL - Form (No Scroll)
+   ============================================ */
+.rightPanel {
+  flex: 0 0 50%;
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #ffffff;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ============================================
+   HEADER
    ============================================ */
 .header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .title {
-  font-size: 28px;
+  font-family: 'Playfair Display', serif;
+  font-size: 30px;
   font-weight: 700;
   color: #1a1a1a;
-  margin: 0 0 8px;
+  margin: 0 0 6px;
+  letter-spacing: -0.3px;
 }
 
 .subtitle {
-  font-size: 15px;
+  font-size: 14px;
   color: #666;
   margin: 0;
 }
@@ -52,34 +106,34 @@
   background: #fef2f2;
   border: 1px solid #fca5a5;
   color: #991b1b;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  margin-bottom: 24px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  margin-bottom: 16px;
 }
 
 .errorIcon {
   flex-shrink: 0;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 /* ============================================
-   Form
+   FORM
    ============================================ */
 .form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .field label {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: #333;
 }
@@ -94,15 +148,15 @@
   position: absolute;
   left: 14px;
   color: #999;
-  font-size: 18px;
+  font-size: 17px;
 }
 
 .inputWrapper input {
   width: 100%;
-  padding: 14px 14px 14px 46px;
+  padding: 12px 14px 12px 44px;
   border: 2px solid #e8e2d5;
   border-radius: 10px;
-  font-size: 15px;
+  font-size: 14px;
   font-family: inherit;
   background: #ffffff;
   transition: border-color 0.3s ease;
@@ -130,8 +184,8 @@
   border: none;
   color: #999;
   cursor: pointer;
-  padding: 8px;
-  font-size: 18px;
+  padding: 6px;
+  font-size: 17px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -144,33 +198,33 @@
 }
 
 /* ============================================
-   Options
+   OPTIONS
    ============================================ */
 .options {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .checkboxLabel {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: 13px;
   color: #333;
   cursor: pointer;
 }
 
 .checkboxLabel input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   accent-color: #c8a86e;
   cursor: pointer;
 }
 
 .forgotLink {
-  font-size: 14px;
+  font-size: 13px;
   color: #c8a86e;
   text-decoration: none;
   font-weight: 500;
@@ -183,26 +237,27 @@
 }
 
 /* ============================================
-   Primary Button
+   PRIMARY BUTTON
    ============================================ */
 .primaryBtn {
   width: 100%;
-  padding: 16px;
-  background: #c8a86e;
+  padding: 14px;
+  background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
   color: #ffffff;
   border: none;
   border-radius: 10px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 8px;
+  margin-top: 4px;
+  box-shadow: 0 4px 16px rgba(200, 168, 110, 0.2);
 }
 
 .primaryBtn:hover:not(:disabled) {
-  background: #b8944a;
+  background: linear-gradient(135deg, #c9a84c 0%, #a8852a 100%);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(200, 168, 110, 0.3);
+  box-shadow: 0 8px 28px rgba(200, 168, 110, 0.35);
 }
 
 .primaryBtn:active:not(:disabled) {
@@ -216,13 +271,13 @@
 }
 
 /* ============================================
-   Divider
+   DIVIDER
    ============================================ */
 .divider {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin: 24px 0 16px;
+  margin: 18px 0 14px;
 }
 
 .divider::before,
@@ -234,30 +289,29 @@
 }
 
 .divider span {
-  font-size: 13px;
+  font-size: 12px;
   color: #999;
   white-space: nowrap;
 }
 
 /* ============================================
-   Footer
+   FOOTER
    ============================================ */
 .footer {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   text-align: center;
-  margin-top: 4px;
 }
 
 .registerLink {
   display: inline-block;
-  padding: 10px;
+  padding: 8px;
   color: #c8a86e;
   text-decoration: none;
   font-weight: 600;
-  font-size: 15px;
-  transition: color 0.3s ease;
+  font-size: 14px;
+  transition: all 0.3s ease;
   border: 2px solid #e8e2d5;
   border-radius: 10px;
 }
@@ -269,7 +323,7 @@
 }
 
 .backLink {
-  font-size: 14px;
+  font-size: 13px;
   color: #999;
   text-decoration: none;
   transition: color 0.3s ease;
@@ -281,17 +335,17 @@
 }
 
 /* ============================================
-   Customer Login
+   CUSTOMER LOGIN
    ============================================ */
 .customerLogin {
   text-align: center;
-  margin-top: 20px;
-  padding-top: 16px;
+  margin-top: 16px;
+  padding-top: 14px;
   border-top: 1px solid #f0ebe6;
 }
 
 .customerLogin p {
-  font-size: 14px;
+  font-size: 13px;
   color: #666;
   margin: 0;
 }
@@ -307,11 +361,48 @@
 }
 
 /* ============================================
-   Responsive
+   RESPONSIVE
    ============================================ */
-@media (max-width: 480px) {
+@media (max-width: 1024px) {
+  .rightPanel {
+    padding: 32px 28px;
+  }
+
+  .title {
+    font-size: 26px;
+  }
+
+  .inputWrapper input {
+    padding: 10px 12px 10px 40px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
   .card {
-    padding: 24px 16px;
+    flex-direction: column;
+    height: auto;
+    max-height: none;
+    border-radius: 16px;
+  }
+
+  .leftPanel {
+    flex: 1;
+    min-height: 200px;
+    height: 200px;
+  }
+
+  .imageWrapper {
+    min-height: 200px;
+  }
+
+  .rightPanel {
+    flex: 1;
+    padding: 24px;
+    height: auto;
+    max-height: 600px;
+    overflow-y: auto;
+    justify-content: flex-start;
   }
 
   .title {
@@ -319,34 +410,124 @@
   }
 
   .inputWrapper input {
-    padding: 12px 12px 12px 40px;
+    padding: 11px 12px 11px 38px;
     font-size: 14px;
   }
 
   .primaryBtn {
-    padding: 14px;
-    font-size: 15px;
+    padding: 12px;
+    font-size: 14px;
   }
 
   .options {
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     align-items: flex-start;
   }
 
   .registerLink {
-    font-size: 14px;
-    padding: 8px;
+    font-size: 13px;
+    padding: 7px;
+  }
+
+  /* Enable scroll on mobile */
+  .rightPanel::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .rightPanel::-webkit-scrollbar-track {
+    background: #f0edeb;
+    border-radius: 4px;
+  }
+
+  .rightPanel::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
+    border-radius: 4px;
   }
 }
 
-/* Dark mode support */
+@media (max-width: 480px) {
+  .rightPanel {
+    padding: 16px;
+    max-height: 500px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .leftPanel {
+    min-height: 150px;
+    height: 150px;
+  }
+
+  .imageWrapper {
+    min-height: 150px;
+  }
+
+  .inputWrapper input {
+    padding: 9px 10px 9px 34px;
+    font-size: 13px;
+  }
+
+  .inputWrapper .inputIcon {
+    left: 10px;
+    font-size: 15px;
+  }
+
+  .primaryBtn {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .registerLink {
+    font-size: 12px;
+    padding: 5px;
+  }
+
+  .backLink {
+    font-size: 11px;
+  }
+
+  .customerLogin p {
+    font-size: 12px;
+  }
+
+  .errorBanner {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .field label {
+    font-size: 12px;
+  }
+
+  .checkboxLabel {
+    font-size: 12px;
+  }
+
+  .forgotLink {
+    font-size: 12px;
+  }
+}
+
+/* ============================================
+   DARK MODE SUPPORT
+   ============================================ */
 @media (prefers-color-scheme: dark) {
   .page {
     background: #1a1a1a;
   }
 
   .card {
+    background: #2d2d2d;
+  }
+
+  .rightPanel {
     background: #2d2d2d;
   }
 
