@@ -2,19 +2,22 @@
 
 .upgradeContainer {
   padding: 2rem;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
+  background: #f8fafc;
+  min-height: 100vh;
 }
 
+/* Header */
 .upgradeHeader {
   text-align: center;
   margin-bottom: 3rem;
 }
 
 .upgradeTitle {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #1f2937;
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: #1e293b;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22,29 +25,30 @@
 }
 
 .headerIcon {
-  color: #6366f1;
-  font-size: 2.5rem;
+  color: #f59e0b;
+  font-size: 2.8rem;
 }
 
 .upgradeSubtitle {
-  color: #6b7280;
-  font-size: 1.1rem;
+  color: #64748b;
+  font-size: 1.2rem;
   margin-top: 0.5rem;
 }
 
+/* Plans Grid */
 .plansGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 2rem;
   margin-bottom: 2rem;
 }
 
 .planCard {
   background: white;
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 2rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  border: 2px solid #e5e7eb;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07);
+  border: 2px solid #e2e8f0;
   position: relative;
   transition: all 0.3s ease;
   display: flex;
@@ -52,25 +56,27 @@
 }
 
 .planCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15);
 }
 
 .planCard.popular {
-  border-color: #6366f1;
-  background: linear-gradient(135deg, #faf5ff 0%, #ffffff 100%);
+  border-color: #f59e0b;
+  background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+  transform: scale(1.02);
 }
 
 .planCard.current {
   border-color: #10b981;
-  background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+  background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%);
 }
 
+/* Badges */
 .popularBadge {
   position: absolute;
   top: -12px;
   right: 20px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, #f59e0b, #d97706);
   color: white;
   padding: 4px 16px;
   border-radius: 20px;
@@ -79,6 +85,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
 }
 
 .currentBadge {
@@ -91,6 +98,16 @@
   border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+/* Plan Content */
+.planIcon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .planHeader {
@@ -98,26 +115,43 @@
 }
 
 .planName {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 0.5rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.3rem;
 }
 
 .planPrice {
-  margin-top: 0.5rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  margin: 0.5rem 0;
 }
 
 .price {
   font-size: 2rem;
-  font-weight: 700;
-  color: #1f2937;
+  font-weight: 800;
+  color: #1e293b;
 }
 
-.planCard.popular .price {
-  color: #6366f1;
+.period {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  font-weight: 500;
 }
 
+.bestFor {
+  display: inline-block;
+  background: #f1f5f9;
+  padding: 2px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  color: #475569;
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+
+/* Features */
 .featuresList {
   list-style: none;
   padding: 0;
@@ -129,32 +163,69 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.5rem 0;
-  color: #4b5563;
-  font-size: 0.95rem;
+  padding: 0.4rem 0;
+  color: #475569;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.featureItem:last-child {
+  border-bottom: none;
 }
 
 .checkIcon {
   color: #10b981;
   flex-shrink: 0;
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 
+/* Plan Footer */
+.planFooter {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.planStats {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.statItem svg {
+  color: #6366f1;
+}
+
+/* Upgrade Button */
 .upgradeBtn {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.8rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: #e5e7eb;
-  color: #6b7280;
+  background: #e2e8f0;
+  color: #94a3b8;
 }
 
 .upgradeBtn:not(:disabled):hover {
   transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .upgradeBtn.currentBtn {
@@ -165,40 +236,105 @@
 }
 
 .upgradeBtn.popularBtn {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, #f59e0b, #d97706);
   color: white;
 }
 
 .upgradeBtn.popularBtn:hover {
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  background: linear-gradient(135deg, #d97706, #b45309);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
 }
 
 .upgradeBtn:not(.currentBtn):not(.popularBtn):hover {
-  background: #d1d5db;
+  background: #cbd5e1;
+  color: #1e293b;
 }
 
-.upgradeFooter {
-  text-align: center;
-  margin-top: 2rem;
-}
-
-.footerText {
-  color: #6b7280;
-  font-size: 0.95rem;
-}
-
-.contactLink {
-  color: #6366f1;
-  text-decoration: none;
+/* Comparison Table */
+.compareToggle {
+  display: block;
+  margin: 2rem auto;
+  padding: 0.75rem 2rem;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 1rem;
   font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.contactLink:hover {
-  text-decoration: underline;
+.compareToggle:hover {
+  background: #f1f5f9;
+  transform: translateY(-2px);
 }
 
-/* Responsive Design */
+.comparisonTable {
+  margin-top: 2rem;
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07);
+  overflow-x: auto;
+}
+
+.comparisonTable h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #1e293b;
+  font-size: 1.5rem;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+thead th {
+  background: #f8fafc;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 700;
+  color: #1e293b;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+thead th:first-child {
+  min-width: 180px;
+}
+
+tbody td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  color: #475569;
+}
+
+tbody tr:hover {
+  background: #f8fafc;
+}
+
+tbody td:first-child {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+tbody td:not(:first-child) {
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .plansGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .upgradeContainer {
     padding: 1rem;
@@ -213,11 +349,44 @@
     gap: 1.5rem;
   }
 
+  .planCard.popular {
+    transform: none;
+  }
+
+  .planCard:hover {
+    transform: translateY(-4px);
+  }
+
+  .price {
+    font-size: 1.5rem;
+  }
+
+  .comparisonTable {
+    padding: 1rem;
+  }
+
+  table {
+    font-size: 0.75rem;
+  }
+
+  thead th,
+  tbody td {
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .upgradeTitle {
+    font-size: 1.5rem;
+  }
+
   .planCard {
     padding: 1.5rem;
   }
 
-  .price {
-    font-size: 1.75rem;
+  .planStats {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
   }
 }
