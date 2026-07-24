@@ -1,4 +1,4 @@
-// src/Pages/Seller/SellerDashboard/SellerDashboard.jsx
+// src/Pages/Seller/SellerDashboard/SellerDashboard.jsx — full file
 
 import React, { useState, useEffect } from "react";
 import {
@@ -19,7 +19,13 @@ import {
 } from "react-icons/fi";
 
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import {
+  useNavigate,
+  useLocation,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import toast from "react-hot-toast";
 
 import styles from "./SellerDashboard.module.css";
@@ -41,7 +47,7 @@ const PLAN_THEME = {
     dashboardName: "Seller Dashboard",
     greeting: "Welcome to your Seller Dashboard",
     subtext: "Manage your store, orders, and products.",
-    badgeLabel: null, // no badge for free tier
+    badgeLabel: null,
     color: "#64748b",
     gradient: "linear-gradient(135deg, #64748b, #475569)",
   },
@@ -76,9 +82,47 @@ const PLAN_THEME = {
 
 const getPlanTheme = (planId) => PLAN_THEME[planId] || PLAN_THEME.free;
 
+// ============================================
+// SIDEBAR MENU — id doubles as the relative route path
+// ============================================
+const menuItems = [
+  { id: "", label: "Dashboard", icon: FiHome }, // index route
+  { id: "products", label: "Products", icon: FiPackage },
+  { id: "orders", label: "Orders", icon: FiShoppingBag },
+  { id: "earnings", label: "Earnings", icon: FiDollarSign },
+  { id: "customers", label: "Customers", icon: FiUsers },
+  { id: "reviews", label: "Reviews", icon: FiMessageSquare },
+  { id: "settings", label: "Settings", icon: FiSettings },
+  { id: "upgrade", label: "Upgrade", icon: FiTrendingUp },
+];
+
+// Simple placeholder for sections that don't have a real page yet
+const ComingSoon = ({ label }) => (
+  <div className={styles.placeholderContent}>{label} Page Coming Soon</div>
+);
+
+const DashboardHome = ({ planTheme }) => (
+  <>
+    <div
+      className={planStyles.welcomeBanner}
+      style={{ "--plan-gradient": planTheme.gradient }}
+    >
+      <div className={planStyles.welcomeText}>
+        <h2>{planTheme.greeting} 👋</h2>
+        <p>{planTheme.subtext}</p>
+      </div>
+      {planTheme.badgeLabel && (
+        <div className={planStyles.welcomeBadge}>{planTheme.badgeLabel}</div>
+      )}
+    </div>
+    <DashboardOverview />
+  </>
+);
+
 const SellerDashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { seller } = useSelector((state) => state.seller);
   const { currentPlanId, current: subscriptionData } = useSelector(
@@ -87,11 +131,15 @@ const SellerDashboard = () => {
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState("dashboard");
 
-  // ✅ Resolve the seller's live plan: prefer the subscription slice (kept
-  // fresh by fetchCurrentSubscription), fall back to the seller doc's own
-  // subscriptionPlanId if the subscription call hasn't resolved yet.
+  // ✅ Active menu is now derived from the URL, not local state, so the
+  // sidebar highlight, browser back/forward, and page refresh all stay in sync.
+  const basePath = "/seller/dashboard";
+  const relativePath = location.pathname
+    .replace(basePath, "")
+    .replace(/^\//, ""); // "" | "products" | "orders" | ...
+  const activeMenu = relativePath.split("/")[0] || "";
+
   const planId =
     subscriptionData?.plan?.id ||
     currentPlanId ||
@@ -99,14 +147,10 @@ const SellerDashboard = () => {
     "free";
   const planTheme = getPlanTheme(planId);
 
-  // Fetch the seller's current subscription plan on load, so the dashboard
-  // reflects Silver/Gold/Platinum immediately without waiting for the
-  // Upgrade page to be visited first.
   useEffect(() => {
     dispatch(fetchCurrentSubscription());
   }, [dispatch]);
 
-  // Handle window resize for responsive sidebar
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
@@ -120,7 +164,6 @@ const SellerDashboard = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // ✅ Handle Logout
   const handleLogout = async () => {
     try {
       const loadingToast = toast.loading("Logging out...");
@@ -135,51 +178,9 @@ const SellerDashboard = () => {
     }
   };
 
-  const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: FiHome },
-    { id: "products", label: "Products", icon: FiPackage },
-    { id: "orders", label: "Orders", icon: FiShoppingBag },
-    { id: "earnings", label: "Earnings", icon: FiDollarSign },
-    { id: "customers", label: "Customers", icon: FiUsers },
-    { id: "reviews", label: "Reviews", icon: FiMessageSquare },
-    { id: "settings", label: "Settings", icon: FiSettings },
-    { id: "upgrade", label: "Upgrade", icon: FiTrendingUp },
-  ];
-
-  const renderContent = () => {
-    switch (activeMenu) {
-      case "dashboard":
-        return (
-          <>
-            {/* ✅ Premium welcome banner — changes with the seller's plan */}
-            <div
-              className={planStyles.welcomeBanner}
-              style={{ "--plan-gradient": planTheme.gradient }}
-            >
-              <div className={planStyles.welcomeText}>
-                <h2>{planTheme.greeting} 👋</h2>
-                <p>{planTheme.subtext}</p>
-              </div>
-              {planTheme.badgeLabel && (
-                <div className={planStyles.welcomeBadge}>
-                  {planTheme.badgeLabel}
-                </div>
-              )}
-            </div>
-            <DashboardOverview />
-          </>
-        );
-
-      case "upgrade":
-        return <Upgrade />;
-
-      default:
-        return (
-          <div className={styles.placeholderContent}>
-            {activeMenu} Page Coming Soon
-          </div>
-        );
-    }
+  const handleMenuClick = (id) => {
+    navigate(id ? `${basePath}/${id}` : basePath);
+    setMobileMenuOpen(false);
   };
 
   return (
@@ -203,7 +204,6 @@ const SellerDashboard = () => {
 
           <div className={styles.headerLogo}>
             <FiShield className={styles.logoIcon} />
-            {/* ✅ Header title now reflects the current plan */}
             <span className={styles.logoText}>{planTheme.dashboardName}</span>
             {planTheme.badgeLabel && (
               <span
@@ -270,11 +270,8 @@ const SellerDashboard = () => {
           <div className={styles.sidebarNav}>
             {menuItems.map((item) => (
               <button
-                key={item.id}
-                onClick={() => {
-                  setActiveMenu(item.id);
-                  setMobileMenuOpen(false);
-                }}
+                key={item.id || "dashboard"}
+                onClick={() => handleMenuClick(item.id)}
                 className={`${styles.navItem} ${
                   activeMenu === item.id ? styles.active : ""
                 }`}
@@ -328,13 +325,37 @@ const SellerDashboard = () => {
           />
         )}
 
-        {/* Content */}
+        {/* Content — each sidebar section is now a real nested route */}
         <main
           className={`${styles.contentArea} ${
             !sidebarOpen ? styles.expanded : ""
           }`}
         >
-          <div className={styles.contentWrapper}>{renderContent()}</div>
+          <div className={styles.contentWrapper}>
+            <Routes>
+              <Route index element={<DashboardHome planTheme={planTheme} />} />
+              <Route
+                path="products"
+                element={<ComingSoon label="Products" />}
+              />
+              <Route path="orders" element={<ComingSoon label="Orders" />} />
+              <Route
+                path="earnings"
+                element={<ComingSoon label="Earnings" />}
+              />
+              <Route
+                path="customers"
+                element={<ComingSoon label="Customers" />}
+              />
+              <Route path="reviews" element={<ComingSoon label="Reviews" />} />
+              <Route
+                path="settings"
+                element={<ComingSoon label="Settings" />}
+              />
+              <Route path="upgrade" element={<Upgrade />} />
+              <Route path="*" element={<Navigate to={basePath} replace />} />
+            </Routes>
+          </div>
         </main>
       </div>
     </div>

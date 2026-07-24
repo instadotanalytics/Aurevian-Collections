@@ -462,7 +462,7 @@ const App = () => {
                 SELLER ROUTES - WITHOUT HEADER (Protected)
                 ============================================ */}
           <Route
-            path={ROUTES.SELLER_DASHBOARD}
+            path={`${ROUTES.SELLER_DASHBOARD}/*`}
             element={
               <SellerRoute>
                 <LayoutWithoutHeader>
