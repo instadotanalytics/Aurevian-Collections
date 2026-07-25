@@ -14,7 +14,7 @@
 
 .container {
   width: 100%;
-  max-width: 1120px;
+  max-width: 1200px;
 }
 
 /* ============================================
@@ -23,11 +23,11 @@
 .card {
   display: flex;
   background: #ffffff;
-  border-radius: 24px;
+  /* border-radius: 24px; */
   overflow: hidden;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.08);
   height: 700px;
-  max-height: 85vh;
+  max-height: 90vh;
   border: 1px solid rgba(212, 175, 55, 0.08);
 }
 
@@ -528,7 +528,8 @@
 .nextBtn {
   background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
   color: white;
-  margin-left: auto;
+  /* margin-left: auto; */
+  margin: auto;
   box-shadow: 0 4px 16px rgba(212, 175, 55, 0.2);
 }
 

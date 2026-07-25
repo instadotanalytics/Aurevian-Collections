@@ -7,7 +7,7 @@ import { sellerLogin, clearSellerError } from '../../../redux/slices/sellerSlice
 import { FiMail, FiLock, FiEye, FiEyeOff, FiAlertCircle } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import styles from './SellerLogin.module.css';
-import LoginImage from "../../../assets/b1.png";
+import LoginImage from "../../../assets/partnerlogin.png";
 import Header from "../../Layout/Header/Header"
 import Footer from "../../Layout/Footer/Footer"
 
@@ -160,7 +160,7 @@ const SellerLogin = () => {
                     id="email"
                     name="email"
                     type="email"
-                    placeholder="seller@example.com"
+                    placeholder="Enter your email"
                     value={formData.email}
                     onChange={handleChange}
                     disabled={isLoading}

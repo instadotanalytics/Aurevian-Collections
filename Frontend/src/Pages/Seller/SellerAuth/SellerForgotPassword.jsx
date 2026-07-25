@@ -2,14 +2,14 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiMail, FiArrowLeft, FiShield, FiSend, FiCheckCircle } from 'react-icons/fi';
+import { FiMail, FiArrowLeft, FiShield, FiSend, FiCheckCircle, FiLock } from 'react-icons/fi';
+import { FaGem } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import styles from './SellerForgotPassword.module.css';
-// import ForgotImage from "../../../assets/forgot.png";
 import LoginImage from "../../../assets/b1.png";
-import Header from "../../Layout/Header/Header"
-import Footer from "../../Layout/Footer/Footer"
+import Header from "../../Layout/Header/Header";
+import Footer from "../../Layout/Footer/Footer";
 
 const SellerForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -57,127 +57,143 @@ const SellerForgotPassword = () => {
 
   if (emailSent) {
     return (
-      <div className={styles.page}>
-        <div className={styles.container}>
-          <div className={styles.card}>
-            {/* Left Side - Image */}
-            <div className={styles.leftPanel}>
-              <div className={styles.imageWrapper}>
-                <img src={ForgotImage} alt="Aurevian Forgot Password" className={styles.sideImage} />
-              </div>
-            </div>
-
-            {/* Right Side - Success Message */}
-            <div className={styles.rightPanel}>
-              <div className={styles.successContent}>
-                <div className={styles.successIcon}>
-                  <FiCheckCircle size={64} color="#10B981" />
+      <>
+        <Header />
+        <div className={styles.page}>
+          <div className={styles.container}>
+            <div className={styles.card}>
+              {/* Left Side - Image */}
+              <div className={styles.leftPanel}>
+                <div className={styles.imageWrapper}>
+                  <img src={LoginImage} alt="Aurevian" className={styles.sideImage} />
+                  <div className={styles.imageOverlay}>
+                    <div className={styles.imageContent}>
+                      <FaGem className={styles.imageGem} />
+                      <h2 className={styles.imageTitle}>AUREVIAN</h2>
+                      <p className={styles.imageSubtitle}>Timeless Elegance</p>
+                    </div>
+                  </div>
                 </div>
-                <h2 className={styles.successTitle}>Check Your Email</h2>
-                <p className={styles.successMessage}>
-                  We've sent a password reset link to <strong>{email}</strong>
-                </p>
-                <p className={styles.successSubMessage}>
-                  Please check your inbox and follow the instructions to reset your password.
-                  The link will expire in 10 minutes.
-                </p>
-                <div className={styles.successActions}>
-                  <Link to="/seller/login" className={styles.backToLoginBtn}>
-                    Back to Login
-                  </Link>
-                  <button 
-                    onClick={() => {
-                      setEmailSent(false);
-                      setEmail('');
-                    }}
-                    className={styles.resendBtn}
-                  >
-                    Try Another Email
-                  </button>
+              </div>
+
+              {/* Right Side - Success Message */}
+              <div className={styles.rightPanel}>
+                <div className={styles.successCard}>
+                  <div className={styles.successIconWrapper}>
+                    <FiCheckCircle className={styles.successIcon} />
+                  </div>
+                  <h2 className={styles.successTitle}>Check Your Email</h2>
+                  <p className={styles.successMessage}>
+                    We've sent a password reset link to <strong>{email}</strong>
+                  </p>
+                  <p className={styles.successSubMessage}>
+                    Please check your inbox and follow the instructions to reset your password.
+                    The link will expire in 10 minutes.
+                  </p>
+                  <div className={styles.successActions}>
+                    <Link to="/seller/login" className={styles.backToLoginBtn}>
+                      Back to Login
+                    </Link>
+                    <button 
+                      onClick={() => {
+                        setEmailSent(false);
+                        setEmail('');
+                      }}
+                      className={styles.resendBtn}
+                    >
+                      Try Another Email
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+        <Footer />
+      </>
     );
   }
 
   return (
     <>
-    <Header/>
-    <div className={styles.page}>
-      <div className={styles.container}>
-        <div className={styles.card}>
-          {/* Left Side - Image */}
-          <div className={styles.leftPanel}>
-            <div className={styles.imageWrapper}>
-              <img src={LoginImage} alt="Aurevian Forgot Password" className={styles.sideImage} />
-            </div>
-          </div>
-
-          {/* Right Side - Form */}
-          <div className={styles.rightPanel}>
-            <div className={styles.header}>
-              <div className={styles.iconWrapper}>
-                <FiShield className={styles.shieldIcon} />
-              </div>
-              <h1 className={styles.title}>Forgot Password?</h1>
-              <p className={styles.subtitle}>
-                Enter your email address and we'll send you a link to reset your password.
-              </p>
-            </div>
-
-            <form onSubmit={handleSubmit} className={styles.form}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Email Address</label>
-                <div className={styles.inputWrapper}>
-                  <FiMail className={styles.inputIcon} />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={`${styles.input} ${error ? styles.inputError : ''}`}
-                    placeholder="seller@example.com"
-                    disabled={isLoading}
-                  />
+      <Header />
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <div className={styles.card}>
+            {/* Left Side - Image with Overlay */}
+            <div className={styles.leftPanel}>
+              <div className={styles.imageWrapper}>
+                <img src={LoginImage} alt="Aurevian" className={styles.sideImage} />
+                <div className={styles.imageOverlay}>
+                 
                 </div>
-                {error && <p className={styles.errorText}>{error}</p>}
               </div>
+            </div>
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className={styles.submitButton}
-              >
-                {isLoading ? (
-                  <>
-                    <span className={styles.spinner}></span>
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <FiSend size={18} />
-                    Send Reset Link
-                  </>
-                )}
-              </button>
+            {/* Right Side - Form */}
+            <div className={styles.rightPanel}>
+              <div className={styles.formCard}>
+                <div className={styles.header}>
+                  <div className={styles.iconWrapper}>
+                    <FiShield className={styles.shieldIcon} />
+                  </div>
+                  <h1 className={styles.title}>Forgot Password?</h1>
+                  <p className={styles.subtitle}>
+                    Enter your email address and we'll send you a link to reset your password.
+                  </p>
+                </div>
 
-              <div className={styles.helpText}>
-                <p>
-                  Remember your password? <Link to="/seller/login" className={styles.loginLink}>Login</Link>
-                </p>
+                <form onSubmit={handleSubmit} className={styles.form}>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Email Address</label>
+                    <div className={styles.inputWrapper}>
+                      <FiMail className={styles.inputIcon} />
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className={`${styles.input} ${error ? styles.inputError : ''}`}
+                        placeholder="seller@example.com"
+                        disabled={isLoading}
+                      />
+                    </div>
+                    {error && <p className={styles.errorText}>{error}</p>}
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className={styles.submitButton}
+                  >
+                    {isLoading ? (
+                      <>
+                        <span className={styles.spinner}></span>
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <FiSend className={styles.submitIcon} />
+                        Send Reset Link
+                      </>
+                    )}
+                  </button>
+
+                  <div className={styles.helpText}>
+                    <p>
+                      Remember your password? <Link to="/seller/login" className={styles.loginLink}>Login</Link>
+                    </p>
+                  </div>
+                </form>
+
+                <div className={styles.footer}>
+                  <p>© {new Date().getFullYear()} Aurevian Collections. All rights reserved.</p>
+                </div>
               </div>
-            </form>
-
-            <div className={styles.footer}>
-              <p>© {new Date().getFullYear()} Aurevian Collections. All rights reserved.</p>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <Footer/>
+      <Footer />
     </>
   );
 };
