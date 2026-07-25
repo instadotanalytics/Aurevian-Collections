@@ -16,7 +16,13 @@ import {
   FiSettings,
   FiUser as FiUserIcon,
   FiShoppingBag as FiOrders,
+
+
 } from "react-icons/fi";
+import {
+  FaUserPlus, FaUserCheck
+} from "react-icons/fa6";
+
 import styles from "./Header.module.css";
 
 import AnnouncementBar from "./AnnouncementBar";
@@ -30,6 +36,258 @@ import { logoutUser } from "../../../redux/slices/authSlice.js";
 import { fetchPublicHeaderConfig } from "../../../redux/slices/headerConfigSlice.js";
 import toast from "react-hot-toast";
 
+// NOTE: "Fashion Items" is a mega-menu column requested for the Shop menu.
+// It isn't part of NavData.js yet, so it's defined locally here. Feel free
+// to move this into NavData.js and import it instead, the same way
+// shopCategories / shopQuickLinks / shopByStfayle are imported.
+const fashionItems = [
+  { id: "fi-1", label: "Perfumes", path: "/fashion/perfumes" },
+  { id: "fi-2", label: "Watches", path: "/fashion/watches" },
+  { id: "fi-3", label: "Sarees", path: "/fashion/sarees" },
+  { id: "fi-4", label: "Sunglasses", path: "/fashion/sunglasses" },
+  { id: "fi-5", label: "Handbags", path: "/fashion/handbags" },
+  { id: "fi-6", label: "Wallets", path: "/fashion/wallets" },
+  { id: "fi-7", label: "Belts", path: "/fashion/belts" },
+];
+
+// Shop Categories with children - FOR MOBILE ONLY
+const shopCategoriesWithChildren = [
+  {
+    id: "earrings",
+    label: "Earrings",
+    path: "/shop/earrings",
+    children: [
+      { id: "stud-earrings", label: "Stud Earrings", path: "/shop/earrings/stud" },
+      { id: "drop-earrings", label: "Drop Earrings", path: "/shop/earrings/drop" },
+      { id: "hoop-earrings", label: "Hoop Earrings", path: "/shop/earrings/hoop" },
+      { id: "jhumkas", label: "Jhumkas", path: "/shop/earrings/jhumkas" },
+      { id: "chandbalis", label: "Chandbalis", path: "/shop/earrings/chandbali" },
+      { id: "danglers", label: "Danglers", path: "/shop/earrings/danglers" },
+    ],
+  },
+  {
+    id: "necklace-sets",
+    label: "Necklace Sets",
+    path: "/shop/necklace-sets",
+    children: [
+      { id: "bridal-sets", label: "Bridal Sets", path: "/shop/necklace-sets/bridal" },
+      { id: "daily-wear", label: "Daily Wear", path: "/shop/necklace-sets/daily" },
+      { id: "party-wear", label: "Party Wear", path: "/shop/necklace-sets/party" },
+      { id: "chokers", label: "Chokers", path: "/shop/necklace-sets/chokers" },
+      { id: "long-sets", label: "Long Necklaces", path: "/shop/necklace-sets/long" },
+    ],
+  },
+  {
+    id: "rings",
+    label: "Rings",
+    path: "/shop/rings",
+    children: [
+      { id: "solitaire", label: "Solitaire Rings", path: "/shop/rings/solitaire" },
+      { id: "couple-rings", label: "Couple Rings", path: "/shop/rings/couple" },
+      { id: "cocktail-rings", label: "Cocktail Rings", path: "/shop/rings/cocktail" },
+      { id: "band-rings", label: "Band Rings", path: "/shop/rings/band" },
+      { id: "statement-rings", label: "Statement Rings", path: "/shop/rings/statement" },
+    ],
+  },
+  {
+    id: "bangles",
+    label: "Bangles",
+    path: "/shop/bangles",
+    children: [
+      { id: "gold-bangles", label: "Gold Bangles", path: "/shop/bangles/gold" },
+      { id: "kada", label: "Kada", path: "/shop/bangles/kada" },
+      { id: "designer-bangles", label: "Designer Bangles", path: "/shop/bangles/designer" },
+      { id: "traditional-bangles", label: "Traditional Bangles", path: "/shop/bangles/traditional" },
+    ],
+  },
+  {
+    id: "bracelets",
+    label: "Bracelets",
+    path: "/shop/bracelets",
+    children: [
+      { id: "chain-bracelets", label: "Chain Bracelets", path: "/shop/bracelets/chain" },
+      { id: "cuff-bracelets", label: "Cuff Bracelets", path: "/shop/bracelets/cuff" },
+      { id: "tennis-bracelets", label: "Tennis Bracelets", path: "/shop/bracelets/tennis" },
+      { id: "anklets", label: "Anklets", path: "/shop/bracelets/anklets" },
+    ],
+  },
+  {
+    id: "pendants",
+    label: "Pendants",
+    path: "/shop/pendants",
+    children: [
+      { id: "diamond-pendants", label: "Diamond Pendants", path: "/shop/pendants/diamond" },
+      { id: "gold-pendants", label: "Gold Pendants", path: "/shop/pendants/gold" },
+      { id: "gemstone-pendants", label: "Gemstone Pendants", path: "/shop/pendants/gemstone" },
+      { id: "locket-pendants", label: "Locket Pendants", path: "/shop/pendants/locket" },
+    ],
+  },
+  {
+    id: "chains",
+    label: "Chains",
+    path: "/shop/chains",
+    children: [
+      { id: "gold-chains", label: "Gold Chains", path: "/shop/chains/gold" },
+      { id: "silver-chains", label: "Silver Chains", path: "/shop/chains/silver" },
+      { id: "adjustable-chains", label: "Adjustable Chains", path: "/shop/chains/adjustable" },
+    ],
+  },
+  {
+    id: "maang-tikka",
+    label: "Maang Tikka",
+    path: "/shop/maang-tikka",
+    children: [
+      { id: "bridal-tikka", label: "Bridal Tikka", path: "/shop/maang-tikka/bridal" },
+      { id: "daily-tikka", label: "Daily Wear Tikka", path: "/shop/maang-tikka/daily" },
+    ],
+  },
+  {
+    id: "nose-pins",
+    label: "Nose Pins",
+    path: "/shop/nose-pins",
+    children: [
+      { id: "stud-pins", label: "Stud Nose Pins", path: "/shop/nose-pins/stud" },
+      { id: "hoop-pins", label: "Hoop Nose Pins", path: "/shop/nose-pins/hoop" },
+    ],
+  },
+];
+
+// Gift Guide Categories with children - FOR MOBILE ONLY
+const giftGuideWithChildren = {
+  byRecipient: [
+    {
+      id: "for-her",
+      label: "For Her",
+      path: "/gift-guide/for-her",
+      children: [
+        { id: "wife", label: "For Wife", path: "/gift-guide/for-her/wife" },
+        { id: "girlfriend", label: "For Girlfriend", path: "/gift-guide/for-her/girlfriend" },
+        { id: "mother", label: "For Mother", path: "/gift-guide/for-her/mother" },
+        { id: "daughter", label: "For Daughter", path: "/gift-guide/for-her/daughter" },
+        { id: "sister", label: "For Sister", path: "/gift-guide/for-her/sister" },
+        { id: "friend", label: "For Friend", path: "/gift-guide/for-her/friend" },
+      ],
+    },
+    {
+      id: "for-him",
+      label: "For Him",
+      path: "/gift-guide/for-him",
+      children: [
+        { id: "husband", label: "For Husband", path: "/gift-guide/for-him/husband" },
+        { id: "boyfriend", label: "For Boyfriend", path: "/gift-guide/for-him/boyfriend" },
+        { id: "father", label: "For Father", path: "/gift-guide/for-him/father" },
+        { id: "brother", label: "For Brother", path: "/gift-guide/for-him/brother" },
+        { id: "son", label: "For Son", path: "/gift-guide/for-him/son" },
+      ],
+    },
+    {
+      id: "for-kids",
+      label: "For Kids",
+      path: "/gift-guide/for-kids",
+      children: [
+        { id: "baby-girl", label: "For Baby Girl", path: "/gift-guide/for-kids/baby-girl" },
+        { id: "baby-boy", label: "For Baby Boy", path: "/gift-guide/for-kids/baby-boy" },
+        { id: "teen-girl", label: "For Teen Girl", path: "/gift-guide/for-kids/teen-girl" },
+        { id: "teen-boy", label: "For Teen Boy", path: "/gift-guide/for-kids/teen-boy" },
+      ],
+    },
+    {
+      id: "for-couples",
+      label: "For Couples",
+      path: "/gift-guide/for-couples",
+      children: [
+        { id: "anniversary", label: "Anniversary Gifts", path: "/gift-guide/for-couples/anniversary" },
+        { id: "wedding", label: "Wedding Gifts", path: "/gift-guide/for-couples/wedding" },
+        { id: "engagement", label: "Engagement Gifts", path: "/gift-guide/for-couples/engagement" },
+      ],
+    },
+  ],
+  byOccasion: [
+    {
+      id: "wedding",
+      label: "Wedding",
+      path: "/gift-guide/wedding",
+      children: [
+        { id: "wedding-gifts", label: "Wedding Gifts", path: "/gift-guide/wedding/gifts" },
+        { id: "bridal-trousseau", label: "Bridal Trousseau", path: "/gift-guide/wedding/trousseau" },
+        { id: "return-gifts", label: "Return Gifts", path: "/gift-guide/wedding/return" },
+      ],
+    },
+    {
+      id: "anniversary",
+      label: "Anniversary",
+      path: "/gift-guide/anniversary",
+      children: [
+        { id: "1st-anniversary", label: "1st Anniversary", path: "/gift-guide/anniversary/1st" },
+        { id: "25th-anniversary", label: "25th Anniversary", path: "/gift-guide/anniversary/25th" },
+        { id: "50th-anniversary", label: "50th Anniversary", path: "/gift-guide/anniversary/50th" },
+      ],
+    },
+    {
+      id: "birthday",
+      label: "Birthday",
+      path: "/gift-guide/birthday",
+      children: [
+        { id: "birthday-gifts", label: "Birthday Gifts", path: "/gift-guide/birthday/gifts" },
+        { id: "surprise-gifts", label: "Surprise Gifts", path: "/gift-guide/birthday/surprise" },
+      ],
+    },
+    {
+      id: "festival",
+      label: "Festival",
+      path: "/gift-guide/festival",
+      children: [
+        { id: "diwali", label: "Diwali Gifts", path: "/gift-guide/festival/diwali" },
+        { id: "rakhi", label: "Rakhi Gifts", path: "/gift-guide/festival/rakhi" },
+        { id: "christmas", label: "Christmas Gifts", path: "/gift-guide/festival/christmas" },
+        { id: "eid", label: "Eid Gifts", path: "/gift-guide/festival/eid" },
+      ],
+    },
+  ],
+  byBudget: [
+    {
+      id: "under-1000",
+      label: "Under ₹1,000",
+      path: "/gift-guide/under-1000",
+      children: [
+        { id: "budget-earrings", label: "Earrings", path: "/gift-guide/under-1000/earrings" },
+        { id: "budget-bracelets", label: "Bracelets", path: "/gift-guide/under-1000/bracelets" },
+      ],
+    },
+    {
+      id: "1000-5000",
+      label: "₹1,000 - ₹5,000",
+      path: "/gift-guide/1000-5000",
+      children: [
+        { id: "budget-rings", label: "Rings", path: "/gift-guide/1000-5000/rings" },
+        { id: "budget-pendants", label: "Pendants", path: "/gift-guide/1000-5000/pendants" },
+      ],
+    },
+    {
+      id: "5000-15000",
+      label: "₹5,000 - ₹15,000",
+      path: "/gift-guide/5000-15000",
+      children: [
+        { id: "budget-sets", label: "Necklace Sets", path: "/gift-guide/5000-15000/sets" },
+        { id: "budget-bangles", label: "Bangles", path: "/gift-guide/5000-15000/bangles" },
+      ],
+    },
+    {
+      id: "above-15000",
+      label: "Above ₹15,000",
+      path: "/gift-guide/above-15000",
+      children: [
+        { id: "premium-gems", label: "Gemstone Jewellery", path: "/gift-guide/above-15000/gemstone" },
+        { id: "premium-diamond", label: "Diamond Jewellery", path: "/gift-guide/above-15000/diamond" },
+      ],
+    },
+  ],
+};
+
+// Placeholder "recent searches" seed shown until the user has real history
+// of their own. Passed through to <SearchPanel /> — if SearchPanel.jsx
+// doesn't yet accept a `recentSearches` prop, add support for it there
+// (fall back to this list when no local/localStorage history exists).
 const defaultRecentSearches = [
   "Bridal lehenga",
   "Gold earrings",
@@ -255,11 +513,11 @@ const Header = ({
 
   const accountMenuItems = isAuthenticated
     ? [
-        { icon: FiUserIcon, label: "Profile", path: "/profile" },
-        { icon: FiOrders, label: "My Orders", path: "/orders" },
-        { icon: FiHeart, label: "Wishlist", path: "/wishlist" },
-        { icon: FiSettings, label: "Settings", path: "/settings" },
-      ]
+      { icon: FiUserIcon, label: "Profile", path: "/profile" },
+      { icon: FiOrders, label: "My Orders", path: "/orders" },
+      { icon: FiHeart, label: "Wishlist", path: "/wishlist" },
+      { icon: FiSettings, label: "Settings", path: "/settings" },
+    ]
     : [];
 
   const toggleMobileShopSub = (id) => {
@@ -577,7 +835,7 @@ const Header = ({
                     className={styles.accountMenuItem}
                     onClick={() => setAccountOpen(false)}
                   >
-                    <FiUserIcon />
+                    <FaUserCheck />
                     <span>Login</span>
                   </Link>
                   <Link
@@ -585,6 +843,7 @@ const Header = ({
                     className={styles.accountMenuItem}
                     onClick={() => setAccountOpen(false)}
                   >
+                    <FaUserPlus />
                     <span>Register</span>
                   </Link>
                 </>
@@ -620,6 +879,19 @@ const Header = ({
             <FiX />
           </button>
         </div>
+        {/* 
+        <div className={styles.drawerSearch}>
+          <SearchPanel
+            styles={styles}
+            isOpen={mobileOpen}
+            onClose={() => {}}
+            onSearchSubmit={onSearchSubmit}
+            variant="inline"
+            autoFocus={false}
+            inputId="aurevian-search-input-mobile"
+            recentSearches={defaultRecentSearches}
+          />
+        </div> */}
 
         {isAuthenticated && user && (
           <div className={styles.drawerUserInfo}>
