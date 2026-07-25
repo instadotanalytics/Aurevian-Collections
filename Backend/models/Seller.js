@@ -303,7 +303,6 @@ const sellerSchema = new mongoose.Schema(
     // ✅ NEW: exact plan tracking (drives the Upgrade page's "current plan" state)
     subscriptionPlanId: {
       type: String,
-      enum: ["free", "silver", "gold", "platinum"],
       default: "free",
     },
 

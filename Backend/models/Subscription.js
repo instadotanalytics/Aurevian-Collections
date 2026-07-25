@@ -12,7 +12,6 @@ const subscriptionSchema = new mongoose.Schema(
     },
     planId: {
       type: String,
-      enum: ["free", "silver", "gold", "platinum"],
       required: true,
     },
     planName: {
@@ -32,7 +31,6 @@ const subscriptionSchema = new mongoose.Schema(
     // ✅ Plan the seller was upgrading/switching FROM, if any
     previousPlanId: {
       type: String,
-      enum: ["free", "silver", "gold", "platinum", null],
       default: null,
     },
     amount: {

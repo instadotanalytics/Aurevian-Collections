@@ -8,6 +8,7 @@ import bannerReducer from "./slices/bannerSlice.js";
 import blogReducer from "./slices/blogSlice.js";
 import profileReducer from "./slices/profileSlice.js"; // ✅ ADD PROFILE REDUCER
 import sellerSubscriptionReducer from "./slices/sellerSubscriptionSlice.js"; // ✅ ADD SUBSCRIPTION REDUCER
+import subscriptionPlanReducer from "./slices/subscriptionPlanSlice.js";
 import supportReducer from "./slices/supportSlice";
 
 export const store = configureStore({
@@ -20,6 +21,7 @@ export const store = configureStore({
     profile: profileReducer, // ✅ ADD PROFILE REDUCER HERE
     sellerSubscription: sellerSubscriptionReducer, // ✅ ADD SUBSCRIPTION REDUCER HERE
     support: supportReducer,
+    subscriptionPlans: subscriptionPlanReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -127,6 +129,14 @@ export const store = configureStore({
           "sellerSubscription/cancel/fulfilled",
           "sellerSubscription/cancel/pending",
           "sellerSubscription/cancel/rejected",
+
+         // Subscription Plan (admin) actions
+          "subscriptionPlans/fetchAll/fulfilled",
+          "subscriptionPlans/fetchAll/pending",
+          "subscriptionPlans/fetchAll/rejected",
+          "subscriptionPlans/create/fulfilled",
+          "subscriptionPlans/update/fulfilled",
+          "subscriptionPlans/toggleStatus/fulfilled",
         ],
 
         // ✅ Ignore these action paths

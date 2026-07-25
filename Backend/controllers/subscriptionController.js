@@ -1,15 +1,14 @@
-// backend/controllers/subscriptionController.js — full updated file
+// backend/controllers/subscriptionController.js — full updated file (plans now DB-backed)
 
 import Subscription from "../models/Subscription.js";
 import Seller from "../models/Seller.js";
 import razorpayService from "../services/razorpayService.js";
 import emailService from "../services/emailService.js";
 import {
-  SUBSCRIPTION_PLANS,
-  PLAN_ORDER,
   getPlan,
   isValidPlan,
-} from "../config/subscriptionPlans.js";
+  getAllActivePlansSorted,
+} from "../services/subscriptionPlanService.js";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const MIN_PAYABLE_AMOUNT = 100; // ₹1 floor so Razorpay never sees a ₹0 order
@@ -18,15 +17,14 @@ const MIN_PAYABLE_AMOUNT = 100; // ₹1 floor so Razorpay never sees a ₹0 orde
 // Auto-expire a seller's paid plan once endDate has passed.
 // ============================================
 const expireIfNeeded = async (seller) => {
-  const isPaidPlan =
-    seller.subscriptionPlanId && seller.subscriptionPlanId !== "free";
+  const isPaidPlan = seller.subscriptionPlanId && seller.subscriptionPlanId !== "free";
   const isExpired =
     seller.subscriptionExpiresAt &&
     new Date(seller.subscriptionExpiresAt).getTime() <= Date.now();
 
   if (!isPaidPlan || !isExpired) return seller;
 
-  const freePlan = getPlan("free");
+  const freePlan = await getPlan("free");
 
   await Subscription.updateMany(
     { seller: seller._id, status: "paid", endDate: { $lte: new Date() } },
@@ -35,8 +33,8 @@ const expireIfNeeded = async (seller) => {
 
   await Seller.findByIdAndUpdate(seller._id, {
     subscriptionPlanId: "free",
-    sellerLevel: freePlan.sellerLevel,
-    isSuperSeller: freePlan.isSuperSeller,
+    sellerLevel: freePlan?.sellerLevel || "basic",
+    isSuperSeller: freePlan?.isSuperSeller || false,
     subscriptionStatus: "inactive",
     subscriptionStartedAt: null,
     subscriptionExpiresAt: null,
@@ -55,14 +53,13 @@ const expireIfNeeded = async (seller) => {
 // Prorated credit for the unused portion of the seller's current
 // active plan, applied toward whatever they're switching to.
 // ============================================
-const calculateProratedCredit = (activeSubscription) => {
+const calculateProratedCredit = async (activeSubscription) => {
   if (!activeSubscription || !activeSubscription.endDate) return 0;
 
-  const remainingMs =
-    new Date(activeSubscription.endDate).getTime() - Date.now();
+  const remainingMs = new Date(activeSubscription.endDate).getTime() - Date.now();
   if (remainingMs <= 0) return 0;
 
-  const currentPlan = getPlan(activeSubscription.planId);
+  const currentPlan = await getPlan(activeSubscription.planId);
   if (!currentPlan || !currentPlan.durationDays) return 0;
 
   const remainingDays = remainingMs / MS_PER_DAY;
@@ -73,7 +70,7 @@ const calculateProratedCredit = (activeSubscription) => {
 };
 
 // ============================================
-// 1. GET ALL PLANS (marks the seller's current plan)
+// 1. GET ALL PLANS (marks the seller's current plan) — DB-backed, admin-controlled
 // ============================================
 export const getPlans = async (req, res) => {
   try {
@@ -84,9 +81,11 @@ export const getPlans = async (req, res) => {
       currentPlanId = seller.subscriptionPlanId || "free";
     }
 
-    const plans = PLAN_ORDER.map((id) => ({
-      ...SUBSCRIPTION_PLANS[id],
-      isCurrent: id === currentPlanId,
+    const activePlans = await getAllActivePlansSorted();
+
+    const plans = activePlans.map((plan) => ({
+      ...plan,
+      isCurrent: plan.id === currentPlanId,
     }));
 
     return res.status(200).json({
@@ -114,15 +113,13 @@ export const getCurrentSubscription = async (req, res) => {
     );
 
     if (!seller) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Seller not found" });
+      return res.status(404).json({ success: false, message: "Seller not found" });
     }
 
     seller = await expireIfNeeded(seller);
 
     const lastOrder = await Subscription.getActiveForSeller(seller._id);
-    const plan = getPlan(seller.subscriptionPlanId || "free");
+    const plan = await getPlan(seller.subscriptionPlanId || "free");
 
     return res.status(200).json({
       success: true,
@@ -153,10 +150,8 @@ export const createSubscriptionOrder = async (req, res) => {
   try {
     const { planId } = req.body;
 
-    if (!planId || !isValidPlan(planId)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid plan selected" });
+    if (!planId || !(await isValidPlan(planId))) {
+      return res.status(400).json({ success: false, message: "Invalid plan selected" });
     }
 
     if (planId === "free") {
@@ -166,7 +161,14 @@ export const createSubscriptionOrder = async (req, res) => {
       });
     }
 
-    const plan = getPlan(planId);
+    const plan = await getPlan(planId);
+    if (!plan.isActive) {
+      return res.status(400).json({
+        success: false,
+        message: `The ${plan.name} plan is currently unavailable`,
+      });
+    }
+
     let seller = await expireIfNeeded(req.seller);
 
     if (
@@ -181,17 +183,12 @@ export const createSubscriptionOrder = async (req, res) => {
       });
     }
 
-    const activeSubscription = await Subscription.getActiveForSeller(
-      seller._id,
-    );
+    const activeSubscription = await Subscription.getActiveForSeller(seller._id);
     const creditApplied = activeSubscription
-      ? calculateProratedCredit(activeSubscription)
+      ? await calculateProratedCredit(activeSubscription)
       : 0;
 
-    const payableAmount = Math.max(
-      plan.price - creditApplied,
-      MIN_PAYABLE_AMOUNT,
-    );
+    const payableAmount = Math.max(plan.price - creditApplied, MIN_PAYABLE_AMOUNT);
 
     const receipt = `sub_${seller._id}_${Date.now()}`.slice(0, 40);
 
@@ -258,12 +255,7 @@ export const createSubscriptionOrder = async (req, res) => {
 // ============================================
 export const verifySubscriptionPayment = async (req, res) => {
   try {
-    const {
-      subscriptionId,
-      razorpayOrderId,
-      razorpayPaymentId,
-      razorpaySignature,
-    } = req.body;
+    const { subscriptionId, razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
 
     if (!subscriptionId || !razorpayOrderId) {
       return res.status(400).json({
@@ -279,9 +271,7 @@ export const verifySubscriptionPayment = async (req, res) => {
     });
 
     if (!subscription) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Subscription order not found" });
+      return res.status(404).json({ success: false, message: "Subscription order not found" });
     }
 
     if (subscription.status === "paid") {
@@ -311,20 +301,15 @@ export const verifySubscriptionPayment = async (req, res) => {
       subscription.status = "failed";
       subscription.failureReason = "Signature verification failed";
       await subscription.save();
-      return res
-        .status(400)
-        .json({ success: false, message: "Payment verification failed" });
+      return res.status(400).json({ success: false, message: "Payment verification failed" });
     }
 
-    const plan = getPlan(subscription.planId);
+    const plan = await getPlan(subscription.planId);
     const startDate = new Date();
-    const endDate = new Date(
-      startDate.getTime() + plan.durationDays * 24 * 60 * 60 * 1000,
-    );
+    const endDate = new Date(startDate.getTime() + plan.durationDays * 24 * 60 * 60 * 1000);
 
     subscription.status = "paid";
-    subscription.razorpayPaymentId =
-      razorpayPaymentId || `mock_pay_${Date.now()}`;
+    subscription.razorpayPaymentId = razorpayPaymentId || `mock_pay_${Date.now()}`;
     subscription.razorpaySignature = razorpaySignature || "mock_signature";
     subscription.startDate = startDate;
     subscription.endDate = endDate;
@@ -354,11 +339,8 @@ export const verifySubscriptionPayment = async (req, res) => {
       { new: true },
     ).select("email firstName lastName fullName");
 
-    console.log(
-      `✅ Seller ${req.seller._id} upgraded to ${plan.name} until ${endDate.toISOString()}`,
-    );
+    console.log(`✅ Seller ${req.seller._id} upgraded to ${plan.name} until ${endDate.toISOString()}`);
 
-    // ✅ Fire-and-forget congratulations email — never block the response on it
     if (updatedSeller?.email) {
       emailService
         .sendSellerSubscriptionEmail(
@@ -368,9 +350,7 @@ export const verifySubscriptionPayment = async (req, res) => {
           endDate,
           `${process.env.CLIENT_URL}/seller/dashboard`,
         )
-        .catch((err) =>
-          console.error("❌ Subscription congrats email failed:", err.message),
-        );
+        .catch((err) => console.error("❌ Subscription congrats email failed:", err.message));
     }
 
     return res.status(200).json({
@@ -406,9 +386,7 @@ export const getSubscriptionHistory = async (req, res) => {
 };
 
 // ============================================
-// 6. CANCEL SUBSCRIPTION — disabled.
-// Subscriptions run for their full paid duration and auto-expire to
-// Free on their own; there is no manual cancellation path.
+// 6. CANCEL SUBSCRIPTION — disabled by design
 // ============================================
 export const cancelSubscription = async (req, res) => {
   return res.status(400).json({

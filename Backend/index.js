@@ -1,14 +1,12 @@
+// ============================================
+// DNS CONFIGURATION
+// ============================================
 import dns from "dns";
-<<<<<<< HEAD
 dns.setServers(["8.8.8.8"]);
-=======
 
-dns.setServers(["8.8.8.8"]); // Backend/index.js
-import dns from 'dns';
-
-dns.setServers(['8.8.8.8']);// Backend/index.js
->>>>>>> 67fe217e0abc6a4afd6e9ae4b897caabb4396cde
-
+// ============================================
+// IMPORTS
+// ============================================
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
@@ -26,7 +24,7 @@ import blogRoutes from "./routes/blogRoutes.js";
 import supportRoutes from "./routes/supportRoutes.js";
 
 // ============================================
-// IMPORT ROUTES
+// ROUTE IMPORTS
 // ============================================
 import authRoutes from "./routes/authRoutes.js";
 import superAdminRoutes from "./routes/superAdminRoutes.js";
@@ -34,26 +32,30 @@ import sellerRoutes from "./routes/sellerRoutes.js";
 import bannerRoutes from "./routes/bannerRoutes.js";
 import userProfileRoutes from "./routes/userProfileRoutes.js";
 import subscriptionRoutes from "./routes/subscriptionRoutes.js";
-
-// ✅ IMPORT REFERRAL AND WALLET ROUTES
+import subscriptionPlanRoutes from "./routes/subscriptionPlanRoutes.js";
 import referralRoutes from "./routes/referralRoutes.js";
 import walletRoutes from "./routes/walletRoutes.js";
 
 // ============================================
-// IMPORT SERVICES
+// SERVICE IMPORTS
 // ============================================
 import superAdminService from "./services/superAdminService.js";
+import { initializeDefaultPlans } from "./services/subscriptionPlanService.js";
 
 // ============================================
-// INITIALIZE SUPER ADMIN ON STARTUP
+// INITIALIZE SERVICES ON STARTUP
 // ============================================
 (async () => {
   try {
     console.log("🔧 Initializing Super Admin...");
     await superAdminService.initializeSuperAdmin();
     console.log("✅ Super Admin initialized successfully");
+
+    console.log("🔧 Seeding subscription plans...");
+    await initializeDefaultPlans();
+    console.log("✅ Subscription plans ready");
   } catch (error) {
-    console.error("❌ Failed to initialize Super Admin:", error.message);
+    console.error("❌ Failed to initialize services:", error.message);
   }
 })();
 
@@ -181,13 +183,18 @@ app.get("/api", (req, res) => {
 });
 
 // ============================================
-// API ROUTES
+// API ROUTES - MOUNT ALL ROUTES
 // ============================================
 console.log("\n🔗 Registering routes:");
 console.log("  📌 /api/auth - Authentication routes");
 console.log("  📌 /api/super-admin - Super Admin routes");
 console.log("  📌 /api/seller - Seller routes");
-console.log("  📌 /api/seller/subscription - Seller Upgrade/Subscription routes");
+console.log(
+  "  📌 /api/seller/subscription - Seller Upgrade/Subscription routes",
+);
+console.log(
+  "  📌 /api/super-admin/subscription-plans - Subscription Plan Management",
+);
 console.log("  📌 /api/banners - Banner Management routes");
 console.log("  📌 /api/user-profile - User Profile routes");
 console.log("  📌 /api/blog - Blog Management routes");
@@ -195,17 +202,17 @@ console.log("  📌 /api/referrals - Referral Code routes");
 console.log("  📌 /api/wallet - Wallet Management routes");
 console.log("  📌 /api/support - Support Ticket routes");
 
-// ✅ MOUNT ALL ROUTES
 app.use("/api/auth", authRoutes);
 app.use("/api/super-admin", superAdminRoutes);
 app.use("/api/seller", sellerRoutes);
 app.use("/api/seller/subscription", subscriptionRoutes);
+app.use("/api/super-admin/subscription-plans", subscriptionPlanRoutes);
 app.use("/api/banners", bannerRoutes);
 app.use("/api/blog", blogRoutes);
 app.use("/api", userProfileRoutes);
 app.use("/api/referrals", referralRoutes);
 app.use("/api/wallet", walletRoutes);
-app.use("/api/support", supportRoutes); // ✅ Support routes mounted
+app.use("/api/support", supportRoutes);
 
 // ============================================
 // 404 NOT FOUND HANDLER
@@ -314,14 +321,30 @@ const server = app.listen(PORT, () => {
   console.log("=".repeat(60));
   console.log(`📍 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(`🔗 Port: ${PORT}`);
-  console.log(`🔗 Client URL: ${process.env.CLIENT_URL || "http://localhost:5173"}`);
-  console.log(`🔑 Google OAuth: ${process.env.GOOGLE_CLIENT_ID ? "✅ Configured" : "❌ Not configured"}`);
-  console.log(`🔐 JWT Secret: ${process.env.JWT_ACCESS_SECRET ? "✅ Configured" : "❌ Not configured"}`);
-  console.log(`📊 MongoDB: ${process.env.MONGODB_URI ? "✅ Configured" : "❌ Not configured"}`);
-  console.log(`📧 Email Service: ${process.env.EMAIL_USER ? "✅ Configured" : "❌ Not configured"}`);
-  console.log(`📱 Twilio Service: ${process.env.TWILIO_ACCOUNT_SID ? "✅ Configured" : "❌ Not configured"}`);
-  console.log(`☁️ Cloudinary: ${process.env.CLOUDINARY_CLOUD_NAME ? "✅ Configured" : "❌ Not configured"}`);
-  console.log(`💳 Razorpay: ${process.env.RAZORPAY_KEY_ID ? "✅ Configured" : "⚠️  Not configured (mock mode)"}`);
+  console.log(
+    `🔗 Client URL: ${process.env.CLIENT_URL || "http://localhost:5173"}`,
+  );
+  console.log(
+    `🔑 Google OAuth: ${process.env.GOOGLE_CLIENT_ID ? "✅ Configured" : "❌ Not configured"}`,
+  );
+  console.log(
+    `🔐 JWT Secret: ${process.env.JWT_ACCESS_SECRET ? "✅ Configured" : "❌ Not configured"}`,
+  );
+  console.log(
+    `📊 MongoDB: ${process.env.MONGODB_URI ? "✅ Configured" : "❌ Not configured"}`,
+  );
+  console.log(
+    `📧 Email Service: ${process.env.EMAIL_USER ? "✅ Configured" : "❌ Not configured"}`,
+  );
+  console.log(
+    `📱 Twilio Service: ${process.env.TWILIO_ACCOUNT_SID ? "✅ Configured" : "❌ Not configured"}`,
+  );
+  console.log(
+    `☁️ Cloudinary: ${process.env.CLOUDINARY_CLOUD_NAME ? "✅ Configured" : "❌ Not configured"}`,
+  );
+  console.log(
+    `💳 Razorpay: ${process.env.RAZORPAY_KEY_ID ? "✅ Configured" : "⚠️  Not configured (mock mode)"}`,
+  );
   console.log("=".repeat(60));
   console.log("📌 Available Routes:");
   console.log("  🔹 /api/auth - Authentication");
@@ -333,7 +356,7 @@ const server = app.listen(PORT, () => {
   console.log("  🔹 /api/blog - Blog Management");
   console.log("  🔹 /api/referrals - Referral Code Management");
   console.log("  🔹 /api/wallet - Wallet Management");
-  console.log("  🔹 /api/support - Support Ticket Management"); // ✅ Added
+  console.log("  🔹 /api/support - Support Ticket Management");
   console.log("  🔹 /health - Health Check");
   console.log("  🔹 /api - API Info");
   console.log("=".repeat(60));

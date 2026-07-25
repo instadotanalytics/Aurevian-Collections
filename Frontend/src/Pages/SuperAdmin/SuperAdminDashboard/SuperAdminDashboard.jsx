@@ -42,6 +42,7 @@ import {
   FiLayers,
   FiImage,
   FiPenTool,
+  FiCreditCard,
 } from "react-icons/fi";
 import {
   superAdminLogout,
@@ -63,7 +64,7 @@ import BannerManagement from "../components/BannerManagement/BannerManagement";
 import BlogManagement from "../components/BlogManagement/BlogManagement";
 import PaymentsManagement from "../components/PaymentsManagement/PaymentsManagement";
 import SupportManagement from "../components/SupportManagement";
- // ✅ Correct import
+import SubscriptionPlanManagement from "../components/SubscriptionPlanManagement/SubscriptionPlanManagement";
 
 const SuperAdminDashboard = () => {
   const dispatch = useDispatch();
@@ -227,6 +228,12 @@ const SuperAdminDashboard = () => {
       isSubMenu: false,
     },
     {
+      id: "subscription-plans",
+      label: "Subscription Plans",
+      icon: FiCreditCard,
+      isSubMenu: false,
+    },
+    {
       id: "blog",
       label: "Blog Management",
       icon: FiPenTool,
@@ -293,6 +300,33 @@ const SuperAdminDashboard = () => {
         );
       case "payments":
         return <PaymentsManagement />;
+      case "subscription-plans":
+        return (
+          <div className={styles.subscriptionPlansContainer}>
+            <div className={styles.pageHeader}>
+              <div className={styles.headerLeft}>
+                <h1 className={styles.pageTitle}>
+                  Subscription Plan Management
+                </h1>
+                <p className={styles.pageSubtitle}>
+                  Manage your subscription plans, pricing, and features
+                </p>
+              </div>
+              {/* <button
+                className={styles.addPlanButton}
+                onClick={() => {
+                  // This will trigger the Add Plan modal in SubscriptionPlanManagement
+                  // We'll pass this as a ref or use a global state
+                  console.log("Add New Plan clicked");
+                }}
+              >
+                <FiPlus size={20} />
+                <span>Add New Plan</span>
+              </button> */}
+            </div>
+            <SubscriptionPlanManagement />
+          </div>
+        );
       case "blog-all":
       case "blog-create":
       case "blog-drafts":
@@ -308,7 +342,7 @@ const SuperAdminDashboard = () => {
       case "banners":
         return <BannerManagement />;
       case "support":
-        return <SupportManagement/>;
+        return <SupportManagement />;
       case "settings":
         return (
           <div className={styles.placeholderContent}>Settings Coming Soon</div>

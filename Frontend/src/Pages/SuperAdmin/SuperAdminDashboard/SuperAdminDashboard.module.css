@@ -902,3 +902,75 @@
     transform: translateY(0);
   }
 }
+
+/* ============================================
+   SUBSCRIPTION PLANS HEADER
+   ============================================ */
+.subscriptionPlansContainer {
+  width: 100%;
+  animation: contentFadeIn 0.5s ease;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding: 0 0.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.headerLeft {
+  flex: 1;
+}
+
+.pageTitle {
+  font-size: 2rem;
+  font-weight: 300;
+  color: #e0e0e0;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #f0e6d0, #c8a86e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 300;
+}
+
+.pageSubtitle {
+  font-size: 0.95rem;
+  color: #888;
+  margin: 0;
+  font-weight: 300;
+  letter-spacing: 0.3px;
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+@media (max-width: 768px) {
+  .pageHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .pageTitle {
+    font-size: 1.5rem;
+  }
+
+  .pageSubtitle {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageTitle {
+    font-size: 1.25rem;
+  }
+
+  .pageSubtitle {
+    font-size: 0.8rem;
+  }
+}
