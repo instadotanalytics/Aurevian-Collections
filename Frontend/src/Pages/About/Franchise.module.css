@@ -319,7 +319,7 @@
   width: 100%;
   max-width: 460px;
   min-width: 0;
-  border-radius: var(--aur-radius-lg);
+  /* border-radius: var(--aur-radius-lg); */
   overflow: hidden;
   border: 1.5px solid rgba(201, 122, 50, 0.35);
   box-shadow: var(--aur-shadow);
@@ -377,7 +377,7 @@
 .imgPlaceholder {
   width: 100%;
   max-width: 420px;
-  border-radius: var(--aur-radius-lg);
+  /* border-radius: var(--aur-radius-lg); */
   background: linear-gradient(150deg, rgba(243, 231, 208, 0.9), rgba(232, 206, 138, 0.5));
   border: 1.5px dashed rgba(156, 122, 50, 0.45);
   display: flex;
@@ -411,7 +411,7 @@
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(14px);
   border: 1px solid rgba(201, 165, 76, 0.35);
-  border-radius: var(--aur-radius-md);
+  /* border-radius: var(--aur-radius-md); */
   box-shadow: var(--aur-shadow-soft);
   padding: 30px 36px;
 }
