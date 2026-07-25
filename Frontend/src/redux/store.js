@@ -10,6 +10,7 @@ import profileReducer from "./slices/profileSlice.js"; // ✅ ADD PROFILE REDUCE
 import sellerSubscriptionReducer from "./slices/sellerSubscriptionSlice.js"; // ✅ ADD SUBSCRIPTION REDUCER
 import subscriptionPlanReducer from "./slices/subscriptionPlanSlice.js";
 import supportReducer from "./slices/supportSlice";
+import headerConfigReducer from "./slices/headerConfigSlice.js";
 
 export const store = configureStore({
   reducer: {
@@ -22,6 +23,7 @@ export const store = configureStore({
     sellerSubscription: sellerSubscriptionReducer, // ✅ ADD SUBSCRIPTION REDUCER HERE
     support: supportReducer,
     subscriptionPlans: subscriptionPlanReducer,
+    headerConfig: headerConfigReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -130,13 +132,21 @@ export const store = configureStore({
           "sellerSubscription/cancel/pending",
           "sellerSubscription/cancel/rejected",
 
-         // Subscription Plan (admin) actions
+          // Subscription Plan (admin) actions
           "subscriptionPlans/fetchAll/fulfilled",
           "subscriptionPlans/fetchAll/pending",
           "subscriptionPlans/fetchAll/rejected",
           "subscriptionPlans/create/fulfilled",
           "subscriptionPlans/update/fulfilled",
           "subscriptionPlans/toggleStatus/fulfilled",
+
+          // Header Config actions
+          "headerConfig/fetchPublic/fulfilled",
+          "headerConfig/fetchPublic/rejected",
+          "headerConfig/fetchAdmin/fulfilled",
+          "headerConfig/fetchAdmin/pending",
+          "headerConfig/fetchAdmin/rejected",
+          "headerConfig/update/fulfilled",
         ],
 
         // ✅ Ignore these action paths
@@ -153,7 +163,6 @@ export const store = configureStore({
           "payload.date",
           "payload.startDate",
           "payload.endDate",
-          "payload.publishedAt",
           "payload.publishedAt",
           "payload.subscriptionStartedAt",
           "payload.subscriptionExpiresAt",
@@ -230,6 +239,10 @@ export const store = configureStore({
           "sellerSubscription.history.*.updatedAt",
           "sellerSubscription.history.*.startDate",
           "sellerSubscription.history.*.endDate",
+
+          // Header Config paths
+          "headerConfig.config.updatedAt",
+          "headerConfig.config.createdAt",
         ],
       },
     }),

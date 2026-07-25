@@ -1,7 +1,4 @@
-/**
- * Header Component with Authentication Integration
- * Integrated with Redux for auth state management
- */
+// src/Pages/Layout/Header/Header.jsx — full file (dynamic content wiring)
 
 import React, { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -24,274 +21,15 @@ import styles from "./Header.module.css";
 
 import AnnouncementBar from "./AnnouncementBar";
 import SearchPanel from "./Searchpanel";
-import {
-  announcements,
-  mainNav,
-  shopCategories,
-  shopQuickLinks,
-  shopByStyle,
-  collectionsDropdown,
-  giftGuide,
-  offersDropdown,
-  aboutDropdown,
-} from "./NavData";
+// ✅ Static NavData is now only the LOADING-STATE fallback, shown until the
+// dynamic config loads from the backend — never edited directly anymore.
+import { mainNav as fallbackMainNav } from "./NavData";
 
 import logo from "../../../assets/Aurevianlogo.png";
 import { logoutUser } from "../../../redux/slices/authSlice.js";
+import { fetchPublicHeaderConfig } from "../../../redux/slices/headerConfigSlice.js";
 import toast from "react-hot-toast";
 
-// NOTE: "Fashion Items" is a mega-menu column requested for the Shop menu.
-// It isn't part of NavData.js yet, so it's defined locally here. Feel free
-// to move this into NavData.js and import it instead, the same way
-// shopCategories / shopQuickLinks / shopByStyle are imported.
-const fashionItems = [
-  { id: "fi-1", label: "Perfumes", path: "/fashion/perfumes" },
-  { id: "fi-2", label: "Watches", path: "/fashion/watches" },
-  { id: "fi-3", label: "Sarees", path: "/fashion/sarees" },
-  { id: "fi-4", label: "Sunglasses", path: "/fashion/sunglasses" },
-  { id: "fi-5", label: "Handbags", path: "/fashion/handbags" },
-  { id: "fi-6", label: "Wallets", path: "/fashion/wallets" },
-  { id: "fi-7", label: "Belts", path: "/fashion/belts" },
-];
-
-// Shop Categories with children - FOR MOBILE ONLY
-const shopCategoriesWithChildren = [
-  {
-    id: "earrings",
-    label: "Earrings",
-    path: "/shop/earrings",
-    children: [
-      { id: "stud-earrings", label: "Stud Earrings", path: "/shop/earrings/stud" },
-      { id: "drop-earrings", label: "Drop Earrings", path: "/shop/earrings/drop" },
-      { id: "hoop-earrings", label: "Hoop Earrings", path: "/shop/earrings/hoop" },
-      { id: "jhumkas", label: "Jhumkas", path: "/shop/earrings/jhumkas" },
-      { id: "chandbalis", label: "Chandbalis", path: "/shop/earrings/chandbali" },
-      { id: "danglers", label: "Danglers", path: "/shop/earrings/danglers" },
-    ],
-  },
-  {
-    id: "necklace-sets",
-    label: "Necklace Sets",
-    path: "/shop/necklace-sets",
-    children: [
-      { id: "bridal-sets", label: "Bridal Sets", path: "/shop/necklace-sets/bridal" },
-      { id: "daily-wear", label: "Daily Wear", path: "/shop/necklace-sets/daily" },
-      { id: "party-wear", label: "Party Wear", path: "/shop/necklace-sets/party" },
-      { id: "chokers", label: "Chokers", path: "/shop/necklace-sets/chokers" },
-      { id: "long-sets", label: "Long Necklaces", path: "/shop/necklace-sets/long" },
-    ],
-  },
-  {
-    id: "rings",
-    label: "Rings",
-    path: "/shop/rings",
-    children: [
-      { id: "solitaire", label: "Solitaire Rings", path: "/shop/rings/solitaire" },
-      { id: "couple-rings", label: "Couple Rings", path: "/shop/rings/couple" },
-      { id: "cocktail-rings", label: "Cocktail Rings", path: "/shop/rings/cocktail" },
-      { id: "band-rings", label: "Band Rings", path: "/shop/rings/band" },
-      { id: "statement-rings", label: "Statement Rings", path: "/shop/rings/statement" },
-    ],
-  },
-  {
-    id: "bangles",
-    label: "Bangles",
-    path: "/shop/bangles",
-    children: [
-      { id: "gold-bangles", label: "Gold Bangles", path: "/shop/bangles/gold" },
-      { id: "kada", label: "Kada", path: "/shop/bangles/kada" },
-      { id: "designer-bangles", label: "Designer Bangles", path: "/shop/bangles/designer" },
-      { id: "traditional-bangles", label: "Traditional Bangles", path: "/shop/bangles/traditional" },
-    ],
-  },
-  {
-    id: "bracelets",
-    label: "Bracelets",
-    path: "/shop/bracelets",
-    children: [
-      { id: "chain-bracelets", label: "Chain Bracelets", path: "/shop/bracelets/chain" },
-      { id: "cuff-bracelets", label: "Cuff Bracelets", path: "/shop/bracelets/cuff" },
-      { id: "tennis-bracelets", label: "Tennis Bracelets", path: "/shop/bracelets/tennis" },
-      { id: "anklets", label: "Anklets", path: "/shop/bracelets/anklets" },
-    ],
-  },
-  {
-    id: "pendants",
-    label: "Pendants",
-    path: "/shop/pendants",
-    children: [
-      { id: "diamond-pendants", label: "Diamond Pendants", path: "/shop/pendants/diamond" },
-      { id: "gold-pendants", label: "Gold Pendants", path: "/shop/pendants/gold" },
-      { id: "gemstone-pendants", label: "Gemstone Pendants", path: "/shop/pendants/gemstone" },
-      { id: "locket-pendants", label: "Locket Pendants", path: "/shop/pendants/locket" },
-    ],
-  },
-  {
-    id: "chains",
-    label: "Chains",
-    path: "/shop/chains",
-    children: [
-      { id: "gold-chains", label: "Gold Chains", path: "/shop/chains/gold" },
-      { id: "silver-chains", label: "Silver Chains", path: "/shop/chains/silver" },
-      { id: "adjustable-chains", label: "Adjustable Chains", path: "/shop/chains/adjustable" },
-    ],
-  },
-  {
-    id: "maang-tikka",
-    label: "Maang Tikka",
-    path: "/shop/maang-tikka",
-    children: [
-      { id: "bridal-tikka", label: "Bridal Tikka", path: "/shop/maang-tikka/bridal" },
-      { id: "daily-tikka", label: "Daily Wear Tikka", path: "/shop/maang-tikka/daily" },
-    ],
-  },
-  {
-    id: "nose-pins",
-    label: "Nose Pins",
-    path: "/shop/nose-pins",
-    children: [
-      { id: "stud-pins", label: "Stud Nose Pins", path: "/shop/nose-pins/stud" },
-      { id: "hoop-pins", label: "Hoop Nose Pins", path: "/shop/nose-pins/hoop" },
-    ],
-  },
-];
-
-// Gift Guide Categories with children - FOR MOBILE ONLY
-const giftGuideWithChildren = {
-  byRecipient: [
-    {
-      id: "for-her",
-      label: "For Her",
-      path: "/gift-guide/for-her",
-      children: [
-        { id: "wife", label: "For Wife", path: "/gift-guide/for-her/wife" },
-        { id: "girlfriend", label: "For Girlfriend", path: "/gift-guide/for-her/girlfriend" },
-        { id: "mother", label: "For Mother", path: "/gift-guide/for-her/mother" },
-        { id: "daughter", label: "For Daughter", path: "/gift-guide/for-her/daughter" },
-        { id: "sister", label: "For Sister", path: "/gift-guide/for-her/sister" },
-        { id: "friend", label: "For Friend", path: "/gift-guide/for-her/friend" },
-      ],
-    },
-    {
-      id: "for-him",
-      label: "For Him",
-      path: "/gift-guide/for-him",
-      children: [
-        { id: "husband", label: "For Husband", path: "/gift-guide/for-him/husband" },
-        { id: "boyfriend", label: "For Boyfriend", path: "/gift-guide/for-him/boyfriend" },
-        { id: "father", label: "For Father", path: "/gift-guide/for-him/father" },
-        { id: "brother", label: "For Brother", path: "/gift-guide/for-him/brother" },
-        { id: "son", label: "For Son", path: "/gift-guide/for-him/son" },
-      ],
-    },
-    {
-      id: "for-kids",
-      label: "For Kids",
-      path: "/gift-guide/for-kids",
-      children: [
-        { id: "baby-girl", label: "For Baby Girl", path: "/gift-guide/for-kids/baby-girl" },
-        { id: "baby-boy", label: "For Baby Boy", path: "/gift-guide/for-kids/baby-boy" },
-        { id: "teen-girl", label: "For Teen Girl", path: "/gift-guide/for-kids/teen-girl" },
-        { id: "teen-boy", label: "For Teen Boy", path: "/gift-guide/for-kids/teen-boy" },
-      ],
-    },
-    {
-      id: "for-couples",
-      label: "For Couples",
-      path: "/gift-guide/for-couples",
-      children: [
-        { id: "anniversary", label: "Anniversary Gifts", path: "/gift-guide/for-couples/anniversary" },
-        { id: "wedding", label: "Wedding Gifts", path: "/gift-guide/for-couples/wedding" },
-        { id: "engagement", label: "Engagement Gifts", path: "/gift-guide/for-couples/engagement" },
-      ],
-    },
-  ],
-  byOccasion: [
-    {
-      id: "wedding",
-      label: "Wedding",
-      path: "/gift-guide/wedding",
-      children: [
-        { id: "wedding-gifts", label: "Wedding Gifts", path: "/gift-guide/wedding/gifts" },
-        { id: "bridal-trousseau", label: "Bridal Trousseau", path: "/gift-guide/wedding/trousseau" },
-        { id: "return-gifts", label: "Return Gifts", path: "/gift-guide/wedding/return" },
-      ],
-    },
-    {
-      id: "anniversary",
-      label: "Anniversary",
-      path: "/gift-guide/anniversary",
-      children: [
-        { id: "1st-anniversary", label: "1st Anniversary", path: "/gift-guide/anniversary/1st" },
-        { id: "25th-anniversary", label: "25th Anniversary", path: "/gift-guide/anniversary/25th" },
-        { id: "50th-anniversary", label: "50th Anniversary", path: "/gift-guide/anniversary/50th" },
-      ],
-    },
-    {
-      id: "birthday",
-      label: "Birthday",
-      path: "/gift-guide/birthday",
-      children: [
-        { id: "birthday-gifts", label: "Birthday Gifts", path: "/gift-guide/birthday/gifts" },
-        { id: "surprise-gifts", label: "Surprise Gifts", path: "/gift-guide/birthday/surprise" },
-      ],
-    },
-    {
-      id: "festival",
-      label: "Festival",
-      path: "/gift-guide/festival",
-      children: [
-        { id: "diwali", label: "Diwali Gifts", path: "/gift-guide/festival/diwali" },
-        { id: "rakhi", label: "Rakhi Gifts", path: "/gift-guide/festival/rakhi" },
-        { id: "christmas", label: "Christmas Gifts", path: "/gift-guide/festival/christmas" },
-        { id: "eid", label: "Eid Gifts", path: "/gift-guide/festival/eid" },
-      ],
-    },
-  ],
-  byBudget: [
-    {
-      id: "under-1000",
-      label: "Under ₹1,000",
-      path: "/gift-guide/under-1000",
-      children: [
-        { id: "budget-earrings", label: "Earrings", path: "/gift-guide/under-1000/earrings" },
-        { id: "budget-bracelets", label: "Bracelets", path: "/gift-guide/under-1000/bracelets" },
-      ],
-    },
-    {
-      id: "1000-5000",
-      label: "₹1,000 - ₹5,000",
-      path: "/gift-guide/1000-5000",
-      children: [
-        { id: "budget-rings", label: "Rings", path: "/gift-guide/1000-5000/rings" },
-        { id: "budget-pendants", label: "Pendants", path: "/gift-guide/1000-5000/pendants" },
-      ],
-    },
-    {
-      id: "5000-15000",
-      label: "₹5,000 - ₹15,000",
-      path: "/gift-guide/5000-15000",
-      children: [
-        { id: "budget-sets", label: "Necklace Sets", path: "/gift-guide/5000-15000/sets" },
-        { id: "budget-bangles", label: "Bangles", path: "/gift-guide/5000-15000/bangles" },
-      ],
-    },
-    {
-      id: "above-15000",
-      label: "Above ₹15,000",
-      path: "/gift-guide/above-15000",
-      children: [
-        { id: "premium-gems", label: "Gemstone Jewellery", path: "/gift-guide/above-15000/gemstone" },
-        { id: "premium-diamond", label: "Diamond Jewellery", path: "/gift-guide/above-15000/diamond" },
-      ],
-    },
-  ],
-};
-
-// Placeholder "recent searches" seed shown until the user has real history
-// of their own. Passed through to <SearchPanel /> — if SearchPanel.jsx
-// doesn't yet accept a `recentSearches` prop, add support for it there
-// (fall back to this list when no local/localStorage history exists).
 const defaultRecentSearches = [
   "Bridal lehenga",
   "Gold earrings",
@@ -299,59 +37,16 @@ const defaultRecentSearches = [
   "Men's watches",
 ];
 
-// Mobile Shop Columns - All have arrows (sub-items)
-const mobileShopColumns = [
-  {
-    id: "category",
-    label: "Shop by Category",
-    items: shopCategoriesWithChildren,
-  },
-  {
-    id: "quicklinks",
-    label: "Quick Links",
-    items: shopQuickLinks,
-  },
-  {
-    id: "style",
-    label: "Shop by Style",
-    items: shopByStyle,
-  },
-  {
-    id: "fashion",
-    label: "Fashion Items",
-    items: fashionItems,
-  },
-];
-
-// Mobile Gift Columns - All have arrows (sub-items)
-const mobileGiftColumns = [
-  {
-    id: "recipient",
-    label: "By Recipient",
-    items: giftGuideWithChildren.byRecipient,
-  },
-  {
-    id: "occasion",
-    label: "By Occasion",
-    items: giftGuideWithChildren.byOccasion,
-  },
-  {
-    id: "budget",
-    label: "By Budget",
-    items: giftGuideWithChildren.byBudget,
-  },
-];
-
 const Header = ({
   cartCount = 0,
   wishlistCount = 0,
   onSearchSubmit,
-  announcementItems,
   logoHref = "/",
 }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { config } = useSelector((state) => state.headerConfig);
 
   const avatarUrl = user?.profileImage?.url || user?.avatar?.url || null;
 
@@ -368,6 +63,44 @@ const Header = ({
 
   const navbarRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(0);
+
+  // ✅ Fetch the admin-managed header content once on mount
+  useEffect(() => {
+    dispatch(fetchPublicHeaderConfig());
+  }, [dispatch]);
+
+  // ✅ Derive every content block from the live config, falling back to the
+  // static defaults only while the fetch hasn't resolved yet.
+  const announcements = config?.announcements?.length
+    ? config.announcements
+    : undefined; // AnnouncementBar already has its own internal fallback
+  const mainNav = config?.mainNav?.length ? config.mainNav : fallbackMainNav;
+  const shopCategories = config?.shopMegaMenu?.categories || [];
+  const shopQuickLinks = config?.shopMegaMenu?.quickLinks || [];
+  const shopByStyle = config?.shopMegaMenu?.byStyle || [];
+  const fashionItems = config?.shopMegaMenu?.fashionItems || [];
+  const shopBanner = config?.shopMegaMenu?.banner || {};
+  const giftGuide = config?.giftGuideMegaMenu || {
+    byRecipient: [],
+    byOccasion: [],
+    byBudget: [],
+  };
+  const collectionsDropdown = config?.collectionsDropdown || [];
+  const offersDropdown = config?.offersDropdown || [];
+  const aboutDropdown = config?.aboutDropdown || [];
+
+  // Mobile drawer columns are built from the same dynamic data
+  const mobileShopColumns = [
+    { id: "category", label: "Shop by Category", items: shopCategories },
+    { id: "quicklinks", label: "Quick Links", items: shopQuickLinks },
+    { id: "style", label: "Shop by Style", items: shopByStyle },
+    { id: "fashion", label: "Fashion Items", items: fashionItems },
+  ];
+  const mobileGiftColumns = [
+    { id: "recipient", label: "By Recipient", items: giftGuide.byRecipient },
+    { id: "occasion", label: "By Occasion", items: giftGuide.byOccasion },
+    { id: "budget", label: "By Budget", items: giftGuide.byBudget },
+  ];
 
   // ---- Header height tracking ----
   useEffect(() => {
@@ -392,9 +125,8 @@ const Header = ({
 
     window.addEventListener("resize", updateHeaderHeight);
     return () => window.removeEventListener("resize", updateHeaderHeight);
-  }, []);
+  }, [mainNav]);
 
-  // Close account dropdown / search panel on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (accountRef.current && !accountRef.current.contains(e.target)) {
@@ -408,7 +140,6 @@ const Header = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Close dropdowns on Escape
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape") {
@@ -423,7 +154,6 @@ const Header = ({
     return () => document.removeEventListener("keydown", handleEscape);
   }, []);
 
-  // Lock body scroll
   useEffect(() => {
     document.body.style.overflow = mobileOpen || searchOpen ? "hidden" : "";
     return () => {
@@ -431,7 +161,6 @@ const Header = ({
     };
   }, [mobileOpen, searchOpen]);
 
-  // Close mobile drawer on window resize (when screen becomes desktop)
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth > 992 && mobileOpen) {
@@ -445,7 +174,6 @@ const Header = ({
     return () => window.removeEventListener("resize", handleResize);
   }, [mobileOpen]);
 
-  // Close mobile drawer when switching tabs/dev tools
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden && mobileOpen) {
@@ -456,10 +184,10 @@ const Header = ({
       }
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [mobileOpen]);
 
-  // Close drawer on click outside
   useEffect(() => {
     if (!mobileOpen) return;
 
@@ -548,7 +276,7 @@ const Header = ({
       ref={navbarRef}
       style={{ "--header-h": headerHeight ? `${headerHeight}px` : undefined }}
     >
-      <AnnouncementBar items={announcementItems || announcements} />
+      <AnnouncementBar items={announcements} />
 
       <div className={styles.topRow}>
         <button
@@ -566,7 +294,9 @@ const Header = ({
             className={styles.logoImage}
             onLoad={() => {
               if (navbarRef.current) {
-                setHeaderHeight(navbarRef.current.getBoundingClientRect().height);
+                setHeaderHeight(
+                  navbarRef.current.getBoundingClientRect().height,
+                );
               }
             }}
           />
@@ -638,12 +368,14 @@ const Header = ({
                           </ul>
                         </div>
                         <div className={styles.megaBanner}>
-                          <span>New Season</span>
-                          <strong>Bridal &amp; Festive Edit</strong>
+                          <span>{shopBanner.tag}</span>
+                          <strong>{shopBanner.title}</strong>
                           <p className={styles.megaBannerOffer}>
-                            Up to 40% Off
+                            {shopBanner.offer}
                           </p>
-                          <Link to="/collections/bridal">Shop the edit →</Link>
+                          <Link to={shopBanner.linkPath || "/"}>
+                            {shopBanner.linkText}
+                          </Link>
                         </div>
                       </div>
                     </div>
@@ -888,19 +620,6 @@ const Header = ({
             <FiX />
           </button>
         </div>
-{/* 
-        <div className={styles.drawerSearch}>
-          <SearchPanel
-            styles={styles}
-            isOpen={mobileOpen}
-            onClose={() => {}}
-            onSearchSubmit={onSearchSubmit}
-            variant="inline"
-            autoFocus={false}
-            inputId="aurevian-search-input-mobile"
-            recentSearches={defaultRecentSearches}
-          />
-        </div> */}
 
         {isAuthenticated && user && (
           <div className={styles.drawerUserInfo}>
@@ -962,7 +681,9 @@ const Header = ({
                           onClick={() => toggleMobileShopSub(col.id)}
                         >
                           <span className={styles.drawerSubHeadingContent}>
-                            <span className={styles.headingText}>{col.label}</span>
+                            <span className={styles.headingText}>
+                              {col.label}
+                            </span>
                             <FiChevronRight
                               className={`${styles.drawerChevron} ${mobileShopSubOpen === col.id ? styles.rotated : ""}`}
                             />
@@ -970,13 +691,13 @@ const Header = ({
                         </button>
                         {mobileShopSubOpen === col.id && (
                           <div className={styles.drawerSubItems}>
-                            {col.items.map((item) => (
+                            {col.items.map((it) => (
                               <Link
-                                key={item.id}
-                                to={item.path}
+                                key={it.id}
+                                to={it.path}
                                 onClick={closeMobileMenu}
                               >
-                                {item.label}
+                                {it.label}
                               </Link>
                             ))}
                           </div>
@@ -1011,7 +732,9 @@ const Header = ({
                           onClick={() => toggleMobileGiftSub(col.id)}
                         >
                           <span className={styles.drawerSubHeadingContent}>
-                            <span className={styles.headingText}>{col.label}</span>
+                            <span className={styles.headingText}>
+                              {col.label}
+                            </span>
                             <FiChevronRight
                               className={`${styles.drawerChevron} ${mobileGiftSubOpen === col.id ? styles.rotated : ""}`}
                             />
@@ -1019,13 +742,13 @@ const Header = ({
                         </button>
                         {mobileGiftSubOpen === col.id && (
                           <div className={styles.drawerSubItems}>
-                            {col.items.map((item) => (
+                            {col.items.map((it) => (
                               <Link
-                                key={item.id}
-                                to={item.path}
+                                key={it.id}
+                                to={it.path}
                                 onClick={closeMobileMenu}
                               >
-                                {item.label}
+                                {it.label}
                               </Link>
                             ))}
                           </div>

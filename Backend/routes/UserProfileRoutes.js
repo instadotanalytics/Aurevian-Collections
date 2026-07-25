@@ -80,27 +80,26 @@ const uploadAvatar = upload.fields([
 // ============================================
 router.use(protect);
 
-router.get("/user-profile/me", getUserProfile);
-router.put("/user-profile", updateUserProfile);
+// ============================================
+// STRIPPED REDUNDANT /user-profile PREFIX
+// (Now mounted at /api/user-profile in server.js)
+// ============================================
+router.get("/me", getUserProfile);
+router.put("/", updateUserProfile);
 
-router.post(
-  "/user-profile/avatar",
-  uploadAvatar,
-  handleMulterError,
-  uploadProfileAvatar,
-);
-router.delete("/user-profile/avatar", deleteProfileAvatar);
+router.post("/avatar", uploadAvatar, handleMulterError, uploadProfileAvatar);
+router.delete("/avatar", deleteProfileAvatar);
 
-router.delete("/user-profile", deleteUserAccount);
+router.delete("/", deleteUserAccount);
 
-router.get("/user-profile/orders", getUserOrders);
-router.get("/user-profile/wishlist", getUserWishlist);
+router.get("/orders", getUserOrders);
+router.get("/wishlist", getUserWishlist);
 
-router.post("/user-profile/addresses", addUserAddress);
-router.put("/user-profile/addresses/:addressId", updateUserAddress);
-router.delete("/user-profile/addresses/:addressId", deleteUserAddress);
+router.post("/addresses", addUserAddress);
+router.put("/addresses/:addressId", updateUserAddress);
+router.delete("/addresses/:addressId", deleteUserAddress);
 
-router.put("/user-profile/preferences", updateUserPreferences);
-router.put("/user-profile/change-password", changeUserPassword);
+router.put("/preferences", updateUserPreferences);
+router.put("/change-password", changeUserPassword);
 
 export default router;

@@ -33,7 +33,9 @@ const Upgrade = () => {
   }, [dispatch]);
 
   const hasActivePaidPlan =
-    current?.subscriptionStatus === "active" && current?.plan?.id !== "free";
+    current?.subscriptionStatus === "active" &&
+    current?.plan &&
+    current.plan.id !== "free";
 
   const handleUpgrade = (planId) => {
     if (planId === "free") return;
@@ -63,14 +65,11 @@ const Upgrade = () => {
         </p>
       </div>
 
-      {/* Active plan banner — informational only, no cancel action */}
       {hasActivePaidPlan && (
         <div className={styles.currentPlanBanner}>
           <div className={styles.bannerText}>
             <span className={styles.bannerLabel}>Active plan</span>
-            <strong className={styles.bannerPlanName}>
-              {current.plan.name}
-            </strong>
+            <strong className={styles.bannerPlanName}>{current.plan.name}</strong>
             {current.subscriptionExpiresAt && (
               <span className={styles.bannerExpiry}>
                 Valid until{" "}
@@ -78,17 +77,6 @@ const Upgrade = () => {
               </span>
             )}
           </div>
-        </div>
-      )}
-
-      {/* Proration note for existing paid sellers */}
-      {hasActivePaidPlan && (
-        <div className={styles.prorationNote}>
-          <FiInfo />
-          <span>
-            Switching plans? We automatically credit the unused value of your
-            current plan toward the new one — you only pay the difference.
-          </span>
         </div>
       )}
 

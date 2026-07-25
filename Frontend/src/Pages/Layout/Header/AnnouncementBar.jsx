@@ -1,28 +1,29 @@
- import React, { useState } from "react";
+import React, { useState } from "react";
 import styles from "./AnnouncementBar.module.css";
-import { announcements as defaultAnnouncements } from "./NavData";
+
+/**
+ * Static fallback announcements for when no items are provided
+ */
+const staticFallback = [
+  "✨ Aurevian - Luxury Redefined",
+  "💎 Free Shipping on Orders Above ₹50,000",
+  "🌟 New Arrivals: The Royal Collection",
+  "🎁 Complimentary Gift Wrapping",
+  "👑 Exclusive Member Benefits",
+];
 
 /**
  * AnnouncementBar - Simple version without external icons
  */
-const AnnouncementBar = ({ 
-  items = defaultAnnouncements, 
-  speed = 28 
-}) => {
+const AnnouncementBar = ({ items, speed = 28 }) => {
   const [isPaused, setIsPaused] = useState(false);
 
-  const displayItems = items.length > 0 ? items : [
-    "✨ Aurevian - Luxury Redefined",
-    "💎 Free Shipping on Orders Above ₹50,000",
-    "🌟 New Arrivals: The Royal Collection",
-    "🎁 Complimentary Gift Wrapping",
-    "👑 Exclusive Member Benefits"
-  ];
+  const displayItems = items && items.length > 0 ? items : staticFallback;
 
   const loopItems = [...displayItems, ...displayItems];
 
   return (
-    <div 
+    <div
       className={styles.wrapper}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -31,8 +32,8 @@ const AnnouncementBar = ({
     >
       <div className={styles.container}>
         <div className={styles.trackWrapper}>
-          <div 
-            className={`${styles.track} ${isPaused ? styles.paused : ''}`}
+          <div
+            className={`${styles.track} ${isPaused ? styles.paused : ""}`}
             style={{ animationDuration: `${speed}s` }}
           >
             {loopItems.map((text, idx) => (

@@ -43,6 +43,7 @@ import {
   FiImage,
   FiPenTool,
   FiCreditCard,
+  FiLayout,
 } from "react-icons/fi";
 import {
   superAdminLogout,
@@ -65,6 +66,7 @@ import BlogManagement from "../components/BlogManagement/BlogManagement";
 import PaymentsManagement from "../components/PaymentsManagement/PaymentsManagement";
 import SupportManagement from "../components/SupportManagement";
 import SubscriptionPlanManagement from "../components/SubscriptionPlanManagement/SubscriptionPlanManagement";
+import HeaderManagement from "../components/HeaderManagement/HeaderManagement";
 
 const SuperAdminDashboard = () => {
   const dispatch = useDispatch();
@@ -259,6 +261,12 @@ const SuperAdminDashboard = () => {
       isSubMenu: false,
     },
     {
+      id: "header",
+      label: "Header Management",
+      icon: FiLayout,
+      isSubMenu: false,
+    },
+    {
       id: "support",
       label: "Support Tickets",
       icon: FiMessageSquare,
@@ -341,6 +349,8 @@ const SuperAdminDashboard = () => {
         );
       case "banners":
         return <BannerManagement />;
+      case "header":
+        return <HeaderManagement />;
       case "support":
         return <SupportManagement />;
       case "settings":

@@ -1,4 +1,3 @@
-
 // ============================================
 // DNS CONFIGURATION
 // ============================================
@@ -36,12 +35,14 @@ import subscriptionRoutes from "./routes/subscriptionRoutes.js";
 import subscriptionPlanRoutes from "./routes/subscriptionPlanRoutes.js";
 import referralRoutes from "./routes/referralRoutes.js";
 import walletRoutes from "./routes/walletRoutes.js";
+import headerConfigRoutes from "./routes/headerConfigRoutes.js";
 
 // ============================================
 // SERVICE IMPORTS
 // ============================================
 import superAdminService from "./services/superAdminService.js";
 import { initializeDefaultPlans } from "./services/subscriptionPlanService.js";
+import { initializeHeaderConfig } from "./services/headerConfigService.js";
 
 // ============================================
 // INITIALIZE SERVICES ON STARTUP
@@ -55,6 +56,10 @@ import { initializeDefaultPlans } from "./services/subscriptionPlanService.js";
     console.log("🔧 Seeding subscription plans...");
     await initializeDefaultPlans();
     console.log("✅ Subscription plans ready");
+
+    console.log("🔧 Seeding header config...");
+    await initializeHeaderConfig();
+    console.log("✅ Header config ready");
   } catch (error) {
     console.error("❌ Failed to initialize services:", error.message);
   }
@@ -177,6 +182,7 @@ app.get("/api", (req, res) => {
       referrals: "/api/referrals",
       wallet: "/api/wallet",
       support: "/api/support",
+      headerConfig: "/api/header-config",
       health: "/health",
     },
     documentation: "Contact support for API documentation",
@@ -184,7 +190,7 @@ app.get("/api", (req, res) => {
 });
 
 // ============================================
-// API ROUTES - MOUNT ALL ROUTES
+// API ROUTES - MOUNT ALL ROUTES (REORDERED)
 // ============================================
 console.log("\n🔗 Registering routes:");
 console.log("  📌 /api/auth - Authentication routes");
@@ -202,18 +208,21 @@ console.log("  📌 /api/blog - Blog Management routes");
 console.log("  📌 /api/referrals - Referral Code routes");
 console.log("  📌 /api/wallet - Wallet Management routes");
 console.log("  📌 /api/support - Support Ticket routes");
+console.log("  📌 /api/header-config - Header Configuration (public + admin)");
 
+// REORDERED: Most specific routes first
 app.use("/api/auth", authRoutes);
-app.use("/api/super-admin", superAdminRoutes);
-app.use("/api/seller", sellerRoutes);
-app.use("/api/seller/subscription", subscriptionRoutes);
-app.use("/api/super-admin/subscription-plans", subscriptionPlanRoutes);
+app.use("/api/super-admin/subscription-plans", subscriptionPlanRoutes); // More specific first
+app.use("/api/super-admin", superAdminRoutes); // Then the generic parent
+app.use("/api/seller/subscription", subscriptionRoutes); // More specific first
+app.use("/api/seller", sellerRoutes); // Then the generic parent
 app.use("/api/banners", bannerRoutes);
 app.use("/api/blog", blogRoutes);
-app.use("/api", userProfileRoutes);
+app.use("/api/user-profile", userProfileRoutes);
 app.use("/api/referrals", referralRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/support", supportRoutes);
+app.use("/api/header-config", headerConfigRoutes);
 
 // ============================================
 // 404 NOT FOUND HANDLER
@@ -358,6 +367,9 @@ const server = app.listen(PORT, () => {
   console.log("  🔹 /api/referrals - Referral Code Management");
   console.log("  🔹 /api/wallet - Wallet Management");
   console.log("  🔹 /api/support - Support Ticket Management");
+  console.log(
+    "  🔹 /api/header-config - Header Configuration (public + admin)",
+  );
   console.log("  🔹 /health - Health Check");
   console.log("  🔹 /api - API Info");
   console.log("=".repeat(60));
