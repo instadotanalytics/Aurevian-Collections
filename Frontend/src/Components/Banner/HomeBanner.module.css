@@ -7,7 +7,7 @@
   overflow: hidden;
   background-color: #f4f9f6; 
   perspective: 1200px;
-  border-radius: 8px; /* Optional: adds a soft luxury edge block shape on wide viewports */
+  
 }
 
 .slide {
@@ -624,7 +624,7 @@
   overflow: hidden;
   background-color: #f4f9f6; 
   perspective: 1200px;
-  border-radius: 8px;
+  
 }
 
 /* ... (keep all your existing styles) ... */

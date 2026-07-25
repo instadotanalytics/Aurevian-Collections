@@ -54,6 +54,240 @@ const fashionItems = [
   { id: "fi-7", label: "Belts", path: "/fashion/belts" },
 ];
 
+// Shop Categories with children - FOR MOBILE ONLY
+const shopCategoriesWithChildren = [
+  {
+    id: "earrings",
+    label: "Earrings",
+    path: "/shop/earrings",
+    children: [
+      { id: "stud-earrings", label: "Stud Earrings", path: "/shop/earrings/stud" },
+      { id: "drop-earrings", label: "Drop Earrings", path: "/shop/earrings/drop" },
+      { id: "hoop-earrings", label: "Hoop Earrings", path: "/shop/earrings/hoop" },
+      { id: "jhumkas", label: "Jhumkas", path: "/shop/earrings/jhumkas" },
+      { id: "chandbalis", label: "Chandbalis", path: "/shop/earrings/chandbali" },
+      { id: "danglers", label: "Danglers", path: "/shop/earrings/danglers" },
+    ],
+  },
+  {
+    id: "necklace-sets",
+    label: "Necklace Sets",
+    path: "/shop/necklace-sets",
+    children: [
+      { id: "bridal-sets", label: "Bridal Sets", path: "/shop/necklace-sets/bridal" },
+      { id: "daily-wear", label: "Daily Wear", path: "/shop/necklace-sets/daily" },
+      { id: "party-wear", label: "Party Wear", path: "/shop/necklace-sets/party" },
+      { id: "chokers", label: "Chokers", path: "/shop/necklace-sets/chokers" },
+      { id: "long-sets", label: "Long Necklaces", path: "/shop/necklace-sets/long" },
+    ],
+  },
+  {
+    id: "rings",
+    label: "Rings",
+    path: "/shop/rings",
+    children: [
+      { id: "solitaire", label: "Solitaire Rings", path: "/shop/rings/solitaire" },
+      { id: "couple-rings", label: "Couple Rings", path: "/shop/rings/couple" },
+      { id: "cocktail-rings", label: "Cocktail Rings", path: "/shop/rings/cocktail" },
+      { id: "band-rings", label: "Band Rings", path: "/shop/rings/band" },
+      { id: "statement-rings", label: "Statement Rings", path: "/shop/rings/statement" },
+    ],
+  },
+  {
+    id: "bangles",
+    label: "Bangles",
+    path: "/shop/bangles",
+    children: [
+      { id: "gold-bangles", label: "Gold Bangles", path: "/shop/bangles/gold" },
+      { id: "kada", label: "Kada", path: "/shop/bangles/kada" },
+      { id: "designer-bangles", label: "Designer Bangles", path: "/shop/bangles/designer" },
+      { id: "traditional-bangles", label: "Traditional Bangles", path: "/shop/bangles/traditional" },
+    ],
+  },
+  {
+    id: "bracelets",
+    label: "Bracelets",
+    path: "/shop/bracelets",
+    children: [
+      { id: "chain-bracelets", label: "Chain Bracelets", path: "/shop/bracelets/chain" },
+      { id: "cuff-bracelets", label: "Cuff Bracelets", path: "/shop/bracelets/cuff" },
+      { id: "tennis-bracelets", label: "Tennis Bracelets", path: "/shop/bracelets/tennis" },
+      { id: "anklets", label: "Anklets", path: "/shop/bracelets/anklets" },
+    ],
+  },
+  {
+    id: "pendants",
+    label: "Pendants",
+    path: "/shop/pendants",
+    children: [
+      { id: "diamond-pendants", label: "Diamond Pendants", path: "/shop/pendants/diamond" },
+      { id: "gold-pendants", label: "Gold Pendants", path: "/shop/pendants/gold" },
+      { id: "gemstone-pendants", label: "Gemstone Pendants", path: "/shop/pendants/gemstone" },
+      { id: "locket-pendants", label: "Locket Pendants", path: "/shop/pendants/locket" },
+    ],
+  },
+  {
+    id: "chains",
+    label: "Chains",
+    path: "/shop/chains",
+    children: [
+      { id: "gold-chains", label: "Gold Chains", path: "/shop/chains/gold" },
+      { id: "silver-chains", label: "Silver Chains", path: "/shop/chains/silver" },
+      { id: "adjustable-chains", label: "Adjustable Chains", path: "/shop/chains/adjustable" },
+    ],
+  },
+  {
+    id: "maang-tikka",
+    label: "Maang Tikka",
+    path: "/shop/maang-tikka",
+    children: [
+      { id: "bridal-tikka", label: "Bridal Tikka", path: "/shop/maang-tikka/bridal" },
+      { id: "daily-tikka", label: "Daily Wear Tikka", path: "/shop/maang-tikka/daily" },
+    ],
+  },
+  {
+    id: "nose-pins",
+    label: "Nose Pins",
+    path: "/shop/nose-pins",
+    children: [
+      { id: "stud-pins", label: "Stud Nose Pins", path: "/shop/nose-pins/stud" },
+      { id: "hoop-pins", label: "Hoop Nose Pins", path: "/shop/nose-pins/hoop" },
+    ],
+  },
+];
+
+// Gift Guide Categories with children - FOR MOBILE ONLY
+const giftGuideWithChildren = {
+  byRecipient: [
+    {
+      id: "for-her",
+      label: "For Her",
+      path: "/gift-guide/for-her",
+      children: [
+        { id: "wife", label: "For Wife", path: "/gift-guide/for-her/wife" },
+        { id: "girlfriend", label: "For Girlfriend", path: "/gift-guide/for-her/girlfriend" },
+        { id: "mother", label: "For Mother", path: "/gift-guide/for-her/mother" },
+        { id: "daughter", label: "For Daughter", path: "/gift-guide/for-her/daughter" },
+        { id: "sister", label: "For Sister", path: "/gift-guide/for-her/sister" },
+        { id: "friend", label: "For Friend", path: "/gift-guide/for-her/friend" },
+      ],
+    },
+    {
+      id: "for-him",
+      label: "For Him",
+      path: "/gift-guide/for-him",
+      children: [
+        { id: "husband", label: "For Husband", path: "/gift-guide/for-him/husband" },
+        { id: "boyfriend", label: "For Boyfriend", path: "/gift-guide/for-him/boyfriend" },
+        { id: "father", label: "For Father", path: "/gift-guide/for-him/father" },
+        { id: "brother", label: "For Brother", path: "/gift-guide/for-him/brother" },
+        { id: "son", label: "For Son", path: "/gift-guide/for-him/son" },
+      ],
+    },
+    {
+      id: "for-kids",
+      label: "For Kids",
+      path: "/gift-guide/for-kids",
+      children: [
+        { id: "baby-girl", label: "For Baby Girl", path: "/gift-guide/for-kids/baby-girl" },
+        { id: "baby-boy", label: "For Baby Boy", path: "/gift-guide/for-kids/baby-boy" },
+        { id: "teen-girl", label: "For Teen Girl", path: "/gift-guide/for-kids/teen-girl" },
+        { id: "teen-boy", label: "For Teen Boy", path: "/gift-guide/for-kids/teen-boy" },
+      ],
+    },
+    {
+      id: "for-couples",
+      label: "For Couples",
+      path: "/gift-guide/for-couples",
+      children: [
+        { id: "anniversary", label: "Anniversary Gifts", path: "/gift-guide/for-couples/anniversary" },
+        { id: "wedding", label: "Wedding Gifts", path: "/gift-guide/for-couples/wedding" },
+        { id: "engagement", label: "Engagement Gifts", path: "/gift-guide/for-couples/engagement" },
+      ],
+    },
+  ],
+  byOccasion: [
+    {
+      id: "wedding",
+      label: "Wedding",
+      path: "/gift-guide/wedding",
+      children: [
+        { id: "wedding-gifts", label: "Wedding Gifts", path: "/gift-guide/wedding/gifts" },
+        { id: "bridal-trousseau", label: "Bridal Trousseau", path: "/gift-guide/wedding/trousseau" },
+        { id: "return-gifts", label: "Return Gifts", path: "/gift-guide/wedding/return" },
+      ],
+    },
+    {
+      id: "anniversary",
+      label: "Anniversary",
+      path: "/gift-guide/anniversary",
+      children: [
+        { id: "1st-anniversary", label: "1st Anniversary", path: "/gift-guide/anniversary/1st" },
+        { id: "25th-anniversary", label: "25th Anniversary", path: "/gift-guide/anniversary/25th" },
+        { id: "50th-anniversary", label: "50th Anniversary", path: "/gift-guide/anniversary/50th" },
+      ],
+    },
+    {
+      id: "birthday",
+      label: "Birthday",
+      path: "/gift-guide/birthday",
+      children: [
+        { id: "birthday-gifts", label: "Birthday Gifts", path: "/gift-guide/birthday/gifts" },
+        { id: "surprise-gifts", label: "Surprise Gifts", path: "/gift-guide/birthday/surprise" },
+      ],
+    },
+    {
+      id: "festival",
+      label: "Festival",
+      path: "/gift-guide/festival",
+      children: [
+        { id: "diwali", label: "Diwali Gifts", path: "/gift-guide/festival/diwali" },
+        { id: "rakhi", label: "Rakhi Gifts", path: "/gift-guide/festival/rakhi" },
+        { id: "christmas", label: "Christmas Gifts", path: "/gift-guide/festival/christmas" },
+        { id: "eid", label: "Eid Gifts", path: "/gift-guide/festival/eid" },
+      ],
+    },
+  ],
+  byBudget: [
+    {
+      id: "under-1000",
+      label: "Under ₹1,000",
+      path: "/gift-guide/under-1000",
+      children: [
+        { id: "budget-earrings", label: "Earrings", path: "/gift-guide/under-1000/earrings" },
+        { id: "budget-bracelets", label: "Bracelets", path: "/gift-guide/under-1000/bracelets" },
+      ],
+    },
+    {
+      id: "1000-5000",
+      label: "₹1,000 - ₹5,000",
+      path: "/gift-guide/1000-5000",
+      children: [
+        { id: "budget-rings", label: "Rings", path: "/gift-guide/1000-5000/rings" },
+        { id: "budget-pendants", label: "Pendants", path: "/gift-guide/1000-5000/pendants" },
+      ],
+    },
+    {
+      id: "5000-15000",
+      label: "₹5,000 - ₹15,000",
+      path: "/gift-guide/5000-15000",
+      children: [
+        { id: "budget-sets", label: "Necklace Sets", path: "/gift-guide/5000-15000/sets" },
+        { id: "budget-bangles", label: "Bangles", path: "/gift-guide/5000-15000/bangles" },
+      ],
+    },
+    {
+      id: "above-15000",
+      label: "Above ₹15,000",
+      path: "/gift-guide/above-15000",
+      children: [
+        { id: "premium-gems", label: "Gemstone Jewellery", path: "/gift-guide/above-15000/gemstone" },
+        { id: "premium-diamond", label: "Diamond Jewellery", path: "/gift-guide/above-15000/diamond" },
+      ],
+    },
+  ],
+};
+
 // Placeholder "recent searches" seed shown until the user has real history
 // of their own. Passed through to <SearchPanel /> — if SearchPanel.jsx
 // doesn't yet accept a `recentSearches` prop, add support for it there
@@ -63,6 +297,49 @@ const defaultRecentSearches = [
   "Gold earrings",
   "Silk saree",
   "Men's watches",
+];
+
+// Mobile Shop Columns - All have arrows (sub-items)
+const mobileShopColumns = [
+  {
+    id: "category",
+    label: "Shop by Category",
+    items: shopCategoriesWithChildren,
+  },
+  {
+    id: "quicklinks",
+    label: "Quick Links",
+    items: shopQuickLinks,
+  },
+  {
+    id: "style",
+    label: "Shop by Style",
+    items: shopByStyle,
+  },
+  {
+    id: "fashion",
+    label: "Fashion Items",
+    items: fashionItems,
+  },
+];
+
+// Mobile Gift Columns - All have arrows (sub-items)
+const mobileGiftColumns = [
+  {
+    id: "recipient",
+    label: "By Recipient",
+    items: giftGuideWithChildren.byRecipient,
+  },
+  {
+    id: "occasion",
+    label: "By Occasion",
+    items: giftGuideWithChildren.byOccasion,
+  },
+  {
+    id: "budget",
+    label: "By Budget",
+    items: giftGuideWithChildren.byBudget,
+  },
 ];
 
 const Header = ({
@@ -76,54 +353,23 @@ const Header = ({
   const navigate = useNavigate();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
 
-  // Google (and any future OAuth) logins store the picture as a nested
-  // object on the user document — { url, publicId } — for both
-  // `profileImage` and `avatar` (see backend/models/User.js). Read it
-  // through this single helper everywhere in this component instead of
-  // assuming `user.profileImage` is already a URL string; that mismatch
-  // was silently breaking every avatar render if you look for
-  // `user.profileImage` truthiness alone (an object is always truthy,
-  // so it passed the check but produced a broken <img src="[object
-  // Object]">).
   const avatarUrl = user?.profileImage?.url || user?.avatar?.url || null;
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [mobileShopSubOpen, setMobileShopSubOpen] = useState(null);
+  const [mobileGiftSubOpen, setMobileGiftSubOpen] = useState(null);
 
   const accountRef = useRef(null);
   const searchRef = useRef(null);
+  const drawerRef = useRef(null);
 
-  // NOTE: the raw text-input state and submit handler used to live here
-  // (`query` / `handleSearch`). That entire search experience (history,
-  // live suggestions, keyboard nav) now lives inside SearchPanel.jsx.
-  // Header just renders <SearchPanel /> inside the left-side panel below
-  // and forwards the same `onSearchSubmit` prop it always accepted — so
-  // consumers of <Header onSearchSubmit={...} /> don't need to change
-  // anything.
-
-  // ---- Header height tracking ----
-  // The Shop / Gift Guide mega menus are positioned with `position: fixed`
-  // so they are anchored to the viewport instead of to whichever nav item
-  // triggered them. That's what stops them from being clipped on the left
-  // or right edge of the screen. To sit them flush under the header
-  // (announcement bar + top row combined), we measure the header's real
-  // rendered height and publish it as a CSS custom property (--header-h)
-  // on the <header> element itself. Header.module.css reads that variable
-  // for both the mega menu's `top` AND its `max-height`, so they can never
-  // disagree with the real header height.
-  //
-  // We use a ResizeObserver (not just a window `resize` listener) because
-  // the header's height can change for reasons that never fire a window
-  // resize event: the logo image finishing loading, web fonts swapping in,
-  // or the announcement bar wrapping onto a second line on a narrower
-  // tablet. A ResizeObserver catches all of these automatically, which is
-  // what keeps the mega menu correctly aligned to the header on every
-  // device instead of relying on a stale measurement.
   const navbarRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(0);
 
+  // ---- Header height tracking ----
   useEffect(() => {
     const node = navbarRef.current;
     if (!node) return;
@@ -137,7 +383,6 @@ const Header = ({
     if (typeof ResizeObserver !== "undefined") {
       const observer = new ResizeObserver(updateHeaderHeight);
       observer.observe(node);
-      // Fallback for orientation changes on some older mobile browsers
       window.addEventListener("orientationchange", updateHeaderHeight);
       return () => {
         observer.disconnect();
@@ -145,7 +390,6 @@ const Header = ({
       };
     }
 
-    // Fallback for browsers without ResizeObserver support
     window.addEventListener("resize", updateHeaderHeight);
     return () => window.removeEventListener("resize", updateHeaderHeight);
   }, []);
@@ -171,13 +415,15 @@ const Header = ({
         setAccountOpen(false);
         setSearchOpen(false);
         setMobileOpen(false);
+        setMobileShopSubOpen(null);
+        setMobileGiftSubOpen(null);
       }
     };
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
   }, []);
 
-  // Lock body scroll when the mobile drawer OR the left search panel is open
+  // Lock body scroll
   useEffect(() => {
     document.body.style.overflow = mobileOpen || searchOpen ? "hidden" : "";
     return () => {
@@ -185,16 +431,74 @@ const Header = ({
     };
   }, [mobileOpen, searchOpen]);
 
+  // Close mobile drawer on window resize (when screen becomes desktop)
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 992 && mobileOpen) {
+        setMobileOpen(false);
+        setOpenAccordion(null);
+        setMobileShopSubOpen(null);
+        setMobileGiftSubOpen(null);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [mobileOpen]);
+
+  // Close mobile drawer when switching tabs/dev tools
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && mobileOpen) {
+        setMobileOpen(false);
+        setOpenAccordion(null);
+        setMobileShopSubOpen(null);
+        setMobileGiftSubOpen(null);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [mobileOpen]);
+
+  // Close drawer on click outside
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const handleClickOutside = (e) => {
+      if (drawerRef.current && !drawerRef.current.contains(e.target)) {
+        setMobileOpen(false);
+        setOpenAccordion(null);
+        setMobileShopSubOpen(null);
+        setMobileGiftSubOpen(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [mobileOpen]);
+
   const toggleAccordion = (id) => {
     setOpenAccordion((prev) => (prev === id ? null : id));
+    if (id !== "shop" && id !== "gift-guide") {
+      setMobileShopSubOpen(null);
+      setMobileGiftSubOpen(null);
+    }
   };
 
   const closeMobileMenu = () => {
     setMobileOpen(false);
     setOpenAccordion(null);
+    setMobileShopSubOpen(null);
+    setMobileGiftSubOpen(null);
   };
 
-  // Handle logout with Redux
+  const handleOverlayClick = () => {
+    closeMobileMenu();
+  };
+
+  const handleDrawerClick = (e) => {
+    e.stopPropagation();
+  };
+
   const handleLogout = async () => {
     try {
       setAccountOpen(false);
@@ -207,7 +511,6 @@ const Header = ({
     }
   };
 
-  // Get user initials for avatar
   const getUserInitials = () => {
     if (!user) return "U";
     if (user.firstName && user.lastName) {
@@ -222,15 +525,22 @@ const Header = ({
     return "U";
   };
 
-  // Account dropdown items with icons
   const accountMenuItems = isAuthenticated
     ? [
-      { icon: FiUserIcon, label: "Profile", path: "/profile" },
-      { icon: FiOrders, label: "My Orders", path: "/orders" },
-      { icon: FiHeart, label: "Wishlist", path: "/wishlist" },
-      { icon: FiSettings, label: "Settings", path: "/settings" },
-    ]
+        { icon: FiUserIcon, label: "Profile", path: "/profile" },
+        { icon: FiOrders, label: "My Orders", path: "/orders" },
+        { icon: FiHeart, label: "Wishlist", path: "/wishlist" },
+        { icon: FiSettings, label: "Settings", path: "/settings" },
+      ]
     : [];
+
+  const toggleMobileShopSub = (id) => {
+    setMobileShopSubOpen((prev) => (prev === id ? null : id));
+  };
+
+  const toggleMobileGiftSub = (id) => {
+    setMobileGiftSubOpen((prev) => (prev === id ? null : id));
+  };
 
   return (
     <header
@@ -240,24 +550,6 @@ const Header = ({
     >
       <AnnouncementBar items={announcementItems || announcements} />
 
-      {/* ================= SINGLE ROW: logo | nav | icons =================
-          Layout note: .topRow is a single flex row. .desktopNav and
-          .mainNav are `display: contents` in the CSS, which "flattens"
-          them so the logo and every nav link become direct flex children
-          of .topRow, spaced by `justify-content: space-between`.
-          .iconGroup stays a real flex box with its own `gap: 12px` so the
-          4 icons (search, wishlist, cart, account) stay evenly spaced from
-          each other regardless of what happens to the rest of the row.
-          See Header.module.css for details.
-
-          The Shop / Gift Guide mega menus below read their vertical
-          position from the `--header-h` CSS variable set on the <header>
-          tag (see the style prop above), instead of an inline `top` style
-          computed per-render. That variable is kept in sync with the
-          header's real rendered height via a ResizeObserver, so the menus
-          stay correctly aligned under the header on every device, even as
-          the header's height changes (announcement bar wrapping, logo
-          loading, font swaps, orientation changes). */}
       <div className={styles.topRow}>
         <button
           className={styles.hamburgerBtn}
@@ -280,7 +572,6 @@ const Header = ({
           />
         </Link>
 
-        {/* ---- Desktop nav ---- */}
         <nav className={styles.desktopNav} aria-label="Primary navigation">
           <ul className={styles.mainNav}>
             {mainNav.map((item) => {
@@ -301,7 +592,6 @@ const Header = ({
                     )}
                   </Link>
 
-                  {/* Shop mega menu */}
                   {item.id === "shop" && (
                     <div
                       className={`${styles.megaMenu} ${styles.megaMenuShop}`}
@@ -359,7 +649,6 @@ const Header = ({
                     </div>
                   )}
 
-                  {/* Collections simple dropdown */}
                   {item.id === "collections" && (
                     <div className={styles.dropdown}>
                       {collectionsDropdown.map((c) => (
@@ -370,7 +659,6 @@ const Header = ({
                     </div>
                   )}
 
-                  {/* Gift Guide mega menu */}
                   {item.id === "gift-guide" && (
                     <div className={styles.megaMenu}>
                       <div className={styles.megaMenuFlex}>
@@ -408,7 +696,6 @@ const Header = ({
                     </div>
                   )}
 
-                  {/* Offers simple dropdown */}
                   {item.id === "offers" && (
                     <div className={styles.dropdown}>
                       {offersDropdown.map((o) => (
@@ -419,7 +706,6 @@ const Header = ({
                     </div>
                   )}
 
-                  {/* About Us simple dropdown */}
                   {item.id === "about" && (
                     <div className={styles.dropdown}>
                       {aboutDropdown.map((a) => (
@@ -435,7 +721,6 @@ const Header = ({
           </ul>
         </nav>
 
-        {/* ---- Icons (search, wishlist, cart, account) ---- */}
         <div className={styles.iconGroup}>
           <div className={styles.searchWrap} ref={searchRef}>
             <button
@@ -447,12 +732,6 @@ const Header = ({
               <FiSearch />
             </button>
 
-            {/* Search panel now slides in from the LEFT edge of the
-                screen and covers up to half the viewport width (see
-                .searchPanel in Header.module.css). The trigger button
-                above is unchanged — only the panel's position/size and
-                open animation changed, from a small dropdown under the
-                icon to a full-height left-side panel. */}
             <div
               className={`${styles.searchPanel} ${searchOpen ? styles.open : ""}`}
             >
@@ -515,7 +794,6 @@ const Header = ({
             >
               {isAuthenticated && user ? (
                 <>
-                  {/* User Info */}
                   <div className={styles.accountUserInfo}>
                     <div className={styles.accountAvatar}>
                       {avatarUrl ? (
@@ -538,7 +816,6 @@ const Header = ({
 
                   <div className={styles.accountDivider} />
 
-                  {/* Account Menu Items */}
                   {accountMenuItems.map((item) => (
                     <Link
                       key={item.path}
@@ -553,7 +830,6 @@ const Header = ({
 
                   <div className={styles.accountDivider} />
 
-                  {/* Logout Button */}
                   <button
                     onClick={handleLogout}
                     className={`${styles.accountMenuItem} ${styles.logoutItem}`}
@@ -586,20 +862,20 @@ const Header = ({
         </div>
       </div>
 
-      {/* Backdrop for the left-side search panel — dims the rest of the
-          page and closes the panel on click, same pattern as the mobile
-          drawer's overlay below. */}
       <div
         className={`${styles.searchOverlay} ${searchOpen ? styles.show : ""}`}
         onClick={() => setSearchOpen(false)}
       />
 
-      {/* ================= MOBILE DRAWER ================= */}
       <div
         className={`${styles.overlay} ${mobileOpen ? styles.show : ""}`}
-        onClick={closeMobileMenu}
+        onClick={handleOverlayClick}
       />
-      <aside className={`${styles.drawer} ${mobileOpen ? styles.show : ""}`}>
+      <aside
+        className={`${styles.drawer} ${mobileOpen ? styles.show : ""}`}
+        ref={drawerRef}
+        onClick={handleDrawerClick}
+      >
         <div className={styles.drawerHeader}>
           <Link to={logoHref} className={styles.logo} onClick={closeMobileMenu}>
             <img src={logo} alt="Aurevian" className={styles.drawerLogoImage} />
@@ -612,16 +888,12 @@ const Header = ({
             <FiX />
           </button>
         </div>
-
-        {/* Same reusable SearchPanel, in "inline" mode: no absolute
-            positioning, suggestions/history render directly beneath the
-            input in the drawer's normal scroll flow (see section 9 —
-            mobile support — in Header.module.css). */}
-        {/* <div className={styles.drawerSearch}>
+{/* 
+        <div className={styles.drawerSearch}>
           <SearchPanel
             styles={styles}
             isOpen={mobileOpen}
-            onClose={() => { }}
+            onClose={() => {}}
             onSearchSubmit={onSearchSubmit}
             variant="inline"
             autoFocus={false}
@@ -630,7 +902,6 @@ const Header = ({
           />
         </div> */}
 
-        {/* User info in mobile drawer */}
         {isAuthenticated && user && (
           <div className={styles.drawerUserInfo}>
             <div className={styles.drawerUserAvatar}>
@@ -684,38 +955,34 @@ const Header = ({
                   <div
                     className={`${styles.drawerSubPanel} ${expanded ? styles.expanded : ""}`}
                   >
-                    <div className={styles.drawerSubGroup}>
-                      <h5>Category</h5>
-                      {shopCategories.map((c) => (
-                        <Link key={c.id} to={c.path} onClick={closeMobileMenu}>
-                          {c.label}
-                        </Link>
-                      ))}
-                    </div>
-                    <div className={styles.drawerSubGroup}>
-                      <h5>Quick Links</h5>
-                      {shopQuickLinks.map((c) => (
-                        <Link key={c.id} to={c.path} onClick={closeMobileMenu}>
-                          {c.label}
-                        </Link>
-                      ))}
-                    </div>
-                    <div className={styles.drawerSubGroup}>
-                      <h5>Shop by Style</h5>
-                      {shopByStyle.map((c) => (
-                        <Link key={c.id} to={c.path} onClick={closeMobileMenu}>
-                          {c.label}
-                        </Link>
-                      ))}
-                    </div>
-                    <div className={styles.drawerSubGroup}>
-                      <h5>Fashion Items</h5>
-                      {fashionItems.map((f) => (
-                        <Link key={f.id} to={f.path} onClick={closeMobileMenu}>
-                          {f.label}
-                        </Link>
-                      ))}
-                    </div>
+                    {mobileShopColumns.map((col) => (
+                      <div key={col.id} className={styles.drawerSubGroup}>
+                        <button
+                          className={styles.drawerSubHeading}
+                          onClick={() => toggleMobileShopSub(col.id)}
+                        >
+                          <span className={styles.drawerSubHeadingContent}>
+                            <span className={styles.headingText}>{col.label}</span>
+                            <FiChevronRight
+                              className={`${styles.drawerChevron} ${mobileShopSubOpen === col.id ? styles.rotated : ""}`}
+                            />
+                          </span>
+                        </button>
+                        {mobileShopSubOpen === col.id && (
+                          <div className={styles.drawerSubItems}>
+                            {col.items.map((item) => (
+                              <Link
+                                key={item.id}
+                                to={item.path}
+                                onClick={closeMobileMenu}
+                              >
+                                {item.label}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
 
@@ -737,30 +1004,34 @@ const Header = ({
                   <div
                     className={`${styles.drawerSubPanel} ${expanded ? styles.expanded : ""}`}
                   >
-                    <div className={styles.drawerSubGroup}>
-                      <h5>By Recipient</h5>
-                      {giftGuide.byRecipient.map((g) => (
-                        <Link key={g.id} to={g.path} onClick={closeMobileMenu}>
-                          {g.label}
-                        </Link>
-                      ))}
-                    </div>
-                    <div className={styles.drawerSubGroup}>
-                      <h5>By Occasion</h5>
-                      {giftGuide.byOccasion.map((g) => (
-                        <Link key={g.id} to={g.path} onClick={closeMobileMenu}>
-                          {g.label}
-                        </Link>
-                      ))}
-                    </div>
-                    <div className={styles.drawerSubGroup}>
-                      <h5>By Budget</h5>
-                      {giftGuide.byBudget.map((g) => (
-                        <Link key={g.id} to={g.path} onClick={closeMobileMenu}>
-                          {g.label}
-                        </Link>
-                      ))}
-                    </div>
+                    {mobileGiftColumns.map((col) => (
+                      <div key={col.id} className={styles.drawerSubGroup}>
+                        <button
+                          className={styles.drawerSubHeading}
+                          onClick={() => toggleMobileGiftSub(col.id)}
+                        >
+                          <span className={styles.drawerSubHeadingContent}>
+                            <span className={styles.headingText}>{col.label}</span>
+                            <FiChevronRight
+                              className={`${styles.drawerChevron} ${mobileGiftSubOpen === col.id ? styles.rotated : ""}`}
+                            />
+                          </span>
+                        </button>
+                        {mobileGiftSubOpen === col.id && (
+                          <div className={styles.drawerSubItems}>
+                            {col.items.map((item) => (
+                              <Link
+                                key={item.id}
+                                to={item.path}
+                                onClick={closeMobileMenu}
+                              >
+                                {item.label}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
 
@@ -795,7 +1066,6 @@ const Header = ({
             );
           })}
 
-          {/* Account section inside drawer */}
           <li className={styles.drawerNavItem}>
             <button
               className={styles.drawerNavLink}
@@ -804,13 +1074,11 @@ const Header = ({
             >
               Account
               <FiChevronRight
-                className={`${styles.drawerChevron} ${openAccordion === "account" ? styles.rotated : ""
-                  }`}
+                className={`${styles.drawerChevron} ${openAccordion === "account" ? styles.rotated : ""}`}
               />
             </button>
             <div
-              className={`${styles.drawerSubPanel} ${openAccordion === "account" ? styles.expanded : ""
-                }`}
+              className={`${styles.drawerSubPanel} ${openAccordion === "account" ? styles.expanded : ""}`}
             >
               <div className={styles.drawerSubGroup}>
                 {isAuthenticated ? (
