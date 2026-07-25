@@ -19,7 +19,13 @@ import {
   FiSettings,
   FiUser as FiUserIcon,
   FiShoppingBag as FiOrders,
+
+
 } from "react-icons/fi";
+import {
+  FaUserPlus, FaUserCheck
+} from "react-icons/fa6";
+
 import styles from "./Header.module.css";
 
 import AnnouncementBar from "./AnnouncementBar";
@@ -43,7 +49,7 @@ import toast from "react-hot-toast";
 // NOTE: "Fashion Items" is a mega-menu column requested for the Shop menu.
 // It isn't part of NavData.js yet, so it's defined locally here. Feel free
 // to move this into NavData.js and import it instead, the same way
-// shopCategories / shopQuickLinks / shopByStyle are imported.
+// shopCategories / shopQuickLinks / shopByStfayle are imported.
 const fashionItems = [
   { id: "fi-1", label: "Perfumes", path: "/fashion/perfumes" },
   { id: "fi-2", label: "Watches", path: "/fashion/watches" },
@@ -527,11 +533,11 @@ const Header = ({
 
   const accountMenuItems = isAuthenticated
     ? [
-        { icon: FiUserIcon, label: "Profile", path: "/profile" },
-        { icon: FiOrders, label: "My Orders", path: "/orders" },
-        { icon: FiHeart, label: "Wishlist", path: "/wishlist" },
-        { icon: FiSettings, label: "Settings", path: "/settings" },
-      ]
+      { icon: FiUserIcon, label: "Profile", path: "/profile" },
+      { icon: FiOrders, label: "My Orders", path: "/orders" },
+      { icon: FiHeart, label: "Wishlist", path: "/wishlist" },
+      { icon: FiSettings, label: "Settings", path: "/settings" },
+    ]
     : [];
 
   const toggleMobileShopSub = (id) => {
@@ -845,7 +851,7 @@ const Header = ({
                     className={styles.accountMenuItem}
                     onClick={() => setAccountOpen(false)}
                   >
-                    <FiUserIcon />
+                    <FaUserCheck />
                     <span>Login</span>
                   </Link>
                   <Link
@@ -853,6 +859,7 @@ const Header = ({
                     className={styles.accountMenuItem}
                     onClick={() => setAccountOpen(false)}
                   >
+                    <FaUserPlus />
                     <span>Register</span>
                   </Link>
                 </>
@@ -888,7 +895,7 @@ const Header = ({
             <FiX />
           </button>
         </div>
-{/* 
+        {/* 
         <div className={styles.drawerSearch}>
           <SearchPanel
             styles={styles}
