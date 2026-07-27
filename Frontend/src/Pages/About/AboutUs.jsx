@@ -1,9 +1,9 @@
 import React from "react";
 import { FiDroplet, FiFeather, FiRepeat, FiArrowUpRight } from "react-icons/fi";
 import styles from "./AboutUs.module.css";
-import heroImage from "../../assets/HeroImage.png";
-import displayImage1 from "../../assets/displayImage1.png";
-import displayImage2 from "../../assets/displayImage2.png";
+import heroImage from "../../assets/Heroimage.png";
+import displayImage1 from "../../assets/DisplayImage1.png";
+import displayImage2 from "../../assets/DisplayImage2.png";
 // TEMPORARY: reusing existing photos as placeholders so the build runs.
 // Swap these two lines for real craft/close-up shots whenever you have them —
 // just drop the files into src/assets/ and update the path + filename here.

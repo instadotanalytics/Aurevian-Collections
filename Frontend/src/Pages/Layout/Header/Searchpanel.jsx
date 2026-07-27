@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { FiSearch, FiClock, FiX, FiTrendingUp } from "react-icons/fi";
 
-import { searchableProducts, popularSearches, trendingSearches } from "./SearchData";
+import { searchableProducts, popularSearches, trendingSearches } from "./Searchdata.js";
 import {
   useDebouncedValue,
   getSuggestions,
@@ -11,7 +11,7 @@ import {
   removeSearchHistoryItem,
   clearSearchHistory,
   useActiveIndex,
-} from "./searchUtils";
+} from "./Searchutils.js";
 
 /**
  * SearchPanel
