@@ -1,15 +1,23 @@
+/* src/Pages/Home/HomeBanner/HomeBanner.module.css */
+
+/* ============================================
+   BANNER CONTAINER - 1200px width
+   ============================================ */
 .bannerContainer {
   position: relative;
   width: 100%;
-  max-width: 100%; /* Constrains the banner width to 1200px */
-  margin: 0 auto;    /* Centers the entire banner horizontally on the screen */
-  height: 400px;     /* Locked frame height */
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 400px;
   overflow: hidden;
-  background-color: #f4f9f6; 
+  background-color: #f4f9f6;
   perspective: 1200px;
-  
+  border-radius: 0;
 }
 
+/* ============================================
+   SLIDES
+   ============================================ */
 .slide {
   position: absolute;
   top: 0;
@@ -24,7 +32,7 @@
   transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), visibility 1.2s;
   display: flex;
   align-items: center;
-  padding: 0 8%; /* Balanced padding inside the 1200px container */
+  padding: 0 8%;
   box-sizing: border-box;
 }
 
@@ -33,6 +41,9 @@
   visibility: visible;
 }
 
+/* ============================================
+   CONTENT WRAPPER
+   ============================================ */
 .contentWrapper {
   max-width: 46%;
   display: flex;
@@ -42,7 +53,9 @@
   z-index: 5;
 }
 
-/* Luxury Word Reveal Structures */
+/* ============================================
+   WORD REVEAL ANIMATIONS
+   ============================================ */
 .wordWrapper {
   display: inline-block;
   overflow: hidden;
@@ -58,6 +71,9 @@
   animation: elegantReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* ============================================
+   TEXT ELEMENTS
+   ============================================ */
 .brandTag {
   font-size: 11px;
   letter-spacing: 5px;
@@ -75,7 +91,7 @@
 }
 
 .title {
-  font-size: 42px; /* Slightly tuned down to sit cleanly inside 1200px limits */
+  font-size: 42px;
   color: #0a2216;
   margin: 0;
   font-weight: 400;
@@ -129,7 +145,9 @@
   transition-delay: 0.75s;
 }
 
-/* Premium High-Contrast Button Frame */
+/* ============================================
+   SHOP BUTTON
+   ============================================ */
 .shopBtn {
   align-self: flex-start;
   background: transparent;
@@ -187,7 +205,9 @@
   transform: translateX(6px);
 }
 
-/* Navigation Handles Overlays */
+/* ============================================
+   NAVIGATION ARROWS
+   ============================================ */
 .navArrowButton {
   position: absolute;
   top: 50%;
@@ -225,236 +245,9 @@
   transform: translateY(-50%) scale(0.92);
 }
 
-@keyframes elegantReveal {
-  from {
-    transform: translateY(110%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-/* ============================= */
-/* Tablet */
-/* ============================= */
-
-@media (max-width:992px){
-
-.bannerContainer{
-    height:360px;
-}
-
-.slide{
-    padding:0 6%;
-    background-position:right center;
-}
-
-.contentWrapper{
-    max-width:58%;
-}
-
-.title{
-    font-size:34px;
-}
-
-.offerHighlight{
-    font-size:40px;
-}
-
-.subtitle{
-    font-size:15px;
-}
-
-.shopBtn{
-    padding:13px 30px;
-}
-
-}
-
-
-/* ============================= */
-/* Mobile */
-/* ============================= */
-
-@media (max-width:768px){
-
-.bannerContainer{
-    height:320px;
-    border-radius:0;
-}
-
-.slide{
-    padding:0 18px;
-    align-items:center;
-    background-size:cover;
-    background-position:80% center;
-}
-
-.contentWrapper{
-
-    max-width:58%;
-
-    padding:0;
-
-    background:transparent;
-
-    box-shadow:none;
-
-    gap:8px;
-}
-
-.brandTag{
-    font-size:9px;
-    letter-spacing:2px;
-}
-
-.title{
-    font-size:26px;
-    line-height:1.15;
-}
-
-.subtitle{
-    font-size:13px;
-}
-
-.offerHighlight{
-    font-size:30px;
-    line-height:1.1;
-}
-
-.subtext{
-    font-size:12px;
-}
-
-.shopBtn{
-
-    padding:11px 20px;
-
-    font-size:10px;
-
-    letter-spacing:2px;
-
-    gap:8px;
-}
-
-.navArrowButton{
-
-    width:34px;
-
-    height:34px;
-}
-
-.leftArrow{
-    left:8px;
-}
-
-.rightArrow{
-    right:8px;
-}
-
-}
-
-
-/* ============================= */
-/* Small Phones */
-/* ============================= */
-
-@media (max-width:480px){
-
-.bannerContainer{
-    height:280px;
-}
-
-.slide{
-
-    background-position:85% center;
-
-    padding:0 14px;
-}
-
-.contentWrapper{
-
-    max-width:60%;
-}
-
-.brandTag{
-    display:none;
-}
-
-.title{
-    font-size:22px;
-}
-
-.subtitle{
-    font-size:12px;
-}
-
-.offerHighlight{
-    font-size:24px;
-}
-
-.subtext{
-    font-size:11px;
-}
-
-.shopBtn{
-
-    padding:10px 16px;
-
-    font-size:9px;
-
-    letter-spacing:1px;
-}
-
-.navArrowButton{
-
-    width:30px;
-
-    height:30px;
-}
-
-}
-/* Add to HomeBanner.module.css */
-
-/* Loading State */
-.loadingState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: #106b47;
-  font-size: 16px;
-  gap: 16px;
-}
-
-.loadingSpinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #e8f0ed;
-  border-top-color: #106b47;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Empty State */
-.emptyState {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: #6b8a7d;
-  font-size: 18px;
-  background: #f4f9f6;
-}
-
-/* Dots Indicator */
+/* ============================================
+   DOTS INDICATOR
+   ============================================ */
 .dotsContainer {
   position: absolute;
   bottom: 20px;
@@ -487,34 +280,27 @@
   box-shadow: 0 0 10px rgba(16, 107, 71, 0.3);
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .dotsContainer {
-    bottom: 12px;
-    gap: 8px;
+/* ============================================
+   KEYFRAMES
+   ============================================ */
+@keyframes elegantReveal {
+  from {
+    transform: translateY(110%);
+    opacity: 0;
   }
-  
-  .dot {
-    width: 8px;
-    height: 8px;
-  }
-}
-
-@media (max-width: 480px) {
-  .dotsContainer {
-    bottom: 8px;
-    gap: 6px;
-  }
-  
-  .dot {
-    width: 6px;
-    height: 6px;
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
-/* src/Pages/Home/HomeBanner/HomeBanner.module.css - Add these */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
-/* Loading State */
+/* ============================================
+   LOADING STATE
+   ============================================ */
 .loadingState {
   display: flex;
   flex-direction: column;
@@ -535,11 +321,9 @@
   animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Empty State */
+/* ============================================
+   EMPTY STATE
+   ============================================ */
 .emptyState {
   display: flex;
   flex-direction: column;
@@ -576,63 +360,9 @@
   color: #8aa89b;
 }
 
-/* Dots Container */
-.dotsContainer {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 10px;
-  z-index: 25;
-}
-
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: rgba(16, 107, 71, 0.3);
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  padding: 0;
-}
-
-.dot:hover {
-  background: rgba(16, 107, 71, 0.5);
-  transform: scale(1.2);
-}
-
-.activeDot {
-  background: #106b47;
-  transform: scale(1.2);
-  box-shadow: 0 0 10px rgba(16, 107, 71, 0.3);
-}
-
-/* src/Pages/Home/HomeBanner/HomeBanner.module.css */
-
 /* ============================================
-   EXISTING STYLES (Keep all your existing styles)
+   BEAUTIFUL LOADING SCREEN OVERLAY
    ============================================ */
-
-.bannerContainer {
-  position: relative;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  height: 400px;
-  overflow: hidden;
-  background-color: #f4f9f6; 
-  perspective: 1200px;
-  
-}
-
-/* ... (keep all your existing styles) ... */
-
-/* ============================================
-   ✅ BEAUTIFUL LOADING SCREEN - ADD THESE
-   ============================================ */
-
 .loadingOverlay {
   position: absolute;
   top: 0;
@@ -683,7 +413,6 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Logo */
 .loadingLogo {
   display: flex;
   align-items: center;
@@ -731,7 +460,6 @@
   50% { opacity: 1; }
 }
 
-/* Loading Text */
 .loadingTextWrapper {
   display: flex;
   align-items: center;
@@ -771,7 +499,6 @@
   40% { transform: translateY(-8px); opacity: 1; }
 }
 
-/* Sub Text */
 .loadingSubText {
   font-size: 14px;
   color: #6b8a7d;
@@ -781,7 +508,6 @@
   animation: loadingTextFade 2s ease-in-out infinite 0.5s;
 }
 
-/* Progress Bar */
 .loadingProgressWrapper {
   display: flex;
   align-items: center;
@@ -829,7 +555,6 @@
   font-family: 'Inter', monospace;
 }
 
-/* Glimmer Effect */
 .loadingGlimmer {
   position: absolute;
   top: -50%;
@@ -848,10 +573,119 @@
 }
 
 /* ============================================
-   RESPONSIVE LOADING SCREEN
+   RESPONSIVE BREAKPOINTS
    ============================================ */
 
+/* Tablet */
+@media (max-width: 992px) {
+  .bannerContainer {
+    height: 360px;
+    max-width: 100%;
+    border-radius: 0;
+  }
+
+  .slide {
+    padding: 0 6%;
+    background-position: right center;
+  }
+
+  .contentWrapper {
+    max-width: 58%;
+  }
+
+  .title {
+    font-size: 34px;
+  }
+
+  .offerHighlight {
+    font-size: 40px;
+  }
+
+  .subtitle {
+    font-size: 15px;
+  }
+
+  .shopBtn {
+    padding: 13px 30px;
+  }
+}
+
+/* Mobile */
 @media (max-width: 768px) {
+  .bannerContainer {
+    height: 320px;
+    max-width: 100%;
+  }
+
+  .slide {
+    padding: 0 18px;
+    align-items: center;
+    background-size: cover;
+    background-position: 80% center;
+  }
+
+  .contentWrapper {
+    max-width: 58%;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+    gap: 8px;
+  }
+
+  .brandTag {
+    font-size: 9px;
+    letter-spacing: 2px;
+  }
+
+  .title {
+    font-size: 26px;
+    line-height: 1.15;
+  }
+
+  .subtitle {
+    font-size: 13px;
+  }
+
+  .offerHighlight {
+    font-size: 30px;
+    line-height: 1.1;
+  }
+
+  .subtext {
+    font-size: 12px;
+  }
+
+  .shopBtn {
+    padding: 11px 20px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    gap: 8px;
+  }
+
+  .navArrowButton {
+    width: 34px;
+    height: 34px;
+  }
+
+  .leftArrow {
+    left: 8px;
+  }
+
+  .rightArrow {
+    right: 8px;
+  }
+
+  .dotsContainer {
+    bottom: 12px;
+    gap: 8px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+  }
+
+  /* Loading Screen */
   .loadingBrandName {
     font-size: 22px;
     letter-spacing: 3px;
@@ -877,7 +711,64 @@
   }
 }
 
+/* Small Phones */
 @media (max-width: 480px) {
+  .bannerContainer {
+    height: 280px;
+    max-width: 100%;
+  }
+
+  .slide {
+    background-position: 85% center;
+    padding: 0 14px;
+  }
+
+  .contentWrapper {
+    max-width: 60%;
+  }
+
+  .brandTag {
+    display: none;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .offerHighlight {
+    font-size: 24px;
+  }
+
+  .subtext {
+    font-size: 11px;
+  }
+
+  .shopBtn {
+    padding: 10px 16px;
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+
+  .navArrowButton {
+    width: 30px;
+    height: 30px;
+  }
+
+  .dotsContainer {
+    bottom: 8px;
+    gap: 6px;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  /* Loading Screen */
   .loadingBrandName {
     font-size: 18px;
     letter-spacing: 2px;
