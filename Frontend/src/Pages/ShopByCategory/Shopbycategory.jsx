@@ -2,7 +2,6 @@
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import { HiOutlineShoppingBag } from "react-icons/hi2";
 import styles from "./Shopbycategory.module.css";
 import earringsImg from "../../assets/earrings.png";
 import necklacesImg from "../../assets/necklaces.png";
@@ -39,14 +38,9 @@ const cardVariants = {
   },
 };
 
-
-
 const CategoryCard = React.memo(function CategoryCard({ category }) {
   return (
-    <motion.div
-      className={styles.card}
-      variants={cardVariants}
-    >
+    <motion.div className={styles.card} variants={cardVariants}>
       <a
         href={`/category/${category.id}`}
         className={styles.cardLink}
@@ -61,25 +55,18 @@ const CategoryCard = React.memo(function CategoryCard({ category }) {
               loading="lazy"
             />
           ) : (
-            <div
-              className={styles.imagePlaceholder}
-              aria-hidden="true"
-            />
+            <div className={styles.imagePlaceholder} aria-hidden="true" />
           )}
 
-          <span
-            className={styles.ring}
-            aria-hidden="true"
-          />
+          <span className={styles.ring} aria-hidden="true" />
         </div>
 
-        <h3 className={styles.categoryName}>
-          {category.name}
-        </h3>
+        <h3 className={styles.categoryName}>{category.name}</h3>
       </a>
     </motion.div>
   );
 });
+
 export default function ShopByCategory() {
   const trackRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -120,20 +107,23 @@ export default function ShopByCategory() {
       <div className={styles.glowBottomRight} aria-hidden="true" />
 
       <div className={styles.container}>
-       <motion.div
-  className={styles.header}
-  initial={{ opacity: 0, y: 24 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  viewport={{ once: true }}
-  transition={{ duration: 0.7 }}
->
-  
-  <h2 className={styles.heading}>
-    Shop By Category
-  </h2>
+        <motion.div
+          className={styles.header}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          <p className={styles.topText}>✦ DISCOVER OUR COLLECTIONS ✦</p>
 
-  <div className={styles.headerDivider}></div>
-</motion.div>
+          <h2 id="shop-by-category-heading" className={styles.heading}>
+            <span className={styles.shop}>Shop</span>
+            <span className={styles.by}>By</span>
+            <span className={styles.category}>Category</span>
+          </h2>
+
+          <div className={styles.headerDivider} aria-hidden="true" />
+        </motion.div>
 
         <div className={styles.sliderWrap}>
           {/* Desktop / tablet arrows — sit on the left & right edges of the slider */}
@@ -205,7 +195,6 @@ export default function ShopByCategory() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
         >
           <span className={styles.ctaLine} aria-hidden="true" />
-
           <span className={styles.ctaLine} aria-hidden="true" />
         </motion.div>
       </div>

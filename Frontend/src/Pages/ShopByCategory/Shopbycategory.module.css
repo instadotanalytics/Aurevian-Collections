@@ -1,13 +1,14 @@
 
 /* ---------------------------------------------------------------
    ShopByCategory.module.css
-   Aurevian Jewellery — premium "Shop by Category" section
-   Circular image cards, minimal (image + name only) — v8
-   Desktop arrows sit on left/right edges of the slider.
-   Mobile arrows sit below the cards, above the CTA/footer row.
+   Aurevian Jewellery — premium "Shop by Category" section — v9
+   - Fixed missing font import (Cormorant Garamond / Great Vibes
+     were used but never loaded, so they fell back to default serif)
+   - Refined spacing, shadows, and nav button finish
+   - Desktop arrows on left/right edges, mobile arrows below cards
 ------------------------------------------------------------------ */
 
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Jost:wght@300;400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Great+Vibes&family=Jost:wght@300;400;500;600&display=swap");
 
 .section {
   --ivory: #fbf6ee;
@@ -25,8 +26,8 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  padding: clamp(28px, 3.4vw, 48px) 0 clamp(48px, 5vw, 72px);
-  background: white;
+ padding: 40px 0;
+  background: linear-gradient(180deg, #ffffff 0%, #fdfbf7 100%);
 }
 
 /* ---------- ambient decoration ---------- */
@@ -36,22 +37,22 @@
   width: clamp(260px, 34vw, 480px);
   height: clamp(260px, 34vw, 480px);
   border-radius: 50%;
-  filter: blur(70px);
-  opacity: 0.55;
+  filter: blur(80px);
+  opacity: 0.45;
   z-index: -1;
   pointer-events: none;
 }
 
 .glowTopLeft {
-  top: -14%;
-  left: -10%;
-  background: transparent;
+  top: -16%;
+  left: -12%;
+  background: radial-gradient(circle, var(--gold-soft), transparent 70%);
 }
 
 .glowBottomRight {
-  bottom: -18%;
-  right: -8%;
-  background: transparent;
+  bottom: -20%;
+  right: -10%;
+  background: radial-gradient(circle, var(--champagne), transparent 70%);
 }
 
 .container {
@@ -67,77 +68,101 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  margin-bottom: clamp(20px, 2.6vw, 32px);
 }
 
-.eyebrow {
+.topText {
   font-family: "Jost", sans-serif;
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: black;
-  margin-bottom: 8px;
+  letter-spacing: 7px;
+  font-size: 13px;
+  color: var(--gold-deep);
+  font-weight: 600;
+  margin: 0 0 18px;
 }
 
-.heading{
-    font-family:"Playfair Display",serif;
-    font-size:48px;
-    font-weight:600;
-    color:#1f1f1f;
-    line-height:1.1;
-    margin-bottom:16px;
-    letter-spacing:.02em;
+.heading {
+  font-size: clamp(26px, 3.5vw, 38px);
+  font-weight: 500;
+  color: #1f1f1f;
+  line-height: 1.1;
+  margin: 0 0 20px;
+  letter-spacing: 0.02em;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: clamp(8px, 1.6vw, 16px);
+  flex-wrap: wrap;
 }
 
-.headerDivider{
-    width:180px;
-    height:1px;
-    background:linear-gradient(
-    to right,
-    transparent,
-    #d4af37,
-    transparent);
-    position:relative;
+.shop,
+.category {
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(22px, 3.8vw, 40px);
+  font-weight: 700;
+  line-height: 1;
+  background: linear-gradient(180deg, #4d3620 0%, #1f1b17 40%, #000000 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.headerDivider::after{
-    content:"✦";
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    background:white;
-    color:#c89b3c;
-    padding:0 14px;
-    font-size:15px;
+.by {
+  font-family: "Great Vibes", cursive;
+    font-size: clamp(25px, 4.2vw, 44px);
+  line-height: 1;
+  padding-bottom: 4px;
+  background: linear-gradient(180deg, #f8e5a3, #d6a73b, #b27b1e);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.subheading {
-  font-family: "Jost", sans-serif;
-  font-weight: 300;
-  font-size: clamp(14px, 1.3vw, 17px);
-  color: var(--muted);
+.headerDivider {
+  width: 150px;
+  height: 1px;
+  margin: 4px 0 22px;
+  background: linear-gradient(to right, transparent, #d4af37, transparent);
+  position: relative;
+}
+
+.headerDivider::after {
+  content: "✦";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: #fffdf9;
+  color: #c89b3c;
+  padding: 0 14px;
+  font-size: 15px;
+}
+
+.subtitle {
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(16px, 2vw, 22px);
+  line-height: 1.55;
+  color: #433c35;
+  font-weight: 500;
+  max-width: 520px;
   margin: 0;
-  letter-spacing: 0.01em;
 }
 
 /* ----------------------------- slider ---------------------------- */
-.sliderWrap{
-    position:relative;
-    display:flex;
-    align-items:center;
-    
+.sliderWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
+
 .track {
   display: flex;
   flex: 1 1 auto;
   min-width: 0;
-  gap: 20px;
+  gap: 24px;
   overflow-x: auto;
   scroll-snap-type: x proximity;
   scroll-behavior: smooth;
-  padding: 10px 2px;
+  padding: 12px 4px;
   margin: 0;
 
   scrollbar-width: none;
@@ -162,33 +187,37 @@
 }
 
 /* -------------------------- nav buttons -------------------------- */
-/* Shared visual style for every arrow button, desktop or mobile */
+/* Shared visual style for every arrow button, desktop or mobile —
+   deep black-to-charcoal circle with a gold icon; hover flips to
+   a warm gold gradient with a soft glow. */
 .navButton {
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: #000;
+  border: 1px solid rgba(214, 175, 90, 0.35);
+  background: linear-gradient(160deg, #1a1a1a 0%, #000000 100%);
   color: var(--gold-soft);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 19px;
   cursor: pointer;
   flex-shrink: 0;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease,
     background 0.3s ease,
-    color 0.3s ease;
+    color 0.3s ease,
+    border-color 0.3s ease;
 }
 
 .navButton:hover:not(:disabled) {
-  background: var(--gold);
+  background: linear-gradient(160deg, #e8c877 0%, var(--gold) 60%, var(--gold-deep) 100%);
   color: #1a1305;
+  border-color: transparent;
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lift);
+  box-shadow: 0 14px 30px -6px rgba(182, 134, 60, 0.55);
 }
 
 .navButton:focus-visible {
@@ -197,7 +226,7 @@
 }
 
 .navButton:disabled {
-  opacity: 0.35;
+  opacity: 0.32;
   cursor: default;
   box-shadow: none;
   transform: none;
@@ -217,11 +246,11 @@
 }
 
 .navButtonLeft.desktopNav {
-  left: 10px;
+  left: -8px;
 }
 
 .navButtonRight.desktopNav {
-  right: 10px;
+  right: -8px;
 }
 
 /* Mobile arrow row — hidden on desktop/tablet, shown only on mobile
@@ -230,8 +259,8 @@
   display: none;
   justify-content: center;
   align-items: center;
-  gap: 18px;
-  margin-top: 20px;
+  gap: 20px;
+  margin-top: 26px;
   margin-bottom: 8px;
 }
 
@@ -249,7 +278,7 @@
   text-align: center;
   text-decoration: none;
   color: inherit;
-  gap: 14px;
+  gap: 16px;
 }
 
 .imageWrap {
@@ -316,7 +345,8 @@
 .categoryName {
   font-family: "Jost", sans-serif;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 14.5px;
+  letter-spacing: 0.03em;
   text-transform: capitalize;
   color: var(--ink);
   margin: 0;
@@ -334,6 +364,12 @@
   justify-content: center;
   gap: 18px;
 }
+
+/*.ctaLine {
+  width: 90px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-soft));
+}*/
 
 .ctaLine:last-child {
   background: linear-gradient(90deg, var(--gold-soft), transparent);
@@ -376,10 +412,10 @@
 
 /* ------------------------------------------------------------------
    Responsive
-   Desktop (≥1180px): all 6 cards visible, side arrows still shown
+   Desktop (≥1180px): all 6 cards visible, side arrows shown
    Tablet (641px–1179px): partial cards visible, side arrows shown
    Mobile (≤640px): side arrows hidden, bottom-row arrows shown
-   below the cards and above the CTA/footer row
+   below the cards and above the CTA row
 ------------------------------------------------------------------ */
 
 /* Small laptop / large tablet */
@@ -392,13 +428,13 @@
     height: 160px;
   }
   .track {
-    gap: 18px;
+    gap: 20px;
   }
   .navButtonLeft.desktopNav {
-    left: -18px;
+    left: -14px;
   }
   .navButtonRight.desktopNav {
-    right: -18px;
+    right: -14px;
   }
 }
 
@@ -418,9 +454,15 @@
     min-height: 130px;
   }
   .desktopNav {
-    width: 44px;
-    height: 44px;
+    width: 42px;
+    height: 42px;
     font-size: 17px;
+  }
+  .navButtonLeft.desktopNav {
+    left: -6px;
+  }
+  .navButtonRight.desktopNav {
+    right: -6px;
   }
 }
 
@@ -440,10 +482,21 @@
     min-height: 120px;
   }
   .navButtonLeft.desktopNav {
-    left: -10px;
+    left: 0;
   }
   .navButtonRight.desktopNav {
-    right: -10px;
+    right: 0;
+  }
+
+  .heading {
+    gap: 8px;
+  }
+  .subtitle {
+    font-size: 17px;
+  }
+  .topText {
+    letter-spacing: 4px;
+    font-size: 11px;
   }
 }
 
@@ -451,7 +504,7 @@
    Mobile — exactly 3 full, clearly-visible cards.
    Side (desktop) arrows are hidden entirely; the bottom-row
    (.mobileNav) arrows take over, sitting below the cards and
-   above the CTA row (i.e. above the footer content that follows).
+   above the CTA row.
 ------------------------------------------------------------------ */
 @media (max-width: 640px) {
   .container {
@@ -459,7 +512,7 @@
   }
 
   .header {
-    margin-bottom: 18px;
+    margin-bottom: 30px;
   }
 
   .sliderWrap {
@@ -501,7 +554,7 @@
     letter-spacing: 0.08em;
   }
 
-  /* Bottom arrow row — below the cards, above the CTA/footer row */
+  /* Bottom arrow row — below the cards, above the CTA row */
   .mobileNav {
     display: flex;
   }
@@ -521,7 +574,7 @@
   }
 
   .section {
-    padding-bottom: 28px;
+    padding-bottom: 32px;
   }
 }
 
@@ -545,6 +598,13 @@
     width: 38px;
     height: 38px;
     font-size: 15px;
+  }
+  .shop,
+  .category {
+    font-size: 34px;
+  }
+  .by {
+    font-size: 38px;
   }
 }
 
