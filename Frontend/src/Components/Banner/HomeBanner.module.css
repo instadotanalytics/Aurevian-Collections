@@ -6,7 +6,7 @@
   height: 400px;     /* Locked frame height */
   overflow: hidden;
   background-color: #f4f9f6; 
-  perspective: 1200px;
+  perspective: 100%;
   
 }
 
