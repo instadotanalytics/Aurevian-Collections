@@ -331,7 +331,7 @@ const server = app.listen(PORT, () => {
   console.log(`📍 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(`🔗 Port: ${PORT}`);
   console.log(
-    `🔗 Client URL: ${process.env.CLIENT_URL || "http://localhost:5173"}`,
+    `🔗 Client URL: ${process.env.CLIENT_URL || "https://aurevian-collections-frontend.onrender.com"}`,
   );
   console.log(
     `🔑 Google OAuth: ${process.env.GOOGLE_CLIENT_ID ? "✅ Configured" : "❌ Not configured"}`,
