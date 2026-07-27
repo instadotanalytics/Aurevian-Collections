@@ -18,7 +18,7 @@ import {
 } from 'react-icons/fi';
 import { FaGem } from 'react-icons/fa';
 import styles from './Contact.module.css';
-import ContactImage from "../../assets/contactimage.png";
+import ContactImage from "../../assets/ContactImage.png";
 import Footer from "../Layout/Footer/Footer";
 
 
