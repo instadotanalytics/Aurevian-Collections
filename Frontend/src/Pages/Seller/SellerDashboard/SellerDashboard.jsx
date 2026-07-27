@@ -1,4 +1,4 @@
-// src/Pages/Seller/SellerDashboard/SellerDashboard.jsx — full file
+// src/Pages/Seller/SellerDashboard/SellerDashboard.jsx
 
 import React, { useState, useEffect } from "react";
 import {
@@ -120,6 +120,11 @@ const DashboardHome = ({ planTheme }) => (
 );
 
 const SellerDashboard = () => {
+  // ✅ Page title
+  useEffect(() => {
+    document.title = "Seller Dashboard | Aurevian Collections";
+  }, []);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();

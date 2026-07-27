@@ -69,6 +69,11 @@ import SubscriptionPlanManagement from "../components/SubscriptionPlanManagement
 import HeaderManagement from "../components/HeaderManagement/HeaderManagement";
 
 const SuperAdminDashboard = () => {
+  // ✅ Page title
+  useEffect(() => {
+    document.title = "Super Admin Dashboard | Aurevian Collections";
+  }, []);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { section, id } = useParams();
@@ -320,17 +325,6 @@ const SuperAdminDashboard = () => {
                   Manage your subscription plans, pricing, and features
                 </p>
               </div>
-              {/* <button
-                className={styles.addPlanButton}
-                onClick={() => {
-                  // This will trigger the Add Plan modal in SubscriptionPlanManagement
-                  // We'll pass this as a ref or use a global state
-                  console.log("Add New Plan clicked");
-                }}
-              >
-                <FiPlus size={20} />
-                <span>Add New Plan</span>
-              </button> */}
             </div>
             <SubscriptionPlanManagement />
           </div>
