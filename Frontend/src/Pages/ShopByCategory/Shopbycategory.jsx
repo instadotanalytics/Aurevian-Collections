@@ -120,16 +120,20 @@ export default function ShopByCategory() {
       <div className={styles.glowBottomRight} aria-hidden="true" />
 
       <div className={styles.container}>
-        <motion.div
-          className={styles.header}
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <span className={styles.eyebrow}>Shop by Category</span>
-          <span className={styles.headerDivider} aria-hidden="true" />
-        </motion.div>
+       <motion.div
+  className={styles.header}
+  initial={{ opacity: 0, y: 24 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true }}
+  transition={{ duration: 0.7 }}
+>
+  
+  <h2 className={styles.heading}>
+    Shop By Category
+  </h2>
+
+  <div className={styles.headerDivider}></div>
+</motion.div>
 
         <div className={styles.sliderWrap}>
           {/* Desktop / tablet arrows — sit on the left & right edges of the slider */}

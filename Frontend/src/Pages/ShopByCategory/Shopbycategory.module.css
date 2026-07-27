@@ -80,33 +80,37 @@
   margin-bottom: 8px;
 }
 
-.heading {
-  font-family: "Playfair Display", serif;
-  font-size: clamp(36px, 4vw, 52px);
-  font-weight: 600;
-  color: #1f1f1f;
-  margin: 0;
-  line-height: 1.2;
+.heading{
+    font-family:"Playfair Display",serif;
+    font-size:48px;
+    font-weight:600;
+    color:#1f1f1f;
+    line-height:1.1;
+    margin-bottom:16px;
+    letter-spacing:.02em;
 }
 
-.headerDivider {
-  width: 120px;
-  height: 2px;
-  margin: 18px 0;
-  background: linear-gradient(to right, transparent, #d4af37, transparent);
-  position: relative;
+.headerDivider{
+    width:180px;
+    height:1px;
+    background:linear-gradient(
+    to right,
+    transparent,
+    #d4af37,
+    transparent);
+    position:relative;
 }
 
-.headerDivider::after {
-  content: "✦";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  color: #c89b3c;
-  font-size: 14px;
-  background: white;
-  padding: 0 10px;
+.headerDivider::after{
+    content:"✦";
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    background:white;
+    color:#c89b3c;
+    padding:0 14px;
+    font-size:15px;
 }
 
 .subheading {
@@ -119,12 +123,12 @@
 }
 
 /* ----------------------------- slider ---------------------------- */
-.sliderWrap {
-  position: relative;
-  display: flex;
-  align-items: center;
+.sliderWrap{
+    position:relative;
+    display:flex;
+    align-items:center;
+    
 }
-
 .track {
   display: flex;
   flex: 1 1 auto;
@@ -213,11 +217,11 @@
 }
 
 .navButtonLeft.desktopNav {
-  left: -22px;
+  left: 10px;
 }
 
 .navButtonRight.desktopNav {
-  right: -22px;
+  right: 10px;
 }
 
 /* Mobile arrow row — hidden on desktop/tablet, shown only on mobile

@@ -52,7 +52,7 @@
 /* ==========================================================
    HERO — editorial text left, form right
 ========================================================== */
-.hero {
+/*.hero {
   position: relative;
   flex: 1;
   display: flex;
@@ -62,7 +62,20 @@
   scroll-margin-top: var(--header-height, 80px);
   min-height: calc(100vh - var(--header-height, 80px));
   width: 100%;
+}*/
+
+.hero {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 60px 24px;
+  overflow: hidden;
+  scroll-margin-top: 76px;
+  min-height: calc(100vh - var(--header-height, 80px));
+  width: 100%;
 }
+
 
 .heroDecor {
   position: absolute;
@@ -314,11 +327,11 @@
    side-by-side layout for First/Last name and Password fields,
    and threw off alignment of the whole card. */
 .row {
-  
-  grid-template-columns: 1fr 1fr;
-  gap: 0.6rem;
+  display: grid;
+  gap: 16px;   /* increase or decrease as you like */
   width: 100%;
 }
+
 
 .formGroup {
   display: flex;
@@ -995,5 +1008,68 @@
 
   .perkText {
     font-size: 11px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .heroInner {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  /* Form first */
+  .heroRight {
+    order: 1;
+    width: 100%;
+    max-width: 100%;
+    justify-content: center;
+  }
+
+  /* Welcome content second */
+  .heroLeft {
+    order: 2;
+    max-width: 560px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .heroContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .heroText {
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .heroHighlights {
+    align-items: flex-start;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .heroHighlightItem {
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .heroQuote {
+    max-width: 480px;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .card {
+    max-width: 420px;
+  }
+
+  .perksGrid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

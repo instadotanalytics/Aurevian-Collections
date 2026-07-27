@@ -890,26 +890,34 @@
 }
 
 /* Tablets — stack hero, keep why-section 2-col */
+
 @media (max-width: 1023px) {
   .heroInner {
+    display: flex;
     flex-direction: column;
     gap: 40px;
   }
 
+  /* Login Card FIRST */
+  .heroRight {
+    order: 1;
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* Hero Content SECOND */
   .heroLeft {
+    order: 2;
     max-width: 640px;
     align-items: center;
     text-align: center;
   }
 
-  .heroRight {
-    width: 100%;
-    max-width: 100%;
-    justify-content: center;
-  }
-
   .card {
     max-width: 420px;
+    width: 100%;
   }
 
   .heroDesc {
@@ -944,6 +952,8 @@
     text-align: left;
   }
 }
+
+
 
 /* Stats + why-rows: always two per row from tablet down to the smallest phones */
 @media (max-width: 1023px) {
