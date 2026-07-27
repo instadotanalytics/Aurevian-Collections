@@ -70,7 +70,7 @@ const Cart = () => {
       oldPrice: 1599,
       quantity: 1,
       available: true,
-      image: 'https://images.unsplash.com/photo-1591369822096-ffd1406f2e9a?w=600&q=80&auto=format&fit=crop',
+      image: 'https://images.unsplash.com/photo-1699894717164-e2a77d30a6fd?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fFBlYXJsJTIwU3R1ZCUyMEVhcnJpbmdzfGVufDB8fDB8fHww',
     },
   ]);
 
