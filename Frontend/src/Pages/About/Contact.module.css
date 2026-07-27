@@ -1,4 +1,5 @@
- @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+/* Contact.module.css */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 .contactPage {
   background: #fcf9f5;
@@ -6,9 +7,10 @@
 }
 
 .contactContainer {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 30px 60px;
+  padding: 0 0 60px;
   font-family: 'Inter', sans-serif;
 }
 
@@ -16,17 +18,12 @@
 .hero {
   display: flex;
   align-items: center;
-  justify-content: space-evenly;
-  /* gap: 10px; */
-  padding: 10px 0;
-  /* background: #ffffff; */
-  border-radius: 24px;
-  margin-bottom: 50px;
-  /* margin-top: 10px; */
-  /* border: 1px solid rgba(212, 175, 55, 0.06); */
-  /* box-shadow: 0 2px 20px rgba(0, 0, 0, 0.02); */
+  justify-content: space-between;
+  gap: 40px;
+  padding: 80px 0 30px;
   position: relative;
   overflow: hidden;
+  margin-bottom: 4rem;
 }
 
 .hero::before {
@@ -51,7 +48,7 @@
 .badge {
   display: inline-block;
   font-family: 'Playfair Display', serif;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: #d4af37;
   letter-spacing: 4px;
@@ -62,7 +59,7 @@
 
 .title {
   font-family: 'Playfair Display', serif;
-  font-size: 50px;
+  font-size: 48px;
   font-weight: 700;
   color: #2d1f14;
   line-height: 1.15;
@@ -105,7 +102,7 @@
 
 .featureList {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   flex-wrap: wrap;
 }
 
@@ -122,16 +119,13 @@
   font-weight: 400;
 }
 
-.feature span {
+.featureIcon {
   font-size: 16px;
-}
-
-.feature p {
-  margin: 0;
+  color: #d4af37;
 }
 
 .heroImage {
-  flex: 0 0 200px;
+  flex: 0 0 45%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -140,13 +134,12 @@
 }
 
 .heroImage img {
-  width: 500px;
-  height: 500px;
+  width: 100%;
+  max-width: 500px;
+  height: auto;
   object-fit: contain;
-  /* border-radius: 50%; */
-  /* background: linear-gradient(145deg, #f5ede6, #e8ddd2); */
-  /* padding: 20px; */
-  /* box-shadow: 0 8px 40px rgba(212, 175, 55, 0.08); */
+  border-radius: 20px;
+  /* box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06); */
 }
 
 /* ===== CONTACT GRID ===== */
@@ -157,11 +150,10 @@
   margin-bottom: 50px;
 }
 
-/* Left Column - Contact Info */
 .contactInfo {
   background: #ffffff;
-  border-radius: 20px;
-  padding: 30px;
+  /* border-radius: 20px; */
+  padding: 32px;
   border: 1px solid rgba(212, 175, 55, 0.06);
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.02);
 }
@@ -192,11 +184,13 @@
   color: #6b4f3a;
   line-height: 1.7;
   font-weight: 300;
+  margin-bottom: 20px;
 }
 
 .infoCards {
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
 .infoCard {
@@ -207,11 +201,12 @@
   border-radius: 12px;
   transition: all 0.3s ease;
   border: 1px solid transparent;
+  border: 1px solid rgba(212, 175, 55, 0.2);
 }
 
 .infoCard:hover {
   background: #ffffff;
-  border: 1px solid rgba(212, 175, 55, 0.424);
+  border: 1px solid rgba(174, 127, 9, 0.46);
   box-shadow: 0 4px 16px rgba(212, 175, 55, 0.04);
   transform: translateX(4px);
 }
@@ -261,8 +256,9 @@
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 10px 0 0;
+  padding: 16px 0 0;
   border-top: 1px solid rgba(212, 175, 55, 0.06);
+  margin-top: 16px;
 }
 
 .socialProofItem {
@@ -270,14 +266,23 @@
 }
 
 .socialProofNumber {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   font-family: 'Playfair Display', serif;
   font-size: 24px;
   font-weight: 700;
   color: #2d1f14;
 }
 
+.starIcon {
+  font-size: 18px;
+  color: #d4af37;
+}
+
 .socialProofLabel {
+  display: block;
   font-size: 12px;
   color: #8b6b55;
   font-weight: 300;
@@ -289,11 +294,11 @@
   background: rgba(212, 175, 55, 0.1);
 }
 
-/* Right Column - Compact Form */
+/* ===== CONTACT FORM ===== */
 .contactFormWrapper {
   background: #ffffff;
-  border-radius: 20px;
-  padding: 30px 40px;
+  /* border-radius: 20px; */
+  padding: 32px 36px;
   border: 1px solid rgba(212, 175, 55, 0.06);
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.02);
 }
@@ -336,7 +341,7 @@
 .formRow {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 15px;
+  gap: 12px;
 }
 
 .formGroup {
@@ -355,13 +360,14 @@
 .formInput {
   padding: 12px 14px;
   border: 1.5px solid rgba(212, 175, 55, 0.08);
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 13px;
   font-family: 'Inter', sans-serif;
   color: #2d1f14;
   background: #fcf9f5;
   transition: all 0.3s ease;
   outline: none;
+  width: 100%;
 }
 
 .formInput:focus {
@@ -401,18 +407,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 15px 28px;
+  gap: 8px;
+  padding: 14px 28px;
   background: linear-gradient(135deg, #c9a84c, #d4af37);
   color: #ffffff;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 14px;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
   transition: all 0.3s ease;
-  /* margin-top: 10px; */
+  margin-top: 4px;
   box-shadow: 0 4px 20px rgba(212, 175, 55, 0.15);
 }
 
@@ -434,9 +440,11 @@
   0% {
     transform: scale(0);
   }
+
   50% {
     transform: scale(1.2);
   }
+
   100% {
     transform: scale(1);
   }
@@ -449,91 +457,6 @@
 
 .submitButton:hover .submitArrow {
   transform: translateX(4px);
-}
-
-/* ===== IMAGE BANNER ===== */
-.imageBanner {
-  margin-bottom: 50px;
-}
-
-.imageBannerContent {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  background: #ffffff;
-  border-radius: 20px;
-  overflow: hidden;
-  border: 1px solid rgba(212, 175, 55, 0.06);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.02);
-}
-
-.imageBannerText {
-  padding: 40px 35px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.imageBannerText h3 {
-  font-family: 'Playfair Display', serif;
-  font-size: 26px;
-  font-weight: 600;
-  color: #2d1f14;
-  margin-bottom: 10px;
-}
-
-.imageBannerText p {
-  font-size: 15px;
-  color: #6b4f3a;
-  line-height: 1.7;
-  font-weight: 300;
-  margin-bottom: 16px;
-}
-
-.imageBannerFeatures {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.imageBannerFeatures span {
-  font-size: 13px;
-  color: #4a3426;
-  font-weight: 400;
-}
-
-.imageBannerImage {
-  background: linear-gradient(145deg, #f5ede6, #e8ddd2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 180px;
-  position: relative;
-  overflow: hidden;
-}
-
-.imageBannerImage::before {
-  content: '';
-  position: absolute;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(212, 175, 55, 0.06), transparent 70%);
-  border-radius: 50%;
-}
-
-.bannerImagePlaceholder {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-}
-
-.bannerLogo {
-  font-family: 'Playfair Display', serif;
-  font-size: 28px;
-  font-weight: 700;
-  color: #8d6c00;
-  letter-spacing: 8px;
-  text-transform: uppercase;
-  opacity: 0.6;
 }
 
 /* ===== FAQ SECTION ===== */
@@ -598,7 +521,7 @@
 /* ===== BOTTOM CTA ===== */
 .bottomCta {
   background: linear-gradient(145deg, #f5ede6, #e8ddd2);
-  border-radius: 20px;
+  /* border-radius: 20px; */
   padding: 40px 50px;
   text-align: center;
   border: 1px solid rgba(212, 175, 55, 0.06);
@@ -637,12 +560,17 @@
   margin: 0;
 }
 
-/* ===== RESPONSIVE ===== */
+/* ============================================
+   RESPONSIVE - MOBILE FIRST
+   ============================================ */
+
+/* Tablet */
 @media (max-width: 1024px) {
   .hero {
     flex-direction: column;
     text-align: center;
-    padding: 40px 30px;
+    padding: 30px 20px;
+    gap: 20px;
   }
 
   .heroContent {
@@ -650,13 +578,12 @@
   }
 
   .title {
-    font-size: 34px;
+    font-size: 38px;
   }
 
   .subtitle {
     max-width: 100%;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 auto 20px;
   }
 
   .divider {
@@ -669,11 +596,15 @@
 
   .heroImage {
     flex: 0 0 auto;
+    width: 100%;
+    max-width: 400px;
   }
 
   .heroImage img {
-    width: 150px;
-    height: 150px;
+    width: 100%;
+    height: auto;
+    max-height: 350px;
+    object-fit: contain;
   }
 
   .contactGrid {
@@ -681,74 +612,97 @@
     gap: 30px;
   }
 
-  .imageBannerContent {
-    grid-template-columns: 1fr;
-  }
-
-  .imageBannerImage {
-    min-height: 140px;
-    order: -1;
-  }
-
   .faqGrid {
     grid-template-columns: 1fr;
   }
 }
 
+/* Mobile */
 @media (max-width: 768px) {
   .contactContainer {
     padding: 0 16px 40px;
   }
 
   .hero {
-    padding: 30px 20px;
+    padding: 20px 0;
+    gap: 16px;
   }
 
   .title {
-    font-size: 28px;
+    font-size: 30px;
+  }
+
+  .badge {
+    font-size: 12px;
+    letter-spacing: 3px;
   }
 
   .subtitle {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .featureList {
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
   }
 
   .feature {
-    width: 100%;
-    justify-content: center;
+    font-size: 12px;
+    padding: 6px 14px;
+  }
+
+  .featureIcon {
+    font-size: 14px;
+  }
+
+  .heroImage {
+    max-width: 100%;
   }
 
   .heroImage img {
-    width: 120px;
-    height: 120px;
+    max-height: 250px;
+    border-radius: 16px;
   }
 
   .contactInfo {
-    padding: 28px 20px;
+    padding: 20px 16px;
   }
 
   .sectionTitle {
-    font-size: 24px;
+    font-size: 22px;
   }
 
-  .contactFormWrapper {
-    padding: 24px 20px 20px;
+  .sectionSubtitle {
+    font-size: 14px;
   }
 
-  .formRow {
-    grid-template-columns: 1fr;
-    gap: 10px;
+  .infoCard {
+    padding: 12px 14px;
+  }
+
+  .infoIconWrapper {
+    width: 40px;
+    height: 40px;
+  }
+
+  .infoIcon {
+    font-size: 18px;
+  }
+
+  .infoContent h4 {
+    font-size: 14px;
+  }
+
+  .infoContent p {
+    font-size: 12px;
   }
 
   .socialProof {
-    flex-direction: column;
-    gap: 12px;
-    padding-top: 16px;
+    /* flex-wrap: wrap; */
+    /* gap: 12px; */
+    padding-top: 14px;
   }
 
   .socialProofDivider {
@@ -756,17 +710,31 @@
     height: 1px;
   }
 
-  .imageBannerText {
-    padding: 28px 20px;
+  .socialProofNumber {
+    font-size: 20px;
   }
 
-  .imageBannerText h3 {
-    font-size: 22px;
+  .starIcon {
+    font-size: 16px;
   }
 
-  .imageBannerFeatures {
-    flex-direction: column;
-    gap: 8px;
+  .contactFormWrapper {
+    padding: 20px 16px;
+  }
+
+  .formTitle {
+    font-size: 20px;
+  }
+
+  .formInput {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .submitButton {
+    padding: 12px 20px;
+    font-size: 13px;
+    border-radius: 10px;
   }
 
   .faqTitle {
@@ -774,62 +742,23 @@
   }
 
   .faqItem {
-    padding: 18px 20px;
+    padding: 16px 18px;
+  }
+
+  .faqContent h4 {
+    font-size: 14px;
+  }
+
+  .faqContent p {
+    font-size: 12px;
   }
 
   .bottomCta {
-    padding: 30px 20px;
+    padding: 28px 20px;
   }
 
   .bottomCtaContent h3 {
     font-size: 22px;
-  }
-
-  .bannerLogo {
-    font-size: 22px;
-    letter-spacing: 6px;
-  }
-}
-
-@media (max-width: 480px) {
-  .title {
-    font-size: 24px;
-  }
-
-  .badge {
-    font-size: 10px;
-    letter-spacing: 3px;
-  }
-
-  .heroImage img {
-    width: 100px;
-    height: 100px;
-  }
-
-  .sectionTitle {
-    font-size: 20px;
-  }
-
-  .formTitle {
-    font-size: 20px;
-  }
-
-  .infoCard {
-    padding: 14px 16px;
-  }
-
-  .infoIconWrapper {
-    width: 38px;
-    height: 38px;
-  }
-
-  .infoIcon {
-    font-size: 16px;
-  }
-
-  .submitButton {
-    padding: 12px 20px;
-    font-size: 13px;
   }
 
   .bottomCtaLogo {
@@ -837,12 +766,218 @@
     letter-spacing: 4px;
   }
 
-  .bannerLogo {
+  .bottomCtaContent p {
+    font-size: 14px;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+  .title {
+    font-size: 26px;
+  }
+
+  .badge {
+    font-size: 10px;
+    letter-spacing: 2px;
+  }
+
+  .heroImage img {
+    max-height: 200px;
+  }
+
+  .sectionTitle {
+    font-size: 20px;
+  }
+
+  .formTitle {
     font-size: 18px;
-    letter-spacing: 4px;
+  }
+
+  .formSubtitle {
+    font-size: 12px;
+  }
+
+  .infoCard {
+    flex-direction: column;
+    text-align: center;
+    padding: 16px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  }
+
+  .infoIconWrapper {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto;
+  }
+
+  .socialProof {
+    flex-direction: row;
+    /* gap: 8px; */
+  }
+
+  .socialProofDivider {
+    width: 40px;
+    height: 1px;
+  }
+
+  .faqTitle {
+    font-size: 22px;
+  }
+
+  .faqItem {
+    padding: 14px 16px;
+  }
+
+  .bottomCta {
+    padding: 24px 16px;
   }
 
   .bottomCtaContent h3 {
     font-size: 20px;
+  }
+
+  .bottomCtaContent p {
+    font-size: 13px;
+  }
+
+  .feature {
+    font-size: 11px;
+    padding: 5px 12px;
+  }
+
+  .featureIcon {
+    font-size: 12px;
+  }
+
+  .submitButton {
+    padding: 10px 16px;
+    font-size: 12px;
+  }
+
+  .formInput {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}
+
+/* ===== DARK MODE SUPPORT ===== */
+@media (prefers-color-scheme: dark) {
+  .contactPage {
+    background: #1a1a1a;
+  }
+
+  .hero::before {
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.08), transparent 70%);
+  }
+
+  .title {
+    color: #ffffff;
+  }
+
+  .subtitle {
+    color: #aaa;
+  }
+
+  .feature {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.06);
+    color: #ddd;
+  }
+
+  .contactInfo,
+  .contactFormWrapper,
+  .faqItem {
+    background: #2d2d2d;
+    border-color: rgba(255, 255, 255, 0.04);
+  }
+
+  .sectionTitle {
+    color: #ffffff;
+  }
+
+  .sectionSubtitle {
+    color: #aaa;
+  }
+
+  .infoContent h4 {
+    color: #ffffff;
+  }
+
+  .infoContent p {
+    color: #aaa;
+  }
+
+  .infoCard:hover {
+    background: #3d3d3d;
+    border-color: rgba(212, 175, 55, 0.2);
+  }
+
+  .formTitle {
+    color: #ffffff;
+  }
+
+  .formSubtitle {
+    color: #aaa;
+  }
+
+  .formInput {
+    background: #3d3d3d;
+    border-color: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+  }
+
+  .formInput:focus {
+    background: #3d3d3d;
+    border-color: #d4af37;
+  }
+
+  .formInput::placeholder {
+    color: #888;
+  }
+
+  .formLabel {
+    color: #ccc;
+  }
+
+  .faqContent h4 {
+    color: #ffffff;
+  }
+
+  .faqContent p {
+    color: #aaa;
+  }
+
+  .bottomCta {
+    background: #2d2d2d;
+    border-color: rgba(255, 255, 255, 0.04);
+  }
+
+  .bottomCtaContent h3 {
+    color: #ffffff;
+  }
+
+  .bottomCtaContent p {
+    color: #aaa;
+  }
+
+  .sectionBadge {
+    background: rgba(212, 175, 55, 0.1);
+  }
+
+  .socialProofNumber {
+    color: #ffffff;
+  }
+
+  .socialProofLabel {
+    color: #888;
+  }
+
+  .socialProofDivider {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .heroImage img {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   }
 }

@@ -1,7 +1,7 @@
 .bannerContainer {
   position: relative;
   width: 100%;
-  max-width: 1200px; /* Constrains the banner width to 1200px */
+  max-width: 100%; /* Constrains the banner width to 1200px */
   margin: 0 auto;    /* Centers the entire banner horizontally on the screen */
   height: 400px;     /* Locked frame height */
   overflow: hidden;

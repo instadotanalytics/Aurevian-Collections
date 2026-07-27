@@ -1,3 +1,4 @@
+
 /* Register.module.css — Aurevian account creation page */
 @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Jost:wght@300;400;500;600&display=swap");
 
@@ -58,8 +59,8 @@
   align-items: center;
   padding: 56px 24px;
   overflow: hidden;
-  scroll-margin-top: var(--header-height);
-  min-height: calc(100vh - var(--header-height));
+  scroll-margin-top: var(--header-height, 80px);
+  min-height: calc(100vh - var(--header-height, 80px));
   width: 100%;
 }
 
@@ -97,7 +98,7 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 1500px;
+  max-width: 1130px;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -166,11 +167,7 @@
   margin: 0 0 30px;
 }
 
-/* ---------- Hero highlights (icon + text rows) ----------
-   Rendered as a column that is centered as a whole block,
-   while each row stays left-aligned internally so the icon
-   circles always sit in a single straight vertical line,
-   regardless of how long each line of text is. */
+/* ---------- Hero highlights (icon + text rows) ---------- */
 .heroHighlights {
   list-style: none;
   margin: 0 0 34px;
@@ -247,7 +244,7 @@
 ========================================================== */
 .card {
   width: 100%;
-  max-width: 400px;
+  max-width: 1000px;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(201, 162, 75, 0.25);
@@ -313,8 +310,11 @@
   width: 100%;
 }
 
+/* FIX: this was missing `display: grid`, which broke the
+   side-by-side layout for First/Last name and Password fields,
+   and threw off alignment of the whole card. */
 .row {
-  display: grid;
+  
   grid-template-columns: 1fr 1fr;
   gap: 0.6rem;
   width: 100%;
@@ -449,7 +449,6 @@
   content: "";
   position: absolute;
   left: 0;
-  top: 50%;
   width: 100%;
   height: 1px;
   background: var(--border);
@@ -713,10 +712,6 @@
     margin-right: auto;
   }
 
-  /* Keep the highlight block centered as a group, but let each
-     row stay left-aligned internally so the icons line up in a
-     single straight column instead of drifting left/right based
-     on how long each line of text is. */
   .heroHighlights {
     align-items: flex-start;
     width: fit-content;
@@ -824,7 +819,6 @@
   .heroHighlights {
     gap: 10px;
     margin-bottom: 26px;
-    /* re-confirm centered-as-a-block / left-aligned-rows on small phones */
     width: fit-content;
     max-width: 100%;
     margin-left: auto;
@@ -850,7 +844,6 @@
     margin-bottom: 22px;
   }
 
-  /* --- Member benefit / stat cards: 2 per row on mobile --- */
   .perksGrid {
     grid-template-columns: repeat(2, 1fr);
     gap: 14px;
@@ -981,7 +974,6 @@
 /* Very small phones (≤360px) — extra tight but still 2 per row */
 @media (max-width: 360px) {
   .row {
-    grid-template-columns: 1fr 1fr;
     gap: 0.35rem;
   }
 

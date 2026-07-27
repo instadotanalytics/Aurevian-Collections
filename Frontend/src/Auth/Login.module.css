@@ -288,7 +288,7 @@
 ========================================================== */
 .card {
   width: 100%;
-  max-width: 400px;
+  max-width: 1000px;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(201, 162, 75, 0.25);
@@ -497,7 +497,7 @@
   content: "";
   position: absolute;
   left: 0;
-  top: 50%;
+  
   width: 100%;
   height: 1px;
   background: var(--border);

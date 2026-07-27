@@ -12,7 +12,6 @@ import {
   FiPhone,
   FiEye,
   FiEyeOff,
-  FiArrowLeft,
   FiStar,
   FiHeart,
   FiTruck,
@@ -24,35 +23,13 @@ import logo from "../assets/Aurevianlogo.png";
 
 import styles from "./Register.module.css";
 
-/* ------------------------------------------------------------------
-   Static content — member benefits shown in the second section
-------------------------------------------------------------------- */
 const PERKS = [
-  {
-    icon: <FiStar />,
-    title: "Early Access",
-    text: "Be first to shop new arrivals and limited drops.",
-  },
-  {
-    icon: <FiHeart />,
-    title: "Save Favorites",
-    text: "Build a wishlist and pick up right where you left off.",
-  },
-  {
-    icon: <FiTruck />,
-    title: "Track Orders",
-    text: "Follow every order from checkout to your doorstep.",
-  },
-  {
-    icon: <FiGift />,
-    title: "Birthday Rewards",
-    text: "A special gift on us, every year you're with us.",
-  },
+  { icon: <FiStar />, title: "Early Access", text: "Be first to shop new arrivals and limited drops." },
+  { icon: <FiHeart />, title: "Save Favorites", text: "Build a wishlist and pick up right where you left off." },
+  { icon: <FiTruck />, title: "Track Orders", text: "Follow every order from checkout to your doorstep." },
+  { icon: <FiGift />, title: "Birthday Rewards", text: "A special gift on us, every year you're with us." },
 ];
 
-/* ------------------------------------------------------------------
-   Static content — short highlights shown beside the hero copy
-------------------------------------------------------------------- */
 const HERO_HIGHLIGHTS = [
   { icon: <FiStar />, text: "Curated, limited-run collections" },
   { icon: <FiHeart />, text: "A wishlist that remembers what you love" },
@@ -117,7 +94,6 @@ const Register = () => {
       <Header />
 
       <main className={styles.page}>
-        {/* ============================= HERO ============================= */}
         <section className={styles.hero} aria-label="Create your Aurevian account">
           <div className={styles.heroDecor} aria-hidden="true">
             <span className={`${styles.blob} ${styles.blob1}`} />
@@ -125,7 +101,6 @@ const Register = () => {
           </div>
 
           <div className={styles.heroInner}>
-            {/* ---------- Left: editorial text content ---------- */}
             <div className={styles.heroLeft}>
               <div className={styles.heroContent}>
                 <span className={styles.heroEyebrow}>Welcome to Aurevian</span>
@@ -164,21 +139,17 @@ const Register = () => {
               </div>
             </div>
 
-            {/* ---------- Right: register form ---------- */}
             <div className={styles.heroRight}>
               <div className={styles.card}>
-                {/* Logo */}
                 <div className={styles.cardLogo}>
                   <img src={logo} alt="Aurevian" className={styles.cardLogoImage} />
                 </div>
 
-                {/* Header */}
                 <div className={styles.header}>
                   <h2 className={styles.title}>Create Account</h2>
                   <p className={styles.subtitle}>Join Aurevian Collections today</p>
                 </div>
 
-                {/* Register Form */}
                 <form onSubmit={handleSubmit} className={styles.form}>
                   <div className={styles.row}>
                     <div className={styles.formGroup}>
@@ -314,15 +285,12 @@ const Register = () => {
                   </button>
                 </form>
 
-                {/* Divider */}
                 <div className={styles.divider}>
                   <span>or continue with</span>
                 </div>
 
-                {/* Google Login */}
                 <GoogleLoginButton redirectTo="/" />
 
-                {/* Login Link */}
                 <p className={styles.footerText}>
                   Already have an account?{" "}
                   <Link to="/login" className={styles.footerLink}>
@@ -334,7 +302,6 @@ const Register = () => {
           </div>
         </section>
 
-        {/* ========================= MEMBER BENEFITS ========================= */}
         <section className={styles.perksSection} aria-labelledby="perks-heading">
           <div className={styles.perksInner}>
             <div className={styles.perksIntro}>
