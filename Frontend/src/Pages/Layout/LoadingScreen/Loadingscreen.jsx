@@ -1,7 +1,7 @@
 // src/Components/common/LoadingScreen.jsx
 import React from 'react';
 import logo from '../../../assets/Aurevianlogo.png'; // ← adjust path to wherever you save the logo
-import styles from './LoadingScreen.module.css';
+import styles from './Loadingscreen.module.css';
 
 /**
  * Full-screen branded loading state for Aurevian Collections.

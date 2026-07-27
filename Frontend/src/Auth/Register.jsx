@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { register, setOTPSent } from "../redux/slices/authSlice.js";
-import GoogleLoginButton from "../auth/GoogleLoginButton.jsx";
+import GoogleLoginButton from "../Auth/GoogleLoginButton.jsx";
 import toast from "react-hot-toast";
 import {
   FiUser,

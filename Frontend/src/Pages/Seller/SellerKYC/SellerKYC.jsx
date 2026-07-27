@@ -15,7 +15,7 @@ import {
   fetchVerificationStatus,
 } from "../../../redux/slices/sellerSlice";
 
-import styles from "./SellerKYC.module.css";
+import styles from "./Sellerkyc.module.css";
 
 const SellerKYC = () => {
   const dispatch = useDispatch();
