@@ -29,11 +29,11 @@ import Header from "../../Layout/Header/Header"
 import Footer from "../../Layout/Footer/Footer"
 
 // Import step images
-import Step1Image from "../../..//assets/personal.png";
+import Step1Image from "../../../assets/personal.png";
 import Step2Image from "../../../assets/pan.png";
-import Step3Image from "../../../assets/Aurevianlogo.png";
-import Step4Image from "../../../assets/b1.png";
-import Step5Image from "../../../assets/Aurevianlogo.png";
+import Step3Image from "../../../assets/adhar.png";
+import Step4Image from "../../../assets/store.png";
+import Step5Image from "../../../assets/sellerrw.png";
 
 const SellerRegister = () => {
   const navigate = useNavigate();
@@ -440,7 +440,7 @@ const SellerRegister = () => {
   const renderPersonalInfo = () => (
     <div className={styles.stepContent}>
       <h2 className={styles.stepTitle}>Personal Information</h2>
-      <p className={styles.stepDesc}></p>
+      <p className={styles.stepDesc}>Enter your personal information</p>
 
       <div className={styles.formRow}>
         <div className={styles.formGroup}>
