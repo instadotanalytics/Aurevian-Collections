@@ -1,8 +1,7 @@
 // ============================================
 // DNS CONFIGURATION
 // ============================================
-import dns from "dns";
-dns.setServers(["8.8.8.8"]);
+
 
 // ============================================
 // IMPORTS
@@ -30,7 +29,7 @@ import authRoutes from "./routes/authRoutes.js";
 import superAdminRoutes from "./routes/superAdminRoutes.js";
 import sellerRoutes from "./routes/sellerRoutes.js";
 import bannerRoutes from "./routes/bannerRoutes.js";
-import userProfileRoutes from "./routes/userProfileRoutes.js";
+import userProfileRoutes from "./routes/UserProfileRoutes.js";
 import subscriptionRoutes from "./routes/subscriptionRoutes.js";
 import subscriptionPlanRoutes from "./routes/subscriptionPlanRoutes.js";
 import referralRoutes from "./routes/referralRoutes.js";

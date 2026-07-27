@@ -263,18 +263,16 @@ const SellerDashboard = () => {
       <div className={styles.mainContent}>
         {/* Sidebar */}
         <aside
-          className={`${styles.sidebar} ${
-            sidebarOpen ? styles.open : styles.closed
-          } ${mobileMenuOpen ? styles.mobileOpen : ""}`}
+          className={`${styles.sidebar} ${sidebarOpen ? styles.open : styles.closed
+            } ${mobileMenuOpen ? styles.mobileOpen : ""}`}
         >
           <div className={styles.sidebarNav}>
             {menuItems.map((item) => (
               <button
                 key={item.id || "dashboard"}
                 onClick={() => handleMenuClick(item.id)}
-                className={`${styles.navItem} ${
-                  activeMenu === item.id ? styles.active : ""
-                }`}
+                className={`${styles.navItem} ${activeMenu === item.id ? styles.active : ""
+                  }`}
               >
                 <item.icon className={styles.navIcon} />
                 <span className={styles.navLabel}>{item.label}</span>
@@ -327,9 +325,8 @@ const SellerDashboard = () => {
 
         {/* Content — each sidebar section is now a real nested route */}
         <main
-          className={`${styles.contentArea} ${
-            !sidebarOpen ? styles.expanded : ""
-          }`}
+          className={`${styles.contentArea} ${!sidebarOpen ? styles.expanded : ""
+            }`}
         >
           <div className={styles.contentWrapper}>
             <Routes>

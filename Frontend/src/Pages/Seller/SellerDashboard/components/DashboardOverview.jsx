@@ -71,7 +71,7 @@ const DashboardOverview = () => {
 
       <div className={styles.header}>
         <div>
-          <h1 className={styles.welcome}>Dashboard Overview</h1>
+          
 
           <p className={styles.subtitle}>
             Track your store's performance and manage your business.
@@ -79,8 +79,7 @@ const DashboardOverview = () => {
         </div>
 
         <div className={styles.headerActions}>
-          <button className={styles.addProductBtn}>+ Add New Product</button>
-
+         
           <div className={styles.storeStatus}>
             <span
               className={`${styles.statusDot} ${
