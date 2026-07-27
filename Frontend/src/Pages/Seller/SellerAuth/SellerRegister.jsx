@@ -29,8 +29,8 @@ import Header from "../../Layout/Header/Header"
 import Footer from "../../Layout/Footer/Footer"
 
 // Import step images
-import Step1Image from "../../..//assets/Aurevianlogo.png";
-import Step2Image from "../../../assets/b1.png";
+import Step1Image from "../../..//assets/personal.png";
+import Step2Image from "../../../assets/pan.png";
 import Step3Image from "../../../assets/Aurevianlogo.png";
 import Step4Image from "../../../assets/b1.png";
 import Step5Image from "../../../assets/Aurevianlogo.png";
@@ -440,24 +440,24 @@ const SellerRegister = () => {
   const renderPersonalInfo = () => (
     <div className={styles.stepContent}>
       <h2 className={styles.stepTitle}>Personal Information</h2>
-      <p className={styles.stepDesc}>Fill your personal details</p>
+      <p className={styles.stepDesc}></p>
 
       <div className={styles.formRow}>
         <div className={styles.formGroup}>
           <label>First Name <span className={styles.required}>*</span></label>
-          <input name="firstName" placeholder="John" value={formData.firstName} onChange={handleChange} className={errors.firstName ? styles.error : ''} />
+          <input name="firstName" placeholder="Enter your first name" value={formData.firstName} onChange={handleChange} className={errors.firstName ? styles.error : ''} />
           {errors.firstName && <span className={styles.errorText}>{errors.firstName}</span>}
         </div>
         <div className={styles.formGroup}>
           <label>Last Name <span className={styles.required}>*</span></label>
-          <input name="lastName" placeholder="Doe" value={formData.lastName} onChange={handleChange} className={errors.lastName ? styles.error : ''} />
+          <input name="lastName" placeholder="Enter your last name" value={formData.lastName} onChange={handleChange} className={errors.lastName ? styles.error : ''} />
           {errors.lastName && <span className={styles.errorText}>{errors.lastName}</span>}
         </div>
       </div>
 
       <div className={styles.formGroup}>
         <label>Email Address <span className={styles.required}>*</span></label>
-        <input type="email" name="email" placeholder="seller@example.com" value={formData.email} onChange={handleChange} className={errors.email ? styles.error : ''} />
+        <input type="email" name="email" placeholder="Enter your email" value={formData.email} onChange={handleChange} className={errors.email ? styles.error : ''} />
         {errors.email && <span className={styles.errorText}>{errors.email}</span>}
       </div>
 

@@ -23,16 +23,16 @@
 .card {
   display: flex;
   background: #ffffff;
-  /* border-radius: 24px; */
   overflow: hidden;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.08);
   height: 700px;
   max-height: 90vh;
   border: 1px solid rgba(212, 175, 55, 0.08);
+  border-radius: 24px;
 }
 
 /* ============================================
-   LEFT PANEL - Image Only (No Text)
+   LEFT PANEL - Image
    ============================================ */
 .leftPanel {
   flex: 0 0 50%;
@@ -46,13 +46,16 @@
   width: 100%;
   height: 100%;
   position: relative;
+  overflow: hidden;
 }
 
 .sideImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   transition: transform 0.6s ease;
+  display: block;
 }
 
 .imageWrapper:hover .sideImage {
@@ -60,24 +63,24 @@
 }
 
 /* ============================================
-   RIGHT PANEL - Form (No Scroll)
+   RIGHT PANEL - Form
    ============================================ */
 .rightPanel {
   flex: 0 0 50%;
-  padding: 32px 40px 28px;
+  padding: 32px 36px 24px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   background: #ffffff;
   height: 100%;
   overflow: hidden;
 }
 
 /* ============================================
-   HEADER
+   HEADER - Fixed at top
    ============================================ */
 .header {
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  flex-shrink: 0;
 }
 
 .title {
@@ -89,22 +92,29 @@
   letter-spacing: -0.3px;
 }
 
+.titleGold {
+  color: #d4af37;
+}
+
 .subtitle {
   font-size: 13px;
   color: #6b6b6b;
   margin: 2px 0 0;
+  line-height: 1.4;
 }
 
 /* ============================================
-   STEP INDICATOR
+   STEP INDICATOR - Fixed at top
    ============================================ */
 .stepIndicator {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   padding: 0 4px;
   position: relative;
+  flex-shrink: 0;
+  gap: 4px;
 }
 
 .stepItem {
@@ -113,6 +123,7 @@
   align-items: center;
   position: relative;
   flex: 1;
+  min-width: 0;
 }
 
 .stepNumber {
@@ -123,11 +134,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 600;
   color: #999;
   transition: all 0.4s ease;
   position: relative;
   z-index: 2;
+  flex-shrink: 0;
 }
 
 .stepNumber.active {
@@ -141,6 +154,19 @@
   color: white;
 }
 
+.stepNumber.completed::after {
+  content: '✓';
+  font-size: 13px;
+}
+
+.stepNumber .stepNumberText {
+  display: none;
+}
+
+.stepNumber.completed .stepNumberText {
+  display: none;
+}
+
 .stepLabel {
   font-size: 9px;
   color: #999;
@@ -149,6 +175,18 @@
   text-transform: uppercase;
   letter-spacing: 0.4px;
   white-space: nowrap;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stepLabel.active {
+  color: #d4af37;
+}
+
+.stepLabel.completed {
+  color: #10b981;
 }
 
 .stepLine {
@@ -165,23 +203,60 @@
   display: none;
 }
 
+.stepLine.completed {
+  background: #10b981;
+}
+
 /* ============================================
-   FORM
+   FORM - Scrollable content area
    ============================================ */
 .form {
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-height: 0;
 }
 
 .stepContent {
   animation: fadeInUp 0.4s ease;
+  display: flex;
+  flex-direction: column;
   flex: 1;
+  min-height: 0;
 }
 
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   SCROLLABLE FORM FIELDS AREA
+   ============================================ */
+.formFieldsWrapper {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 6px;
+  margin-bottom: 10px;
+}
+
+.formFieldsWrapper::-webkit-scrollbar {
+  width: 4px;
+}
+
+.formFieldsWrapper::-webkit-scrollbar-track {
+  background: #f0edeb;
+  border-radius: 4px;
+}
+
+.formFieldsWrapper::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
+  border-radius: 4px;
+}
+
+.stepHeader {
+  margin-bottom: 10px;
+  flex-shrink: 0;
 }
 
 .stepTitle {
@@ -194,7 +269,7 @@
 .stepDesc {
   font-size: 13px;
   color: #6b6b6b;
-  margin: 0 0 14px;
+  margin: 0;
 }
 
 /* ============================================
@@ -210,22 +285,28 @@
   display: flex;
   flex-direction: column;
   gap: 3px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  min-width: 0;
 }
 
 .formGroup label {
   font-size: 13px;
   font-weight: 500;
   color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .required {
   color: #d4af37;
+  font-weight: 700;
 }
 
 .optional {
   color: #999;
   font-weight: 400;
+  font-size: 11px;
 }
 
 .formGroup input,
@@ -239,6 +320,14 @@
   transition: all 0.3s ease;
   background: #faf8f6;
   width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.formGroup input:hover,
+.formGroup textarea:hover,
+.formGroup select:hover {
+  border-color: #d4af37;
 }
 
 .formGroup input:focus,
@@ -264,16 +353,19 @@
 .errorText {
   font-size: 11px;
   color: #ef4444;
+  margin-top: 2px;
 }
 
 .hint {
   font-size: 11px;
   color: #999;
+  margin-top: 2px;
 }
 
 .validText {
   font-size: 11px;
   color: #10b981;
+  margin-top: 2px;
 }
 
 /* ============================================
@@ -287,7 +379,7 @@
   position: relative;
   border: 2px dashed #e8e3dc;
   border-radius: 12px;
-  padding: 18px 20px;
+  padding: 16px 20px;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -314,6 +406,7 @@
   font-size: 13px;
   color: #1a1a1a;
   margin: 0;
+  font-weight: 500;
 }
 
 .fileUploadArea span {
@@ -383,6 +476,7 @@
   border-radius: 20px;
   background: white;
   font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -415,6 +509,7 @@
   font-size: 13px;
   background: #faf8f6;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .socialLinks input:focus {
@@ -490,29 +585,34 @@
 }
 
 /* ============================================
-   NAVIGATION
+   NAVIGATION - CENTERED
    ============================================ */
 .navigation {
   display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 14px;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 6px;
   padding-top: 12px;
   border-top: 1px solid #e8e3dc;
+  flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 .prevBtn,
 .nextBtn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 10px 24px;
+  padding: 10px 32px;
   border: none;
   border-radius: 10px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  min-width: 120px;
 }
 
 .prevBtn {
@@ -522,15 +622,13 @@
 
 .prevBtn:hover:not(:disabled) {
   background: #e8e3dc;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .nextBtn {
   background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
   color: white;
-  /* margin-left: auto; */
-  margin: auto;
-  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.2);
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.25);
 }
 
 .nextBtn:hover:not(:disabled) {
@@ -542,15 +640,17 @@
 .nextBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none !important;
 }
 
 /* ============================================
    TRUST FEATURES
    ============================================ */
 .trustFeatures {
-  margin-top: 12px;
-  padding-top: 12px;
+  margin-top: 10px;
+  padding-top: 10px;
   border-top: 1px solid #e8e3dc;
+  flex-shrink: 0;
 }
 
 .trustHeader {
@@ -621,6 +721,7 @@
   margin-top: 8px;
   padding-top: 8px;
   border-top: 1px solid #e8e3dc;
+  flex-shrink: 0;
 }
 
 .footer p {
@@ -640,11 +741,11 @@
 }
 
 /* ============================================
-   RESPONSIVE
+   RESPONSIVE - Desktop to Tablet
    ============================================ */
 @media (max-width: 1024px) {
   .rightPanel {
-    padding: 28px 28px 24px;
+    padding: 28px 28px 20px;
   }
 
   .trustGrid {
@@ -652,146 +753,453 @@
   }
 }
 
+/* ============================================
+   MOBILE RESPONSIVE - FIXED FOR 375px
+   ============================================ */
 @media (max-width: 768px) {
+  .page {
+    padding: 10px;
+    align-items: flex-start;
+    padding-top: 16px;
+  }
+
   .card {
     flex-direction: column;
     height: auto;
     max-height: none;
     border-radius: 16px;
+    min-height: 95vh;
+    width: 100%;
   }
 
   .leftPanel {
-    flex: 1;
-    min-height: 200px;
-    height: 200px;
+    flex: 0 0 auto;
+    height: 180px;
+    min-height: 180px;
+    width: 100%;
   }
 
   .imageWrapper {
-    min-height: 200px;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .sideImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+    display: block;
+  }
+
+  .imageWrapper:hover .sideImage {
+    transform: none;
   }
 
   .rightPanel {
     flex: 1;
-    padding: 20px;
+    padding: 16px 14px 14px;
     height: auto;
-    max-height: 600px;
-    /* overflow-y: auto; */
-    justify-content: flex-start;
+    max-height: none;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
   }
 
-  .formRow {
-    grid-template-columns: 1fr;
+  .header {
+    margin-bottom: 8px;
   }
 
-  .reviewGrid {
-    grid-template-columns: 1fr;
+  .title {
+    font-size: 18px;
   }
 
+  .subtitle {
+    font-size: 11px;
+  }
+
+  /* Step indicator */
   .stepIndicator {
-    flex-wrap: wrap;
-    gap: 4px;
-    justify-content: center;
+    display: flex;
+    justify-content: space-between;
+    gap: 2px;
+    margin-bottom: 10px;
+    overflow-x: auto;
+    padding: 4px 2px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .stepIndicator::-webkit-scrollbar {
+    display: none;
   }
 
   .stepItem {
-    flex: none;
+    flex: 0 0 auto;
+    min-width: 44px;
+  }
+
+  .stepNumber {
+    width: 28px;
+    height: 28px;
+    font-size: 10px;
+  }
+
+  .stepLabel {
+    font-size: 6px;
+    letter-spacing: 0.2px;
+    margin-top: 2px;
   }
 
   .stepLine {
     display: none;
   }
 
-  .stepLabel {
-    font-size: 8px;
+  /* Form fields wrapper - SCROLLABLE */
+  .formFieldsWrapper {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+    margin-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
   }
 
+  .stepHeader {
+    margin-bottom: 6px;
+  }
+
+  .stepTitle {
+    font-size: 15px;
+  }
+
+  .stepDesc {
+    font-size: 11px;
+  }
+
+  /* Form grid - SINGLE COLUMN */
+  .formRow {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .formGroup {
+    margin-bottom: 8px;
+    width: 100%;
+  }
+
+  .formGroup label {
+    font-size: 11px;
+  }
+
+  .formGroup input,
+  .formGroup textarea,
+  .formGroup select {
+    padding: 7px 10px;
+    font-size: 12px;
+    border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Review grid - single column */
+  .reviewGrid {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .reviewSection {
+    padding: 10px 12px;
+  }
+
+  .reviewSection h4 {
+    font-size: 11px;
+  }
+
+  .reviewGrid div {
+    font-size: 11px;
+  }
+
+  /* Navigation - CENTERED */
   .navigation {
     flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 8px;
+    margin-top: 4px;
+    justify-content: center;
+    width: 100%;
   }
 
   .prevBtn,
   .nextBtn {
-    flex: 1;
-    justify-content: center;
-    min-width: 100px;
+    flex: 0 1 auto;
+    min-width: 90px;
     padding: 8px 16px;
     font-size: 12px;
+    border-radius: 8px;
+    width: auto;
+  }
+
+  /* Trust features */
+  .trustFeatures {
+    margin-top: 6px;
+    padding-top: 6px;
+  }
+
+  .trustHeader {
+    font-size: 11px;
+  }
+
+  .trustSubtext {
+    font-size: 10px;
+    margin: 2px 0 6px;
+  }
+
+  .trustGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+  }
+
+  .trustItem {
+    padding: 5px 6px;
+  }
+
+  .trustItem h4 {
+    font-size: 10px;
+  }
+
+  .trustItem p {
+    font-size: 8px;
+  }
+
+  .footer {
+    margin-top: 4px;
+    padding-top: 4px;
+  }
+
+  .footer p {
+    font-size: 11px;
+  }
+
+  /* File upload */
+  .fileUploadArea {
+    padding: 10px 14px;
+    min-height: 50px;
+  }
+
+  .uploadIcon {
+    font-size: 18px;
+  }
+
+  .fileUploadArea p {
+    font-size: 11px;
+  }
+
+  .fileUploadArea span {
+    font-size: 9px;
+  }
+
+  .categoryGrid {
+    gap: 4px;
+  }
+
+  .categoryBtn {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  .checkboxLabel {
+    font-size: 11px;
+  }
+
+  .checkboxLabel input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+/* ============================================
+   EXTRA SMALL MOBILE (375px and below)
+   ============================================ */
+@media (max-width: 480px) {
+  .page {
+    padding: 6px;
+    padding-top: 10px;
+  }
+
+  .card {
+    border-radius: 12px;
+    min-height: 98vh;
+  }
+
+  .leftPanel {
+    height: 140px;
+    min-height: 140px;
+  }
+
+  .sideImage {
+    object-position: center 25%;
+  }
+
+  .rightPanel {
+    padding: 12px 10px 10px;
+  }
+
+  .title {
+    font-size: 16px;
+  }
+
+  .subtitle {
+    font-size: 10px;
+  }
+
+  .stepNumber {
+    width: 24px;
+    height: 24px;
+    font-size: 9px;
+  }
+
+  .stepLabel {
+    font-size: 5px;
+    letter-spacing: 0.1px;
+  }
+
+  .stepItem {
+    min-width: 36px;
+  }
+
+  .stepTitle {
+    font-size: 14px;
+  }
+
+  .stepDesc {
+    font-size: 10px;
+  }
+
+  .formGroup input,
+  .formGroup textarea,
+  .formGroup select {
+    padding: 6px 8px;
+    font-size: 11px;
+    border-radius: 6px;
+  }
+
+  .formGroup label {
+    font-size: 10px;
+  }
+
+  .formGroup {
+    margin-bottom: 6px;
+  }
+
+  .prevBtn,
+  .nextBtn {
+    min-width: 70px;
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .navigation {
+    gap: 6px;
+    padding-top: 6px;
   }
 
   .trustGrid {
     grid-template-columns: 1fr;
-    gap: 6px;
+    gap: 3px;
   }
 
-  /* Enable scroll on mobile */
-  .rightPanel::-webkit-scrollbar {
-    width: 4px;
+  .trustItem {
+    padding: 4px 6px;
   }
 
-  .rightPanel::-webkit-scrollbar-track {
-    background: #f0edeb;
-    border-radius: 4px;
+  .trustItem h4 {
+    font-size: 9px;
   }
 
-  .rightPanel::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
-    border-radius: 4px;
+  .trustItem p {
+    font-size: 8px;
+  }
+
+  .footer p {
+    font-size: 10px;
+  }
+
+  .stepHeader {
+    margin-bottom: 4px;
+  }
+
+  .stepIndicator {
+    margin-bottom: 6px;
+  }
+
+  .formFieldsWrapper {
+    margin-bottom: 4px;
+  }
+
+  .fileUploadArea {
+    padding: 8px 10px;
+    min-height: 40px;
+  }
+
+  .uploadIcon {
+    font-size: 16px;
+  }
+
+  .fileUploadArea p {
+    font-size: 10px;
+  }
+
+  .fileUploadArea span {
+    font-size: 8px;
+  }
+
+  .reviewSection {
+    padding: 8px 10px;
+  }
+
+  .reviewSection h4 {
+    font-size: 10px;
+  }
+
+  .reviewGrid div {
+    font-size: 10px;
+  }
+
+  .checkboxLabel {
+    font-size: 10px;
+  }
+
+  .checkboxLabel input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
   }
 }
 
-@media (max-width: 480px) {
-  .page {
-    padding: 12px;
+/* ============================================
+   TABLET PORTRAIT
+   ============================================ */
+@media (min-width: 481px) and (max-width: 768px) {
+  .leftPanel {
+    height: 200px;
+    min-height: 200px;
+  }
+
+  .sideImage {
+    object-position: center 30%;
   }
 
   .rightPanel {
-    padding: 16px;
-    max-height: 500px;
+    padding: 18px 18px 14px;
   }
 
   .title {
     font-size: 20px;
   }
 
-  .stepNumber {
-    width: 28px;
-    height: 28px;
-    font-size: 11px;
-  }
-
-  .categoryBtn {
-    font-size: 11px;
-    padding: 4px 10px;
-  }
-
-  .stepTitle {
-    font-size: 17px;
-  }
-
-  .formGroup input,
-  .formGroup textarea {
-    padding: 8px 12px;
-    font-size: 13px;
-  }
-
-  .fileUploadArea {
-    padding: 12px 16px;
-    min-height: 60px;
-  }
-
-  .uploadIcon {
-    font-size: 20px;
-  }
-
-  .trustItem {
-    padding: 6px 8px;
-  }
-
-  .trustItem h4 {
-    font-size: 11px;
-  }
-
-  .trustItem p {
-    font-size: 9px;
+  .trustGrid {
+    grid-template-columns: 1fr 1fr;
   }
 }

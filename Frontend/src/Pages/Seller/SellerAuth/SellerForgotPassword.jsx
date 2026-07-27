@@ -7,7 +7,7 @@ import { FaGem } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import styles from './SellerForgotPassword.module.css';
-import LoginImage from "../../../assets/b1.png";
+import LoginImage from "../../../assets/sellerpass.png";
 import Header from "../../Layout/Header/Header";
 import Footer from "../../Layout/Footer/Footer";
 
