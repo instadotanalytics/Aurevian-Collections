@@ -7,9 +7,6 @@
 
 /* ==========================================================
    THEME VARIABLES
-   A warm, jewellery-house palette: ink instead of flat black,
-   ivory instead of clinical white, and a single antique-gold
-   accent reserved for hover states, hairlines and the banner.
    ========================================================== */
 .navbar,
 .navbar *,
@@ -29,14 +26,23 @@
   --line: #e8e2d5;
   --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
+  /* ✅ STICKY HEADER */
   position: sticky;
   top: 0;
   z-index: 1000;
+  
+  /* ✅ FULL WIDTH WITH MAX 1200px */
   width: 100%;
- background:rgba(238, 215, 191);
+  max-width: 1200px;
+  margin: 0 auto;
+  
+  background: rgba(238, 215, 191, 1);
   color: var(--ink);
   font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
   border-bottom: 1px solid var(--line);
+  
+  /* ✅ Shadow for depth when scrolling */
+  box-shadow: 0 2px 12px rgba(21, 19, 15, 0.06);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -47,7 +53,7 @@
 }
 
 /* ==========================================================
-   TOP ROW: logo, nav, icons
+   TOP ROW
    ========================================================== */
 .topRow {
   position: relative;
@@ -55,11 +61,14 @@
   align-items: center;
   justify-content: space-between;
   height: 70px;
-  /* padding: 0 24px; */
+  padding: 0 24px;
   max-width: 1200px;
   margin: 0 auto;
 }
 
+/* ==========================================================
+   LOGO
+   ========================================================== */
 .logo {
   font-family: "Cormorant Garamond", serif;
   font-size: 14px;
@@ -80,8 +89,6 @@
   object-fit: contain;
   display: block;
   transition: transform 0.35s ease;
-}
-.logoImage {
   filter: grayscale(100%) brightness(20%);
 }
 
@@ -89,7 +96,9 @@
   transform: scale(1.03);
 }
 
-/* --- Search form --- */
+/* ==========================================================
+   SEARCH FORM
+   ========================================================== */
 .searchForm {
   display: flex;
   align-items: center;
@@ -155,7 +164,7 @@
 }
 
 /* ==========================================================
-   SEARCH PANEL — slides in from the LEFT edge
+   SEARCH PANEL
    ========================================================== */
 .searchPanel {
   position: fixed;
@@ -228,7 +237,9 @@
   visibility: visible;
 }
 
-/* --- Right icons --- */
+/* ==========================================================
+   RIGHT ICONS
+   ========================================================== */
 .iconBtn {
   position: relative;
   background: none;
@@ -296,7 +307,9 @@
   background: var(--gold-soft);
 }
 
-/* --- Account dropdown --- */
+/* ==========================================================
+   ACCOUNT DROPDOWN
+   ========================================================== */
 .accountWrap {
   position: relative;
   align-self: center;
@@ -319,7 +332,6 @@
   transform: translateY(8px);
   transition: all var(--transition);
   z-index: 1100;
-  /* padding: 0 10px; */
 }
 
 .accountDropdown.open {
@@ -425,7 +437,7 @@
 }
 
 /* ==========================================================
-   SIMPLE DROPDOWN (Collections / Offers / About Us)
+   DROPDOWN
    ========================================================== */
 .dropdown {
   position: absolute;
@@ -469,7 +481,7 @@
 }
 
 /* ==========================================================
-   MEGA MENU (Shop / Gift Guide) - Desktop Only
+   MEGA MENU
    ========================================================== */
 .megaMenu {
   position: fixed;
@@ -795,17 +807,14 @@
 }
 
 /* ==========================================================
-   MOBILE DRAWER SUB HEADINGS - LEFT ALIGNED
+   MOBILE DRAWER SUB HEADINGS
    ========================================================== */
-
-/* Remove the box/border styling from drawerSubGroup */
 .drawerSubGroup {
   margin-bottom: 0;
   padding: 0;
   border-bottom: none;
 }
 
-/* Simple heading style - LEFT ALIGNED */
 .drawerSubHeading {
   display: flex;
   justify-content: space-between;
@@ -853,7 +862,6 @@
   color: var(--gold-deep);
 }
 
-/* Sub-items - indented with padding */
 .drawerSubItems {
   padding-left: 40px;
   margin: 0;
@@ -922,7 +930,7 @@
 }
 
 /* ==========================================================
-   PREMIUM SEARCH PANEL CONTENT (SearchPanel.jsx)
+   SEARCH PANEL CONTENT
    ========================================================== */
 .searchPanelBody {
   display: flex;
