@@ -150,5 +150,9 @@ export const aboutDropdown = [
   { id: "support", label: "Support", path: "/support" },
   { id: "stories", label: "Stories", path: "/stories" },
   { id: "franchise", label: "Franchise", path: "/franchise" },
-  
+   {
+    id: "why-aurevian",
+    label: "Why Aurevian",
+    path: "/why-aurevian",
+  },
 ];

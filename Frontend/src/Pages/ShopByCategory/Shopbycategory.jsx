@@ -129,12 +129,6 @@ export default function ShopByCategory() {
         >
           <span className={styles.eyebrow}>Shop by Category</span>
           <span className={styles.headerDivider} aria-hidden="true" />
-          <h2 id="shop-by-category-heading" className={styles.heading}>
-            Discover Your Signature Style
-          </h2>
-          <p className={styles.subheading}>
-            Timeless designs for every moment, made for you.
-          </p>
         </motion.div>
 
         <div className={styles.sliderWrap}>
@@ -183,10 +177,7 @@ export default function ShopByCategory() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
         >
           <span className={styles.ctaLine} aria-hidden="true" />
-          <a href="/collections" className={styles.ctaButton}>
-            <HiOutlineShoppingBag className={styles.ctaIcon} aria-hidden="true" />
-            View All Collections
-          </a>
+          
           <span className={styles.ctaLine} aria-hidden="true" />
         </motion.div>
       </div>
