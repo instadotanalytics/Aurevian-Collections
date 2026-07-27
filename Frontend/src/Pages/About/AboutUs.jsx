@@ -8,8 +8,8 @@ import displayImage2 from "../../assets/DisplayImage2.png";
 // Swap these two lines for real craft/close-up shots whenever you have them —
 // just drop the files into src/assets/ and update the path + filename here.
 
-import craftImage1 from "../../assets/craftImage1.png";
-import craftImage2 from "../../assets/craftImage2.png";
+import craftImage1 from "../../assets/CraftImage1.png";
+import craftImage2 from "../../assets/CraftImage2.png";
 
 
 const values = [
