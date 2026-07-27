@@ -40,6 +40,7 @@ const cardVariants = {
 };
 
 
+
 const CategoryCard = React.memo(function CategoryCard({ category }) {
   return (
     <motion.div
@@ -79,7 +80,6 @@ const CategoryCard = React.memo(function CategoryCard({ category }) {
     </motion.div>
   );
 });
-
 export default function ShopByCategory() {
   const trackRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -132,9 +132,10 @@ export default function ShopByCategory() {
         </motion.div>
 
         <div className={styles.sliderWrap}>
+          {/* Desktop / tablet arrows — sit on the left & right edges of the slider */}
           <button
             type="button"
-            className={`${styles.navButton} ${styles.navButtonLeft}`}
+            className={`${styles.navButton} ${styles.navButtonLeft} ${styles.desktopNav}`}
             onClick={() => scrollByAmount(-1)}
             disabled={!canScrollLeft}
             aria-label="Scroll to previous categories"
@@ -160,7 +161,30 @@ export default function ShopByCategory() {
 
           <button
             type="button"
-            className={`${styles.navButton} ${styles.navButtonRight}`}
+            className={`${styles.navButton} ${styles.navButtonRight} ${styles.desktopNav}`}
+            onClick={() => scrollByAmount(1)}
+            disabled={!canScrollRight}
+            aria-label="Scroll to next categories"
+          >
+            <FiChevronRight />
+          </button>
+        </div>
+
+        {/* Mobile arrows — sit below the cards, above the CTA/footer area */}
+        <div className={styles.mobileNav}>
+          <button
+            type="button"
+            className={styles.navButton}
+            onClick={() => scrollByAmount(-1)}
+            disabled={!canScrollLeft}
+            aria-label="Scroll to previous categories"
+          >
+            <FiChevronLeft />
+          </button>
+
+          <button
+            type="button"
+            className={styles.navButton}
             onClick={() => scrollByAmount(1)}
             disabled={!canScrollRight}
             aria-label="Scroll to next categories"
@@ -177,7 +201,7 @@ export default function ShopByCategory() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
         >
           <span className={styles.ctaLine} aria-hidden="true" />
-          
+
           <span className={styles.ctaLine} aria-hidden="true" />
         </motion.div>
       </div>
