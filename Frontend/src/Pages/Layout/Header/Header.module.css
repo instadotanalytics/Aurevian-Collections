@@ -75,7 +75,7 @@
 }
 
 .logoImage {
-  height: 48px;
+  height: 68px;
   width: auto;
   object-fit: contain;
   display: block;
@@ -1457,7 +1457,7 @@
   }
 
   .logoImage {
-    height: 34px;
+    height: 54px;
     max-width: 32vw;
   }
 
@@ -1494,6 +1494,10 @@
 @media (max-width: 480px) {
   .searchPanel {
     width: 100vw;
+  }
+   .logoImage {
+    height: 54px;
+    max-width: 32vw;
   }
 
   .searchPanelDropdown {
