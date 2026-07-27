@@ -33,7 +33,7 @@ import {
   aboutDropdown as fallbackAboutDropdown,
 } from "./NavData";
 
-import logo from "../../../assets/Aurevianlogo.png";
+import logo from "../../../assets/reallogo.png";
 import { logoutUser } from "../../../redux/slices/authSlice.js";
 import { fetchPublicHeaderConfig } from "../../../redux/slices/headerConfigSlice.js";
 import toast from "react-hot-toast";

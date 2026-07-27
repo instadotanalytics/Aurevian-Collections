@@ -33,7 +33,7 @@
   top: 0;
   z-index: 1000;
   width: 100%;
-  background: var(--ivory);
+ background:rgba(238, 215, 191);
   color: var(--ink);
   font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
   border-bottom: 1px solid var(--line);
@@ -80,6 +80,9 @@
   object-fit: contain;
   display: block;
   transition: transform 0.35s ease;
+}
+.logoImage {
+  filter: grayscale(100%) brightness(20%);
 }
 
 .logo:hover .logoImage {
@@ -1389,7 +1392,7 @@
   }
 
   .logoImage {
-    height: 40px;
+    height: 57px;
     max-width: 34vw;
     object-fit: contain;
   }
@@ -1494,10 +1497,6 @@
 @media (max-width: 480px) {
   .searchPanel {
     width: 100vw;
-  }
-   .logoImage {
-    height: 54px;
-    max-width: 32vw;
   }
 
   .searchPanelDropdown {

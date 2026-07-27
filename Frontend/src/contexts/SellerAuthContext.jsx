@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 
 const SellerAuthContext = createContext(null);
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://aurevian-collections.onrender.com/api';
 
 export const useSellerAuth = () => {
   const context = useContext(SellerAuthContext);
