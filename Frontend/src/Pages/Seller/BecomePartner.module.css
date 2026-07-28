@@ -1,99 +1,165 @@
-/* src/Pages/Seller/BecomePartner.module.css */
+/* BecomePartner.module.css - Complete with Smooth Animations */
 
+/* ============================================
+   VARIABLES
+   ============================================ */
+:root {
+  --gold: #d4af37;
+  --gold-light: #f5f0e8;
+  --gold-dark: #b8962e;
+  --cream: #fcf9f5;
+  --dark: #1a1a1a;
+  --gray: #6b6b6b;
+  --light-gray: #f8f6f4;
+  --border: #e8e3dc;
+  --shadow: 0 2px 20px rgba(0, 0, 0, 0.04);
+  --shadow-hover: 0 8px 40px rgba(0, 0, 0, 0.08);
+  --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================
+   PAGE
+   ============================================ */
 .page {
   min-height: 100vh;
   background: #ffffff;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px 40px;
+  padding-top: 0 !important;
+  margin-top: 0 !important;
 }
 
 /* ============================================
-   Hero Section
+   PREVENT SCROLL STUTTER
+   ============================================ */
+* {
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* ============================================
+   SMOOTH ANIMATIONS
+   ============================================ */
+.hero,
+.features,
+.benefits,
+.howItWorks,
+.cta,
+.featureCard,
+.step,
+.trustBadge,
+.stat,
+.heroContent,
+.heroImage,
+.testimonialCard {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================
+   HERO SECTION
    ============================================ */
 .hero {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 60px 20px 40px;
-  gap: 60px;
-  min-height: 80vh;
+  padding: 40px 0 30px;
+  gap: 30px;
+  transform: translateZ(0);
+  opacity: 1;
 }
 
 .heroContent {
   flex: 1;
-  max-width: 580px;
+  width: 100%;
+  text-align: center;
+  transform: translateZ(0);
 }
 
 .badge {
-  display: inline-block;
-  padding: 8px 20px;
-  background: #f8f6f4;
-  border-radius: 30px;
-  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: var(--gold-light);
+  border-radius: 50px;
+  font-size: 12px;
   font-weight: 600;
-  color: #c8a86e;
-  letter-spacing: 0.5px;
-  margin-bottom: 20px;
+  color: var(--gold-dark);
+  margin-bottom: 16px;
+}
+
+.badgeIcon {
+  font-size: 12px;
 }
 
 .heroTitle {
-  font-size: 48px;
+  font-family: 'Playfair Display', serif;
+  font-size: 34px;
   font-weight: 700;
-  color: #1a1a1a;
-  line-height: 1.1;
-  margin: 0 0 20px;
+  color: var(--dark);
+  line-height: 1.15;
+  margin: 0 0 12px;
 }
 
 .highlight {
-  color: #c8a86e;
+  color: var(--gold-dark);
   position: relative;
 }
 
-.highlight::after {
-  content: '';
-  position: absolute;
-  bottom: 4px;
-  left: 0;
-  right: 0;
-  height: 8px;
-  background: rgba(200, 168, 110, 0.2);
-  border-radius: 4px;
-}
-
 .heroSubtitle {
-  font-size: 18px;
-  color: #666;
+  font-size: 16px;
+  color: var(--gray);
   line-height: 1.7;
-  margin: 0 0 30px;
+  margin: 0 0 24px;
+  padding: 0 10px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .heroButtons {
   display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 40px;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 28px;
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
 }
 
 .primaryBtn {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 16px 32px;
-  background: #c8a86e;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: var(--dark);
   color: white;
   border: none;
-  border-radius: 10px;
-  font-size: 16px;
+  border-radius: 8px;
+  font-size: 15px;
   font-weight: 600;
   text-decoration: none;
-  transition: all 0.3s ease;
+  transition: var(--transition);
+  width: 100%;
 }
 
 .primaryBtn:hover {
-  background: #b8944a;
+  background: #2d2d2d;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(200, 168, 110, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
 .primaryBtn svg {
@@ -101,200 +167,267 @@
 }
 
 .primaryBtn:hover svg {
-  transform: translateX(5px);
+  transform: translateX(4px);
 }
 
 .secondaryBtn {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  padding: 16px 32px;
+  justify-content: center;
+  padding: 14px 28px;
   background: transparent;
-  color: #1a1a1a;
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
-  font-size: 16px;
+  color: var(--dark);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 15px;
   font-weight: 600;
   text-decoration: none;
-  transition: all 0.3s ease;
+  transition: var(--transition);
+  width: 100%;
 }
 
 .secondaryBtn:hover {
-  border-color: #c8a86e;
-  background: #f8f6f4;
+  border-color: var(--dark);
+  background: #fafafa;
 }
 
 .heroStats {
   display: flex;
-  gap: 40px;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .stat {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 80px;
+  transform: translateZ(0);
 }
 
 .statNumber {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--dark);
 }
 
 .statLabel {
-  font-size: 14px;
-  color: #999;
+  font-size: 12px;
+  color: var(--gray);
   margin-top: 2px;
 }
 
-/* ============================================
-   Hero Image
-   ============================================ */
 .heroImage {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 20px;
+  width: 100%;
+  border-radius: 16px;
   overflow: hidden;
-  min-height: 400px;
-  max-width: 500px;
-  background: linear-gradient(135deg, #f8f6f4 0%, #e8e2d5 100%);
+  min-height: 220px;
+  transform: translateZ(0);
 }
 
 .heroImageImg {
   width: 100%;
   height: 100%;
-  min-height: 400px;
+  min-height: 220px;
   object-fit: cover;
-  transition: transform 0.4s ease;
+  transition: transform 0.6s ease;
+  border-radius: 16px;
 }
 
-.heroImageImg:hover {
+.heroImage:hover .heroImageImg {
   transform: scale(1.02);
 }
 
 /* ============================================
-   Features Section
+   TRUST BADGES
+   ============================================ */
+.trustBadges {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 10px 0 30px;
+}
+
+.trustBadge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--light-gray);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  transition: var(--transition);
+  transform: translateZ(0);
+}
+
+.trustBadge:hover {
+  border-color: var(--gold);
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.trustBadgeIcon {
+  font-size: 18px;
+  color: var(--gold-dark);
+}
+
+.trustBadge span {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dark);
+}
+
+/* ============================================
+   FEATURES
    ============================================ */
 .features {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 80px 20px;
-  background: #f8f6f4;
+  padding: 40px 0;
+  transform: translateZ(0);
 }
 
 .sectionHeader {
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: 32px;
+}
+
+.sectionBadge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gold-dark);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
 }
 
 .sectionHeader h2 {
-  font-size: 36px;
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
   font-weight: 700;
-  color: #1a1a1a;
-  margin: 0 0 12px;
+  color: var(--dark);
+  margin: 0 0 8px;
 }
 
 .sectionHeader p {
-  font-size: 18px;
-  color: #666;
+  font-size: 15px;
+  color: var(--gray);
   margin: 0;
 }
 
 .featuresGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
+  grid-template-columns: 1fr;
+  gap: 16px;
 }
 
 .featureCard {
   background: white;
-  padding: 30px;
-  border-radius: 16px;
+  padding: 24px 20px;
+  border-radius: 14px;
   text-align: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: var(--transition);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  transform: translateZ(0);
 }
 
 .featureCard:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--gold);
 }
 
 .featureIcon {
-  width: 60px;
-  height: 60px;
-  margin: 0 auto 16px;
-  background: #f8f6f4;
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 12px;
+  background: var(--gold-light);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
-  color: #c8a86e;
+  font-size: 20px;
+  color: var(--gold-dark);
+  transition: var(--transition);
+}
+
+.featureCard:hover .featureIcon {
+  background: var(--dark);
+  color: white;
+  transform: scale(1.05);
 }
 
 .featureCard h3 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 10px;
+  color: var(--dark);
+  margin: 0 0 6px;
 }
 
 .featureCard p {
-  font-size: 14px;
-  color: #666;
+  font-size: 13px;
+  color: var(--gray);
   line-height: 1.6;
   margin: 0;
 }
 
 /* ============================================
-   Benefits Section
+   BENEFITS
    ============================================ */
 .benefits {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 80px 20px;
+  padding: 40px 0;
+  background: var(--light-gray);
+  border-radius: 16px;
+  margin: 0 -16px;
+  padding: 40px 16px;
+  transform: translateZ(0);
 }
 
 .benefitsContent {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
 }
 
 .benefitsLeft .badge {
-  background: #f8f6f4;
-  padding: 6px 16px;
+  background: white;
+  padding: 4px 14px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  color: #c8a86e;
-  display: inline-block;
+  color: var(--gold-dark);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   margin-bottom: 12px;
 }
 
 .benefitsLeft h2 {
-  font-size: 36px;
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
   font-weight: 700;
-  color: #1a1a1a;
-  margin: 0 0 16px;
+  color: var(--dark);
+  margin: 0 0 10px;
 }
 
 .benefitsLeft > p {
-  font-size: 16px;
-  color: #666;
+  font-size: 15px;
+  color: var(--gray);
   line-height: 1.7;
-  margin: 0 0 30px;
+  margin: 0 0 20px;
 }
 
 .benefitsList {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 0 0 20px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  grid-template-columns: 1fr;
+  gap: 8px;
 }
 
 .benefitsList li {
@@ -302,158 +435,247 @@
   align-items: center;
   gap: 10px;
   font-size: 14px;
-  color: #333;
+  color: var(--dark);
+  padding: 6px 0;
 }
 
-.benefitsList li svg {
-  color: #10b981;
+.benefitCheck {
+  color: var(--gold-dark);
   flex-shrink: 0;
+  font-size: 16px;
 }
 
+.benefitsBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--dark);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+  width: 100%;
+}
+
+.benefitsBtn:hover {
+  background: #2d2d2d;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.benefitsBtn svg {
+  transition: transform 0.3s ease;
+}
+
+.benefitsBtn:hover svg {
+  transform: translateX(4px);
+}
+
+/* ============================================
+   TESTIMONIAL
+   ============================================ */
 .testimonialCard {
-  background: #f8f6f4;
-  padding: 40px;
-  border-radius: 16px;
+  background: white;
+  padding: 24px 20px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  transition: var(--transition);
+  transform: translateZ(0);
+}
+
+.testimonialCard:hover {
+  border-color: var(--gold);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-3px);
+}
+
+.testimonialStars {
+  display: flex;
+  gap: 4px;
+  color: var(--gold-dark);
+  font-size: 14px;
+  margin-bottom: 12px;
 }
 
 .testimonialQuote {
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.7;
-  color: #1a1a1a;
+  color: var(--dark);
   font-style: italic;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .testimonialAuthor {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .testimonialAvatar {
-  width: 48px;
-  height: 48px;
-  background: #c8a86e;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-}
-
-.testimonialAuthor h4 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0;
-}
-
-.testimonialAuthor p {
-  font-size: 14px;
-  color: #666;
-  margin: 0;
-}
-
-/* ============================================
-   How It Works Section
-   ============================================ */
-.howItWorks {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 80px 20px;
-  background: #f8f6f4;
-}
-
-.steps {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 30px;
-}
-
-.step {
-  text-align: center;
-  padding: 30px 20px;
-}
-
-.stepNumber {
-  width: 50px;
-  height: 50px;
-  margin: 0 auto 16px;
-  background: #c8a86e;
-  color: white;
+  width: 40px;
+  height: 40px;
+  background: var(--gold-light);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
+}
+
+.testimonialAuthor h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark);
+  margin: 0;
+}
+
+.testimonialAuthor p {
+  font-size: 12px;
+  color: var(--gray);
+  margin: 0;
+}
+
+/* ============================================
+   HOW IT WORKS
+   ============================================ */
+.howItWorks {
+  padding: 40px 0;
+  transform: translateZ(0);
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.step {
+  text-align: center;
+  padding: 24px 16px;
+  background: white;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  transition: var(--transition);
+  transform: translateZ(0);
+}
+
+.step:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--gold);
+}
+
+.stepNumber {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 12px;
+  background: var(--dark);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
   font-weight: 700;
 }
 
-.step h3 {
-  font-size: 18px;
+.stepContent h3 {
+  font-size: 16px;
   font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 10px;
+  color: var(--dark);
+  margin: 0 0 6px;
 }
 
-.step p {
-  font-size: 14px;
-  color: #666;
+.stepContent p {
+  font-size: 13px;
+  color: var(--gray);
   line-height: 1.6;
   margin: 0;
 }
 
 /* ============================================
-   CTA Section
+   CTA SECTION
    ============================================ */
 .cta {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 80px 20px;
+  padding: 20px 0 0;
+  transform: translateZ(0);
 }
 
 .ctaContent {
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-  padding: 60px;
-  border-radius: 20px;
+  background: var(--dark);
+  padding: 36px 24px;
+  border-radius: 16px;
   text-align: center;
   color: white;
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
+}
+
+.ctaBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50px;
+  font-size: 11px;
+  color: var(--gold);
+  margin-bottom: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.ctaGem {
+  font-size: 12px;
 }
 
 .ctaContent h2 {
-  font-size: 36px;
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
   font-weight: 700;
-  margin: 0 0 16px;
+  margin: 0 0 12px;
+  position: relative;
+  z-index: 1;
 }
 
 .ctaContent p {
-  font-size: 18px;
+  font-size: 15px;
   opacity: 0.8;
-  margin: 0 0 30px;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 0 24px;
+  max-width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 .ctaBtn {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 16px 40px;
-  background: #c8a86e;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: var(--gold);
   color: white;
   border: none;
-  border-radius: 10px;
-  font-size: 18px;
+  border-radius: 8px;
+  font-size: 16px;
   font-weight: 600;
   text-decoration: none;
-  transition: all 0.3s ease;
+  transition: var(--transition);
+  position: relative;
+  z-index: 1;
+  width: 100%;
 }
 
 .ctaBtn:hover {
-  background: #b8944a;
+  background: var(--gold-dark);
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(200, 168, 110, 0.3);
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.3);
 }
 
 .ctaBtn svg {
@@ -461,19 +683,19 @@
 }
 
 .ctaBtn:hover svg {
-  transform: translateX(5px);
+  transform: translateX(4px);
 }
 
 .ctaNote {
-  margin-top: 20px !important;
-  font-size: 14px !important;
-  opacity: 0.7 !important;
+  margin-top: 16px !important;
+  font-size: 13px !important;
+  opacity: 0.6 !important;
 }
 
 .ctaNote a {
-  color: #c8a86e;
+  color: var(--gold);
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .ctaNote a:hover {
@@ -481,141 +703,419 @@
 }
 
 /* ============================================
-   Responsive
+   HIDE SCROLLBAR
    ============================================ */
-@media (max-width: 1024px) {
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
+* {
+  scrollbar-width: none;
+}
+
+/* ============================================
+   SELECTION
+   ============================================ */
+::selection {
+  background: var(--gold);
+  color: white;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (min-width: 600px) {
+  .page {
+    padding: 0 30px 50px;
+  }
+
   .hero {
-    flex-direction: column;
-    text-align: center;
-    padding: 40px 20px;
-  }
-
-  .heroContent {
-    max-width: 100%;
-  }
-
-  .heroButtons {
-    justify-content: center;
-  }
-
-  .heroStats {
-    justify-content: center;
-  }
-
-  .heroImage {
-    width: 100%;
-    max-width: 100%;
-    min-height: 300px;
-  }
-
-  .heroImageImg {
-    min-height: 300px;
-  }
-
-  .featuresGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .benefitsContent {
-    grid-template-columns: 1fr;
+    padding: 60px 0 40px;
     gap: 40px;
   }
 
-  .benefitsList {
-    grid-template-columns: 1fr;
-  }
-
-  .steps {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
   .heroTitle {
-    font-size: 32px;
-  }
-
-  .heroSubtitle {
-    font-size: 16px;
+    font-size: 40px;
   }
 
   .heroButtons {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .heroStats {
     flex-direction: row;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .heroImage {
-    min-height: 250px;
-  }
-
-  .heroImageImg {
-    min-height: 250px;
-  }
-
-  .featuresGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .steps {
-    grid-template-columns: 1fr;
-  }
-
-  .ctaContent {
-    padding: 40px 20px;
-  }
-
-  .ctaContent h2 {
-    font-size: 28px;
-  }
-
-  .sectionHeader h2 {
-    font-size: 28px;
-  }
-
-  .benefitsLeft h2 {
-    font-size: 28px;
-  }
-}
-
-@media (max-width: 480px) {
-  .heroTitle {
-    font-size: 26px;
+    max-width: 100%;
+    justify-content: center;
   }
 
   .primaryBtn,
   .secondaryBtn {
-    width: 100%;
-    justify-content: center;
+    width: auto;
+    min-width: 200px;
   }
 
-  .heroImage {
-    min-height: 200px;
+  .heroStats {
+    gap: 32px;
   }
 
-  .heroImageImg {
-    min-height: 200px;
+  .statNumber {
+    font-size: 28px;
   }
 
-  .featureCard {
-    padding: 20px;
+  .trustBadges {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .featuresGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .benefitsList {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .benefits {
+    margin: 0;
+    padding: 50px 32px;
+  }
+
+  .benefitsBtn {
+    width: auto;
+  }
+
+  .steps {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .ctaBtn {
-    width: 100%;
-    justify-content: center;
+    width: auto;
+    min-width: 250px;
+  }
+
+  .ctaContent {
+    padding: 50px 40px;
+  }
+
+  .ctaContent h2 {
+    font-size: 32px;
+  }
+
+  .ctaContent p {
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page {
+    padding: 0 40px 60px;
+  }
+
+  .hero {
+    flex-direction: row;
+    padding: 80px 0 60px;
+    gap: 60px;
+    min-height: 80vh;
+  }
+
+  .heroContent {
+    text-align: left;
+    max-width: 50%;
+  }
+
+  .heroTitle {
+    font-size: 52px;
+  }
+
+  .heroSubtitle {
+    padding: 0;
+    margin-left: 0;
+  }
+
+  .heroButtons {
+    justify-content: flex-start;
+    margin-bottom: 40px;
+  }
+
+  .heroStats {
+    justify-content: flex-start;
+  }
+
+  .heroImage {
+    flex: 1;
+    max-width: 45%;
+    min-height: 400px;
+  }
+
+  .heroImageImg {
+    min-height: 400px;
+  }
+
+  .featuresGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .featureCard {
+    padding: 32px 28px;
+  }
+
+  .benefitsContent {
+    flex-direction: row;
+    gap: 60px;
+  }
+
+  .benefitsLeft {
+    flex: 1;
+  }
+
+  .benefitsRight {
+    flex: 1;
+  }
+
+  .steps {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+
+  .step {
+    padding: 32px 20px;
+  }
+
+  .ctaContent {
+    padding: 60px;
+  }
+
+  .ctaContent h2 {
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding: 0 12px 30px;
+  }
+
+  .hero {
+    padding: 30px 0 20px;
+    gap: 20px;
+  }
+
+  .heroTitle {
+    font-size: 28px;
+  }
+
+  .heroSubtitle {
+    font-size: 14px;
+    padding: 0 5px;
+  }
+
+  .heroButtons {
+    max-width: 100%;
+  }
+
+  .primaryBtn,
+  .secondaryBtn {
+    font-size: 14px;
+    padding: 12px 20px;
+  }
+
+  .heroStats {
+    gap: 12px;
+  }
+
+  .statNumber {
+    font-size: 20px;
+  }
+
+  .statLabel {
+    font-size: 10px;
+  }
+
+  .heroImage {
+    min-height: 160px;
+  }
+
+  .heroImageImg {
+    min-height: 160px;
+  }
+
+  .trustBadges {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 8px 0 20px;
+  }
+
+  .trustBadge {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .trustBadgeIcon {
+    font-size: 16px;
+  }
+
+  .sectionHeader h2 {
+    font-size: 24px;
+  }
+
+  .sectionHeader p {
+    font-size: 14px;
+  }
+
+  .featureCard {
+    padding: 20px 16px;
+  }
+
+  .featureIcon {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+
+  .featureCard h3 {
+    font-size: 15px;
+  }
+
+  .featureCard p {
+    font-size: 12px;
+  }
+
+  .benefits {
+    padding: 30px 12px;
+    margin: 0 -12px;
+  }
+
+  .benefitsLeft h2 {
+    font-size: 24px;
+  }
+
+  .benefitsLeft > p {
+    font-size: 14px;
+  }
+
+  .benefitsList li {
+    font-size: 13px;
+  }
+
+  .benefitsBtn {
+    font-size: 14px;
+    padding: 10px 20px;
   }
 
   .testimonialCard {
-    padding: 24px;
+    padding: 20px 16px;
   }
 
   .testimonialQuote {
+    font-size: 15px;
+  }
+
+  .step {
+    padding: 20px 14px;
+  }
+
+  .stepNumber {
+    width: 38px;
+    height: 38px;
     font-size: 16px;
+  }
+
+  .stepContent h3 {
+    font-size: 15px;
+  }
+
+  .stepContent p {
+    font-size: 12px;
+  }
+
+  .ctaContent {
+    padding: 28px 16px;
+  }
+
+  .ctaContent h2 {
+    font-size: 24px;
+  }
+
+  .ctaContent p {
+    font-size: 14px;
+  }
+
+  .ctaBtn {
+    font-size: 14px;
+    padding: 12px 24px;
+  }
+
+  .ctaNote {
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .page {
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .heroImage {
+    min-height: 180px;
+  }
+  
+  .heroImageImg {
+    min-height: 180px;
+  }
+
+  .featuresGrid {
+    gap: 12px;
+  }
+
+  .steps {
+    gap: 12px;
+  }
+
+  .benefits {
+    margin: 0 -12px;
+    padding: 30px 12px;
+  }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .hero,
+  .features,
+  .benefits,
+  .howItWorks,
+  .cta,
+  .featureCard,
+  .step,
+  .trustBadge,
+  .stat {
+    will-change: auto;
+    transform: none;
+    backface-visibility: visible;
+  }
+}
+
+/* ============================================
+   PRINT
+   ============================================ */
+@media print {
+  .page {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+  
+  .heroButtons,
+  .benefitsCta,
+  .ctaBtn,
+  .ctaNote {
+    display: none !important;
   }
 }

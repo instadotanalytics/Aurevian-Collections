@@ -16,24 +16,33 @@ const FALLBACK_CATEGORIES = [
   { id: "earrings", label: "Earrings", path: "/shop/earrings", image: "" },
   { id: "necklaces", label: "Necklaces", path: "/shop/necklaces", image: "" },
   { id: "rings", label: "Rings", path: "/shop/rings", image: "" },
+const CATEGORIES = [
+  { id: "earrings", name: "Earrings", image: earringsImg },
+  { id: "necklaces", name: "Necklaces", image: necklacesImg },
+  { id: "rings", name: "Rings", image: ringsImg },
+  { id: "bracelets", name: "Bracelets", image: braceletsImg },
+  { id: "anklets", name: "Anklets", image: ankletsImg },
+  { id: "bridal", name: "Bridal", image: bridalImg },
+  { id: "nosepin", name: "Nosepin", image: nosepinImg },
+  { id: "chain", name: "Chain", image: chainImg },
 ];
 
 const containerVariants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.09,
-      delayChildren: 0.15,
+      staggerChildren: 0.07,
+      delayChildren: 0.1,
     },
   },
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 28 },
+  hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
@@ -74,6 +83,7 @@ const CategoryCard = React.memo(function CategoryCard({ category }) {
             </div>
           )}
 
+          {/* Rotating dashed ring, layered on top of the image */}
           <span className={styles.ring} aria-hidden="true" />
         </div>
 
@@ -124,8 +134,8 @@ export default function ShopByCategory() {
     const el = trackRef.current;
     if (!el) return;
     const card = el.querySelector(`.${styles.card}`);
-    const cardWidth = card ? card.getBoundingClientRect().width : 200;
-    const gap = 32;
+    const cardWidth = card ? card.getBoundingClientRect().width : 140;
+    const gap = 16;
     const distance = (cardWidth + gap) * 2 * direction;
     el.scrollBy({ left: distance, behavior: "smooth" });
   };
@@ -141,10 +151,10 @@ export default function ShopByCategory() {
       <div className={styles.container}>
         <motion.div
           className={styles.header}
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.6 }}
         >
           <p className={styles.topText}>✦ DISCOVER OUR COLLECTIONS ✦</p>
 
@@ -219,10 +229,10 @@ export default function ShopByCategory() {
 
         <motion.div
           className={styles.ctaWrap}
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 14 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.6 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
         >
           <span className={styles.ctaLine} aria-hidden="true" />
           <span className={styles.ctaLine} aria-hidden="true" />
