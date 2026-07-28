@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import styles from "./Shopbycategory.module.css";
+import styles from "./ShopByCategory.module.css";
 import { fetchPublicHeaderConfig } from "./../../redux/slices/headerConfigSlice.js";
 
 // ✅ Fully dynamic now — no static image imports. Whatever the admin sets
@@ -16,15 +16,11 @@ const FALLBACK_CATEGORIES = [
   { id: "earrings", label: "Earrings", path: "/shop/earrings", image: "" },
   { id: "necklaces", label: "Necklaces", path: "/shop/necklaces", image: "" },
   { id: "rings", label: "Rings", path: "/shop/rings", image: "" },
-const CATEGORIES = [
-  { id: "earrings", name: "Earrings", image: earringsImg },
-  { id: "necklaces", name: "Necklaces", image: necklacesImg },
-  { id: "rings", name: "Rings", image: ringsImg },
-  { id: "bracelets", name: "Bracelets", image: braceletsImg },
-  { id: "anklets", name: "Anklets", image: ankletsImg },
-  { id: "bridal", name: "Bridal", image: bridalImg },
-  { id: "nosepin", name: "Nosepin", image: nosepinImg },
-  { id: "chain", name: "Chain", image: chainImg },
+  { id: "bracelets", label: "Bracelets", path: "/shop/bracelets", image: "" },
+  { id: "anklets", label: "Anklets", path: "/shop/anklets", image: "" },
+  { id: "bridal", label: "Bridal", path: "/shop/bridal", image: "" },
+  { id: "nosepin", label: "Nosepin", path: "/shop/nosepin", image: "" },
+  { id: "chains", label: "Chains", path: "/shop/chains", image: "" },
 ];
 
 const containerVariants = {
