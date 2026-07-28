@@ -9,6 +9,8 @@ import ringsImg from "../../assets/rings.png";
 import braceletsImg from "../../assets/bracelets.png";
 import ankletsImg from "../../assets/anklets.png";
 import bridalImg from "../../assets/bridal.png";
+import nosepinImg from "../../assets/nosepin.png";
+import chainImg from "../../assets/chain.png";
 
 const CATEGORIES = [
   { id: "earrings", name: "Earrings", image: earringsImg },
@@ -17,6 +19,8 @@ const CATEGORIES = [
   { id: "bracelets", name: "Bracelets", image: braceletsImg },
   { id: "anklets", name: "Anklets", image: ankletsImg },
   { id: "bridal", name: "Bridal", image: bridalImg },
+  { id: "nosepin", name:"Nosepin", image: nosepinImg },
+  { id: "chain", name:"Chain", image:chainImg},
 ];
 
 const containerVariants = {

@@ -89,17 +89,17 @@
   letter-spacing: 0.02em;
   display: flex;
   justify-content: center;
-  align-items: flex-end;
-  gap: clamp(8px, 1.6vw, 16px);
+  align-items: baseline;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .shop,
 .category {
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(22px, 3.8vw, 40px);
+  font-size: clamp(32px, 4vw, 52px);
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.3;
   background: linear-gradient(180deg, #4d3620 0%, #1f1b17 40%, #000000 100%);
   -webkit-background-clip: text;
   background-clip: text;
@@ -107,14 +107,29 @@
 }
 
 .by {
-  font-family: "Great Vibes", cursive;
-    font-size: clamp(25px, 4.2vw, 44px);
-  line-height: 1;
-  padding-bottom: 4px;
-  background: linear-gradient(180deg, #f8e5a3, #d6a73b, #b27b1e);
+  font-family: "Great Vibes";
+  font-size: clamp(32px, 4vw, 50px);
+  font-weight: 400;
+  line-height: 1.3;
+  display: inline-block;
+  transform: none;
+
+  background: linear-gradient(
+    180deg,
+    #f8e9b8 0%,
+    #e5c15b 35%,
+    #c9962f 70%,
+    #a66b16 100%
+  );
+
   -webkit-background-clip: text;
   background-clip: text;
+  color: transparent;
   -webkit-text-fill-color: transparent;
+
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .headerDivider {
@@ -527,22 +542,23 @@
   .track {
     flex: 1 1 100%;
     width: 100%;
-    gap: 12px;
-    padding: 8px 4px;
+  gap: 8px;
+  padding: 8px 1px;
+
   }
 
   /* Card/image sizing: 3 equal, clearly visible cards.
      min-width/min-height act as a floor so images never
      render too small even on narrow devices. */
   .card {
-    width: calc((100% - 2 * 12px) / 3);
-    min-width: 92px;
+     width: calc((100% - 3 * 12px) / 4);
+  min-width: 70px;
   }
   .imageWrap {
-    width: calc((100% - 2 * 12px) / 3);
-    height: calc((100% - 2 * 12px) / 3);
-    min-width: 92px;
-    min-height: 92px;
+    width: calc((100% - 3 * 12px) / 4);
+  height: calc((100% - 3 * 12px) / 4);
+  min-width: 70px;
+  min-height: 70px;
   }
 
   .cardLink {
