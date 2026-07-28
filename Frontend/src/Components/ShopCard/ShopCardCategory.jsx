@@ -160,6 +160,7 @@ export default function ShopCardCategory() {
             <h2 id="shop-cards-heading" className={styles.heading}>
               Best Products For You
             </h2>
+            <h3 className={styles.subHeading}>Here you can find the latest trending pieces!</h3>
           </div>
 
           <a href="/shop" className={styles.viewAllBtn}>

@@ -87,6 +87,13 @@
   letter-spacing: -0.5px;
 }
 
+.subHeading {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: 50;
+  color: #666;
+}
+
 .viewAllBtn {
   display: inline-flex;
   align-items: center;
@@ -167,6 +174,10 @@
 /* Hide scroll buttons on mobile */
 @media (max-width: 768px) {
   .scrollBtn {
+    display: none;
+  }
+
+  .subHeading {
     display: none;
   }
 }
