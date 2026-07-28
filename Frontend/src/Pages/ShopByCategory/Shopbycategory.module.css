@@ -1,11 +1,9 @@
-
 /* ---------------------------------------------------------------
    ShopByCategory.module.css
-   Aurevian Jewellery — premium "Shop by Category" section — v9
-   - Fixed missing font import (Cormorant Garamond / Great Vibes
-     were used but never loaded, so they fell back to default serif)
-   - Refined spacing, shadows, and nav button finish
-   - Desktop arrows on left/right edges, mobile arrows below cards
+   Aurevian Jewellery — premium "Shop by Category" section — v11
+   - Compact, clean layout: 8 cards visible on desktop, 4 on mobile
+   - Rotating dashed ring overlaid directly on top of each image
+   - Very tight top/bottom section padding, gradient background
 ------------------------------------------------------------------ */
 
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Great+Vibes&family=Jost:wght@300;400;500;600&display=swap");
@@ -20,14 +18,14 @@
   --gold-soft: #d9b877;
   --ink: #2b2118;
   --muted: #8a7a68;
-  --shadow-soft: 0 20px 45px -20px rgba(120, 90, 40, 0.25);
-  --shadow-lift: 0 26px 50px -16px rgba(120, 90, 40, 0.4);
+  --shadow-soft: 0 14px 30px -16px rgba(120, 90, 40, 0.25);
+  --shadow-lift: 0 18px 34px -14px rgba(120, 90, 40, 0.38);
 
   position: relative;
   isolation: isolate;
   overflow: hidden;
- padding: 40px 0;
-  background: linear-gradient(180deg, #ffffff 0%, #fdfbf7 100%);
+  padding: 18px 0;
+  background: linear-gradient(180deg, var(--ivory) 0%, var(--cream) 55%, var(--champagne) 100%);
 }
 
 /* ---------- ambient decoration ---------- */
@@ -38,7 +36,7 @@
   height: clamp(260px, 34vw, 480px);
   border-radius: 50%;
   filter: blur(80px);
-  opacity: 0.45;
+  opacity: 0.4;
   z-index: -1;
   pointer-events: none;
 }
@@ -46,7 +44,6 @@
 .glowTopLeft {
   top: -16%;
   left: -12%;
-  background: radial-gradient(circle, var(--gold-soft), transparent 70%);
 }
 
 .glowBottomRight {
@@ -73,31 +70,31 @@
 .topText {
   font-family: "Jost", sans-serif;
   text-transform: uppercase;
-  letter-spacing: 7px;
-  font-size: 13px;
+  letter-spacing: 6px;
+  font-size: 12px;
   color: var(--gold-deep);
   font-weight: 600;
-  margin: 0 0 18px;
+  margin: 0 0 14px;
 }
 
 .heading {
-  font-size: clamp(26px, 3.5vw, 38px);
+  font-size: clamp(24px, 3vw, 34px);
   font-weight: 500;
   color: #1f1f1f;
   line-height: 1.1;
-  margin: 0 0 20px;
+  margin: 0 0 16px;
   letter-spacing: 0.02em;
   display: flex;
   justify-content: center;
   align-items: baseline;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .shop,
 .category {
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(32px, 4vw, 52px);
+  font-size: clamp(28px, 3.6vw, 46px);
   font-weight: 700;
   line-height: 1.3;
   background: linear-gradient(180deg, #4d3620 0%, #1f1b17 40%, #000000 100%);
@@ -108,11 +105,10 @@
 
 .by {
   font-family: "Great Vibes";
-  font-size: clamp(32px, 4vw, 50px);
+  font-size: clamp(28px, 3.6vw, 44px);
   font-weight: 400;
   line-height: 1.3;
   display: inline-block;
-  transform: none;
 
   background: linear-gradient(
     180deg,
@@ -133,9 +129,9 @@
 }
 
 .headerDivider {
-  width: 150px;
+  width: 130px;
   height: 1px;
-  margin: 4px 0 22px;
+  margin: 2px 0 18px;
   background: linear-gradient(to right, transparent, #d4af37, transparent);
   position: relative;
 }
@@ -148,8 +144,8 @@
   transform: translate(-50%, -50%);
   background: #fffdf9;
   color: #c89b3c;
-  padding: 0 14px;
-  font-size: 15px;
+  padding: 0 12px;
+  font-size: 13px;
 }
 
 .subtitle {
@@ -173,12 +169,13 @@
   display: flex;
   flex: 1 1 auto;
   min-width: 0;
-  gap: 24px;
+  gap: 16px;
   overflow-x: auto;
   scroll-snap-type: x proximity;
   scroll-behavior: smooth;
-  padding: 12px 4px;
+  padding: 10px 4px;
   margin: 0;
+  justify-content: center;
 
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -194,20 +191,10 @@
   border-radius: 12px;
 }
 
-/* Center the row on wide screens where all 6 cards fit with room to spare */
-@media (min-width: 1180px) {
-  .track {
-    justify-content: center;
-  }
-}
-
 /* -------------------------- nav buttons -------------------------- */
-/* Shared visual style for every arrow button, desktop or mobile —
-   deep black-to-charcoal circle with a gold icon; hover flips to
-   a warm gold gradient with a soft glow. */
 .navButton {
-  width: 46px;
-  height: 46px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 1px solid rgba(214, 175, 90, 0.35);
   background: linear-gradient(160deg, #1a1a1a 0%, #000000 100%);
@@ -215,10 +202,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 19px;
+  font-size: 17px;
   cursor: pointer;
   flex-shrink: 0;
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease,
@@ -232,7 +219,7 @@
   color: #1a1305;
   border-color: transparent;
   transform: translateY(-2px);
-  box-shadow: 0 14px 30px -6px rgba(182, 134, 60, 0.55);
+  box-shadow: 0 12px 26px -6px rgba(182, 134, 60, 0.5);
 }
 
 .navButton:focus-visible {
@@ -241,14 +228,12 @@
 }
 
 .navButton:disabled {
-  opacity: 0.32;
+  opacity: 0.28;
   cursor: default;
   box-shadow: none;
   transform: none;
 }
 
-/* Desktop arrows — absolutely positioned on the left/right edges of
-   the slider, vertically centered over the image row */
 .desktopNav {
   position: absolute;
   top: 50%;
@@ -261,28 +246,28 @@
 }
 
 .navButtonLeft.desktopNav {
-  left: -8px;
+  left: -6px;
 }
 
 .navButtonRight.desktopNav {
-  right: -8px;
+  right: -6px;
 }
 
-/* Mobile arrow row — hidden on desktop/tablet, shown only on mobile
-   (see the max-width: 640px block below) */
 .mobileNav {
   display: none;
   justify-content: center;
   align-items: center;
-  gap: 20px;
-  margin-top: 26px;
-  margin-bottom: 8px;
+  gap: 16px;
+  margin-top: 20px;
+  margin-bottom: 6px;
 }
 
 /* ------------------------------ card ------------------------------ */
+/* Desktop default: exactly 8 cards in a single, compact row */
 .card {
   flex: 0 0 auto;
-  width: 190px;
+  width: calc((100% - 7 * 16px) / 8);
+  min-width: 108px;
   scroll-snap-align: start;
 }
 
@@ -293,13 +278,13 @@
   text-align: center;
   text-decoration: none;
   color: inherit;
-  gap: 16px;
+  gap: 12px;
 }
 
 .imageWrap {
   position: relative;
-  width: 170px;
-  height: 170px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
   overflow: hidden;
   background: linear-gradient(160deg, var(--champagne) 0%, var(--cream) 100%);
@@ -329,42 +314,53 @@
 
 .card:hover .imageWrap,
 .card:focus-within .imageWrap {
-  transform: translateY(-6px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-lift);
 }
 
 .card:hover .image {
-  transform: scale(1.08);
+  transform: scale(1.06);
 }
 
-/* Thin gold ring that appears on hover, just outside the circle */
+/* Continuously rotating dashed ring, sitting just 1px outside the
+   image circle. Slow, subtle spin — speeds up only slightly on hover.
+   Color is intentionally darker than the section's background. */
 .ring {
   position: absolute;
-  inset: -6px;
+  inset: -1px;
   border-radius: 50%;
-  border: 1px solid var(--gold-soft);
-  opacity: 0;
-  transform: scale(0.94);
-  transition:
-    opacity 0.4s ease,
-    transform 0.4s ease;
+  border: 3px dotted #3a2c1e;
+  opacity: 0.85;
   pointer-events: none;
+  animation: ringSpin 22s linear infinite;
+  transition: opacity 0.3s ease, border-color 0.3s ease;
 }
 
 .card:hover .ring,
 .card:focus-within .ring {
   opacity: 1;
-  transform: scale(1);
+  border-color: var(--gold-deep);
+  animation-duration: 14s;
+}
+
+@keyframes ringSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .categoryName {
   font-family: "Jost", sans-serif;
   font-weight: 500;
-  font-size: 14.5px;
+  font-size: 13px;
   letter-spacing: 0.03em;
   text-transform: capitalize;
   color: var(--ink);
   margin: 0;
+  white-space: nowrap;
   transition: color 0.3s ease;
 }
 
@@ -377,14 +373,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 18px;
+  gap: 16px;
+  margin-top: 8px;
 }
-
-/*.ctaLine {
-  width: 90px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold-soft));
-}*/
 
 .ctaLine:last-child {
   background: linear-gradient(90deg, var(--gold-soft), transparent);
@@ -394,14 +385,14 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 15px 34px;
+  padding: 13px 30px;
   border: 1px solid var(--gold);
   border-radius: 999px;
   background: transparent;
   color: var(--gold-deep);
   font-family: "Jost", sans-serif;
   font-weight: 500;
-  font-size: 13px;
+  font-size: 12.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   text-decoration: none;
@@ -422,79 +413,62 @@
 }
 
 .ctaIcon {
-  font-size: 16px;
+  font-size: 15px;
 }
 
 /* ------------------------------------------------------------------
-   Responsive
-   Desktop (≥1180px): all 6 cards visible, side arrows shown
-   Tablet (641px–1179px): partial cards visible, side arrows shown
-   Mobile (≤640px): side arrows hidden, bottom-row arrows shown
-   below the cards and above the CTA row
+   Responsive card counts
+   Desktop (≥1180px): 8 cards, single row, no scrolling needed
+   Laptop (993–1179px): 7 cards
+   Tablet (769–992px): 6 cards
+   Small tablet (641–768px): 5 cards
+   Mobile (≤640px): exactly 4 cards
 ------------------------------------------------------------------ */
 
-/* Small laptop / large tablet */
 @media (max-width: 1179px) {
-  .card {
-    width: 160px;
-  }
-  .imageWrap {
-    width: 160px;
-    height: 160px;
-  }
-  .track {
-    gap: 20px;
-  }
-  .navButtonLeft.desktopNav {
-    left: -14px;
-  }
-  .navButtonRight.desktopNav {
-    right: -14px;
-  }
-}
-
-/* Tablet — ~4 cards visible */
-@media (max-width: 992px) {
-  .track {
-    gap: 16px;
-  }
-  .card {
-    width: calc((100% - 3 * 16px) / 4);
-    min-width: 130px;
-  }
-  .imageWrap {
-    width: calc((100% - 3 * 16px) / 4);
-    height: calc((100% - 3 * 16px) / 4);
-    min-width: 130px;
-    min-height: 130px;
-  }
-  .desktopNav {
-    width: 42px;
-    height: 42px;
-    font-size: 17px;
-  }
-  .navButtonLeft.desktopNav {
-    left: -6px;
-  }
-  .navButtonRight.desktopNav {
-    right: -6px;
-  }
-}
-
-/* Small tablet — ~3-4 cards */
-@media (max-width: 768px) {
   .track {
     gap: 14px;
   }
   .card {
-    width: calc((100% - 2 * 14px) / 3.5);
-    min-width: 120px;
+    width: calc((100% - 6 * 14px) / 7);
+    min-width: 100px;
   }
-  .imageWrap {
-    width: calc((100% - 2 * 14px) / 3.5);
-    height: calc((100% - 2 * 14px) / 3.5);
-    min-width: 120px;
-    min-height: 120px;
+  .navButtonLeft.desktopNav {
+    left: -10px;
+  }
+  .navButtonRight.desktopNav {
+    right: -10px;
+  }
+}
+
+@media (max-width: 992px) {
+  .track {
+    gap: 14px;
+  }
+  .card {
+    width: calc((100% - 5 * 14px) / 6);
+    min-width: 96px;
+  }
+  .desktopNav {
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+  }
+  .navButtonLeft.desktopNav {
+    left: -4px;
+  }
+  .navButtonRight.desktopNav {
+    right: -4px;
+  }
+}
+
+@media (max-width: 768px) {
+  .track {
+    gap: 12px;
+  }
+  .card {
+    width: calc((100% - 4 * 12px) / 5);
+    min-width: 92px;
   }
   .navButtonLeft.desktopNav {
     left: 0;
@@ -507,34 +481,31 @@
     gap: 8px;
   }
   .subtitle {
-    font-size: 17px;
+    font-size: 16px;
   }
   .topText {
-    letter-spacing: 4px;
-    font-size: 11px;
+    letter-spacing: 3.5px;
+    font-size: 10.5px;
   }
 }
 
 /* ------------------------------------------------------------------
-   Mobile — exactly 3 full, clearly-visible cards.
-   Side (desktop) arrows are hidden entirely; the bottom-row
-   (.mobileNav) arrows take over, sitting below the cards and
-   above the CTA row.
+   Mobile — exactly 4 clean, compact cards, side arrows hidden,
+   bottom-row arrows take over below the cards.
 ------------------------------------------------------------------ */
 @media (max-width: 640px) {
   .container {
-    padding-inline: 16px;
+    padding-inline: 14px;
   }
 
   .header {
-    margin-bottom: 30px;
+    margin-bottom: 24px;
   }
 
   .sliderWrap {
     position: relative;
   }
 
-  /* Hide the side arrows on mobile — the bottom row takes over */
   .desktopNav {
     display: none;
   }
@@ -542,43 +513,32 @@
   .track {
     flex: 1 1 100%;
     width: 100%;
-  gap: 8px;
-  padding: 8px 1px;
-
+    gap: 10px;
+    padding: 6px 1px;
   }
 
-  /* Card/image sizing: 3 equal, clearly visible cards.
-     min-width/min-height act as a floor so images never
-     render too small even on narrow devices. */
   .card {
-     width: calc((100% - 3 * 12px) / 4);
-  min-width: 70px;
-  }
-  .imageWrap {
-    width: calc((100% - 3 * 12px) / 4);
-  height: calc((100% - 3 * 12px) / 4);
-  min-width: 70px;
-  min-height: 70px;
+    width: calc((100% - 3 * 10px) / 4);
+    min-width: 68px;
   }
 
   .cardLink {
-    gap: 8px;
+    gap: 7px;
   }
 
   .categoryName {
-    font-size: 11.5px;
-    letter-spacing: 0.08em;
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
   }
 
-  /* Bottom arrow row — below the cards, above the CTA row */
   .mobileNav {
     display: flex;
   }
 
   .mobileNav .navButton {
-    width: 42px;
-    height: 42px;
-    font-size: 16px;
+    width: 38px;
+    height: 38px;
+    font-size: 15px;
   }
 
   .ctaLine {
@@ -586,41 +546,38 @@
   }
 
   .ctaWrap {
-    margin-top: 10px;
+    margin-top: 6px;
   }
 
   .section {
-    padding-bottom: 32px;
+    padding-bottom: 18px;
   }
 }
 
-/* Very small phones — keep 3 cards, tighten spacing only */
+/* Very small phones — keep 4 cards, tighten spacing only */
 @media (max-width: 380px) {
   .track {
-    gap: 8px;
-    padding: 8px 4px;
+    gap: 7px;
+    padding: 6px 2px;
   }
   .card {
-    width: calc((100% - 2 * 8px) / 3);
-    min-width: 84px;
-  }
-  .imageWrap {
-    width: calc((100% - 2 * 8px) / 3);
-    height: calc((100% - 2 * 8px) / 3);
-    min-width: 84px;
-    min-height: 84px;
+    width: calc((100% - 3 * 7px) / 4);
+    min-width: 62px;
   }
   .mobileNav .navButton {
-    width: 38px;
-    height: 38px;
-    font-size: 15px;
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
   }
   .shop,
   .category {
-    font-size: 34px;
+    font-size: 30px;
   }
   .by {
-    font-size: 38px;
+    font-size: 34px;
+  }
+  .categoryName {
+    font-size: 9.5px;
   }
 }
 
@@ -634,5 +591,8 @@
   .navButton,
   .ctaButton {
     transition: none !important;
+  }
+  .ring {
+    animation: none !important;
   }
 }
