@@ -1,0 +1,503 @@
+/* src/Components/ShopCardCategory/ShopCardCategory.module.css */
+
+/* ==========================================================
+   SECTION
+   ========================================================== */
+.section {
+  padding: 60px 24px;
+  background: #fcf9f5;
+  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ==========================================================
+   HEADER
+   ========================================================== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.topText {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #b3873f;
+  margin: 0;
+}
+
+.heading {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 32px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.viewAllBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
+  text-decoration: none;
+  padding: 8px 16px;
+  border: 1px solid #d4c9b8;
+  background: transparent;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.viewAllBtn:hover {
+  background: #1a1a1a;
+  color: #fcf9f5;
+  border-color: #1a1a1a;
+}
+
+.viewAllIcon {
+  font-size: 16px;
+  transition: transform 0.3s ease;
+}
+
+.viewAllBtn:hover .viewAllIcon {
+  transform: translateX(4px);
+}
+
+/* ==========================================================
+   SCROLL WRAPPER
+   ========================================================== */
+.scrollWrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* ==========================================================
+   SCROLL BUTTONS - Desktop only
+   ========================================================== */
+.scrollBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #d4c9b8;
+  color: #1a1a1a;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  box-shadow: none;
+}
+
+.scrollBtn:hover {
+  background: #1a1a1a;
+  color: #fcf9f5;
+  border-color: #1a1a1a;
+}
+
+.scrollLeftBtn {
+  left: -22px;
+}
+
+.scrollRightBtn {
+  right: -22px;
+}
+
+/* Hide scroll buttons on mobile */
+@media (max-width: 768px) {
+  .scrollBtn {
+    display: none;
+  }
+}
+
+/* ==========================================================
+   SCROLL CONTAINER - Horizontal scroll
+   ========================================================== */
+.scrollContainer {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 8px 4px 16px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollContainer::-webkit-scrollbar {
+  height: 0;
+  width: 0;
+}
+
+.scrollContainer {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ==========================================================
+   PRODUCT CARD — NO border, NO shadow, NO background
+   ========================================================== */
+.card {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  text-decoration: none;
+  color: #1a1a1a;
+  background: transparent;
+  border: none;
+  transition: transform 0.3s ease;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+/* ==========================================================
+   IMAGE SIZE - Bigger images
+   ========================================================== */
+.imageWrap {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+  background: #f0ebe4;
+  overflow: hidden;
+}
+
+.image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.card:hover .image {
+  transform: scale(1.04);
+}
+
+.imagePlaceholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(145deg, #f0ebe4 0%, #e5ddd2 100%);
+}
+
+.imagePlaceholder::after {
+  content: "✦";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 32px;
+  color: #b3873f;
+  opacity: 0.3;
+}
+
+/* ==========================================================
+   DISCOUNT BADGE
+   ========================================================== */
+.discountBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #1a1a1a;
+  color: #fcf9f5;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  z-index: 1;
+  text-transform: uppercase;
+}
+
+/* ==========================================================
+   INFO
+   ========================================================== */
+.info {
+  padding: 14px 4px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  background: transparent;
+}
+
+.title {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ratingRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.starIcon {
+  color: #b3873f;
+  font-size: 12px;
+}
+
+.ratingValue {
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+}
+
+.priceRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.price {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  letter-spacing: -0.3px;
+}
+
+.oldPrice {
+  font-size: 13px;
+  color: #999;
+  text-decoration: line-through;
+}
+
+/* ==========================================================
+   RESPONSIVE - Desktop: 4 cards visible
+   ========================================================== */
+@media (min-width: 769px) {
+  .card {
+    min-width: 260px;
+    max-width: 260px;
+  }
+
+  .imageWrap {
+    padding-bottom: 100%;
+  }
+
+  .title {
+    font-size: 17px;
+  }
+
+  .price {
+    font-size: 20px;
+  }
+}
+
+/* ==========================================================
+   RESPONSIVE - Tablet: 3 cards visible
+   ========================================================== */
+@media (max-width: 992px) {
+  .section {
+    padding: 48px 16px;
+  }
+
+  .heading {
+    font-size: 28px;
+  }
+
+  .card {
+    min-width: 220px;
+    max-width: 220px;
+  }
+}
+
+/* ==========================================================
+   RESPONSIVE - Mobile: 2 cards visible
+   ========================================================== */
+@media (max-width: 768px) {
+  .section {
+    padding: 40px 12px;
+  }
+
+  .header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .heading {
+    font-size: 24px;
+  }
+
+  .viewAllBtn {
+    font-size: 12px;
+    padding: 6px 14px;
+  }
+
+  /* ✅ 2 cards visible on mobile */
+  .card {
+    min-width: 45vw;
+    max-width: 45vw;
+  }
+
+  .imageWrap {
+    padding-bottom: 100%;
+  }
+
+  .title {
+    font-size: 14px;
+  }
+
+  .price {
+    font-size: 16px;
+  }
+
+  .oldPrice {
+    font-size: 12px;
+  }
+
+  .scrollContainer {
+    gap: 14px;
+    padding: 4px 2px 12px;
+  }
+}
+
+/* ==========================================================
+   RESPONSIVE - Small Phones: 2 cards with bigger images
+   ========================================================== */
+@media (max-width: 480px) {
+  .section {
+    padding: 32px 8px;
+  }
+
+  .heading {
+    font-size: 20px;
+  }
+
+  .topText {
+    font-size: 9px;
+    letter-spacing: 2px;
+  }
+
+  .viewAllBtn {
+    font-size: 10px;
+    padding: 4px 10px;
+  }
+
+  .viewAllBtn span {
+    display: none;
+  }
+
+  .viewAllBtn .viewAllIcon {
+    font-size: 18px;
+    margin: 0;
+  }
+
+  /* ✅ 2 cards with bigger images on small phones */
+  .card {
+    min-width: 44vw;
+    max-width: 44vw;
+  }
+
+  .imageWrap {
+    padding-bottom: 100%;
+  }
+
+  .info {
+    padding: 10px 2px 12px;
+  }
+
+  .title {
+    font-size: 13px;
+  }
+
+  .price {
+    font-size: 14px;
+  }
+
+  .oldPrice {
+    font-size: 11px;
+  }
+
+  .scrollContainer {
+    gap: 10px;
+    padding: 2px 0 10px;
+  }
+
+  .discountBadge {
+    font-size: 8px;
+    padding: 3px 8px;
+  }
+
+  .imageWrap {
+    padding-bottom: 100%;
+  }
+}
+
+/* ==========================================================
+   EXTRA SMALL PHONES
+   ========================================================== */
+@media (max-width: 380px) {
+  .card {
+    min-width: 42vw;
+    max-width: 42vw;
+  }
+
+  .title {
+    font-size: 12px;
+  }
+
+  .price {
+    font-size: 13px;
+  }
+
+  .oldPrice {
+    font-size: 10px;
+  }
+
+  .discountBadge {
+    font-size: 7px;
+    padding: 2px 6px;
+  }
+
+  .ratingRow {
+    gap: 2px;
+  }
+
+  .starIcon {
+    font-size: 10px;
+  }
+
+  .ratingValue {
+    font-size: 10px;
+  }
+}
