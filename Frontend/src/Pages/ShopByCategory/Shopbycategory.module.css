@@ -465,10 +465,10 @@
     font-size: 16px;
   }
   .navButtonLeft.desktopNav {
-    left: -4px;
+    display: none;
   }
   .navButtonRight.desktopNav {
-    right: -4px;
+    display: none;
   }
 }
 
@@ -481,10 +481,10 @@
     min-width: 92px;
   }
   .navButtonLeft.desktopNav {
-    left: 0;
+    display: none;
   }
   .navButtonRight.desktopNav {
-    right: 0;
+    display: none;
   }
 
   .heading {
@@ -546,9 +546,7 @@
   }
 
   .mobileNav .navButton {
-    width: 38px;
-    height: 38px;
-    font-size: 15px;
+    display: none;
   }
 
   .ctaLine {
@@ -575,9 +573,7 @@
     min-width: 62px;
   }
   .mobileNav .navButton {
-    width: 34px;
-    height: 34px;
-    font-size: 14px;
+    display: none;
   }
   .shop,
   .category {
