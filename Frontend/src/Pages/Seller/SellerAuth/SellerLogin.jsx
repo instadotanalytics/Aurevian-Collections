@@ -4,12 +4,22 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { sellerLogin, clearSellerError } from '../../../redux/slices/sellerSlice';
-import { FiMail, FiLock, FiEye, FiEyeOff, FiAlertCircle } from 'react-icons/fi';
+import { 
+  FiMail, 
+  FiLock, 
+  FiEye, 
+  FiEyeOff, 
+  FiAlertCircle,
+  FiUser,
+  FiShield,
+  FiArrowRight
+} from 'react-icons/fi';
+import { FaGem } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import styles from './SellerLogin.module.css';
 import LoginImage from "../../../assets/partnerlogin.png";
-import Header from "../../Layout/Header/Header"
-import Footer from "../../Layout/Footer/Footer"
+import Header from "../../Layout/Header/Header";
+import Footer from "../../Layout/Footer/Footer";
 
 const SellerLogin = () => {
   const navigate = useNavigate();
@@ -126,122 +136,127 @@ const SellerLogin = () => {
 
   return (
     <>
-    <Header/>
-    <div className={styles.page}>
-      <div className={styles.container}>
-        <div className={styles.card}>
-          {/* Left Side - Image */}
-          <div className={styles.leftPanel}>
-            <div className={styles.imageWrapper}>
-              <img src={LoginImage} alt="Aurevian Seller Login" className={styles.sideImage} />
-            </div>
-          </div>
-
-          {/* Right Side - Form */}
-          <div className={styles.rightPanel}>
-            <div className={styles.header}>
-              <h1 className={styles.title}>Welcome Back</h1>
-              <p className={styles.subtitle}>Login to your seller dashboard</p>
-            </div>
-
-            {(localError || error) && (
-              <div className={styles.errorBanner}>
-                <FiAlertCircle className={styles.errorIcon} />
-                <span>{localError || error}</span>
+      <Header />
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <div className={styles.card}>
+            {/* Left Side - Image (60%) */}
+            <div className={styles.leftPanel}>
+              <div className={styles.imageWrapper}>
+                <img src={LoginImage} alt="Aurevian Seller Login" className={styles.sideImage} />
               </div>
-            )}
+            </div>
 
-            <form onSubmit={handleSubmit} className={styles.form}>
-              <div className={styles.field}>
-                <label htmlFor="email">Email Address</label>
-                <div className={styles.inputWrapper}>
-                  <FiMail className={styles.inputIcon} />
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    disabled={isLoading}
-                    autoComplete="email"
-                  />
+            {/* Right Side - Form (40%) */}
+            <div className={styles.rightPanel}>
+              <div className={styles.formContainer}>
+                <div className={styles.header}>
+                  <div className={styles.iconWrapper}>
+                    <FiShield className={styles.shieldIcon} />
+                  </div>
+                  <h1 className={styles.title}>Welcome Back</h1>
+                  <p className={styles.subtitle}>Login to your seller dashboard</p>
                 </div>
-              </div>
 
-              <div className={styles.field}>
-                <label htmlFor="password">Password</label>
-                <div className={styles.inputWrapper}>
-                  <FiLock className={styles.inputIcon} />
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter your password"
-                    value={formData.password}
-                    onChange={handleChange}
+                {(localError || error) && (
+                  <div className={styles.errorBanner}>
+                    <FiAlertCircle className={styles.errorIcon} />
+                    <span>{localError || error}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit} className={styles.form}>
+                  <div className={styles.field}>
+                    <label htmlFor="email">Email Address</label>
+                    <div className={styles.inputWrapper}>
+                      <FiMail className={styles.inputIcon} />
+                      <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        disabled={isLoading}
+                        autoComplete="email"
+                      />
+                    </div>
+                  </div>
+
+                  <div className={styles.field}>
+                    <label htmlFor="password">Password</label>
+                    <div className={styles.inputWrapper}>
+                      <FiLock className={styles.inputIcon} />
+                      <input
+                        id="password"
+                        name="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Enter your password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        disabled={isLoading}
+                        autoComplete="current-password"
+                      />
+                      <button
+                        type="button"
+                        className={styles.visibilityBtn}
+                        onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showPassword ? <FiEyeOff /> : <FiEye />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={styles.options}>
+                    <label className={styles.checkboxLabel}>
+                      <input
+                        type="checkbox"
+                        name="remember"
+                        checked={formData.remember}
+                        onChange={handleChange}
+                        disabled={isLoading}
+                      />
+                      <span>Remember me</span>
+                    </label>
+                    <Link to="/seller/forgot-password" className={styles.forgotLink}>
+                      Forgot password?
+                    </Link>
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    className={styles.primaryBtn}
                     disabled={isLoading}
-                    autoComplete="current-password"
-                  />
-                  <button
-                    type="button"
-                    className={styles.visibilityBtn}
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                    {isLoading ? 'Logging in...' : 'Login'}
                   </button>
+                </form>
+
+                <div className={styles.divider}>
+                  <span>New to Aurevian?</span>
+                </div>
+
+                <div className={styles.footer}>
+                  <Link to="/seller/register" className={styles.registerLink}>
+                    Register as a Seller <FiArrowRight className={styles.arrowIcon} />
+                  </Link>
+                  <Link to="/become-a-partner" className={styles.backLink}>
+                    ← Back to Become a Partner
+                  </Link>
+                </div>
+
+                <div className={styles.customerLogin}>
+                  <p>
+                    Are you a customer? <Link to="/login">Login here</Link>
+                  </p>
                 </div>
               </div>
-
-              <div className={styles.options}>
-                <label className={styles.checkboxLabel}>
-                  <input
-                    type="checkbox"
-                    name="remember"
-                    checked={formData.remember}
-                    onChange={handleChange}
-                    disabled={isLoading}
-                  />
-                  <span>Remember me</span>
-                </label>
-                <Link to="/seller/forgot-password" className={styles.forgotLink}>
-                  Forgot password?
-                </Link>
-              </div>
-
-              <button 
-                type="submit" 
-                className={styles.primaryBtn}
-                disabled={isLoading}
-              >
-                {isLoading ? 'Logging in...' : 'Login'}
-              </button>
-            </form>
-
-            <div className={styles.divider}>
-              <span>New to Aurevian?</span>
-            </div>
-
-            <div className={styles.footer}>
-              <Link to="/seller/register" className={styles.registerLink}>
-                Register as a Seller
-              </Link>
-              <Link to="/become-a-partner" className={styles.backLink}>
-                ← Back to Become a Partner
-              </Link>
-            </div>
-
-            <div className={styles.customerLogin}>
-              <p>
-                Are you a customer? <Link to="/login">Login here</Link>
-              </p>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <Footer/>
+      <Footer />
     </>
   );
 };
