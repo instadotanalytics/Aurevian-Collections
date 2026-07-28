@@ -1,26 +1,31 @@
 // config/cors.js
 
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 
+const normalize = (url) => url?.replace(/\/$/, "");
+
 const allowedOrigins = [
-  process.env.CLIENT_URL || 'http://localhost:5173',
-  'http://localhost:5173',
-  'http://localhost:5174',
-  'http://localhost:3000',
-  'http://127.0.0.1:5173',
-  'http://localhost:5000',
-];
+  process.env.CLIENT_URL,
+  "https://aurevian-collections-frontend.onrender.com",
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:3000",
+  "http://127.0.0.1:5173",
+  "http://localhost:5000",
+]
+  .filter(Boolean)
+  .map(normalize);
 
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin) {
       return callback(null, true);
     }
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       return callback(null, true);
     }
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    if (allowedOrigins.includes(normalize(origin))) {
       callback(null, true);
     } else {
       console.warn(`❌ CORS blocked origin: ${origin}`);
@@ -29,18 +34,18 @@ const corsOptions = {
   },
   credentials: true,
   optionsSuccessStatus: 200,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-Requested-With',
-    'Accept',
-    'Origin',
-    'Access-Control-Allow-Origin',
-    'Access-Control-Allow-Credentials',
-    'X-CSRF-Token',
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "Accept",
+    "Origin",
+    "Access-Control-Allow-Origin",
+    "Access-Control-Allow-Credentials",
+    "X-CSRF-Token",
   ],
-  exposedHeaders: ['Set-Cookie'],
+  exposedHeaders: ["Set-Cookie"],
   maxAge: 86400,
 };
 
