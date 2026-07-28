@@ -1,188 +1,99 @@
-/* SellerRegister.module.css */
-
 /* ============================================
-   PAGE CONTAINER
+   MOBILE FIRST - BASE STYLES (Mobile First)
    ============================================ */
+   
+/* Reset & Base */
+* {
+  box-sizing: border-box;
+}
+
 .page {
   min-height: 100vh;
   background: linear-gradient(135deg, #faf7f2 0%, #f5f0ea 100%);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 20px;
+  padding: 0;
 }
 
 .container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 100%;
+  padding: 0;
 }
 
 /* ============================================
-   CARD - Two Column Layout
+   CARD - Mobile First (Full Screen)
    ============================================ */
 .card {
   display: flex;
+  flex-direction: column;
   background: #ffffff;
-  overflow: hidden;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.08);
-  height: 650px;
-  max-height: 85vh;
-  border: 1px solid rgba(212, 175, 55, 0.08);
+  min-height: 100vh;
+  width: 100%;
+  box-shadow: none;
+  border: none;
   border-radius: 0;
+  overflow: visible;
 }
 
 /* ============================================
-   LEFT PANEL - Image
+   LEFT PANEL - Hidden on Mobile
    ============================================ */
 .leftPanel {
-  flex: 0 0 50%;
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d1f14 100%);
-  height: 100%;
-}
-
-.imageWrapper {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  overflow: hidden;
-}
-
-.sideImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  transition: transform 0.6s ease;
-  display: block;
-}
-
-.imageWrapper:hover .sideImage {
-  transform: scale(1.02);
-}
-
-.imageOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.3) 50%, rgba(0, 0, 0, 0.6) 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-}
-
-.imageContent {
-  text-align: center;
-  color: #ffffff;
-  max-width: 280px;
-}
-
-.imageStep {
-  display: inline-block;
-  padding: 6px 18px;
-  background: rgba(212, 175, 55, 0.15);
-  border: 1px solid rgba(212, 175, 55, 0.25);
-  border-radius: 50px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #d4af37;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-bottom: 14px;
-}
-
-.imageTitle {
-  font-family: 'Playfair Display', serif;
-  font-size: 28px;
-  font-weight: 700;
-  color: #ffffff;
-  margin: 0 0 10px;
-  line-height: 1.2;
-}
-
-.imageDesc {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
-  margin: 0 0 18px;
-  line-height: 1.6;
-}
-
-.imageIcon {
-  width: 50px;
-  height: 50px;
-  margin: 0 auto;
-  background: rgba(212, 175, 55, 0.12);
-  border: 1px solid rgba(212, 175, 55, 0.15);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  color: #d4af37;
-  transition: all 0.3s ease;
-}
-
-.imageIcon:hover {
-  background: rgba(212, 175, 55, 0.2);
-  transform: scale(1.05);
+  display: none;
 }
 
 /* ============================================
-   RIGHT PANEL - Form
+   RIGHT PANEL - Full Width
    ============================================ */
 .rightPanel {
-  flex: 0 0 50%;
-  padding: 24px 28px 16px;
+  flex: 1;
+  padding: 20px 20px 16px;
   display: flex;
   flex-direction: column;
   background: #ffffff;
-  height: 100%;
-  overflow: hidden;
+  width: 100%;
+  min-height: 100vh;
+  overflow: visible;
 }
 
 /* ============================================
    HEADER
    ============================================ */
 .header {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   flex-shrink: 0;
 }
 
 .title {
   font-family: 'Playfair Display', serif;
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 700;
   color: #1a1a1a;
   margin: 0;
   letter-spacing: -0.3px;
 }
 
-.titleGold {
-  color: #d4af37;
-}
-
 .subtitle {
-  font-size: 12px;
+  font-size: 15px;
   color: #6b6b6b;
-  margin: 2px 0 0;
-  line-height: 1.4;
+  margin: 4px 0 0;
+  line-height: 1.5;
 }
 
 /* ============================================
-   STEP INDICATOR
+   STEP INDICATOR - Numbers
    ============================================ */
 .stepIndicator {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
-  padding: 0 4px;
+  margin-bottom: 16px;
+  padding: 0 2px;
   position: relative;
   flex-shrink: 0;
+  gap: 4px;
 }
 
 .stepItem {
@@ -194,15 +105,15 @@
 }
 
 .stepNumber {
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   background: #f0edeb;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
   color: #999;
   transition: all 0.4s ease;
   position: relative;
@@ -210,24 +121,33 @@
   flex-shrink: 0;
 }
 
+/* Active Step - Gold */
 .stepNumber.active {
   background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
   color: white;
   box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3);
+  transform: scale(1.05);
 }
 
+/* Completed Step - Green with Checkmark */
 .stepNumber.completed {
   background: #10b981;
   color: white;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.stepNumber.completed svg {
+  width: 20px;
+  height: 20px;
 }
 
 .stepLabel {
-  font-size: 8px;
+  font-size: 10px;
   color: #999;
-  margin-top: 3px;
+  margin-top: 4px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.5px;
   white-space: nowrap;
 }
 
@@ -241,12 +161,18 @@
 
 .stepLine {
   position: absolute;
-  top: 16px;
-  left: calc(50% + 16px);
-  right: calc(-50% + 16px);
+  top: 19px;
+  left: calc(50% + 19px);
+  right: calc(-50% + 19px);
   height: 2px;
   background: #e8e3dc;
   z-index: 0;
+  transition: background 0.4s ease;
+}
+
+/* Line turns green when step completed */
+.stepItem.completed .stepLine {
+  background: #10b981;
 }
 
 .stepItem:last-child .stepLine {
@@ -254,13 +180,13 @@
 }
 
 /* ============================================
-   FORM - Scrollable content area
+   FORM - Flexible Layout
    ============================================ */
 .form {
   display: flex;
   flex-direction: column;
   flex: 1;
-  min-height: 0;
+  overflow: visible;
 }
 
 .stepContent {
@@ -268,14 +194,13 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  min-height: 0;
-  gap: 8px;
+  overflow: visible;
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -287,62 +212,53 @@
    SCROLLABLE FORM FIELDS AREA
    ============================================ */
 .formFieldsWrapper {
-  flex: 1;
-  overflow-y: auto;
-  padding-right: 4px;
+  flex: 0 1 auto;
+  overflow-y: visible;
+  padding-right: 0;
   margin-bottom: 0;
-}
-
-.formFieldsWrapper::-webkit-scrollbar {
-  width: 3px;
-}
-
-.formFieldsWrapper::-webkit-scrollbar-track {
-  background: #f0edeb;
-  border-radius: 4px;
-}
-
-.formFieldsWrapper::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
-  border-radius: 4px;
+  max-height: none;
 }
 
 .stepHeader {
-  margin-bottom: 6px;
+  margin-bottom: 14px;
   flex-shrink: 0;
 }
 
 .stepTitle {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
   color: #1a1a1a;
-  margin: 0 0 1px;
+  margin: 0 0 4px;
 }
 
 .stepDesc {
-  font-size: 12px;
+  font-size: 15px;
   color: #6b6b6b;
   margin: 0;
 }
 
 /* ============================================
-   FORM GROUPS - COMPACT
+   FORM GROUPS - Perfect Size
    ============================================ */
 .formRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 12px;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  margin-bottom: 6px;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.formGroup:last-child {
+  margin-bottom: 0;
 }
 
 .formGroup label {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 500;
   color: #1a1a1a;
   display: flex;
@@ -358,21 +274,23 @@
 .optional {
   color: #999;
   font-weight: 400;
-  font-size: 10px;
+  font-size: 13px;
 }
 
 .formGroup input,
 .formGroup textarea,
 .formGroup select {
-  padding: 7px 12px;
-  border: 1px solid #e8e3dc;
-  border-radius: 8px;
-  font-size: 13px;
-  font-family: 'Inter', sans-serif;
+  padding: 12px 16px;
+  border: 1.5px solid #e8e3dc;
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
   transition: all 0.3s ease;
   background: #faf8f6;
   width: 100%;
   box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .formGroup input:hover,
@@ -386,13 +304,13 @@
 .formGroup select:focus {
   outline: none;
   border-color: #d4af37;
-  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
+  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
   background: #ffffff;
 }
 
 .formGroup textarea {
   resize: vertical;
-  min-height: 40px;
+  min-height: 60px;
 }
 
 .formGroup input.error,
@@ -402,25 +320,25 @@
 }
 
 .errorText {
-  font-size: 10px;
+  font-size: 13px;
   color: #ef4444;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 .hint {
-  font-size: 10px;
+  font-size: 13px;
   color: #999;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 .validText {
-  font-size: 10px;
+  font-size: 13px;
   color: #10b981;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 /* ============================================
-   FILE UPLOAD - COMPACT
+   FILE UPLOAD - Touch Friendly
    ============================================ */
 .fileUploadWrapper {
   margin-top: 2px;
@@ -429,13 +347,13 @@
 .fileUploadArea {
   position: relative;
   border: 2px dashed #e8e3dc;
-  border-radius: 10px;
-  padding: 12px 16px;
+  border-radius: 12px;
+  padding: 20px 16px;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
   background: #faf8f6;
-  min-height: 60px;
+  min-height: 100px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -448,20 +366,20 @@
 }
 
 .uploadIcon {
-  font-size: 20px;
+  font-size: 28px;
   color: #d4af37;
-  margin-bottom: 3px;
+  margin-bottom: 6px;
 }
 
 .fileUploadArea p {
-  font-size: 12px;
+  font-size: 15px;
   color: #1a1a1a;
   margin: 0;
   font-weight: 500;
 }
 
 .fileUploadArea span {
-  font-size: 10px;
+  font-size: 13px;
   color: #999;
 }
 
@@ -478,28 +396,28 @@
 .filePreview {
   position: relative;
   width: 100%;
-  max-width: 100px;
+  max-width: 140px;
   margin: 0 auto;
 }
 
 .filePreview img {
   width: 100%;
   height: auto;
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid #e8e3dc;
 }
 
 .removeFile {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  width: 18px;
-  height: 18px;
+  top: -10px;
+  right: -10px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: #ef4444;
   color: white;
   border: none;
-  font-size: 12px;
+  font-size: 16px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -512,24 +430,28 @@
 }
 
 /* ============================================
-   CATEGORY GRID - COMPACT
+   CATEGORY GRID - Touch Friendly
    ============================================ */
 .categoryGrid {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 2px;
+  gap: 8px;
+  margin-top: 4px;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .categoryBtn {
-  padding: 4px 10px;
-  border: 1px solid #e8e3dc;
-  border-radius: 16px;
+  padding: 8px 16px;
+  border: 1.5px solid #e8e3dc;
+  border-radius: 24px;
   background: white;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  flex: 0 1 auto;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .categoryBtn:hover {
@@ -543,21 +465,25 @@
   box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
 }
 
+.categoryBtn:active {
+  transform: scale(0.95);
+}
+
 /* ============================================
-   SOCIAL LINKS - COMPACT
+   SOCIAL LINKS
    ============================================ */
 .socialLinks {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   margin-top: 2px;
 }
 
 .socialLinks input {
-  padding: 6px 12px;
-  border: 1px solid #e8e3dc;
-  border-radius: 8px;
-  font-size: 12px;
+  padding: 10px 16px;
+  border: 1.5px solid #e8e3dc;
+  border-radius: 10px;
+  font-size: 15px;
   background: #faf8f6;
   width: 100%;
   box-sizing: border-box;
@@ -570,33 +496,33 @@
 }
 
 /* ============================================
-   REVIEW SECTION - COMPACT
+   REVIEW SECTION
    ============================================ */
 .reviewSection {
   background: #faf8f6;
-  border-radius: 10px;
-  padding: 10px 14px;
-  margin-bottom: 6px;
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
   border: 1px solid #f0edeb;
 }
 
 .reviewSection h4 {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 600;
   color: #1a1a1a;
-  margin: 0 0 3px;
+  margin: 0 0 6px;
 }
 
 .reviewGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2px 12px;
+  grid-template-columns: 1fr;
+  gap: 4px;
 }
 
 .reviewGrid div {
-  font-size: 12px;
+  font-size: 15px;
   color: #4a4a4a;
-  padding: 1px 0;
+  padding: 2px 0;
 }
 
 .reviewGrid strong {
@@ -604,21 +530,21 @@
 }
 
 .termsGroup {
-  margin: 4px 0 2px;
+  margin: 8px 0 4px;
 }
 
 .checkboxLabel {
   display: flex;
   align-items: flex-start;
-  gap: 6px;
+  gap: 10px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 15px;
   color: #4a4a4a;
 }
 
 .checkboxLabel input[type="checkbox"] {
-  width: 15px;
-  height: 15px;
+  width: 20px;
+  height: 20px;
   margin-top: 1px;
   accent-color: #d4af37;
   cursor: pointer;
@@ -636,19 +562,21 @@
 }
 
 /* ============================================
-   NAVIGATION - NO BLANK SPACE
+   NAVIGATION - Always Visible
    ============================================ */
 .navigation {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
-  margin-top: 4px;
-  padding-top: 6px;
-  border-top: 1px solid #e8e3dc;
+  gap: 12px;
+  padding-top: 16px;
   flex-shrink: 0;
   flex-wrap: wrap;
-  min-height: auto;
+  min-height: 64px;
+  border-top: 2px solid #e8e3dc;
+  margin-top: 12px;
+  background: #ffffff;
+  clear: both;
 }
 
 .prevBtn,
@@ -656,15 +584,16 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 8px 24px;
+  gap: 8px;
+  padding: 12px 32px;
   border: none;
-  border-radius: 8px;
-  font-size: 13px;
+  border-radius: 10px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 100px;
+  min-width: 120px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .prevBtn {
@@ -675,6 +604,10 @@
 .prevBtn:hover:not(:disabled) {
   background: #e8e3dc;
   transform: translateY(-2px);
+}
+
+.prevBtn:active {
+  transform: scale(0.97);
 }
 
 .nextBtn {
@@ -688,6 +621,10 @@
   box-shadow: 0 8px 28px rgba(212, 175, 55, 0.35);
 }
 
+.nextBtn:active {
+  transform: scale(0.97);
+}
+
 .prevBtn:disabled,
 .nextBtn:disabled {
   opacity: 0.5;
@@ -696,88 +633,18 @@
 }
 
 /* ============================================
-   TRUST FEATURES - COMPACT
-   ============================================ */
-.trustFeatures {
-  margin-top: 4px;
-  padding-top: 4px;
-  border-top: 1px solid #e8e3dc;
-  flex-shrink: 0;
-}
-
-.trustHeader {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #1a1a1a;
-}
-
-.trustHeaderIcon {
-  color: #d4af37;
-  font-size: 13px;
-}
-
-.trustSubtext {
-  font-size: 11px;
-  color: #6b6b6b;
-  margin: 1px 0 4px;
-}
-
-.trustGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 6px;
-}
-
-.trustItem {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  padding: 6px 8px;
-  background: #faf8f6;
-  border-radius: 6px;
-  transition: all 0.3s ease;
-}
-
-.trustItem:hover {
-  background: #f5f0ea;
-}
-
-.trustItemIcon {
-  font-size: 14px;
-  color: #d4af37;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
-.trustItem h4 {
-  font-size: 11px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0;
-}
-
-.trustItem p {
-  font-size: 9px;
-  color: #6b6b6b;
-  margin: 0;
-}
-
-/* ============================================
    FOOTER
    ============================================ */
 .footer {
   text-align: center;
-  margin-top: 4px;
-  padding-top: 4px;
+  margin-top: 10px;
+  padding-top: 10px;
   border-top: 1px solid #e8e3dc;
   flex-shrink: 0;
 }
 
 .footer p {
-  font-size: 12px;
+  font-size: 15px;
   color: #6b6b6b;
   margin: 0;
 }
@@ -793,451 +660,164 @@
 }
 
 /* ============================================
-   RESPONSIVE - Desktop to Tablet
+   TABLET & DESKTOP (768px and above)
    ============================================ */
-@media (max-width: 1024px) {
-  .rightPanel {
-    padding: 20px 20px 14px;
-  }
-
-  .trustGrid {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .title {
-    font-size: 20px;
-  }
-
-  .imageTitle {
-    font-size: 24px;
-  }
-}
-
-/* ============================================
-   MOBILE RESPONSIVE - NO BLANK SPACE
-   ============================================ */
-@media (max-width: 768px) {
+@media (min-width: 768px) {
   .page {
-    padding: 10px;
-    align-items: flex-start;
-    padding-top: 12px;
+    padding: 20px;
+    align-items: center;
+  }
+
+  .container {
+    max-width: 1200px;
+    padding: 0;
   }
 
   .card {
-    flex-direction: column;
-    height: auto;
-    max-height: none;
+    flex-direction: row;
+    height: 650px;
+    max-height: 85vh;
+    min-height: auto;
     border-radius: 0;
-    min-height: 95vh;
-    width: 100%;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.08);
+    overflow: hidden;
   }
 
   .leftPanel {
-    flex: 0 0 auto;
-    height: 160px;
-    min-height: 160px;
+    display: block;
+    flex: 0 0 50%;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d1f14 100%);
+    height: 100%;
+  }
+
+  .imageWrapper {
     width: 100%;
-    /* display: none; */
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sideImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.6s ease;
+    display: block;
+  }
+
+  .imageWrapper:hover .sideImage {
+    transform: scale(1.02);
   }
 
   .rightPanel {
-    flex: 1;
-    padding: 12px 10px 10px;
-    height: auto;
-    max-height: none;
+    flex: 0 0 50%;
+    padding: 28px 32px 20px;
+    height: 100%;
+    min-height: auto;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    box-sizing: border-box;
   }
 
-  .header {
-    margin-bottom: 6px;
+  .form {
+    overflow: hidden;
   }
 
-  .title {
-    font-size: 17px;
-  }
-
-  .subtitle {
-    font-size: 11px;
-  }
-
-  .stepIndicator {
-    display: flex;
-    justify-content: space-between;
-    gap: 2px;
-    margin-bottom: 6px;
-    overflow-x: auto;
-    padding: 2px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-
-  .stepIndicator::-webkit-scrollbar {
-    display: none;
-  }
-
-  .stepItem {
-    flex: 0 0 auto;
-    min-width: 38px;
-  }
-
-  .stepNumber {
-    width: 26px;
-    height: 26px;
-    font-size: 10px;
-  }
-
-  .stepLabel {
-    font-size: 6px;
-    letter-spacing: 0.2px;
-    margin-top: 2px;
-  }
-
-  .stepLine {
-    display: none;
+  .stepContent {
+    overflow: hidden;
   }
 
   .formFieldsWrapper {
     flex: 1;
     overflow-y: auto;
-    padding-right: 4px;
-    margin-bottom: 0;
-    -webkit-overflow-scrolling: touch;
+    padding-right: 8px;
+    max-height: 100%;
   }
 
-  .stepHeader {
-    margin-bottom: 4px;
+  .formFieldsWrapper::-webkit-scrollbar {
+    width: 5px;
   }
 
-  .stepTitle {
-    font-size: 14px;
+  .formFieldsWrapper::-webkit-scrollbar-track {
+    background: #f0edeb;
+    border-radius: 4px;
   }
 
-  .stepDesc {
-    font-size: 11px;
-  }
-
-  .formRow {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-
-  .formGroup {
-    margin-bottom: 5px;
-    width: 100%;
-  }
-
-  .formGroup label {
-    font-size: 11px;
-  }
-
-  .formGroup input,
-  .formGroup textarea,
-  .formGroup select {
-    padding: 6px 10px;
-    font-size: 12px;
-    border-radius: 6px;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .reviewGrid {
-    grid-template-columns: 1fr;
-    gap: 2px;
-  }
-
-  .reviewSection {
-    padding: 8px 10px;
-  }
-
-  .reviewSection h4 {
-    font-size: 11px;
-  }
-
-  .reviewGrid div {
-    font-size: 11px;
-  }
-
-  .navigation {
-    flex-wrap: wrap;
-    gap: 6px;
-    padding-top: 6px;
-    margin-top: 3px;
-    justify-content: center;
-    width: 100%;
-    min-height: auto;
-  }
-
-  .prevBtn,
-  .nextBtn {
-    flex: 0 1 auto;
-    min-width: 80px;
-    padding: 6px 14px;
-    font-size: 11px;
-    border-radius: 6px;
-    width: auto;
-  }
-
-  .trustFeatures {
-    margin-top: 4px;
-    padding-top: 4px;
-  }
-
-  .trustHeader {
-    font-size: 11px;
-  }
-
-  .trustSubtext {
-    font-size: 10px;
-    margin: 1px 0 4px;
-  }
-
-  .trustGrid {
-    grid-template-columns: 1fr 1fr;
-    gap: 4px;
-  }
-
-  .trustItem {
-    padding: 4px 6px;
-  }
-
-  .trustItem h4 {
-    font-size: 10px;
-  }
-
-  .trustItem p {
-    font-size: 8px;
-  }
-
-  .footer {
-    margin-top: 4px;
-    padding-top: 4px;
-  }
-
-  .footer p {
-    font-size: 11px;
-  }
-
-  .fileUploadArea {
-    padding: 8px 12px;
-    min-height: 45px;
-  }
-
-  .uploadIcon {
-    font-size: 16px;
-  }
-
-  .fileUploadArea p {
-    font-size: 11px;
-  }
-
-  .fileUploadArea span {
-    font-size: 9px;
-  }
-
-  .categoryGrid {
-    gap: 4px;
-  }
-
-  .categoryBtn {
-    font-size: 10px;
-    padding: 3px 8px;
-  }
-
-  .checkboxLabel {
-    font-size: 11px;
-  }
-
-  .checkboxLabel input[type="checkbox"] {
-    width: 14px;
-    height: 14px;
-  }
-}
-
-/* ============================================
-   EXTRA SMALL MOBILE (375px and below)
-   ============================================ */
-@media (max-width: 480px) {
-  .page {
-    padding: 6px;
-    padding-top: 8px;
-  }
-
-  .card {
-    min-height: 98vh;
-  }
-
-  .leftPanel {
-    display: none;
-  }
-
-  .rightPanel {
-    padding: 8px 6px 6px;
-  }
-
-  .title {
-    font-size: 15px;
-  }
-
-  .subtitle {
-    font-size: 10px;
-  }
-
-  .stepNumber {
-    width: 22px;
-    height: 22px;
-    font-size: 8px;
-  }
-
-  .stepLabel {
-    font-size: 5px;
-    letter-spacing: 0.1px;
-  }
-
-  .stepItem {
-    min-width: 32px;
-  }
-
-  .stepTitle {
-    font-size: 13px;
-  }
-
-  .stepDesc {
-    font-size: 10px;
-  }
-
-  .formGroup input,
-  .formGroup textarea,
-  .formGroup select {
-    padding: 5px 8px;
-    font-size: 11px;
-    border-radius: 5px;
-  }
-
-  .formGroup label {
-    font-size: 10px;
-  }
-
-  .formGroup {
-    margin-bottom: 4px;
-  }
-
-  .prevBtn,
-  .nextBtn {
-    min-width: 65px;
-    padding: 5px 10px;
-    font-size: 10px;
-    border-radius: 5px;
-  }
-
-  .navigation {
-    gap: 4px;
-    padding-top: 4px;
-  }
-
-  .trustGrid {
-    grid-template-columns: 1fr;
-    gap: 3px;
-  }
-
-  .trustItem {
-    padding: 3px 5px;
-  }
-
-  .trustItem h4 {
-    font-size: 9px;
-  }
-
-  .trustItem p {
-    font-size: 8px;
-  }
-
-  .footer p {
-    font-size: 10px;
-  }
-
-  .stepHeader {
-    margin-bottom: 3px;
-  }
-
-  .stepIndicator {
-    margin-bottom: 4px;
+  .formFieldsWrapper::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
+    border-radius: 4px;
   }
 
   .formFieldsWrapper {
-    margin-bottom: 0;
+    scrollbar-width: thin;
+    scrollbar-color: #d4af37 #f0edeb;
   }
 
-  .fileUploadArea {
-    padding: 6px 8px;
-    min-height: 35px;
+  .stepIndicator {
+    margin-bottom: 14px;
   }
 
-  .uploadIcon {
-    font-size: 14px;
+  .stepNumber {
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
   }
 
-  .fileUploadArea p {
-    font-size: 10px;
+  .stepLine {
+    top: 18px;
+    left: calc(50% + 18px);
+    right: calc(-50% + 18px);
   }
 
-  .fileUploadArea span {
-    font-size: 8px;
-  }
-
-  .reviewSection {
-    padding: 6px 8px;
-  }
-
-  .reviewSection h4 {
-    font-size: 10px;
-  }
-
-  .reviewGrid div {
-    font-size: 10px;
-  }
-
-  .checkboxLabel {
-    font-size: 10px;
-  }
-
-  .checkboxLabel input[type="checkbox"] {
-    width: 13px;
-    height: 13px;
-  }
-
-  .categoryBtn {
-    font-size: 9px;
-    padding: 2px 6px;
-  }
-}
-
-/* ============================================
-   TABLET PORTRAIT (481px - 768px)
-   ============================================ */
-@media (min-width: 481px) and (max-width: 768px) {
-  
-
-  .rightPanel {
-    padding: 14px 14px 10px;
-  }
-
-  .title {
+  .stepTitle {
     font-size: 18px;
   }
 
-  .trustGrid {
-    grid-template-columns: 1fr 1fr;
+  .stepDesc {
+    font-size: 14px;
   }
 
   .formGroup input,
   .formGroup textarea,
   .formGroup select {
-    padding: 7px 10px;
-    font-size: 12px;
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  .formGroup label {
+    font-size: 14px;
+  }
+
+  .reviewGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .navigation {
+    margin-top: 10px;
+    padding-top: 14px;
+    min-height: 60px;
+  }
+
+  .prevBtn,
+  .nextBtn {
+    padding: 10px 28px;
+    font-size: 14px;
+    min-width: 120px;
+  }
+}
+
+/* ============================================
+   LARGE DESKTOP (1024px and above)
+   ============================================ */
+@media (min-width: 1024px) {
+  .rightPanel {
+    padding: 32px 40px 24px;
+  }
+
+  .title {
+    font-size: 28px;
   }
 }
 
@@ -1251,7 +831,6 @@
 
   .card {
     background: #2d2d2d;
-    border-color: rgba(212, 175, 55, 0.1);
   }
 
   .rightPanel {
@@ -1401,6 +980,7 @@
 
   .navigation {
     border-color: #4d4d4d;
+    background: #2d2d2d;
   }
 
   .footer {
@@ -1413,34 +993,6 @@
 
   .footer a {
     color: #d4af37;
-  }
-
-  .trustFeatures {
-    border-color: #4d4d4d;
-  }
-
-  .trustHeader {
-    color: #ddd;
-  }
-
-  .trustSubtext {
-    color: #888;
-  }
-
-  .trustItem {
-    background: #3d3d3d;
-  }
-
-  .trustItem h4 {
-    color: #ddd;
-  }
-
-  .trustItem p {
-    color: #888;
-  }
-
-  .trustItem:hover {
-    background: #4d4d4d;
   }
 
   .errorText {
@@ -1457,5 +1009,15 @@
 
   .termsGroup .checkboxLabel {
     color: #bbb;
+  }
+
+  @media (min-width: 768px) {
+    .formFieldsWrapper::-webkit-scrollbar-track {
+      background: #3d3d3d;
+    }
+    
+    .formFieldsWrapper::-webkit-scrollbar-thumb {
+      background: #d4af37;
+    }
   }
 }
