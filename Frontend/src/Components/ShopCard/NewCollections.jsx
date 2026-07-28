@@ -1,12 +1,12 @@
 // src/Components/NewCollections/NewCollections.jsx
 
 import React, { useRef } from "react";
-import { FiArrowRight, FiArrowLeft } from "react-icons/fi";
+import { FiArrowRight, FiArrowLeft, FiStar } from "react-icons/fi"; // ✅ FiStar instead of FiSparkles
 import { FaStar } from "react-icons/fa";
 import styles from "./NewCollections.module.css";
 
 // ==========================================================
-// JEWELLERY IMAGES - New Collection
+// NEW COLLECTION IMAGES
 // ==========================================================
 const NEW_COLLECTION_IMAGES = {
   diamondNecklace: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&h=500&fit=crop&crop=center&q=80",
@@ -31,6 +31,7 @@ const NEW_PRODUCTS = [
     discount: 24, 
     rating: 4.9, 
     isNew: true,
+    collection: "Spring 2025",
     image: NEW_COLLECTION_IMAGES.diamondNecklace 
   },
   { 
@@ -41,6 +42,7 @@ const NEW_PRODUCTS = [
     discount: 25, 
     rating: 4.8, 
     isNew: true,
+    collection: "Spring 2025",
     image: NEW_COLLECTION_IMAGES.goldRing 
   },
   { 
@@ -51,6 +53,7 @@ const NEW_PRODUCTS = [
     discount: 25, 
     rating: 4.7, 
     isNew: true,
+    collection: "Spring 2025",
     image: NEW_COLLECTION_IMAGES.emeraldEarrings 
   },
   { 
@@ -61,6 +64,7 @@ const NEW_PRODUCTS = [
     discount: 21, 
     rating: 4.6, 
     isNew: true,
+    collection: "Spring 2025",
     image: NEW_COLLECTION_IMAGES.pearlBracelet 
   },
   { 
@@ -71,6 +75,7 @@ const NEW_PRODUCTS = [
     discount: 29, 
     rating: 4.9, 
     isNew: true,
+    collection: "Spring 2025",
     image: NEW_COLLECTION_IMAGES.sapphirePendant 
   },
   { 
@@ -81,6 +86,7 @@ const NEW_PRODUCTS = [
     discount: 24, 
     rating: 4.7, 
     isNew: true,
+    collection: "Spring 2025",
     image: NEW_COLLECTION_IMAGES.rubyStuds 
   },
   { 
@@ -91,6 +97,7 @@ const NEW_PRODUCTS = [
     discount: 20, 
     rating: 4.9, 
     isNew: true,
+    collection: "Spring 2025",
     image: NEW_COLLECTION_IMAGES.platinumBand 
   },
   { 
@@ -101,6 +108,7 @@ const NEW_PRODUCTS = [
     discount: 25, 
     rating: 4.8, 
     isNew: true,
+    collection: "Spring 2025",
     image: NEW_COLLECTION_IMAGES.tanzaniteRing 
   },
 ];
@@ -109,11 +117,23 @@ function ProductCard({ product }) {
   return (
     <a href={`/product/${product.id}`} className={styles.card} aria-label={product.name}>
       <div className={styles.imageWrap}>
-        {product.isNew && (
-          <span className={styles.newBadge}>✦ NEW</span>
-        )}
+        {/* NEW Collection Banner */}
+        <div className={styles.newBanner}>
+          <FiStar className={styles.newIcon} /> {/* ✅ FiStar instead of FiSparkles */}
+          <span className={styles.newText}>NEW</span>
+        </div>
+        
+        {/* Collection Name Badge */}
+        <div className={styles.collectionBadge}>
+          {product.collection}
+        </div>
+
+        {/* Discount Badge */}
         {product.discount ? (
-          <span className={styles.discountBadge}>{product.discount}% OFF</span>
+          <div className={styles.discountBadge}>
+            <span className={styles.discountNumber}>{product.discount}%</span>
+            <span className={styles.discountLabel}>OFF</span>
+          </div>
         ) : null}
 
         {product.image ? (
@@ -138,9 +158,7 @@ function ProductCard({ product }) {
 
         <div className={styles.priceRow}>
           <span className={styles.price}>₹{product.price.toLocaleString("en-IN")}</span>
-          {product.oldPrice ? (
-            <span className={styles.oldPrice}>₹{product.oldPrice.toLocaleString("en-IN")}</span>
-          ) : null}
+          <span className={styles.oldPrice}>₹{product.oldPrice.toLocaleString("en-IN")}</span>
         </div>
       </div>
     </a>

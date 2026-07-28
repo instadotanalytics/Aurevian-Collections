@@ -1,4 +1,4 @@
-/* src/Components/NewCollections/NewCollections.module.css */
+/* src/Components/Offers/Offers.module.css */
 
 /* ==========================================================
    SECTION
@@ -90,13 +90,27 @@
   letter-spacing: -0.5px;
 }
 
-.subtitle {
-  font-family: "Inter", sans-serif;
-  font-size: 14px;
-  color: #8a7a68;
-  margin: 4px 0 0;
-  font-weight: 400;
-  max-width: 500px;
+/* Timer Row */
+.timerRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.timerIcon {
+  color: #b3873f;
+  font-size: 16px;
+}
+
+.timerText {
+  font-size: 13px;
+  color: #666;
+}
+
+.timerText strong {
+  color: #1a1a1a;
+  font-weight: 700;
 }
 
 .viewAllBtn {
@@ -270,9 +284,9 @@
 }
 
 /* ==========================================================
-   NEW BANNER - Top full width
+   OFFER BANNER - Top full width
    ========================================================== */
-.newBanner {
+.offerBanner {
   position: absolute;
   top: 0;
   left: 0;
@@ -286,39 +300,21 @@
   z-index: 2;
 }
 
-.newIcon {
+.offerIcon {
   color: #ffffff;
   font-size: 11px;
 }
 
-.newText {
+.offerTagText {
   color: #ffffff;
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-}
-
-/* ==========================================================
-   COLLECTION BADGE - Top right
-   ========================================================== */
-.collectionBadge {
-  position: absolute;
-  top: 32px;
-  right: 8px;
-  background: rgba(255, 255, 255, 0.92);
-  color: #1a1a1a;
-  font-size: 8px;
-  font-weight: 600;
   letter-spacing: 0.5px;
-  padding: 3px 10px;
-  z-index: 2;
   text-transform: uppercase;
-  border: 1px solid rgba(179, 135, 63, 0.2);
 }
 
 /* ==========================================================
-   DISCOUNT BADGE - Bottom right
+   DISCOUNT BADGE - Bottom right large
    ========================================================== */
 .discountBadge {
   position: absolute;
@@ -410,6 +406,25 @@
   text-decoration: line-through;
 }
 
+/* Savings Row */
+.savingsRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.savingsIcon {
+  color: #10b981;
+  font-size: 12px;
+}
+
+.savingsText {
+  font-size: 12px;
+  color: #10b981;
+  font-weight: 600;
+}
+
 /* ==========================================================
    DIVIDER
    ========================================================== */
@@ -468,9 +483,8 @@
     font-size: 24px;
   }
 
-  .subtitle {
-    font-size: 12px;
-    max-width: 300px;
+  .timerText {
+    font-size: 11px;
   }
 
   .viewAllBtn {
@@ -519,8 +533,16 @@
     letter-spacing: 2px;
   }
 
-  .subtitle {
-    display: none;
+  .timerText {
+    font-size: 10px;
+  }
+
+  .timerRow {
+    gap: 4px;
+  }
+
+  .timerIcon {
+    font-size: 13px;
   }
 
   .viewAllBtn {
@@ -558,8 +580,13 @@
     font-size: 11px;
   }
 
+  .savingsText {
+    font-size: 10px;
+  }
+
   .discountNumber {
     font-size: 14px;
+    min-width: 30px;
   }
 
   .discountBadge {
@@ -571,18 +598,11 @@
     font-size: 7px;
   }
 
-  .collectionBadge {
-    font-size: 7px;
-    padding: 2px 8px;
-    top: 28px;
-    right: 6px;
-  }
-
-  .newText {
+  .offerTagText {
     font-size: 7px;
   }
 
-  .newIcon {
+  .offerIcon {
     font-size: 9px;
   }
 
@@ -608,6 +628,10 @@
 
   .oldPrice {
     font-size: 10px;
+  }
+
+  .savingsText {
+    font-size: 9px;
   }
 
   .discountNumber {

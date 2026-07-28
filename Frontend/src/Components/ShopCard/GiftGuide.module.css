@@ -1,4 +1,4 @@
-/* src/Components/NewCollections/NewCollections.module.css */
+/* src/Components/GiftGuide/GiftGuide.module.css */
 
 /* ==========================================================
    SECTION
@@ -7,9 +7,6 @@
   --ivory: #fbf6ee;
   --cream: #f6ecdd;
   --champagne: #eaddc4;
-  --gold: #b6863c;
-  --gold-deep: #97702f;
-  --gold-soft: #d9b877;
 
   padding: 60px 24px;
   background: transparent;
@@ -270,83 +267,34 @@
 }
 
 /* ==========================================================
-   NEW BANNER - Top full width
+   BADGES
    ========================================================== */
-.newBanner {
+.categoryBadge {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(90deg, #b3873f, #8a6a30);
-  padding: 4px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  z-index: 2;
-}
-
-.newIcon {
-  color: #ffffff;
-  font-size: 11px;
-}
-
-.newText {
+  top: 10px;
+  left: 10px;
+  background: linear-gradient(135deg, #b3873f, #8a6a30);
   color: #ffffff;
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-}
-
-/* ==========================================================
-   COLLECTION BADGE - Top right
-   ========================================================== */
-.collectionBadge {
-  position: absolute;
-  top: 32px;
-  right: 8px;
-  background: rgba(255, 255, 255, 0.92);
-  color: #1a1a1a;
-  font-size: 8px;
-  font-weight: 600;
   letter-spacing: 0.5px;
-  padding: 3px 10px;
-  z-index: 2;
+  padding: 4px 12px;
+  z-index: 1;
   text-transform: uppercase;
-  border: 1px solid rgba(179, 135, 63, 0.2);
 }
 
-/* ==========================================================
-   DISCOUNT BADGE - Bottom right
-   ========================================================== */
 .discountBadge {
   position: absolute;
-  bottom: 12px;
-  right: 12px;
+  top: 10px;
+  right: 10px;
   background: #1a1a1a;
-  color: #ffffff;
-  padding: 8px 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 2;
-  min-width: 52px;
-}
-
-.discountNumber {
-  font-size: 20px;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.5px;
-}
-
-.discountLabel {
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 1px;
+  color: #fcf9f5;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  z-index: 1;
   text-transform: uppercase;
-  margin-top: 2px;
 }
 
 /* ==========================================================
@@ -395,6 +343,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-top: auto;
 }
 
 .price {
@@ -495,10 +444,6 @@
     font-size: 12px;
   }
 
-  .discountNumber {
-    font-size: 16px;
-  }
-
   .scrollContainer {
     gap: 14px;
     padding: 4px 2px 12px;
@@ -558,37 +503,19 @@
     font-size: 11px;
   }
 
-  .discountNumber {
-    font-size: 14px;
-  }
-
-  .discountBadge {
-    padding: 4px 8px;
-    min-width: 40px;
-  }
-
-  .discountLabel {
-    font-size: 7px;
-  }
-
-  .collectionBadge {
-    font-size: 7px;
-    padding: 2px 8px;
-    top: 28px;
-    right: 6px;
-  }
-
-  .newText {
-    font-size: 7px;
-  }
-
-  .newIcon {
-    font-size: 9px;
-  }
-
   .scrollContainer {
     gap: 10px;
     padding: 2px 0 10px;
+  }
+
+  .discountBadge {
+    font-size: 8px;
+    padding: 3px 8px;
+  }
+
+  .categoryBadge {
+    font-size: 7px;
+    padding: 3px 8px;
   }
 }
 
@@ -610,8 +537,14 @@
     font-size: 10px;
   }
 
-  .discountNumber {
-    font-size: 12px;
+  .discountBadge {
+    font-size: 7px;
+    padding: 2px 6px;
+  }
+
+  .categoryBadge {
+    font-size: 7px;
+    padding: 2px 6px;
   }
 
   .ratingRow {
