@@ -7,7 +7,7 @@ const normalize = (url) => url?.replace(/\/$/, "");
 
 const allowedOrigins = [
   process.env.CLIENT_URL,
-  "https://aurevian-collections-frontend.onrender.com",
+  // "https://aurevian-collections-frontend.onrender.com",
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:3000",

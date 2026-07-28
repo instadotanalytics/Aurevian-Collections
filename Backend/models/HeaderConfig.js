@@ -11,6 +11,19 @@ const linkItemSchema = new mongoose.Schema(
   { _id: false },
 );
 
+// ✅ NEW: categories carry an extra `image` field. This image is never
+// rendered in the navbar dropdown — only the homepage "Shop by Category"
+// section reads it. Store a plain hosted URL (Cloudinary, etc.).
+const categoryItemSchema = new mongoose.Schema(
+  {
+    id: { type: String, required: true },
+    label: { type: String, required: true, trim: true },
+    path: { type: String, required: true, trim: true },
+    image: { type: String, trim: true, default: "" },
+  },
+  { _id: false },
+);
+
 const mainNavItemSchema = new mongoose.Schema(
   {
     id: { type: String, required: true },
@@ -53,7 +66,8 @@ const headerConfigSchema = new mongoose.Schema(
     },
 
     shopMegaMenu: {
-      categories: { type: [linkItemSchema], default: [] },
+      // ✅ categories now use categoryItemSchema (adds `image`)
+      categories: { type: [categoryItemSchema], default: [] },
       quickLinks: { type: [linkItemSchema], default: [] },
       byStyle: { type: [linkItemSchema], default: [] },
       fashionItems: { type: [linkItemSchema], default: [] },

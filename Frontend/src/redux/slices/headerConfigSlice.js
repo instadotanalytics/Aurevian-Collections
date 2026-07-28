@@ -3,7 +3,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://aurevian-collections.onrender.com/api";
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://aurevian-collections.onrender.com/api";
 
 const authHeader = () => {
   const token =
@@ -64,6 +66,37 @@ export const updateHeaderConfig = createAsyncThunk(
   },
 );
 
+// ============================================
+// Upload a category image (multipart) — returns { url, publicId }.
+// Does NOT save the header config; the caller stores the returned url
+// on the relevant category and saves via updateHeaderConfig separately.
+// ============================================
+export const uploadCategoryImage = createAsyncThunk(
+  "headerConfig/uploadCategoryImage",
+  async (file, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const { data } = await axios.post(
+        `${API_URL}/header-config/upload-category-image`,
+        formData,
+        {
+          headers: {
+            ...authHeader(),
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+      return data.data; // { url, publicId }
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to upload image",
+      );
+    }
+  },
+);
+
 const headerConfigSlice = createSlice({
   name: "headerConfig",
   initialState: {
@@ -71,6 +104,7 @@ const headerConfigSlice = createSlice({
     adminConfig: null, // used by the admin editor (mirrors config, edited locally then saved)
     isLoading: false,
     isSaving: false,
+    isUploadingImage: false,
     error: null,
   },
   reducers: {
@@ -111,6 +145,18 @@ const headerConfigSlice = createSlice({
       })
       .addCase(updateHeaderConfig.rejected, (state, action) => {
         state.isSaving = false;
+        state.error = action.payload;
+      })
+
+      .addCase(uploadCategoryImage.pending, (state) => {
+        state.isUploadingImage = true;
+        state.error = null;
+      })
+      .addCase(uploadCategoryImage.fulfilled, (state) => {
+        state.isUploadingImage = false;
+      })
+      .addCase(uploadCategoryImage.rejected, (state, action) => {
+        state.isUploadingImage = false;
         state.error = action.payload;
       });
   },

@@ -291,3 +291,105 @@
     align-items: stretch;
   }
 }
+
+/* ✅ Category row: thumbnail + fields side by side */
+.categoryRow {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.categoryRow:last-child {
+  border-bottom: none;
+}
+
+.categoryThumbWrap {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  position: relative;
+}
+
+.categoryThumbButton {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  border: 1px dashed #cbd5e1;
+  background: #f8fafc;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.categoryThumbButton:hover:not(:disabled) {
+  border-color: #106b47;
+}
+
+.categoryThumbButton:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.categoryThumb {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  display: block;
+}
+
+.categoryThumbEmpty {
+  font-size: 9px;
+  color: #94a3b8;
+  font-weight: 600;
+  text-align: center;
+  padding: 4px;
+}
+
+.categoryThumbUploading {
+  font-size: 11px;
+  color: #106b47;
+  font-weight: 600;
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.uploadTextBtn {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 11.5px;
+  color: #106b47;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.uploadTextBtn:disabled {
+  color: #94a3b8;
+  cursor: default;
+  text-decoration: none;
+}
+
+.categoryFields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .categoryRow {
+    flex-direction: column;
+  }
+}

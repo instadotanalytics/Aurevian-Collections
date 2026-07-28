@@ -5,8 +5,10 @@ import {
   getPublicHeaderConfig,
   getHeaderConfigAdmin,
   updateHeaderConfigAdmin,
+  uploadCategoryImage,
 } from "../controllers/headerConfigController.js";
 import { protectSuperAdmin } from "../middleware/superAdminAuth.js";
+import upload, { handleMulterError } from "../middleware/upload.js";
 
 const router = express.Router();
 
@@ -22,5 +24,13 @@ router.use(protectSuperAdmin);
 
 router.get("/", getHeaderConfigAdmin);
 router.put("/", updateHeaderConfigAdmin);
+
+// Category image upload — used by the Shop by Category editor
+router.post(
+  "/upload-category-image",
+  upload.single("image"),
+  handleMulterError,
+  uploadCategoryImage,
+);
 
 export default router;

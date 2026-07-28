@@ -1,26 +1,21 @@
-
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import styles from "./Shopbycategory.module.css";
-import earringsImg from "../../assets/earrings.png";
-import necklacesImg from "../../assets/necklaces.png";
-import ringsImg from "../../assets/rings.png";
-import braceletsImg from "../../assets/bracelets.png";
-import ankletsImg from "../../assets/anklets.png";
-import bridalImg from "../../assets/bridal.png";
-import nosepinImg from "../../assets/nosepin.png";
-import chainImg from "../../assets/chain.png";
+import { fetchPublicHeaderConfig } from "./../../redux/slices/headerConfigSlice.js";
 
-const CATEGORIES = [
-  { id: "earrings", name: "Earrings", image: earringsImg },
-  { id: "necklaces", name: "Necklaces", image: necklacesImg },
-  { id: "rings", name: "Rings", image: ringsImg },
-  { id: "bracelets", name: "Bracelets", image: braceletsImg },
-  { id: "anklets", name: "Anklets", image: ankletsImg },
-  { id: "bridal", name: "Bridal", image: bridalImg },
-  { id: "nosepin", name:"Nosepin", image: nosepinImg },
-  { id: "chain", name:"Chain", image:chainImg},
+// ✅ Fully dynamic now — no static image imports. Whatever the admin sets
+// in Header Management → Shop Mega Menu → Shop by Category is the single
+// source of truth. If a category has no image yet, we show a clean
+// initials placeholder instead of a broken/blank box.
+
+// Bare-minimum fallback list, only used if the config hasn't loaded at all
+const FALLBACK_CATEGORIES = [
+  { id: "earrings", label: "Earrings", path: "/shop/earrings", image: "" },
+  { id: "necklaces", label: "Necklaces", path: "/shop/necklaces", image: "" },
+  { id: "rings", label: "Rings", path: "/shop/rings", image: "" },
 ];
 
 const containerVariants = {
@@ -42,36 +37,66 @@ const cardVariants = {
   },
 };
 
+const getInitials = (label = "") =>
+  label
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+
 const CategoryCard = React.memo(function CategoryCard({ category }) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const hasImage = Boolean(category.image) && !imageFailed;
+
   return (
     <motion.div className={styles.card} variants={cardVariants}>
-      <a
-        href={`/category/${category.id}`}
+      <Link
+        to={category.path || "/shop"}
         className={styles.cardLink}
-        aria-label={`Explore ${category.name}`}
+        aria-label={`Explore ${category.label}`}
       >
         <div className={styles.imageWrap}>
-          {category.image ? (
+          {hasImage ? (
             <img
               src={category.image}
-              alt={category.name}
+              alt={category.label}
               className={styles.image}
               loading="lazy"
+              onError={() => setImageFailed(true)}
             />
           ) : (
-            <div className={styles.imagePlaceholder} aria-hidden="true" />
+            <div className={styles.imagePlaceholder} aria-hidden="true">
+              <span className={styles.imagePlaceholderText}>
+                {getInitials(category.label) || "?"}
+              </span>
+            </div>
           )}
 
           <span className={styles.ring} aria-hidden="true" />
         </div>
 
-        <h3 className={styles.categoryName}>{category.name}</h3>
-      </a>
+        <h3 className={styles.categoryName}>{category.label}</h3>
+      </Link>
     </motion.div>
   );
 });
 
 export default function ShopByCategory() {
+  const dispatch = useDispatch();
+  const { config } = useSelector((state) => state.headerConfig);
+
+  useEffect(() => {
+    if (!config) {
+      dispatch(fetchPublicHeaderConfig());
+    }
+  }, [dispatch, config]);
+
+  const categories = config?.shopMegaMenu?.categories?.length
+    ? config.shopMegaMenu.categories
+    : FALLBACK_CATEGORIES;
+
   const trackRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -93,7 +118,7 @@ export default function ShopByCategory() {
       el.removeEventListener("scroll", updateScrollState);
       window.removeEventListener("resize", updateScrollState);
     };
-  }, [updateScrollState]);
+  }, [updateScrollState, categories]);
 
   const scrollByAmount = (direction) => {
     const el = trackRef.current;
@@ -106,7 +131,10 @@ export default function ShopByCategory() {
   };
 
   return (
-    <section className={styles.section} aria-labelledby="shop-by-category-heading">
+    <section
+      className={styles.section}
+      aria-labelledby="shop-by-category-heading"
+    >
       <div className={styles.glowTopLeft} aria-hidden="true" />
       <div className={styles.glowBottomRight} aria-hidden="true" />
 
@@ -130,7 +158,6 @@ export default function ShopByCategory() {
         </motion.div>
 
         <div className={styles.sliderWrap}>
-          {/* Desktop / tablet arrows — sit on the left & right edges of the slider */}
           <button
             type="button"
             className={`${styles.navButton} ${styles.navButtonLeft} ${styles.desktopNav}`}
@@ -152,7 +179,7 @@ export default function ShopByCategory() {
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
           >
-            {CATEGORIES.map((category) => (
+            {categories.map((category) => (
               <CategoryCard key={category.id} category={category} />
             ))}
           </motion.div>
@@ -168,7 +195,6 @@ export default function ShopByCategory() {
           </button>
         </div>
 
-        {/* Mobile arrows — sit below the cards, above the CTA/footer area */}
         <div className={styles.mobileNav}>
           <button
             type="button"

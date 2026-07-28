@@ -29,7 +29,10 @@
   background-size: cover;
   background-position: center right;
   background-repeat: no-repeat;
-  transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), visibility 1.2s;
+  transition:
+    opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1),
+    transform 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+    visibility 1.2s;
   display: flex;
   align-items: center;
   padding: 0 8%;
@@ -96,7 +99,7 @@
   margin: 0;
   font-weight: 400;
   line-height: 1.15;
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
 }
 
 .subtitle {
@@ -165,7 +168,10 @@
   z-index: 1;
   overflow: hidden;
   opacity: 0;
-  transition: color 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease, border-color 0.4s;
+  transition:
+    color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.8s ease,
+    border-color 0.4s;
 }
 
 .showContent .shopBtn {
@@ -174,7 +180,7 @@
 }
 
 .shopBtn::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
@@ -224,7 +230,11 @@
   cursor: pointer;
   backdrop-filter: blur(8px);
   z-index: 25;
-  transition: background 0.3s, color 0.3s, border-color 0.3s, transform 0.2s;
+  transition:
+    background 0.3s,
+    color 0.3s,
+    border-color 0.3s,
+    transform 0.2s;
 }
 
 .leftArrow {
@@ -295,7 +305,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ============================================
@@ -383,16 +395,28 @@
   left: -50%;
   width: 200%;
   height: 200%;
-  background: 
-    radial-gradient(ellipse at 30% 40%, rgba(16, 107, 71, 0.05) 0%, transparent 60%),
-    radial-gradient(ellipse at 70% 60%, rgba(16, 107, 71, 0.03) 0%, transparent 50%),
+  background:
+    radial-gradient(
+      ellipse at 30% 40%,
+      rgba(16, 107, 71, 0.05) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse at 70% 60%,
+      rgba(16, 107, 71, 0.03) 0%,
+      transparent 50%
+    ),
     linear-gradient(135deg, #f8fbfa 0%, #f0f5f2 100%);
   animation: loadingBgFloat 6s ease-in-out infinite alternate;
 }
 
 @keyframes loadingBgFloat {
-  0% { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(2%, -2%) scale(1.02); }
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(2%, -2%) scale(1.02);
+  }
 }
 
 .loadingContent {
@@ -409,8 +433,14 @@
 }
 
 @keyframes loadingFadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .loadingLogo {
@@ -424,8 +454,15 @@
 }
 
 @keyframes loadingLogoPulse {
-  0%, 100% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.05); opacity: 1; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
 }
 
 .loadingLogoCircle {
@@ -433,8 +470,12 @@
 }
 
 @keyframes loadingCircleSpin {
-  from { stroke-dashoffset: 138.23; }
-  to { stroke-dashoffset: 0; }
+  from {
+    stroke-dashoffset: 138.23;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 .loadingLogoDiamond {
@@ -442,12 +483,19 @@
 }
 
 @keyframes loadingDiamondPulse {
-  0%, 100% { opacity: 0.4; transform: scale(0.95); }
-  50% { opacity: 0.8; transform: scale(1.05); }
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
 }
 
 .loadingBrandName {
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
   font-size: 28px;
   font-weight: 600;
   color: #0a2216;
@@ -456,8 +504,13 @@
 }
 
 @keyframes loadingTextFade {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .loadingTextWrapper {
@@ -475,7 +528,7 @@
   letter-spacing: 3px;
   text-transform: uppercase;
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 .loadingDots {
@@ -490,13 +543,27 @@
   animation: loadingDotBounce 1.4s ease-in-out infinite;
 }
 
-.loadingDots .dot1 { animation-delay: 0s; }
-.loadingDots .dot2 { animation-delay: 0.2s; }
-.loadingDots .dot3 { animation-delay: 0.4s; }
+.loadingDots .dot1 {
+  animation-delay: 0s;
+}
+.loadingDots .dot2 {
+  animation-delay: 0.2s;
+}
+.loadingDots .dot3 {
+  animation-delay: 0.4s;
+}
 
 @keyframes loadingDotBounce {
-  0%, 80%, 100% { transform: translateY(0); opacity: 0.3; }
-  40% { transform: translateY(-8px); opacity: 1; }
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.3;
+  }
+  40% {
+    transform: translateY(-8px);
+    opacity: 1;
+  }
 }
 
 .loadingSubText {
@@ -534,7 +601,7 @@
 }
 
 .loadingProgressFill::after {
-  content: '';
+  content: "";
   position: absolute;
   right: 0;
   top: -2px;
@@ -552,7 +619,7 @@
   font-variant-numeric: tabular-nums;
   min-width: 36px;
   text-align: right;
-  font-family: 'Inter', monospace;
+  font-family: "Inter", monospace;
 }
 
 .loadingGlimmer {
@@ -561,15 +628,25 @@
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(ellipse at 30% 40%, rgba(255, 255, 255, 0.4) 0%, transparent 50%);
+  background: radial-gradient(
+    ellipse at 30% 40%,
+    rgba(255, 255, 255, 0.4) 0%,
+    transparent 50%
+  );
   animation: loadingGlimmerMove 4s ease-in-out infinite;
   pointer-events: none;
 }
 
 @keyframes loadingGlimmerMove {
-  0% { transform: translate(-10%, -10%) rotate(0deg) scale(1); }
-  50% { transform: translate(10%, 10%) rotate(5deg) scale(1.1); }
-  100% { transform: translate(-10%, -10%) rotate(0deg) scale(1); }
+  0% {
+    transform: translate(-10%, -10%) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate(10%, 10%) rotate(5deg) scale(1.1);
+  }
+  100% {
+    transform: translate(-10%, -10%) rotate(0deg) scale(1);
+  }
 }
 
 /* ============================================
@@ -662,17 +739,9 @@
     gap: 8px;
   }
 
+  /* ✅ Hide nav arrows on mobile — autoplay handles slide transitions */
   .navArrowButton {
-    width: 34px;
-    height: 34px;
-  }
-
-  .leftArrow {
-    left: 8px;
-  }
-
-  .rightArrow {
-    right: 8px;
+    display: none;
   }
 
   .dotsContainer {
@@ -751,11 +820,6 @@
     padding: 10px 16px;
     font-size: 9px;
     letter-spacing: 1px;
-  }
-
-  .navArrowButton {
-    width: 30px;
-    height: 30px;
   }
 
   .dotsContainer {

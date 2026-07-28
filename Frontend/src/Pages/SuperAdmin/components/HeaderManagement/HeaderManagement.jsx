@@ -1,10 +1,11 @@
 // src/Pages/SuperAdmin/components/HeaderManagement/HeaderManagement.jsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAdminHeaderConfig,
   updateHeaderConfig,
+  uploadCategoryImage,
   clearHeaderConfigError,
 } from "../../../../redux/slices/headerConfigSlice";
 import styles from "./HeaderManagement.module.css";
@@ -70,6 +71,153 @@ const LinkListEditor = ({ title, items, onChange }) => {
           >
             ×
           </button>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ============================================
+// ✅ Shop by Category editor — file upload instead of a URL field.
+// Uploads go through uploadCategoryImage (Cloudinary), and only the
+// returned URL is stored on the category. Image is never shown in the
+// navbar dropdown — only on the homepage "Shop by Category" section.
+// ============================================
+const CategoryListEditor = ({ title, items, onChange }) => {
+  const dispatch = useDispatch();
+  const [uploadingIndex, setUploadingIndex] = useState(null);
+  const fileInputRefs = useRef({});
+
+  const update = (index, field, value) => {
+    const next = [...items];
+    next[index] = { ...next[index], [field]: value };
+    if (field === "label" && !next[index]._touchedId) {
+      next[index].id = slugify(value);
+    }
+    onChange(next);
+  };
+
+  const add = () => {
+    onChange([
+      ...items,
+      { id: `category-${Date.now()}`, label: "", path: "", image: "" },
+    ]);
+  };
+
+  const remove = (index) => {
+    onChange(items.filter((_, i) => i !== index));
+  };
+
+  const triggerFilePicker = (index) => {
+    fileInputRefs.current[index]?.click();
+  };
+
+  const handleFileSelected = async (index, e) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-selecting the same file later
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image must be under 10MB");
+      return;
+    }
+
+    setUploadingIndex(index);
+    try {
+      const result = await dispatch(uploadCategoryImage(file)).unwrap();
+      update(index, "image", result.url);
+      toast.success("Image uploaded");
+    } catch (err) {
+      toast.error(err || "Failed to upload image");
+    } finally {
+      setUploadingIndex(null);
+    }
+  };
+
+  return (
+    <div className={styles.subSection}>
+      <div className={styles.subSectionHeader}>
+        <h4>{title}</h4>
+        <button type="button" className={styles.addSmallBtn} onClick={add}>
+          + Add Category
+        </button>
+      </div>
+      {items.length === 0 && (
+        <p className={styles.emptyHint}>No categories yet</p>
+      )}
+      {items.map((item, index) => (
+        <div key={index} className={styles.categoryRow}>
+          <div className={styles.categoryThumbWrap}>
+            <button
+              type="button"
+              className={styles.categoryThumbButton}
+              onClick={() => triggerFilePicker(index)}
+              disabled={uploadingIndex === index}
+              title="Click to upload image"
+            >
+              {uploadingIndex === index ? (
+                <span className={styles.categoryThumbUploading}>...</span>
+              ) : item.image ? (
+                <img
+                  src={item.image}
+                  alt={item.label || "category"}
+                  className={styles.categoryThumb}
+                  onError={() => update(index, "image", "")}
+                />
+              ) : (
+                <span className={styles.categoryThumbEmpty}>+ Image</span>
+              )}
+            </button>
+            <input
+              ref={(el) => (fileInputRefs.current[index] = el)}
+              type="file"
+              accept="image/*"
+              className={styles.hiddenFileInput}
+              onChange={(e) => handleFileSelected(index, e)}
+            />
+          </div>
+
+          <div className={styles.categoryFields}>
+            <div className={styles.linkRow}>
+              <input
+                type="text"
+                placeholder="Label (e.g. Earrings)"
+                value={item.label}
+                onChange={(e) => update(index, "label", e.target.value)}
+                className={styles.linkLabelInput}
+              />
+              <input
+                type="text"
+                placeholder="/path (e.g. /shop/earrings)"
+                value={item.path}
+                onChange={(e) => update(index, "path", e.target.value)}
+                className={styles.linkPathInput}
+              />
+              <button
+                type="button"
+                className={styles.removeSmallBtn}
+                onClick={() => remove(index)}
+              >
+                ×
+              </button>
+            </div>
+            <button
+              type="button"
+              className={styles.uploadTextBtn}
+              onClick={() => triggerFilePicker(index)}
+              disabled={uploadingIndex === index}
+            >
+              {uploadingIndex === index
+                ? "Uploading..."
+                : item.image
+                  ? "Replace image"
+                  : "Upload image (shown on homepage only)"}
+            </button>
+          </div>
         </div>
       ))}
     </div>
@@ -346,8 +494,8 @@ const HeaderManagement = () => {
         openSection={openSection}
         onToggle={toggleSection}
       >
-        <LinkListEditor
-          title="Shop by Category"
+        <CategoryListEditor
+          title="Shop by Category (image shown on homepage only)"
           items={form.shopMegaMenu.categories}
           onChange={(v) => setShopField("categories", v)}
         />
