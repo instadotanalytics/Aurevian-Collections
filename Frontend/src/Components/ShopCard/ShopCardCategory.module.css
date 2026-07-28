@@ -1,17 +1,54 @@
 /* src/Components/ShopCardCategory/ShopCardCategory.module.css */
 
 /* ==========================================================
-   SECTION
+   SECTION - Using ShopByCategory gradient colors
    ========================================================== */
 .section {
+  --ivory: #fbf6ee;
+  --cream: #f6ecdd;
+  --champagne: #eaddc4;
+  
   padding: 60px 24px;
-  background: #fcf9f5;
+  background: linear-gradient(180deg, var(--ivory) 0%, var(--cream) 55%, var(--champagne) 100%);
   font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* Ambient glow decorations */
+.section::before,
+.section::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.section::before {
+  width: clamp(260px, 34vw, 480px);
+  height: clamp(260px, 34vw, 480px);
+  top: -16%;
+  left: -12%;
+  background: radial-gradient(circle, var(--cream), transparent 70%);
+}
+
+.section::after {
+  width: clamp(260px, 34vw, 480px);
+  height: clamp(260px, 34vw, 480px);
+  bottom: -20%;
+  right: -10%;
+  background: radial-gradient(circle, var(--champagne), transparent 70%);
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 /* ==========================================================
@@ -363,7 +400,6 @@
     padding: 6px 14px;
   }
 
-  /* ✅ 2 cards visible on mobile */
   .card {
     min-width: 45vw;
     max-width: 45vw;
@@ -422,7 +458,6 @@
     margin: 0;
   }
 
-  /* ✅ 2 cards with bigger images on small phones */
   .card {
     min-width: 44vw;
     max-width: 44vw;
@@ -499,5 +534,27 @@
 
   .ratingValue {
     font-size: 10px;
+  }
+}
+
+/* ==========================================================
+   REDUCED MOTION
+   ========================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .imageWrap,
+  .image,
+  .imagePlaceholder,
+  .card,
+  .viewAllBtn,
+  .scrollBtn {
+    transition: none !important;
+  }
+  
+  .card:hover .image {
+    transform: none !important;
+  }
+  
+  .card:hover {
+    transform: none !important;
   }
 }
