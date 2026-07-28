@@ -158,7 +158,7 @@ export default function ShopCardCategory() {
           <div className={styles.headerText}>
             <p className={styles.topText}>✦ TRENDING PICKS ✦</p>
             <h2 id="shop-cards-heading" className={styles.heading}>
-              Best Sellers For You
+              Best Products For You
             </h2>
           </div>
 
