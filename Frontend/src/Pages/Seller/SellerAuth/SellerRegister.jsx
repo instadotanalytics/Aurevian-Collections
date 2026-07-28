@@ -59,27 +59,22 @@ const SellerRegister = () => {
     1: {
       title: 'Personal Information',
       description: 'Fill your personal details',
-      icon: <FiUser />,
     },
     2: {
       title: 'PAN Card Details',
       description: 'Enter your PAN card details',
-      icon: <FiShield />,
     },
     3: {
       title: 'Aadhaar Card Details',
       description: 'Enter your Aadhaar card details',
-      icon: <FiAward />,
     },
     4: {
       title: 'Store & GST Details',
       description: 'Tell us about your store',
-      icon: <FiShoppingBag />,
     },
     5: {
       title: 'Review & Submit',
       description: 'Review your information',
-      icon: <FiCheck />,
     },
   };
 
@@ -320,7 +315,11 @@ const SellerRegister = () => {
   const handleNext = () => {
     if (validateStep(currentStep)) {
       setCurrentStep(prev => prev + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Scroll to top of form on step change
+      const formElement = document.querySelector(`.${styles.form}`);
+      if (formElement) {
+        formElement.scrollTop = 0;
+      }
     } else {
       toast.error('Please fill all required fields');
     }
@@ -328,7 +327,11 @@ const SellerRegister = () => {
 
   const handlePrevious = () => {
     setCurrentStep(prev => prev - 1);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Scroll to top of form on step change
+    const formElement = document.querySelector(`.${styles.form}`);
+    if (formElement) {
+      formElement.scrollTop = 0;
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -399,26 +402,39 @@ const SellerRegister = () => {
     }
   };
 
+  // ============================================
+  // STEP INDICATOR - Numbers instead of Icons
+  // ============================================
   const renderStepIndicator = () => {
-    const steps = [
-      { label: 'Personal', icon: <FiUser /> },
-      { label: 'PAN', icon: <FiShield /> },
-      { label: 'Aadhaar', icon: <FiAward /> },
-      { label: 'Store', icon: <FiShoppingBag /> },
-      { label: 'Review', icon: <FiCheck /> },
-    ];
+    const steps = ['Personal', 'PAN', 'Aadhaar', 'Store', 'Review'];
+    
     return (
-     
       <div className={styles.stepIndicator}>
-        {steps.map((step, index) => (
-          <div key={index} className={styles.stepItem}>
-            <div className={`${styles.stepNumber} ${currentStep > index + 1 ? styles.completed : ''} ${currentStep === index + 1 ? styles.active : ''}`}>
-              {currentStep > index + 1 ? <FiCheck /> : step.icon}
+        {steps.map((label, index) => {
+          const stepNumber = index + 1;
+          const isCompleted = currentStep > stepNumber;
+          const isActive = currentStep === stepNumber;
+          
+          return (
+            <div key={index} className={styles.stepItem}>
+              <div 
+                className={`${styles.stepNumber} 
+                  ${isActive ? styles.active : ''} 
+                  ${isCompleted ? styles.completed : ''}`}
+              >
+                {isCompleted ? <FiCheck /> : stepNumber}
+              </div>
+              <span 
+                className={`${styles.stepLabel} 
+                  ${isActive ? styles.active : ''} 
+                  ${isCompleted ? styles.completed : ''}`}
+              >
+                {label}
+              </span>
+              {index < steps.length - 1 && <div className={styles.stepLine} />}
             </div>
-            <span className={styles.stepLabel}>{step.label}</span>
-            {index < steps.length - 1 && <div className={styles.stepLine} />}
-          </div>
-        ))}
+          );
+        })}
       </div>
     );
   };
@@ -439,44 +455,48 @@ const SellerRegister = () => {
   // ============================================
   const renderPersonalInfo = () => (
     <div className={styles.stepContent}>
-      <h2 className={styles.stepTitle}>Personal Information</h2>
-      <p className={styles.stepDesc}>Enter your personal information</p>
-
-      <div className={styles.formRow}>
-        <div className={styles.formGroup}>
-          <label>First Name <span className={styles.required}>*</span></label>
-          <input name="firstName" placeholder="Enter your first name" value={formData.firstName} onChange={handleChange} className={errors.firstName ? styles.error : ''} />
-          {errors.firstName && <span className={styles.errorText}>{errors.firstName}</span>}
-        </div>
-        <div className={styles.formGroup}>
-          <label>Last Name <span className={styles.required}>*</span></label>
-          <input name="lastName" placeholder="Enter your last name" value={formData.lastName} onChange={handleChange} className={errors.lastName ? styles.error : ''} />
-          {errors.lastName && <span className={styles.errorText}>{errors.lastName}</span>}
-        </div>
+      <div className={styles.stepHeader}>
+        <h2 className={styles.stepTitle}>Personal Information</h2>
+        <p className={styles.stepDesc}>Enter your personal information</p>
       </div>
 
-      <div className={styles.formGroup}>
-        <label>Email Address <span className={styles.required}>*</span></label>
-        <input type="email" name="email" placeholder="Enter your email" value={formData.email} onChange={handleChange} className={errors.email ? styles.error : ''} />
-        {errors.email && <span className={styles.errorText}>{errors.email}</span>}
-      </div>
-
-      <div className={styles.formGroup}>
-        <label>Phone Number <span className={styles.required}>*</span></label>
-        <input type="tel" name="phone" placeholder="+91 9876543210" value={formData.phone} onChange={handleChange} className={errors.phone ? styles.error : ''} />
-        {errors.phone && <span className={styles.errorText}>{errors.phone}</span>}
-      </div>
-
-      <div className={styles.formRow}>
-        <div className={styles.formGroup}>
-          <label>Password <span className={styles.required}>*</span></label>
-          <input type="password" name="password" placeholder="Min 6 characters" value={formData.password} onChange={handleChange} className={errors.password ? styles.error : ''} />
-          {errors.password && <span className={styles.errorText}>{errors.password}</span>}
+      <div className={styles.formFieldsWrapper}>
+        <div className={styles.formRow}>
+          <div className={styles.formGroup}>
+            <label>First Name <span className={styles.required}>*</span></label>
+            <input name="firstName" placeholder="Enter your first name" value={formData.firstName} onChange={handleChange} className={errors.firstName ? styles.error : ''} />
+            {errors.firstName && <span className={styles.errorText}>{errors.firstName}</span>}
+          </div>
+          <div className={styles.formGroup}>
+            <label>Last Name <span className={styles.required}>*</span></label>
+            <input name="lastName" placeholder="Enter your last name" value={formData.lastName} onChange={handleChange} className={errors.lastName ? styles.error : ''} />
+            {errors.lastName && <span className={styles.errorText}>{errors.lastName}</span>}
+          </div>
         </div>
+
         <div className={styles.formGroup}>
-          <label>Confirm Password <span className={styles.required}>*</span></label>
-          <input type="password" name="confirmPassword" placeholder="Confirm your password" value={formData.confirmPassword} onChange={handleChange} className={errors.confirmPassword ? styles.error : ''} />
-          {errors.confirmPassword && <span className={styles.errorText}>{errors.confirmPassword}</span>}
+          <label>Email Address <span className={styles.required}>*</span></label>
+          <input type="email" name="email" placeholder="Enter your email" value={formData.email} onChange={handleChange} className={errors.email ? styles.error : ''} />
+          {errors.email && <span className={styles.errorText}>{errors.email}</span>}
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Phone Number <span className={styles.required}>*</span></label>
+          <input type="tel" name="phone" placeholder="+91 9876543210" value={formData.phone} onChange={handleChange} className={errors.phone ? styles.error : ''} />
+          {errors.phone && <span className={styles.errorText}>{errors.phone}</span>}
+        </div>
+
+        <div className={styles.formRow}>
+          <div className={styles.formGroup}>
+            <label>Password <span className={styles.required}>*</span></label>
+            <input type="password" name="password" placeholder="Min 6 characters" value={formData.password} onChange={handleChange} className={errors.password ? styles.error : ''} />
+            {errors.password && <span className={styles.errorText}>{errors.password}</span>}
+          </div>
+          <div className={styles.formGroup}>
+            <label>Confirm Password <span className={styles.required}>*</span></label>
+            <input type="password" name="confirmPassword" placeholder="Confirm your password" value={formData.confirmPassword} onChange={handleChange} className={errors.confirmPassword ? styles.error : ''} />
+            {errors.confirmPassword && <span className={styles.errorText}>{errors.confirmPassword}</span>}
+          </div>
         </div>
       </div>
     </div>
@@ -487,52 +507,56 @@ const SellerRegister = () => {
   // ============================================
   const renderPanCard = () => (
     <div className={styles.stepContent}>
-      <h2 className={styles.stepTitle}>PAN Card Details</h2>
-      <p className={styles.stepDesc}>Enter your PAN card details for KYC</p>
-
-      <div className={styles.formGroup}>
-        <label>PAN Number <span className={styles.required}>*</span></label>
-        <input
-          name="panNumber"
-          placeholder="ABCDE1234F"
-          value={formData.panNumber}
-          onChange={(e) => {
-            const value = e.target.value.toUpperCase().replace(/\s/g, '');
-            setFormData(prev => ({ ...prev, panNumber: value }));
-            if (errors.panNumber) {
-              setErrors(prev => ({ ...prev, panNumber: '' }));
-            }
-          }}
-          className={errors.panNumber ? styles.error : ''}
-          maxLength={10}
-        />
-        {errors.panNumber && <span className={styles.errorText}>{errors.panNumber}</span>}
-        <small className={styles.hint}>Format: 5 letters + 4 digits + 1 letter (e.g., ABCDE1234F)</small>
-        {formData.panNumber && formData.panNumber.length === 10 && /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.panNumber) && (
-          <span className={styles.validText}>✅ Valid PAN format</span>
-        )}
+      <div className={styles.stepHeader}>
+        <h2 className={styles.stepTitle}>PAN Card Details</h2>
+        <p className={styles.stepDesc}>Enter your PAN card details for KYC</p>
       </div>
 
-      <div className={styles.formGroup}>
-        <label>Upload PAN Card <span className={styles.required}>*</span></label>
-        <div className={styles.fileUploadWrapper}>
-          <div className={styles.fileUploadArea}>
-            {panPreview ? (
-              <div className={styles.filePreview}>
-                <img src={panPreview} alt="PAN Card" />
-                <button type="button" className={styles.removeFile} onClick={() => { setFormData(prev => ({ ...prev, panCard: null })); setPanPreview(null); }}>×</button>
-              </div>
-            ) : (
-              <>
-                <FiUpload className={styles.uploadIcon} />
-                <p>Click to upload PAN card image</p>
-                <span>JPG, PNG, PDF (Max 5MB)</span>
-              </>
-            )}
-            <input type="file" name="panCard" accept="image/*,.pdf" onChange={handleChange} className={styles.fileInput} />
-          </div>
+      <div className={styles.formFieldsWrapper}>
+        <div className={styles.formGroup}>
+          <label>PAN Number <span className={styles.required}>*</span></label>
+          <input
+            name="panNumber"
+            placeholder="ABCDE1234F"
+            value={formData.panNumber}
+            onChange={(e) => {
+              const value = e.target.value.toUpperCase().replace(/\s/g, '');
+              setFormData(prev => ({ ...prev, panNumber: value }));
+              if (errors.panNumber) {
+                setErrors(prev => ({ ...prev, panNumber: '' }));
+              }
+            }}
+            className={errors.panNumber ? styles.error : ''}
+            maxLength={10}
+          />
+          {errors.panNumber && <span className={styles.errorText}>{errors.panNumber}</span>}
+          <small className={styles.hint}>Format: 5 letters + 4 digits + 1 letter (e.g., ABCDE1234F)</small>
+          {formData.panNumber && formData.panNumber.length === 10 && /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.panNumber) && (
+            <span className={styles.validText}>✅ Valid PAN format</span>
+          )}
         </div>
-        {errors.panCard && <span className={styles.errorText}>{errors.panCard}</span>}
+
+        <div className={styles.formGroup}>
+          <label>Upload PAN Card <span className={styles.required}>*</span></label>
+          <div className={styles.fileUploadWrapper}>
+            <div className={styles.fileUploadArea}>
+              {panPreview ? (
+                <div className={styles.filePreview}>
+                  <img src={panPreview} alt="PAN Card" />
+                  <button type="button" className={styles.removeFile} onClick={() => { setFormData(prev => ({ ...prev, panCard: null })); setPanPreview(null); }}>×</button>
+                </div>
+              ) : (
+                <>
+                  <FiUpload className={styles.uploadIcon} />
+                  <p>Click to upload PAN card image</p>
+                  <span>JPG, PNG, PDF (Max 5MB)</span>
+                </>
+              )}
+              <input type="file" name="panCard" accept="image/*,.pdf" onChange={handleChange} className={styles.fileInput} />
+            </div>
+          </div>
+          {errors.panCard && <span className={styles.errorText}>{errors.panCard}</span>}
+        </div>
       </div>
     </div>
   );
@@ -542,52 +566,56 @@ const SellerRegister = () => {
   // ============================================
   const renderAadhaarCard = () => (
     <div className={styles.stepContent}>
-      <h2 className={styles.stepTitle}>Aadhaar Card Details</h2>
-      <p className={styles.stepDesc}>Enter your Aadhaar card details for KYC</p>
-
-      <div className={styles.formGroup}>
-        <label>Aadhaar Number <span className={styles.required}>*</span></label>
-        <input
-          name="aadhaarNumber"
-          placeholder="123456789012"
-          value={formData.aadhaarNumber}
-          onChange={(e) => {
-            const value = e.target.value.replace(/\s/g, '');
-            setFormData(prev => ({ ...prev, aadhaarNumber: value }));
-            if (errors.aadhaarNumber) {
-              setErrors(prev => ({ ...prev, aadhaarNumber: '' }));
-            }
-          }}
-          className={errors.aadhaarNumber ? styles.error : ''}
-          maxLength={12}
-        />
-        {errors.aadhaarNumber && <span className={styles.errorText}>{errors.aadhaarNumber}</span>}
-        <small className={styles.hint}>12-digit Aadhaar number</small>
-        {formData.aadhaarNumber && formData.aadhaarNumber.length === 12 && /^[0-9]{12}$/.test(formData.aadhaarNumber) && (
-          <span className={styles.validText}>✅ Valid Aadhaar format</span>
-        )}
+      <div className={styles.stepHeader}>
+        <h2 className={styles.stepTitle}>Aadhaar Card Details</h2>
+        <p className={styles.stepDesc}>Enter your Aadhaar card details for KYC</p>
       </div>
 
-      <div className={styles.formGroup}>
-        <label>Upload Aadhaar Card <span className={styles.required}>*</span></label>
-        <div className={styles.fileUploadWrapper}>
-          <div className={styles.fileUploadArea}>
-            {aadhaarPreview ? (
-              <div className={styles.filePreview}>
-                <img src={aadhaarPreview} alt="Aadhaar Card" />
-                <button type="button" className={styles.removeFile} onClick={() => { setFormData(prev => ({ ...prev, aadhaarCard: null })); setAadhaarPreview(null); }}>×</button>
-              </div>
-            ) : (
-              <>
-                <FiUpload className={styles.uploadIcon} />
-                <p>Click to upload Aadhaar card image</p>
-                <span>JPG, PNG, PDF (Max 5MB)</span>
-              </>
-            )}
-            <input type="file" name="aadhaarCard" accept="image/*,.pdf" onChange={handleChange} className={styles.fileInput} />
-          </div>
+      <div className={styles.formFieldsWrapper}>
+        <div className={styles.formGroup}>
+          <label>Aadhaar Number <span className={styles.required}>*</span></label>
+          <input
+            name="aadhaarNumber"
+            placeholder="123456789012"
+            value={formData.aadhaarNumber}
+            onChange={(e) => {
+              const value = e.target.value.replace(/\s/g, '');
+              setFormData(prev => ({ ...prev, aadhaarNumber: value }));
+              if (errors.aadhaarNumber) {
+                setErrors(prev => ({ ...prev, aadhaarNumber: '' }));
+              }
+            }}
+            className={errors.aadhaarNumber ? styles.error : ''}
+            maxLength={12}
+          />
+          {errors.aadhaarNumber && <span className={styles.errorText}>{errors.aadhaarNumber}</span>}
+          <small className={styles.hint}>12-digit Aadhaar number</small>
+          {formData.aadhaarNumber && formData.aadhaarNumber.length === 12 && /^[0-9]{12}$/.test(formData.aadhaarNumber) && (
+            <span className={styles.validText}>✅ Valid Aadhaar format</span>
+          )}
         </div>
-        {errors.aadhaarCard && <span className={styles.errorText}>{errors.aadhaarCard}</span>}
+
+        <div className={styles.formGroup}>
+          <label>Upload Aadhaar Card <span className={styles.required}>*</span></label>
+          <div className={styles.fileUploadWrapper}>
+            <div className={styles.fileUploadArea}>
+              {aadhaarPreview ? (
+                <div className={styles.filePreview}>
+                  <img src={aadhaarPreview} alt="Aadhaar Card" />
+                  <button type="button" className={styles.removeFile} onClick={() => { setFormData(prev => ({ ...prev, aadhaarCard: null })); setAadhaarPreview(null); }}>×</button>
+                </div>
+              ) : (
+                <>
+                  <FiUpload className={styles.uploadIcon} />
+                  <p>Click to upload Aadhaar card image</p>
+                  <span>JPG, PNG, PDF (Max 5MB)</span>
+                </>
+              )}
+              <input type="file" name="aadhaarCard" accept="image/*,.pdf" onChange={handleChange} className={styles.fileInput} />
+            </div>
+          </div>
+          {errors.aadhaarCard && <span className={styles.errorText}>{errors.aadhaarCard}</span>}
+        </div>
       </div>
     </div>
   );
@@ -597,82 +625,136 @@ const SellerRegister = () => {
   // ============================================
   const renderStoreInfo = () => (
     <div className={styles.stepContent}>
-      <h2 className={styles.stepTitle}>Store & GST Details</h2>
-      <p className={styles.stepDesc}>Tell us about your store (GST is optional)</p>
-
-      <div className={styles.formGroup}>
-        <label>Store Name <span className={styles.required}>*</span></label>
-        <input name="storeName" placeholder="Your Brand Name" value={formData.storeName} onChange={handleChange} className={errors.storeName ? styles.error : ''} />
-        {errors.storeName && <span className={styles.errorText}>{errors.storeName}</span>}
+      <div className={styles.stepHeader}>
+        <h2 className={styles.stepTitle}>Store & GST Details</h2>
+        <p className={styles.stepDesc}>Tell us about your store (GST is optional)</p>
       </div>
 
-      <div className={styles.formGroup}>
-        <label>Brand Name</label>
-        <input name="brandName" placeholder="Your Brand Name (optional)" value={formData.brandName} onChange={handleChange} />
-      </div>
+      <div className={styles.formFieldsWrapper}>
+        <div className={styles.formGroup}>
+          <label>Store Name <span className={styles.required}>*</span></label>
+          <input 
+            name="storeName" 
+            placeholder="Your Brand Name" 
+            value={formData.storeName} 
+            onChange={handleChange} 
+            className={errors.storeName ? styles.error : ''} 
+          />
+          {errors.storeName && <span className={styles.errorText}>{errors.storeName}</span>}
+        </div>
 
-      <div className={styles.formGroup}>
-        <label>Business Description</label>
-        <textarea name="businessDescription" placeholder="Tell us about your jewellery business..." value={formData.businessDescription} onChange={handleChange} rows={2} />
-      </div>
+        <div className={styles.formGroup}>
+          <label>Brand Name</label>
+          <input 
+            name="brandName" 
+            placeholder="Your Brand Name (optional)" 
+            value={formData.brandName} 
+            onChange={handleChange} 
+          />
+        </div>
 
-      <div className={styles.formGroup}>
-        <label>GST Number <span className={styles.optional}>(Optional)</span></label>
-        <input
-          name="gstNumber"
-          placeholder="22AAAAA0000A1Z5"
-          value={formData.gstNumber}
-          onChange={(e) => {
-            const value = e.target.value.toUpperCase().replace(/\s/g, '');
-            setFormData(prev => ({ ...prev, gstNumber: value }));
-          }}
-        />
-        <small className={styles.hint}>Enter GST number if you have one (optional)</small>
-      </div>
+        <div className={styles.formGroup}>
+          <label>Business Description</label>
+          <textarea 
+            name="businessDescription" 
+            placeholder="Tell us about your jewellery business..." 
+            value={formData.businessDescription} 
+            onChange={handleChange} 
+            rows={2} 
+          />
+        </div>
 
-      <div className={styles.formGroup}>
-        <label>GST Certificate <span className={styles.optional}>(Optional)</span></label>
-        <div className={styles.fileUploadWrapper}>
-          <div className={styles.fileUploadArea}>
-            {gstPreview ? (
-              <div className={styles.filePreview}>
-                <img src={gstPreview} alt="GST Certificate" />
-                <button type="button" className={styles.removeFile} onClick={() => { setFormData(prev => ({ ...prev, gstCertificate: null })); setGstPreview(null); }}>×</button>
-              </div>
-            ) : (
-              <>
-                <FiUpload className={styles.uploadIcon} />
-                <p>Click to upload GST certificate (optional)</p>
-                <span>JPG, PNG, PDF (Max 5MB)</span>
-              </>
-            )}
-            <input type="file" name="gstCertificate" accept="image/*,.pdf" onChange={handleChange} className={styles.fileInput} />
+        <div className={styles.formGroup}>
+          <label>GST Number <span className={styles.optional}>(Optional)</span></label>
+          <input
+            name="gstNumber"
+            placeholder="22AAAAA0000A1Z5"
+            value={formData.gstNumber}
+            onChange={(e) => {
+              const value = e.target.value.toUpperCase().replace(/\s/g, '');
+              setFormData(prev => ({ ...prev, gstNumber: value }));
+            }}
+          />
+          <small className={styles.hint}>Enter GST number if you have one (optional)</small>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>GST Certificate <span className={styles.optional}>(Optional)</span></label>
+          <div className={styles.fileUploadWrapper}>
+            <div className={styles.fileUploadArea}>
+              {gstPreview ? (
+                <div className={styles.filePreview}>
+                  <img src={gstPreview} alt="GST Certificate" />
+                  <button 
+                    type="button" 
+                    className={styles.removeFile} 
+                    onClick={() => { 
+                      setFormData(prev => ({ ...prev, gstCertificate: null })); 
+                      setGstPreview(null); 
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <FiUpload className={styles.uploadIcon} />
+                  <p>Click to upload GST certificate (optional)</p>
+                  <span>JPG, PNG, PDF (Max 5MB)</span>
+                </>
+              )}
+              <input 
+                type="file" 
+                name="gstCertificate" 
+                accept="image/*,.pdf" 
+                onChange={handleChange} 
+                className={styles.fileInput} 
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className={styles.formGroup}>
-        <label>Categories <span className={styles.required}>*</span></label>
-        <div className={styles.categoryGrid}>
-          {categoryOptions.map((cat) => (
-            <button key={cat.value} type="button" className={`${styles.categoryBtn} ${formData.productCategories.includes(cat.value) ? styles.selected : ''}`} onClick={() => handleCategoryToggle(cat.value)}>
-              {cat.label}
-            </button>
-          ))}
+        <div className={styles.formGroup}>
+          <label>Categories <span className={styles.required}>*</span></label>
+          <div className={styles.categoryGrid}>
+            {categoryOptions.map((cat) => (
+              <button
+                key={cat.value}
+                type="button"
+                className={`${styles.categoryBtn} ${formData.productCategories.includes(cat.value) ? styles.selected : ''}`}
+                onClick={() => handleCategoryToggle(cat.value)}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+          {errors.productCategories && <span className={styles.errorText}>{errors.productCategories}</span>}
         </div>
-        {errors.productCategories && <span className={styles.errorText}>{errors.productCategories}</span>}
-      </div>
 
-      <div className={styles.formGroup}>
-        <label>Website</label>
-        <input name="website" placeholder="https://yourstore.com" value={formData.website} onChange={handleChange} />
-      </div>
+        <div className={styles.formGroup}>
+          <label>Website</label>
+          <input 
+            name="website" 
+            placeholder="https://yourstore.com" 
+            value={formData.website} 
+            onChange={handleChange} 
+          />
+        </div>
 
-      <div className={styles.formGroup}>
-        <label>Social Links</label>
-        <div className={styles.socialLinks}>
-          <input placeholder="Facebook URL" value={formData.socialLinks.facebook} onChange={(e) => handleSocialLink('facebook', e.target.value)} />
-          <input placeholder="Instagram URL" value={formData.socialLinks.instagram} onChange={(e) => handleSocialLink('instagram', e.target.value)} />
+        <div className={styles.formGroup}>
+          <label>Social Links</label>
+          <div className={styles.socialLinks}>
+            <input 
+              placeholder="Facebook URL" 
+              value={formData.socialLinks.facebook} 
+              onChange={(e) => handleSocialLink('facebook', e.target.value)} 
+            />
+            <input 
+              placeholder="Instagram URL" 
+              value={formData.socialLinks.instagram} 
+              onChange={(e) => handleSocialLink('instagram', e.target.value)} 
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -683,40 +765,44 @@ const SellerRegister = () => {
   // ============================================
   const renderReview = () => (
     <div className={styles.stepContent}>
-      <h2 className={styles.stepTitle}>Review & Submit</h2>
-      <p className={styles.stepDesc}>Please review your information before submitting</p>
-
-      <div className={styles.reviewSection}>
-        <h4>Personal Information</h4>
-        <div className={styles.reviewGrid}>
-          <div><strong>Name:</strong> {formData.firstName} {formData.lastName}</div>
-          <div><strong>Email:</strong> {formData.email}</div>
-          <div><strong>Phone:</strong> {formData.phone}</div>
-        </div>
+      <div className={styles.stepHeader}>
+        <h2 className={styles.stepTitle}>Review & Submit</h2>
+        <p className={styles.stepDesc}>Please review your information before submitting</p>
       </div>
 
-      <div className={styles.reviewSection}>
-        <h4>KYC Documents</h4>
-        <div className={styles.reviewGrid}>
-          <div><strong>PAN:</strong> {formData.panNumber}</div>
-          <div><strong>Aadhaar:</strong> {formData.aadhaarNumber}</div>
-          <div><strong>GST:</strong> {formData.gstNumber || 'Not provided'}</div>
+      <div className={styles.formFieldsWrapper}>
+        <div className={styles.reviewSection}>
+          <h4>Personal Information</h4>
+          <div className={styles.reviewGrid}>
+            <div><strong>Name:</strong> {formData.firstName} {formData.lastName}</div>
+            <div><strong>Email:</strong> {formData.email}</div>
+            <div><strong>Phone:</strong> {formData.phone}</div>
+          </div>
         </div>
-      </div>
 
-      <div className={styles.reviewSection}>
-        <h4>Store Information</h4>
-        <div className={styles.reviewGrid}>
-          <div><strong>Store:</strong> {formData.storeName}</div>
-          <div><strong>Categories:</strong> {formData.productCategories.join(', ')}</div>
+        <div className={styles.reviewSection}>
+          <h4>KYC Documents</h4>
+          <div className={styles.reviewGrid}>
+            <div><strong>PAN:</strong> {formData.panNumber}</div>
+            <div><strong>Aadhaar:</strong> {formData.aadhaarNumber}</div>
+            <div><strong>GST:</strong> {formData.gstNumber || 'Not provided'}</div>
+          </div>
         </div>
-      </div>
 
-      <div className={styles.termsGroup}>
-        <label className={styles.checkboxLabel}>
-          <input type="checkbox" name="termsAccepted" checked={formData.termsAccepted} onChange={handleChange} />
-          <span>I agree to the <Link to="/terms" target="_blank">Terms of Service</Link> and <Link to="/privacy" target="_blank">Privacy Policy</Link></span>
-        </label>
+        <div className={styles.reviewSection}>
+          <h4>Store Information</h4>
+          <div className={styles.reviewGrid}>
+            <div><strong>Store:</strong> {formData.storeName}</div>
+            <div><strong>Categories:</strong> {formData.productCategories.join(', ')}</div>
+          </div>
+        </div>
+
+        <div className={styles.termsGroup}>
+          <label className={styles.checkboxLabel}>
+            <input type="checkbox" name="termsAccepted" checked={formData.termsAccepted} onChange={handleChange} />
+            <span>I agree to the <Link to="/terms" target="_blank">Terms of Service</Link> and <Link to="/privacy" target="_blank">Privacy Policy</Link></span>
+          </label>
+        </div>
       </div>
     </div>
   );
@@ -725,77 +811,57 @@ const SellerRegister = () => {
   // MAIN RENDER
   // ============================================
   return (
-     <>
-    <Header/>
-    <div className={styles.page}>
-      <div className={styles.container}>
-        <div className={styles.card}>
-          {/* Left Side - Image changes with step */}
-          <div className={styles.leftPanel}>
-            <div className={styles.imageWrapper}>
-              <img 
-                src={stepImages[currentStep]} 
-                alt={`Step ${currentStep} - ${stepInfo[currentStep].title}`} 
-                className={styles.sideImage} 
-              />
-            </div>
-          </div>
-
-          {/* Right Side - Form */}
-          <div className={styles.rightPanel}>
-            <div className={styles.header}>
-              <h1 className={styles.title}>Become a Seller</h1>
-              <p className={styles.subtitle}>Complete your registration to start selling on Aurevian</p>
+    <>
+      <Header/>
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <div className={styles.card}>
+            {/* Left Side - Image changes with step */}
+            <div className={styles.leftPanel}>
+              <div className={styles.imageWrapper}>
+                <img 
+                  src={stepImages[currentStep]} 
+                  alt={`Step ${currentStep} - ${stepInfo[currentStep].title}`} 
+                  className={styles.sideImage} 
+                />
+              </div>
             </div>
 
-            {renderStepIndicator()}
+            {/* Right Side - Form */}
+            <div className={styles.rightPanel}>
+              <div className={styles.header}>
+                <h1 className={styles.title}>Become a Seller</h1>
+                <p className={styles.subtitle}>Complete your registration to start selling on Aurevian</p>
+              </div>
 
-            <form onSubmit={handleSubmit} className={styles.form}>
-              {renderStepContent()}
+              {renderStepIndicator()}
 
-              <div className={styles.navigation}>
-                {currentStep > 1 && (
-                  <button type="button" onClick={handlePrevious} className={styles.prevBtn} disabled={loading}>
-                    <FiArrowLeft /> Back
+              <form onSubmit={handleSubmit} className={styles.form}>
+                {renderStepContent()}
+
+                <div className={styles.navigation}>
+                  {currentStep > 1 && (
+                    <button type="button" onClick={handlePrevious} className={styles.prevBtn} disabled={loading}>
+                      <FiArrowLeft /> Back
+                    </button>
+                  )}
+
+                  <button type="submit" className={styles.nextBtn} disabled={loading}>
+                    {loading ? 'Submitting...' : currentStep === 5 ? 'Submit Application' : 'Next Step'}
+                    {currentStep < 5 && <FiArrowRight />}
                   </button>
-                )}
+                </div>
+              </form>
 
-                <button type="submit" className={styles.nextBtn} disabled={loading}>
-                  {loading ? 'Submitting...' : currentStep === 5 ? 'Submit Application' : 'Next Step'}
-                  {currentStep < 5 && <FiArrowRight />}
-                </button>
+              <div className={styles.footer}>
+                <p>Already have an account? <Link to="/seller/login">Sign in here</Link></p>
               </div>
-            </form>
-
-            {/* Trust Features */}
-            {/* <div className={styles.trustFeatures}>
-              <div className={styles.trustHeader}>
-                <FaGem className={styles.trustHeaderIcon} />
-                <span>Join 500+ successful sellers</span>
-              </div>
-              <p className={styles.trustSubtext}>and grow your jewellery business with Aurevian.</p>
-              <div className={styles.trustGrid}>
-                {trustFeatures.map((feature, index) => (
-                  <div key={index} className={styles.trustItem}>
-                    <div className={styles.trustItemIcon}>{feature.icon}</div>
-                    <div>
-                      <h4>{feature.title}</h4>
-                      <p>{feature.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div> */}
-
-            <div className={styles.footer}>
-              <p>Already have an account? <Link to="/seller/login">Sign in here</Link></p>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <Footer/>
-        </>
+      <Footer/>
+    </>
   );
 };
 
