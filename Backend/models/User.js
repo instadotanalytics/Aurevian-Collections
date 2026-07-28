@@ -17,8 +17,10 @@ const addressSchema = new mongoose.Schema(
 
     phone: {
       type: String,
-      required: true,
       trim: true,
+      sparse: true,
+      unique: true,
+      required: false,
     },
 
     alternatePhone: {
