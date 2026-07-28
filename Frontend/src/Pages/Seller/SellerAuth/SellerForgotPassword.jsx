@@ -62,23 +62,16 @@ const SellerForgotPassword = () => {
         <div className={styles.page}>
           <div className={styles.container}>
             <div className={styles.card}>
-              {/* Left Side - Image */}
+              {/* Left Side - Image (60%) */}
               <div className={styles.leftPanel}>
                 <div className={styles.imageWrapper}>
                   <img src={LoginImage} alt="Aurevian" className={styles.sideImage} />
-                  <div className={styles.imageOverlay}>
-                    <div className={styles.imageContent}>
-                      <FaGem className={styles.imageGem} />
-                      <h2 className={styles.imageTitle}>AUREVIAN</h2>
-                      <p className={styles.imageSubtitle}>Timeless Elegance</p>
-                    </div>
-                  </div>
                 </div>
               </div>
 
-              {/* Right Side - Success Message */}
+              {/* Right Side - Success Message (40%) */}
               <div className={styles.rightPanel}>
-                <div className={styles.successCard}>
+                <div className={styles.formContainer}>
                   <div className={styles.successIconWrapper}>
                     <FiCheckCircle className={styles.successIcon} />
                   </div>
@@ -120,19 +113,16 @@ const SellerForgotPassword = () => {
       <div className={styles.page}>
         <div className={styles.container}>
           <div className={styles.card}>
-            {/* Left Side - Image with Overlay */}
+            {/* Left Side - Image (60%) */}
             <div className={styles.leftPanel}>
               <div className={styles.imageWrapper}>
                 <img src={LoginImage} alt="Aurevian" className={styles.sideImage} />
-                <div className={styles.imageOverlay}>
-                 
-                </div>
               </div>
             </div>
 
-            {/* Right Side - Form */}
+            {/* Right Side - Form (40%) */}
             <div className={styles.rightPanel}>
-              <div className={styles.formCard}>
+              <div className={styles.formContainer}>
                 <div className={styles.header}>
                   <div className={styles.iconWrapper}>
                     <FiShield className={styles.shieldIcon} />
@@ -144,7 +134,7 @@ const SellerForgotPassword = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className={styles.form}>
-                  <div className={styles.formGroup}>
+                  <div className={styles.field}>
                     <label className={styles.label}>Email Address</label>
                     <div className={styles.inputWrapper}>
                       <FiMail className={styles.inputIcon} />
