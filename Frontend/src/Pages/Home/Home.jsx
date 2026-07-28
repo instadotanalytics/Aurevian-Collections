@@ -7,8 +7,9 @@ import ShopByCategory from '../ShopByCategory/Shopbycategory'
 const Home = () => {
   return (
     <div>
-        <HomeBanner/>
+       <HomeBanner/>
         <ShopByCategory/>
+        
         <Footer/>
     </div>
   )

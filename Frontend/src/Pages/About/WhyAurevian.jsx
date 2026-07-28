@@ -11,7 +11,7 @@ import {
 import styles from "./WhyAurevian.module.css";
 import heroImage from "../../assets/HeroImage1.png";
 import productImage from "../../assets/ProductImage.png";
-import Header from "../Layout/Header/Header";
+
 import Footer from "../Layout/Footer/Footer";
 
 // Comparison rows — real trade-offs a shopper is actually weighing,
@@ -110,7 +110,7 @@ const sections = [
 const WhyAurevian = () => {
   return (
     <>
-    <Header/>
+    
     <main className={styles.page}>
       {/* ================= HERO ================= */}
       <section className={styles.hero}>
