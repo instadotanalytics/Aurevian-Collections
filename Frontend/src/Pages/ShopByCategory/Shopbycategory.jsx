@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import styles from "./ShopByCategory.module.css";
+import styles from "./Shopbycategory.module.css";
 import { fetchPublicHeaderConfig } from "./../../redux/slices/headerConfigSlice.js";
 
 // ✅ Fully dynamic now — no static image imports. Whatever the admin sets
