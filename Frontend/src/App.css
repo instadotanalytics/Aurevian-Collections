@@ -6,13 +6,16 @@
 }
 
 :root {
-  --ivory: #fbf6ee;
-  --cream: #f6ecdd;
+  /* Universal site color, sampled from reference image */
+  --primary-bg: #faf3e9;
+
+  --ivory: #faf3e9;
+  --cream: #faf3e9;
   --white: #ffffff;
-  --champagne: #eaddc4;
-  --gold: #b6863c;
-  --gold-deep: #97702f;
-  --gold-soft: #d9b877;
+  --champagne: #f2e6d2;
+  --gold: #c89b3c;
+  --gold-deep: #a97f2e;
+  --gold-soft: #d8ac48;
   --ink: #2b2118;
   --muted: #8a7a68;
 
@@ -30,15 +33,23 @@ body,
 body {
   font-family: "Poppins", sans-serif;
   color: var(--ink);
-  background: linear-gradient(
-    180deg,
-    var(--ivory) 0%,
-    var(--cream) 55%,
-    var(--champagne) 100%
-  );
-  background-attachment: fixed;
+  background-color: var(--primary-bg);
+  background-image: none;
 }
 
 #root {
   min-height: 100vh;
+  background-color: var(--primary-bg);
+}
+
+/* Ensure common layout wrappers inherit the same universal color
+   instead of defaulting to white/transparent */
+section,
+header,
+footer,
+main,
+.page,
+.container,
+.wrapper {
+  background-color: var(--primary-bg);
 }

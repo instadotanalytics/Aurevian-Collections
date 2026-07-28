@@ -7,7 +7,7 @@
   --ivory: #fbf6ee;
   --cream: #f6ecdd;
   --champagne: #eaddc4;
-  
+
   padding: 60px 24px;
   background: transparent;
   font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
@@ -19,7 +19,7 @@
 /* Ambient glow decorations */
 .section::before,
 .section::after {
-  content: '';
+  content: "";
   position: absolute;
   border-radius: 50%;
   filter: blur(80px);
@@ -549,11 +549,11 @@
   .scrollBtn {
     transition: none !important;
   }
-  
+
   .card:hover .image {
     transform: none !important;
   }
-  
+
   .card:hover {
     transform: none !important;
   }
