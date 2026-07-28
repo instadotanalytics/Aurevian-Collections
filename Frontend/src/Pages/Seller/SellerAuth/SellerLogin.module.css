@@ -1,81 +1,81 @@
-/* src/Pages/Seller/SellerLogin.module.css */
+/* ============================================
+   FONT IMPORTS
+   ============================================ */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 /* ============================================
-   PAGE CONTAINER
+   MOBILE FIRST - BASE STYLES
    ============================================ */
 .page {
   min-height: 100vh;
+  background: linear-gradient(135deg, #fdf8f1 0%, #f6efe4 100%);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  background: #ffffff;
-  padding: 0 20px;
+  padding: 0;
 }
 
 .container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 100%;
+  padding: 0;
 }
 
-/* ============================================
-   CARD - Two Column Layout
-   ============================================ */
 .card {
   display: flex;
+  flex-direction: column;
   background: #ffffff;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.05);
-  height: 600px;
-  max-height: 80vh;
-  border: 1px solid #f0ebe6;
+  min-height: 100vh;
+  width: 100%;
   border-radius: 0;
+  overflow: hidden;
+  box-shadow: none;
+  border: none;
 }
 
 /* ============================================
-   LEFT PANEL - Image (60%)
+   IMAGE SECTION - Top on Mobile
    ============================================ */
-.leftPanel {
-  flex: 0 0 60%;
-  position: relative;
+.imageSection {
+  width: 100%;
+  height: 200px;
+  min-height: 200px;
   overflow: hidden;
-  height: 100%;
+  position: relative;
+  padding: 0;
 }
 
 .imageWrapper {
   width: 100%;
   height: 100%;
-  position: relative;
   overflow: hidden;
 }
 
-.sideImage {
+.loginImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.6s ease;
-}
-
-.imageWrapper:hover .sideImage {
-  transform: scale(1.02);
+  object-position: center;
+  display: block;
 }
 
 /* ============================================
-   RIGHT PANEL - Form (40%)
+   FORM SECTION - Bottom on Mobile
    ============================================ */
-.rightPanel {
-  flex: 0 0 40%;
-  padding: 40px 32px;
+.formSection {
+  flex: 1;
+  padding: 24px 20px 20px;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   background: #ffffff;
-  height: 100%;
-  overflow: hidden;
+  width: 100%;
+  justify-content: center;
 }
 
 .formContainer {
   width: 100%;
-  max-width: 380px;
+  max-width: 400px;
+  margin: 0 auto;
 }
 
 /* ============================================
@@ -83,37 +83,42 @@
    ============================================ */
 .header {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
-.iconWrapper {
-  width: 46px;
-  height: 46px;
-  margin: 0 auto ;
-  background: #f5f0ea;
+.logoIcon {
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.10) 0%, rgba(212, 175, 55, 0.04) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0 auto 14px;
+  border: 1px solid rgba(212, 175, 55, 0.12);
 }
 
-.shieldIcon {
+.gemIcon {
   font-size: 24px;
   color: #d4af37;
 }
 
 .title {
   font-family: 'Playfair Display', serif;
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 700;
   color: #1a1a1a;
-  margin: 0 0 4px;
+  margin: 0;
+  letter-spacing: -0.3px;
+  line-height: 1.1;
 }
 
 .subtitle {
-  font-size: 14px;
-  color: #888;
-  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: #7a7a7a;
+  margin: 6px 0 0;
 }
 
 /* ============================================
@@ -122,19 +127,21 @@
 .errorBanner {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  padding: 12px 16px;
   background: #fef2f2;
+  border-radius: 10px;
   border: 1px solid #fca5a5;
-  color: #991b1b;
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-size: 13px;
   margin-bottom: 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #dc2626;
 }
 
 .errorIcon {
   flex-shrink: 0;
-  font-size: 16px;
+  font-size: 17px;
+  color: #ef4444;
 }
 
 /* ============================================
@@ -143,64 +150,79 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .field label {
-  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
   font-weight: 600;
-  color: #444;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
+  color: #1a1a1a;
 }
 
 .inputWrapper {
   position: relative;
   display: flex;
   align-items: center;
+  height: 48px;
+  border: 1.5px solid #e8e2d8;
+  border-radius: 12px;
+  background: #fffdf9;
+  transition: all 0.3s ease;
 }
 
-.inputWrapper .inputIcon {
+.inputWrapper:hover {
+  border-color: #d4af37;
+}
+
+.inputWrapper.focused {
+  border-color: #d4af37;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
+}
+
+.inputIcon {
   position: absolute;
   left: 14px;
-  color: #aaa;
-  font-size: 18px;
+  font-size: 16px;
+  color: #b0a89a;
+  pointer-events: none;
   transition: color 0.3s ease;
+  z-index: 1;
 }
 
-.inputWrapper:focus-within .inputIcon {
+.inputWrapper.focused .inputIcon {
   color: #d4af37;
 }
 
 .inputWrapper input {
-  width: 100%;
-  height: 46px;
-  padding: 0 14px 0 44px;
-  border: 1.5px solid #e8e2d5;
-  border-radius: 8px;
-  font-size: 14px;
   font-family: 'Inter', sans-serif;
-  background: #faf8f6;
-  transition: all 0.3s ease;
+  width: 100%;
+  height: 100%;
+  padding: 0 14px 0 44px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 400;
+  background: transparent;
   color: #1a1a1a;
+  transition: all 0.3s ease;
 }
 
 .inputWrapper input:focus {
   outline: none;
-  border-color: #d4af37;
-  background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.06);
 }
 
-.inputWrapper input:hover {
-  border-color: #c9a84c;
-  background: #ffffff;
+.inputWrapper input::placeholder {
+  color: #b0a89a;
+  font-weight: 400;
+  font-size: 15px;
 }
 
 .inputWrapper input:disabled {
@@ -208,28 +230,28 @@
   cursor: not-allowed;
 }
 
-.inputWrapper input::placeholder {
-  color: #b3ab9e;
-}
-
 .visibilityBtn {
   position: absolute;
-  right: 12px;
+  right: 14px;
   background: none;
   border: none;
-  color: #aaa;
+  color: #b0a89a;
   cursor: pointer;
-  padding: 6px;
-  font-size: 18px;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  font-size: 16px;
   transition: all 0.3s ease;
+  z-index: 1;
 }
 
 .visibilityBtn:hover {
-  color: #d4af37;
+  color: #6b6b6b;
+}
+
+.visibilityBtn:focus {
+  outline: none;
 }
 
 /* ============================================
@@ -239,17 +261,20 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 2px;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
 }
 
 .checkboxLabel {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
-  color: #555;
   cursor: pointer;
-  transition: color 0.3s ease;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #4a4a4a;
 }
 
 .checkboxLabel:hover {
@@ -257,18 +282,19 @@
 }
 
 .checkboxLabel input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
   accent-color: #d4af37;
   cursor: pointer;
 }
 
 .forgotLink {
-  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
   color: #d4af37;
   text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .forgotLink:hover {
@@ -280,36 +306,49 @@
    PRIMARY BUTTON
    ============================================ */
 .primaryBtn {
-  width: 100%;
-  height: 46px;
-  background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
-  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  height: 48px;
+  padding: 0 18px;
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+  color: #ffffff;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 4px;
-  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.15);
   letter-spacing: 0.3px;
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
 }
 
 .primaryBtn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #c9a84c 0%, #a8852a 100%);
   transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(212, 175, 55, 0.25);
+  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
 }
 
 .primaryBtn:active:not(:disabled) {
-  transform: translateY(0);
+  transform: scale(0.98);
 }
 
 .primaryBtn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+  transform: none !important;
+}
+
+.btnArrow {
+  font-size: 17px;
+  transition: transform 0.3s ease;
+}
+
+.primaryBtn:hover:not(:disabled) .btnArrow {
+  transform: translateX(3px);
 }
 
 /* ============================================
@@ -318,25 +357,71 @@
 .divider {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin: 18px 0 14px;
+  text-align: center;
+  margin: 18px 0 12px;
 }
 
 .divider::before,
 .divider::after {
   content: '';
   flex: 1;
-  height: 1px;
-  background: #e8e2d5;
+  border-bottom: 1px solid #e8e2d8;
 }
 
 .divider span {
-  font-size: 11px;
-  color: #999;
-  white-space: nowrap;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #b0a89a;
+  padding: 0 14px;
+  text-transform: lowercase;
+}
+
+/* ============================================
+   SOCIAL BUTTONS
+   ============================================ */
+.socialButtons {
+  display: flex;
+  gap: 10px;
+}
+
+.socialBtn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  height: 46px;
+  border: 1.5px solid #e8e2d8;
+  border-radius: 12px;
+  background: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
   font-weight: 500;
+  color: #1a1a1a;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.socialBtn:hover {
+  border-color: #d4af37;
+  background: rgba(212, 175, 55, 0.02);
+  transform: translateY(-1px);
+}
+
+.socialBtn:active {
+  transform: scale(0.97);
+}
+
+.socialIcon {
+  font-size: 17px;
+  color: #6b6b6b;
+  transition: color 0.3s ease;
+}
+
+.socialBtn:hover .socialIcon {
+  color: #d4af37;
 }
 
 /* ============================================
@@ -346,110 +431,494 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  margin-top: 14px;
   text-align: center;
 }
 
-.registerLink {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px;
-  color: #d4af37;
-  text-decoration: none;
-  font-weight: 600;
+.registerText {
+  font-family: 'Inter', sans-serif;
   font-size: 14px;
-  transition: all 0.3s ease;
-  border: 1.5px solid #e8e2d5;
-  border-radius: 8px;
-  background: transparent;
-}
-
-.registerLink:hover {
-  color: #b8962e;
-  border-color: #d4af37;
-  background: #faf8f6;
-}
-
-.arrowIcon {
-  transition: transform 0.3s ease;
-}
-
-.registerLink:hover .arrowIcon {
-  transform: translateX(4px);
-}
-
-.backLink {
-  font-size: 13px;
-  color: #999;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.backLink:hover {
-  color: #555;
-  text-decoration: underline;
-}
-
-/* ============================================
-   CUSTOMER LOGIN
-   ============================================ */
-.customerLogin {
-  text-align: center;
-  margin-top: 10px;
-  padding-top: 12px;
-  /* border-top: 1px solid #f0ebe6; */
-}
-
-.customerLogin p {
-  font-size: 13px;
-  color: #888;
+  font-weight: 400;
+  color: #6b6b6b;
   margin: 0;
 }
 
-.customerLogin a {
+.registerText a {
   color: #d4af37;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
-.customerLogin a:hover {
+.registerText a:hover {
+  color: #b8962e;
   text-decoration: underline;
 }
 
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #8a8a8a;
+  text-decoration: none;
+  padding: 4px;
+  transition: all 0.3s ease;
+}
+
+.backLink:hover {
+  color: #d4af37;
+}
+
+.backIcon {
+  font-size: 15px;
+  transition: transform 0.3s ease;
+}
+
+.backLink:hover .backIcon {
+  transform: translateX(-2px);
+}
+
 /* ============================================
-   RESPONSIVE - Mobile Only
+   TABLET & DESKTOP (768px and above)
    ============================================ */
-@media (max-width: 768px) {
-  .card {
-    flex-direction: column-reverse;
-    height: auto;
-    max-height: none;
-    border-radius: 0;
+@media (min-width: 768px) {
+  .page {
+    padding: 24px;
+    align-items: center;
   }
 
-  .leftPanel {
-    flex: 1;
-    height: 200px;
-    min-height: 200px;
-    width: 100%;
+  .container {
+    max-width: 1000px;
+    padding: 0;
+  }
+
+  .card {
+    flex-direction: row;
+    height: 540px;
+    max-height: 80vh;
+    min-height: 480px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .imageSection {
+    flex: 0 0 58%;
+    height: 100%;
+    width: auto;
+    min-height: auto;
+    padding: 0;
   }
 
   .imageWrapper {
+    border-radius: 0;
+    overflow: hidden;
+  }
+
+  .loginImage {
+    transition: transform 0.6s ease;
+  }
+
+  .imageWrapper:hover .loginImage {
+    transform: scale(1.03);
+  }
+
+  .formSection {
+    flex: 0 0 42%;
+    padding: 32px 32px 28px;
+    height: 100%;
+    justify-content: center;
+    background: transparent;
+  }
+
+  .formContainer {
+    max-width: 340px;
+  }
+
+  .header {
+    margin-bottom: 20px;
+  }
+
+  .logoIcon {
+    width: 52px;
+    height: 52px;
+    margin-bottom: 12px;
+  }
+
+  .gemIcon {
+    font-size: 22px;
+  }
+
+  .title {
+    font-size: 26px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .form {
+    gap: 14px;
+  }
+
+  .field label {
+    font-size: 13px;
+  }
+
+  .inputWrapper {
+    height: 44px;
+    border-radius: 12px;
+  }
+
+  .inputWrapper input {
+    font-size: 14px;
+    padding: 0 12px 0 38px;
+  }
+
+  .inputWrapper input::placeholder {
+    font-size: 14px;
+  }
+
+  .inputIcon {
+    font-size: 15px;
+    left: 12px;
+  }
+
+  .visibilityBtn {
+    font-size: 15px;
+    right: 12px;
+  }
+
+  .primaryBtn {
+    height: 44px;
+    font-size: 15px;
+    border-radius: 12px;
+  }
+
+  .socialBtn {
+    height: 40px;
+    font-size: 13px;
+    border-radius: 12px;
+    padding: 8px 14px;
+  }
+
+  .socialIcon {
+    font-size: 16px;
+  }
+
+  .registerText {
+    font-size: 13px;
+  }
+
+  .backLink {
+    font-size: 13px;
+  }
+
+  .divider {
+    margin: 14px 0 10px;
+  }
+
+  .divider span {
+    font-size: 12px;
+    padding: 0 12px;
+  }
+
+  .checkboxLabel {
+    font-size: 13px;
+  }
+
+  .forgotLink {
+    font-size: 13px;
+  }
+
+  .footer {
+    margin-top: 12px;
+    gap: 4px;
+  }
+}
+
+/* ============================================
+   LARGE DESKTOP (1024px and above)
+   ============================================ */
+@media (min-width: 1024px) {
+  .page {
+    padding: 28px;
+  }
+
+  .container {
+    max-width: 1100px;
+  }
+
+  .card {
+    height: 560px;
+    max-height: 82vh;
+    min-height: 500px;
+    border-radius: 14px;
+  }
+
+  .imageSection {
+    flex: 0 0 60%;
+  }
+
+  .formSection {
+    flex: 0 0 40%;
+    padding: 36px 36px 30px;
+  }
+
+  .formContainer {
+    max-width: 360px;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .logoIcon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .gemIcon {
+    font-size: 24px;
+  }
+
+  .inputWrapper {
+    height: 46px;
+    border-radius: 12px;
+  }
+
+  .inputWrapper input {
+    font-size: 14px;
+    padding: 0 14px 0 40px;
+  }
+
+  .primaryBtn {
+    height: 46px;
+    font-size: 15px;
+    border-radius: 12px;
+  }
+
+  .socialBtn {
+    height: 42px;
+    font-size: 13px;
+  }
+
+  .field label {
+    font-size: 13px;
+  }
+}
+
+/* ============================================
+   EXTRA LARGE DESKTOP (1400px and above)
+   ============================================ */
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1200px;
+  }
+
+  .card {
+    height: 580px;
+    border-radius: 16px;
+  }
+
+  .imageSection {
+    flex: 0 0 60%;
+  }
+
+  .formSection {
+    flex: 0 0 40%;
+    padding: 40px 40px 32px;
+  }
+
+  .formContainer {
+    max-width: 380px;
+  }
+
+  .title {
+    font-size: 30px;
+  }
+
+  .logoIcon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .gemIcon {
+    font-size: 26px;
+  }
+
+  .inputWrapper {
+    height: 48px;
+  }
+
+  .inputWrapper input {
+    font-size: 15px;
+  }
+
+  .primaryBtn {
+    height: 48px;
+    font-size: 16px;
+  }
+
+  .socialBtn {
+    height: 44px;
+    font-size: 14px;
+  }
+
+  .socialIcon {
+    font-size: 17px;
+  }
+}
+
+/* ============================================
+   EXTRA SMALL MOBILE (480px and below)
+   ============================================ */
+@media (max-width: 480px) {
+  .imageSection {
+    height: 200px;
     min-height: 200px;
   }
 
-  .rightPanel {
-    flex: 1;
-    padding: 24px 16px;
-    height: auto;
-    max-height: none;
-    overflow-y: auto;
-    justify-content: flex-start;
+  .formSection {
+    padding: 0 16px;
   }
 
   .formContainer {
     max-width: 100%;
+  }
+
+  .title {
+    font-size: 25px;
+  }
+
+  .subtitle {
+    font-size: 15px;
+  }
+
+  .logoIcon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+  }
+
+  .gemIcon {
+    font-size: 20px;
+  }
+
+  .header {
+    margin-bottom: 18px;
+  }
+
+  .form {
+    gap: 14px;
+  }
+
+  .field label {
+    font-size: 14px;
+  }
+
+  .inputWrapper {
+    height: 44px;
+    border-radius: 10px;
+  }
+
+  .inputWrapper input {
+    font-size: 15px;
+    padding: 5px 12px 5px 38px;
+  }
+
+  .inputWrapper input::placeholder {
+    font-size: 15px;
+  }
+
+  .inputIcon {
+    font-size: 15px;
+    left: 12px;
+  }
+
+  .visibilityBtn {
+    font-size: 15px;
+    right: 12px;
+  }
+
+  .primaryBtn {
+    height: 44px;
+    font-size: 16px;
+    border-radius: 10px;
+    margin-top: 2px;
+  }
+
+  .socialBtn {
+    height: 40px;
+    font-size: 15px;
+    border-radius: 10px;
+    padding: 12px 10px;
+  }
+
+  .socialIcon {
+    font-size: 16px;
+  }
+
+  .options {
+    gap: 6px;
+    margin-top: 2px;
+  }
+
+  .checkboxLabel {
+    font-size: 14px;
+  }
+
+  .forgotLink {
+    font-size: 14px;
+  }
+
+  .divider {
+    margin: 18px 0 18px;
+  }
+
+  .divider span {
+    font-size: 14px;
+    padding: 0 12px;
+  }
+
+  .footer {
+    margin-top: 12px;
+    gap: 4px;
+  }
+
+  .registerText {
+    font-size: 14px;
+  }
+
+  .backLink {
+    font-size: 13px;
+  }
+
+  .errorBanner {
+    font-size: 13px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+  }
+}
+
+/* ============================================
+   VERY SMALL MOBILE (380px and below)
+   ============================================ */
+@media (max-width: 380px) {
+  .imageSection {
+    height: 150px;
+    min-height: 150px;
+  }
+
+  .formSection {
+    padding: 12px;
   }
 
   .title {
@@ -460,146 +929,93 @@
     font-size: 13px;
   }
 
-  .iconWrapper {
-    width: 48px;
-    height: 48px;
+  .logoIcon {
+    width: 44px;
+    height: 44px;
   }
 
-  .shieldIcon {
-    font-size: 20px;
-  }
-
-  .inputWrapper input {
-    height: 42px;
-    font-size: 14px;
-  }
-
-  .primaryBtn {
-    height: 42px;
-    font-size: 14px;
-  }
-
-  .options {
-    flex-direction: column;
-    gap: 10px;
-    align-items: flex-start;
-  }
-
-  .registerLink {
-    font-size: 13px;
-    padding: 8px;
-  }
-
-  .backLink {
-    font-size: 12px;
-  }
-
-  .customerLogin p {
-    font-size: 12px;
-  }
-
-  .divider span {
-    font-size: 10px;
-  }
-
-  .rightPanel::-webkit-scrollbar {
-    width: 3px;
-  }
-
-  .rightPanel::-webkit-scrollbar-track {
-    background: #f0edeb;
-    border-radius: 4px;
-  }
-
-  .rightPanel::-webkit-scrollbar-thumb {
-    background: #d4af37;
-    border-radius: 4px;
-  }
-}
-
-@media (max-width: 480px) {
-  .page {
-    padding: 0 0 15px;
-  }
-
-  .leftPanel {
-    height: 160px;
-    min-height: 160px;
-  }
-
-  .imageWrapper {
-    min-height: 160px;
-  }
-
-  .rightPanel {
-    padding: 25px 20px;
-  }
-
-  .title {
-    font-size: 20px;
-  }
-
-  .subtitle {
-    font-size: 12px;
-  }
-
-  .inputWrapper input {
-    height: 38px;
-    font-size: 13px;
-    padding: 0 12px 0 38px;
-  }
-
-  .inputWrapper .inputIcon {
-    left: 10px;
-    font-size: 16px;
-  }
-
-  .primaryBtn {
-    height: 38px;
-    font-size: 13px;
-  }
-
-  .iconWrapper {
-    width: 40px;
-    height: 40px;
-  }
-
-  .shieldIcon {
+  .gemIcon {
     font-size: 18px;
   }
 
-  .errorBanner {
-    font-size: 12px;
-    padding: 8px 12px;
+  .header {
+    margin-bottom: 16px;
   }
 
-  .field label {
-    font-size: 11px;
+  .inputWrapper {
+    height: 40px;
+    border-radius: 10px;
+  }
+
+  .inputWrapper input {
+    font-size: 13px;
+    padding: 0 10px 0 34px;
+  }
+
+  .inputWrapper input::placeholder {
+    font-size: 13px;
+  }
+
+  .inputIcon {
+    font-size: 14px;
+    left: 10px;
+  }
+
+  .visibilityBtn {
+    font-size: 14px;
+    right: 10px;
+  }
+
+  .primaryBtn {
+    height: 40px;
+    font-size: 14px;
+    border-radius: 10px;
+  }
+
+  .socialBtn {
+    height: 36px;
+    font-size: 12px;
+    border-radius: 10px;
+    padding: 6px 8px;
+  }
+
+  .socialIcon {
+    font-size: 14px;
   }
 
   .checkboxLabel {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .forgotLink {
     font-size: 12px;
   }
 
-  .registerLink {
+  .registerText {
     font-size: 12px;
-    padding: 6px;
   }
 
   .backLink {
-    font-size: 11px;
-  }
-
-  .customerLogin p {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .divider span {
-    font-size: 9px;
+    font-size: 11px;
+    padding: 0 10px;
+  }
+
+  .footer {
+    margin-top: 10px;
+    gap: 3px;
+  }
+
+  .field label {
+    font-size: 12px;
+  }
+
+  .errorBanner {
+    font-size: 12px;
+    padding: 8px 12px;
   }
 }
 
@@ -608,16 +1024,15 @@
    ============================================ */
 @media (prefers-color-scheme: dark) {
   .page {
-    background: #1a1a1a;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2218 100%);
   }
 
   .card {
-    background: #2d2d2d;
-    border-color: #4d4d4d;
+    background: #1a1a1a;
   }
 
-  .rightPanel {
-    background: #2d2d2d;
+  .formSection {
+    background: #1a1a1a;
   }
 
   .title {
@@ -625,31 +1040,50 @@
   }
 
   .subtitle {
-    color: #aaa;
+    color: #999;
   }
 
   .field label {
     color: #ccc;
   }
 
+  .inputWrapper {
+    background: rgba(50, 50, 50, 0.6);
+    border-color: #4a4a4a;
+  }
+
+  .inputWrapper:hover {
+    border-color: #d4af37;
+  }
+
+  .inputWrapper.focused {
+    border-color: #d4af37;
+    background: rgba(50, 50, 50, 0.8);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
+  }
+
   .inputWrapper input {
-    background: #3d3d3d;
-    border-color: #4d4d4d;
     color: #ffffff;
   }
 
-  .inputWrapper input:focus {
-    border-color: #d4af37;
-    background: #3d3d3d;
-  }
-
-  .inputWrapper input:hover {
-    border-color: #c9a84c;
-    background: #3d3d3d;
-  }
-
-  .inputWrapper .inputIcon {
+  .inputWrapper input::placeholder {
     color: #888;
+  }
+
+  .inputIcon {
+    color: #888;
+  }
+
+  .inputWrapper.focused .inputIcon {
+    color: #d4af37;
+  }
+
+  .visibilityBtn {
+    color: #888;
+  }
+
+  .visibilityBtn:hover {
+    color: #ccc;
   }
 
   .checkboxLabel {
@@ -660,72 +1094,87 @@
     color: #fff;
   }
 
-  .divider span {
-    color: #888;
-  }
-
-  .divider::before,
-  .divider::after {
-    background: #4d4d4d;
-  }
-
-  .registerLink {
-    border-color: #4d4d4d;
+  .forgotLink {
     color: #d4af37;
   }
 
-  .registerLink:hover {
-    border-color: #d4af37;
-    background: #3d3d3d;
+  .forgotLink:hover {
+    color: #c9a83a;
+  }
+
+  .registerText {
+    color: #999;
+  }
+
+  .registerText a {
+    color: #d4af37;
+  }
+
+  .registerText a:hover {
+    color: #c9a83a;
   }
 
   .backLink {
-    color: #888;
+    color: #999;
   }
 
   .backLink:hover {
-    color: #aaa;
-  }
-
-  .customerLogin {
-    border-color: #4d4d4d;
-  }
-
-  .customerLogin p {
-    color: #888;
-  }
-
-  .customerLogin a {
     color: #d4af37;
   }
 
   .errorBanner {
     background: #3d1a1a;
     border-color: #6d2a2a;
-    color: #fca5a5;
+    color: #f87171;
   }
 
-  .visibilityBtn {
+  .divider::before,
+  .divider::after {
+    border-color: #4a4a4a;
+  }
+
+  .divider span {
     color: #888;
   }
 
-  .visibilityBtn:hover {
+  .socialBtn {
+    background: rgba(50, 50, 50, 0.6);
+    border-color: #4a4a4a;
+    color: #ddd;
+  }
+
+  .socialBtn:hover {
+    border-color: #d4af37;
+    background: rgba(212, 175, 55, 0.05);
+  }
+
+  .socialIcon {
+    color: #888;
+  }
+
+  .socialBtn:hover .socialIcon {
     color: #d4af37;
   }
 
-  .forgotLink {
-    color: #d4af37;
+  .logoIcon {
+    background: rgba(212, 175, 55, 0.08);
+    border-color: rgba(212, 175, 55, 0.12);
   }
 
-  .forgotLink:hover {
-    color: #c9a84c;
+  .primaryBtn {
+    background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
   }
 
-  .iconWrapper {
-    background: #3d3d3d;
-  }
+  @media (min-width: 768px) {
+    .card {
+      background: rgba(35, 35, 35, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-color: rgba(255, 255, 255, 0.05);
+    }
 
-  .shieldIcon {
-    color: #d4af37;
+    .formSection {
+      background: transparent;
+    }
   }
 }

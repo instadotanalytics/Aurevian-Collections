@@ -10,11 +10,10 @@ import {
   FiEye, 
   FiEyeOff, 
   FiAlertCircle,
-  FiUser,
-  FiShield,
-  FiArrowRight
+  FiArrowRight,
+  FiChevronLeft
 } from 'react-icons/fi';
-import { FaGem } from 'react-icons/fa';
+import { FaGem, FaGoogle } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import styles from './SellerLogin.module.css';
 import LoginImage from "../../../assets/partnerlogin.png";
@@ -33,23 +32,21 @@ const SellerLogin = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState(null);
+  const [focusedField, setFocusedField] = useState(null);
 
-  // ✅ Redirect based on status
+  // Redirect based on status
   useEffect(() => {
     if (isAuthenticated && seller) {
-      // If email or phone not verified, go to OTP page
       if (!seller.emailVerified || !seller.phoneVerified) {
         navigate('/seller/verify-otp');
         return;
       }
       
-      // If status is pending, show pending message
       if (seller.status === 'pending') {
         toast.info('⏳ Your account is pending approval. Please wait for verification (within 24 hours).');
         return;
       }
       
-      // If status is approved, go to dashboard
       if (seller.status === 'approved') {
         navigate('/seller/dashboard');
         return;
@@ -79,6 +76,14 @@ const SellerLogin = () => {
     dispatch(clearSellerError());
   };
 
+  const handleFocus = (field) => {
+    setFocusedField(field);
+  };
+
+  const handleBlur = () => {
+    setFocusedField(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLocalError(null);
@@ -106,7 +111,6 @@ const SellerLogin = () => {
     if (sellerLogin.fulfilled.match(result)) {
       const sellerData = result.payload;
       
-      // ✅ If email or phone not verified, go to OTP page
       if (!sellerData.emailVerified || !sellerData.phoneVerified) {
         localStorage.setItem('sellerEmail', email);
         localStorage.setItem('sellerPhone', sellerData.phone);
@@ -140,22 +144,22 @@ const SellerLogin = () => {
       <div className={styles.page}>
         <div className={styles.container}>
           <div className={styles.card}>
-            {/* Left Side - Image (60%) */}
-            <div className={styles.leftPanel}>
+            {/* Image Section */}
+            <div className={styles.imageSection}>
               <div className={styles.imageWrapper}>
-                <img src={LoginImage} alt="Aurevian Seller Login" className={styles.sideImage} />
+                <img src={LoginImage} alt="Aurevian Luxury Collection" className={styles.loginImage} />
               </div>
             </div>
 
-            {/* Right Side - Form (40%) */}
-            <div className={styles.rightPanel}>
+            {/* Form Section */}
+            <div className={styles.formSection}>
               <div className={styles.formContainer}>
                 <div className={styles.header}>
-                  <div className={styles.iconWrapper}>
-                    <FiShield className={styles.shieldIcon} />
+                  <div className={styles.logoIcon}>
+                    <FaGem className={styles.gemIcon} />
                   </div>
-                  <h1 className={styles.title}>Welcome Back</h1>
-                  <p className={styles.subtitle}>Login to your seller dashboard</p>
+                  <h1 className={styles.title}>Welcome Back!</h1>
+                  <p className={styles.subtitle}>Sign in to continue shopping</p>
                 </div>
 
                 {(localError || error) && (
@@ -165,18 +169,20 @@ const SellerLogin = () => {
                   </div>
                 )}
 
-                <form onSubmit={handleSubmit} className={styles.form}>
+                <form onSubmit={handleSubmit} className={styles.form} noValidate>
                   <div className={styles.field}>
                     <label htmlFor="email">Email Address</label>
-                    <div className={styles.inputWrapper}>
+                    <div className={`${styles.inputWrapper} ${focusedField === 'email' ? styles.focused : ''}`}>
                       <FiMail className={styles.inputIcon} />
                       <input
                         id="email"
                         name="email"
                         type="email"
-                        placeholder="Enter your email"
+                        placeholder="name@example.com"
                         value={formData.email}
                         onChange={handleChange}
+                        onFocus={() => handleFocus('email')}
+                        onBlur={handleBlur}
                         disabled={isLoading}
                         autoComplete="email"
                       />
@@ -185,7 +191,7 @@ const SellerLogin = () => {
 
                   <div className={styles.field}>
                     <label htmlFor="password">Password</label>
-                    <div className={styles.inputWrapper}>
+                    <div className={`${styles.inputWrapper} ${focusedField === 'password' ? styles.focused : ''}`}>
                       <FiLock className={styles.inputIcon} />
                       <input
                         id="password"
@@ -194,6 +200,8 @@ const SellerLogin = () => {
                         placeholder="Enter your password"
                         value={formData.password}
                         onChange={handleChange}
+                        onFocus={() => handleFocus('password')}
+                        onBlur={handleBlur}
                         disabled={isLoading}
                         autoComplete="current-password"
                       />
@@ -220,7 +228,7 @@ const SellerLogin = () => {
                       <span>Remember me</span>
                     </label>
                     <Link to="/seller/forgot-password" className={styles.forgotLink}>
-                      Forgot password?
+                      Forgot Password?
                     </Link>
                   </div>
 
@@ -229,27 +237,27 @@ const SellerLogin = () => {
                     className={styles.primaryBtn}
                     disabled={isLoading}
                   >
-                    {isLoading ? 'Logging in...' : 'Login'}
+                    {isLoading ? 'Logging in...' : 'Sign In'}
+                    {!isLoading && <FiArrowRight className={styles.btnArrow} />}
                   </button>
                 </form>
 
                 <div className={styles.divider}>
-                  <span>New to Aurevian?</span>
+                  <span>or continue with</span>
+                </div>
+
+                <div className={styles.socialButtons}>
+                  <button type="button" className={styles.socialBtn}>
+                    <FaGoogle className={styles.socialIcon} />
+                    Continue with Google
+                  </button>
                 </div>
 
                 <div className={styles.footer}>
-                  <Link to="/seller/register" className={styles.registerLink}>
-                    Register as a Seller <FiArrowRight className={styles.arrowIcon} />
-                  </Link>
-                  <Link to="/become-a-partner" className={styles.backLink}>
-                    ← Back to Become a Partner
-                  </Link>
-                </div>
-
-                <div className={styles.customerLogin}>
-                  <p>
-                    Are you a customer? <Link to="/login">Login here</Link>
+                  <p className={styles.registerText}>
+                    Don't have an account? <Link to="/seller/register">Create Account</Link>
                   </p>
+                 
                 </div>
               </div>
             </div>
