@@ -1,4 +1,4 @@
-// backend/models/User.js
+// backend/models/User.js - ULTIMATE FIX VERSION
 
 import mongoose from "mongoose";
 import validator from "validator";
@@ -14,88 +14,72 @@ const addressSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-
     phone: {
       type: String,
       trim: true,
       required: false,
-      // REMOVED: unique and sparse from sub-document
     },
-
     alternatePhone: {
       type: String,
       default: "",
       trim: true,
     },
-
     addressType: {
       type: String,
       enum: ["Home", "Work", "Office", "Other"],
       default: "Home",
-      set: (v) =>
-        v ? v.charAt(0).toUpperCase() + v.slice(1).toLowerCase() : v,
+      set: (v) => v ? v.charAt(0).toUpperCase() + v.slice(1).toLowerCase() : v,
     },
-
     house: {
       type: String,
       required: true,
       trim: true,
     },
-
     apartment: {
       type: String,
       default: "",
       trim: true,
     },
-
     street: {
       type: String,
       required: true,
       trim: true,
     },
-
     landmark: {
       type: String,
       default: "",
       trim: true,
     },
-
     area: {
       type: String,
       default: "",
       trim: true,
     },
-
     city: {
       type: String,
       required: true,
       trim: true,
     },
-
     state: {
       type: String,
       required: true,
       trim: true,
     },
-
     country: {
       type: String,
       default: "India",
       trim: true,
     },
-
     pincode: {
       type: String,
       required: true,
       trim: true,
     },
-
     deliveryInstructions: {
       type: String,
       default: "",
       trim: true,
     },
-
     isDefault: {
       type: Boolean,
       default: false,
@@ -116,19 +100,19 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "First name is required"],
       trim: true,
-      default: "User", // ✅ Added default
+      default: "User",
     },
     lastName: {
       type: String,
       required: [true, "Last name is required"],
       trim: true,
-      default: "", // ✅ Added default
+      default: "",
     },
     fullName: {
       type: String,
       required: [true, "Full name is required"],
       trim: true,
-      default: "User", // ✅ Added default
+      default: "User",
     },
     email: {
       type: String,
@@ -142,7 +126,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       unique: true,
       sparse: true,
-      index: true, // ✅ Explicit index
+      index: true,
     },
     authProvider: {
       type: String,
@@ -178,10 +162,9 @@ const userSchema = new mongoose.Schema(
       trim: true,
       unique: true,
       sparse: true,
-      default: undefined, // ✅ CRITICAL: default to undefined, not null or empty string
+      default: undefined,
       validate: {
         validator: function(v) {
-          // ✅ Prevent empty strings
           return v === undefined || v === null || v.trim().length > 0;
         },
         message: "Phone cannot be empty string",
@@ -324,14 +307,12 @@ const userSchema = new mongoose.Schema(
 );
 
 // ============================================
-// INDEXES - ✅ FIXED
+// INDEXES
 // ============================================
 userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ firebaseUid: 1 }, { unique: true, sparse: true });
 userSchema.index({ role: 1, isActive: 1 });
 userSchema.index({ createdAt: -1 });
-// ✅ REMOVED: userSchema.index({ phone: 1 }, { sparse: true });
-// Phone index is automatically created by the field's `unique: true` and `sparse: true`
 
 // ============================================
 // VIRTUALS
@@ -375,20 +356,20 @@ userSchema.set("toObject", {
 });
 
 // ============================================
-// PRE-VALIDATE MIDDLEWARE - ✅ ENHANCED
+// ✅ FIXED PRE-VALIDATE - NO 'next' PARAMETER
 // ============================================
-userSchema.pre("validate", function(next) {
-  // ✅ Ensure firstName has valid value
+userSchema.pre("validate", function() {
+  // Ensure firstName has valid value
   if (!this.firstName || this.firstName.trim() === "") {
     this.firstName = "User";
   }
   
-  // ✅ Ensure lastName has valid value
+  // Ensure lastName has valid value
   if (!this.lastName || this.lastName.trim() === "") {
     this.lastName = "";
   }
   
-  // ✅ Ensure fullName is set
+  // Ensure fullName is set
   if (!this.fullName || this.fullName.trim() === "") {
     this.fullName = `${this.firstName} ${this.lastName}`.trim();
     if (this.fullName === "") {
@@ -396,28 +377,25 @@ userSchema.pre("validate", function(next) {
     }
   }
   
-  // ✅ Ensure gender has valid value
+  // Ensure gender has valid value
   if (!this.gender || this.gender.trim() === "") {
     this.gender = "Prefer not to say";
   }
   
-  // ✅ CRITICAL: Convert empty phone string to undefined
+  // CRITICAL: Convert empty phone string to undefined
   if (this.phone === "" || this.phone === null) {
     this.phone = undefined;
   }
   
-  // ✅ Ensure phone is not empty string
   if (this.phone && this.phone.trim() === "") {
     this.phone = undefined;
   }
-  
-  next();
 });
 
 // ============================================
-// PRE-SAVE MIDDLEWARE - ✅ ENHANCED
+// ✅ FIXED PRE-SAVE - NO 'next' PARAMETER
 // ============================================
-userSchema.pre("save", function(next) {
+userSchema.pre("save", function() {
   // Set fullName from firstName and lastName
   if (this.firstName || this.lastName) {
     const firstName = this.firstName || "User";
@@ -435,7 +413,7 @@ userSchema.pre("save", function(next) {
     this.lastName = parts.slice(1).join(" ") || "";
   }
 
-  // ✅ CRITICAL: Sanitize phone again before save
+  // CRITICAL: Sanitize phone again before save
   if (this.phone === "" || this.phone === null) {
     this.phone = undefined;
   }
@@ -459,13 +437,10 @@ userSchema.pre("save", function(next) {
     this.memberSince = this.createdAt || new Date();
   }
   
-  // ✅ Ensure email is set
+  // Ensure email is set
   if (!this.email) {
-    next(new Error("Email is required"));
-    return;
+    throw new Error("Email is required");
   }
-  
-  next();
 });
 
 // ============================================
@@ -518,7 +493,7 @@ userSchema.methods.addNotification = async function (notification) {
 };
 
 // ============================================
-// STATIC METHODS - ✅ FIXED WITH RETRY LOGIC
+// STATIC METHODS
 // ============================================
 
 userSchema.statics.findByEmail = function (email) {
@@ -529,103 +504,10 @@ userSchema.statics.findByFirebaseUid = function (uid) {
   return this.findOne({ firebaseUid: uid });
 };
 
-userSchema.statics.findOrCreateFromFirebase = async function (firebaseUser, options = {}) {
-  // ✅ Add retry logic for race conditions
-  const maxRetries = 3;
-  let retryCount = 0;
-  let lastError = null;
-  
-  while (retryCount < maxRetries) {
-    try {
-      console.log(`🔍 Finding user with firebaseUid: ${firebaseUser.uid} (attempt ${retryCount + 1}/${maxRetries})`);
-      
-      // ✅ Try to find user by Firebase UID first
-      let user = await this.findOne({ firebaseUid: firebaseUser.uid });
-      
-      if (user) {
-        console.log(`👤 User found by firebaseUid: ${user.email}`);
-        return await this._updateExistingUser(user, firebaseUser);
-      }
-      
-      // ✅ If not found by firebaseUid, try by email
-      if (firebaseUser.email) {
-        user = await this.findOne({ email: firebaseUser.email.toLowerCase() });
-        if (user) {
-          console.log(`👤 User found by email: ${user.email}`);
-          // Link firebaseUid to existing user
-          user.firebaseUid = firebaseUser.uid;
-          return await this._updateExistingUser(user, firebaseUser);
-        }
-      }
-      
-      console.log("👤 User not found, creating new...");
-      
-      // ✅ Create new user
-      return await this._createNewUser(firebaseUser);
-      
-    } catch (error) {
-      lastError = error;
-      
-      // ✅ Handle duplicate key errors specifically
-      if (error.code === 11000) {
-        console.warn(`⚠️ Duplicate key error, retrying... (attempt ${retryCount + 1}/${maxRetries})`);
-        retryCount++;
-        
-        // ✅ If we've retried enough times, try to find the user that caused the conflict
-        if (retryCount === maxRetries) {
-          console.log("🔍 Attempting to find conflicting user...");
-          
-          // ✅ Try to find by firebaseUid again
-          let existingUser = await this.findOne({ firebaseUid: firebaseUser.uid });
-          
-          if (!existingUser && firebaseUser.email) {
-            existingUser = await this.findOne({ email: firebaseUser.email.toLowerCase() });
-          }
-          
-          if (existingUser) {
-            console.log(`✅ Found existing user: ${existingUser.email}`);
-            return await this._updateExistingUser(existingUser, firebaseUser);
-          }
-          
-          // ✅ If still no user found, try one more time with a different approach
-          console.log("⚠️ Could not find existing user, attempting to create with retry...");
-          
-          // ✅ Try to create with a slight delay
-          await new Promise(resolve => setTimeout(resolve, 100));
-          try {
-            return await this._createNewUser(firebaseUser);
-          } catch (finalError) {
-            if (finalError.code === 11000) {
-              // ✅ One last attempt to find the user
-              const finalUser = await this.findOne({ email: firebaseUser.email.toLowerCase() });
-              if (finalUser) {
-                console.log(`✅ Found user after final attempt: ${finalUser.email}`);
-                return await this._updateExistingUser(finalUser, firebaseUser);
-              }
-            }
-            throw finalError;
-          }
-        }
-        
-        // ✅ Wait before retry
-        await new Promise(resolve => setTimeout(resolve, 100 * retryCount));
-      } else {
-        console.error("❌ Error in findOrCreateFromFirebase:", error.message);
-        console.error("Stack:", error.stack);
-        throw error;
-      }
-    }
-  }
-  
-  throw lastError || new Error("Failed to create or find user after multiple attempts");
-};
-
-// ✅ Helper method to update existing user
 userSchema.statics._updateExistingUser = async function(user, firebaseUser) {
   try {
     console.log(`🔄 Updating existing user: ${user.email}`);
     
-    // ✅ Update user information
     if (firebaseUser.displayName) {
       const parts = firebaseUser.displayName.split(" ");
       user.firstName = parts[0] || user.firstName || "User";
@@ -633,7 +515,6 @@ userSchema.statics._updateExistingUser = async function(user, firebaseUser) {
       user.fullName = firebaseUser.displayName;
     }
     
-    // ✅ Update photo if available
     if (firebaseUser.photoURL) {
       user.profileImage = {
         url: firebaseUser.photoURL,
@@ -652,7 +533,6 @@ userSchema.statics._updateExistingUser = async function(user, firebaseUser) {
     
     user.lastLogin = new Date();
     
-    // ✅ CRITICAL: Ensure phone is never an empty string
     if (user.phone === "" || user.phone === null) {
       user.phone = undefined;
     }
@@ -666,12 +546,14 @@ userSchema.statics._updateExistingUser = async function(user, firebaseUser) {
   }
 };
 
-// ✅ Helper method to create new user
 userSchema.statics._createNewUser = async function(firebaseUser) {
   try {
     console.log(`🆕 Creating new user for: ${firebaseUser.email || firebaseUser.uid}`);
     
-    // ✅ Safely extract name parts
+    if (!firebaseUser.email) {
+      throw new Error("Email is required to create a user");
+    }
+    
     const nameParts = firebaseUser.displayName 
       ? firebaseUser.displayName.split(" ") 
       : ["User", ""];
@@ -680,12 +562,6 @@ userSchema.statics._createNewUser = async function(firebaseUser) {
     const lastName = nameParts.slice(1).join(" ") || "";
     const fullName = firebaseUser.displayName || `${firstName} ${lastName}`.trim() || "User";
     
-    // ✅ CRITICAL: Ensure email is set
-    if (!firebaseUser.email) {
-      throw new Error("Email is required to create a user");
-    }
-    
-    // ✅ Create user object - phone is NOT set for Google users
     const user = new this({
       firstName: firstName,
       lastName: lastName,
@@ -706,15 +582,11 @@ userSchema.statics._createNewUser = async function(firebaseUser) {
       lastLogin: new Date(),
       memberSince: new Date(),
       profileCompletion: 20,
-      // ✅ CRITICAL: Do NOT set phone field for Google users without phone
-      // phone: undefined, (this is the default)
     });
     
-    // ✅ Save user
     await user.save();
     console.log(`✅ New user created: ${user.email}`);
     
-    // ✅ Add welcome notification
     try {
       await user.addNotification({
         type: "welcome",
@@ -724,7 +596,6 @@ userSchema.statics._createNewUser = async function(firebaseUser) {
       });
     } catch (notifError) {
       console.warn("⚠️ Could not add welcome notification:", notifError.message);
-      // Don't fail the user creation for notification failure
     }
     
     return user;
@@ -732,6 +603,84 @@ userSchema.statics._createNewUser = async function(firebaseUser) {
     console.error("❌ Error creating new user:", error.message);
     throw error;
   }
+};
+
+userSchema.statics.findOrCreateFromFirebase = async function (firebaseUser, options = {}) {
+  const maxRetries = 3;
+  let retryCount = 0;
+  let lastError = null;
+  
+  while (retryCount < maxRetries) {
+    try {
+      console.log(`🔍 Finding user with firebaseUid: ${firebaseUser.uid} (attempt ${retryCount + 1}/${maxRetries})`);
+      
+      let user = await this.findOne({ firebaseUid: firebaseUser.uid });
+      
+      if (user) {
+        console.log(`👤 User found by firebaseUid: ${user.email}`);
+        return await this._updateExistingUser(user, firebaseUser);
+      }
+      
+      if (firebaseUser.email) {
+        user = await this.findOne({ email: firebaseUser.email.toLowerCase() });
+        if (user) {
+          console.log(`👤 User found by email: ${user.email}`);
+          user.firebaseUid = firebaseUser.uid;
+          return await this._updateExistingUser(user, firebaseUser);
+        }
+      }
+      
+      console.log("👤 User not found, creating new...");
+      return await this._createNewUser(firebaseUser);
+      
+    } catch (error) {
+      lastError = error;
+      
+      if (error.code === 11000) {
+        console.warn(`⚠️ Duplicate key error, retrying... (attempt ${retryCount + 1}/${maxRetries})`);
+        retryCount++;
+        
+        if (retryCount === maxRetries) {
+          console.log("🔍 Attempting to find conflicting user...");
+          
+          let existingUser = await this.findOne({ firebaseUid: firebaseUser.uid });
+          
+          if (!existingUser && firebaseUser.email) {
+            existingUser = await this.findOne({ email: firebaseUser.email.toLowerCase() });
+          }
+          
+          if (existingUser) {
+            console.log(`✅ Found existing user: ${existingUser.email}`);
+            return await this._updateExistingUser(existingUser, firebaseUser);
+          }
+          
+          console.log("⚠️ Could not find existing user, attempting to create with retry...");
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          try {
+            return await this._createNewUser(firebaseUser);
+          } catch (finalError) {
+            if (finalError.code === 11000) {
+              const finalUser = await this.findOne({ email: firebaseUser.email.toLowerCase() });
+              if (finalUser) {
+                console.log(`✅ Found user after final attempt: ${finalUser.email}`);
+                return await this._updateExistingUser(finalUser, firebaseUser);
+              }
+            }
+            throw finalError;
+          }
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 100 * retryCount));
+      } else {
+        console.error("❌ Error in findOrCreateFromFirebase:", error.message);
+        console.error("Stack:", error.stack);
+        throw error;
+      }
+    }
+  }
+  
+  throw lastError || new Error("Failed to create or find user after multiple attempts");
 };
 
 const User = mongoose.model("User", userSchema);
