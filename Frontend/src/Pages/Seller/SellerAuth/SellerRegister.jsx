@@ -29,7 +29,7 @@ import Header from "../../Layout/Header/Header"
 import Footer from "../../Layout/Footer/Footer"
 
 // Import step images
-import Step1Image from "../../../assets/personal.png";
+import Step1Image from "../../../assets/registerstep1.png";
 import Step2Image from "../../../assets/pan.png";
 import Step3Image from "../../../assets/adhar.png";
 import Step4Image from "../../../assets/store.png";
