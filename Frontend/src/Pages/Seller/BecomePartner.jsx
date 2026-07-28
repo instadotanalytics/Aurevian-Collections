@@ -1,6 +1,6 @@
 // src/Pages/Seller/BecomePartner.jsx
-import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   FiArrowRight, 
   FiShield, 
@@ -13,13 +13,7 @@ import {
   FiHeart,
   FiGlobe,
   FiClock,
-  FiThumbsUp,
-  FiDollarSign,
-  FiBarChart2,
-  FiSmile,
-  FiZap,
-  FiLayers,
-  FiEye
+  FiThumbsUp
 } from 'react-icons/fi';
 import { FaGem } from 'react-icons/fa';
 import gsap from 'gsap';
@@ -27,10 +21,15 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import styles from './BecomePartner.module.css';
 import Contactimg from "../../assets/partner.png";
 
-// Register ScrollTrigger
-gsap.registerPlugin(ScrollTrigger);
+// Register ScrollTrigger once
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const BecomePartner = () => {
+  const navigate = useNavigate();
+  
+  // Refs for animation targets
   const heroRef = useRef(null);
   const featuresRef = useRef(null);
   const benefitsRef = useRef(null);
@@ -43,7 +42,8 @@ const BecomePartner = () => {
   const statsItemsRef = useRef([]);
   const [animationsReady, setAnimationsReady] = useState(false);
 
-  const features = [
+  // Memoized data
+  const features = useMemo(() => [
     {
       icon: <FiShield />,
       title: 'Verified Seller Badge',
@@ -74,9 +74,9 @@ const BecomePartner = () => {
       title: 'Secure Payments',
       description: 'Get paid securely and on time every sale',
     }
-  ];
+  ], []);
 
-  const benefits = [
+  const benefits = useMemo(() => [
     'Premium luxury customer base access',
     'Zero monthly subscription fees',
     'Competitive commission rates',
@@ -85,14 +85,32 @@ const BecomePartner = () => {
     'Priority customer support',
     'Marketing & promotional opportunities',
     'Secure & timely payments'
-  ];
+  ], []);
 
-  const trustBadges = [
+  const trustBadges = useMemo(() => [
     { icon: <FiShield />, label: '100% Secure' },
     { icon: <FiGlobe />, label: 'Global Reach' },
     { icon: <FiClock />, label: '24/7 Support' },
     { icon: <FiThumbsUp />, label: '98% Satisfaction' }
-  ];
+  ], []);
+
+  const steps = useMemo(() => [
+    { number: '1', title: 'Register', desc: 'Create your seller account and tell us about your business' },
+    { number: '2', title: 'Verify & Submit', desc: 'Submit your business documents for verification' },
+    { number: '3', title: 'Get Approved', desc: 'Our team reviews and approves your application' },
+    { number: '4', title: 'Start Selling', desc: 'List your products and start selling to luxury customers' }
+  ], []);
+
+  const stats = useMemo(() => [
+    { number: '500+', label: 'Active Sellers' },
+    { number: '10K+', label: 'Products Sold' },
+    { number: '98%', label: 'Satisfaction Rate' }
+  ], []);
+
+  // Handle navigation with scroll to top on destination
+ const handleNavigate = useCallback((path) => {
+  navigate(path);
+}, [navigate]);
 
   // Initialize animations
   useEffect(() => {
@@ -100,42 +118,44 @@ const BecomePartner = () => {
       setAnimationsReady(true);
     }, 100);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (typeof window !== 'undefined') {
+        ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      }
+    };
   }, []);
 
   // Run animations when ready
   useEffect(() => {
-    if (!animationsReady) return;
+    if (!animationsReady || typeof window === 'undefined') return;
 
-    // Kill all existing ScrollTriggers to prevent conflicts
     ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-
-    // Refresh ScrollTrigger
     ScrollTrigger.refresh();
 
     const ctx = gsap.context(() => {
-      // 1. Hero Section
-      gsap.from(heroRef.current, {
-        opacity: 0,
-        y: 50,
-        duration: 1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: "top 85%",
-          toggleActions: "play none none reverse",
-          invalidateOnRefresh: true
-        }
-      });
+      if (heroRef.current) {
+        gsap.from(heroRef.current, {
+          opacity: 0,
+          y: 40,
+          duration: 0.8,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: heroRef.current,
+            start: "top 85%",
+            toggleActions: "play none none reverse",
+            invalidateOnRefresh: true
+          }
+        });
+      }
 
-      // 2. Stats - Simple fade in (no number counting to avoid NaN)
       statsItemsRef.current.forEach((item, index) => {
         if (item) {
           gsap.from(item, {
             opacity: 0,
-            y: 30,
-            duration: 0.6,
-            delay: index * 0.1,
+            y: 20,
+            duration: 0.5,
+            delay: index * 0.08,
             ease: "power2.out",
             scrollTrigger: {
               trigger: item,
@@ -147,14 +167,13 @@ const BecomePartner = () => {
         }
       });
 
-      // 3. Features
       featureCardsRef.current.forEach((card, index) => {
         if (card) {
           gsap.from(card, {
             opacity: 0,
-            y: 40,
-            duration: 0.6,
-            delay: index * 0.08,
+            y: 30,
+            duration: 0.5,
+            delay: index * 0.06,
             ease: "power2.out",
             scrollTrigger: {
               trigger: card,
@@ -166,28 +185,28 @@ const BecomePartner = () => {
         }
       });
 
-      // 4. Benefits
-      gsap.from(benefitsRef.current, {
-        opacity: 0,
-        y: 40,
-        duration: 0.8,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: benefitsRef.current,
-          start: "top 85%",
-          toggleActions: "play none none reverse",
-          invalidateOnRefresh: true
-        }
-      });
+      if (benefitsRef.current) {
+        gsap.from(benefitsRef.current, {
+          opacity: 0,
+          y: 30,
+          duration: 0.7,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: benefitsRef.current,
+            start: "top 85%",
+            toggleActions: "play none none reverse",
+            invalidateOnRefresh: true
+          }
+        });
+      }
 
-      // 5. Benefit Items
       benefitItemsRef.current.forEach((item, index) => {
         if (item) {
           gsap.from(item, {
             opacity: 0,
-            x: -20,
+            x: -15,
             duration: 0.4,
-            delay: index * 0.06,
+            delay: index * 0.05,
             ease: "power2.out",
             scrollTrigger: {
               trigger: item,
@@ -199,28 +218,28 @@ const BecomePartner = () => {
         }
       });
 
-      // 6. Testimonial
-      gsap.from(testimonialRef.current, {
-        opacity: 0,
-        scale: 0.95,
-        duration: 0.8,
-        ease: "back.out(1.7)",
-        scrollTrigger: {
-          trigger: testimonialRef.current,
-          start: "top 85%",
-          toggleActions: "play none none reverse",
-          invalidateOnRefresh: true
-        }
-      });
+      if (testimonialRef.current) {
+        gsap.from(testimonialRef.current, {
+          opacity: 0,
+          scale: 0.95,
+          duration: 0.7,
+          ease: "back.out(1.7)",
+          scrollTrigger: {
+            trigger: testimonialRef.current,
+            start: "top 85%",
+            toggleActions: "play none none reverse",
+            invalidateOnRefresh: true
+          }
+        });
+      }
 
-      // 7. Steps
       stepItemsRef.current.forEach((item, index) => {
         if (item) {
           gsap.from(item, {
             opacity: 0,
-            y: 30,
+            y: 25,
             duration: 0.5,
-            delay: index * 0.1,
+            delay: index * 0.08,
             ease: "power2.out",
             scrollTrigger: {
               trigger: item,
@@ -232,39 +251,37 @@ const BecomePartner = () => {
         }
       });
 
-      // 8. CTA
-      gsap.from(ctaRef.current, {
-        opacity: 0,
-        y: 40,
-        duration: 0.8,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: ctaRef.current,
-          start: "top 85%",
-          toggleActions: "play none none reverse",
-          invalidateOnRefresh: true
-        }
-      });
-
-      // 9. Hero Image Parallax
-      const heroImg = heroRef.current?.querySelector('img');
-      if (heroImg) {
-        gsap.to(heroImg, {
-          y: -20,
-          ease: "none",
+      if (ctaRef.current) {
+        gsap.from(ctaRef.current, {
+          opacity: 0,
+          y: 30,
+          duration: 0.7,
+          ease: "power2.out",
           scrollTrigger: {
-            trigger: heroRef.current,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 1,
+            trigger: ctaRef.current,
+            start: "top 85%",
+            toggleActions: "play none none reverse",
             invalidateOnRefresh: true
           }
         });
       }
 
-      // Refresh ScrollTrigger after setup
-      ScrollTrigger.refresh();
+      const heroImg = heroRef.current?.querySelector('img');
+      if (heroImg) {
+        gsap.to(heroImg, {
+          y: -15,
+          ease: "none",
+          scrollTrigger: {
+            trigger: heroRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 0.5,
+            invalidateOnRefresh: true
+          }
+        });
+      }
 
+      ScrollTrigger.refresh();
     }, []);
 
     return () => {
@@ -273,13 +290,15 @@ const BecomePartner = () => {
     };
   }, [animationsReady]);
 
-  // Refresh on window resize
+  // Handle resize
   useEffect(() => {
     const handleResize = () => {
-      ScrollTrigger.refresh();
+      if (typeof window !== 'undefined') {
+        ScrollTrigger.refresh();
+      }
     };
     
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
@@ -300,19 +319,18 @@ const BecomePartner = () => {
             Start selling on Aurevian and grow your business with us.
           </p>
           <div className={styles.heroButtons}>
-            <Link to="/seller/register" className={styles.primaryBtn}>
+            <button 
+              onClick={() => handleNavigate('/seller/register')} 
+              className={styles.primaryBtn}
+            >
               Get Started Now <FiArrowRight />
-            </Link>
+            </button>
             <Link to="/seller/login" className={styles.secondaryBtn}>
               Already a Partner? Login
             </Link>
           </div>
           <div className={styles.heroStats}>
-            {[
-              { number: '500+', label: 'Active Sellers' },
-              { number: '10K+', label: 'Products Sold' },
-              { number: '98%', label: 'Satisfaction Rate' }
-            ].map((stat, index) => (
+            {stats.map((stat, index) => (
               <div key={index} className={styles.stat} ref={(el) => (statsItemsRef.current[index] = el)}>
                 <span className={styles.statNumber}>{stat.number}</span>
                 <span className={styles.statLabel}>{stat.label}</span>
@@ -321,7 +339,13 @@ const BecomePartner = () => {
           </div>
         </div>
         <div className={styles.heroImage}>
-          <img src={Contactimg} alt="Luxury Jewellery" className={styles.heroImageImg} />
+          <img 
+            src={Contactimg} 
+            alt="Luxury Jewellery" 
+            className={styles.heroImageImg} 
+            loading="lazy"
+            decoding="async"
+          />
         </div>
       </section>
 
@@ -378,9 +402,12 @@ const BecomePartner = () => {
               ))}
             </ul>
             <div className={styles.benefitsCta}>
-              <Link to="/seller/register" className={styles.benefitsBtn}>
+              <button 
+                onClick={() => handleNavigate('/seller/register')} 
+                className={styles.benefitsBtn}
+              >
                 Start Selling Today <FiArrowRight />
-              </Link>
+              </button>
             </div>
           </div>
           <div className={styles.benefitsRight}>
@@ -412,12 +439,7 @@ const BecomePartner = () => {
           <p>Get started in 4 simple steps</p>
         </div>
         <div className={styles.steps}>
-          {[
-            { number: '1', title: 'Register', desc: 'Create your seller account and tell us about your business' },
-            { number: '2', title: 'Verify & Submit', desc: 'Submit your business documents for verification' },
-            { number: '3', title: 'Get Approved', desc: 'Our team reviews and approves your application' },
-            { number: '4', title: 'Start Selling', desc: 'List your products and start selling to luxury customers' }
-          ].map((step, index) => (
+          {steps.map((step, index) => (
             <div key={index} className={styles.step} ref={(el) => (stepItemsRef.current[index] = el)}>
               <div className={styles.stepNumber}>{step.number}</div>
               <div className={styles.stepContent}>
@@ -441,9 +463,12 @@ const BecomePartner = () => {
             Join Aurevian today and take your jewellery business to the next level.
             We're here to help you succeed.
           </p>
-          <Link to="/seller/register" className={styles.ctaBtn}>
+          <button 
+            onClick={() => handleNavigate('/seller/register')} 
+            className={styles.ctaBtn}
+          >
             Get Started Now <FiArrowRight />
-          </Link>
+          </button>
           <p className={styles.ctaNote}>
             Already have an account? <Link to="/seller/login">Sign in here</Link>
           </p>

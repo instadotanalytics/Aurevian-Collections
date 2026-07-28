@@ -65,6 +65,7 @@ import BlogDetail from "./Pages/UserBlog/BlogDetail.jsx";
 import Profile from "./Pages/Profile/Profile.jsx";
 
 import SellerKYC from "./Pages/Seller/SellerKYC/SellerKYC";
+import ScrollToTop from "./Pages/Seller/ScrollToTop.jsx";
 
 // ============================================
 // ROUTES CONSTANTS
@@ -187,6 +188,7 @@ const App = () => {
             },
           }}
         />
+         <ScrollToTop/>
         <Routes>
           {/* ============================================
                 PUBLIC ROUTES - WITH HEADER

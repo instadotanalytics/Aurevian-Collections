@@ -1,4 +1,4 @@
-/* BecomePartner.module.css - Complete with Smooth Animations */
+/* BecomePartner.module.css - Complete Optimized */
 
 /* ============================================
    VARIABLES
@@ -12,13 +12,13 @@
   --gray: #6b6b6b;
   --light-gray: #f8f6f4;
   --border: #e8e3dc;
-  --shadow: 0 2px 20px rgba(0, 0, 0, 0.04);
-  --shadow-hover: 0 8px 40px rgba(0, 0, 0, 0.08);
-  --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ============================================
-   PAGE
+   PAGE - Base
    ============================================ */
 .page {
   min-height: 100vh;
@@ -31,6 +31,9 @@
   padding: 0 20px 40px;
   padding-top: 0 !important;
   margin-top: 0 !important;
+  transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* ============================================
@@ -46,7 +49,7 @@ html {
 }
 
 /* ============================================
-   SMOOTH ANIMATIONS
+   SMOOTH ANIMATIONS - GPU Accelerated
    ============================================ */
 .hero,
 .features,
@@ -154,11 +157,13 @@ html {
   text-decoration: none;
   transition: var(--transition);
   width: 100%;
+  transform: translateZ(0);
+  cursor: pointer;
 }
 
 .primaryBtn:hover {
   background: #2d2d2d;
-  transform: translateY(-2px);
+  transform: translateY(-2px) translateZ(0);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
@@ -184,6 +189,7 @@ html {
   text-decoration: none;
   transition: var(--transition);
   width: 100%;
+  transform: translateZ(0);
 }
 
 .secondaryBtn:hover {
@@ -226,6 +232,7 @@ html {
   overflow: hidden;
   min-height: 220px;
   transform: translateZ(0);
+  background: var(--light-gray);
 }
 
 .heroImageImg {
@@ -235,10 +242,11 @@ html {
   object-fit: cover;
   transition: transform 0.6s ease;
   border-radius: 16px;
+  transform: translateZ(0);
 }
 
 .heroImage:hover .heroImageImg {
-  transform: scale(1.02);
+  transform: scale(1.02) translateZ(0);
 }
 
 /* ============================================
@@ -266,7 +274,7 @@ html {
 .trustBadge:hover {
   border-color: var(--gold);
   background: white;
-  transform: translateY(-2px);
+  transform: translateY(-2px) translateZ(0);
   box-shadow: var(--shadow-hover);
 }
 
@@ -336,7 +344,7 @@ html {
 }
 
 .featureCard:hover {
-  transform: translateY(-4px);
+  transform: translateY(-4px) translateZ(0);
   box-shadow: var(--shadow-hover);
   border-color: var(--gold);
 }
@@ -353,12 +361,13 @@ html {
   font-size: 20px;
   color: var(--gold-dark);
   transition: var(--transition);
+  transform: translateZ(0);
 }
 
 .featureCard:hover .featureIcon {
   background: var(--dark);
   color: white;
-  transform: scale(1.05);
+  transform: scale(1.05) translateZ(0);
 }
 
 .featureCard h3 {
@@ -437,6 +446,7 @@ html {
   font-size: 14px;
   color: var(--dark);
   padding: 6px 0;
+  transform: translateZ(0);
 }
 
 .benefitCheck {
@@ -460,11 +470,13 @@ html {
   text-decoration: none;
   transition: var(--transition);
   width: 100%;
+  transform: translateZ(0);
+  cursor: pointer;
 }
 
 .benefitsBtn:hover {
   background: #2d2d2d;
-  transform: translateY(-2px);
+  transform: translateY(-2px) translateZ(0);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
@@ -491,7 +503,7 @@ html {
 .testimonialCard:hover {
   border-color: var(--gold);
   box-shadow: var(--shadow-hover);
-  transform: translateY(-3px);
+  transform: translateY(-3px) translateZ(0);
 }
 
 .testimonialStars {
@@ -525,6 +537,7 @@ html {
   align-items: center;
   justify-content: center;
   font-size: 20px;
+  transform: translateZ(0);
 }
 
 .testimonialAuthor h4 {
@@ -565,7 +578,7 @@ html {
 }
 
 .step:hover {
-  transform: translateY(-4px);
+  transform: translateY(-4px) translateZ(0);
   box-shadow: var(--shadow-hover);
   border-color: var(--gold);
 }
@@ -582,6 +595,7 @@ html {
   justify-content: center;
   font-size: 18px;
   font-weight: 700;
+  transform: translateZ(0);
 }
 
 .stepContent h3 {
@@ -599,7 +613,7 @@ html {
 }
 
 /* ============================================
-   CTA SECTION
+   CTA
    ============================================ */
 .cta {
   padding: 20px 0 0;
@@ -670,11 +684,13 @@ html {
   position: relative;
   z-index: 1;
   width: 100%;
+  transform: translateZ(0);
+  cursor: pointer;
 }
 
 .ctaBtn:hover {
   background: var(--gold-dark);
-  transform: translateY(-2px);
+  transform: translateY(-2px) translateZ(0);
   box-shadow: 0 8px 24px rgba(212, 175, 55, 0.3);
 }
 
@@ -713,14 +729,6 @@ html {
 
 * {
   scrollbar-width: none;
-}
-
-/* ============================================
-   SELECTION
-   ============================================ */
-::selection {
-  background: var(--gold);
-  color: white;
 }
 
 /* ============================================
@@ -1098,9 +1106,17 @@ html {
   .trustBadge,
   .stat {
     will-change: auto;
-    transform: none;
+    transform: none !important;
     backface-visibility: visible;
   }
+}
+
+/* ============================================
+   SELECTION
+   ============================================ */
+::selection {
+  background: var(--gold);
+  color: white;
 }
 
 /* ============================================

@@ -49,7 +49,7 @@
 .glowBottomRight {
   bottom: -20%;
   right: -10%;
-  background: radial-gradient(circle, var(--champagne), transparent 70%);
+  background: transparent;
 }
 
 .container {
