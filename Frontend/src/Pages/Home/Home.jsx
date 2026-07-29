@@ -6,6 +6,8 @@ import ShopCardCategory from "../../Components/ShopCard/ShopCardCategory";
 import NewArrivalsBanner from "../../Components/Banner/NewArrivalsBanner";
 import NewCollections from "../../Components/ShopCard/NewCollections";
 import Footer from "../Layout/Footer/Footer";
+import GiftGuide from "../../Components/ShopCard/GiftGuide";
+import Offers from "../../Components/ShopCard/Offers";
 
 const Home = () => {
   return (
@@ -15,6 +17,8 @@ const Home = () => {
       <ShopCardCategory />
       <NewArrivalsBanner />
       <NewCollections />
+      <GiftGuide/>
+      <Offers/>
       <Footer />
     </div>
   );
