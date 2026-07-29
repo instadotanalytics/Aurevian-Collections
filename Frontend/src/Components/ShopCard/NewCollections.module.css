@@ -11,7 +11,7 @@
   --line: #e4dccb;
 
   padding: 56px 24px 60px;
-  background:transparent;
+  background: transparent;
   font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
 }
 
@@ -78,9 +78,7 @@
   text-decoration: none;
   padding-bottom: 2px;
   border-bottom: 1px solid var(--ink);
-  transition:
-    gap 0.3s ease,
-    opacity 0.3s ease;
+  transition: gap 0.3s ease, opacity 0.3s ease;
   white-space: nowrap;
 }
 
@@ -109,10 +107,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition:
-    background 0.3s ease,
-    color 0.3s ease,
-    border-color 0.3s ease;
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .navBtn:hover {
@@ -122,7 +117,7 @@
 }
 
 /* ==========================================================
-   SCROLL CONTAINER
+   SCROLL CONTAINER — Horizontal scroll with 3 cards visible
    ========================================================== */
 .scrollContainer {
   display: flex;
@@ -141,24 +136,28 @@
 }
 
 /* ==========================================================
-   CARD — tall editorial portrait card, no border/box-shadow
+   CARD — Each card takes 1/3 of container width
    ========================================================== */
 .card {
-  flex: 0 0 auto;
-  width: 220px;
+  flex: 0 0 calc(33.333% - 15px);
+  min-width: 280px;
+  max-width: 290px;
   scroll-snap-align: start;
   display: flex;
   flex-direction: column;
   text-decoration: none;
   color: inherit;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+
 
 .imageWrap {
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 5;
   overflow: hidden;
-  background: #f2ece1;
+  
 }
 
 .image {
@@ -167,16 +166,20 @@
   object-fit: cover;
   display: block;
   transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  border-top-left-radius: 130px;
+  border-bottom-right-radius: 130px;
+  /* border-top-right-radius: 150px; */
+  /* border-bottom-left-radius: 150px; */
 }
 
-.card:hover .image {
-  transform: scale(1.07);
-}
+
 
 .imagePlaceholder {
   width: 100%;
   height: 100%;
   background: linear-gradient(150deg, #f2ece1 0%, #e6dbc6 100%);
+  border-top-left-radius: 100px;
+  border-bottom-right-radius: 100px;
 }
 
 /* Corner ribbon flag */
@@ -272,20 +275,21 @@
   }
 
   .card {
-    width: 190px;
+    flex: 0 0 calc(50% - 11px);
+    min-width: 240px;
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .section {
-    padding: 34px 14px 38px;
+    padding: 40px 16px 44px;
   }
 
   .header {
     flex-direction: column;
     align-items: flex-start;
     gap: 14px;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
   }
 
   .headerActions {
@@ -294,12 +298,33 @@
   }
 
   .card {
-    width: 45vw;
-    min-width: 150px;
+    flex: 0 0 calc(50% - 8px);
+    min-width: 160px;
+  }
+
+  .navArrows {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding: 32px 12px 36px;
+  }
+
+  .header {
+    gap: 10px;
+    margin-bottom: 18px;
   }
 
   .scrollContainer {
-    gap: 14px;
+    gap: 12px;
+    padding: 2px 2px 10px;
+  }
+
+  .card {
+    flex: 0 0 calc(50% - 6px);
+    min-width: 140px;
   }
 
   .title {
@@ -309,6 +334,24 @@
   .price {
     font-size: 14px;
   }
+
+  .heading {
+    font-size: clamp(20px, 4.5vw, 24px);
+  }
+
+  .image {
+    border-top-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+  }
+
+  .imagePlaceholder {
+    border-top-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+  }
+
+  .navArrows {
+    display: none;
+  }
 }
 
 /* ==========================================================
@@ -317,10 +360,14 @@
 @media (prefers-reduced-motion: reduce) {
   .image,
   .viewAllBtn,
-  .navBtn {
+  .navBtn,
+  .card {
     transition: none !important;
   }
   .card:hover .image {
+    transform: none !important;
+  }
+  .card:hover {
     transform: none !important;
   }
 }

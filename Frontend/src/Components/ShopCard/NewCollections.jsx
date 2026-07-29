@@ -20,7 +20,7 @@ const NEW_COLLECTION_IMAGES = {
 };
 
 // ==========================================================
-// NEW COLLECTION PRODUCT DATA (swap for real/dynamic data later)
+// NEW COLLECTION PRODUCT DATA
 // ==========================================================
 const NEW_PRODUCTS = [
   { id: "n1", name: "Diamond Halo Necklace", price: 12999, oldPrice: 16999, rating: 4.9, collection: "Spring 2025", image: NEW_COLLECTION_IMAGES.diamondNecklace },
@@ -31,14 +31,17 @@ const NEW_PRODUCTS = [
   { id: "n6", name: "Ruby Stud Earrings", price: 6499, oldPrice: 8499, rating: 4.7, collection: "Spring 2025", image: NEW_COLLECTION_IMAGES.rubyStuds },
   { id: "n7", name: "Platinum Wedding Band", price: 15999, oldPrice: 19999, rating: 4.9, collection: "Spring 2025", image: NEW_COLLECTION_IMAGES.platinumBand },
   { id: "n8", name: "Tanzanite Cocktail Ring", price: 11999, oldPrice: 15999, rating: 4.8, collection: "Spring 2025", image: NEW_COLLECTION_IMAGES.tanzaniteRing },
+  // Adding 3 more products to show 4 products per row
+  { id: "n9", name: "Rose Gold Pendant", price: 7999, oldPrice: 10999, rating: 4.8, collection: "Spring 2025", image: NEW_COLLECTION_IMAGES.diamondNecklace },
+  { id: "n10", name: "Silver Chain Bracelet", price: 4499, oldPrice: 5999, rating: 4.6, collection: "Spring 2025", image: NEW_COLLECTION_IMAGES.pearlBracelet },
+  { id: "n11", name: "Pearl Stud Earrings", price: 3499, oldPrice: 4999, rating: 4.7, collection: "Spring 2025", image: NEW_COLLECTION_IMAGES.rubyStuds },
 ];
 
 function ProductCard({ product }) {
   return (
     <a href={`/product/${product.id}`} className={styles.card} aria-label={product.name}>
       <div className={styles.imageWrap}>
-        <span className={styles.ribbon}>New</span>
-
+        
         {product.image ? (
           <img
             src={product.image}
