@@ -1317,31 +1317,78 @@
    MOBILE BOTTOM NAVIGATION (NEW)
    ========================================================== */
 .mobileBottomNav {
-  display: none;
   position: fixed;
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1500;
-  
-  /* Pill shape & Glass-morphism background */
-  background: rgba(255, 235, 225, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 50px;
-  padding: 8px 16px;
-  
+
   display: flex;
   align-items: center;
   justify-content: space-around;
   gap: 6px;
-  box-shadow: 0 8px 24px rgba(21, 19, 15, 0.12);
-  
+
+  min-width: 320px;
   max-width: 92%;
   width: auto;
-  min-width: 320px;
-  overflow-x: auto;
+  padding: 10px 18px;
+  overflow: hidden;
+
+  border-radius: 60px;
+  border: 1px solid rgba(255,255,255,0.25);
+
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+
+  box-shadow:
+    0 8px 35px rgba(0,0,0,0.12),
+    inset 0 1px 1px rgba(255,255,255,0.4);
+}
+
+/* Animated Glass Shine */
+.mobileBottomNav::before{
+  content:"";
+  position:absolute;
+  inset:-60%;
+  background: linear-gradient(
+    130deg,
+    transparent 25%,
+    rgba(255,255,255,.45) 45%,
+    rgba(255,255,255,.08) 60%,
+    transparent 75%
+  );
+
+  transform: rotate(15deg);
+  animation: glassShine 7s linear infinite;
+  pointer-events:none;
+}
+
+/* Soft Gradient Glow */
+.mobileBottomNav::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,.25), transparent 45%),
+    radial-gradient(circle at 80% 70%, rgba(255,215,180,.18), transparent 45%);
+  pointer-events:none;
+}
+
+@keyframes glassShine{
+  0%{
+    transform: translateX(-120%) rotate(15deg);
+  }
+  100%{
+    transform: translateX(120%) rotate(15deg);
+  }
+}
+.mobileBottomNav:hover{
+    backdrop-filter: blur(30px) saturate(220%);
+    -webkit-backdrop-filter: blur(30px) saturate(220%);
+    transform: translateX(-50%) translateY(-3px);
+    transition: .35s ease;
 }
 
 .bottomNavItem {
