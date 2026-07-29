@@ -1330,38 +1330,32 @@
 
   min-width: 320px;
   max-width: 92%;
-  width: auto;
   padding: 10px 18px;
+
   overflow: hidden;
+  isolation: isolate;
 
-  border-radius: 60px;
-  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 999px;
 
-  background: rgba(255,255,255,0.12);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background: rgba(255,255,255,.12);
+
+  backdrop-filter:
+      blur(30px)
+      saturate(220%)
+      brightness(115%);
+
+  -webkit-backdrop-filter:
+      blur(30px)
+      saturate(220%)
+      brightness(115%);
+
+  border:1px solid rgba(255,255,255,.18);
 
   box-shadow:
-    0 8px 35px rgba(0,0,0,0.12),
-    inset 0 1px 1px rgba(255,255,255,0.4);
-}
+      0 10px 35px rgba(0,0,0,.12),
+      inset 0 1px 1px rgba(255,255,255,.45);
 
-/* Animated Glass Shine */
-.mobileBottomNav::before{
-  content:"";
-  position:absolute;
-  inset:-60%;
-  background: linear-gradient(
-    130deg,
-    transparent 25%,
-    rgba(255,255,255,.45) 45%,
-    rgba(255,255,255,.08) 60%,
-    transparent 75%
-  );
-
-  transform: rotate(15deg);
-  animation: glassShine 7s linear infinite;
-  pointer-events:none;
+  transition:.4s;
 }
 
 /* Soft Gradient Glow */
@@ -1384,11 +1378,115 @@
     transform: translateX(120%) rotate(15deg);
   }
 }
+.mobileBottomNav::before{
+    content:"";
+    position:absolute;
+    inset:-80%;
+
+    background:
+    linear-gradient(
+        130deg,
+        transparent 30%,
+        rgba(255,255,255,.75) 45%,
+        rgba(255,255,255,.25) 55%,
+        transparent 70%
+    );
+
+    filter: blur(30px);
+
+    animation: liquidMove 6s linear infinite;
+
+    pointer-events:none;
+}
+.mobileBottomNav::after{
+
+    content:"";
+
+    position:absolute;
+    inset:0;
+
+    border-radius:inherit;
+
+    padding:1.3px;
+
+    background:linear-gradient(
+        130deg,
+        rgba(255,255,255,.7),
+        rgba(255,255,255,.05),
+        rgba(255,255,255,.45),
+        rgba(255,255,255,.05),
+        rgba(255,255,255,.8)
+    );
+
+    animation:borderFlow 5s linear infinite;
+
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+
+    mask-composite:exclude;
+    -webkit-mask-composite:xor;
+
+    pointer-events:none;
+}
+
 .mobileBottomNav:hover{
-    backdrop-filter: blur(30px) saturate(220%);
-    -webkit-backdrop-filter: blur(30px) saturate(220%);
-    transform: translateX(-50%) translateY(-3px);
-    transition: .35s ease;
+
+    transform:
+    translateX(-50%)
+    translateY(-4px);
+
+    backdrop-filter:
+      blur(40px)
+      saturate(250%)
+      brightness(125%);
+
+    -webkit-backdrop-filter:
+      blur(40px)
+      saturate(250%)
+      brightness(125%);
+}
+
+@keyframes liquidMove{
+
+    0%{
+
+        transform:
+        translateX(-70%)
+        translateY(-20%)
+        rotate(130deg);
+
+    }
+
+    100%{
+
+        transform:
+        translateX(70%)
+        translateY(20%)
+        rotate(130deg);
+
+    }
+
+}
+
+@keyframes borderFlow{
+
+    from{
+
+        transform:rotate(0deg);
+
+    }
+
+    to{
+
+        transform:rotate(360deg);
+
+    }
+
 }
 
 .bottomNavItem {
