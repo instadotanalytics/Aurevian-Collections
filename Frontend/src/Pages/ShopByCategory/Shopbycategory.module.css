@@ -24,7 +24,7 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  padding: 18px 0;
+  padding: 120px 0 18px 0; /* Increased top padding to account for fixed header */
   background: var(--ivory);
 }
 
@@ -65,6 +65,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  padding-top: 20px; /* Added extra padding for spacing */
 }
 
 .topText {
@@ -215,7 +216,12 @@
 }
 
 .navButton:hover:not(:disabled) {
-  background: linear-gradient(160deg, #e8c877 0%, var(--gold) 60%, var(--gold-deep) 100%);
+  background: linear-gradient(
+    160deg,
+    #e8c877 0%,
+    var(--gold) 60%,
+    var(--gold-deep) 100%
+  );
   color: #1a1305;
   border-color: transparent;
   transform: translateY(-2px);
@@ -226,13 +232,6 @@
   outline: 2px solid var(--gold);
   outline-offset: 3px;
 }
-
-/*.navButton:disabled {
-  opacity: 0.28;
-  cursor: default;
-  box-shadow: none;
-  transform: none;
-}*/
 
 .desktopNav {
   position: absolute;
@@ -294,7 +293,7 @@
     box-shadow 0.35s ease;
 }
 
-.image{
+.image {
   display: block;
   width: 100%;
   height: 100%;
@@ -342,7 +341,9 @@
   opacity: 0.85;
   pointer-events: none;
   animation: ringSpin 22s linear infinite;
-  transition: opacity 0.3s ease, border-color 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    border-color 0.3s ease;
 }
 
 .card:hover .ring,
@@ -472,6 +473,10 @@
 }
 
 @media (max-width: 768px) {
+  .section {
+    padding: 100px 0 18px 0; /* Slightly less top padding on tablet */
+  }
+
   .track {
     gap: 12px;
   }
@@ -503,12 +508,17 @@
    bottom-row arrows take over below the cards.
 ------------------------------------------------------------------ */
 @media (max-width: 640px) {
+  .section {
+    padding: 80px 0 18px 0; /* Less top padding on mobile since header is smaller */
+  }
+
   .container {
     padding-inline: 14px;
   }
 
   .header {
     margin-bottom: 24px;
+    padding-top: 10px;
   }
 
   .sliderWrap {
@@ -555,14 +565,14 @@
   .ctaWrap {
     margin-top: 6px;
   }
-
-  .section {
-    padding-bottom: 18px;
-  }
 }
 
 /* Very small phones — keep 4 cards, tighten spacing only */
 @media (max-width: 380px) {
+  .section {
+    padding: 70px 0 18px 0;
+  }
+
   .track {
     gap: 7px;
     padding: 6px 2px;
