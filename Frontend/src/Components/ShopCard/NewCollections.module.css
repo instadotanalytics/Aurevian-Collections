@@ -14,9 +14,9 @@
   --text-secondary: #777777;
   --border: #ece3d4;
 
+  font-family: "Work Sans", "Segoe UI", sans-serif;
   padding: 56px 24px 64px;
   background: transparent;
-  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
 }
 
 .container {
@@ -25,22 +25,36 @@
 }
 
 /* ==========================================================
-   HEADER — two aligned rows:
-   Row 1: eyebrow label  <—>  View All
-   Row 2: heading         <—>  slider arrows
+   HEADER — two columns sitting side by side.
+   LEFT column stacks: eyebrow label → heading + rule
+   RIGHT column stacks: View All button → arrow buttons
+   Because each column is just a top-to-bottom stack, the first
+   line of each column (eyebrow / View All) always lines up,
+   and the second line of each column (heading / arrows) always
+   lines up too — on both mobile and desktop.
    ========================================================== */
 .header {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 30px;
-}
-
-.headerRow {
-  display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 26px;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.headerRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  flex: none;
 }
 
 .headerText {
@@ -55,11 +69,12 @@
   text-transform: uppercase;
   color: var(--gold-deep);
   margin: 0;
+  line-height: 1;
 }
 
 .heading {
   font-family: "Playfair Display", "Cormorant Garamond", serif;
-  font-size: clamp(24px, 3vw, 34px);
+  font-size: clamp(22px, 3vw, 32px);
   font-weight: 700;
   color: var(--ink);
   margin: 0 0 8px;
@@ -73,39 +88,47 @@
   background: var(--ink);
 }
 
+/* "View All" — thin gold outline pill, sits on its own top line
+   in the right column, vertically matching the eyebrow label */
 .viewAllBtn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+
+  min-width: 92px;
+  height: 34px;
+  padding: 0 18px;
+
+  background: transparent;
+  border: 1px solid var(--gold);
+  border-radius: 50px;
+
   font-size: 13px;
   font-weight: 600;
-  color: var(--ink);
+  color: var(--gold-deep);
   text-decoration: none;
-  padding-bottom: 2px;
-  border-bottom: 1px solid var(--ink);
-  transition: gap 0.3s ease, opacity 0.3s ease;
   white-space: nowrap;
-  flex: none;
+  cursor: pointer;
+
+  transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
 }
 
 .viewAllBtn:hover {
-  gap: 12px;
-  opacity: 0.7;
+  background: var(--gold);
+  color: #111;
+  transform: translateY(-2px);
 }
 
-.viewAllIcon {
-  font-size: 15px;
-}
-
+/* Arrow buttons — sit on their own line beneath "View All",
+   right-aligned, small light-outline circles */
 .navArrows {
   display: flex;
   gap: 8px;
-  flex: none;
 }
 
 .navBtn {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   border: 1px solid var(--border);
   background: var(--card-bg);
@@ -159,23 +182,18 @@
   flex-direction: column;
   text-decoration: none;
   color: inherit;
-  background: var(--card-bg);
+  background-color: transparent;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.06);
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+
+ 
+   
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 16px 32px rgba(201, 164, 92, 0.2);
-  }
+ 
 
-  .card:hover .image {
-    transform: scale(1.04);
-  }
+  
 }
 
 /* ==========================================================
@@ -311,15 +329,16 @@
   }
 }
 
-@media (max-width: 768px) {
+
+
+  /* Mobile: hide the slider arrows — the right column becomes
+     just the "View All" button, top-aligned with "Fresh Arrivals" */
+  @media (max-width: 768px) {
   .section {
     padding: 40px 16px 44px;
   }
 
   .header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
     margin-bottom: 22px;
   }
 
@@ -328,78 +347,92 @@
     min-width: 160px;
   }
 
+  .headerRight {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+  }
+
   .navArrows {
-    display: none;
+    display: flex;
+    gap: 8px;
   }
 }
 
 @media (max-width: 480px) {
-  .section {
-    padding: 32px 12px 36px;
-  }
 
   .header {
-    gap: 10px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 10px;
     margin-bottom: 18px;
   }
 
+  .headerLeft {
+    display: contents;
+  }
+
+  .topText {
+    grid-column: 1;
+    grid-row: 1;
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 2px;
+    align-self: center;
+  }
+
+  .headerText {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .heading {
+    margin: 0 0 6px;
+    font-size: 22px;
+  }
+
+  .headingRule {
+    width: 48px;
+    height: 3px;
+  }
+
+  .headerRight {
+    display: contents;
+  }
+
   .viewAllBtn {
+    grid-column: 2;
+    grid-row: 1;
+
+    justify-self: end;
+
+    width: 92px;
+    height: 34px;
     font-size: 12px;
+    padding: 0;
+  }
+
+  .navArrows {
+    grid-column: 2;
+    grid-row: 2;
+
+    justify-self: end;
+
+    display: flex;
+    gap: 8px;
   }
 
   .navBtn {
-    width: 32px;
-    height: 32px;
-  }
-
-  .scrollContainer {
-    gap: 12px;
-    padding: 2px 2px 10px;
-  }
-
-  .card {
-    flex: 0 0 calc(50% - 6px);
-    min-width: 140px;
-    border-radius: 10px;
-  }
-
-  .body {
-    padding: 9px 9px 10px;
-  }
-
-  .title {
-    font-size: 12px;
-  }
-
-  .price {
-    font-size: 12px;
-  }
-
-  .image {
-    border-top-left-radius: 60px;
-    border-bottom-right-radius: 60px;
-  }
-
-  .imagePlaceholder {
-    border-top-left-radius: 60px;
-    border-bottom-right-radius: 60px;
+    width: 34px;
+    height: 34px;
   }
 }
 
 @media (max-width: 420px) {
-  .headerRow {
-    align-items: flex-start;
-  }
-
-  .topText {
-    font-size: 10.5px;
-    letter-spacing: 2px;
-  }
-
-  .heading {
-    font-size: clamp(18px, 4.5vw, 22px);
-  }
-
   .card {
     flex: 0 0 calc(50% - 6px);
     min-width: 130px;
@@ -414,10 +447,6 @@
     border-top-left-radius: 40px;
     border-bottom-right-radius: 40px;
   }
-
-  .navArrows {
-    display: none;
-  }
 }
 
 /* ==========================================================
@@ -430,14 +459,13 @@
   .navBtn {
     transition: none !important;
   }
-  
+
   .card:hover {
     transform: none !important;
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.06) !important;
+    
   }
-  
+
   .card:hover .image {
     transform: none !important;
   }
 }
-
