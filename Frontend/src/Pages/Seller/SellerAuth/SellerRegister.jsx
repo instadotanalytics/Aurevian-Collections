@@ -892,14 +892,7 @@ const SellerRegister = () => {
                   className={styles.sideImage} 
                 />
                 <div className={styles.imageOverlay} />
-                <div className={styles.imageContent}>
-                  <div className={styles.imageBadge}>
-                    <FaGem className={styles.imageBadgeIcon} />
-                    <span>Step {currentStep} of 5</span>
-                  </div>
-                  <h3 className={styles.imageTitle}>{stepInfo[currentStep].title}</h3>
-                  <p className={styles.imageDesc}>{stepInfo[currentStep].description}</p>
-                </div>
+               
               </div>
             </div>
 

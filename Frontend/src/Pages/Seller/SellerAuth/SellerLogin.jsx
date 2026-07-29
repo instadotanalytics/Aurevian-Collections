@@ -4,13 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { sellerLogin, clearSellerError } from '../../../redux/slices/sellerSlice';
-import { 
-  FiMail, 
-  FiLock, 
-  FiEye, 
-  FiEyeOff, 
+import {
+  FiMail,
+  FiLock,
+  FiEye,
+  FiEyeOff,
   FiAlertCircle,
-  FiArrowRight
+  FiArrowRight,
+  FiShield
 } from 'react-icons/fi';
 import { FaGem } from 'react-icons/fa';
 import toast from 'react-hot-toast';
@@ -23,7 +24,7 @@ const SellerLogin = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isLoading, error, isAuthenticated, seller } = useSelector((state) => state.seller);
-  
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -40,17 +41,17 @@ const SellerLogin = () => {
         navigate('/seller/verify-otp');
         return;
       }
-      
+
       if (seller.status === 'pending') {
         toast.info('⏳ Your account is pending approval. Please wait for verification (within 24 hours).');
         return;
       }
-      
+
       if (seller.status === 'approved') {
         navigate('/seller/dashboard');
         return;
       }
-      
+
       if (seller.status === 'rejected') {
         toast.error('Your account has been rejected. Please contact support.');
       } else if (seller.status === 'suspended') {
@@ -88,7 +89,7 @@ const SellerLogin = () => {
     setLocalError(null);
 
     const { email, password } = formData;
-    
+
     if (!email || !password) {
       setLocalError('Please fill in all fields');
       return;
@@ -109,20 +110,20 @@ const SellerLogin = () => {
 
     if (sellerLogin.fulfilled.match(result)) {
       const sellerData = result.payload;
-      
+
       if (!sellerData.emailVerified || !sellerData.phoneVerified) {
         localStorage.setItem('sellerEmail', email);
         localStorage.setItem('sellerPhone', sellerData.phone);
         toast.info('Please verify your email and phone first.');
         navigate('/seller/verify-otp', {
-          state: { 
-            email: email, 
-            phone: sellerData.phone 
+          state: {
+            email: email,
+            phone: sellerData.phone
           }
         });
         return;
       }
-      
+
       if (sellerData.status === 'pending') {
         toast.info('⏳ Your account is pending approval. You will receive an email within 24 hours.');
         return;
@@ -143,6 +144,7 @@ const SellerLogin = () => {
       <div className={styles.page}>
         <div className={styles.container}>
           <div className={styles.card}>
+
             {/* Image Section */}
             <div className={styles.imageSection}>
               <div className={styles.imageWrapper}>
@@ -150,23 +152,22 @@ const SellerLogin = () => {
               </div>
             </div>
 
+            {/* Seal — signature element bridging image and form */}
+            <div className={styles.seal} aria-hidden="true">
+              <FaGem className={styles.sealIcon} />
+            </div>
+
             {/* Form Section */}
             <div className={styles.formSection}>
               <div className={styles.formContainer}>
                 <div className={styles.header}>
-                  <div className={styles.logoIcon}>
-                    <FaGem className={styles.gemIcon} />
-                  </div>
-                  <h1 className={styles.title}>
-                    <span>AUREVIAN</span>
-                  </h1>
-                  <p className={styles.subtitle}>
-                    Your Account, Our Priority
-                  </p>
+                  <span className={styles.eyebrow}>Seller Portal</span>
+                  <h1 className={styles.title}>Welcome Back</h1>
+                  <p className={styles.subtitle}>Sign in to your Aurevian account</p>
                 </div>
 
                 {(localError || error) && (
-                  <div className={styles.errorBanner}>
+                  <div className={styles.errorBanner} role="alert">
                     <FiAlertCircle className={styles.errorIcon} />
                     <span>{localError || error}</span>
                   </div>
@@ -235,15 +236,20 @@ const SellerLogin = () => {
                     </Link>
                   </div>
 
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     className={styles.primaryBtn}
                     disabled={isLoading}
                   >
-                    {isLoading ? 'Logging in...' : 'Secure Your Account'}
+                    {isLoading ? 'Signing in…' : 'Secure Your Account'}
                     {!isLoading && <FiArrowRight className={styles.btnArrow} />}
                   </button>
                 </form>
+
+                <div className={styles.trustRow}>
+                  <FiShield className={styles.trustIcon} />
+                  <span>Your details are encrypted and never shared</span>
+                </div>
 
                 <div className={styles.footer}>
                   <p className={styles.registerText}>
