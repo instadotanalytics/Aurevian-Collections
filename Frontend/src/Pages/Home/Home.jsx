@@ -8,6 +8,7 @@ import NewCollections from "../../Components/ShopCard/NewCollections";
 import Footer from "../Layout/Footer/Footer";
 import GiftGuide from "../../Components/ShopCard/GiftGuide";
 import Offers from "../../Components/ShopCard/Offers";
+import ShopTheLook from "../../Components/ShopCard/ShopTheLook";
 
 const Home = () => {
   return (
@@ -19,6 +20,7 @@ const Home = () => {
       <NewCollections />
       <GiftGuide/>
       <Offers/>
+      <ShopTheLook/>
       <Footer />
     </div>
   );
