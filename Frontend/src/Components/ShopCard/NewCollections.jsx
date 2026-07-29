@@ -9,14 +9,14 @@ import styles from "./NewCollections.module.css";
 // NEW COLLECTION IMAGES
 // ==========================================================
 const NEW_COLLECTION_IMAGES = {
-  diamondNecklace: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&h=625&fit=crop&crop=center&q=80",
-  goldRing: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500&h=625&fit=crop&crop=center&q=80",
-  emeraldEarrings: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500&h=625&fit=crop&crop=center&q=80",
-  pearlBracelet: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500&h=625&fit=crop&crop=center&q=80",
-  sapphirePendant: "https://images.unsplash.com/photo-1611085583191-a3b181f3d6c0?w=500&h=625&fit=crop&crop=center&q=80",
-  rubyStuds: "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=500&h=625&fit=crop&crop=center&q=80",
-  platinumBand: "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=500&h=625&fit=crop&crop=center&q=80",
-  tanzaniteRing: "https://images.unsplash.com/photo-1589128777073-4375663d2ed2?w=500&h=625&fit=crop&crop=center&q=80",
+  diamondNecklace: "https://i.pinimg.com/736x/c9/7e/9f/c97e9f9a6888e906eff403d2b703297c.jpg",
+  goldRing: "https://i.pinimg.com/1200x/4d/94/ee/4d94ee4c9ac395cc0b8339b2aedd9fb1.jpg",
+  emeraldEarrings: "https://i.pinimg.com/736x/7f/00/a0/7f00a0eed6732c3827f5a41a1f2a9c45.jpg",
+  pearlBracelet: "https://i.pinimg.com/736x/b3/0a/b5/b30ab5738f474f74e01baddc9f11d9eb.jpg",
+  sapphirePendant: "https://i.pinimg.com/736x/03/55/9c/03559cf6a40ba8d586b1c91aee84910a.jpg",
+  rubyStuds: "https://i.pinimg.com/1200x/82/b8/a9/82b8a9520e7037d5de2cb82ce4896902.jpg",
+  platinumBand: "https://i.pinimg.com/736x/4f/38/fb/4f38fba0d238d0d74979baa86abe77da.jpg",
+  tanzaniteRing: "https://i.pinimg.com/736x/92/48/bc/9248bcb8e9b4cec255ea2f5dbf891209.jpg",
 };
 
 // ==========================================================

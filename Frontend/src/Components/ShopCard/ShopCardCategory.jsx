@@ -9,14 +9,14 @@ import styles from "./ShopCardCategory.module.css";
 // JEWELLERY IMAGES (Unsplash - High Quality Jewellery Photos)
 // ==========================================================
 const JEWELLERY_IMAGES = {
-  earrings: "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=500&h=500&fit=crop&crop=center&q=80",
-  necklace: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&h=500&fit=crop&crop=center&q=80",
-  ring: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500&h=500&fit=crop&crop=center&q=80",
-  bracelet: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500&h=500&fit=crop&crop=center&q=80",
-  jhumka: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500&h=500&fit=crop&crop=center&q=80",
-  polki: "https://images.unsplash.com/photo-1611085583191-a3b181f3d6c0?w=500&h=500&fit=crop&crop=center&q=80",
-  anklet: "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=500&h=500&fit=crop&crop=center&q=80",
-  nosepin: "https://images.unsplash.com/photo-1589128777073-4375663d2ed2?w=500&h=500&fit=crop&crop=center&q=80",
+  earrings: "https://i.pinimg.com/736x/5b/0e/08/5b0e08f53ecb685fc53a3177f700f11b.jpg",
+  necklace: "https://img.staticdj.com/d163231c2f7292d419ed4cfba6a6c36c_2056x.jpeg",
+  ring: "https://i.pinimg.com/736x/83/1a/6f/831a6ffce13568ce2ddff2d1a8e629fd.jpg",
+  bracelet: "https://i.pinimg.com/736x/61/57/d5/6157d5bc2d28670ee98309576e6c861f.jpg",
+  jhumka: "https://i.pinimg.com/736x/86/2b/06/862b06ece38f21324da94e01faaeed01.jpg",
+  polki: "https://i.pinimg.com/736x/af/41/2a/af412a893dcdf665b50cbec0b4180814.jpg",
+  anklet: "https://i.pinimg.com/736x/07/12/a0/0712a04f3d2139237226823ee10cf46a.jpg",
+  nosepin: "https://i.pinimg.com/736x/be/d6/ca/bed6ca1d94b7cc31388bd8fe462250ff.jpg",
 };
 
 /* ------------------------------------------------------------------

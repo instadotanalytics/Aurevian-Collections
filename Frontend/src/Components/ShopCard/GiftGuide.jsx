@@ -8,14 +8,14 @@ import styles from "./GiftGuide.module.css";
 // GIFT GUIDE IMAGES
 // ==========================================================
 const GIFT_IMAGES = {
-  anniversary: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&h=500&fit=crop&crop=center&q=80",
-  birthday: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500&h=500&fit=crop&crop=center&q=80",
-  wedding: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500&h=500&fit=crop&crop=center&q=80",
-  mother: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500&h=500&fit=crop&crop=center&q=80",
-  valentine: "https://images.unsplash.com/photo-1611085583191-a3b181f3d6c0?w=500&h=500&fit=crop&crop=center&q=80",
-  festival: "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=500&h=500&fit=crop&crop=center&q=80",
-  graduation: "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=500&h=500&fit=crop&crop=center&q=80",
-  corporate: "https://images.unsplash.com/photo-1589128777073-4375663d2ed2?w=500&h=500&fit=crop&crop=center&q=80",
+  anniversary: "https://i.pinimg.com/736x/e2/21/d1/e221d13ceba46a48f6a888619ec46bee.jpg",
+  birthday: "https://i.pinimg.com/1200x/e2/b7/6d/e2b76d9671d9f32be67ebd5607b9d492.jpg",
+  wedding: "https://i.pinimg.com/1200x/30/58/e7/3058e7390c75657800f3789f338e22f2.jpg",
+  mother: "https://i.pinimg.com/1200x/9c/10/8c/9c108c17fecf903da4652be6d791bb18.jpg",
+  valentine: "https://i.pinimg.com/736x/f2/18/09/f21809ec9a5932744cc577fbaa0bcb2f.jpg",
+  festival: "https://i.pinimg.com/1200x/87/10/d5/8710d57ea02996eea94b2bb6a7f32948.jpg",
+  graduation: "https://i.pinimg.com/1200x/57/f1/e1/57f1e1097725771838eb1991daf62b5d.jpg",
+  corporate: "https://i.pinimg.com/736x/1f/54/a8/1f54a86cfbcef3888d7e85c05aca3dd4.jpg",
 };
 
 // ==========================================================
