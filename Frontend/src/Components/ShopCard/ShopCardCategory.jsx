@@ -1,8 +1,7 @@
 // src/Components/ShopCardCategory/ShopCardCategory.jsx
 
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { FiArrowRight, FiArrowLeft } from "react-icons/fi";
-import { FaStar } from "react-icons/fa";
 import styles from "./ShopCardCategory.module.css";
 
 // ==========================================================
@@ -20,116 +19,49 @@ const JEWELLERY_IMAGES = {
 };
 
 /* ------------------------------------------------------------------
-   PRODUCT DATA WITH IMAGES
+   PRODUCT DATA
 ------------------------------------------------------------------ */
 const PRODUCTS = [
-  { 
-    id: "p1", 
-    name: "Zircon Drop Earrings", 
-    price: 1499, 
-    oldPrice: 2199, 
-    discount: 32, 
-    rating: 4.8, 
-    image: JEWELLERY_IMAGES.earrings 
-  },
-  { 
-    id: "p2", 
-    name: "Kundan Choker Necklace", 
-    price: 3299, 
-    oldPrice: 4999, 
-    discount: 34, 
-    rating: 4.9, 
-    image: JEWELLERY_IMAGES.necklace 
-  },
-  { 
-    id: "p3", 
-    name: "Rose Gold Band Ring", 
-    price: 999, 
-    oldPrice: 1499, 
-    discount: 33, 
-    rating: 4.7, 
-    image: JEWELLERY_IMAGES.ring 
-  },
-  { 
-    id: "p4", 
-    name: "Pearl Charm Bracelet", 
-    price: 1799, 
-    oldPrice: 2499, 
-    discount: 28, 
-    rating: 4.6, 
-    image: JEWELLERY_IMAGES.bracelet 
-  },
-  { 
-    id: "p5", 
-    name: "Temple Jhumka Earrings", 
-    price: 1299, 
-    oldPrice: 1999, 
-    discount: 35, 
-    rating: 4.8, 
-    image: JEWELLERY_IMAGES.jhumka 
-  },
-  { 
-    id: "p6", 
-    name: "Bridal Polki Necklace Set", 
-    price: 7999, 
-    oldPrice: 11999, 
-    discount: 33, 
-    rating: 5.0, 
-    image: JEWELLERY_IMAGES.polki 
-  },
-  { 
-    id: "p7", 
-    name: "Minimal Chain Anklet", 
-    price: 799, 
-    oldPrice: 1099, 
-    discount: 27, 
-    rating: 4.5, 
-    image: JEWELLERY_IMAGES.anklet 
-  },
-  { 
-    id: "p8", 
-    name: "Diamond Cut Nose Pin", 
-    price: 599, 
-    oldPrice: 899, 
-    discount: 33, 
-    rating: 4.7, 
-    image: JEWELLERY_IMAGES.nosepin 
-  },
+  { id: "p1", name: "Zircon Drop Earrings", category: "Earrings", price: 1499, oldPrice: 2199, image: JEWELLERY_IMAGES.earrings },
+  { id: "p2", name: "Kundan Choker Necklace", category: "Necklace", price: 3299, oldPrice: 4999, image: JEWELLERY_IMAGES.necklace },
+  { id: "p3", name: "Rose Gold Band Ring", category: "Ring", price: 999, oldPrice: 1499, image: JEWELLERY_IMAGES.ring },
+  { id: "p4", name: "Pearl Charm Bracelet", category: "Bracelet", price: 1799, oldPrice: 2499, image: JEWELLERY_IMAGES.bracelet },
+  { id: "p5", name: "Temple Jhumka Earrings", category: "Earrings", price: 1299, oldPrice: 1999, image: JEWELLERY_IMAGES.jhumka },
+  { id: "p6", name: "Bridal Polki Necklace Set", category: "Necklace", price: 7999, oldPrice: 11999, image: JEWELLERY_IMAGES.polki },
+  { id: "p7", name: "Minimal Chain Anklet", category: "Anklet", price: 799, oldPrice: 1099, image: JEWELLERY_IMAGES.anklet },
+  { id: "p8", name: "Diamond Cut Nose Pin", category: "Nose Pin", price: 599, oldPrice: 899, image: JEWELLERY_IMAGES.nosepin },
 ];
 
 function ProductCard({ product }) {
   return (
     <a href={`/product/${product.id}`} className={styles.card} aria-label={product.name}>
-      <div className={styles.imageWrap}>
-        {product.discount ? (
-          <span className={styles.discountBadge}>{product.discount}% OFF</span>
-        ) : null}
-
-        {product.image ? (
-          <img 
-            src={product.image} 
-            alt={product.name} 
-            className={styles.image} 
-            loading="lazy" 
-          />
-        ) : (
-          <div className={styles.imagePlaceholder} aria-hidden="true" />
-        )}
+      <div className={styles.frame}>
+        <div className={styles.imageWrap}>
+          {product.image ? (
+            <img
+              src={product.image}
+              alt={product.name}
+              className={styles.image}
+              loading="lazy"
+              draggable="false"
+            />
+          ) : (
+            <div className={styles.imagePlaceholder} aria-hidden="true" />
+          )}
+        </div>
+        <span className={styles.cornerTL} aria-hidden="true" />
+        <span className={styles.cornerBR} aria-hidden="true" />
       </div>
 
       <div className={styles.info}>
+        <p className={styles.category}>{product.category}</p>
         <h3 className={styles.title}>{product.name}</h3>
 
-        <div className={styles.ratingRow}>
-          <FaStar className={styles.starIcon} />
-          <span className={styles.ratingValue}>{product.rating.toFixed(1)}</span>
-        </div>
-
         <div className={styles.priceRow}>
-          <span className={styles.price}>₹{product.price.toLocaleString("en-IN")}</span>
           {product.oldPrice ? (
             <span className={styles.oldPrice}>₹{product.oldPrice.toLocaleString("en-IN")}</span>
           ) : null}
+          <span className={styles.price}>₹{product.price.toLocaleString("en-IN")}</span>
         </div>
       </div>
     </a>
@@ -139,17 +71,61 @@ function ProductCard({ product }) {
 export default function ShopCardCategory() {
   const scrollContainerRef = useRef(null);
 
-  const scrollLeft = () => {
+  // Drag-to-scroll (click + drag with the cursor, left to right)
+  const dragState = useRef({ isDown: false, startX: 0, startScrollLeft: 0, moved: false });
+
+  const scrollByAmount = (direction) => {
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: -280, behavior: "smooth" });
+      scrollContainerRef.current.scrollBy({ left: direction * 260, behavior: "smooth" });
     }
   };
 
-  const scrollRight = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: 280, behavior: "smooth" });
+  const handleMouseDown = (e) => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    dragState.current.isDown = true;
+    dragState.current.moved = false;
+    dragState.current.startX = e.pageX - el.offsetLeft;
+    dragState.current.startScrollLeft = el.scrollLeft;
+    el.classList.add(styles.dragging);
+  };
+
+  const endDrag = () => {
+    const el = scrollContainerRef.current;
+    dragState.current.isDown = false;
+    if (el) el.classList.remove(styles.dragging);
+  };
+
+  const handleMouseMove = (e) => {
+    const el = scrollContainerRef.current;
+    if (!el || !dragState.current.isDown) return;
+    e.preventDefault();
+    const x = e.pageX - el.offsetLeft;
+    const walk = x - dragState.current.startX;
+    if (Math.abs(walk) > 4) dragState.current.moved = true;
+    el.scrollLeft = dragState.current.startScrollLeft - walk;
+  };
+
+  // Prevent the click from firing (and navigating) right after a drag
+  const handleClickCapture = (e) => {
+    if (dragState.current.moved) {
+      e.preventDefault();
+      e.stopPropagation();
     }
   };
+
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const onMouseLeave = () => endDrag();
+    const onMouseUp = () => endDrag();
+    el.addEventListener("mouseleave", onMouseLeave);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => {
+      el.removeEventListener("mouseleave", onMouseLeave);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
 
   return (
     <section className={styles.section} aria-labelledby="shop-cards-heading">
@@ -163,32 +139,38 @@ export default function ShopCardCategory() {
             <h3 className={styles.subHeading}>Here you can find the latest trending pieces!</h3>
           </div>
 
-          <a href="/shop" className={styles.viewAllBtn}>
-            View All
-            <FiArrowRight className={styles.viewAllIcon} />
-          </a>
+          <div className={styles.navArrows}>
+            <a href="/shop" className={styles.viewAllBtn}>
+              View All
+            </a>
+
+            <button
+              type="button"
+              className={styles.navArrowBtn}
+              onClick={() => scrollByAmount(-1)}
+              aria-label="Scroll left"
+            >
+              <FiArrowLeft size={16} />
+            </button>
+            <button
+              type="button"
+              className={styles.navArrowBtn}
+              onClick={() => scrollByAmount(1)}
+              aria-label="Scroll right"
+            >
+              <FiArrowRight size={16} />
+            </button>
+          </div>
         </div>
 
-        {/* Scroll Container */}
         <div className={styles.scrollWrapper}>
-          {/* Desktop Arrow Buttons */}
-          <button 
-            className={`${styles.scrollBtn} ${styles.scrollLeftBtn}`} 
-            onClick={scrollLeft}
-            aria-label="Scroll left"
+          <div
+            className={styles.scrollContainer}
+            ref={scrollContainerRef}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onClickCapture={handleClickCapture}
           >
-            <FiArrowLeft size={20} />
-          </button>
-          
-          <button 
-            className={`${styles.scrollBtn} ${styles.scrollRightBtn}`} 
-            onClick={scrollRight}
-            aria-label="Scroll right"
-          >
-            <FiArrowRight size={20} />
-          </button>
-
-          <div className={styles.scrollContainer} ref={scrollContainerRef}>
             {PRODUCTS.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
