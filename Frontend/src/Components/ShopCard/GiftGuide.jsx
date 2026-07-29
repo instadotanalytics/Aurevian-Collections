@@ -8,14 +8,14 @@ import styles from "./GiftGuide.module.css";
 // GIFT GUIDE IMAGES
 // ==========================================================
 const GIFT_IMAGES = {
-  anniversary: "https://i.pinimg.com/736x/e2/21/d1/e221d13ceba46a48f6a888619ec46bee.jpg",
-  birthday: "https://i.pinimg.com/1200x/e2/b7/6d/e2b76d9671d9f32be67ebd5607b9d492.jpg",
-  wedding: "https://i.pinimg.com/1200x/30/58/e7/3058e7390c75657800f3789f338e22f2.jpg",
-  mother: "https://i.pinimg.com/1200x/9c/10/8c/9c108c17fecf903da4652be6d791bb18.jpg",
-  valentine: "https://i.pinimg.com/736x/f2/18/09/f21809ec9a5932744cc577fbaa0bcb2f.jpg",
-  festival: "https://i.pinimg.com/1200x/87/10/d5/8710d57ea02996eea94b2bb6a7f32948.jpg",
-  graduation: "https://i.pinimg.com/1200x/57/f1/e1/57f1e1097725771838eb1991daf62b5d.jpg",
-  corporate: "https://i.pinimg.com/736x/1f/54/a8/1f54a86cfbcef3888d7e85c05aca3dd4.jpg",
+  anniversary: "https://i.pinimg.com/736x/79/2e/f6/792ef645e1894c2cb98676e5aed731ad.jpg",
+  birthday: "https://i.pinimg.com/736x/45/7c/e0/457ce04c1cc92d108ff50fa4a6ba14cf.jpg",
+  wedding: "https://i.pinimg.com/1200x/d7/95/e2/d795e2303a83dfb54c436fad106f8dc3.jpg",
+  mother: "https://i.pinimg.com/736x/57/7f/3f/577f3ff1942409edf18da447c0842225.jpg",
+  valentine: "https://i.pinimg.com/736x/a4/74/c4/a474c4bb477e5696072f392f0a4c6027.jpg",
+  festival: "https://i.pinimg.com/736x/a8/0e/00/a80e0090db41c1c3347c6498ce7a848a.jpg",
+  graduation: "https://i.pinimg.com/736x/f9/87/0a/f9870a91c638d49b37cbb40ae7f28af6.jpg",
+  corporate: "https://i.pinimg.com/736x/0e/ca/bd/0ecabde96898be93f8f3ef86a40cbf90.jpg",
 };
 
 // ==========================================================
