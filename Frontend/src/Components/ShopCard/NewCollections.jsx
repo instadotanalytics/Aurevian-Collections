@@ -1,3 +1,4 @@
+
 // src/Components/NewCollections/NewCollections.jsx
 
 import React, { useRef } from "react";
@@ -37,8 +38,6 @@ function ProductCard({ product }) {
   return (
     <a href={`/product/${product.id}`} className={styles.card} aria-label={product.name}>
       <div className={styles.imageWrap}>
-        <span className={styles.ribbon}>New</span>
-
         {product.image ? (
           <img
             src={product.image}
@@ -74,38 +73,47 @@ function ProductCard({ product }) {
 export default function NewCollections() {
   const scrollContainerRef = useRef(null);
 
-  const scrollLeft = () => {
-    scrollContainerRef.current?.scrollBy({ left: -300, behavior: "smooth" });
+  // Scroll by exactly one "page" (the full visible width of the
+  // container), so the grid always advances by a clean set of
+  // cards — 4 on desktop, 3 on tablet, 2 on mobile.
+  const scrollByPage = (direction) => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    el.scrollBy({ left: direction * el.clientWidth, behavior: "smooth" });
   };
 
-  const scrollRight = () => {
-    scrollContainerRef.current?.scrollBy({ left: 300, behavior: "smooth" });
-  };
+  const scrollLeft = () => scrollByPage(-1);
+  const scrollRight = () => scrollByPage(1);
 
   return (
     <section className={styles.section} aria-labelledby="new-collections-heading">
       <div className={styles.container}>
         <div className={styles.header}>
-          <div className={styles.headerText}>
+          {/* Row 1: "Fresh Arrivals" (left)  <—>  "View All" plain link (right) */}
+          <div className={styles.topRow}>
             <p className={styles.topText}>Fresh Arrivals</p>
-            <h2 id="new-collections-heading" className={styles.heading}>
-              New Collections
-            </h2>
-            <span className={styles.headingRule} aria-hidden="true" />
+            <a href="/shop/new-arrivals" className={styles.viewAllBtn}>
+            
+              View All
+              
+            </a>
           </div>
 
-          <div className={styles.headerActions}>
-            <a href="/shop/new-arrivals" className={styles.viewAllBtn}>
-              View All
-              <FiArrowRight className={styles.viewAllIcon} />
-            </a>
+          {/* Row 2: "New Collections" heading (left)  <—>  arrow buttons (right) */}
+          <div className={styles.bottomRow}>
+            <div className={styles.headerText}>
+              <h2 id="new-collections-heading" className={styles.heading}>
+                New Collections
+              </h2>
+              <span className={styles.headingRule} aria-hidden="true" />
+            </div>
 
             <div className={styles.navArrows}>
               <button type="button" className={styles.navBtn} onClick={scrollLeft} aria-label="Scroll left">
-                <FiArrowLeft size={16} />
+                <FiArrowLeft size={15} />
               </button>
               <button type="button" className={styles.navBtn} onClick={scrollRight} aria-label="Scroll right">
-                <FiArrowRight size={16} />
+                <FiArrowRight size={15} />
               </button>
             </div>
           </div>

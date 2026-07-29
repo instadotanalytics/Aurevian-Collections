@@ -227,16 +227,15 @@
   outline-offset: 3px;
 }
 
-.navButton:disabled {
+/*.navButton:disabled {
   opacity: 0.28;
   cursor: default;
   box-shadow: none;
   transform: none;
-}
+}*/
 
 .desktopNav {
   position: absolute;
-  top: 50%;
   transform: translateY(-50%);
   z-index: 2;
 }
@@ -246,11 +245,11 @@
 }
 
 .navButtonLeft.desktopNav {
-  left: -6px;
+  left: -48px;
 }
 
 .navButtonRight.desktopNav {
-  right: -6px;
+  right: -48px;
 }
 
 .mobileNav {
