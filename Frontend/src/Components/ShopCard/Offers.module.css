@@ -1,57 +1,25 @@
 /* src/Components/Offers/Offers.module.css */
 
 /* ==========================================================
-   SECTION
+   SECTION — warm, urgency-driven palette
    ========================================================== */
 .section {
-  --ivory: #fbf6ee;
-  --cream: #f6ecdd;
-  --champagne: #eaddc4;
+  --ivory: #fdf5ea;
+  --ink: #241a12;
   --gold: #b6863c;
-  --gold-deep: #97702f;
-  --gold-soft: #d9b877;
+  --gold-deep: #8a6a30;
+  --maroon: #a33d3d;
+  --green: #1f9d63;
+  --line: rgba(36, 26, 18, 0.16);
 
-  padding: 60px 24px;
-  background: transparent;
+  padding: 52px 24px 60px;
+  background: linear-gradient(180deg, var(--ivory) 0%, #f7e9d4 100%);
   font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-}
-
-/* Ambient glow decorations */
-.section::before,
-.section::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.4;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.section::before {
-  width: clamp(260px, 34vw, 480px);
-  height: clamp(260px, 34vw, 480px);
-  top: -16%;
-  left: -12%;
-  background: radial-gradient(circle, var(--cream), transparent 70%);
-}
-
-.section::after {
-  width: clamp(260px, 34vw, 480px);
-  height: clamp(260px, 34vw, 480px);
-  bottom: -20%;
-  right: -10%;
-  background: radial-gradient(circle, var(--champagne), transparent 70%);
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
-  position: relative;
-  z-index: 1;
 }
 
 /* ==========================================================
@@ -59,142 +27,112 @@
    ========================================================== */
 .header {
   display: flex;
-  justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 32px;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 28px;
   flex-wrap: wrap;
-  gap: 16px;
 }
 
 .headerText {
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
 .topText {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 3px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
   text-transform: uppercase;
-  color: #b3873f;
-  margin: 0;
+  color: var(--maroon);
+  margin: 0 0 6px;
 }
 
 .heading {
   font-family: "Cormorant Garamond", serif;
-  font-size: 32px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0;
-  letter-spacing: -0.5px;
+  font-size: clamp(26px, 3.2vw, 36px);
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 8px;
 }
 
-/* Timer Row */
 .timerRow {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 4px;
+  gap: 7px;
 }
 
 .timerIcon {
-  color: #b3873f;
-  font-size: 16px;
+  color: var(--maroon);
+  font-size: 15px;
 }
 
 .timerText {
   font-size: 13px;
-  color: #666;
+  color: #6b5a48;
 }
 
 .timerText strong {
-  color: #1a1a1a;
+  color: var(--maroon);
   font-weight: 700;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .viewAllBtn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #1a1a1a;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #fff;
   text-decoration: none;
-  padding: 8px 16px;
-  border: 1px solid #d4c9b8;
-  background: transparent;
-  transition: all 0.3s ease;
-  font-family: inherit;
-  cursor: pointer;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: linear-gradient(120deg, var(--maroon), #8a2f2f);
   white-space: nowrap;
-  flex-shrink: 0;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .viewAllBtn:hover {
-  background: #1a1a1a;
-  color: #fcf9f5;
-  border-color: #1a1a1a;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -10px rgba(163, 61, 61, 0.6);
 }
 
 .viewAllIcon {
-  font-size: 16px;
-  transition: transform 0.3s ease;
+  font-size: 14px;
 }
 
-.viewAllBtn:hover .viewAllIcon {
-  transform: translateX(4px);
+.navArrows {
+  display: flex;
+  gap: 8px;
 }
 
-/* ==========================================================
-   SCROLL WRAPPER
-   ========================================================== */
-.scrollWrapper {
-  position: relative;
-  width: 100%;
-}
-
-/* ==========================================================
-   SCROLL BUTTONS
-   ========================================================== */
-.scrollBtn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid #d4c9b8;
-  color: #1a1a1a;
-  width: 44px;
-  height: 44px;
+.navBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-family: inherit;
-  box-shadow: none;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease;
 }
 
-.scrollBtn:hover {
-  background: #1a1a1a;
-  color: #fcf9f5;
-  border-color: #1a1a1a;
-}
-
-.scrollLeftBtn {
-  left: -22px;
-}
-
-.scrollRightBtn {
-  right: -22px;
-}
-
-/* Hide scroll buttons on mobile */
-@media (max-width: 768px) {
-  .scrollBtn {
-    display: none;
-  }
+.navBtn:hover {
+  background: var(--ink);
+  color: #fff;
 }
 
 /* ==========================================================
@@ -202,452 +140,307 @@
    ========================================================== */
 .scrollContainer {
   display: flex;
-  gap: 20px;
+  gap: 22px;
   overflow-x: auto;
-  padding: 8px 4px 16px;
+  padding: 6px 6px 14px;
   scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
   -webkit-overflow-scrolling: touch;
-}
-
-.scrollContainer::-webkit-scrollbar {
-  height: 0;
-  width: 0;
-}
-
-.scrollContainer {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
+.scrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
 /* ==========================================================
-   PRODUCT CARD
+   TICKET-STYLE CARD
    ========================================================== */
 .card {
+  flex: 0 0 auto;
+  width: 220px;
+  scroll-snap-align: start;
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
+
+  overflow: visible;
+  box-shadow: 0 14px 28px -18px rgba(36, 26, 18, 0.35);
+}
+
+.cardLink {
+  display: flex;
+  flex-direction: column;
   text-decoration: none;
-  color: #1a1a1a;
-  background: transparent;
-  border: none;
-  transition: transform 0.3s ease;
-  overflow: hidden;
+  color: inherit;
 }
 
-.card:hover {
-  transform: translateY(-4px);
-}
-
-/* ==========================================================
-   IMAGE
-   ========================================================== */
 .imageWrap {
   position: relative;
   width: 100%;
-  padding-bottom: 100%;
-  background: #f0ebe4;
+  aspect-ratio: 1 / 1;
+  /* border-radius: 16px 16px 0 0; */
   overflow: hidden;
+  background: #f0e6d5;
 }
 
 .image {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
   transition: transform 0.5s ease;
 }
 
 .card:hover .image {
-  transform: scale(1.04);
+  transform: scale(1.05);
 }
 
 .imagePlaceholder {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(145deg, #f0ebe4 0%, #e5ddd2 100%);
+  background: linear-gradient(150deg, #f0e6d5 0%, #e3d3b3 100%);
 }
 
-.imagePlaceholder::after {
-  content: "✦";
+.offerTag {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 32px;
-  color: #b3873f;
-  opacity: 0.3;
-}
-
-/* ==========================================================
-   OFFER BANNER - Top full width
-   ========================================================== */
-.offerBanner {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(90deg, #b3873f, #8a6a30);
-  padding: 4px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
+  top: 10px;
+  left: 10px;
   z-index: 2;
-}
-
-.offerIcon {
-  color: #ffffff;
-  font-size: 11px;
-}
-
-.offerTagText {
-  color: #ffffff;
+  background: rgba(36, 26, 18, 0.85);
+  color: #f7e9d4;
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
   text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 999px;
 }
 
-/* ==========================================================
-   DISCOUNT BADGE - Bottom right large
-   ========================================================== */
-.discountBadge {
+/* Jagged discount burst badge */
+.discountBurst {
   position: absolute;
-  bottom: 12px;
-  right: 12px;
-  background: #1a1a1a;
-  color: #ffffff;
-  padding: 8px 12px;
+  top: -10px;
+  right: 8px;
+  z-index: 3;
+  width: 52px;
+  height: 52px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  z-index: 2;
-  min-width: 52px;
+  justify-content: center;
+  background: var(--maroon);
+  color: #fff;
+  clip-path: polygon(
+    50% 0%,
+    61% 14%,
+    78% 6%,
+    82% 24%,
+    100% 27%,
+    91% 43%,
+    100% 60%,
+    83% 66%,
+    78% 84%,
+    61% 76%,
+    50% 92%,
+    39% 76%,
+    22% 84%,
+    17% 66%,
+    0% 60%,
+    9% 43%,
+    0% 27%,
+    18% 24%,
+    22% 6%,
+    39% 14%
+  );
 }
 
 .discountNumber {
-  font-size: 20px;
+  font-size: 13px;
   font-weight: 800;
   line-height: 1;
-  letter-spacing: -0.5px;
 }
 
 .discountLabel {
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-top: 2px;
+  font-size: 6.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-top: 1px;
+}
+
+/* ==========================================================
+   PERFORATED TICKET SEAM
+   ========================================================== */
+.perforation {
+  position: relative;
+  height: 1px;
+  border-top: 2px dashed var(--line);
+  background: #ffffff;
+}
+
+.perforation::before,
+.perforation::after {
+  content: "";
+  position: absolute;
+  top: -9px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--ivory);
+  box-shadow: 0 4px 8px -4px rgba(36, 26, 18, 0.2) inset;
+}
+
+.perforation::before {
+  left: -9px;
+}
+
+.perforation::after {
+  right: -9px;
 }
 
 /* ==========================================================
    INFO
    ========================================================== */
 .info {
-  padding: 14px 4px 16px;
+  background: #ffffff;
+  padding: 14px 14px 6px;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  flex: 1;
-  background: transparent;
 }
 
 .title {
   font-family: "Cormorant Garamond", serif;
-  font-size: 16px;
-  font-weight: 500;
-  color: #1a1a1a;
+  font-size: 15.5px;
+  font-weight: 600;
+  color: var(--ink);
   margin: 0;
   line-height: 1.3;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.ratingRow {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.starIcon {
-  color: #b3873f;
-  font-size: 12px;
-}
-
-.ratingValue {
-  font-size: 12px;
-  font-weight: 500;
-  color: #666;
-}
-
 .priceRow {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  align-items: baseline;
+  gap: 9px;
 }
 
 .price {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1a1a1a;
-  letter-spacing: -0.3px;
+  font-size: 16.5px;
+  font-weight: 800;
+  color: var(--ink);
 }
 
 .oldPrice {
-  font-size: 13px;
-  color: #999;
+  font-size: 12px;
+  color: #a89a86;
   text-decoration: line-through;
 }
 
-/* Savings Row */
 .savingsRow {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 2px;
+  gap: 5px;
 }
 
 .savingsIcon {
-  color: #10b981;
+  color: var(--green);
   font-size: 12px;
 }
 
 .savingsText {
-  font-size: 12px;
-  color: #10b981;
-  font-weight: 600;
+  font-size: 11.5px;
+  color: var(--green);
+  font-weight: 700;
 }
 
 /* ==========================================================
-   DIVIDER
+   GRAB DEAL BUTTON
    ========================================================== */
-.dividerLine {
-  width: 100%;
-  height: 1px;
-  margin-top: 20px;
-  background: linear-gradient(to right, transparent, #d4c9b8, transparent);
+.grabBtn {
+  background: #ffffff;
+  border: none;
+  border-top: 1px dashed var(--line);
+  /* border-radius: 0 0 16px 16px; */
+  padding: 11px 12px 13px;
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  cursor: pointer;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease;
+}
+
+.grabBtn:hover {
+  background: var(--gold-deep);
+  color: #fff;
 }
 
 /* ==========================================================
    RESPONSIVE
    ========================================================== */
-@media (min-width: 769px) {
-  .card {
-    min-width: 260px;
-    max-width: 260px;
-  }
-
-  .title {
-    font-size: 17px;
-  }
-
-  .price {
-    font-size: 20px;
-  }
-}
-
 @media (max-width: 992px) {
   .section {
-    padding: 48px 16px;
-  }
-
-  .heading {
-    font-size: 28px;
+    padding: 42px 16px 48px;
   }
 
   .card {
-    min-width: 220px;
-    max-width: 220px;
+    width: 190px;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .section {
-    padding: 40px 12px;
+    padding: 32px 14px 38px;
   }
 
   .header {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .heading {
-    font-size: 24px;
-  }
-
-  .timerText {
-    font-size: 11px;
-  }
-
-  .viewAllBtn {
-    font-size: 12px;
-    padding: 6px 14px;
-  }
-
-  .card {
-    min-width: 45vw;
-    max-width: 45vw;
-  }
-
-  .title {
-    font-size: 14px;
-  }
-
-  .price {
-    font-size: 16px;
-  }
-
-  .oldPrice {
-    font-size: 12px;
-  }
-
-  .discountNumber {
-    font-size: 16px;
-  }
-
-  .scrollContainer {
+    flex-direction: column;
+    align-items: flex-start;
     gap: 14px;
-    padding: 4px 2px 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .section {
-    padding: 32px 8px;
+    margin-bottom: 20px;
   }
 
-  .heading {
-    font-size: 20px;
-  }
-
-  .topText {
-    font-size: 9px;
-    letter-spacing: 2px;
-  }
-
-  .timerText {
-    font-size: 10px;
-  }
-
-  .timerRow {
-    gap: 4px;
-  }
-
-  .timerIcon {
-    font-size: 13px;
-  }
-
-  .viewAllBtn {
-    font-size: 10px;
-    padding: 4px 10px;
+  .headerActions {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .viewAllBtn span {
     display: none;
   }
 
-  .viewAllBtn .viewAllIcon {
-    font-size: 18px;
-    margin: 0;
-  }
-
   .card {
-    min-width: 44vw;
-    max-width: 44vw;
-  }
-
-  .info {
-    padding: 10px 2px 12px;
-  }
-
-  .title {
-    font-size: 13px;
-  }
-
-  .price {
-    font-size: 14px;
-  }
-
-  .oldPrice {
-    font-size: 11px;
-  }
-
-  .savingsText {
-    font-size: 10px;
-  }
-
-  .discountNumber {
-    font-size: 14px;
-    min-width: 30px;
-  }
-
-  .discountBadge {
-    padding: 4px 8px;
-    min-width: 40px;
-  }
-
-  .discountLabel {
-    font-size: 7px;
-  }
-
-  .offerTagText {
-    font-size: 7px;
-  }
-
-  .offerIcon {
-    font-size: 9px;
+    width: 44vw;
+    min-width: 155px;
   }
 
   .scrollContainer {
-    gap: 10px;
-    padding: 2px 0 10px;
-  }
-}
-
-@media (max-width: 380px) {
-  .card {
-    min-width: 42vw;
-    max-width: 42vw;
+    gap: 14px;
   }
 
   .title {
-    font-size: 12px;
+    font-size: 13.5px;
   }
 
   .price {
-    font-size: 13px;
+    font-size: 14px;
   }
 
-  .oldPrice {
-    font-size: 10px;
-  }
-
-  .savingsText {
-    font-size: 9px;
+  .discountBurst {
+    width: 44px;
+    height: 44px;
   }
 
   .discountNumber {
-    font-size: 12px;
-  }
-
-  .ratingRow {
-    gap: 2px;
-  }
-
-  .starIcon {
-    font-size: 10px;
-  }
-
-  .ratingValue {
-    font-size: 10px;
+    font-size: 11px;
   }
 }
 
@@ -655,19 +448,13 @@
    REDUCED MOTION
    ========================================================== */
 @media (prefers-reduced-motion: reduce) {
-  .imageWrap,
   .image,
-  .card,
   .viewAllBtn,
-  .scrollBtn {
+  .navBtn,
+  .grabBtn {
     transition: none !important;
   }
-
   .card:hover .image {
-    transform: none !important;
-  }
-
-  .card:hover {
     transform: none !important;
   }
 }
