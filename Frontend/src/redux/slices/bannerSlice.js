@@ -3,7 +3,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://aurevian-collections.onrender.com/api';
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://aurevian-collections.onrender.com/api";
 
 // ============================================
 // ✅ FIX 1: Create axios instance with interceptor
@@ -15,19 +17,19 @@ const api = axios.create({
 // Request interceptor - automatically add token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('superAdminToken');
+    const token = localStorage.getItem("superAdminToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     // For FormData, let browser set Content-Type with boundary
     if (config.data instanceof FormData) {
-      delete config.headers['Content-Type'];
+      delete config.headers["Content-Type"];
     }
     return config;
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor - handle 401
@@ -36,12 +38,12 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Token expired or invalid - redirect to login
-      localStorage.removeItem('superAdminToken');
-      localStorage.removeItem('superAdminUser');
+      localStorage.removeItem("superAdminToken");
+      localStorage.removeItem("superAdminUser");
       // Don't redirect automatically, let component handle it
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 // ============================================
@@ -49,11 +51,16 @@ api.interceptors.response.use(
 // ============================================
 
 // Get active banners (public - no auth needed)
+// ✅ UPDATED: Accept placement parameter
 export const fetchActiveBanners = createAsyncThunk(
   "banners/fetchActive",
-  async (_, { rejectWithValue }) => {
+  async (placement = null, { rejectWithValue }) => {
     try {
-      const response = await api.get('/banners/active');
+      let url = "/banners/active";
+      if (placement) {
+        url += `?placement=${placement}`;
+      }
+      const response = await api.get(url);
       if (response.data.success) {
         return response.data.data;
       }
@@ -61,20 +68,23 @@ export const fetchActiveBanners = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
-  }
+  },
 );
 
 // Get all banners (admin)
 export const fetchAllBanners = createAsyncThunk(
   "banners/fetchAll",
-  async ({ page = 1, limit = 20, isActive, isFeatured, search } = {}, { rejectWithValue, getState }) => {
+  async (
+    { page = 1, limit = 20, isActive, isFeatured, search } = {},
+    { rejectWithValue, getState },
+  ) => {
     try {
       const params = new URLSearchParams();
-      params.append('page', page);
-      params.append('limit', limit);
-      if (isActive !== undefined) params.append('isActive', isActive);
-      if (isFeatured !== undefined) params.append('isFeatured', isFeatured);
-      if (search) params.append('search', search);
+      params.append("page", page);
+      params.append("limit", limit);
+      if (isActive !== undefined) params.append("isActive", isActive);
+      if (isFeatured !== undefined) params.append("isFeatured", isFeatured);
+      if (search) params.append("search", search);
 
       const response = await api.get(`/banners?${params.toString()}`);
       if (response.data.success) {
@@ -84,7 +94,7 @@ export const fetchAllBanners = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
-  }
+  },
 );
 
 // ✅ FIX 2: Create banner - properly handle FormData
@@ -93,9 +103,11 @@ export const createBanner = createAsyncThunk(
   async (formData, { rejectWithValue }) => {
     try {
       // Check if token exists
-      const token = localStorage.getItem('superAdminToken');
+      const token = localStorage.getItem("superAdminToken");
       if (!token) {
-        return rejectWithValue('No authentication token found. Please login again.');
+        return rejectWithValue(
+          "No authentication token found. Please login again.",
+        );
       }
 
       // Create a new FormData to ensure it's clean
@@ -106,23 +118,23 @@ export const createBanner = createAsyncThunk(
         }
       }
 
-      const response = await api.post('/banners', cleanFormData, {
+      const response = await api.post("/banners", cleanFormData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
-      
+
       if (response.data.success) {
         return response.data.data;
       }
       return rejectWithValue(response.data.message);
     } catch (error) {
       if (error.response?.status === 401) {
-        return rejectWithValue('Session expired. Please login again.');
+        return rejectWithValue("Session expired. Please login again.");
       }
       return rejectWithValue(error.response?.data?.message || error.message);
     }
-  }
+  },
 );
 
 // Update banner
@@ -130,9 +142,11 @@ export const updateBanner = createAsyncThunk(
   "banners/update",
   async ({ id, formData }, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('superAdminToken');
+      const token = localStorage.getItem("superAdminToken");
       if (!token) {
-        return rejectWithValue('No authentication token found. Please login again.');
+        return rejectWithValue(
+          "No authentication token found. Please login again.",
+        );
       }
 
       const cleanFormData = new FormData();
@@ -144,21 +158,21 @@ export const updateBanner = createAsyncThunk(
 
       const response = await api.put(`/banners/${id}`, cleanFormData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
-      
+
       if (response.data.success) {
         return response.data.data;
       }
       return rejectWithValue(response.data.message);
     } catch (error) {
       if (error.response?.status === 401) {
-        return rejectWithValue('Session expired. Please login again.');
+        return rejectWithValue("Session expired. Please login again.");
       }
       return rejectWithValue(error.response?.data?.message || error.message);
     }
-  }
+  },
 );
 
 // Delete banner
@@ -166,24 +180,26 @@ export const deleteBanner = createAsyncThunk(
   "banners/delete",
   async (id, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('superAdminToken');
+      const token = localStorage.getItem("superAdminToken");
       if (!token) {
-        return rejectWithValue('No authentication token found. Please login again.');
+        return rejectWithValue(
+          "No authentication token found. Please login again.",
+        );
       }
 
       const response = await api.delete(`/banners/${id}`);
-      
+
       if (response.data.success) {
         return id;
       }
       return rejectWithValue(response.data.message);
     } catch (error) {
       if (error.response?.status === 401) {
-        return rejectWithValue('Session expired. Please login again.');
+        return rejectWithValue("Session expired. Please login again.");
       }
       return rejectWithValue(error.response?.data?.message || error.message);
     }
-  }
+  },
 );
 
 // Toggle banner status
@@ -191,24 +207,26 @@ export const toggleBannerStatus = createAsyncThunk(
   "banners/toggle",
   async (id, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('superAdminToken');
+      const token = localStorage.getItem("superAdminToken");
       if (!token) {
-        return rejectWithValue('No authentication token found. Please login again.');
+        return rejectWithValue(
+          "No authentication token found. Please login again.",
+        );
       }
 
       const response = await api.patch(`/banners/${id}/toggle`);
-      
+
       if (response.data.success) {
         return response.data.data;
       }
       return rejectWithValue(response.data.message);
     } catch (error) {
       if (error.response?.status === 401) {
-        return rejectWithValue('Session expired. Please login again.');
+        return rejectWithValue("Session expired. Please login again.");
       }
       return rejectWithValue(error.response?.data?.message || error.message);
     }
-  }
+  },
 );
 
 // Update banner order
@@ -216,24 +234,26 @@ export const updateBannerOrder = createAsyncThunk(
   "banners/updateOrder",
   async (orders, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('superAdminToken');
+      const token = localStorage.getItem("superAdminToken");
       if (!token) {
-        return rejectWithValue('No authentication token found. Please login again.');
+        return rejectWithValue(
+          "No authentication token found. Please login again.",
+        );
       }
 
-      const response = await api.put('/banners/order', { orders });
-      
+      const response = await api.put("/banners/order", { orders });
+
       if (response.data.success) {
         return response.data.data;
       }
       return rejectWithValue(response.data.message);
     } catch (error) {
       if (error.response?.status === 401) {
-        return rejectWithValue('Session expired. Please login again.');
+        return rejectWithValue("Session expired. Please login again.");
       }
       return rejectWithValue(error.response?.data?.message || error.message);
     }
-  }
+  },
 );
 
 // ============================================
@@ -251,8 +271,8 @@ const initialState = {
     page: 1,
     limit: 20,
     total: 0,
-    pages: 0
-  }
+    pages: 0,
+  },
 };
 
 const bannerSlice = createSlice({
@@ -267,7 +287,7 @@ const bannerSlice = createSlice({
     },
     setBannerPage: (state, action) => {
       state.pagination.page = action.payload;
-    }
+    },
   },
   extraReducers: (builder) => {
     // Fetch Active Banners
@@ -330,7 +350,9 @@ const bannerSlice = createSlice({
       })
       .addCase(updateBanner.fulfilled, (state, action) => {
         state.isUploading = false;
-        const index = state.banners.findIndex(b => b._id === action.payload._id);
+        const index = state.banners.findIndex(
+          (b) => b._id === action.payload._id,
+        );
         if (index !== -1) {
           state.banners[index] = action.payload;
         }
@@ -345,7 +367,7 @@ const bannerSlice = createSlice({
     // Delete Banner
     builder
       .addCase(deleteBanner.fulfilled, (state, action) => {
-        state.banners = state.banners.filter(b => b._id !== action.payload);
+        state.banners = state.banners.filter((b) => b._id !== action.payload);
         if (state.selectedBanner?._id === action.payload) {
           state.selectedBanner = null;
         }
@@ -358,12 +380,16 @@ const bannerSlice = createSlice({
     // Toggle Banner Status
     builder
       .addCase(toggleBannerStatus.fulfilled, (state, action) => {
-        const index = state.banners.findIndex(b => b._id === action.payload._id);
+        const index = state.banners.findIndex(
+          (b) => b._id === action.payload._id,
+        );
         if (index !== -1) {
           state.banners[index] = action.payload;
         }
         // Update active banners if present
-        const activeIndex = state.activeBanners.findIndex(b => b._id === action.payload._id);
+        const activeIndex = state.activeBanners.findIndex(
+          (b) => b._id === action.payload._id,
+        );
         if (activeIndex !== -1) {
           if (!action.payload.isActive) {
             state.activeBanners.splice(activeIndex, 1);
@@ -386,8 +412,9 @@ const bannerSlice = createSlice({
       .addCase(updateBannerOrder.rejected, (state, action) => {
         state.error = action.payload;
       });
-  }
+  },
 });
 
-export const { clearBannerError, clearSelectedBanner, setBannerPage } = bannerSlice.actions;
+export const { clearBannerError, clearSelectedBanner, setBannerPage } =
+  bannerSlice.actions;
 export default bannerSlice.reducer;

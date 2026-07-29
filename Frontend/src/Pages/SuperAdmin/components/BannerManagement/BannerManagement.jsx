@@ -1,7 +1,5 @@
-// src/Pages/SuperAdmin/components/BannerManagement/BannerManagement.jsx
-
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAllBanners,
   createBanner,
@@ -9,39 +7,44 @@ import {
   deleteBanner,
   toggleBannerStatus,
   updateBannerOrder,
-  clearBannerError
-} from '../../../../redux/slices/bannerSlice';
-import styles from './BannerManagement.module.css';
-import toast from 'react-hot-toast';
+  clearBannerError,
+  setBannerPage,
+} from "../../../../redux/slices/bannerSlice";
+import styles from "./BannerManagement.module.css";
+import toast from "react-hot-toast";
+
+const emptyForm = (placement = "hero") => ({
+  title: "",
+  subtitle: "",
+  offer: "",
+  subtext: "",
+  buttonText: "Shop Now",
+  buttonLink: "/shop",
+  placement,
+  isActive: true,
+  isFeatured: false,
+  startDate: "",
+  endDate: "",
+  image: null,
+});
 
 const BannerManagement = () => {
   const dispatch = useDispatch();
   const { banners, isLoading, isUploading, error, pagination } = useSelector(
-    (state) => state.banners
+    (state) => state.banners,
   );
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBanner, setEditingBanner] = useState(null);
-  const [formData, setFormData] = useState({
-    title: '',
-    subtitle: '',
-    offer: '',
-    subtext: '',
-    buttonText: 'Shop Now',
-    buttonLink: '/shop',
-    isActive: true,
-    isFeatured: false,
-    startDate: '',
-    endDate: '',
-    image: null
-  });
+  const [formData, setFormData] = useState(emptyForm());
   const [previewImage, setPreviewImage] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterPlacement, setFilterPlacement] = useState("all");
 
   useEffect(() => {
     fetchBanners();
-  }, [pagination.page, searchTerm, filterStatus]);
+  }, [pagination.page, searchTerm, filterStatus, filterPlacement]);
 
   useEffect(() => {
     if (error) {
@@ -53,25 +56,26 @@ const BannerManagement = () => {
   const fetchBanners = () => {
     const params = {
       page: pagination.page,
-      limit: pagination.limit
+      limit: pagination.limit,
     };
     if (searchTerm) params.search = searchTerm;
-    if (filterStatus !== 'all') params.isActive = filterStatus === 'active';
+    if (filterStatus !== "all") params.isActive = filterStatus === "active";
+    if (filterPlacement !== "all") params.placement = filterPlacement;
     dispatch(fetchAllBanners(params));
   };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData(prev => ({ ...prev, image: file }));
+      setFormData((prev) => ({ ...prev, image: file }));
       const reader = new FileReader();
       reader.onload = (event) => {
         setPreviewImage(event.target.result);
@@ -82,42 +86,44 @@ const BannerManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const formDataToSend = new FormData();
-    Object.keys(formData).forEach(key => {
-      if (key === 'image' && formData[key] instanceof File) {
-        formDataToSend.append('image', formData[key]);
-      } else if (key !== 'image') {
+    Object.keys(formData).forEach((key) => {
+      if (key === "image" && formData[key] instanceof File) {
+        formDataToSend.append("image", formData[key]);
+      } else if (key !== "image") {
         formDataToSend.append(key, formData[key]);
       }
     });
 
     try {
       if (editingBanner) {
-        await dispatch(updateBanner({
-          id: editingBanner._id,
-          formData: formDataToSend
-        })).unwrap();
-        toast.success('Banner updated successfully!');
+        await dispatch(
+          updateBanner({
+            id: editingBanner._id,
+            formData: formDataToSend,
+          }),
+        ).unwrap();
+        toast.success("Banner updated successfully!");
       } else {
         await dispatch(createBanner(formDataToSend)).unwrap();
-        toast.success('Banner created successfully!');
+        toast.success("Banner created successfully!");
       }
       handleCloseModal();
       fetchBanners();
     } catch (error) {
-      toast.error(error || 'Failed to save banner');
+      toast.error(error || "Failed to save banner");
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this banner?')) {
+    if (window.confirm("Are you sure you want to delete this banner?")) {
       try {
         await dispatch(deleteBanner(id)).unwrap();
-        toast.success('Banner deleted successfully!');
+        toast.success("Banner deleted successfully!");
         fetchBanners();
       } catch (error) {
-        toast.error(error || 'Failed to delete banner');
+        toast.error(error || "Failed to delete banner");
       }
     }
   };
@@ -125,27 +131,28 @@ const BannerManagement = () => {
   const handleToggleStatus = async (id) => {
     try {
       await dispatch(toggleBannerStatus(id)).unwrap();
-      toast.success('Banner status updated!');
+      toast.success("Banner status updated!");
       fetchBanners();
     } catch (error) {
-      toast.error(error || 'Failed to update banner status');
+      toast.error(error || "Failed to update banner status");
     }
   };
 
   const handleEdit = (banner) => {
     setEditingBanner(banner);
     setFormData({
-      title: banner.title || '',
-      subtitle: banner.subtitle || '',
-      offer: banner.offer || '',
-      subtext: banner.subtext || '',
-      buttonText: banner.buttonText || 'Shop Now',
-      buttonLink: banner.buttonLink || '/shop',
+      title: banner.title || "",
+      subtitle: banner.subtitle || "",
+      offer: banner.offer || "",
+      subtext: banner.subtext || "",
+      buttonText: banner.buttonText || "Shop Now",
+      buttonLink: banner.buttonLink || "/shop",
+      placement: banner.placement || "hero",
       isActive: banner.isActive,
       isFeatured: banner.isFeatured || false,
-      startDate: banner.startDate ? banner.startDate.split('T')[0] : '',
-      endDate: banner.endDate ? banner.endDate.split('T')[0] : '',
-      image: null
+      startDate: banner.startDate ? banner.startDate.split("T")[0] : "",
+      endDate: banner.endDate ? banner.endDate.split("T")[0] : "",
+      image: null,
     });
     setPreviewImage(banner.image?.url || null);
     setIsModalOpen(true);
@@ -154,25 +161,23 @@ const BannerManagement = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingBanner(null);
-    setFormData({
-      title: '',
-      subtitle: '',
-      offer: '',
-      subtext: '',
-      buttonText: 'Shop Now',
-      buttonLink: '/shop',
-      isActive: true,
-      isFeatured: false,
-      startDate: '',
-      endDate: '',
-      image: null
-    });
+    setFormData(emptyForm());
     setPreviewImage(null);
+  };
+
+  const openCreateModal = (placement) => {
+    setEditingBanner(null);
+    setFormData(emptyForm(placement));
+    setPreviewImage(null);
+    setIsModalOpen(true);
   };
 
   const handlePageChange = (newPage) => {
     dispatch(setBannerPage(newPage));
   };
+
+  const placementLabel = (placement) =>
+    placement === "newArrivalsBanner" ? "New Arrivals" : "Hero";
 
   return (
     <div className={styles.container}>
@@ -182,29 +187,20 @@ const BannerManagement = () => {
           <h1 className={styles.title}>Banner Management</h1>
           <p className={styles.subtitle}>Manage your homepage banners</p>
         </div>
-        <button
-          className={styles.createButton}
-          onClick={() => {
-            setEditingBanner(null);
-            setFormData({
-              title: '',
-              subtitle: '',
-              offer: '',
-              subtext: '',
-              buttonText: 'Shop Now',
-              buttonLink: '/shop',
-              isActive: true,
-              isFeatured: false,
-              startDate: '',
-              endDate: '',
-              image: null
-            });
-            setPreviewImage(null);
-            setIsModalOpen(true);
-          }}
-        >
-          <span>+</span> Create Banner
-        </button>
+        <div className={styles.createButtonGroup}>
+          <button
+            className={styles.createButton}
+            onClick={() => openCreateModal("hero")}
+          >
+            <span>+</span> Create Hero Banner
+          </button>
+          <button
+            className={styles.createButtonSecondary}
+            onClick={() => openCreateModal("newArrivalsBanner")}
+          >
+            <span>+</span> Create New Arrivals Banner
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -218,6 +214,15 @@ const BannerManagement = () => {
             className={styles.searchInput}
           />
         </div>
+        <select
+          className={styles.filterSelect}
+          value={filterPlacement}
+          onChange={(e) => setFilterPlacement(e.target.value)}
+        >
+          <option value="all">All Placements</option>
+          <option value="hero">Hero</option>
+          <option value="newArrivalsBanner">New Arrivals</option>
+        </select>
         <select
           className={styles.filterSelect}
           value={filterStatus}
@@ -238,7 +243,10 @@ const BannerManagement = () => {
       ) : banners.length === 0 ? (
         <div className={styles.emptyState}>
           <p>No banners found</p>
-          <button className={styles.createButton} onClick={() => setIsModalOpen(true)}>
+          <button
+            className={styles.createButton}
+            onClick={() => openCreateModal("hero")}
+          >
             Create your first banner
           </button>
         </div>
@@ -249,12 +257,17 @@ const BannerManagement = () => {
               <div className={styles.bannerImage}>
                 <img src={banner.image?.url} alt={banner.title} />
                 <div className={styles.bannerStatus}>
-                  <span className={`${styles.statusBadge} ${banner.isActive ? styles.active : styles.inactive}`}>
-                    {banner.isActive ? 'Active' : 'Inactive'}
+                  <span
+                    className={`${styles.statusBadge} ${banner.isActive ? styles.active : styles.inactive}`}
+                  >
+                    {banner.isActive ? "Active" : "Inactive"}
                   </span>
                   {banner.isFeatured && (
                     <span className={styles.featuredBadge}>Featured</span>
                   )}
+                  <span className={styles.placementBadge}>
+                    {placementLabel(banner.placement)}
+                  </span>
                 </div>
               </div>
               <div className={styles.bannerContent}>
@@ -276,7 +289,7 @@ const BannerManagement = () => {
                     className={`${styles.actionButton} ${styles.toggleButton}`}
                     onClick={() => handleToggleStatus(banner._id)}
                   >
-                    {banner.isActive ? 'Deactivate' : 'Activate'}
+                    {banner.isActive ? "Deactivate" : "Activate"}
                   </button>
                   <button
                     className={`${styles.actionButton} ${styles.deleteButton}`}
@@ -319,12 +332,29 @@ const BannerManagement = () => {
         <div className={styles.modalOverlay} onClick={handleCloseModal}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2>{editingBanner ? 'Edit Banner' : 'Create New Banner'}</h2>
+              <h2>
+                {editingBanner
+                  ? "Edit Banner"
+                  : `Create New ${placementLabel(formData.placement)} Banner`}
+              </h2>
               <button className={styles.closeButton} onClick={handleCloseModal}>
                 ×
               </button>
             </div>
             <form onSubmit={handleSubmit} className={styles.modalForm}>
+              <div className={styles.formGroup}>
+                <label>Banner Placement *</label>
+                <select
+                  name="placement"
+                  value={formData.placement}
+                  onChange={handleInputChange}
+                  className={styles.placementSelect}
+                >
+                  <option value="hero">Hero (Top Slider)</option>
+                  <option value="newArrivalsBanner">New Arrivals Banner</option>
+                </select>
+              </div>
+
               <div className={styles.formGroup}>
                 <label>Title *</label>
                 <input
@@ -425,7 +455,7 @@ const BannerManagement = () => {
                     id="bannerImage"
                   />
                   <label htmlFor="bannerImage" className={styles.fileLabel}>
-                    {previewImage ? 'Change Image' : 'Upload Image'}
+                    {previewImage ? "Change Image" : "Upload Image"}
                   </label>
                   {previewImage && (
                     <div className={styles.imagePreview}>
@@ -434,7 +464,9 @@ const BannerManagement = () => {
                   )}
                 </div>
                 {!previewImage && !editingBanner && (
-                  <p className={styles.hint}>* Image is required for new banners</p>
+                  <p className={styles.hint}>
+                    * Image is required for new banners
+                  </p>
                 )}
               </div>
 
@@ -476,7 +508,11 @@ const BannerManagement = () => {
                   className={styles.submitButton}
                   disabled={isUploading}
                 >
-                  {isUploading ? 'Saving...' : editingBanner ? 'Update Banner' : 'Create Banner'}
+                  {isUploading
+                    ? "Saving..."
+                    : editingBanner
+                      ? "Update Banner"
+                      : "Create Banner"}
                 </button>
               </div>
             </form>
