@@ -65,7 +65,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 9 / 16;
-  /* border-radius: 16px; */
+  border-radius: 16px;
   overflow: hidden;
   background: #000;
 }
@@ -150,7 +150,7 @@
    RESPONSIVE
    Desktop (≥993px): 4 reels in a row
    Tablet (641–992px): 2 reels in a row
-   Mobile (≤640px): exactly 1 reel in a row
+   Mobile (≤640px): horizontal left-to-right scroll, no stacking
    ========================================================== */
 @media (max-width: 992px) {
   .grid {
@@ -170,8 +170,26 @@
   }
 
   .grid {
-    grid-template-columns: 1fr;
+    display: flex;
+    grid-template-columns: unset;
     gap: 14px;
+    overflow-x: auto;
+    padding: 4px 4px 8px;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .card {
+    flex: 0 0 auto;
+    width: 72vw;
+    max-width: 260px;
+    scroll-snap-align: start;
   }
 
   .mediaWrap {

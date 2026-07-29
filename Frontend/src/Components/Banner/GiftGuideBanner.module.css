@@ -1,0 +1,523 @@
+/* src/Components/Banner/GiftGuideBanner.module.css */
+
+.bannerWrapper {
+  width: 100%;
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.bannerContainer {
+  position: relative;
+  width: 100%;
+  min-height: 480px;
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.8s ease,
+    visibility 0.8s ease;
+  display: flex;
+  align-items: center;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 480px;
+}
+
+.slide.activeSlide {
+  opacity: 1;
+  visibility: visible;
+  position: relative;
+  z-index: 1;
+}
+
+.content {
+  padding-left: 80px;
+  max-width: 520px;
+  position: relative;
+  z-index: 2;
+  opacity: 0;
+  transform: translateY(30px);
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s ease;
+}
+
+.showContent {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============================================
+   LIGHT TEXT (for dark backgrounds)
+   ============================================ */
+.lightText .eyebrow {
+  color: #d4af6a;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.lightText .title {
+  color: #faf7f1;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+}
+
+.lightText .subtext {
+  color: #e2dccf;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.lightText .offer {
+  color: #d4af6a;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.lightText .cta {
+  color: #faf7f1;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  border-bottom-color: #d4af6a;
+}
+
+.lightText .cta:hover {
+  color: #d4af6a;
+}
+
+.lightText .dividerLine {
+  background: #d4af6a;
+}
+
+.lightText .dividerDot {
+  background: #d4af6a;
+}
+
+/* ============================================
+   DARK TEXT (for light backgrounds)
+   ============================================ */
+.darkText .eyebrow {
+  color: #0a2216;
+  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
+}
+
+.darkText .title {
+  color: #0a2216;
+  text-shadow: 0 2px 12px rgba(255, 255, 255, 0.2);
+}
+
+.darkText .subtext {
+  color: #1a3a2a;
+  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+}
+
+.darkText .offer {
+  color: #106b47;
+  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+}
+
+.darkText .cta {
+  color: #0a2216;
+  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+  border-bottom-color: #106b47;
+}
+
+.darkText .cta:hover {
+  color: #106b47;
+}
+
+.darkText .dividerLine {
+  background: #0a2216;
+}
+
+.darkText .dividerDot {
+  background: #0a2216;
+}
+
+/* ============================================
+   WHITE TEXT (for the first banner)
+   ============================================ */
+.whiteText .eyebrow {
+  color: #faf7f1;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+}
+
+.whiteText .title {
+  color: #ffffff;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.6);
+}
+
+.whiteText .subtext {
+  color: #f0ece2;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.whiteText .offer {
+  color: #faf7f1;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.whiteText .cta {
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  border-bottom-color: #d4af6a;
+}
+
+.whiteText .cta:hover {
+  color: #d4af6a;
+}
+
+.whiteText .dividerLine {
+  background: #d4af6a;
+}
+
+.whiteText .dividerDot {
+  background: #d4af6a;
+}
+
+/* Individual white text styles */
+.eyebrowWhite {
+  color: #faf7f1 !important;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5) !important;
+}
+
+.titleWhite {
+  color: #ffffff !important;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.6) !important;
+}
+
+.subtextWhite {
+  color: #f0ece2 !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5) !important;
+}
+
+.offerWhite {
+  color: #faf7f1 !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5) !important;
+}
+
+.ctaWhite {
+  color: #ffffff !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5) !important;
+  border-bottom-color: #d4af6a !important;
+}
+
+.ctaWhite:hover {
+  color: #d4af6a !important;
+}
+
+.dividerLineWhite {
+  background: #d4af6a !important;
+}
+
+.dividerDotWhite {
+  background: #d4af6a !important;
+}
+
+/* ============================================
+   TEXT ALIGNMENT
+   ============================================ */
+.leftAligned {
+  padding-left: 80px;
+  padding-right: 0;
+  text-align: left;
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.rightAligned {
+  padding-left: 0;
+  padding-right: 80px;
+  text-align: right;
+  margin-left: auto;
+  margin-right: 0;
+}
+
+/* ============================================
+   INDIVIDUAL ELEMENT STYLES (fallback)
+   ============================================ */
+.eyebrow {
+  display: inline-block;
+  font-family: "Manrope", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.title {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 500;
+  font-size: 48px;
+  line-height: 1.15;
+  margin: 0 0 20px 0;
+}
+
+.wordWrapper {
+  display: inline-block;
+  overflow: hidden;
+}
+
+.animatedWord {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(40px);
+  animation: wordFadeIn 0.8s ease forwards;
+}
+
+@keyframes wordFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.dividerLine {
+  width: 36px;
+  height: 1px;
+}
+
+.dividerDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.subtext {
+  font-family: "Manrope", sans-serif;
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.6;
+  margin: 0 0 8px 0;
+}
+
+.offer {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 26px;
+  font-style: italic;
+  margin: 4px 0 26px 0;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: "Manrope", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding-bottom: 6px;
+  border-bottom: 2px solid;
+  transition: all 0.35s ease;
+  width: fit-content;
+}
+
+.cta svg {
+  transition: transform 0.35s ease;
+}
+
+.cta:hover {
+  gap: 18px;
+}
+
+.cta:hover svg {
+  transform: translateX(6px);
+}
+
+/* ============================================
+   DOTS NAVIGATION
+   ============================================ */
+.dotsContainer {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px 0;
+  background: transparent;
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.dot:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.activeDot {
+  background: #d4af6a;
+  width: 30px;
+  border-radius: 6px;
+}
+
+/* ============================================
+   LOADING SKELETON
+   ============================================ */
+.skeletonBanner {
+  background: linear-gradient(90deg, #e4ded1 25%, #f0ece2 50%, #e4ded1 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  min-height: 480px;
+  margin: 0;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 1024px) {
+  .title {
+    font-size: 40px;
+  }
+
+  .content {
+    padding-left: 60px;
+    max-width: 450px;
+  }
+
+  .leftAligned {
+    padding-left: 60px;
+  }
+
+  .rightAligned {
+    padding-right: 60px;
+  }
+}
+
+@media (max-width: 768px) {
+  .bannerContainer {
+    min-height: 380px;
+  }
+
+  .slide {
+    min-height: 380px;
+  }
+
+  .content {
+    padding-left: 32px;
+    max-width: 85%;
+  }
+
+  .title {
+    font-size: 32px;
+  }
+
+  .skeletonBanner {
+    min-height: 380px;
+  }
+
+  .dotsContainer {
+    bottom: 12px;
+    gap: 10px;
+  }
+
+  .leftAligned {
+    padding-left: 32px;
+    padding-right: 20px;
+  }
+
+  .rightAligned {
+    padding-right: 32px;
+    padding-left: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bannerContainer {
+    min-height: 320px;
+  }
+
+  .slide {
+    min-height: 320px;
+  }
+
+  .content {
+    padding-left: 20px;
+    padding-right: 20px;
+    max-width: 90%;
+  }
+
+  .title {
+    font-size: 26px;
+  }
+
+  .eyebrow {
+    font-size: 10px;
+    letter-spacing: 3px;
+  }
+
+  .subtext {
+    font-size: 13px;
+  }
+
+  .offer {
+    font-size: 20px;
+  }
+
+  .skeletonBanner {
+    min-height: 320px;
+  }
+
+  .dotsContainer {
+    bottom: 8px;
+    gap: 8px;
+    padding: 12px 0;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+  }
+
+  .activeDot {
+    width: 24px;
+  }
+
+  .leftAligned {
+    padding-left: 20px;
+    padding-right: 12px;
+  }
+
+  .rightAligned {
+    padding-right: 20px;
+    padding-left: 12px;
+  }
+}
