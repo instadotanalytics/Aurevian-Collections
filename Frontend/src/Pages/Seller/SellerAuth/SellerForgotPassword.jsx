@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiMail, FiArrowLeft, FiShield, FiSend, FiCheckCircle, FiLock } from 'react-icons/fi';
+import { FiMail, FiArrowLeft, FiCheckCircle } from 'react-icons/fi';
 import { FaGem } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
@@ -47,7 +47,7 @@ const SellerForgotPassword = () => {
 
     try {
       const response = await axios.post(`${API_URL}/seller/forgot-password`, { email });
-      
+
       if (response.data.success) {
         setEmailSent(true);
         toast.success('Password reset link sent to your email!');
@@ -71,37 +71,44 @@ const SellerForgotPassword = () => {
         <div className={styles.page}>
           <div className={styles.container}>
             <div className={styles.card}>
-              {/* Image Section - Top on Mobile */}
+              {/* Image Section */}
               <div className={styles.imageSection}>
                 <div className={styles.imageWrapper}>
                   <img src={LoginImage} alt="Aurevian" className={styles.loginImage} />
                 </div>
               </div>
 
-              {/* Success Section - Bottom on Mobile */}
-              <div className={styles.successSection}>
-                <div className={styles.successContainer}>
-                  <div className={styles.successIconWrapper}>
-                    <FiCheckCircle className={styles.successIcon} />
+              {/* Seal — signature element bridging image and content */}
+              <div className={styles.seal} aria-hidden="true">
+                <FiCheckCircle className={styles.sealIcon} />
+              </div>
+
+              {/* Success Section */}
+              <div className={styles.formSection}>
+                <div className={styles.formContainer}>
+                  <div className={styles.header}>
+                    <span className={styles.eyebrow}>Email Sent</span>
+                    <h1 className={styles.title}>Check Your Inbox</h1>
+                    <p className={styles.subtitle}>
+                      We sent a reset link to <strong>{email}</strong>
+                    </p>
                   </div>
-                  <h2 className={styles.successTitle}>Check Your Email</h2>
-                  <p className={styles.successMessage}>
-                    We've sent a password reset link to <strong>{email}</strong>
+
+                  <p className={styles.helperText}>
+                    Follow the instructions in the email to reset your password.
+                    The link expires in 10 minutes.
                   </p>
-                  <p className={styles.successSubMessage}>
-                    Please check your inbox and follow the instructions to reset your password.
-                    The link will expire in 10 minutes.
-                  </p>
+
                   <div className={styles.successActions}>
-                    <Link to="/seller/login" className={styles.backToLoginBtn}>
+                    <Link to="/seller/login" className={styles.primaryBtn}>
                       Back to Login
                     </Link>
-                    <button 
+                    <button
                       onClick={() => {
                         setEmailSent(false);
                         setEmail('');
                       }}
-                      className={styles.resendBtn}
+                      className={styles.secondaryBtn}
                     >
                       Try Another Email
                     </button>
@@ -122,47 +129,53 @@ const SellerForgotPassword = () => {
       <div className={styles.page}>
         <div className={styles.container}>
           <div className={styles.card}>
-            {/* Image Section - Top on Mobile */}
+            {/* Image Section */}
             <div className={styles.imageSection}>
               <div className={styles.imageWrapper}>
                 <img src={LoginImage} alt="Aurevian" className={styles.loginImage} />
               </div>
             </div>
 
-            {/* Form Section - Bottom on Mobile */}
+            {/* Seal — signature element bridging image and form */}
+            <div className={styles.seal} aria-hidden="true">
+              <FaGem className={styles.sealIcon} />
+            </div>
+
+            {/* Form Section */}
             <div className={styles.formSection}>
               <div className={styles.formContainer}>
                 <div className={styles.header}>
-                  <div className={styles.logoIcon}>
-                    <FaGem className={styles.gemIcon} />
-                  </div>
-                  <h1 className={styles.title}>
-                    <span>AUREVIAN</span>
-                  </h1>
+                  <span className={styles.eyebrow}>Seller Portal</span>
+                  <h1 className={styles.title}>Forgot Password?</h1>
                   <p className={styles.subtitle}>
-                    Reset Your Password
+                    Enter your email and we'll send you a reset link
                   </p>
                 </div>
 
-                {error && <p className={styles.errorBanner}>{error}</p>}
+                {error && (
+                  <div className={styles.errorBanner} role="alert">
+                    <span>{error}</span>
+                  </div>
+                )}
 
                 <form onSubmit={handleSubmit} className={styles.form}>
                   <div className={styles.field}>
-                    <label className={styles.label}>Email Address</label>
+                    <label htmlFor="email" className={styles.label}>Email Address</label>
                     <div className={`${styles.inputWrapper} ${focusedField === 'email' ? styles.focused : ''}`}>
                       <FiMail className={styles.inputIcon} />
                       <input
+                        id="email"
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         onFocus={() => handleFocus('email')}
                         onBlur={handleBlur}
                         className={styles.input}
-                        placeholder="Enter your email address"
+                        placeholder="name@example.com"
                         disabled={isLoading}
+                        autoComplete="email"
                       />
                     </div>
-                    {error && <p className={styles.errorText}>{error}</p>}
                   </div>
 
                   <button
@@ -173,7 +186,7 @@ const SellerForgotPassword = () => {
                     {isLoading ? (
                       <>
                         <span className={styles.spinner}></span>
-                        Sending...
+                        Sending…
                       </>
                     ) : (
                       'Send Reset Link'

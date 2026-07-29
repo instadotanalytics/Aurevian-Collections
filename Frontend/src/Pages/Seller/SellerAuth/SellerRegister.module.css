@@ -18,7 +18,7 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #faf7f2 0%, #f5f0ea 100%);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   padding: 0;
   position: relative;
@@ -53,25 +53,29 @@
   width: 100%;
   max-width: 1200px;
   padding: 0;
-  height: 100vh;
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 100vh;
 }
 
 /* ============================================
-   CARD - Full Screen with Glass Effect
+   CARD - No Border Radius, Full Width
    ============================================ */
 .card {
   display: flex;
   flex-direction: column;
   background: #ffffff;
-  min-height: 100vh;
-  width: 1200px;
-  margin: auto;
-  box-shadow: none;
-  border: none;
+  width: 100%;
+  max-width: 1200px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(212, 175, 55, 0.06);
   border-radius: 0;
   overflow: hidden;
-  height: 100vh;
-  position: relative;
+  min-height: 100vh;
+  height: auto;
+  margin: 0;
 }
 
 /* ============================================
@@ -82,19 +86,18 @@
 }
 
 /* ============================================
-   RIGHT PANEL - Full Width
+   RIGHT PANEL - Full Width on Mobile
    ============================================ */
 .rightPanel {
   flex: 1;
-  padding: 20px 24px 16px;
+  padding: 16px 16px 12px;
   display: flex;
   flex-direction: column;
   background: #ffffff;
   width: 100%;
+  overflow: visible;
   min-height: 100vh;
-  overflow: hidden;
-  height: 100vh;
-  position: relative;
+  height: auto;
 }
 
 /* ============================================
@@ -102,15 +105,15 @@
    ============================================ */
 .header {
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   flex-shrink: 0;
   position: relative;
 }
 
 .headerIcon {
-  width: 48px;
-  height: 48px;
-  margin: 0 auto 8px;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 6px;
   background: linear-gradient(135deg, rgba(212, 175, 55, 0.12) 0%, rgba(212, 175, 55, 0.04) 100%);
   border-radius: 50%;
   display: flex;
@@ -126,17 +129,17 @@
 }
 
 .headerIconSvg {
-  font-size: 22px;
+  font-size: 18px;
   color: #d4af37;
 }
 
 .title {
   font-family: 'Playfair Display', serif;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   color: #1a1a1a;
   margin: 0;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   line-height: 1.2;
   background: linear-gradient(135deg, #1a1a1a 0%, #d4af37 100%);
   -webkit-background-clip: text;
@@ -146,22 +149,22 @@
 
 .subtitle {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 400;
   color: #6b6b6b;
   margin: 2px 0 0;
-  line-height: 1.4;
+  line-height: 1.3;
   letter-spacing: 0.2px;
 }
 
 /* ============================================
-   STEP INDICATOR - Animated
+   STEP INDICATOR - Compact
    ============================================ */
 .stepIndicator {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   padding: 0 2px;
   position: relative;
   flex-shrink: 0;
@@ -177,15 +180,15 @@
 }
 
 .stepNumber {
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: #f0edeb;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
   color: #999;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -197,43 +200,29 @@
 .stepNumber.active {
   background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
   color: white;
-  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
-  transform: scale(1.1);
-  animation: bounceStep 0.6s ease;
-}
-
-@keyframes bounceStep {
-  0% { transform: scale(0.8); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1.1); }
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3);
+  transform: scale(1.05);
 }
 
 .stepNumber.completed {
   background: #10b981;
   color: white;
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
-  animation: checkPop 0.4s ease;
-}
-
-@keyframes checkPop {
-  0% { transform: scale(0.5); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .stepNumber.completed svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
 }
 
 .stepLabel {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 9px;
+  font-size: 7px;
   font-weight: 600;
   color: #999;
-  margin-top: 4px;
+  margin-top: 3px;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.4px;
   white-space: nowrap;
   transition: color 0.3s ease;
 }
@@ -248,9 +237,9 @@
 
 .stepLine {
   position: absolute;
-  top: 17px;
-  left: calc(50% + 17px);
-  right: calc(-50% + 17px);
+  top: 15px;
+  left: calc(50% + 15px);
+  right: calc(-50% + 15px);
   height: 2px;
   background: #e8e3dc;
   z-index: 0;
@@ -266,29 +255,29 @@
 }
 
 /* ============================================
-   FORM - Animated
+   FORM - Flexible Height (No Overflow Hidden)
    ============================================ */
 .form {
   display: flex;
   flex-direction: column;
   flex: 1;
-  overflow: hidden;
+  overflow: visible;
   min-height: 0;
 }
 
 .stepContent {
-  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   flex: 1;
-  overflow: hidden;
+  overflow: visible;
   min-height: 0;
 }
 
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -297,38 +286,24 @@
 }
 
 /* ============================================
-   FORM FIELDS WRAPPER
+   FORM FIELDS WRAPPER - Auto Height
    ============================================ */
 .formFieldsWrapper {
-  flex: 1;
-  overflow-y: auto;
+  flex: 0 0 auto;
+  overflow: visible;
   padding-right: 4px;
   margin-bottom: 0;
-  min-height: 0;
-}
-
-.formFieldsWrapper::-webkit-scrollbar {
-  width: 4px;
-}
-
-.formFieldsWrapper::-webkit-scrollbar-track {
-  background: #f0edeb;
-  border-radius: 4px;
-}
-
-.formFieldsWrapper::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
-  border-radius: 4px;
+  max-height: none;
 }
 
 .stepHeader {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   flex-shrink: 0;
 }
 
 .stepTitle {
   font-family: 'Playfair Display', serif;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: #1a1a1a;
   margin: 0 0 2px;
@@ -337,7 +312,7 @@
 
 .stepDesc {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 400;
   color: #6b6b6b;
   margin: 0;
@@ -345,39 +320,20 @@
 }
 
 /* ============================================
-   FORM GROUPS - Modern with Animations
+   FORM GROUPS - Compact
    ============================================ */
 .formRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 10px;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-bottom: 12px;
-  animation: fadeField 0.4s ease both;
+  gap: 3px;
+  margin-bottom: 10px;
 }
-
-@keyframes fadeField {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.formGroup:nth-child(1) { animation-delay: 0.05s; }
-.formGroup:nth-child(2) { animation-delay: 0.1s; }
-.formGroup:nth-child(3) { animation-delay: 0.15s; }
-.formGroup:nth-child(4) { animation-delay: 0.2s; }
-.formGroup:nth-child(5) { animation-delay: 0.25s; }
-.formGroup:nth-child(6) { animation-delay: 0.3s; }
 
 .formGroup:last-child {
   margin-bottom: 0;
@@ -385,7 +341,7 @@
 
 .formGroup label {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: #1a1a1a;
   display: flex;
@@ -408,17 +364,17 @@
 .optional {
   color: #999;
   font-weight: 400;
-  font-size: 11px;
+  font-size: 10px;
 }
 
 .formGroup input,
 .formGroup textarea,
 .formGroup select {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  padding: 10px 14px;
+  padding: 8px 12px;
   border: 2px solid #e8e3dc;
-  border-radius: 10px;
-  font-size: 13px;
+  border-radius: 8px;
+  font-size: 12px;
   font-weight: 400;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: #faf8f6;
@@ -428,14 +384,14 @@
   appearance: none;
   color: #1a1a1a;
   letter-spacing: 0.2px;
-  height: 42px;
+  height: 38px;
 }
 
 .formGroup input::placeholder,
 .formGroup textarea::placeholder {
   color: #b0b0b0;
   font-weight: 400;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .formGroup input:hover,
@@ -450,7 +406,7 @@
 .formGroup select:focus {
   outline: none;
   border-color: #d4af37;
-  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
   background: #ffffff;
   transform: translateY(-1px);
 }
@@ -459,15 +415,15 @@
 .formGroup textarea.focused,
 .formGroup select.focused {
   border-color: #d4af37;
-  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
   background: #ffffff;
 }
 
 .formGroup textarea {
   resize: vertical;
-  min-height: 50px;
+  min-height: 40px;
   height: auto;
-  padding: 10px 14px;
+  padding: 8px 12px;
 }
 
 .formGroup input.error,
@@ -478,22 +434,15 @@
 
 .errorText {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 400;
   color: #ef4444;
   margin-top: 2px;
-  animation: shakeError 0.4s ease;
-}
-
-@keyframes shakeError {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
 }
 
 .hint {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 400;
   color: #999;
   margin-top: 2px;
@@ -501,20 +450,14 @@
 
 .validText {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
   color: #10b981;
   margin-top: 2px;
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
 }
 
 /* ============================================
-   FILE UPLOAD - Animated
+   FILE UPLOAD - Compact
    ============================================ */
 .fileUploadWrapper {
   margin-top: 0;
@@ -523,13 +466,13 @@
 .fileUploadArea {
   position: relative;
   border: 2px dashed #e8e3dc;
-  border-radius: 10px;
-  padding: 16px 14px;
+  border-radius: 8px;
+  padding: 12px 10px;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: #faf8f6;
-  min-height: 80px;
+  min-height: 65px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -540,7 +483,7 @@
   border-color: #d4af37;
   background: rgba(212, 175, 55, 0.03);
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.08);
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.06);
 }
 
 .fileUploadArea.hasFile {
@@ -549,9 +492,9 @@
 }
 
 .uploadIcon {
-  font-size: 24px;
+  font-size: 20px;
   color: #d4af37;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
   transition: transform 0.3s ease;
 }
 
@@ -561,7 +504,7 @@
 
 .fileUploadArea p {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
   color: #1a1a1a;
   margin: 0;
@@ -570,7 +513,7 @@
 
 .fileUploadArea span {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 400;
   color: #999;
   letter-spacing: 0.2px;
@@ -589,14 +532,8 @@
 .filePreview {
   position: relative;
   width: 100%;
-  max-width: 100px;
+  max-width: 80px;
   margin: 0 auto;
-  animation: zoomIn 0.3s ease;
-}
-
-@keyframes zoomIn {
-  from { opacity: 0; transform: scale(0.8); }
-  to { opacity: 1; transform: scale(1); }
 }
 
 .filePreview img {
@@ -608,15 +545,15 @@
 
 .removeFile {
   position: absolute;
-  top: -8px;
-  right: -8px;
-  width: 22px;
-  height: 22px;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: #ef4444;
   color: white;
   border: none;
-  font-size: 14px;
+  font-size: 11px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -630,24 +567,24 @@
 }
 
 /* ============================================
-   CATEGORY GRID - Animated
+   CATEGORY GRID - Compact
    ============================================ */
 .categoryGrid {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 4px;
+  gap: 5px;
+  margin-top: 3px;
   margin-bottom: 0;
   padding-bottom: 0;
 }
 
 .categoryBtn {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  padding: 6px 14px;
+  padding: 5px 12px;
   border: 2px solid #e8e3dc;
-  border-radius: 20px;
+  border-radius: 16px;
   background: white;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -660,14 +597,14 @@
 .categoryBtn:hover {
   border-color: #d4af37;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.12);
 }
 
 .categoryBtn.selected {
   background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
   color: white;
   border-color: #d4af37;
-  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.25);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
   transform: translateY(-2px);
 }
 
@@ -676,85 +613,85 @@
 }
 
 /* ============================================
-   SOCIAL LINKS
+   SOCIAL LINKS - Compact
    ============================================ */
 .socialLinks {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   margin-top: 2px;
 }
 
 .socialLinks input {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  padding: 10px 14px;
+  padding: 8px 12px;
   border: 2px solid #e8e3dc;
-  border-radius: 10px;
-  font-size: 13px;
+  border-radius: 8px;
+  font-size: 12px;
   font-weight: 400;
   background: #faf8f6;
   width: 100%;
   box-sizing: border-box;
   color: #1a1a1a;
   letter-spacing: 0.2px;
-  height: 42px;
+  height: 36px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .socialLinks input:focus {
   outline: none;
   border-color: #d4af37;
-  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
   background: white;
   transform: translateY(-1px);
 }
 
 .socialLinks input.focused {
   border-color: #d4af37;
-  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
   background: white;
 }
 
 .socialLinks input::placeholder {
   color: #b0b0b0;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 /* ============================================
-   REVIEW SECTION
+   REVIEW SECTION - Compact
    ============================================ */
 .reviewSection {
   background: linear-gradient(135deg, #faf8f6 0%, #f5f0ea 100%);
-  border-radius: 10px;
-  padding: 14px 18px;
-  margin-bottom: 10px;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
   border: 1px solid #f0edeb;
   transition: all 0.3s ease;
 }
 
 .reviewSection:hover {
   border-color: #d4af37;
-  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.06);
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.04);
 }
 
 .reviewSection h4 {
   font-family: 'Playfair Display', serif;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   color: #1a1a1a;
-  margin: 0 0 6px;
+  margin: 0 0 4px;
   letter-spacing: 0.2px;
 }
 
 .reviewGrid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 4px;
+  gap: 3px;
 }
 
 .reviewGrid div {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 400;
   color: #4a4a4a;
   padding: 2px 0;
@@ -767,16 +704,16 @@
 }
 
 .termsGroup {
-  margin: 8px 0 4px;
+  margin: 6px 0 2px;
 }
 
 .checkboxLabel {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 400;
   color: #4a4a4a;
   letter-spacing: 0.2px;
@@ -788,8 +725,8 @@
 }
 
 .checkboxLabel input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   margin-top: 2px;
   accent-color: #d4af37;
   cursor: pointer;
@@ -814,21 +751,24 @@
 }
 
 /* ============================================
-   NAVIGATION - Animated Buttons
+   NAVIGATION - Always Visible at Bottom
    ============================================ */
 .navigation {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 12px;
-  padding-top: 12px;
+  gap: 10px;
+  padding: 10px 0 4px;
   flex-shrink: 0;
   flex-wrap: wrap;
-  min-height: 56px;
-  margin-top: 8px;
+  min-height: 48px;
+  margin-top: 6px;
   background: #ffffff;
   clear: both;
   border-top: 1px solid #f0edeb;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
 }
 
 .prevBtn,
@@ -836,16 +776,16 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 10px 28px;
+  gap: 5px;
+  padding: 8px 22px;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-width: 100px;
+  min-width: 80px;
   -webkit-tap-highlight-color: transparent;
   letter-spacing: 0.3px;
   position: relative;
@@ -860,7 +800,7 @@
 .prevBtn:hover:not(:disabled) {
   background: #e8e3dc;
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 .prevBtn:active {
@@ -870,7 +810,7 @@
 .nextBtn {
   background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
   color: white;
-  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.25);
 }
 
 .nextBtn::before {
@@ -880,8 +820,8 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transition: left 0.6s ease;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.5s ease;
 }
 
 .nextBtn:hover:not(:disabled)::before {
@@ -889,8 +829,8 @@
 }
 
 .nextBtn:hover:not(:disabled) {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 32px rgba(212, 175, 55, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.35);
 }
 
 .nextBtn:active {
@@ -905,8 +845,8 @@
 }
 
 .loader {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border: 2px solid rgba(255,255,255,0.3);
   border-top: 2px solid #ffffff;
   border-radius: 50%;
@@ -919,19 +859,19 @@
 }
 
 /* ============================================
-   FOOTER
+   FOOTER - Compact
    ============================================ */
 .footer {
   text-align: center;
-  margin-top: 8px;
-  padding-top: 8px;
+  margin-top: 4px;
+  padding-top: 4px;
   border-top: 1px solid #f0edeb;
   flex-shrink: 0;
 }
 
 .footer p {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 400;
   color: #6b6b6b;
   margin: 0;
@@ -960,29 +900,32 @@
   }
 
   .container {
-    max-width: 100%;
+    max-width: 1200px;
     padding: 0;
-    height: 100vh;
+    margin: 0 auto;
+    min-height: 100vh;
+    align-items: center;
   }
 
   .card {
     flex-direction: row;
     height: 100vh;
-    max-height: 100vh;
     min-height: 100vh;
     border-radius: 0;
-    box-shadow: none;
-    border: none;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(212, 175, 55, 0.06);
     overflow: hidden;
+    max-width: 1200px;
+    margin: 0 auto;
   }
 
   .leftPanel {
     display: block;
-    flex: 0 0 60%;
+    flex: 0 0 55%;
     position: relative;
     overflow: hidden;
     background: linear-gradient(135deg, #1a1a1a 0%, #2d1f14 100%);
-    height: 100vh;
+    height: 100%;
   }
 
   .imageWrapper {
@@ -1006,70 +949,24 @@
   }
 
   .imageOverlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(26,26,26,0.3) 0%, rgba(26,26,26,0.6) 100%);
-    z-index: 1;
+    display: none;
   }
 
   .imageContent {
-    position: absolute;
-    bottom: 60px;
-    left: 50px;
-    z-index: 2;
-    color: white;
-    max-width: 70%;
-  }
-
-  .imageBadge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 16px;
-    background: rgba(212, 175, 55, 0.2);
-    backdrop-filter: blur(10px);
-    border-radius: 50px;
-    font-size: 12px;
-    font-weight: 500;
-    color: #d4af37;
-    border: 1px solid rgba(212, 175, 55, 0.2);
-    margin-bottom: 12px;
-  }
-
-  .imageBadgeIcon {
-    font-size: 14px;
-  }
-
-  .imageTitle {
-    font-family: 'Playfair Display', serif;
-    font-size: 32px;
-    font-weight: 700;
-    margin: 0 0 6px;
-    letter-spacing: 1px;
-  }
-
-  .imageDesc {
-    font-family: 'Inter', sans-serif;
-    font-size: 15px;
-    opacity: 0.8;
-    margin: 0;
-    line-height: 1.6;
+    display: none;
   }
 
   .rightPanel {
-    flex: 0 0 40%;
-    padding: 24px 32px 20px;
-    height: 100vh;
-    min-height: 100vh;
-    overflow: hidden;
+    flex: 0 0 45%;
+    padding: 20px 28px 16px;
+    height: 100%;
+    min-height: 100%;
+    overflow: visible;
     background: #ffffff;
   }
 
   .header {
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   .headerIcon {
@@ -1086,44 +983,29 @@
   }
 
   .subtitle {
-    font-size: 14px;
+    font-size: 13px;
     margin-top: 2px;
   }
 
   .form {
-    overflow: hidden;
+    overflow: visible;
     min-height: 0;
   }
 
   .stepContent {
-    overflow: hidden;
+    overflow: visible;
     min-height: 0;
   }
 
   .formFieldsWrapper {
-    flex: 1;
-    overflow-y: auto;
+    flex: 0 0 auto;
+    overflow: visible;
     padding-right: 6px;
     max-height: none;
-    min-height: 0;
-  }
-
-  .formFieldsWrapper::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  .formFieldsWrapper::-webkit-scrollbar-track {
-    background: #f0edeb;
-    border-radius: 4px;
-  }
-
-  .formFieldsWrapper::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
-    border-radius: 4px;
   }
 
   .stepIndicator {
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   .stepNumber {
@@ -1145,7 +1027,7 @@
   }
 
   .stepTitle {
-    font-size: 18px;
+    font-size: 20px;
   }
 
   .stepDesc {
@@ -1153,7 +1035,7 @@
   }
 
   .stepHeader {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
   }
 
   .formGroup {
@@ -1180,7 +1062,7 @@
   }
 
   .formRow {
-    gap: 10px;
+    gap: 12px;
   }
 
   .reviewGrid {
@@ -1189,9 +1071,12 @@
 
   .navigation {
     margin-top: 8px;
-    padding-top: 10px;
-    min-height: 52px;
+    padding: 10px 0 4px;
+    min-height: 48px;
     gap: 10px;
+    flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
   }
 
   .prevBtn,
@@ -1203,8 +1088,8 @@
   }
 
   .fileUploadArea {
-    padding: 12px 14px;
-    min-height: 70px;
+    padding: 10px 12px;
+    min-height: 60px;
   }
 
   .uploadIcon {
@@ -1212,11 +1097,11 @@
   }
 
   .fileUploadArea p {
-    font-size: 12px;
+    font-size: 11px;
   }
 
   .fileUploadArea span {
-    font-size: 10px;
+    font-size: 9px;
   }
 
   .categoryBtn {
@@ -1229,9 +1114,9 @@
   }
 
   .socialLinks input {
-    height: 38px;
+    height: 36px;
     padding: 8px 12px;
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .socialLinks {
@@ -1239,12 +1124,12 @@
   }
 
   .reviewSection {
-    padding: 12px 16px;
+    padding: 10px 14px;
     margin-bottom: 8px;
   }
 
   .reviewSection h4 {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .reviewGrid div {
@@ -1256,8 +1141,8 @@
   }
 
   .footer {
-    margin-top: 6px;
-    padding-top: 6px;
+    margin-top: 4px;
+    padding-top: 4px;
   }
 
   .footer p {
@@ -1270,12 +1155,12 @@
    ============================================ */
 @media (min-width: 1024px) {
   .leftPanel {
-    flex: 0 0 65%;
+    flex: 0 0 50%;
   }
 
   .rightPanel {
-    flex: 0 0 35%;
-    padding: 28px 40px 24px;
+    flex: 0 0 50%;
+    padding: 24px 36px 20px;
   }
 
   .title {
@@ -1283,11 +1168,11 @@
   }
 
   .subtitle {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .stepTitle {
-    font-size: 20px;
+    font-size: 22px;
   }
 
   .formGroup input,
@@ -1311,20 +1196,6 @@
     padding: 10px 28px;
     font-size: 14px;
   }
-
-  .imageTitle {
-    font-size: 40px;
-  }
-
-  .imageDesc {
-    font-size: 17px;
-  }
-
-  .imageContent {
-    bottom: 80px;
-    left: 60px;
-    max-width: 60%;
-  }
 }
 
 /* ============================================
@@ -1332,63 +1203,71 @@
    ============================================ */
 @media (max-width: 480px) {
   .rightPanel {
-    padding: 16px 14px 12px;
+    padding: 12px 12px 10px;
+    min-height: 100vh;
+  }
+
+  .container {
+    min-height: 100vh;
+  }
+
+  .card {
+    min-height: 100vh;
   }
 
   .title {
-    font-size: 24px;
-    letter-spacing: 1px;
+    font-size: 20px;
   }
 
   .subtitle {
-    font-size: 13px;
+    font-size: 11px;
   }
 
   .header {
-    margin-bottom: 12px;
+    margin-bottom: 8px;
   }
 
   .headerIcon {
-    width: 40px;
-    height: 40px;
+    width: 34px;
+    height: 34px;
   }
 
   .headerIconSvg {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .stepIndicator {
-    margin-bottom: 12px;
+    margin-bottom: 8px;
   }
 
   .stepNumber {
-    width: 30px;
-    height: 30px;
-    font-size: 12px;
+    width: 26px;
+    height: 26px;
+    font-size: 10px;
   }
 
   .stepLine {
-    top: 15px;
-    left: calc(50% + 15px);
-    right: calc(-50% + 15px);
+    top: 13px;
+    left: calc(50% + 13px);
+    right: calc(-50% + 13px);
   }
 
   .stepLabel {
-    font-size: 8px;
-    margin-top: 4px;
-    letter-spacing: 0.5px;
+    font-size: 6px;
+    margin-top: 2px;
+    letter-spacing: 0.3px;
   }
 
   .stepTitle {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .stepDesc {
-    font-size: 13px;
+    font-size: 11px;
   }
 
   .stepHeader {
-    margin-bottom: 12px;
+    margin-bottom: 8px;
   }
 
   .formRow {
@@ -1397,94 +1276,125 @@
   }
 
   .formGroup {
-    margin-bottom: 12px;
-    gap: 4px;
+    margin-bottom: 8px;
+    gap: 3px;
   }
 
   .formGroup label {
-    font-size: 13px;
+    font-size: 11px;
   }
 
   .formGroup input,
   .formGroup textarea,
   .formGroup select {
-    font-size: 13px;
-    padding: 10px 12px;
-    border-radius: 8px;
-    height: 42px;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    height: 34px;
   }
 
   .formGroup input::placeholder,
   .formGroup textarea::placeholder {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .categoryBtn {
-    font-size: 12px;
-    padding: 6px 14px;
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 14px;
+  }
+
+  .categoryGrid {
+    gap: 4px;
   }
 
   .navigation {
-    gap: 10px;
-    padding-top: 12px;
-    margin-top: 8px;
-    min-height: 52px;
+    gap: 8px;
+    padding: 8px 0 4px;
+    margin-top: 4px;
+    min-height: 42px;
+    flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
   }
 
   .prevBtn,
   .nextBtn {
-    padding: 10px 20px;
-    font-size: 13px;
-    min-width: 80px;
-    border-radius: 8px;
+    padding: 6px 16px;
+    font-size: 11px;
+    min-width: 70px;
+    border-radius: 6px;
   }
 
   .footer {
-    margin-top: 8px;
-    padding-top: 8px;
+    margin-top: 4px;
+    padding-top: 4px;
   }
 
   .footer p {
-    font-size: 13px;
+    font-size: 10px;
   }
 
   .reviewSection {
-    padding: 12px 14px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
   }
 
   .reviewSection h4 {
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .reviewGrid div {
-    font-size: 13px;
-  }
-
-  .checkboxLabel {
-    font-size: 13px;
-  }
-
-  .fileUploadArea {
-    padding: 16px 12px;
-    min-height: 80px;
-  }
-
-  .fileUploadArea p {
-    font-size: 13px;
-  }
-
-  .fileUploadArea span {
     font-size: 11px;
   }
 
+  .checkboxLabel {
+    font-size: 11px;
+  }
+
+  .fileUploadArea {
+    padding: 10px 8px;
+    min-height: 55px;
+  }
+
+  .fileUploadArea p {
+    font-size: 10px;
+  }
+
+  .fileUploadArea span {
+    font-size: 9px;
+  }
+
   .uploadIcon {
-    font-size: 24px;
+    font-size: 16px;
   }
 
   .socialLinks input {
-    font-size: 13px;
-    padding: 10px 12px;
-    height: 42px;
+    font-size: 12px;
+    padding: 6px 10px;
+    height: 32px;
+  }
+
+  .socialLinks {
+    gap: 4px;
+  }
+
+  .filePreview {
+    max-width: 60px;
+  }
+
+  .removeFile {
+    width: 16px;
+    height: 16px;
+    font-size: 9px;
+    top: -4px;
+    right: -4px;
+  }
+
+  .errorText,
+  .hint,
+  .validText {
+    font-size: 9px;
   }
 }
 
@@ -1498,6 +1408,7 @@
 
   .card {
     background: #2d2d2d;
+    border-color: rgba(212, 175, 55, 0.1);
   }
 
   .rightPanel {
@@ -1573,14 +1484,14 @@
   .formGroup select:focus {
     border-color: #d4af37;
     background: #3d3d3d;
-    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
   }
 
   .formGroup input.focused,
   .formGroup textarea.focused,
   .formGroup select.focused {
     border-color: #d4af37;
-    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
     background: #3d3d3d;
   }
 
