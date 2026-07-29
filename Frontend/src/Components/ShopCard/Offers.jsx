@@ -1,6 +1,6 @@
 // src/Components/Offers/Offers.jsx
 
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { FiArrowRight, FiArrowLeft, FiClock, FiZap } from "react-icons/fi";
 import styles from "./Offers.module.css";
 
@@ -32,12 +32,18 @@ const OFFER_PRODUCTS = [
   { id: "o8", name: "Gold Rate Discount", price: 8999, oldPrice: 12999, discount: 31, offerTag: "Gold Special", image: OFFER_IMAGES.gold },
 ];
 
-function ProductCard({ product }) {
+function ProductCard({ product, onClickCapture }) {
   const savings = product.oldPrice - product.price;
 
   return (
     <div className={styles.card}>
-      <a href={`/product/${product.id}`} className={styles.cardLink} aria-label={product.name}>
+      <a
+        href={`/product/${product.id}`}
+        className={styles.cardLink}
+        aria-label={product.name}
+        onClickCapture={onClickCapture}
+        draggable="false"
+      >
         <div className={styles.imageWrap}>
           <span className={styles.offerTag}>{product.offerTag}</span>
           <span className={styles.discountBurst}>
@@ -51,6 +57,7 @@ function ProductCard({ product }) {
               alt={product.name}
               className={styles.image}
               loading="lazy"
+              draggable="false"
             />
           ) : (
             <div className={styles.imagePlaceholder} aria-hidden="true" />
@@ -85,6 +92,9 @@ function ProductCard({ product }) {
 export default function Offers() {
   const scrollContainerRef = useRef(null);
 
+  // Drag-to-scroll (click + drag with the cursor, left to right)
+  const dragState = useRef({ isDown: false, startX: 0, startScrollLeft: 0, moved: false });
+
   const scrollLeft = () => {
     scrollContainerRef.current?.scrollBy({ left: -300, behavior: "smooth" });
   };
@@ -92,6 +102,53 @@ export default function Offers() {
   const scrollRight = () => {
     scrollContainerRef.current?.scrollBy({ left: 300, behavior: "smooth" });
   };
+
+  const handleMouseDown = (e) => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    dragState.current.isDown = true;
+    dragState.current.moved = false;
+    dragState.current.startX = e.pageX - el.offsetLeft;
+    dragState.current.startScrollLeft = el.scrollLeft;
+    el.classList.add(styles.dragging);
+  };
+
+  const endDrag = () => {
+    const el = scrollContainerRef.current;
+    dragState.current.isDown = false;
+    if (el) el.classList.remove(styles.dragging);
+  };
+
+  const handleMouseMove = (e) => {
+    const el = scrollContainerRef.current;
+    if (!el || !dragState.current.isDown) return;
+    e.preventDefault();
+    const x = e.pageX - el.offsetLeft;
+    const walk = x - dragState.current.startX;
+    if (Math.abs(walk) > 4) dragState.current.moved = true;
+    el.scrollLeft = dragState.current.startScrollLeft - walk;
+  };
+
+  // Prevent the click from firing (and navigating) right after a drag
+  const handleClickCapture = (e) => {
+    if (dragState.current.moved) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const onMouseLeave = () => endDrag();
+    const onMouseUp = () => endDrag();
+    el.addEventListener("mouseleave", onMouseLeave);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => {
+      el.removeEventListener("mouseleave", onMouseLeave);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
 
   const getTimeRemaining = () => {
     const now = new Date();
@@ -137,9 +194,14 @@ export default function Offers() {
           </div>
         </div>
 
-        <div className={styles.scrollContainer} ref={scrollContainerRef}>
+        <div
+          className={styles.scrollContainer}
+          ref={scrollContainerRef}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+        >
           {OFFER_PRODUCTS.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product.id} product={product} onClickCapture={handleClickCapture} />
           ))}
         </div>
       </div>
