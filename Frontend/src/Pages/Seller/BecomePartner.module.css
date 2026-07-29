@@ -7,28 +7,29 @@
   --gold: #d4af37;
   --gold-light: #f5f0e8;
   --gold-dark: #b8962e;
-  --cream: #fcf9f5;
+  --cream: #faf7f2;
+  --cream-light: #fdfbf8;
   --dark: #1a1a1a;
   --gray: #6b6b6b;
-  --light-gray: #f8f6f4;
+  --light-gray: #f5f0ea;
   --border: #e8e3dc;
   --shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.08);
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ============================================
-   PAGE - Base
+   PAGE - Cream Background
    ============================================ */
 .page {
   min-height: 100vh;
-  background: #ffffff;
+  /* background: var(--cream); */
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow-x: hidden;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px 40px;
+  /* padding: 0 20px 40px; */
   padding-top: 0 !important;
   margin-top: 0 !important;
   transform: translateZ(0);
@@ -49,13 +50,14 @@ html {
 }
 
 /* ============================================
-   SMOOTH ANIMATIONS - GPU Accelerated
+   SMOOTH ANIMATIONS
    ============================================ */
 .hero,
 .features,
 .benefits,
 .howItWorks,
 .cta,
+.marqueeSection,
 .featureCard,
 .step,
 .trustBadge,
@@ -66,18 +68,17 @@ html {
   will-change: transform, opacity;
   transform: translateZ(0);
   backface-visibility: hidden;
-  -webkit-font-smoothing: antialiased;
 }
 
 /* ============================================
-   HERO SECTION
+   HERO SECTION - Compact
    ============================================ */
 .hero {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 40px 0 30px;
-  gap: 30px;
+  padding: 30px 0 20px;
+  gap: 24px;
   transform: translateZ(0);
   opacity: 1;
 }
@@ -92,14 +93,14 @@ html {
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 6px 16px;
   background: var(--gold-light);
   border-radius: 50px;
   font-size: 12px;
   font-weight: 600;
   color: var(--gold-dark);
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .badgeIcon {
@@ -108,10 +109,10 @@ html {
 
 .heroTitle {
   font-family: 'Playfair Display', serif;
-  font-size: 34px;
+  font-size: 32px;
   font-weight: 700;
   color: var(--dark);
-  line-height: 1.15;
+  line-height: 1.2;
   margin: 0 0 12px;
 }
 
@@ -121,10 +122,10 @@ html {
 }
 
 .heroSubtitle {
-  font-size: 16px;
+  font-size: 15px;
   color: var(--gray);
   line-height: 1.7;
-  margin: 0 0 24px;
+  margin: 0 0 20px;
   padding: 0 10px;
   max-width: 600px;
   margin-left: auto;
@@ -134,8 +135,8 @@ html {
 .heroButtons {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 28px;
+  gap: 10px;
+  margin-bottom: 24px;
   max-width: 320px;
   margin-left: auto;
   margin-right: auto;
@@ -147,18 +148,19 @@ html {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 14px 28px;
+  padding: 12px 28px;
   background: var(--dark);
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   text-decoration: none;
   transition: var(--transition);
   width: 100%;
   transform: translateZ(0);
   cursor: pointer;
+  letter-spacing: 0.3px;
 }
 
 .primaryBtn:hover {
@@ -179,12 +181,12 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 14px 28px;
+  padding: 12px 28px;
   background: transparent;
   color: var(--dark);
-  border: 2px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   text-decoration: none;
   transition: var(--transition);
@@ -194,13 +196,13 @@ html {
 
 .secondaryBtn:hover {
   border-color: var(--dark);
-  background: #fafafa;
+  background: rgba(0, 0, 0, 0.02);
 }
 
 .heroStats {
   display: flex;
   justify-content: center;
-  gap: 24px;
+  gap: 30px;
   flex-wrap: wrap;
   width: 100%;
 }
@@ -210,7 +212,7 @@ html {
   flex-direction: column;
   align-items: center;
   flex: 1;
-  min-width: 80px;
+  min-width: 70px;
   transform: translateZ(0);
 }
 
@@ -224,13 +226,14 @@ html {
   font-size: 12px;
   color: var(--gray);
   margin-top: 2px;
+  font-weight: 500;
 }
 
 .heroImage {
   width: 100%;
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
-  min-height: 220px;
+  min-height: 200px;
   transform: translateZ(0);
   background: var(--light-gray);
 }
@@ -238,10 +241,10 @@ html {
 .heroImageImg {
   width: 100%;
   height: 100%;
-  min-height: 220px;
+  min-height: 200px;
   object-fit: cover;
   transition: transform 0.6s ease;
-  border-radius: 16px;
+  border-radius: 12px;
   transform: translateZ(0);
 }
 
@@ -250,25 +253,26 @@ html {
 }
 
 /* ============================================
-   TRUST BADGES
+   TRUST BADGES - Compact
    ============================================ */
 .trustBadges {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
-  padding: 10px 0 30px;
+  padding: 8px 0 20px;
 }
 
 .trustBadge {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 16px;
-  background: var(--light-gray);
+  padding: 10px 16px;
+  background: white;
   border-radius: 10px;
   border: 1px solid var(--border);
   transition: var(--transition);
   transform: translateZ(0);
+  box-shadow: var(--shadow);
 }
 
 .trustBadge:hover {
@@ -290,16 +294,16 @@ html {
 }
 
 /* ============================================
-   FEATURES
+   FEATURES - Compact Cards
    ============================================ */
 .features {
-  padding: 40px 0;
+  padding: 30px 0;
   transform: translateZ(0);
 }
 
 .sectionHeader {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .sectionBadge {
@@ -309,7 +313,7 @@ html {
   color: var(--gold-dark);
   letter-spacing: 2px;
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .sectionHeader h2 {
@@ -317,25 +321,26 @@ html {
   font-size: 28px;
   font-weight: 700;
   color: var(--dark);
-  margin: 0 0 8px;
+  margin: 0 0 6px;
 }
 
 .sectionHeader p {
   font-size: 15px;
   color: var(--gray);
   margin: 0;
+  line-height: 1.6;
 }
 
 .featuresGrid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
+  gap: 14px;
 }
 
 .featureCard {
   background: white;
-  padding: 24px 20px;
-  border-radius: 14px;
+  padding: 20px 18px;
+  border-radius: 12px;
   text-align: center;
   transition: var(--transition);
   box-shadow: var(--shadow);
@@ -350,9 +355,9 @@ html {
 }
 
 .featureIcon {
-  width: 50px;
-  height: 50px;
-  margin: 0 auto 12px;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 10px;
   background: var(--gold-light);
   border-radius: 50%;
   display: flex;
@@ -374,7 +379,7 @@ html {
   font-size: 16px;
   font-weight: 600;
   color: var(--dark);
-  margin: 0 0 6px;
+  margin: 0 0 4px;
 }
 
 .featureCard p {
@@ -385,25 +390,110 @@ html {
 }
 
 /* ============================================
-   BENEFITS
+   MARQUEE SECTION - Auto Scroll
+   ============================================ */
+.marqueeSection {
+  padding: 20px 0 30px;
+  overflow: hidden;
+  transform: translateZ(0);
+}
+
+.marqueeContainer {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.marqueeTrack {
+  display: flex;
+  gap: 16px;
+  animation: marqueeScroll 25s linear infinite;
+  width: max-content;
+}
+
+.marqueeTrack:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.marqueeCard {
+  flex: 0 0 220px;
+  background: white;
+  border-radius: 12px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+  transform: translateZ(0);
+}
+
+.marqueeCard:hover {
+  transform: translateY(-4px) translateZ(0);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--gold);
+}
+
+.marqueeCardContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.marqueeIcon {
+  font-size: 24px;
+  color: var(--gold-dark);
+  margin-bottom: 6px;
+}
+
+.marqueeCard h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark);
+  margin: 0 0 4px;
+}
+
+.marqueeTag {
+  font-size: 11px;
+  color: var(--gray);
+  margin: 0 0 6px;
+}
+
+.marqueePrice {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gold-dark);
+}
+
+/* ============================================
+   BENEFITS - Compact
    ============================================ */
 .benefits {
-  padding: 40px 0;
-  background: var(--light-gray);
-  border-radius: 16px;
+  padding: 30px 0;
+  background: white;
+  border-radius: 12px;
   margin: 0 -16px;
-  padding: 40px 16px;
+  padding: 30px 20px;
   transform: translateZ(0);
+  box-shadow: var(--shadow);
 }
 
 .benefitsContent {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 24px;
 }
 
 .benefitsLeft .badge {
-  background: white;
+  background: var(--gold-light);
   padding: 4px 14px;
   border-radius: 20px;
   font-size: 11px;
@@ -412,7 +502,7 @@ html {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .benefitsLeft h2 {
@@ -420,23 +510,23 @@ html {
   font-size: 26px;
   font-weight: 700;
   color: var(--dark);
-  margin: 0 0 10px;
+  margin: 0 0 8px;
 }
 
 .benefitsLeft > p {
   font-size: 15px;
   color: var(--gray);
   line-height: 1.7;
-  margin: 0 0 20px;
+  margin: 0 0 16px;
 }
 
 .benefitsList {
   list-style: none;
   padding: 0;
-  margin: 0 0 20px;
+  margin: 0 0 16px;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 8px;
+  gap: 6px;
 }
 
 .benefitsList li {
@@ -445,7 +535,7 @@ html {
   gap: 10px;
   font-size: 14px;
   color: var(--dark);
-  padding: 6px 0;
+  padding: 4px 0;
   transform: translateZ(0);
 }
 
@@ -465,7 +555,7 @@ html {
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   text-decoration: none;
   transition: var(--transition);
@@ -488,13 +578,40 @@ html {
   transform: translateX(4px);
 }
 
+/* Benefits Right - Image */
+.benefitsRight {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.benefitsImageWrapper {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--light-gray);
+}
+
+.benefitsImage {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px;
+  transition: transform 0.6s ease;
+}
+
+.benefitsImage:hover {
+  transform: scale(1.02);
+}
+
 /* ============================================
    TESTIMONIAL
    ============================================ */
 .testimonialCard {
-  background: white;
-  padding: 24px 20px;
-  border-radius: 14px;
+  background: var(--cream-light);
+  padding: 20px 18px;
+  border-radius: 12px;
   border: 1px solid var(--border);
   transition: var(--transition);
   transform: translateZ(0);
@@ -503,23 +620,23 @@ html {
 .testimonialCard:hover {
   border-color: var(--gold);
   box-shadow: var(--shadow-hover);
-  transform: translateY(-3px) translateZ(0);
+  transform: translateY(-2px) translateZ(0);
 }
 
 .testimonialStars {
   display: flex;
-  gap: 4px;
+  gap: 3px;
   color: var(--gold-dark);
   font-size: 14px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .testimonialQuote {
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.7;
   color: var(--dark);
   font-style: italic;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .testimonialAuthor {
@@ -554,27 +671,28 @@ html {
 }
 
 /* ============================================
-   HOW IT WORKS
+   HOW IT WORKS - Compact
    ============================================ */
 .howItWorks {
-  padding: 40px 0;
+  padding: 30px 0;
   transform: translateZ(0);
 }
 
 .steps {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
+  gap: 14px;
 }
 
 .step {
   text-align: center;
-  padding: 24px 16px;
+  padding: 20px 16px;
   background: white;
-  border-radius: 14px;
+  border-radius: 12px;
   border: 1px solid var(--border);
   transition: var(--transition);
   transform: translateZ(0);
+  box-shadow: var(--shadow);
 }
 
 .step:hover {
@@ -584,25 +702,25 @@ html {
 }
 
 .stepNumber {
-  width: 44px;
-  height: 44px;
-  margin: 0 auto 12px;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 10px;
   background: var(--dark);
   color: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   transform: translateZ(0);
 }
 
 .stepContent h3 {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--dark);
-  margin: 0 0 6px;
+  margin: 0 0 4px;
 }
 
 .stepContent p {
@@ -613,17 +731,17 @@ html {
 }
 
 /* ============================================
-   CTA
+   CTA - Compact
    ============================================ */
 .cta {
-  padding: 20px 0 0;
+  padding: 15px 0 0;
   transform: translateZ(0);
 }
 
 .ctaContent {
   background: var(--dark);
-  padding: 36px 24px;
-  border-radius: 16px;
+  padding: 30px 20px;
+  border-radius: 10px;
   text-align: center;
   color: white;
   position: relative;
@@ -636,11 +754,11 @@ html {
   align-items: center;
   gap: 6px;
   padding: 4px 14px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 50px;
   font-size: 11px;
   color: var(--gold);
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   position: relative;
   z-index: 1;
 }
@@ -653,18 +771,19 @@ html {
   font-family: 'Playfair Display', serif;
   font-size: 26px;
   font-weight: 700;
-  margin: 0 0 12px;
+  margin: 0 0 10px;
   position: relative;
   z-index: 1;
 }
 
 .ctaContent p {
   font-size: 15px;
-  opacity: 0.8;
-  margin: 0 0 24px;
+  opacity: 0.85;
+  margin: 0 0 20px;
   max-width: 100%;
   position: relative;
   z-index: 1;
+  line-height: 1.7;
 }
 
 .ctaBtn {
@@ -677,7 +796,7 @@ html {
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   text-decoration: none;
   transition: var(--transition);
@@ -703,7 +822,7 @@ html {
 }
 
 .ctaNote {
-  margin-top: 16px !important;
+  margin-top: 14px !important;
   font-size: 13px !important;
   opacity: 0.6 !important;
 }
@@ -736,16 +855,16 @@ html {
    ============================================ */
 @media (min-width: 600px) {
   .page {
-    padding: 0 30px 50px;
+    /* padding: 0 30px 40px; */
   }
 
   .hero {
-    padding: 60px 0 40px;
-    gap: 40px;
+    padding: 40px 0 30px;
+    gap: 30px;
   }
 
   .heroTitle {
-    font-size: 40px;
+    font-size: 38px;
   }
 
   .heroButtons {
@@ -757,15 +876,15 @@ html {
   .primaryBtn,
   .secondaryBtn {
     width: auto;
-    min-width: 200px;
+    min-width: 180px;
   }
 
   .heroStats {
-    gap: 32px;
+    gap: 30px;
   }
 
   .statNumber {
-    font-size: 28px;
+    font-size: 26px;
   }
 
   .trustBadges {
@@ -782,7 +901,7 @@ html {
 
   .benefits {
     margin: 0;
-    padding: 50px 32px;
+    padding: 30px 28px;
   }
 
   .benefitsBtn {
@@ -795,15 +914,15 @@ html {
 
   .ctaBtn {
     width: auto;
-    min-width: 250px;
+    min-width: 220px;
   }
 
   .ctaContent {
-    padding: 50px 40px;
+    padding: 40px 30px;
   }
 
   .ctaContent h2 {
-    font-size: 32px;
+    font-size: 30px;
   }
 
   .ctaContent p {
@@ -811,18 +930,36 @@ html {
     margin-left: auto;
     margin-right: auto;
   }
+
+  .marqueeCard {
+    flex: 0 0 200px;
+  }
+
+  .benefitsImage {
+    height: 250px;
+  }
+
+  .benefitsRight {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .benefitsRight .testimonialCard,
+  .benefitsRight .benefitsImageWrapper {
+    flex: 1;
+    min-width: 200px;
+  }
 }
 
 @media (min-width: 1024px) {
   .page {
-    padding: 0 40px 60px;
+    /* padding: 0 40px 50px; */
   }
 
   .hero {
     flex-direction: row;
-    padding: 80px 0 60px;
-    gap: 60px;
-    min-height: 80vh;
+    padding: 60px 0 40px;
+    gap: 50px;
   }
 
   .heroContent {
@@ -831,17 +968,18 @@ html {
   }
 
   .heroTitle {
-    font-size: 52px;
+    font-size: 48px;
   }
 
   .heroSubtitle {
     padding: 0;
     margin-left: 0;
+    font-size: 16px;
   }
 
   .heroButtons {
     justify-content: flex-start;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
   }
 
   .heroStats {
@@ -851,25 +989,25 @@ html {
   .heroImage {
     flex: 1;
     max-width: 45%;
-    min-height: 400px;
+    min-height: 350px;
   }
 
   .heroImageImg {
-    min-height: 400px;
+    min-height: 350px;
   }
 
   .featuresGrid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+    gap: 20px;
   }
 
   .featureCard {
-    padding: 32px 28px;
+    padding: 24px 20px;
   }
 
   .benefitsContent {
     flex-direction: row;
-    gap: 60px;
+    gap: 40px;
   }
 
   .benefitsLeft {
@@ -878,23 +1016,39 @@ html {
 
   .benefitsRight {
     flex: 1;
+    flex-direction: column;
+  }
+
+  .benefitsRight .testimonialCard,
+  .benefitsRight .benefitsImageWrapper {
+    flex: 1;
+    min-width: auto;
+  }
+
+  .benefitsImage {
+    height: 220px;
   }
 
   .steps {
     grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
+    gap: 20px;
   }
 
   .step {
-    padding: 32px 20px;
+    padding: 24px 18px;
   }
 
   .ctaContent {
-    padding: 60px;
+    padding: 50px 40px;
+    margin-bottom: 40px;
   }
 
   .ctaContent h2 {
-    font-size: 40px;
+    font-size: 36px;
+  }
+
+  .marqueeCard {
+    flex: 0 0 220px;
   }
 }
 
@@ -904,8 +1058,8 @@ html {
   }
 
   .hero {
-    padding: 30px 0 20px;
-    gap: 20px;
+    padding: 20px 0 15px;
+    gap: 16px;
   }
 
   .heroTitle {
@@ -924,11 +1078,11 @@ html {
   .primaryBtn,
   .secondaryBtn {
     font-size: 14px;
-    padding: 12px 20px;
+    padding: 10px 18px;
   }
 
   .heroStats {
-    gap: 12px;
+    gap: 14px;
   }
 
   .statNumber {
@@ -936,7 +1090,7 @@ html {
   }
 
   .statLabel {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .heroImage {
@@ -950,11 +1104,11 @@ html {
   .trustBadges {
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
-    padding: 8px 0 20px;
+    padding: 6px 0 16px;
   }
 
   .trustBadge {
-    padding: 10px 12px;
+    padding: 8px 12px;
     font-size: 12px;
   }
 
@@ -971,7 +1125,7 @@ html {
   }
 
   .featureCard {
-    padding: 20px 16px;
+    padding: 16px 14px;
   }
 
   .featureIcon {
@@ -989,7 +1143,7 @@ html {
   }
 
   .benefits {
-    padding: 30px 12px;
+    padding: 24px 14px;
     margin: 0 -12px;
   }
 
@@ -1007,29 +1161,33 @@ html {
 
   .benefitsBtn {
     font-size: 14px;
-    padding: 10px 20px;
+    padding: 10px 18px;
+  }
+
+  .benefitsImage {
+    height: 160px;
   }
 
   .testimonialCard {
-    padding: 20px 16px;
+    padding: 16px 14px;
   }
 
   .testimonialQuote {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .step {
-    padding: 20px 14px;
+    padding: 16px 14px;
   }
 
   .stepNumber {
-    width: 38px;
-    height: 38px;
-    font-size: 16px;
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
   }
 
   .stepContent h3 {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .stepContent p {
@@ -1037,7 +1195,7 @@ html {
   }
 
   .ctaContent {
-    padding: 28px 16px;
+    padding: 24px 16px;
   }
 
   .ctaContent h2 {
@@ -1050,11 +1208,28 @@ html {
 
   .ctaBtn {
     font-size: 14px;
-    padding: 12px 24px;
+    padding: 12px 20px;
   }
 
   .ctaNote {
     font-size: 12px !important;
+  }
+
+  .marqueeCard {
+    flex: 0 0 160px;
+    padding: 12px 14px;
+  }
+
+  .marqueeCard h4 {
+    font-size: 12px;
+  }
+
+  .marqueePrice {
+    font-size: 14px;
+  }
+
+  .marqueeIcon {
+    font-size: 20px;
   }
 }
 
@@ -1065,24 +1240,28 @@ html {
   }
   
   .heroImage {
-    min-height: 180px;
+    min-height: 170px;
   }
   
   .heroImageImg {
-    min-height: 180px;
+    min-height: 170px;
   }
 
   .featuresGrid {
-    gap: 12px;
+    gap: 10px;
   }
 
   .steps {
-    gap: 12px;
+    gap: 10px;
   }
 
   .benefits {
-    margin: 0 -12px;
-    padding: 30px 12px;
+    margin: 0;
+    padding: 24px 14px;
+  }
+
+  .marqueeTrack {
+    animation-duration: 20s;
   }
 }
 
@@ -1096,11 +1275,24 @@ html {
     transition-duration: 0.01ms !important;
   }
   
+  .marqueeTrack {
+    animation: none !important;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+  
+  .marqueeCard {
+    flex: 0 0 auto !important;
+  }
+
   .hero,
   .features,
   .benefits,
   .howItWorks,
   .cta,
+  .marqueeSection,
   .featureCard,
   .step,
   .trustBadge,
@@ -1108,6 +1300,7 @@ html {
     will-change: auto;
     transform: none !important;
     backface-visibility: visible;
+    opacity: 1 !important;
   }
 }
 
@@ -1125,13 +1318,14 @@ html {
 @media print {
   .page {
     padding: 0 !important;
-    max-width: 100% !important;
+    max-width: 1200px !important;
   }
   
   .heroButtons,
   .benefitsCta,
   .ctaBtn,
-  .ctaNote {
+  .ctaNote,
+  .marqueeSection {
     display: none !important;
   }
 }
