@@ -8,14 +8,14 @@ import styles from "./Offers.module.css";
 // OFFERS IMAGES
 // ==========================================================
 const OFFER_IMAGES = {
-  diwali: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&h=500&fit=crop&crop=center&q=80",
-  summer: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500&h=500&fit=crop&crop=center&q=80",
-  festive: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500&h=500&fit=crop&crop=center&q=80",
-  clearance: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500&h=500&fit=crop&crop=center&q=80",
-  bridal: "https://images.unsplash.com/photo-1611085583191-a3b181f3d6c0?w=500&h=500&fit=crop&crop=center&q=80",
-  anniversary: "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=500&h=500&fit=crop&crop=center&q=80",
-  wedding: "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=500&h=500&fit=crop&crop=center&q=80",
-  gold: "https://images.unsplash.com/photo-1589128777073-4375663d2ed2?w=500&h=500&fit=crop&crop=center&q=80",
+  diwali: "https://i.pinimg.com/1200x/d0/53/0d/d0530dca94a42e2caef39cc9dd740dde.jpg",
+  summer: "https://i.pinimg.com/736x/2e/42/64/2e4264277939897b5a3ed0b996f148bf.jpg",
+  festive: "https://i.pinimg.com/1200x/dc/b9/9d/dcb99d9fd6de932c239de89b0ad6e684.jpg",
+  clearance: "https://i.pinimg.com/736x/b0/e6/27/b0e62737469ed749d17bb85563ce05ac.jpg",
+  bridal: "https://i.pinimg.com/736x/8d/7a/92/8d7a923b009698993ffeede1c68b7a92.jpg",
+  anniversary: "https://i.pinimg.com/736x/1f/5c/34/1f5c3450b9e81721e97df7486bf97c28.jpg",
+  wedding: "https://i.pinimg.com/736x/ba/92/43/ba9243fb483eb668e44d9fdccb1afb40.jpg",
+  gold: "https://i.pinimg.com/736x/f9/d6/06/f9d606f3f13a92ebdaa8009877864878.jpg",
 };
 
 // ==========================================================
