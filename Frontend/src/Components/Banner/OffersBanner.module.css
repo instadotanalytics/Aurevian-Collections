@@ -1,8 +1,17 @@
 /* src/Components/Banner/OffersBanner.module.css */
 
+/*
+  Design tokens (kept consistent with the rest of the site)
+  --card:   #faf7f1  off-white / cream
+  --ink:    #0a2216  deep green (primary heading color)
+  --brown:  #5c3d2e  warm brown (body text)
+  --gold:   #d4af6a  gold accent
+  --gold-d: #8b6914  deeper gold (small caps / labels)
+*/
+
 .offersSection {
   width: 100%;
-  padding: 40px 0;
+  padding: 36px 0;
   background: #faf7f1;
 }
 
@@ -16,65 +25,167 @@
 .bannerContainer {
   position: relative;
   width: 100%;
-  min-height: 500px;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  border-radius: 16px;
+  min-height: 460px;
+  border-radius: 18px;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
 }
 
-/* Decorative White Border */
-.decorativeBorder {
+/* ---------- Slide ---------- */
+
+.slide {
   position: absolute;
-  top: 20px;
-  left: 20px;
-  right: 20px;
-  bottom: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.6);
-  border-radius: 12px;
-  pointer-events: none;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.9s ease,
+    visibility 0.9s ease;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  overflow: hidden;
+  border-radius: 18px;
+  min-height: 460px;
+}
+
+.slide.activeSlide {
+  opacity: 1;
+  visibility: visible;
+  position: relative;
   z-index: 1;
 }
 
-/* Content */
-.contentWrapper {
+/* Alternate the card side per slide for an editorial, non-templated rhythm */
+.slide:nth-child(even) {
+  justify-content: flex-end;
+}
+
+.slideBg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transform: scale(1.09);
+  transition: transform 6.5s ease-out;
+}
+
+.activeSlide .slideBg {
+  transform: scale(1);
+}
+
+/* ---------- Corner appraisal marks (signature detail) ---------- */
+
+.cornerMarks span {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid rgba(250, 247, 241, 0.85);
+  opacity: 0.9;
+  z-index: 2;
+}
+
+.cornerTL {
+  top: 18px;
+  left: 18px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.cornerTR {
+  top: 18px;
+  right: 18px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.cornerBL {
+  bottom: 18px;
+  left: 18px;
+  border-right: none;
+  border-top: none;
+}
+
+.cornerBR {
+  bottom: 18px;
+  right: 18px;
+  border-left: none;
+  border-top: none;
+}
+
+/* ---------- Content Card ---------- */
+
+.card {
   position: relative;
   z-index: 3;
-  max-width: 560px;
-  text-align: center;
-  padding: 48px 52px;
-  background: rgba(10, 34, 22, 0.5);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  max-width: 420px;
+  margin: 0 0 36px 36px;
+  background: linear-gradient(
+    155deg,
+    rgba(250, 247, 241, 0.62),
+    rgba(250, 247, 241, 0.42)
+  );
+  backdrop-filter: blur(22px) saturate(1.5);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 18px;
+  box-shadow:
+    0 24px 50px -18px rgba(10, 34, 22, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  padding: 34px 38px 30px 38px;
+  opacity: 0;
+  transform: translateX(-22px);
+  transition:
+    opacity 0.7s ease 0.15s,
+    transform 0.7s ease 0.15s;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 22px;
+  right: 22px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #d4af6a 30%,
+    #d4af6a 70%,
+    transparent
+  );
+  opacity: 0.85;
+}
+
+.slide:nth-child(even) .card {
+  margin: 0 36px 36px 0;
+  transform: translateX(22px);
+}
+
+.showCard {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .eyebrow {
-  display: inline-block;
+  display: block;
   font-family: "Manrope", sans-serif;
   font-size: 12px;
   font-weight: 600;
-  letter-spacing: 4px;
+  letter-spacing: 3px;
   text-transform: uppercase;
-  color: #d4af6a;
-  margin-bottom: 18px;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  color: #8b6914;
+  margin-bottom: 10px;
 }
 
 .title {
   font-family: "Cormorant Garamond", serif;
   font-weight: 500;
-  font-size: 48px;
-  line-height: 1.15;
-  color: #faf7f1;
-  margin: 0 0 20px 0;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  font-style: italic;
+  font-size: 36px;
+  line-height: 1.12;
+  color: #0a2216;
+  margin: 0 0 14px 0;
 }
 
 .wordWrapper {
@@ -85,14 +196,14 @@
 .animatedWord {
   display: inline-block;
   opacity: 0;
-  transform: translateY(40px);
-  animation: wordFadeIn 0.8s ease forwards;
+  transform: translateY(30px);
+  animation: wordFadeIn 0.7s ease forwards;
 }
 
 @keyframes wordFadeIn {
   0% {
     opacity: 0;
-    transform: translateY(40px);
+    transform: translateY(30px);
   }
   100% {
     opacity: 1;
@@ -103,90 +214,117 @@
 .divider {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
 .dividerLine {
-  width: 40px;
+  width: 32px;
   height: 1px;
   background: #d4af6a;
 }
 
 .dividerDot {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
   background: #d4af6a;
 }
 
 .subtext {
   font-family: "Manrope", sans-serif;
-  font-size: 16px;
-  font-weight: 300;
-  color: #e2dccf;
-  line-height: 1.6;
-  margin: 0 0 8px 0;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.55;
+  color: #5c3d2e;
+  margin: 0 0 6px 0;
 }
 
 .offer {
   font-family: "Cormorant Garamond", serif;
-  font-size: 28px;
+  font-size: 20px;
   font-style: italic;
-  color: #d4af6a;
-  margin: 8px 0 24px 0;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
-  letter-spacing: 1px;
+  color: #8b6914;
+  margin: 4px 0 20px 0;
+  letter-spacing: 0.3px;
 }
 
 .cta {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   font-family: "Manrope", sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
   text-transform: uppercase;
-  color: #faf7f1;
   text-decoration: none;
-  padding: 12px 32px;
-  border: 2px solid #d4af6a;
-  border-radius: 30px;
-  transition: all 0.35s ease;
+  color: #0a2216;
+  padding: 11px 26px;
+  border: 1.5px solid #0a2216;
+  border-radius: 26px;
+  transition: all 0.3s ease;
   width: fit-content;
-  margin: 0 auto;
-  background: rgba(212, 175, 106, 0.1);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .cta svg {
-  transition: transform 0.35s ease;
+  transition: transform 0.3s ease;
 }
 
 .cta:hover {
-  background: rgba(212, 175, 106, 0.25);
-  gap: 18px;
-  border-color: #faf7f1;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(212, 175, 106, 0.2);
+  background: #0a2216;
+  color: #faf7f1;
+  gap: 14px;
 }
 
 .cta:hover svg {
-  transform: translateX(6px);
+  transform: translateX(5px);
 }
 
-/* Loading skeleton */
+/* ---------- Dots Navigation ---------- */
+
+.dotsContainer {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(250, 247, 241, 0.5);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.dot:hover {
+  background: rgba(250, 247, 241, 0.8);
+}
+
+.activeDot {
+  background: #d4af6a;
+  width: 22px;
+  border-radius: 5px;
+}
+
+/* ---------- Loading skeleton ---------- */
+
 .skeletonBanner {
   background: linear-gradient(90deg, #e4ded1 25%, #f0ece2 50%, #e4ded1 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
-  min-height: 500px;
+  min-height: 460px;
   max-width: 1200px;
   margin: 0 auto;
-  border-radius: 16px;
+  border-radius: 18px;
 }
 
 @keyframes shimmer {
@@ -198,125 +336,249 @@
   }
 }
 
-/* Responsive */
+/* ---------- Responsive ---------- */
+
 @media (max-width: 1024px) {
-  .title {
-    font-size: 40px;
+  .bannerContainer,
+  .slide {
+    min-height: 420px;
   }
 
-  .contentWrapper {
-    max-width: 480px;
-    padding: 36px 40px;
-  }
-
-  .offer {
-    font-size: 24px;
-  }
-}
-
-@media (max-width: 768px) {
-  .offersSection {
-    padding: 30px 0;
-  }
-
-  .bannerContainer {
-    min-height: 400px;
-    padding: 30px;
-  }
-
-  .contentWrapper {
-    max-width: 100%;
-    padding: 28px 24px;
+  .card,
+  .slide:nth-child(even) .card {
+    max-width: 360px;
   }
 
   .title {
     font-size: 32px;
   }
+}
+
+@media (max-width: 768px) {
+  .offersSection {
+    padding: 26px 0;
+  }
+
+  .bannerContainer,
+  .slide {
+    min-height: 380px;
+    border-radius: 14px;
+  }
+
+  .slide {
+    align-items: flex-end;
+    justify-content: center !important;
+  }
+
+  /* Bottom scrim replaces the glass card — text now sits directly on the
+     image, so contrast has to come from the gradient instead of a panel */
+  .slide::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: linear-gradient(
+      to top,
+      rgba(6, 20, 13, 0.78) 0%,
+      rgba(6, 20, 13, 0.5) 32%,
+      rgba(6, 20, 13, 0.12) 62%,
+      rgba(6, 20, 13, 0) 85%
+    );
+  }
+
+  .card,
+  .slide:nth-child(even) .card {
+    max-width: none;
+    width: calc(100% - 40px);
+    margin: 0 20px 22px 20px;
+    background: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+    transform: translateY(14px);
+  }
+
+  .card::before {
+    display: none;
+  }
+
+  .showCard {
+    transform: translateY(0);
+  }
+
+  /* Text now reads directly over the image — light theme + shadow for
+     contrast on any background, brand colors kept consistent.
+     Spacing is deliberately tight here: the desktop rhythm (built for a
+     roomy card) reads as gaps once there's no box holding it together. */
+  .eyebrow {
+    color: #d4af6a;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+  }
+
+  .title {
+    color: #faf7f1;
+    font-size: 26px;
+    line-height: 1.08;
+    margin: 0 0 8px 0;
+    text-shadow: 0 3px 16px rgba(0, 0, 0, 0.7);
+  }
+
+  .divider {
+    margin-bottom: 8px;
+  }
+
+  .dividerLine {
+    width: 22px;
+    background: #d4af6a;
+  }
+
+  .dividerDot {
+    background: #d4af6a;
+  }
 
   .subtext {
-    font-size: 14px;
+    color: #f0ece2;
+    font-size: 13px;
+    line-height: 1.4;
+    margin: 0 0 2px 0;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
   }
 
   .offer {
-    font-size: 22px;
+    color: #d4af6a;
+    font-size: 15px;
+    margin: 0 0 12px 0;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
   }
 
-  .decorativeBorder {
-    top: 12px;
-    left: 12px;
-    right: 12px;
-    bottom: 12px;
+  .cta {
+    color: #faf7f1;
+    border-color: #d4af6a;
+    background: rgba(212, 175, 106, 0.14);
+    padding: 9px 22px;
+    font-size: 11px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  }
+
+  .cta:hover {
+    background: rgba(212, 175, 106, 0.3);
+    color: #faf7f1;
+  }
+
+  .cornerMarks {
+    display: none;
   }
 
   .skeletonBanner {
-    min-height: 400px;
+    min-height: 380px;
+    border-radius: 14px;
   }
 }
 
 @media (max-width: 480px) {
   .offersSection {
-    padding: 20px 0;
+    padding: 18px 0;
   }
 
   .bannerWrapper {
     padding: 0 12px;
   }
 
-  .bannerContainer {
-    min-height: 320px;
-    padding: 16px;
+  .bannerContainer,
+  .slide {
+    min-height: 300px;
     border-radius: 12px;
   }
 
-  .contentWrapper {
-    padding: 20px 16px;
-    border-radius: 12px;
-  }
-
-  .title {
-    font-size: 26px;
+  .card,
+  .slide:nth-child(even) .card {
+    width: calc(100% - 24px);
+    margin: 0 12px 16px 12px;
+    padding: 0;
+    border-radius: 0;
   }
 
   .eyebrow {
-    font-size: 10px;
-    letter-spacing: 3px;
-    margin-bottom: 12px;
+    font-size: 9px;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
   }
 
-  .subtext {
-    font-size: 12px;
-  }
-
-  .offer {
-    font-size: 18px;
-    margin: 4px 0 16px 0;
-  }
-
-  .cta {
-    font-size: 11px;
-    padding: 10px 20px;
-  }
-
-  .decorativeBorder {
-    top: 8px;
-    left: 8px;
-    right: 8px;
-    bottom: 8px;
-    border-width: 1.5px;
-    border-radius: 8px;
-  }
-
-  .skeletonBanner {
-    min-height: 320px;
-    border-radius: 12px;
+  .title {
+    font-size: 19px;
+    margin: 0 0 8px 0;
   }
 
   .divider {
-    gap: 6px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   .dividerLine {
-    width: 24px;
+    width: 22px;
+  }
+
+  .subtext {
+    font-size: 11px;
+    margin: 0 0 4px 0;
+  }
+
+  .offer {
+    font-size: 14px;
+    margin: 2px 0 12px 0;
+  }
+
+  .cta {
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 8px 18px;
+    gap: 6px;
+  }
+
+  .cta:hover {
+    gap: 8px;
+  }
+
+  .skeletonBanner {
+    min-height: 300px;
+    border-radius: 12px;
+  }
+
+  .dotsContainer {
+    bottom: 8px;
+    gap: 7px;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .activeDot {
+    width: 16px;
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .slideBg,
+  .card,
+  .animatedWord,
+  .cta,
+  .cta svg {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .activeSlide .slideBg {
+    transform: none !important;
   }
 }
