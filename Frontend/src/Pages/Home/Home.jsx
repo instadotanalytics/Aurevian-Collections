@@ -16,8 +16,8 @@ import Footer from "../Layout/Footer/Footer";
 const Home = () => {
   return (
     <div>
-      <HomeBanner />
       <ShopByCategory />
+      <HomeBanner />
       <ShopCardCategory />
       <NewArrivalsBanner />
       <NewCollections />
