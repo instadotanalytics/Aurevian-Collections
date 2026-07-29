@@ -75,11 +75,12 @@ const GiftGuideBanner = () => {
       textColor: "light",
       textAlign: "left",
     },
+    // In the staticBanners array, update the fifth banner:
     {
       _id: "5",
       title: "Corporate Gifting",
-      subtitle: "Impress with sophistication",
-      subtext: "Premium gifts for your clients",
+      subtitle: "Impress with Sophistication",
+      subtext: "Premium gifts for your clients", // Shortened
       offer: "Corporate Collection",
       image: {
         url: "https://i.pinimg.com/1200x/cb/a7/ac/cba7ac799d0958e903a3216352bad1cf.jpg",
@@ -87,7 +88,7 @@ const GiftGuideBanner = () => {
       buttonText: "Explore Corporate Gifts",
       buttonLink: "/gifts/corporate",
       placement: "giftGuide",
-      textColor: "dark", // Changed from light to dark
+      textColor: "dark",
       textAlign: "left",
     },
   ];

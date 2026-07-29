@@ -2,9 +2,11 @@
 
 .bannerWrapper {
   width: 100%;
-  margin: 0;
+  margin: 0 auto;
+  max-width: 1200px;
   position: relative;
   overflow: hidden;
+  padding: 0 20px;
 }
 
 .bannerContainer {
@@ -12,6 +14,7 @@
   width: 100%;
   min-height: 480px;
   overflow: hidden;
+  border-radius: 12px;
 }
 
 .slide {
@@ -31,6 +34,7 @@
   background-position: center;
   background-repeat: no-repeat;
   min-height: 480px;
+  border-radius: 12px;
 }
 
 .slide.activeSlide {
@@ -57,32 +61,38 @@
   transform: translateY(0);
 }
 
-/* ============================================
-   LIGHT TEXT (for dark backgrounds)
-   ============================================ */
+/* Light Text (default for dark backgrounds) */
 .lightText .eyebrow {
   color: #d4af6a;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  text-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.8),
+    0 0 30px rgba(0, 0, 0, 0.3);
 }
 
 .lightText .title {
   color: #faf7f1;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+  text-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.9),
+    0 0 40px rgba(0, 0, 0, 0.4);
 }
 
 .lightText .subtext {
   color: #e2dccf;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  text-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.8),
+    0 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .lightText .offer {
   color: #d4af6a;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  text-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.8),
+    0 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .lightText .cta {
   color: #faf7f1;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
   border-bottom-color: #d4af6a;
 }
 
@@ -98,32 +108,38 @@
   background: #d4af6a;
 }
 
-/* ============================================
-   DARK TEXT (for light backgrounds)
-   ============================================ */
+/* Dark Text (for light backgrounds) */
 .darkText .eyebrow {
   color: #0a2216;
-  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
+  text-shadow:
+    0 2px 12px rgba(255, 255, 255, 0.5),
+    0 0 30px rgba(255, 255, 255, 0.2);
 }
 
 .darkText .title {
   color: #0a2216;
-  text-shadow: 0 2px 12px rgba(255, 255, 255, 0.2);
+  text-shadow:
+    0 4px 20px rgba(255, 255, 255, 0.6),
+    0 0 40px rgba(255, 255, 255, 0.3);
 }
 
 .darkText .subtext {
   color: #1a3a2a;
-  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+  text-shadow:
+    0 2px 12px rgba(255, 255, 255, 0.5),
+    0 0 20px rgba(255, 255, 255, 0.2);
 }
 
 .darkText .offer {
   color: #106b47;
-  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+  text-shadow:
+    0 2px 12px rgba(255, 255, 255, 0.5),
+    0 0 20px rgba(255, 255, 255, 0.2);
 }
 
 .darkText .cta {
   color: #0a2216;
-  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+  text-shadow: 0 2px 12px rgba(255, 255, 255, 0.5);
   border-bottom-color: #106b47;
 }
 
@@ -139,28 +155,7 @@
   background: #0a2216;
 }
 
-/* ============================================
-   TEXT ALIGNMENT
-   ============================================ */
-.leftAligned {
-  padding-left: 80px;
-  padding-right: 0;
-  text-align: left;
-  margin-left: 0;
-  margin-right: auto;
-}
-
-.rightAligned {
-  padding-left: 0;
-  padding-right: 80px;
-  text-align: right;
-  margin-left: auto;
-  margin-right: 0;
-}
-
-/* ============================================
-   INDIVIDUAL ELEMENT STYLES (fallback)
-   ============================================ */
+/* Individual element styles (fallback) */
 .eyebrow {
   display: inline-block;
   font-family: "Manrope", sans-serif;
@@ -263,9 +258,24 @@
   transform: translateX(6px);
 }
 
-/* ============================================
-   DOTS NAVIGATION
-   ============================================ */
+/* Text Alignment */
+.leftAligned {
+  padding-left: 80px;
+  padding-right: 0;
+  text-align: left;
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.rightAligned {
+  padding-left: 0;
+  padding-right: 80px;
+  text-align: right;
+  margin-left: auto;
+  margin-right: 0;
+}
+
+/* Dots Navigation */
 .dotsContainer {
   display: flex;
   justify-content: center;
@@ -300,15 +310,14 @@
   border-radius: 6px;
 }
 
-/* ============================================
-   LOADING SKELETON
-   ============================================ */
+/* Loading skeleton */
 .skeletonBanner {
   background: linear-gradient(90deg, #e4ded1 25%, #f0ece2 50%, #e4ded1 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   min-height: 480px;
   margin: 0;
+  border-radius: 12px;
 }
 
 @keyframes shimmer {
@@ -343,12 +352,18 @@
 }
 
 @media (max-width: 768px) {
+  .bannerWrapper {
+    padding: 0 16px;
+  }
+
   .bannerContainer {
     min-height: 380px;
+    border-radius: 8px;
   }
 
   .slide {
     min-height: 380px;
+    border-radius: 8px;
   }
 
   .content {
@@ -362,6 +377,7 @@
 
   .skeletonBanner {
     min-height: 380px;
+    border-radius: 8px;
   }
 
   .dotsContainer {
@@ -381,63 +397,182 @@
 }
 
 @media (max-width: 480px) {
+  .bannerWrapper {
+    padding: 0 12px;
+  }
+
   .bannerContainer {
-    min-height: 320px;
+    min-height: 280px;
+    border-radius: 6px;
   }
 
   .slide {
-    min-height: 320px;
+    min-height: 280px;
+    border-radius: 6px;
   }
 
   .content {
-    padding-left: 20px;
-    padding-right: 20px;
-    max-width: 90%;
+    padding-left: 16px;
+    padding-right: 16px;
+    max-width: 100%;
+    width: 90%;
+    position: relative;
+    isolation: isolate;
+  }
+
+  /* Directional scrim — only for light/white text, fades naturally into the image */
+  .leftAligned.lightText::before,
+  .leftAligned.whiteText::before,
+  .rightAligned.lightText::before,
+  .rightAligned.whiteText::before {
+    content: "";
+    position: absolute;
+    inset: -20px;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .leftAligned.lightText::before,
+  .leftAligned.whiteText::before {
+    background: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.55) 0%,
+      rgba(0, 0, 0, 0.35) 55%,
+      rgba(0, 0, 0, 0) 100%
+    );
+  }
+
+  .rightAligned.lightText::before,
+  .rightAligned.whiteText::before {
+    background: linear-gradient(
+      to left,
+      rgba(0, 0, 0, 0.55) 0%,
+      rgba(0, 0, 0, 0.35) 55%,
+      rgba(0, 0, 0, 0) 100%
+    );
+  }
+
+  /* Smaller font sizes for mobile */
+  .eyebrow {
+    font-size: 8px;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
   }
 
   .title {
-    font-size: 26px;
+    font-size: 20px;
+    line-height: 1.2;
+    margin: 0 0 10px 0;
   }
 
-  .eyebrow {
-    font-size: 10px;
-    letter-spacing: 3px;
+  .divider {
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .dividerLine {
+    width: 20px;
+  }
+
+  .dividerDot {
+    width: 3px;
+    height: 3px;
   }
 
   .subtext {
-    font-size: 13px;
+    font-size: 11px;
+    line-height: 1.4;
+    margin: 0 0 4px 0;
   }
 
   .offer {
-    font-size: 20px;
+    font-size: 16px;
+    margin: 2px 0 14px 0;
+  }
+
+  .cta {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    gap: 8px;
+    padding-bottom: 4px;
+  }
+
+  .cta svg {
+    width: 12px;
+    height: 9px;
   }
 
   .skeletonBanner {
-    min-height: 320px;
+    min-height: 280px;
+    border-radius: 6px;
   }
 
   .dotsContainer {
-    bottom: 8px;
-    gap: 8px;
-    padding: 12px 0;
+    bottom: 6px;
+    gap: 6px;
+    padding: 8px 0;
   }
 
   .dot {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   .activeDot {
-    width: 24px;
+    width: 18px;
+    border-radius: 4px;
   }
 
   .leftAligned {
-    padding-left: 20px;
-    padding-right: 12px;
+    padding-left: 16px;
+    padding-right: 10px;
   }
 
   .rightAligned {
-    padding-right: 20px;
-    padding-left: 12px;
+    padding-right: 16px;
+    padding-left: 10px;
+    text-align: right;
+  }
+
+  /* Enhanced text shadows for mobile readability */
+  .lightText .eyebrow,
+  .lightText .subtext,
+  .lightText .offer,
+  .whiteText .eyebrow,
+  .whiteText .subtext,
+  .whiteText .offer {
+    text-shadow:
+      0 2px 10px rgba(0, 0, 0, 0.9),
+      0 0 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .lightText .title,
+  .whiteText .title {
+    text-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.95),
+      0 0 40px rgba(0, 0, 0, 0.6);
+  }
+
+  .lightText .cta,
+  .whiteText .cta {
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+  }
+
+  .darkText .eyebrow,
+  .darkText .subtext,
+  .darkText .offer {
+    text-shadow:
+      0 2px 10px rgba(255, 255, 255, 0.7),
+      0 0 30px rgba(255, 255, 255, 0.4);
+  }
+
+  .darkText .title {
+    text-shadow:
+      0 4px 16px rgba(255, 255, 255, 0.8),
+      0 0 40px rgba(255, 255, 255, 0.5);
+  }
+
+  .darkText .cta {
+    text-shadow: 0 2px 10px rgba(255, 255, 255, 0.7);
   }
 }
