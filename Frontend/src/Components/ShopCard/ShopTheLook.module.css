@@ -65,7 +65,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 9 / 16;
-  border-radius: 16px;
+  /* border-radius: 16px; */
   overflow: hidden;
   background: #000;
 }

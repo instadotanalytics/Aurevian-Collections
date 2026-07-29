@@ -44,6 +44,7 @@ const SellerRegister = () => {
   const [loading, setLoading] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
+  const [isFocused, setIsFocused] = useState({});
 
   // Step images mapping
   const stepImages = {
@@ -58,7 +59,7 @@ const SellerRegister = () => {
   const stepInfo = {
     1: {
       title: 'Personal Information',
-      description: 'Fill your personal details',
+      description: 'Enter your personal details',
     },
     2: {
       title: 'PAN Card Details',
@@ -147,24 +148,6 @@ const SellerRegister = () => {
     { value: 'other', label: '📦 Other' },
   ];
 
-  const trustFeatures = [
-    {
-      icon: <FiShield />,
-      title: 'Trusted Platform',
-      description: 'Secure & Reliable Marketplace'
-    },
-    {
-      icon: <FiTrendingUp />,
-      title: 'Grow Your Business',
-      description: 'Reach Luxury Customers Worldwide'
-    },
-    {
-      icon: <FiStar />,
-      title: 'More Sales, More Success',
-      description: "We're here to help you grow"
-    }
-  ];
-
   // OTP Timer
   useEffect(() => {
     if (resendTimer > 0) {
@@ -210,6 +193,14 @@ const SellerRegister = () => {
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
+  };
+
+  const handleFocus = (field) => {
+    setIsFocused(prev => ({ ...prev, [field]: true }));
+  };
+
+  const handleBlur = (field) => {
+    setIsFocused(prev => ({ ...prev, [field]: false }));
   };
 
   const handleSocialLink = (platform, value) => {
@@ -315,7 +306,6 @@ const SellerRegister = () => {
   const handleNext = () => {
     if (validateStep(currentStep)) {
       setCurrentStep(prev => prev + 1);
-      // Scroll to top of form on step change
       const formElement = document.querySelector(`.${styles.form}`);
       if (formElement) {
         formElement.scrollTop = 0;
@@ -327,7 +317,6 @@ const SellerRegister = () => {
 
   const handlePrevious = () => {
     setCurrentStep(prev => prev - 1);
-    // Scroll to top of form on step change
     const formElement = document.querySelector(`.${styles.form}`);
     if (formElement) {
       formElement.scrollTop = 0;
@@ -403,7 +392,7 @@ const SellerRegister = () => {
   };
 
   // ============================================
-  // STEP INDICATOR - Numbers instead of Icons
+  // STEP INDICATOR
   // ============================================
   const renderStepIndicator = () => {
     const steps = ['Personal', 'PAN', 'Aadhaar', 'Store', 'Review'];
@@ -457,44 +446,96 @@ const SellerRegister = () => {
     <div className={styles.stepContent}>
       <div className={styles.stepHeader}>
         <h2 className={styles.stepTitle}>Personal Information</h2>
-        <p className={styles.stepDesc}>Enter your personal information</p>
+        <p className={styles.stepDesc}>Enter your personal details</p>
       </div>
 
       <div className={styles.formFieldsWrapper}>
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
             <label>First Name <span className={styles.required}>*</span></label>
-            <input name="firstName" placeholder="Enter your first name" value={formData.firstName} onChange={handleChange} className={errors.firstName ? styles.error : ''} />
+            <input 
+              name="firstName" 
+              placeholder="Enter your first name" 
+              value={formData.firstName} 
+              onChange={handleChange}
+              onFocus={() => handleFocus('firstName')}
+              onBlur={() => handleBlur('firstName')}
+              className={`${errors.firstName ? styles.error : ''} ${isFocused.firstName ? styles.focused : ''}`}
+            />
             {errors.firstName && <span className={styles.errorText}>{errors.firstName}</span>}
           </div>
           <div className={styles.formGroup}>
             <label>Last Name <span className={styles.required}>*</span></label>
-            <input name="lastName" placeholder="Enter your last name" value={formData.lastName} onChange={handleChange} className={errors.lastName ? styles.error : ''} />
+            <input 
+              name="lastName" 
+              placeholder="Enter your last name" 
+              value={formData.lastName} 
+              onChange={handleChange}
+              onFocus={() => handleFocus('lastName')}
+              onBlur={() => handleBlur('lastName')}
+              className={`${errors.lastName ? styles.error : ''} ${isFocused.lastName ? styles.focused : ''}`}
+            />
             {errors.lastName && <span className={styles.errorText}>{errors.lastName}</span>}
           </div>
         </div>
 
         <div className={styles.formGroup}>
           <label>Email Address <span className={styles.required}>*</span></label>
-          <input type="email" name="email" placeholder="Enter your email" value={formData.email} onChange={handleChange} className={errors.email ? styles.error : ''} />
+          <input 
+            type="email" 
+            name="email" 
+            placeholder="Enter your email" 
+            value={formData.email} 
+            onChange={handleChange}
+            onFocus={() => handleFocus('email')}
+            onBlur={() => handleBlur('email')}
+            className={`${errors.email ? styles.error : ''} ${isFocused.email ? styles.focused : ''}`}
+          />
           {errors.email && <span className={styles.errorText}>{errors.email}</span>}
         </div>
 
         <div className={styles.formGroup}>
           <label>Phone Number <span className={styles.required}>*</span></label>
-          <input type="tel" name="phone" placeholder="+91 9876543210" value={formData.phone} onChange={handleChange} className={errors.phone ? styles.error : ''} />
+          <input 
+            type="tel" 
+            name="phone" 
+            placeholder="+91 9876543210" 
+            value={formData.phone} 
+            onChange={handleChange}
+            onFocus={() => handleFocus('phone')}
+            onBlur={() => handleBlur('phone')}
+            className={`${errors.phone ? styles.error : ''} ${isFocused.phone ? styles.focused : ''}`}
+          />
           {errors.phone && <span className={styles.errorText}>{errors.phone}</span>}
         </div>
 
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
             <label>Password <span className={styles.required}>*</span></label>
-            <input type="password" name="password" placeholder="Min 6 characters" value={formData.password} onChange={handleChange} className={errors.password ? styles.error : ''} />
+            <input 
+              type="password" 
+              name="password" 
+              placeholder="Min 6 characters" 
+              value={formData.password} 
+              onChange={handleChange}
+              onFocus={() => handleFocus('password')}
+              onBlur={() => handleBlur('password')}
+              className={`${errors.password ? styles.error : ''} ${isFocused.password ? styles.focused : ''}`}
+            />
             {errors.password && <span className={styles.errorText}>{errors.password}</span>}
           </div>
           <div className={styles.formGroup}>
             <label>Confirm Password <span className={styles.required}>*</span></label>
-            <input type="password" name="confirmPassword" placeholder="Confirm your password" value={formData.confirmPassword} onChange={handleChange} className={errors.confirmPassword ? styles.error : ''} />
+            <input 
+              type="password" 
+              name="confirmPassword" 
+              placeholder="Confirm your password" 
+              value={formData.confirmPassword} 
+              onChange={handleChange}
+              onFocus={() => handleFocus('confirmPassword')}
+              onBlur={() => handleBlur('confirmPassword')}
+              className={`${errors.confirmPassword ? styles.error : ''} ${isFocused.confirmPassword ? styles.focused : ''}`}
+            />
             {errors.confirmPassword && <span className={styles.errorText}>{errors.confirmPassword}</span>}
           </div>
         </div>
@@ -526,7 +567,9 @@ const SellerRegister = () => {
                 setErrors(prev => ({ ...prev, panNumber: '' }));
               }
             }}
-            className={errors.panNumber ? styles.error : ''}
+            onFocus={() => handleFocus('panNumber')}
+            onBlur={() => handleBlur('panNumber')}
+            className={`${errors.panNumber ? styles.error : ''} ${isFocused.panNumber ? styles.focused : ''}`}
             maxLength={10}
           />
           {errors.panNumber && <span className={styles.errorText}>{errors.panNumber}</span>}
@@ -539,7 +582,7 @@ const SellerRegister = () => {
         <div className={styles.formGroup}>
           <label>Upload PAN Card <span className={styles.required}>*</span></label>
           <div className={styles.fileUploadWrapper}>
-            <div className={styles.fileUploadArea}>
+            <div className={`${styles.fileUploadArea} ${panPreview ? styles.hasFile : ''}`}>
               {panPreview ? (
                 <div className={styles.filePreview}>
                   <img src={panPreview} alt="PAN Card" />
@@ -585,7 +628,9 @@ const SellerRegister = () => {
                 setErrors(prev => ({ ...prev, aadhaarNumber: '' }));
               }
             }}
-            className={errors.aadhaarNumber ? styles.error : ''}
+            onFocus={() => handleFocus('aadhaarNumber')}
+            onBlur={() => handleBlur('aadhaarNumber')}
+            className={`${errors.aadhaarNumber ? styles.error : ''} ${isFocused.aadhaarNumber ? styles.focused : ''}`}
             maxLength={12}
           />
           {errors.aadhaarNumber && <span className={styles.errorText}>{errors.aadhaarNumber}</span>}
@@ -598,7 +643,7 @@ const SellerRegister = () => {
         <div className={styles.formGroup}>
           <label>Upload Aadhaar Card <span className={styles.required}>*</span></label>
           <div className={styles.fileUploadWrapper}>
-            <div className={styles.fileUploadArea}>
+            <div className={`${styles.fileUploadArea} ${aadhaarPreview ? styles.hasFile : ''}`}>
               {aadhaarPreview ? (
                 <div className={styles.filePreview}>
                   <img src={aadhaarPreview} alt="Aadhaar Card" />
@@ -627,30 +672,36 @@ const SellerRegister = () => {
     <div className={styles.stepContent}>
       <div className={styles.stepHeader}>
         <h2 className={styles.stepTitle}>Store & GST Details</h2>
-        <p className={styles.stepDesc}>Tell us about your store (GST is optional)</p>
+        <p className={styles.stepDesc}>Tell us about your store</p>
       </div>
 
       <div className={styles.formFieldsWrapper}>
-        <div className={styles.formGroup}>
-          <label>Store Name <span className={styles.required}>*</span></label>
-          <input 
-            name="storeName" 
-            placeholder="Your Brand Name" 
-            value={formData.storeName} 
-            onChange={handleChange} 
-            className={errors.storeName ? styles.error : ''} 
-          />
-          {errors.storeName && <span className={styles.errorText}>{errors.storeName}</span>}
-        </div>
-
-        <div className={styles.formGroup}>
-          <label>Brand Name</label>
-          <input 
-            name="brandName" 
-            placeholder="Your Brand Name (optional)" 
-            value={formData.brandName} 
-            onChange={handleChange} 
-          />
+        <div className={styles.formRow}>
+          <div className={styles.formGroup}>
+            <label>Store Name <span className={styles.required}>*</span></label>
+            <input 
+              name="storeName" 
+              placeholder="Your Store Name" 
+              value={formData.storeName} 
+              onChange={handleChange}
+              onFocus={() => handleFocus('storeName')}
+              onBlur={() => handleBlur('storeName')}
+              className={`${errors.storeName ? styles.error : ''} ${isFocused.storeName ? styles.focused : ''}`}
+            />
+            {errors.storeName && <span className={styles.errorText}>{errors.storeName}</span>}
+          </div>
+          <div className={styles.formGroup}>
+            <label>Brand Name</label>
+            <input 
+              name="brandName" 
+              placeholder="Your Brand Name (optional)" 
+              value={formData.brandName} 
+              onChange={handleChange}
+              onFocus={() => handleFocus('brandName')}
+              onBlur={() => handleBlur('brandName')}
+              className={`${isFocused.brandName ? styles.focused : ''}`}
+            />
+          </div>
         </div>
 
         <div className={styles.formGroup}>
@@ -659,29 +710,49 @@ const SellerRegister = () => {
             name="businessDescription" 
             placeholder="Tell us about your jewellery business..." 
             value={formData.businessDescription} 
-            onChange={handleChange} 
+            onChange={handleChange}
+            onFocus={() => handleFocus('businessDescription')}
+            onBlur={() => handleBlur('businessDescription')}
+            className={`${isFocused.businessDescription ? styles.focused : ''}`}
             rows={2} 
           />
         </div>
 
-        <div className={styles.formGroup}>
-          <label>GST Number <span className={styles.optional}>(Optional)</span></label>
-          <input
-            name="gstNumber"
-            placeholder="22AAAAA0000A1Z5"
-            value={formData.gstNumber}
-            onChange={(e) => {
-              const value = e.target.value.toUpperCase().replace(/\s/g, '');
-              setFormData(prev => ({ ...prev, gstNumber: value }));
-            }}
-          />
-          <small className={styles.hint}>Enter GST number if you have one (optional)</small>
+        <div className={styles.formRow}>
+          <div className={styles.formGroup}>
+            <label>GST Number <span className={styles.optional}>(Optional)</span></label>
+            <input
+              name="gstNumber"
+              placeholder="22AAAAA0000A1Z5"
+              value={formData.gstNumber}
+              onChange={(e) => {
+                const value = e.target.value.toUpperCase().replace(/\s/g, '');
+                setFormData(prev => ({ ...prev, gstNumber: value }));
+              }}
+              onFocus={() => handleFocus('gstNumber')}
+              onBlur={() => handleBlur('gstNumber')}
+              className={`${isFocused.gstNumber ? styles.focused : ''}`}
+            />
+            <small className={styles.hint}>Enter GST number if you have one (optional)</small>
+          </div>
+          <div className={styles.formGroup}>
+            <label>Website</label>
+            <input 
+              name="website" 
+              placeholder="https://yourstore.com" 
+              value={formData.website} 
+              onChange={handleChange}
+              onFocus={() => handleFocus('website')}
+              onBlur={() => handleBlur('website')}
+              className={`${isFocused.website ? styles.focused : ''}`}
+            />
+          </div>
         </div>
 
         <div className={styles.formGroup}>
           <label>GST Certificate <span className={styles.optional}>(Optional)</span></label>
           <div className={styles.fileUploadWrapper}>
-            <div className={styles.fileUploadArea}>
+            <div className={`${styles.fileUploadArea} ${gstPreview ? styles.hasFile : ''}`}>
               {gstPreview ? (
                 <div className={styles.filePreview}>
                   <img src={gstPreview} alt="GST Certificate" />
@@ -732,27 +803,23 @@ const SellerRegister = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>Website</label>
-          <input 
-            name="website" 
-            placeholder="https://yourstore.com" 
-            value={formData.website} 
-            onChange={handleChange} 
-          />
-        </div>
-
-        <div className={styles.formGroup}>
           <label>Social Links</label>
           <div className={styles.socialLinks}>
             <input 
               placeholder="Facebook URL" 
               value={formData.socialLinks.facebook} 
-              onChange={(e) => handleSocialLink('facebook', e.target.value)} 
+              onChange={(e) => handleSocialLink('facebook', e.target.value)}
+              onFocus={() => handleFocus('facebook')}
+              onBlur={() => handleBlur('facebook')}
+              className={`${isFocused.facebook ? styles.focused : ''}`}
             />
             <input 
               placeholder="Instagram URL" 
               value={formData.socialLinks.instagram} 
-              onChange={(e) => handleSocialLink('instagram', e.target.value)} 
+              onChange={(e) => handleSocialLink('instagram', e.target.value)}
+              onFocus={() => handleFocus('instagram')}
+              onBlur={() => handleBlur('instagram')}
+              className={`${isFocused.instagram ? styles.focused : ''}`}
             />
           </div>
         </div>
@@ -816,7 +883,7 @@ const SellerRegister = () => {
       <div className={styles.page}>
         <div className={styles.container}>
           <div className={styles.card}>
-            {/* Left Side - Image changes with step */}
+            {/* Left Side - Image with overlay effects */}
             <div className={styles.leftPanel}>
               <div className={styles.imageWrapper}>
                 <img 
@@ -824,12 +891,24 @@ const SellerRegister = () => {
                   alt={`Step ${currentStep} - ${stepInfo[currentStep].title}`} 
                   className={styles.sideImage} 
                 />
+                <div className={styles.imageOverlay} />
+                <div className={styles.imageContent}>
+                  <div className={styles.imageBadge}>
+                    <FaGem className={styles.imageBadgeIcon} />
+                    <span>Step {currentStep} of 5</span>
+                  </div>
+                  <h3 className={styles.imageTitle}>{stepInfo[currentStep].title}</h3>
+                  <p className={styles.imageDesc}>{stepInfo[currentStep].description}</p>
+                </div>
               </div>
             </div>
 
             {/* Right Side - Form */}
             <div className={styles.rightPanel}>
               <div className={styles.header}>
+                <div className={styles.headerIcon}>
+                  <FiAward className={styles.headerIconSvg} />
+                </div>
                 <h1 className={styles.title}>Become a Seller</h1>
                 <p className={styles.subtitle}>Complete your registration to start selling on Aurevian</p>
               </div>
@@ -847,8 +926,14 @@ const SellerRegister = () => {
                   )}
 
                   <button type="submit" className={styles.nextBtn} disabled={loading}>
-                    {loading ? 'Submitting...' : currentStep === 5 ? 'Submit Application' : 'Next Step'}
-                    {currentStep < 5 && <FiArrowRight />}
+                    {loading ? (
+                      <span className={styles.loader}></span>
+                    ) : currentStep === 5 ? (
+                      'Submit Application'
+                    ) : (
+                      'Next Step'
+                    )}
+                    {currentStep < 5 && !loading && <FiArrowRight />}
                   </button>
                 </div>
               </form>

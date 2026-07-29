@@ -1,1 +1,443 @@
 
+/* src/Components/NewCollections/NewCollections.module.css */
+
+/* ==========================================================
+   SECTION — ivory/cream luxury palette
+   ========================================================== */
+.section {
+  --bg: #f9f5ef;
+  --card-bg: #fffdf9;
+  --gold: #c9a45c;
+  --gold-deep: #a9843f;
+  --gold-soft: #d9b877;
+  --ink: #1a1a1a;
+  --text-secondary: #777777;
+  --border: #ece3d4;
+
+  padding: 56px 24px 64px;
+  background: transparent;
+  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+}
+
+.container {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+/* ==========================================================
+   HEADER — two aligned rows:
+   Row 1: eyebrow label  <—>  View All
+   Row 2: heading         <—>  slider arrows
+   ========================================================== */
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+}
+
+.topText {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  margin: 0;
+}
+
+.heading {
+  font-family: "Playfair Display", "Cormorant Garamond", serif;
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+}
+
+.headingRule {
+  display: block;
+  width: 56px;
+  height: 3px;
+  background: var(--ink);
+}
+
+.viewAllBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--ink);
+  transition: gap 0.3s ease, opacity 0.3s ease;
+  white-space: nowrap;
+  flex: none;
+}
+
+.viewAllBtn:hover {
+  gap: 12px;
+  opacity: 0.7;
+}
+
+.viewAllIcon {
+  font-size: 15px;
+}
+
+.navArrows {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
+
+.navBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+}
+
+.navBtn:hover {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+  transform: translateY(-2px);
+}
+
+.navBtn:active {
+  transform: translateY(0);
+}
+
+/* ==========================================================
+   SCROLL CONTAINER — Horizontal scroll with 3 cards visible
+   ========================================================== */
+.scrollContainer {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 4px 4px 16px;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+/* ==========================================================
+   CARD — Each card takes 1/3 of container width
+   ========================================================== */
+.card {
+  flex: 0 0 calc(33.333% - 15px);
+  min-width: 280px;
+  max-width: 290px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  background: var(--card-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.06);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 32px rgba(201, 164, 92, 0.2);
+  }
+
+  .card:hover .image {
+    transform: scale(1.04);
+  }
+}
+
+/* ==========================================================
+   IMAGE WRAP
+   ========================================================== */
+.imageWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: transparent;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  border-top-left-radius: 130px;
+  border-bottom-right-radius: 130px;
+}
+
+.imagePlaceholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(150deg, #f2ece1 0%, #e6dbc6 100%);
+  border-top-left-radius: 130px;
+  border-bottom-right-radius: 130px;
+}
+
+/* ==========================================================
+   RIBBON
+   ========================================================== */
+.ribbon {
+  position: absolute;
+  top: 16px;
+  left: 0;
+  z-index: 2;
+  background: var(--ink);
+  color: var(--gold-soft);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 6px 14px 6px 12px;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 7px 50%);
+}
+
+/* ==========================================================
+   BODY
+   ========================================================== */
+.body {
+  padding: 10px 11px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.collectionTag {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  margin: 0;
+}
+
+.title {
+  font-family: "Playfair Display", "Cormorant Garamond", serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 1px 0 2px;
+}
+
+.starIcon {
+  color: var(--gold);
+  font-size: 10px;
+}
+
+.ratingValue {
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin-top: 2px;
+}
+
+.price {
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.oldPrice {
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  text-decoration: line-through;
+}
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+@media (max-width: 1023px) {
+  .section {
+    padding: 44px 16px 50px;
+  }
+
+  .card {
+    flex: 0 0 calc(50% - 11px);
+    min-width: 240px;
+  }
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 40px 16px 44px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+
+  .card {
+    flex: 0 0 calc(50% - 8px);
+    min-width: 160px;
+  }
+
+  .navArrows {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding: 32px 12px 36px;
+  }
+
+  .header {
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .viewAllBtn {
+    font-size: 12px;
+  }
+
+  .navBtn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .scrollContainer {
+    gap: 12px;
+    padding: 2px 2px 10px;
+  }
+
+  .card {
+    flex: 0 0 calc(50% - 6px);
+    min-width: 140px;
+    border-radius: 10px;
+  }
+
+  .body {
+    padding: 9px 9px 10px;
+  }
+
+  .title {
+    font-size: 12px;
+  }
+
+  .price {
+    font-size: 12px;
+  }
+
+  .image {
+    border-top-left-radius: 60px;
+    border-bottom-right-radius: 60px;
+  }
+
+  .imagePlaceholder {
+    border-top-left-radius: 60px;
+    border-bottom-right-radius: 60px;
+  }
+}
+
+@media (max-width: 420px) {
+  .headerRow {
+    align-items: flex-start;
+  }
+
+  .topText {
+    font-size: 10.5px;
+    letter-spacing: 2px;
+  }
+
+  .heading {
+    font-size: clamp(18px, 4.5vw, 22px);
+  }
+
+  .card {
+    flex: 0 0 calc(50% - 6px);
+    min-width: 130px;
+  }
+
+  .image {
+    border-top-left-radius: 40px;
+    border-bottom-right-radius: 40px;
+  }
+
+  .imagePlaceholder {
+    border-top-left-radius: 40px;
+    border-bottom-right-radius: 40px;
+  }
+
+  .navArrows {
+    display: none;
+  }
+}
+
+/* ==========================================================
+   REDUCED MOTION
+   ========================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .image,
+  .viewAllBtn,
+  .navBtn {
+    transition: none !important;
+  }
+  
+  .card:hover {
+    transform: none !important;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.06) !important;
+  }
+  
+  .card:hover .image {
+    transform: none !important;
+  }
+}
+
