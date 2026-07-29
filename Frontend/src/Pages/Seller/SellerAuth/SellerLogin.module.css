@@ -1,5 +1,7 @@
+/* SellerLogin.module.css */
+
 /* ============================================
-   FONT IMPORTS
+   FONT IMPORTS - Premium Fonts
    ============================================ */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:wght@300;400;500;600;700;800&display=swap');
 
@@ -8,7 +10,7 @@
    ============================================ */
 .page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #fdf8f1 0%, #f6efe4 100%);
+  background: linear-gradient(135deg, #faf7f2 0%, #f5f0ea 100%);
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -38,11 +40,12 @@
    ============================================ */
 .imageSection {
   width: 100%;
-  height: 200px;
-  min-height: 200px;
+  height: 300px;
+  min-height: 300px;
   overflow: hidden;
   position: relative;
   padding: 0;
+  flex-shrink: 0;
 }
 
 .imageWrapper {
@@ -64,61 +67,70 @@
    ============================================ */
 .formSection {
   flex: 1;
-  padding: 24px 20px 20px;
+  padding: 28px 24px 20px;
   display: flex;
   flex-direction: column;
   background: #ffffff;
   width: 100%;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .formContainer {
   width: 100%;
-  max-width: 400px;
+  max-width: 460px;
   margin: 0 auto;
 }
 
 /* ============================================
-   HEADER
+   HEADER - Clean & Minimal
    ============================================ */
 .header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  flex-shrink: 0;
 }
 
 .logoIcon {
-  width: 56px;
-  height: 56px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   background: linear-gradient(135deg, rgba(212, 175, 55, 0.10) 0%, rgba(212, 175, 55, 0.04) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 14px;
-  border: 1px solid rgba(212, 175, 55, 0.12);
+  margin: 0 auto 16px;
+  border: 1.5px solid rgba(212, 175, 55, 0.12);
 }
 
 .gemIcon {
-  font-size: 24px;
+  font-size: 36px;
   color: #d4af37;
 }
 
 .title {
   font-family: 'Playfair Display', serif;
-  font-size: 28px;
+  font-size: 42px;
   font-weight: 700;
   color: #1a1a1a;
   margin: 0;
-  letter-spacing: -0.3px;
+  letter-spacing: 3px;
   line-height: 1.1;
 }
 
+.title span {
+  color: #d4af37;
+  letter-spacing: 4px;
+}
+
 .subtitle {
-  font-family: 'Inter', sans-serif;
-  font-size: 15px;
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
   font-weight: 400;
-  color: #7a7a7a;
-  margin: 6px 0 0;
+  color: #4a4a4a;
+  margin: 12px 0 0;
+  line-height: 1.5;
+  letter-spacing: 0.5px;
+  font-style: italic;
 }
 
 /* ============================================
@@ -127,30 +139,30 @@
 .errorBanner {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
+  gap: 10px;
+  padding: 14px 18px;
   background: #fef2f2;
   border-radius: 10px;
   border: 1px solid #fca5a5;
-  margin-bottom: 16px;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
+  margin-bottom: 20px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 15px;
   color: #dc2626;
 }
 
 .errorIcon {
   flex-shrink: 0;
-  font-size: 17px;
+  font-size: 18px;
   color: #ef4444;
 }
 
 /* ============================================
-   FORM
+   FORM - Clean & Minimal
    ============================================ */
 .form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 .field {
@@ -160,20 +172,21 @@
 }
 
 .field label {
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
   font-weight: 600;
   color: #1a1a1a;
+  letter-spacing: 0.3px;
 }
 
 .inputWrapper {
   position: relative;
   display: flex;
   align-items: center;
-  height: 48px;
-  border: 1.5px solid #e8e2d8;
-  border-radius: 12px;
-  background: #fffdf9;
+  height: 54px;
+  border: 1.5px solid #e8e3dc;
+  border-radius: 10px;
+  background: #faf8f6;
   transition: all 0.3s ease;
 }
 
@@ -189,8 +202,8 @@
 
 .inputIcon {
   position: absolute;
-  left: 14px;
-  font-size: 16px;
+  left: 16px;
+  font-size: 18px;
   color: #b0a89a;
   pointer-events: none;
   transition: color 0.3s ease;
@@ -202,17 +215,18 @@
 }
 
 .inputWrapper input {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   width: 100%;
   height: 100%;
-  padding: 0 14px 0 44px;
+  padding: 0 16px 0 48px;
   border: none;
-  border-radius: 12px;
-  font-size: 15px;
+  border-radius: 10px;
+  font-size: 16px;
   font-weight: 400;
   background: transparent;
   color: #1a1a1a;
   transition: all 0.3s ease;
+  letter-spacing: 0.2px;
 }
 
 .inputWrapper input:focus {
@@ -220,9 +234,9 @@
 }
 
 .inputWrapper input::placeholder {
-  color: #b0a89a;
+  color: #b0b0b0;
   font-weight: 400;
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .inputWrapper input:disabled {
@@ -232,7 +246,7 @@
 
 .visibilityBtn {
   position: absolute;
-  right: 14px;
+  right: 16px;
   background: none;
   border: none;
   color: #b0a89a;
@@ -241,7 +255,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 18px;
   transition: all 0.3s ease;
   z-index: 1;
 }
@@ -255,14 +269,14 @@
 }
 
 /* ============================================
-   OPTIONS
+   OPTIONS - Clean Layout
    ============================================ */
 .options {
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
   margin-top: 4px;
 }
 
@@ -271,10 +285,11 @@
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
   font-weight: 400;
   color: #4a4a4a;
+  letter-spacing: 0.2px;
 }
 
 .checkboxLabel:hover {
@@ -282,19 +297,20 @@
 }
 
 .checkboxLabel input[type="checkbox"] {
-  width: 17px;
-  height: 17px;
+  width: 18px;
+  height: 18px;
   accent-color: #d4af37;
   cursor: pointer;
 }
 
 .forgotLink {
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
   font-weight: 500;
   color: #d4af37;
   text-decoration: none;
   transition: all 0.3s ease;
+  letter-spacing: 0.2px;
 }
 
 .forgotLink:hover {
@@ -303,33 +319,34 @@
 }
 
 /* ============================================
-   PRIMARY BUTTON
+   PRIMARY BUTTON - Clean & Premium
    ============================================ */
 .primaryBtn {
-  font-family: 'Inter', sans-serif;
-  height: 48px;
-  padding: 0 18px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  height: 54px;
+  padding: 0 20px;
   border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+  border-radius: 10px;
+  background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
   color: #ffffff;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  letter-spacing: 0.3px;
-  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.2);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.2);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .primaryBtn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.3);
 }
 
 .primaryBtn:active:not(:disabled) {
@@ -343,7 +360,7 @@
 }
 
 .btnArrow {
-  font-size: 17px;
+  font-size: 20px;
   transition: transform 0.3s ease;
 }
 
@@ -352,95 +369,24 @@
 }
 
 /* ============================================
-   DIVIDER
-   ============================================ */
-.divider {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  margin: 18px 0 12px;
-}
-
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  border-bottom: 1px solid #e8e2d8;
-}
-
-.divider span {
-  font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  font-weight: 400;
-  color: #b0a89a;
-  padding: 0 14px;
-  text-transform: lowercase;
-}
-
-/* ============================================
-   SOCIAL BUTTONS
-   ============================================ */
-.socialButtons {
-  display: flex;
-  gap: 10px;
-}
-
-.socialBtn {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 14px;
-  height: 46px;
-  border: 1.5px solid #e8e2d8;
-  border-radius: 12px;
-  background: #ffffff;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: #1a1a1a;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.socialBtn:hover {
-  border-color: #d4af37;
-  background: rgba(212, 175, 55, 0.02);
-  transform: translateY(-1px);
-}
-
-.socialBtn:active {
-  transform: scale(0.97);
-}
-
-.socialIcon {
-  font-size: 17px;
-  color: #6b6b6b;
-  transition: color 0.3s ease;
-}
-
-.socialBtn:hover .socialIcon {
-  color: #d4af37;
-}
-
-/* ============================================
-   FOOTER
+   FOOTER - Clean
    ============================================ */
 .footer {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-top: 14px;
+  align-items: center;
+  margin-top: 18px;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .registerText {
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
   font-weight: 400;
   color: #6b6b6b;
   margin: 0;
+  letter-spacing: 0.2px;
 }
 
 .registerText a {
@@ -453,33 +399,6 @@
 .registerText a:hover {
   color: #b8962e;
   text-decoration: underline;
-}
-
-.backLink {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  color: #8a8a8a;
-  text-decoration: none;
-  padding: 4px;
-  transition: all 0.3s ease;
-}
-
-.backLink:hover {
-  color: #d4af37;
-}
-
-.backIcon {
-  font-size: 15px;
-  transition: transform 0.3s ease;
-}
-
-.backLink:hover .backIcon {
-  transform: translateX(-2px);
 }
 
 /* ============================================
@@ -498,19 +417,17 @@
 
   .card {
     flex-direction: row;
-    height: 540px;
-    max-height: 80vh;
-    min-height: 480px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    height: 650px;
+    max-height: 85vh;
+    min-height: auto;
+    border-radius: 0;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.08);
+    overflow: hidden;
   }
 
   .imageSection {
-    flex: 0 0 58%;
+    flex: 0 0 50%;
     height: 100%;
     width: auto;
     min-height: auto;
@@ -527,120 +444,101 @@
   }
 
   .imageWrapper:hover .loginImage {
-    transform: scale(1.03);
+    transform: scale(1.02);
   }
 
   .formSection {
-    flex: 0 0 42%;
-    padding: 32px 32px 28px;
+    flex: 0 0 50%;
+    padding: 32px 36px 28px;
     height: 100%;
     justify-content: center;
     background: transparent;
   }
 
   .formContainer {
-    max-width: 340px;
+    max-width: 100%;
   }
 
   .header {
-    margin-bottom: 20px;
+    margin-bottom: 28px;
   }
 
   .logoIcon {
-    width: 52px;
-    height: 52px;
-    margin-bottom: 12px;
+    width: 72px;
+    height: 72px;
+    margin-bottom: 14px;
   }
 
   .gemIcon {
-    font-size: 22px;
+    font-size: 32px;
   }
 
   .title {
-    font-size: 26px;
+    font-size: 40px;
+    letter-spacing: 3px;
+  }
+
+  .title span {
+    letter-spacing: 4px;
   }
 
   .subtitle {
-    font-size: 14px;
+    font-size: 22px;
   }
 
   .form {
-    gap: 14px;
+    gap: 18px;
   }
 
   .field label {
-    font-size: 13px;
-  }
-
-  .inputWrapper {
-    height: 44px;
-    border-radius: 12px;
-  }
-
-  .inputWrapper input {
-    font-size: 14px;
-    padding: 0 12px 0 38px;
-  }
-
-  .inputWrapper input::placeholder {
-    font-size: 14px;
-  }
-
-  .inputIcon {
-    font-size: 15px;
-    left: 12px;
-  }
-
-  .visibilityBtn {
-    font-size: 15px;
-    right: 12px;
-  }
-
-  .primaryBtn {
-    height: 44px;
-    font-size: 15px;
-    border-radius: 12px;
-  }
-
-  .socialBtn {
-    height: 40px;
-    font-size: 13px;
-    border-radius: 12px;
-    padding: 8px 14px;
-  }
-
-  .socialIcon {
     font-size: 16px;
   }
 
+  .inputWrapper {
+    height: 52px;
+    border-radius: 10px;
+  }
+
+  .inputWrapper input {
+    font-size: 16px;
+    padding: 0 16px 0 48px;
+  }
+
+  .inputWrapper input::placeholder {
+    font-size: 16px;
+  }
+
+  .inputIcon {
+    font-size: 18px;
+    left: 16px;
+  }
+
+  .visibilityBtn {
+    font-size: 18px;
+    right: 16px;
+  }
+
+  .primaryBtn {
+    height: 52px;
+    font-size: 17px;
+    border-radius: 10px;
+    letter-spacing: 0.8px;
+  }
+
   .registerText {
-    font-size: 13px;
-  }
-
-  .backLink {
-    font-size: 13px;
-  }
-
-  .divider {
-    margin: 14px 0 10px;
-  }
-
-  .divider span {
-    font-size: 12px;
-    padding: 0 12px;
+    font-size: 16px;
   }
 
   .checkboxLabel {
-    font-size: 13px;
+    font-size: 16px;
   }
 
   .forgotLink {
-    font-size: 13px;
+    font-size: 16px;
   }
 
   .footer {
-    margin-top: 12px;
-    gap: 4px;
+    margin-top: 18px;
   }
 }
 
@@ -657,27 +555,191 @@
   }
 
   .card {
-    height: 560px;
-    max-height: 82vh;
-    min-height: 500px;
-    border-radius: 14px;
-  }
-
-  .imageSection {
-    flex: 0 0 60%;
+    height: 680px;
+    max-height: 85vh;
   }
 
   .formSection {
-    flex: 0 0 40%;
-    padding: 36px 36px 30px;
+    padding: 36px 44px 32px;
+  }
+
+  .title {
+    font-size: 44px;
+    letter-spacing: 4px;
+  }
+
+  .title span {
+    letter-spacing: 5px;
+  }
+
+  .subtitle {
+    font-size: 24px;
+  }
+
+  .logoIcon {
+    width: 80px;
+    height: 80px;
+  }
+
+  .gemIcon {
+    font-size: 36px;
+  }
+
+  .inputWrapper {
+    height: 54px;
+  }
+
+  .inputWrapper input {
+    font-size: 16px;
+    padding: 0 18px 0 50px;
+  }
+
+  .primaryBtn {
+    height: 54px;
+    font-size: 17px;
+  }
+
+  .field label {
+    font-size: 16px;
+  }
+}
+
+/* ============================================
+   EXTRA SMALL MOBILE (480px and below)
+   ============================================ */
+@media (max-width: 480px) {
+  .imageSection {
+    height: 260px;
+    min-height: 260px;
+  }
+
+  .formSection {
+    padding: 20px 16px 16px;
   }
 
   .formContainer {
-    max-width: 360px;
+    max-width: 100%;
+  }
+
+  .title {
+    font-size: 32px;
+    letter-spacing: 2px;
+  }
+
+  .title span {
+    letter-spacing: 3px;
+  }
+
+  .subtitle {
+    font-size: 20px;
+  }
+
+  .logoIcon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 12px;
+  }
+
+  .gemIcon {
+    font-size: 28px;
+  }
+
+  .header {
+    margin-bottom: 22px;
+  }
+
+  .form {
+    gap: 16px;
+  }
+
+  .field label {
+    font-size: 15px;
+  }
+
+  .inputWrapper {
+    height: 48px;
+    border-radius: 10px;
+  }
+
+  .inputWrapper input {
+    font-size: 15px;
+    padding: 0 14px 0 44px;
+  }
+
+  .inputWrapper input::placeholder {
+    font-size: 15px;
+  }
+
+  .inputIcon {
+    font-size: 16px;
+    left: 14px;
+  }
+
+  .visibilityBtn {
+    font-size: 16px;
+    right: 14px;
+  }
+
+  .primaryBtn {
+    height: 48px;
+    font-size: 15px;
+    border-radius: 10px;
+    letter-spacing: 0.6px;
+    margin-top: 4px;
+  }
+
+  .options {
+    gap: 8px;
+    margin-top: 2px;
+  }
+
+  .checkboxLabel {
+    font-size: 15px;
+  }
+
+  .forgotLink {
+    font-size: 15px;
+  }
+
+  .footer {
+    margin-top: 14px;
+  }
+
+  .registerText {
+    font-size: 15px;
+  }
+
+  .errorBanner {
+    font-size: 14px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+  }
+}
+
+/* ============================================
+   VERY SMALL MOBILE (380px and below)
+   ============================================ */
+@media (max-width: 380px) {
+  .imageSection {
+    height: 220px;
+    min-height: 220px;
+  }
+
+  .formSection {
+    padding: 16px 12px 14px;
   }
 
   .title {
     font-size: 28px;
+    letter-spacing: 1px;
+  }
+
+  .title span {
+    letter-spacing: 2px;
+  }
+
+  .subtitle {
+    font-size: 18px;
   }
 
   .logoIcon {
@@ -689,153 +751,22 @@
     font-size: 24px;
   }
 
-  .inputWrapper {
-    height: 46px;
-    border-radius: 12px;
-  }
-
-  .inputWrapper input {
-    font-size: 14px;
-    padding: 0 14px 0 40px;
-  }
-
-  .primaryBtn {
-    height: 46px;
-    font-size: 15px;
-    border-radius: 12px;
-  }
-
-  .socialBtn {
-    height: 42px;
-    font-size: 13px;
-  }
-
-  .field label {
-    font-size: 13px;
-  }
-}
-
-/* ============================================
-   EXTRA LARGE DESKTOP (1400px and above)
-   ============================================ */
-@media (min-width: 1400px) {
-  .container {
-    max-width: 1200px;
-  }
-
-  .card {
-    height: 580px;
-    border-radius: 16px;
-  }
-
-  .imageSection {
-    flex: 0 0 60%;
-  }
-
-  .formSection {
-    flex: 0 0 40%;
-    padding: 40px 40px 32px;
-  }
-
-  .formContainer {
-    max-width: 380px;
-  }
-
-  .title {
-    font-size: 30px;
-  }
-
-  .logoIcon {
-    width: 60px;
-    height: 60px;
-  }
-
-  .gemIcon {
-    font-size: 26px;
-  }
-
-  .inputWrapper {
-    height: 48px;
-  }
-
-  .inputWrapper input {
-    font-size: 15px;
-  }
-
-  .primaryBtn {
-    height: 48px;
-    font-size: 16px;
-  }
-
-  .socialBtn {
-    height: 44px;
-    font-size: 14px;
-  }
-
-  .socialIcon {
-    font-size: 17px;
-  }
-}
-
-/* ============================================
-   EXTRA SMALL MOBILE (480px and below)
-   ============================================ */
-@media (max-width: 480px) {
-  .imageSection {
-    height: 200px;
-    min-height: 200px;
-  }
-
-  .formSection {
-    padding: 0 16px;
-  }
-
-  .formContainer {
-    max-width: 100%;
-  }
-
-  .title {
-    font-size: 25px;
-  }
-
-  .subtitle {
-    font-size: 15px;
-  }
-
-  .logoIcon {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 12px;
-  }
-
-  .gemIcon {
-    font-size: 20px;
-  }
-
   .header {
     margin-bottom: 18px;
   }
 
-  .form {
-    gap: 14px;
-  }
-
-  .field label {
-    font-size: 14px;
-  }
-
   .inputWrapper {
     height: 44px;
-    border-radius: 10px;
+    border-radius: 8px;
   }
 
   .inputWrapper input {
-    font-size: 15px;
-    padding: 5px 12px 5px 38px;
+    font-size: 14px;
+    padding: 0 12px 0 40px;
   }
 
   .inputWrapper input::placeholder {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .inputIcon {
@@ -850,25 +781,9 @@
 
   .primaryBtn {
     height: 44px;
-    font-size: 16px;
-    border-radius: 10px;
-    margin-top: 2px;
-  }
-
-  .socialBtn {
-    height: 40px;
-    font-size: 15px;
-    border-radius: 10px;
-    padding: 12px 10px;
-  }
-
-  .socialIcon {
-    font-size: 16px;
-  }
-
-  .options {
-    gap: 6px;
-    margin-top: 2px;
+    font-size: 14px;
+    border-radius: 8px;
+    letter-spacing: 0.5px;
   }
 
   .checkboxLabel {
@@ -879,26 +794,16 @@
     font-size: 14px;
   }
 
-  .divider {
-    margin: 18px 0 18px;
-  }
-
-  .divider span {
-    font-size: 14px;
-    padding: 0 12px;
-  }
-
-  .footer {
-    margin-top: 12px;
-    gap: 4px;
-  }
-
   .registerText {
     font-size: 14px;
   }
 
-  .backLink {
-    font-size: 13px;
+  .footer {
+    margin-top: 12px;
+  }
+
+  .field label {
+    font-size: 14px;
   }
 
   .errorBanner {
@@ -909,130 +814,19 @@
 }
 
 /* ============================================
-   VERY SMALL MOBILE (380px and below)
-   ============================================ */
-@media (max-width: 380px) {
-  .imageSection {
-    height: 150px;
-    min-height: 150px;
-  }
-
-  .formSection {
-    padding: 12px;
-  }
-
-  .title {
-    font-size: 22px;
-  }
-
-  .subtitle {
-    font-size: 13px;
-  }
-
-  .logoIcon {
-    width: 44px;
-    height: 44px;
-  }
-
-  .gemIcon {
-    font-size: 18px;
-  }
-
-  .header {
-    margin-bottom: 16px;
-  }
-
-  .inputWrapper {
-    height: 40px;
-    border-radius: 10px;
-  }
-
-  .inputWrapper input {
-    font-size: 13px;
-    padding: 0 10px 0 34px;
-  }
-
-  .inputWrapper input::placeholder {
-    font-size: 13px;
-  }
-
-  .inputIcon {
-    font-size: 14px;
-    left: 10px;
-  }
-
-  .visibilityBtn {
-    font-size: 14px;
-    right: 10px;
-  }
-
-  .primaryBtn {
-    height: 40px;
-    font-size: 14px;
-    border-radius: 10px;
-  }
-
-  .socialBtn {
-    height: 36px;
-    font-size: 12px;
-    border-radius: 10px;
-    padding: 6px 8px;
-  }
-
-  .socialIcon {
-    font-size: 14px;
-  }
-
-  .checkboxLabel {
-    font-size: 13px;
-  }
-
-  .forgotLink {
-    font-size: 12px;
-  }
-
-  .registerText {
-    font-size: 12px;
-  }
-
-  .backLink {
-    font-size: 12px;
-  }
-
-  .divider span {
-    font-size: 11px;
-    padding: 0 10px;
-  }
-
-  .footer {
-    margin-top: 10px;
-    gap: 3px;
-  }
-
-  .field label {
-    font-size: 12px;
-  }
-
-  .errorBanner {
-    font-size: 12px;
-    padding: 8px 12px;
-  }
-}
-
-/* ============================================
    DARK MODE SUPPORT
    ============================================ */
 @media (prefers-color-scheme: dark) {
   .page {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2a2218 100%);
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d1f14 100%);
   }
 
   .card {
-    background: #1a1a1a;
+    background: #2d2d2d;
   }
 
   .formSection {
-    background: #1a1a1a;
+    background: #2d2d2d;
   }
 
   .title {
@@ -1040,7 +834,7 @@
   }
 
   .subtitle {
-    color: #999;
+    color: #bbb;
   }
 
   .field label {
@@ -1048,8 +842,8 @@
   }
 
   .inputWrapper {
-    background: rgba(50, 50, 50, 0.6);
-    border-color: #4a4a4a;
+    background: #3d3d3d;
+    border-color: #4d4d4d;
   }
 
   .inputWrapper:hover {
@@ -1058,7 +852,7 @@
 
   .inputWrapper.focused {
     border-color: #d4af37;
-    background: rgba(50, 50, 50, 0.8);
+    background: #3d3d3d;
     box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
   }
 
@@ -1114,46 +908,10 @@
     color: #c9a83a;
   }
 
-  .backLink {
-    color: #999;
-  }
-
-  .backLink:hover {
-    color: #d4af37;
-  }
-
   .errorBanner {
     background: #3d1a1a;
     border-color: #6d2a2a;
     color: #f87171;
-  }
-
-  .divider::before,
-  .divider::after {
-    border-color: #4a4a4a;
-  }
-
-  .divider span {
-    color: #888;
-  }
-
-  .socialBtn {
-    background: rgba(50, 50, 50, 0.6);
-    border-color: #4a4a4a;
-    color: #ddd;
-  }
-
-  .socialBtn:hover {
-    border-color: #d4af37;
-    background: rgba(212, 175, 55, 0.05);
-  }
-
-  .socialIcon {
-    color: #888;
-  }
-
-  .socialBtn:hover .socialIcon {
-    color: #d4af37;
   }
 
   .logoIcon {
@@ -1162,15 +920,12 @@
   }
 
   .primaryBtn {
-    background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+    background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
   }
 
   @media (min-width: 768px) {
     .card {
-      background: rgba(35, 35, 35, 0.92);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-color: rgba(255, 255, 255, 0.05);
+      background: #2d2d2d;
     }
 
     .formSection {

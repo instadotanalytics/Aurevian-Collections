@@ -10,10 +10,9 @@ import {
   FiEye, 
   FiEyeOff, 
   FiAlertCircle,
-  FiArrowRight,
-  FiChevronLeft
+  FiArrowRight
 } from 'react-icons/fi';
-import { FaGem, FaGoogle } from 'react-icons/fa';
+import { FaGem } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import styles from './SellerLogin.module.css';
 import LoginImage from "../../../assets/partnerlogin.png";
@@ -158,8 +157,12 @@ const SellerLogin = () => {
                   <div className={styles.logoIcon}>
                     <FaGem className={styles.gemIcon} />
                   </div>
-                  <h1 className={styles.title}>Welcome Back!</h1>
-                  <p className={styles.subtitle}>Sign in to continue shopping</p>
+                  <h1 className={styles.title}>
+                    <span>AUREVIAN</span>
+                  </h1>
+                  <p className={styles.subtitle}>
+                    Your Account, Our Priority
+                  </p>
                 </div>
 
                 {(localError || error) && (
@@ -237,27 +240,15 @@ const SellerLogin = () => {
                     className={styles.primaryBtn}
                     disabled={isLoading}
                   >
-                    {isLoading ? 'Logging in...' : 'Sign In'}
+                    {isLoading ? 'Logging in...' : 'Secure Your Account'}
                     {!isLoading && <FiArrowRight className={styles.btnArrow} />}
                   </button>
                 </form>
 
-                <div className={styles.divider}>
-                  <span>or continue with</span>
-                </div>
-
-                <div className={styles.socialButtons}>
-                  <button type="button" className={styles.socialBtn}>
-                    <FaGoogle className={styles.socialIcon} />
-                    Continue with Google
-                  </button>
-                </div>
-
                 <div className={styles.footer}>
                   <p className={styles.registerText}>
-                    Don't have an account? <Link to="/seller/register">Create Account</Link>
+                    New to Aurevian? <Link to="/seller/register">Create Account</Link>
                   </p>
-                 
                 </div>
               </div>
             </div>

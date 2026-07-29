@@ -1,3 +1,5 @@
+/* SellerRegister.module.css */
+
 /* ============================================
    FONT IMPORTS - Premium Fonts
    ============================================ */
@@ -6,8 +8,6 @@
 /* ============================================
    MOBILE FIRST - BASE STYLES
    ============================================ */
-   
-/* Reset & Base */
 * {
   box-sizing: border-box;
 }
@@ -50,11 +50,11 @@
 }
 
 /* ============================================
-   RIGHT PANEL - Full Width
+   RIGHT PANEL - Full Width with Padding
    ============================================ */
 .rightPanel {
   flex: 1;
-  padding: 20px 20px 16px;
+  padding: 28px 24px 20px;
   display: flex;
   flex-direction: column;
   background: #ffffff;
@@ -64,45 +64,64 @@
 }
 
 /* ============================================
-   HEADER - Premium Font
+   HEADER - Premium Font (Clean & Minimal)
    ============================================ */
 .header {
-  margin-bottom: 12px;
+  text-align: center;
+  margin-bottom: 28px;
   flex-shrink: 0;
+}
+
+.logoIcon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.10) 0%, rgba(212, 175, 55, 0.04) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  border: 1.5px solid rgba(212, 175, 55, 0.12);
+}
+
+.gemIcon {
+  font-size: 32px;
+  color: #d4af37;
 }
 
 .title {
   font-family: 'Playfair Display', serif;
-  font-size: 28px;
+  font-size: 36px;
   font-weight: 700;
   color: #1a1a1a;
   margin: 0;
-  letter-spacing: -0.5px;
+  letter-spacing: 2px;
   line-height: 1.2;
 }
 
 .title span {
   color: #d4af37;
+  letter-spacing: 3px;
 }
 
 .subtitle {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 400;
   color: #6b6b6b;
-  margin: 4px 0 0;
+  margin: 8px 0 0;
   line-height: 1.5;
   letter-spacing: 0.2px;
 }
 
 /* ============================================
-   STEP INDICATOR - Numbers
+   STEP INDICATOR - Clean Numbers
    ============================================ */
 .stepIndicator {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
   padding: 0 2px;
   position: relative;
   flex-shrink: 0;
@@ -118,16 +137,16 @@
 }
 
 .stepNumber {
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   background: #f0edeb;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Playfair Display', serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 600;
   color: #999;
   transition: all 0.4s ease;
   position: relative;
@@ -135,7 +154,6 @@
   flex-shrink: 0;
 }
 
-/* Active Step - Gold */
 .stepNumber.active {
   background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
   color: white;
@@ -143,7 +161,6 @@
   transform: scale(1.05);
 }
 
-/* Completed Step - Green with Checkmark */
 .stepNumber.completed {
   background: #10b981;
   color: white;
@@ -157,10 +174,10 @@
 
 .stepLabel {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   color: #999;
-  margin-top: 4px;
+  margin-top: 8px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
   white-space: nowrap;
@@ -176,16 +193,15 @@
 
 .stepLine {
   position: absolute;
-  top: 19px;
-  left: calc(50% + 19px);
-  right: calc(-50% + 19px);
+  top: 21px;
+  left: calc(50% + 21px);
+  right: calc(-50% + 21px);
   height: 2px;
   background: #e8e3dc;
   z-index: 0;
   transition: background 0.4s ease;
 }
 
-/* Line turns green when step completed */
 .stepItem.completed .stepLine {
   background: #10b981;
 }
@@ -195,7 +211,7 @@
 }
 
 /* ============================================
-   FORM - Flexible Layout
+   FORM - Clean & Spacious
    ============================================ */
 .form {
   display: flex;
@@ -235,17 +251,17 @@
 }
 
 .stepHeader {
-  margin-bottom: 14px;
+  margin-bottom: 22px;
   flex-shrink: 0;
 }
 
 .stepTitle {
   font-family: 'Playfair Display', serif;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   color: #1a1a1a;
-  margin: 0 0 4px;
-  letter-spacing: -0.3px;
+  margin: 0 0 6px;
+  letter-spacing: 0.3px;
 }
 
 .stepDesc {
@@ -258,19 +274,19 @@
 }
 
 /* ============================================
-   FORM GROUPS - Perfect Size
+   FORM GROUPS - Perfect Size (Clean & Readable)
    ============================================ */
 .formRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 16px;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-bottom: 14px;
+  gap: 6px;
+  margin-bottom: 18px;
 }
 
 .formGroup:last-child {
@@ -280,12 +296,13 @@
 .formGroup label {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
   color: #1a1a1a;
   display: flex;
   align-items: center;
   gap: 4px;
   letter-spacing: 0.2px;
+  margin-bottom: 2px;
 }
 
 .required {
@@ -303,7 +320,7 @@
 .formGroup textarea,
 .formGroup select {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  padding: 12px 16px;
+  padding: 14px 16px;
   border: 1.5px solid #e8e3dc;
   border-radius: 10px;
   font-size: 15px;
@@ -316,6 +333,7 @@
   appearance: none;
   color: #1a1a1a;
   letter-spacing: 0.2px;
+  height: 52px;
 }
 
 .formGroup input::placeholder,
@@ -335,13 +353,14 @@
 .formGroup select:focus {
   outline: none;
   border-color: #d4af37;
-  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
   background: #ffffff;
 }
 
 .formGroup textarea {
   resize: vertical;
   min-height: 60px;
+  height: auto;
 }
 
 .formGroup input.error,
@@ -355,7 +374,7 @@
   font-size: 13px;
   font-weight: 400;
   color: #ef4444;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .hint {
@@ -363,7 +382,7 @@
   font-size: 13px;
   font-weight: 400;
   color: #999;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .validText {
@@ -371,11 +390,11 @@
   font-size: 13px;
   font-weight: 500;
   color: #10b981;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 /* ============================================
-   FILE UPLOAD - Touch Friendly
+   FILE UPLOAD - Clean & Touch Friendly
    ============================================ */
 .fileUploadWrapper {
   margin-top: 2px;
@@ -384,13 +403,13 @@
 .fileUploadArea {
   position: relative;
   border: 2px dashed #e8e3dc;
-  border-radius: 12px;
-  padding: 20px 16px;
+  border-radius: 10px;
+  padding: 28px 20px;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
   background: #faf8f6;
-  min-height: 100px;
+  min-height: 120px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -403,9 +422,9 @@
 }
 
 .uploadIcon {
-  font-size: 28px;
+  font-size: 36px;
   color: #d4af37;
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 
 .fileUploadArea p {
@@ -472,20 +491,20 @@
 }
 
 /* ============================================
-   CATEGORY GRID - Touch Friendly
+   CATEGORY GRID - Clean & Touch Friendly
    ============================================ */
 .categoryGrid {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 4px;
+  gap: 10px;
+  margin-top: 6px;
   margin-bottom: 0;
   padding-bottom: 0;
 }
 
 .categoryBtn {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  padding: 8px 16px;
+  padding: 10px 20px;
   border: 1.5px solid #e8e3dc;
   border-radius: 24px;
   background: white;
@@ -515,18 +534,18 @@
 }
 
 /* ============================================
-   SOCIAL LINKS
+   SOCIAL LINKS - Clean
    ============================================ */
 .socialLinks {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 2px;
+  gap: 12px;
+  margin-top: 4px;
 }
 
 .socialLinks input {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  padding: 10px 16px;
+  padding: 12px 16px;
   border: 1.5px solid #e8e3dc;
   border-radius: 10px;
   font-size: 15px;
@@ -536,11 +555,13 @@
   box-sizing: border-box;
   color: #1a1a1a;
   letter-spacing: 0.2px;
+  height: 50px;
 }
 
 .socialLinks input:focus {
   outline: none;
   border-color: #d4af37;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
   background: white;
 }
 
@@ -549,29 +570,29 @@
 }
 
 /* ============================================
-   REVIEW SECTION
+   REVIEW SECTION - Clean Summary
    ============================================ */
 .reviewSection {
   background: #faf8f6;
-  border-radius: 12px;
-  padding: 16px 18px;
-  margin-bottom: 10px;
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
   border: 1px solid #f0edeb;
 }
 
 .reviewSection h4 {
   font-family: 'Playfair Display', serif;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: #1a1a1a;
-  margin: 0 0 6px;
-  letter-spacing: -0.2px;
+  margin: 0 0 10px;
+  letter-spacing: 0.3px;
 }
 
 .reviewGrid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 4px;
+  gap: 6px;
 }
 
 .reviewGrid div {
@@ -579,7 +600,7 @@
   font-size: 15px;
   font-weight: 400;
   color: #4a4a4a;
-  padding: 2px 0;
+  padding: 4px 0;
   letter-spacing: 0.2px;
 }
 
@@ -589,13 +610,13 @@
 }
 
 .termsGroup {
-  margin: 8px 0 4px;
+  margin: 12px 0 6px;
 }
 
 .checkboxLabel {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: 12px;
   cursor: pointer;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 15px;
@@ -605,9 +626,9 @@
 }
 
 .checkboxLabel input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  margin-top: 1px;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
   accent-color: #d4af37;
   cursor: pointer;
   flex-shrink: 0;
@@ -624,19 +645,19 @@
 }
 
 /* ============================================
-   NAVIGATION - Always Visible
+   NAVIGATION - Clean Buttons
    ============================================ */
 .navigation {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 12px;
-  padding-top: 16px;
+  gap: 16px;
+  padding-top: 20px;
   flex-shrink: 0;
   flex-wrap: wrap;
-  min-height: 64px;
-  border-top: 2px solid #e8e3dc;
-  margin-top: 12px;
+  min-height: 72px;
+  border-top: 1.5px solid #e8e3dc;
+  margin-top: 16px;
   background: #ffffff;
   clear: both;
 }
@@ -646,16 +667,16 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 32px;
+  gap: 10px;
+  padding: 14px 36px;
   border: none;
   border-radius: 10px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 120px;
+  min-width: 130px;
   -webkit-tap-highlight-color: transparent;
   letter-spacing: 0.3px;
 }
@@ -697,13 +718,13 @@
 }
 
 /* ============================================
-   FOOTER
+   FOOTER - Clean
    ============================================ */
 .footer {
   text-align: center;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid #e8e3dc;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1.5px solid #e8e3dc;
   flex-shrink: 0;
 }
 
@@ -731,7 +752,7 @@
    ============================================ */
 @media (min-width: 768px) {
   .page {
-    padding: 20px;
+    padding: 24px;
     align-items: center;
   }
 
@@ -782,7 +803,7 @@
 
   .rightPanel {
     flex: 0 0 50%;
-    padding: 28px 32px 20px;
+    padding: 32px 36px 28px;
     height: 100%;
     min-height: auto;
     overflow: hidden;
@@ -823,34 +844,45 @@
   }
 
   .stepIndicator {
-    margin-bottom: 14px;
+    margin-bottom: 22px;
   }
 
   .stepNumber {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     font-size: 15px;
   }
 
   .stepLine {
-    top: 18px;
-    left: calc(50% + 18px);
-    right: calc(-50% + 18px);
+    top: 20px;
+    left: calc(50% + 20px);
+    right: calc(-50% + 20px);
+  }
+
+  .stepLabel {
+    font-size: 10px;
+    margin-top: 6px;
   }
 
   .stepTitle {
-    font-size: 20px;
+    font-size: 22px;
   }
 
   .stepDesc {
     font-size: 14px;
   }
 
+  .formGroup {
+    margin-bottom: 16px;
+    gap: 6px;
+  }
+
   .formGroup input,
   .formGroup textarea,
   .formGroup select {
-    padding: 10px 14px;
+    padding: 12px 16px;
     font-size: 14px;
+    height: 48px;
   }
 
   .formGroup label {
@@ -862,16 +894,37 @@
   }
 
   .navigation {
-    margin-top: 10px;
-    padding-top: 14px;
-    min-height: 60px;
+    margin-top: 14px;
+    padding-top: 18px;
+    min-height: 68px;
   }
 
   .prevBtn,
   .nextBtn {
-    padding: 10px 28px;
-    font-size: 14px;
+    padding: 12px 32px;
+    font-size: 15px;
     min-width: 120px;
+  }
+
+  .title {
+    font-size: 34px;
+  }
+
+  .subtitle {
+    font-size: 16px;
+  }
+
+  .logoIcon {
+    width: 68px;
+    height: 68px;
+  }
+
+  .gemIcon {
+    font-size: 30px;
+  }
+
+  .header {
+    margin-bottom: 24px;
   }
 }
 
@@ -880,11 +933,309 @@
    ============================================ */
 @media (min-width: 1024px) {
   .rightPanel {
-    padding: 32px 40px 24px;
+    padding: 36px 44px 32px;
   }
 
   .title {
-    font-size: 32px;
+    font-size: 38px;
+  }
+
+  .subtitle {
+    font-size: 16px;
+  }
+
+  .logoIcon {
+    width: 76px;
+    height: 76px;
+  }
+
+  .gemIcon {
+    font-size: 34px;
+  }
+
+  .stepTitle {
+    font-size: 24px;
+  }
+
+  .formGroup input,
+  .formGroup textarea,
+  .formGroup select {
+    font-size: 15px;
+    padding: 14px 18px;
+    height: 52px;
+  }
+
+  .formGroup label {
+    font-size: 15px;
+  }
+}
+
+/* ============================================
+   EXTRA SMALL MOBILE (480px and below)
+   ============================================ */
+@media (max-width: 480px) {
+  .rightPanel {
+    padding: 20px 16px 16px;
+  }
+
+  .title {
+    font-size: 30px;
+    letter-spacing: 1px;
+  }
+
+  .title span {
+    letter-spacing: 2px;
+  }
+
+  .subtitle {
+    font-size: 15px;
+  }
+
+  .logoIcon {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 12px;
+  }
+
+  .gemIcon {
+    font-size: 26px;
+  }
+
+  .header {
+    margin-bottom: 20px;
+  }
+
+  .stepIndicator {
+    margin-bottom: 20px;
+  }
+
+  .stepNumber {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+
+  .stepLine {
+    top: 18px;
+    left: calc(50% + 18px);
+    right: calc(-50% + 18px);
+  }
+
+  .stepLabel {
+    font-size: 9px;
+    margin-top: 6px;
+  }
+
+  .stepTitle {
+    font-size: 20px;
+  }
+
+  .stepDesc {
+    font-size: 14px;
+  }
+
+  .stepHeader {
+    margin-bottom: 18px;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .formGroup {
+    margin-bottom: 16px;
+    gap: 5px;
+  }
+
+  .formGroup label {
+    font-size: 14px;
+  }
+
+  .formGroup input,
+  .formGroup textarea,
+  .formGroup select {
+    font-size: 14px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    height: 48px;
+  }
+
+  .formGroup input::placeholder,
+  .formGroup textarea::placeholder {
+    font-size: 14px;
+  }
+
+  .categoryBtn {
+    font-size: 13px;
+    padding: 8px 16px;
+  }
+
+  .navigation {
+    gap: 12px;
+    padding-top: 16px;
+    margin-top: 12px;
+    min-height: 60px;
+  }
+
+  .prevBtn,
+  .nextBtn {
+    padding: 12px 24px;
+    font-size: 14px;
+    min-width: 100px;
+  }
+
+  .footer {
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+
+  .footer p {
+    font-size: 14px;
+  }
+
+  .reviewSection {
+    padding: 16px 18px;
+  }
+
+  .reviewSection h4 {
+    font-size: 16px;
+  }
+
+  .reviewGrid div {
+    font-size: 14px;
+  }
+
+  .checkboxLabel {
+    font-size: 14px;
+  }
+
+  .checkboxLabel input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+  }
+
+  .fileUploadArea {
+    padding: 20px 16px;
+    min-height: 100px;
+  }
+
+  .fileUploadArea p {
+    font-size: 14px;
+  }
+
+  .fileUploadArea span {
+    font-size: 12px;
+  }
+
+  .uploadIcon {
+    font-size: 30px;
+  }
+
+  .socialLinks input {
+    font-size: 14px;
+    padding: 12px 14px;
+    height: 46px;
+  }
+}
+
+/* ============================================
+   VERY SMALL MOBILE (380px and below)
+   ============================================ */
+@media (max-width: 380px) {
+  .rightPanel {
+    padding: 16px 12px 14px;
+  }
+
+  .title {
+    font-size: 26px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .logoIcon {
+    width: 52px;
+    height: 52px;
+  }
+
+  .gemIcon {
+    font-size: 22px;
+  }
+
+  .header {
+    margin-bottom: 16px;
+  }
+
+  .stepNumber {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .stepLine {
+    top: 16px;
+    left: calc(50% + 16px);
+    right: calc(-50% + 16px);
+  }
+
+  .stepLabel {
+    font-size: 8px;
+    margin-top: 5px;
+  }
+
+  .stepTitle {
+    font-size: 18px;
+  }
+
+  .stepDesc {
+    font-size: 13px;
+  }
+
+  .formGroup label {
+    font-size: 13px;
+  }
+
+  .formGroup input,
+  .formGroup textarea,
+  .formGroup select {
+    font-size: 13px;
+    padding: 10px 12px;
+    height: 44px;
+  }
+
+  .formGroup input::placeholder,
+  .formGroup textarea::placeholder {
+    font-size: 13px;
+  }
+
+  .prevBtn,
+  .nextBtn {
+    padding: 10px 18px;
+    font-size: 13px;
+    min-width: 80px;
+  }
+
+  .footer p {
+    font-size: 13px;
+  }
+
+  .categoryBtn {
+    font-size: 12px;
+    padding: 6px 14px;
+  }
+
+  .reviewSection {
+    padding: 14px 16px;
+  }
+
+  .reviewGrid div {
+    font-size: 13px;
+  }
+
+  .checkboxLabel {
+    font-size: 13px;
   }
 }
 
@@ -920,6 +1271,27 @@
     color: #888;
   }
 
+  .stepNumber {
+    background: #3d3d3d;
+    color: #888;
+  }
+
+  .stepLine {
+    background: #4d4d4d;
+  }
+
+  .stepLabel {
+    color: #888;
+  }
+
+  .stepLabel.active {
+    color: #d4af37;
+  }
+
+  .stepLabel.completed {
+    color: #10b981;
+  }
+
   .formGroup label {
     color: #ccc;
   }
@@ -948,6 +1320,7 @@
   .formGroup select:focus {
     border-color: #d4af37;
     background: #3d3d3d;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
   }
 
   .formGroup input.error,
@@ -956,25 +1329,16 @@
     border-color: #6d2a2a;
   }
 
-  .stepNumber {
-    background: #3d3d3d;
+  .errorText {
+    color: #f87171;
+  }
+
+  .validText {
+    color: #34d399;
+  }
+
+  .hint {
     color: #888;
-  }
-
-  .stepLine {
-    background: #4d4d4d;
-  }
-
-  .stepLabel {
-    color: #888;
-  }
-
-  .stepLabel.active {
-    color: #d4af37;
-  }
-
-  .stepLabel.completed {
-    color: #10b981;
   }
 
   .reviewSection {
@@ -996,6 +1360,10 @@
 
   .checkboxLabel {
     color: #bbb;
+  }
+
+  .checkboxLabel a {
+    color: #d4af37;
   }
 
   .fileUploadArea {
@@ -1071,20 +1439,9 @@
     color: #d4af37;
   }
 
-  .errorText {
-    color: #f87171;
-  }
-
-  .validText {
-    color: #34d399;
-  }
-
-  .hint {
-    color: #888;
-  }
-
-  .termsGroup .checkboxLabel {
-    color: #bbb;
+  .logoIcon {
+    background: rgba(212, 175, 55, 0.08);
+    border-color: rgba(212, 175, 55, 0.12);
   }
 
   @media (min-width: 768px) {

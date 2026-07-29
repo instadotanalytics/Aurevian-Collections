@@ -16,8 +16,17 @@ const SellerForgotPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [error, setError] = useState('');
+  const [focusedField, setFocusedField] = useState(null);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+  const handleFocus = (field) => {
+    setFocusedField(field);
+  };
+
+  const handleBlur = () => {
+    setFocusedField(null);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -62,16 +71,16 @@ const SellerForgotPassword = () => {
         <div className={styles.page}>
           <div className={styles.container}>
             <div className={styles.card}>
-              {/* Left Side - Image (60%) */}
-              <div className={styles.leftPanel}>
+              {/* Image Section - Top on Mobile */}
+              <div className={styles.imageSection}>
                 <div className={styles.imageWrapper}>
-                  <img src={LoginImage} alt="Aurevian" className={styles.sideImage} />
+                  <img src={LoginImage} alt="Aurevian" className={styles.loginImage} />
                 </div>
               </div>
 
-              {/* Right Side - Success Message (40%) */}
-              <div className={styles.rightPanel}>
-                <div className={styles.formContainer}>
+              {/* Success Section - Bottom on Mobile */}
+              <div className={styles.successSection}>
+                <div className={styles.successContainer}>
                   <div className={styles.successIconWrapper}>
                     <FiCheckCircle className={styles.successIcon} />
                   </div>
@@ -113,37 +122,43 @@ const SellerForgotPassword = () => {
       <div className={styles.page}>
         <div className={styles.container}>
           <div className={styles.card}>
-            {/* Left Side - Image (60%) */}
-            <div className={styles.leftPanel}>
+            {/* Image Section - Top on Mobile */}
+            <div className={styles.imageSection}>
               <div className={styles.imageWrapper}>
-                <img src={LoginImage} alt="Aurevian" className={styles.sideImage} />
+                <img src={LoginImage} alt="Aurevian" className={styles.loginImage} />
               </div>
             </div>
 
-            {/* Right Side - Form (40%) */}
-            <div className={styles.rightPanel}>
+            {/* Form Section - Bottom on Mobile */}
+            <div className={styles.formSection}>
               <div className={styles.formContainer}>
                 <div className={styles.header}>
-                  <div className={styles.iconWrapper}>
-                    <FiShield className={styles.shieldIcon} />
+                  <div className={styles.logoIcon}>
+                    <FaGem className={styles.gemIcon} />
                   </div>
-                  <h1 className={styles.title}>Forgot Password?</h1>
+                  <h1 className={styles.title}>
+                    <span>AUREVIAN</span>
+                  </h1>
                   <p className={styles.subtitle}>
-                    Enter your email address and we'll send you a link to reset your password.
+                    Reset Your Password
                   </p>
                 </div>
+
+                {error && <p className={styles.errorBanner}>{error}</p>}
 
                 <form onSubmit={handleSubmit} className={styles.form}>
                   <div className={styles.field}>
                     <label className={styles.label}>Email Address</label>
-                    <div className={styles.inputWrapper}>
+                    <div className={`${styles.inputWrapper} ${focusedField === 'email' ? styles.focused : ''}`}>
                       <FiMail className={styles.inputIcon} />
                       <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className={`${styles.input} ${error ? styles.inputError : ''}`}
-                        placeholder="seller@example.com"
+                        onFocus={() => handleFocus('email')}
+                        onBlur={handleBlur}
+                        className={styles.input}
+                        placeholder="Enter your email address"
                         disabled={isLoading}
                       />
                     </div>
@@ -153,7 +168,7 @@ const SellerForgotPassword = () => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className={styles.submitButton}
+                    className={styles.primaryBtn}
                   >
                     {isLoading ? (
                       <>
@@ -161,23 +176,17 @@ const SellerForgotPassword = () => {
                         Sending...
                       </>
                     ) : (
-                      <>
-                        <FiSend className={styles.submitIcon} />
-                        Send Reset Link
-                      </>
+                      'Send Reset Link'
                     )}
                   </button>
 
-                  <div className={styles.helpText}>
-                    <p>
-                      Remember your password? <Link to="/seller/login" className={styles.loginLink}>Login</Link>
-                    </p>
+                  <div className={styles.footerLinks}>
+                    <Link to="/seller/login" className={styles.backLink}>
+                      <FiArrowLeft className={styles.backIcon} />
+                      Back to Login
+                    </Link>
                   </div>
                 </form>
-
-                <div className={styles.footer}>
-                  <p>© {new Date().getFullYear()} Aurevian Collections. All rights reserved.</p>
-                </div>
               </div>
             </div>
           </div>
