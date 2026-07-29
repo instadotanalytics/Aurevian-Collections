@@ -1,8 +1,7 @@
 // src/Components/GiftGuide/GiftGuide.jsx
 
 import React, { useRef } from "react";
-import { FiArrowRight, FiArrowLeft, FiGift } from "react-icons/fi";
-import { FaStar } from "react-icons/fa";
+import { FiArrowRight, FiArrowLeft } from "react-icons/fi";
 import styles from "./GiftGuide.module.css";
 
 // ==========================================================
@@ -20,128 +19,52 @@ const GIFT_IMAGES = {
 };
 
 // ==========================================================
-// GIFT GUIDE PRODUCT DATA
+// GIFT GUIDE PRODUCT DATA (swap for real/dynamic data later)
 // ==========================================================
 const GIFT_PRODUCTS = [
-  { 
-    id: "g1", 
-    name: "Anniversary Diamond Set", 
-    price: 15999, 
-    oldPrice: 19999, 
-    discount: 20, 
-    rating: 4.9, 
-    category: "Anniversary",
-    image: GIFT_IMAGES.anniversary 
-  },
-  { 
-    id: "g2", 
-    name: "Birthstone Personalized Ring", 
-    price: 8999, 
-    oldPrice: 11999, 
-    discount: 25, 
-    rating: 4.8, 
-    category: "Birthday",
-    image: GIFT_IMAGES.birthday 
-  },
-  { 
-    id: "g3", 
-    name: "Bridal Polki Necklace", 
-    price: 24999, 
-    oldPrice: 32999, 
-    discount: 24, 
-    rating: 4.9, 
-    category: "Wedding",
-    image: GIFT_IMAGES.wedding 
-  },
-  { 
-    id: "g4", 
-    name: "Mother's Pearl Pendant", 
-    price: 7499, 
-    oldPrice: 9999, 
-    discount: 25, 
-    rating: 4.7, 
-    category: "For Mother",
-    image: GIFT_IMAGES.mother 
-  },
-  { 
-    id: "g5", 
-    name: "Heart-Shaped Ruby Pendant", 
-    price: 12999, 
-    oldPrice: 16999, 
-    discount: 24, 
-    rating: 4.8, 
-    category: "Valentine's",
-    image: GIFT_IMAGES.valentine 
-  },
-  { 
-    id: "g6", 
-    name: "Festival Gold Earrings", 
-    price: 6499, 
-    oldPrice: 8499, 
-    discount: 24, 
-    rating: 4.6, 
-    category: "Festival",
-    image: GIFT_IMAGES.festival 
-  },
-  { 
-    id: "g7", 
-    name: "Graduation Charm Bracelet", 
-    price: 5499, 
-    oldPrice: 6999, 
-    discount: 21, 
-    rating: 4.7, 
-    category: "Graduation",
-    image: GIFT_IMAGES.graduation 
-  },
-  { 
-    id: "g8", 
-    name: "Corporate Gifting Set", 
-    price: 19999, 
-    oldPrice: 25999, 
-    discount: 23, 
-    rating: 4.8, 
-    category: "Corporate",
-    image: GIFT_IMAGES.corporate 
-  },
+  { id: "g1", name: "Angel Wings Charm", price: 899, oldPrice: 1299, image: GIFT_IMAGES.anniversary },
+  { id: "g2", name: "Diamond Solitaire Pendant", price: 12999, oldPrice: 16999, image: GIFT_IMAGES.birthday },
+  { id: "g3", name: "Sparkling Heart Drop Pendant", price: 2499, oldPrice: 3299, image: GIFT_IMAGES.wedding },
+  { id: "g4", name: "Sparkling Crystal Heart Pendant", price: 1899, oldPrice: 2599, image: GIFT_IMAGES.mother },
+  { id: "g5", name: "Ruby Heart Charm", price: 3499, oldPrice: 4499, image: GIFT_IMAGES.valentine },
+  { id: "g6", name: "Festival Gold Drop Earrings", price: 6499, oldPrice: 8499, image: GIFT_IMAGES.festival },
+  { id: "g7", name: "Graduation Charm Bracelet", price: 5499, oldPrice: 6999, image: GIFT_IMAGES.graduation },
+  { id: "g8", name: "Corporate Gifting Set", price: 19999, oldPrice: 25999, image: GIFT_IMAGES.corporate },
 ];
 
 function ProductCard({ product }) {
   return (
-    <a href={`/product/${product.id}`} className={styles.card} aria-label={product.name}>
-      <div className={styles.imageWrap}>
-        <span className={styles.categoryBadge}>{product.category}</span>
-        {product.discount ? (
-          <span className={styles.discountBadge}>{product.discount}% OFF</span>
-        ) : null}
-
-        {product.image ? (
-          <img 
-            src={product.image} 
-            alt={product.name} 
-            className={styles.image} 
-            loading="lazy" 
-          />
-        ) : (
-          <div className={styles.imagePlaceholder} aria-hidden="true" />
-        )}
-      </div>
-
-      <div className={styles.info}>
-        <h3 className={styles.title}>{product.name}</h3>
-
-        <div className={styles.ratingRow}>
-          <FaStar className={styles.starIcon} />
-          <span className={styles.ratingValue}>{product.rating.toFixed(1)}</span>
+    <div className={styles.card}>
+      <a href={`/product/${product.id}`} className={styles.cardLink} aria-label={product.name}>
+        <div className={styles.imageWrap}>
+          {product.image ? (
+            <img
+              src={product.image}
+              alt={product.name}
+              className={styles.image}
+              loading="lazy"
+            />
+          ) : (
+            <div className={styles.imagePlaceholder} aria-hidden="true" />
+          )}
         </div>
 
-        <div className={styles.priceRow}>
-          <span className={styles.price}>₹{product.price.toLocaleString("en-IN")}</span>
-          {product.oldPrice ? (
-            <span className={styles.oldPrice}>₹{product.oldPrice.toLocaleString("en-IN")}</span>
-          ) : null}
+        <div className={styles.content}>
+          <h3 className={styles.title}>{product.name}</h3>
+
+          <div className={styles.priceRow}>
+            {product.oldPrice ? (
+              <span className={styles.oldPrice}>₹{product.oldPrice.toLocaleString("en-IN")}</span>
+            ) : null}
+            <span className={styles.price}>₹{product.price.toLocaleString("en-IN")}</span>
+          </div>
         </div>
-      </div>
-    </a>
+      </a>
+
+      <button type="button" className={styles.addToCartBtn}>
+        Add To Cart
+      </button>
+    </div>
   );
 }
 
@@ -150,13 +73,13 @@ export default function GiftGuide() {
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: -280, behavior: "smooth" });
+      scrollContainerRef.current.scrollBy({ left: -260, behavior: "smooth" });
     }
   };
 
   const scrollRight = () => {
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: 280, behavior: "smooth" });
+      scrollContainerRef.current.scrollBy({ left: 260, behavior: "smooth" });
     }
   };
 
@@ -164,48 +87,35 @@ export default function GiftGuide() {
     <section className={styles.section} aria-labelledby="gift-guide-heading">
       <div className={styles.container}>
         <div className={styles.header}>
-          <div className={styles.headerText}>
-            <p className={styles.topText}>✦ PERFECT GIFT ✦</p>
-            <h2 id="gift-guide-heading" className={styles.heading}>
-              Gift Guide
-            </h2>
-            <p className={styles.subtitle}>Find the perfect piece for every occasion — curated with love</p>
-          </div>
+          <h2 id="gift-guide-heading" className={styles.heading}>
+            You may also like
+          </h2>
 
-          <a href="/shop/gift-guide" className={styles.viewAllBtn}>
-            View All
-            <FiArrowRight className={styles.viewAllIcon} />
-          </a>
-        </div>
-
-        {/* Scroll Container */}
-        <div className={styles.scrollWrapper}>
-          {/* Desktop Arrow Buttons */}
-          <button 
-            className={`${styles.scrollBtn} ${styles.scrollLeftBtn}`} 
-            onClick={scrollLeft}
-            aria-label="Scroll left"
-          >
-            <FiArrowLeft size={20} />
-          </button>
-          
-          <button 
-            className={`${styles.scrollBtn} ${styles.scrollRightBtn}`} 
-            onClick={scrollRight}
-            aria-label="Scroll right"
-          >
-            <FiArrowRight size={20} />
-          </button>
-
-          <div className={styles.scrollContainer} ref={scrollContainerRef}>
-            {GIFT_PRODUCTS.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+          <div className={styles.navArrows}>
+            <button
+              type="button"
+              className={styles.navBtn}
+              onClick={scrollLeft}
+              aria-label="Scroll left"
+            >
+              <FiArrowLeft size={16} />
+            </button>
+            <button
+              type="button"
+              className={styles.navBtn}
+              onClick={scrollRight}
+              aria-label="Scroll right"
+            >
+              <FiArrowRight size={16} />
+            </button>
           </div>
         </div>
 
-        {/* Divider Line */}
-        <div className={styles.dividerLine} aria-hidden="true" />
+        <div className={styles.scrollContainer} ref={scrollContainerRef}>
+          {GIFT_PRODUCTS.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
       </div>
     </section>
   );
