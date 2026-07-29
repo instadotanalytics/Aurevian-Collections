@@ -9,6 +9,7 @@ import GiftGuideBanner from "../../Components/Banner/GiftGuideBanner";
 import NewCollections from "../../Components/ShopCard/NewCollections";
 import GiftGuide from "../../Components/ShopCard/GiftGuide";
 import Offers from "../../Components/ShopCard/Offers";
+import OffersBanner from "../../Components/Banner/OffersBanner";
 import ShopTheLook from "../../Components/ShopCard/ShopTheLook";
 import Footer from "../Layout/Footer/Footer";
 
@@ -22,6 +23,7 @@ const Home = () => {
       <NewCollections />
       <GiftGuideBanner />
       <GiftGuide />
+      <OffersBanner />
       <Offers />
       <ShopTheLook />
       <Footer />

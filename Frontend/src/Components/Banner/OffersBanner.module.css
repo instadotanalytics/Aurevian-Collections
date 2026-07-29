@@ -1,0 +1,322 @@
+/* src/Components/Banner/OffersBanner.module.css */
+
+.offersSection {
+  width: 100%;
+  padding: 40px 0;
+  background: #faf7f1;
+}
+
+.bannerWrapper {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.bannerContainer {
+  position: relative;
+  width: 100%;
+  min-height: 500px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+/* Decorative White Border */
+.decorativeBorder {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Content */
+.contentWrapper {
+  position: relative;
+  z-index: 3;
+  max-width: 560px;
+  text-align: center;
+  padding: 48px 52px;
+  background: rgba(10, 34, 22, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.eyebrow {
+  display: inline-block;
+  font-family: "Manrope", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #d4af6a;
+  margin-bottom: 18px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.title {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 500;
+  font-size: 48px;
+  line-height: 1.15;
+  color: #faf7f1;
+  margin: 0 0 20px 0;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+}
+
+.wordWrapper {
+  display: inline-block;
+  overflow: hidden;
+}
+
+.animatedWord {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(40px);
+  animation: wordFadeIn 0.8s ease forwards;
+}
+
+@keyframes wordFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.dividerLine {
+  width: 40px;
+  height: 1px;
+  background: #d4af6a;
+}
+
+.dividerDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #d4af6a;
+}
+
+.subtext {
+  font-family: "Manrope", sans-serif;
+  font-size: 16px;
+  font-weight: 300;
+  color: #e2dccf;
+  line-height: 1.6;
+  margin: 0 0 8px 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.offer {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 28px;
+  font-style: italic;
+  color: #d4af6a;
+  margin: 8px 0 24px 0;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+  letter-spacing: 1px;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: "Manrope", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #faf7f1;
+  text-decoration: none;
+  padding: 12px 32px;
+  border: 2px solid #d4af6a;
+  border-radius: 30px;
+  transition: all 0.35s ease;
+  width: fit-content;
+  margin: 0 auto;
+  background: rgba(212, 175, 106, 0.1);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.cta svg {
+  transition: transform 0.35s ease;
+}
+
+.cta:hover {
+  background: rgba(212, 175, 106, 0.25);
+  gap: 18px;
+  border-color: #faf7f1;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(212, 175, 106, 0.2);
+}
+
+.cta:hover svg {
+  transform: translateX(6px);
+}
+
+/* Loading skeleton */
+.skeletonBanner {
+  background: linear-gradient(90deg, #e4ded1 25%, #f0ece2 50%, #e4ded1 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  min-height: 500px;
+  max-width: 1200px;
+  margin: 0 auto;
+  border-radius: 16px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .title {
+    font-size: 40px;
+  }
+
+  .contentWrapper {
+    max-width: 480px;
+    padding: 36px 40px;
+  }
+
+  .offer {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .offersSection {
+    padding: 30px 0;
+  }
+
+  .bannerContainer {
+    min-height: 400px;
+    padding: 30px;
+  }
+
+  .contentWrapper {
+    max-width: 100%;
+    padding: 28px 24px;
+  }
+
+  .title {
+    font-size: 32px;
+  }
+
+  .subtext {
+    font-size: 14px;
+  }
+
+  .offer {
+    font-size: 22px;
+  }
+
+  .decorativeBorder {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .skeletonBanner {
+    min-height: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .offersSection {
+    padding: 20px 0;
+  }
+
+  .bannerWrapper {
+    padding: 0 12px;
+  }
+
+  .bannerContainer {
+    min-height: 320px;
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .contentWrapper {
+    padding: 20px 16px;
+    border-radius: 12px;
+  }
+
+  .title {
+    font-size: 26px;
+  }
+
+  .eyebrow {
+    font-size: 10px;
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+  }
+
+  .subtext {
+    font-size: 12px;
+  }
+
+  .offer {
+    font-size: 18px;
+    margin: 4px 0 16px 0;
+  }
+
+  .cta {
+    font-size: 11px;
+    padding: 10px 20px;
+  }
+
+  .decorativeBorder {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    border-width: 1.5px;
+    border-radius: 8px;
+  }
+
+  .skeletonBanner {
+    min-height: 320px;
+    border-radius: 12px;
+  }
+
+  .divider {
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .dividerLine {
+    width: 24px;
+  }
+}
