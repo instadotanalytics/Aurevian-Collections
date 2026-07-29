@@ -656,7 +656,7 @@
   flex-shrink: 0;
   flex-wrap: wrap;
   min-height: 72px;
-  border-top: 1.5px solid #e8e3dc;
+  /* border-top: 1.5px solid #e8e3dc; */
   margin-top: 16px;
   background: #ffffff;
   clear: both;
@@ -724,7 +724,7 @@
   text-align: center;
   margin-top: 14px;
   padding-top: 14px;
-  border-top: 1.5px solid #e8e3dc;
+  /* border-top: 1.5px solid #e8e3dc; */
   flex-shrink: 0;
 }
 
