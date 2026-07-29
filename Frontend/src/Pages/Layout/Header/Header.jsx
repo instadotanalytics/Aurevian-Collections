@@ -1,5 +1,4 @@
-
-// src/Pages/Layout/Header/Header.jsx — full file (dynamic content wiring)
+// src/Pages/Layout/Header/Header.jsx — full file with mobile bottom nav
 
 import React, { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,6 +16,11 @@ import {
   FiSettings,
   FiUser as FiUserIcon,
   FiShoppingBag as FiOrders,
+  FiHome,
+  FiBox,
+  FiGrid,
+  FiGift,
+  FiTag
 } from "react-icons/fi";
 import {
   FaUserPlus, FaUserCheck
@@ -26,8 +30,7 @@ import styles from "./Header.module.css";
 
 import AnnouncementBar from "./AnnouncementBar";
 import SearchPanel from "./Searchpanel";
-// ✅ Static NavData is now only the LOADING-STATE fallback, shown until the
-// dynamic config loads from the backend — never edited directly anymore.
+// ✅ Static NavData is now only the LOADING-STATE fallback
 import {
   mainNav as fallbackMainNav,
   aboutDropdown as fallbackAboutDropdown,
@@ -38,8 +41,7 @@ import { logoutUser } from "../../../redux/slices/authSlice.js";
 import { fetchPublicHeaderConfig } from "../../../redux/slices/headerConfigSlice.js";
 import toast from "react-hot-toast";
 
-// Placeholder "recent searches" seed shown until the user has real history
-// of their own.
+// Placeholder "recent searches"
 const defaultRecentSearches = [
   "Bridal lehenga",
   "Gold earrings",
@@ -79,11 +81,10 @@ const Header = ({
     dispatch(fetchPublicHeaderConfig());
   }, [dispatch]);
 
-  // ✅ Derive every content block from the live config, falling back to the
-  // static defaults only while the fetch hasn't resolved yet.
+  // ✅ Derive every content block from the live config, falling back to static defaults
   const announcements = config?.announcements?.length
     ? config.announcements
-    : undefined; // AnnouncementBar already has its own internal fallback
+    : undefined;
   const mainNav = config?.mainNav?.length ? config.mainNav : fallbackMainNav;
   const shopCategories = config?.shopMegaMenu?.categories || [];
   const shopQuickLinks = config?.shopMegaMenu?.quickLinks || [];
@@ -97,8 +98,6 @@ const Header = ({
   };
   const collectionsDropdown = config?.collectionsDropdown || [];
   const offersDropdown = config?.offersDropdown || [];
-  // ✅ FIX: this was previously a stray `import` statement inside the
-  // component body, which caused `aboutDropdown` to be undefined.
   const aboutDropdown = config?.aboutDropdown?.length
     ? config.aboutDropdown
     : fallbackAboutDropdown || [];
@@ -870,6 +869,33 @@ const Header = ({
           </Link>
         </div>
       </aside>
+
+      {/* ==========================================================
+           MOBILE BOTTOM NAVIGATION (NEW)
+           ========================================================== */}
+      <nav className={styles.mobileBottomNav} aria-label="Mobile bottom navigation">
+        <Link to="/" className={styles.bottomNavItem}>
+          <FiHome className={styles.bottomNavIcon} />
+          <span className={styles.bottomNavLabel}>Home</span>
+        </Link>
+        <Link to="/shop" className={styles.bottomNavItem}>
+          <FiBox className={styles.bottomNavIcon} />
+          <span className={styles.bottomNavLabel}>Shop</span>
+        </Link>
+        <Link to="/collections" className={styles.bottomNavItem}>
+          <FiGrid className={styles.bottomNavIcon} />
+          <span className={styles.bottomNavLabel}>Collections</span>
+        </Link>
+        <Link to="/gifts" className={styles.bottomNavItem}>
+          <FiGift className={styles.bottomNavIcon} />
+          <span className={styles.bottomNavLabel}>Gifts</span>
+        </Link>
+        <Link to="/offers" className={styles.bottomNavItem}>
+          <FiTag className={styles.bottomNavIcon} />
+          <span className={styles.bottomNavLabel}>Offers</span>
+        </Link>
+      </nav>
+
     </header>
   );
 };

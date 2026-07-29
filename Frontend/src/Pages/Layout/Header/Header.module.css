@@ -7,9 +7,6 @@
 
 /* ==========================================================
    THEME VARIABLES
-   A warm, jewellery-house palette: ink instead of flat black,
-   ivory instead of clinical white, and a single antique-gold
-   accent reserved for hover states, hairlines and the banner.
    ========================================================== */
 .navbar,
 .navbar *,
@@ -33,7 +30,7 @@
   top: 0;
   z-index: 1000;
   width: 100%;
- background:rgba(238, 215, 191);
+  background: rgba(238, 215, 191);
   color: var(--ink);
   font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
   border-bottom: 1px solid var(--line);
@@ -47,7 +44,7 @@
 }
 
 /* ==========================================================
-   TOP ROW: logo, nav, icons
+   TOP ROW
    ========================================================== */
 .topRow {
   position: relative;
@@ -55,7 +52,6 @@
   align-items: center;
   justify-content: space-between;
   height: 70px;
-  /* padding: 0 24px; */
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -80,8 +76,6 @@
   object-fit: contain;
   display: block;
   transition: transform 0.35s ease;
-}
-.logoImage {
   filter: grayscale(100%) brightness(20%);
 }
 
@@ -155,7 +149,7 @@
 }
 
 /* ==========================================================
-   SEARCH PANEL — slides in from the LEFT edge
+   SEARCH PANEL
    ========================================================== */
 .searchPanel {
   position: fixed;
@@ -319,7 +313,6 @@
   transform: translateY(8px);
   transition: all var(--transition);
   z-index: 1100;
-  /* padding: 0 10px; */
 }
 
 .accountDropdown.open {
@@ -425,7 +418,7 @@
 }
 
 /* ==========================================================
-   SIMPLE DROPDOWN (Collections / Offers / About Us)
+   SIMPLE DROPDOWN
    ========================================================== */
 .dropdown {
   position: absolute;
@@ -469,7 +462,7 @@
 }
 
 /* ==========================================================
-   MEGA MENU (Shop / Gift Guide) - Desktop Only
+   MEGA MENU
    ========================================================== */
 .megaMenu {
   position: fixed;
@@ -795,17 +788,14 @@
 }
 
 /* ==========================================================
-   MOBILE DRAWER SUB HEADINGS - LEFT ALIGNED
+   MOBILE DRAWER SUB HEADINGS
    ========================================================== */
-
-/* Remove the box/border styling from drawerSubGroup */
 .drawerSubGroup {
   margin-bottom: 0;
   padding: 0;
   border-bottom: none;
 }
 
-/* Simple heading style - LEFT ALIGNED */
 .drawerSubHeading {
   display: flex;
   justify-content: space-between;
@@ -853,7 +843,6 @@
   color: var(--gold-deep);
 }
 
-/* Sub-items - indented with padding */
 .drawerSubItems {
   padding-left: 40px;
   margin: 0;
@@ -922,7 +911,7 @@
 }
 
 /* ==========================================================
-   PREMIUM SEARCH PANEL CONTENT (SearchPanel.jsx)
+   PREMIUM SEARCH PANEL CONTENT
    ========================================================== */
 .searchPanelBody {
   display: flex;
@@ -1325,6 +1314,87 @@
 }
 
 /* ==========================================================
+   MOBILE BOTTOM NAVIGATION (NEW)
+   ========================================================== */
+.mobileBottomNav {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1500;
+  
+  /* Pill shape & Glass-morphism background */
+  background: rgba(255, 235, 225, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50px;
+  padding: 8px 16px;
+  
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 6px;
+  box-shadow: 0 8px 24px rgba(21, 19, 15, 0.12);
+  
+  max-width: 92%;
+  width: auto;
+  min-width: 320px;
+  overflow-x: auto;
+}
+
+.bottomNavItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--ink);
+  padding: 6px 12px;
+  border-radius: 30px;
+  transition: background var(--transition), color var(--transition);
+  gap: 2px;
+  position: relative;
+  white-space: nowrap;
+}
+
+.bottomNavItem:hover,
+.bottomNavItem:focus-visible {
+  background: var(--gold-soft);
+  color: var(--gold-deep);
+}
+
+.bottomNavItem:active {
+  transform: scale(0.95);
+}
+
+.bottomNavItem.active {
+  color: var(--gold-deep);
+  font-weight: 600;
+}
+
+.bottomNavItem.active::before {
+  content: "";
+  position: absolute;
+  inset: 2px 6px;
+  background: rgba(179, 135, 63, 0.08);
+  border-radius: 30px;
+  z-index: -1;
+}
+
+.bottomNavIcon {
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+
+.bottomNavLabel {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+/* ==========================================================
    RESPONSIVE BREAKPOINTS
    ========================================================== */
 
@@ -1404,6 +1474,11 @@
   .accountDropdown {
     right: -60px;
   }
+  
+  /* Show bottom nav on tablet/mobile */
+  .mobileBottomNav {
+    display: flex;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1435,6 +1510,27 @@
   .drawerSubItems a {
     font-size: 13.5px;
     padding: 10px 32px;
+  }
+
+  /* Adjust bottom nav for small phones */
+  .mobileBottomNav {
+    min-width: auto;
+    width: calc(100% - 24px);
+    padding: 6px 8px;
+    gap: 2px;
+    bottom: 12px;
+  }
+
+  .bottomNavItem {
+    padding: 4px 8px;
+  }
+
+  .bottomNavIcon {
+    font-size: 18px;
+  }
+
+  .bottomNavLabel {
+    font-size: 9px;
   }
 }
 
