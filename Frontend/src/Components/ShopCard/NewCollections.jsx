@@ -42,9 +42,6 @@ function ProductCard({ product }) {
   return (
     <a href={`/product/${product.id}`} className={styles.card} aria-label={product.name}>
       <div className={styles.imageWrap}>
-
-        
-
         {product.image ? (
           <img
             src={product.image}
@@ -95,25 +92,29 @@ export default function NewCollections() {
   return (
     <section className={styles.section} aria-labelledby="new-collections-heading">
       <div className={styles.container}>
+        {/* Two-column header:
+            LEFT  → "Fresh Arrivals" (top line) + "New Collections" heading (below)
+            RIGHT → "View All" button (top line) + arrow buttons (below)
+            Because both columns simply stack top-to-bottom, the
+            top lines naturally line up with each other, and so do
+            the bottom lines — on every screen size. On mobile the
+            arrows are hidden, so the right column is just the
+            "View All" button sitting next to "Fresh Arrivals". */}
         <div className={styles.header}>
-          {/* Row 1: "Fresh Arrivals" (left)  <—>  "View All" plain link (right) */}
-          <div className={styles.topRow}>
+          <div className={styles.headerLeft}>
             <p className={styles.topText}>Fresh Arrivals</p>
-            <a href="/shop/new-arrivals" className={styles.viewAllBtn}>
-            
-              View All
-              
-            </a>
-          </div>
-
-          {/* Row 2: "New Collections" heading (left)  <—>  arrow buttons (right) */}
-          <div className={styles.bottomRow}>
             <div className={styles.headerText}>
               <h2 id="new-collections-heading" className={styles.heading}>
                 New Collections
               </h2>
               <span className={styles.headingRule} aria-hidden="true" />
             </div>
+          </div>
+
+          <div className={styles.headerRight}>
+            <a href="/shop/new-arrivals" className={styles.viewAllBtn}>
+              View All
+            </a>
 
             <div className={styles.navArrows}>
               <button type="button" className={styles.navBtn} onClick={scrollLeft} aria-label="Scroll left">
@@ -135,4 +136,3 @@ export default function NewCollections() {
     </section>
   );
 }
-
