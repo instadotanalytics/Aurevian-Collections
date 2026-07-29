@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap");
+ @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap");
 
 * {
   margin: 0%;
@@ -26,10 +26,13 @@
   --line: #e8e2d5;
   --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
-  position: sticky;
+  /* ✅ FROZEN HEADER: Changed to fixed */
+  position: fixed;
   top: 0;
-  z-index: 1000;
+  left: 0;
   width: 100%;
+  z-index: 1000;
+  
   background: rgba(238, 215, 191);
   color: var(--ink);
   font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
@@ -1314,11 +1317,11 @@
 }
 
 /* ==========================================================
-   MOBILE BOTTOM NAVIGATION (NEW)
+   MOBILE BOTTOM NAVIGATION (FROZEN)
    ========================================================== */
 .mobileBottomNav {
   position: fixed;
-  bottom: 20px;
+  bottom: 0;       /* ✅ FROZEN to the bottom edge */
   left: 50%;
   transform: translateX(-50%);
   z-index: 1500;
@@ -1344,7 +1347,6 @@
       saturate(220%)
       brightness(115%);
       
-
   -webkit-backdrop-filter:
       blur(30px)
       saturate(220%)
@@ -1436,7 +1438,6 @@
 }
 
 .mobileBottomNav:hover{
-
     transform:
     translateX(-50%)
     translateY(-4px);
@@ -1453,41 +1454,27 @@
 }
 
 @keyframes liquidMove{
-
     0%{
-
         transform:
         translateX(-70%)
         translateY(-20%)
         rotate(130deg);
-
     }
-
     100%{
-
         transform:
         translateX(70%)
         translateY(20%)
         rotate(130deg);
-
     }
-
 }
 
 @keyframes borderFlow{
-
     from{
-
         transform:rotate(0deg);
-
     }
-
     to{
-
         transform:rotate(360deg);
-
     }
-
 }
 
 .bottomNavItem {
@@ -1664,7 +1651,7 @@
     width: calc(100% - 24px);
     padding: 6px 8px;
     gap: 2px;
-    bottom: 12px;
+    bottom: 0;
   }
 
   .bottomNavItem {

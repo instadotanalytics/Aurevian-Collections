@@ -13,9 +13,10 @@
   --muted: #8a7a68;
   --gold: #b3873f;
   --gold-deep: #8a6a30;
+  --gold-light: rgba(179, 135, 63, 0.15);
 
-  padding: 48px 24px 56px;
-  background: transparent;
+  padding: 64px 24px 48px;
+  background: #fcfaf7; /* Clean ivory background */
   font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
   position: relative;
   isolation: isolate;
@@ -23,10 +24,34 @@
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
   position: relative;
   z-index: 1;
+}
+
+/* ==========================================================
+   DECORATIVE TOP ORNAMENT
+   ========================================================== */
+.topOrnament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.ornamentLine {
+  width: 32px;
+  height: 1px;
+  background: var(--gold);
+  opacity: 0.4;
+}
+
+.ornamentDiamond {
+  color: var(--gold);
+  font-size: 14px;
+  opacity: 0.7;
 }
 
 /* ==========================================================
@@ -35,45 +60,73 @@
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 26px;
+  align-items: flex-end;
+  margin-bottom: 32px;
   gap: 16px;
+  flex-wrap: wrap;
+}
+
+.headingWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.subHeading {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--gold-deep);
 }
 
 .heading {
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(22px, 2.6vw, 28px);
-  font-weight: 500;
+  font-size: clamp(28px, 3.2vw, 36px);
+  font-weight: 600;
   color: var(--ink);
   margin: 0;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.01em;
+}
+
+.heading::after {
+  content: "";
+  display: block;
+  width: 42px;
+  height: 2px;
+  background: var(--gold);
+  margin-top: 6px;
 }
 
 .navArrows {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-shrink: 0;
 }
 
 .navBtn {
-  width: 34px;
-  height: 34px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  border: 1px solid rgba(36, 29, 22, 0.25);
-  background: transparent;
+  border: 1px solid rgba(36, 29, 22, 0.1);
+  background: var(--ivory);
   color: var(--ink);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  transition: none; /* Removed hover transition */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
 .navBtn:hover {
-  background: var(--ink);
-  color: var(--ivory);
-  border-color: var(--ink);
+  background: var(--gold);
+  color: #fff;
+  border-color: var(--gold);
+  box-shadow: 0 4px 12px var(--gold-light);
+  /* Removed transform: scale(1.05) */
 }
 
 /* ==========================================================
@@ -81,12 +134,15 @@
    ========================================================== */
 .scrollContainer {
   display: flex;
-  gap: 18px;
+  gap: 24px;
   overflow-x: auto;
-  padding: 6px 4px 10px;
+  padding: 10px 4px 16px;
   scroll-behavior: smooth;
   scroll-snap-type: x proximity;
   -webkit-overflow-scrolling: touch;
+  /* Subtle gradient fade on the right edge */
+  mask-image: linear-gradient(to right, black 95%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black 95%, transparent 100%);
 }
 
 .scrollContainer::-webkit-scrollbar {
@@ -100,26 +156,28 @@
 }
 
 /* ==========================================================
-   ARCH CARD
+   ARCH CARD (Refined)
    ========================================================== */
 .card {
   flex: 0 0 auto;
-  width: 225px;
+  width: 240px;
   scroll-snap-align: start;
   display: flex;
   flex-direction: column;
   align-items: center;
   background: var(--blush);
-  border-radius: 125px 125px 14px 14px;
-  padding: 0 0 18px;
+  border-radius: 135px 135px 16px 16px;
+  padding: 0 0 20px;
   overflow: hidden;
-  transition: transform 0.35s ease, box-shadow 0.35s ease;
-  box-shadow: 0 10px 24px -16px rgba(120, 90, 40, 0.3);
+  transition: none; /* Removed all hover transitions */
+  box-shadow: 0 8px 24px -12px rgba(120, 90, 40, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 18px 30px -16px rgba(120, 90, 40, 0.4);
+  /* Removed transform: translateY(-8px) */
+  /* Removed box-shadow change */
+  /* Removed border-color change */
 }
 
 .cardLink {
@@ -134,21 +192,22 @@
 
 .content {
   width: 100%;
-  padding: 14px 16px 0;
+  padding: 16px 16px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 /* ==========================================================
-   IMAGE — fills the arch edge-to-edge, hugging the curve
+   IMAGE
    ========================================================== */
 .imageWrap {
+  position: relative;
   width: 100%;
-  height: 215px;
-  border-radius: 125px 125px 0 0;
+  height: 230px;
+  border-radius: 135px 135px 0 0;
   overflow: hidden;
-  background: linear-gradient(180deg, var(--blush) 0%, var(--blush-deep) 100%);
+  background: linear-gradient(180deg, #fff 0%, var(--blush-deep) 100%);
 }
 
 .image {
@@ -156,11 +215,11 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.4s ease;
+  transition: none; /* Removed zoom transition */
 }
 
 .card:hover .image {
-  transform: scale(1.05);
+  /* Removed transform: scale(1.08) */
 }
 
 .imagePlaceholder {
@@ -176,22 +235,22 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 28px;
+  font-size: 32px;
   color: var(--gold);
-  opacity: 0.5;
+  opacity: 0.3;
 }
 
 /* ==========================================================
    TITLE + PRICE
    ========================================================== */
 .title {
-  font-family: "Inter", sans-serif;
-  font-size: 12.5px;
-  font-weight: 500;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--ink);
-  margin: 0 0 8px;
-  line-height: 1.35;
-  min-height: 32px;
+  margin: 0 0 10px;
+  line-height: 1.3;
+  min-height: 38px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -200,24 +259,25 @@
 
 .priceRow {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
-  gap: 7px;
-  margin-bottom: 14px;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .price {
   font-family: "Inter", sans-serif;
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--ink);
 }
 
 .oldPrice {
   font-family: "Inter", sans-serif;
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--muted);
   text-decoration: line-through;
+  font-weight: 400;
 }
 
 /* ==========================================================
@@ -226,24 +286,58 @@
 .addToCartBtn {
   width: calc(100% - 32px);
   margin: 0 16px;
-  padding: 9px 10px;
-  border: 1px solid rgba(36, 29, 22, 0.3);
+  padding: 10px 10px;
+  border: none;
   border-radius: 999px;
-  background: transparent;
-  color: var(--ink);
+  background: var(--gold);
+  color: #fff;
   font-family: "Inter", sans-serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  transition: none; /* Removed hover transitions */
+  box-shadow: 0 4px 12px var(--gold-light);
 }
 
 .addToCartBtn:hover {
-  background: var(--ink);
-  color: var(--ivory);
-  border-color: var(--ink);
+  /* Removed background change */
+  /* Removed transform: scale(1.02) */
+  /* Removed box-shadow change */
+}
+
+.addToCartBtn:active {
+  transform: scale(0.96);
+}
+
+/* ==========================================================
+   VIEW ALL FOOTER
+   ========================================================== */
+.footerLink {
+  display: flex;
+  justify-content: center;
+  margin-top: 36px;
+}
+
+.viewAllLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 8px 20px;
+  border-bottom: 1px solid transparent;
+  transition: none; /* Removed hover transition */
+}
+
+.viewAllLink:hover {
+  /* Removed color change */
+  /* Removed border change */
+  /* Removed gap change */
 }
 
 /* ==========================================================
@@ -251,69 +345,77 @@
    ========================================================== */
 @media (max-width: 992px) {
   .section {
-    padding: 40px 16px 44px;
+    padding: 48px 20px 40px;
   }
 
   .card {
-    width: 200px;
-    border-radius: 110px 110px 12px 12px;
+    width: 210px;
+    border-radius: 120px 120px 14px 14px;
   }
 
   .imageWrap {
-    height: 190px;
-    border-radius: 110px 110px 0 0;
+    height: 200px;
+    border-radius: 120px 120px 0 0;
   }
 
   .content {
-    padding: 12px 14px 0;
+    padding: 14px 14px 0;
   }
 }
 
 @media (max-width: 640px) {
   .section {
-    padding: 32px 14px 36px;
+    padding: 40px 12px 32px;
   }
 
   .header {
-    margin-bottom: 18px;
+    margin-bottom: 24px;
+    align-items: flex-start;
   }
 
   .heading {
-    font-size: 19px;
+    font-size: 24px;
+  }
+
+  .subHeading {
+    font-size: 10px;
   }
 
   .navBtn {
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
   }
 
   .scrollContainer {
-    gap: 12px;
+    gap: 14px;
+    padding: 6px 2px 12px;
+    mask-image: none;
+    -webkit-mask-image: none;
   }
 
   .card {
     width: 50vw;
-    min-width: 172px;
-    border-radius: 92px 92px 10px 10px;
+    min-width: 165px;
+    border-radius: 100px 100px 12px 12px;
   }
 
   .imageWrap {
-    height: 155px;
-    border-radius: 92px 92px 0 0;
+    height: 165px;
+    border-radius: 100px 100px 0 0;
   }
 
   .content {
-    padding: 10px 12px 0;
+    padding: 12px 12px 0;
   }
 
   .title {
-    font-size: 12px;
-    min-height: 30px;
-    margin-bottom: 6px;
+    font-size: 14px;
+    min-height: 34px;
+    margin-bottom: 8px;
   }
 
   .price {
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .oldPrice {
@@ -321,21 +423,34 @@
   }
 
   .priceRow {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    gap: 8px;
   }
 
   .addToCartBtn {
-    font-size: 9px;
-    padding: 7px 8px;
+    font-size: 10px;
+    padding: 8px 8px;
     width: calc(100% - 24px);
     margin: 0 12px;
+  }
+
+  .footerLink {
+    margin-top: 28px;
+  }
+
+  .viewAllLink {
+    font-size: 12px;
   }
 }
 
 @media (max-width: 380px) {
   .card {
     width: 52vw;
-    min-width: 158px;
+    min-width: 148px;
+  }
+
+  .imageWrap {
+    height: 145px;
   }
 }
 
@@ -346,7 +461,8 @@
   .card,
   .image,
   .navBtn,
-  .addToCartBtn {
+  .addToCartBtn,
+  .viewAllLink {
     transition: none !important;
   }
 
@@ -355,6 +471,10 @@
   }
 
   .card:hover .image {
+    transform: none !important;
+  }
+
+  .addToCartBtn:hover {
     transform: none !important;
   }
 }

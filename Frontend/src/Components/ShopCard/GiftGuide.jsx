@@ -19,7 +19,7 @@ const GIFT_IMAGES = {
 };
 
 // ==========================================================
-// GIFT GUIDE PRODUCT DATA (swap for real/dynamic data later)
+// GIFT GUIDE PRODUCT DATA
 // ==========================================================
 const GIFT_PRODUCTS = [
   { id: "g1", name: "Angel Wings Charm", price: 899, oldPrice: 1299, image: GIFT_IMAGES.anniversary },
@@ -53,10 +53,10 @@ function ProductCard({ product }) {
           <h3 className={styles.title}>{product.name}</h3>
 
           <div className={styles.priceRow}>
+            <span className={styles.price}>₹{product.price.toLocaleString("en-IN")}</span>
             {product.oldPrice ? (
               <span className={styles.oldPrice}>₹{product.oldPrice.toLocaleString("en-IN")}</span>
             ) : null}
-            <span className={styles.price}>₹{product.price.toLocaleString("en-IN")}</span>
           </div>
         </div>
       </a>
@@ -73,23 +73,34 @@ export default function GiftGuide() {
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: -260, behavior: "smooth" });
+      scrollContainerRef.current.scrollBy({ left: -280, behavior: "smooth" });
     }
   };
 
   const scrollRight = () => {
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: 260, behavior: "smooth" });
+      scrollContainerRef.current.scrollBy({ left: 280, behavior: "smooth" });
     }
   };
 
   return (
     <section className={styles.section} aria-labelledby="gift-guide-heading">
       <div className={styles.container}>
+        
+        {/* --- DECORATIVE TOP ORNAMENT --- */}
+        <div className={styles.topOrnament} aria-hidden="true">
+          <span className={styles.ornamentLine}></span>
+          <span className={styles.ornamentDiamond}>✦</span>
+          <span className={styles.ornamentLine}></span>
+        </div>
+
         <div className={styles.header}>
-          <h2 id="gift-guide-heading" className={styles.heading}>
-            You may also like
-          </h2>
+          <div className={styles.headingWrapper}>
+            <span className={styles.subHeading}>Curated for you</span>
+            <h2 id="gift-guide-heading" className={styles.heading}>
+              You May Also Like
+            </h2>
+          </div>
 
           <div className={styles.navArrows}>
             <button
@@ -98,7 +109,7 @@ export default function GiftGuide() {
               onClick={scrollLeft}
               aria-label="Scroll left"
             >
-              <FiArrowLeft size={16} />
+              <FiArrowLeft size={18} />
             </button>
             <button
               type="button"
@@ -106,7 +117,7 @@ export default function GiftGuide() {
               onClick={scrollRight}
               aria-label="Scroll right"
             >
-              <FiArrowRight size={16} />
+              <FiArrowRight size={18} />
             </button>
           </div>
         </div>
@@ -116,6 +127,14 @@ export default function GiftGuide() {
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
+
+        {/* --- VIEW ALL LINK AT BOTTOM --- */}
+        <div className={styles.footerLink}>
+          <a href="/gifts" className={styles.viewAllLink}>
+            Explore All Gifts <FiArrowRight />
+          </a>
+        </div>
+
       </div>
     </section>
   );
