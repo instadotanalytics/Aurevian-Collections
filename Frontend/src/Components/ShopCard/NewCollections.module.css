@@ -1,4 +1,3 @@
-
 /* src/Components/NewCollections/NewCollections.module.css */
 
 /* ==========================================================
@@ -110,7 +109,10 @@
   white-space: nowrap;
   cursor: pointer;
 
-  transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease,
+    transform 0.2s ease;
 }
 
 .viewAllBtn:hover {
@@ -137,7 +139,11 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.2s ease;
 }
 
 .navBtn:hover {
@@ -185,15 +191,9 @@
   background-color: transparent;
   border-radius: 12px;
   overflow: hidden;
-
- 
-   
 }
 
 @media (hover: hover) and (pointer: fine) {
- 
-
-  
 }
 
 /* ==========================================================
@@ -329,17 +329,37 @@
   }
 }
 
-
-
-  /* Mobile: hide the slider arrows — the right column becomes
+/* Mobile: hide the slider arrows — the right column becomes
      just the "View All" button, top-aligned with "Fresh Arrivals" */
-  @media (max-width: 768px) {
+@media (max-width: 768px) {
   .section {
-    padding: 40px 16px 44px;
+    padding: 32px 14px 36px;
   }
 
   .header {
-    margin-bottom: 22px;
+    margin-bottom: 18px;
+  }
+
+  .topText {
+    font-size: 10px;
+    letter-spacing: 1.6px;
+  }
+
+  .heading {
+    font-size: 20px;
+    margin: 0 0 5px;
+  }
+
+  .headingRule {
+    width: 44px;
+    height: 2px;
+  }
+
+  .viewAllBtn {
+    min-width: 78px;
+    height: 32px;
+    font-size: 12px;
+    padding: 0 12px;
   }
 
   .card {
@@ -351,25 +371,25 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 10px;
+    justify-content: center;
+    gap: 0;
   }
 
+  /* arrows removed on mobile — the scroll row is swipeable already */
   .navArrows {
-    display: flex;
-    gap: 8px;
+    display: none;
   }
 }
 
 @media (max-width: 480px) {
-
   .header {
     display: grid;
     grid-template-columns: 1fr auto;
     grid-template-rows: auto auto;
     align-items: center;
     column-gap: 12px;
-    row-gap: 10px;
-    margin-bottom: 18px;
+    row-gap: 8px;
+    margin-bottom: 16px;
   }
 
   .headerLeft {
@@ -380,8 +400,8 @@
     grid-column: 1;
     grid-row: 1;
     margin: 0;
-    font-size: 11px;
-    letter-spacing: 2px;
+    font-size: 9.5px;
+    letter-spacing: 1.4px;
     align-self: center;
   }
 
@@ -391,44 +411,37 @@
   }
 
   .heading {
-    margin: 0 0 6px;
-    font-size: 22px;
+    margin: 0 0 5px;
+    font-size: 18px;
   }
 
   .headingRule {
-    width: 48px;
-    height: 3px;
+    width: 40px;
+    height: 2px;
   }
 
   .headerRight {
     display: contents;
   }
 
+  /* View All now spans both header rows and sits vertically
+     centered, since the arrow row beneath it is gone */
   .viewAllBtn {
     grid-column: 2;
-    grid-row: 1;
+    grid-row: 1 / span 2;
 
     justify-self: end;
+    align-self: center;
 
-    width: 92px;
-    height: 34px;
-    font-size: 12px;
+    width: 84px;
+    height: 32px;
+    font-size: 11.5px;
     padding: 0;
   }
 
+  /* arrows removed on mobile */
   .navArrows {
-    grid-column: 2;
-    grid-row: 2;
-
-    justify-self: end;
-
-    display: flex;
-    gap: 8px;
-  }
-
-  .navBtn {
-    width: 34px;
-    height: 34px;
+    display: none;
   }
 }
 
@@ -436,6 +449,10 @@
   .card {
     flex: 0 0 calc(50% - 6px);
     min-width: 130px;
+  }
+
+  .heading {
+    font-size: 17px;
   }
 
   .image {
@@ -462,7 +479,6 @@
 
   .card:hover {
     transform: none !important;
-    
   }
 
   .card:hover .image {
