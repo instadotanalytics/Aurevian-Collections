@@ -35,6 +35,8 @@
   background: var(--ivory);
   color: var(--ink);
   font-family: var(--sans);
+  padding-top: 120px; /* Account for fixed header */
+  min-height: 100vh;
 }
 
 .story * {

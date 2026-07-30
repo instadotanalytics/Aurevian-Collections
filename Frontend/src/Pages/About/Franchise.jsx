@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
 import { motion, AnimatePresence, useInView } from "framer-motion";
@@ -41,16 +40,12 @@ import {
 } from "react-icons/lu";
 import styles from "./Franchise.module.css";
 import franchiseHero from "../../assets/franchisehero.png";
-
+import Header from "../../Pages/Layout/Header/Header";
+import Footer from "../../Pages/Layout/Footer/Footer";
 
 /* ---------------------------------------------------------------- */
 /* Image imports                                                     */
 /* ---------------------------------------------------------------- */
-/* NOTE: adjust this relative path to match where Franchise.jsx sits
-   relative to your assets folder, e.g.:
-   - src/pages/Franchise.jsx      -> "../assets/franchiseimage.png"
-   - src/components/Franchise.jsx -> "../assets/franchiseimage.png"
-   - src/Franchise.jsx            -> "./assets/franchiseimage.png"      */
 import bridalSetImage from "../../assets/Bridalsetimage.png";
 import ringsImage from "../../assets/Ringsimage.png";
 import necklaceImage from "../../assets/Necklaceimage.png";
@@ -374,25 +369,6 @@ const Eyebrow = ({ children }) => (
   <span className={styles.eyebrow}>{children}</span>
 );
 
-/** Placeholder block for images — kept for any remaining slots that still need one. */
-const ImagePlaceholder = ({
-  label,
-  sublabel,
-  ratio = "4 / 3",
-  icon = <FaGem />,
-}) => (
-  <div
-    className={styles.imgPlaceholder}
-    style={{ aspectRatio: ratio }}
-    data-image-slot={label}
-  >
-    <div className={styles.imgPlaceholderIcon}>{icon}</div>
-    <p className={styles.imgPlaceholderLabel}>{label}</p>
-    {sublabel && <p className={styles.imgPlaceholderSub}>{sublabel}</p>}
-  </div>
-);
-
-/** Animated count-up, triggers once when in view. */
 const CountUp = ({ value, suffix = "", duration = 1.6 }) => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.6 });
@@ -421,8 +397,7 @@ const CountUp = ({ value, suffix = "", duration = 1.6 }) => {
 };
 
 /* ---------------------------------------------------------------- */
-/* Hero feature strip — the "Premium Brand / Complete Support /      */
-/* Growth Opportunity" bordered strip beneath the hero copy          */
+/* Hero feature strip                                               */
 /* ---------------------------------------------------------------- */
 
 const HeroFeatureStrip = () => (
@@ -451,7 +426,7 @@ const HeroFeatureStrip = () => (
 );
 
 /* ---------------------------------------------------------------- */
-/* Why Partner — editorial hairline list (replaces card grid)        */
+/* Why Partner List                                                 */
 /* ---------------------------------------------------------------- */
 
 const WhyPartnerList = () => {
@@ -494,7 +469,7 @@ const WhyPartnerList = () => {
 };
 
 /* ---------------------------------------------------------------- */
-/* Aurevian Promise — six-card brand-promise grid                    */
+/* Aurevian Promise Grid                                            */
 /* ---------------------------------------------------------------- */
 
 const AurevianPromiseGrid = () => (
@@ -536,7 +511,7 @@ const AurevianPromiseGrid = () => (
 );
 
 /* ---------------------------------------------------------------- */
-/* Collection showcase — swipeable rail of jewellery categories      */
+/* Collection Showcase                                              */
 /* ---------------------------------------------------------------- */
 
 const CollectionShowcase = () => {
@@ -650,7 +625,7 @@ const CollectionShowcase = () => {
 };
 
 /* ---------------------------------------------------------------- */
-/* Business support — flowing hairline list (replaces card grid)     */
+/* Support Flow                                                     */
 /* ---------------------------------------------------------------- */
 
 const SupportFlow = () => (
@@ -680,7 +655,7 @@ const SupportFlow = () => (
 );
 
 /* ---------------------------------------------------------------- */
-/* Profit calculator                                                 */
+/* Profit Calculator                                                */
 /* ---------------------------------------------------------------- */
 
 const ProfitCalculator = () => {
@@ -692,7 +667,7 @@ const ProfitCalculator = () => {
 
   const results = useMemo(() => {
     const monthlyCosts = rent + staff + expenses;
-    const grossMargin = sales * 0.35; // avg category margin
+    const grossMargin = sales * 0.35;
     const monthlyProfit = grossMargin - monthlyCosts;
     const annualProfit = monthlyProfit * 12;
     const roi = investment > 0 ? (annualProfit / investment) * 100 : 0;
@@ -838,7 +813,7 @@ const ProfitCalculator = () => {
 };
 
 /* ---------------------------------------------------------------- */
-/* Testimonial carousel                                              */
+/* Testimonial Carousel                                             */
 /* ---------------------------------------------------------------- */
 
 const TestimonialCarousel = () => {
@@ -920,7 +895,7 @@ const TestimonialCarousel = () => {
 };
 
 /* ---------------------------------------------------------------- */
-/* FAQ accordion                                                     */
+/* FAQ Accordion                                                    */
 /* ---------------------------------------------------------------- */
 
 const FaqAccordion = () => {
@@ -962,7 +937,7 @@ const FaqAccordion = () => {
 };
 
 /* ---------------------------------------------------------------- */
-/* Inquiry form                                                      */
+/* Inquiry Form                                                     */
 /* ---------------------------------------------------------------- */
 
 const InquiryForm = () => {
@@ -979,7 +954,7 @@ const InquiryForm = () => {
     agree: false,
   });
   const [errors, setErrors] = useState({});
-  const [status, setStatus] = useState("idle"); // idle | loading | success
+  const [status, setStatus] = useState("idle");
 
   const update = (key) => (e) => {
     const val =
@@ -1143,7 +1118,7 @@ const Field = ({ label, error, children, full }) => (
 );
 
 /* ---------------------------------------------------------------- */
-/* Page                                                               */
+/* Page                                                             */
 /* ---------------------------------------------------------------- */
 
 const Franchise = () => {
@@ -1183,17 +1158,11 @@ const Franchise = () => {
         </script>
       </Helmet>
 
+      <Header />
+
       <main className={styles.page}>
         {/* ---------------- HERO ---------------- */}
         <section className={styles.hero}>
-          {/* <div className={styles.heroBg} aria-hidden="true">
-            <span className={`${styles.blurCircle} ${styles.blurCircle1}`} />
-            <span className={`${styles.blurCircle} ${styles.blurCircle2}`} />
-            <span className={styles.ring1} />
-            <span className={styles.ring2} />
-            <span className={styles.ring3} />
-          </div> */}
-
           <div className={styles.heroInner}>
             <motion.div
               className={styles.heroLeft}
@@ -1214,9 +1183,8 @@ const Franchise = () => {
               </motion.div>
 
               <motion.h1 variants={fadeUp} className={styles.heroHeading}>
-                Build Your Own{" "}
-                <span className={styles.goldText}>Aurevian</span> Jewellery
-                Business
+                Build Your Own <span className={styles.goldText}>Aurevian</span>{" "}
+                Jewellery Business
               </motion.h1>
 
               <motion.p variants={fadeUp} className={styles.heroSub}>
@@ -1225,18 +1193,17 @@ const Franchise = () => {
               </motion.p>
 
               <motion.div variants={fadeUp} className={styles.heroButtons}>
-  <a href="#inquiry" className={styles.btnPrimary}>
-    <FaStoreAlt /> Explore Franchise
-  </a>
-
-  <a
-    href="/aurevian-franchise-brochure.pdf"
-    className={styles.btnSecondary}
-    download
-  >
-    <HiOutlineDownload /> Download Brochure
-  </a>
-</motion.div>
+                <a href="#inquiry" className={styles.btnPrimary}>
+                  <FaStoreAlt /> Explore Franchise
+                </a>
+                <a
+                  href="/aurevian-franchise-brochure.pdf"
+                  className={styles.btnSecondary}
+                  download
+                >
+                  <HiOutlineDownload /> Download Brochure
+                </a>
+              </motion.div>
             </motion.div>
 
             <motion.div
@@ -1246,15 +1213,10 @@ const Franchise = () => {
               transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
             >
               <div className={styles.heroImageFrame}>
-                 <img
-    src={franchiseHero}
-    alt="Aurevian Franchise"
-    className={styles.heroImage}
-  />
-                {/* Blank slot — drop your own showroom image here */}
-                <div
-                  className={styles.heroImageBlank}
-                  data-image-slot="hero-showroom"
+                <img
+                  src={franchiseHero}
+                  alt="Aurevian Franchise"
+                  className={styles.heroImage}
                 />
                 <span className={styles.heroImageCorner} data-corner="tl" />
                 <span className={styles.heroImageCorner} data-corner="br" />
@@ -1339,8 +1301,7 @@ const Franchise = () => {
                     <span>Interior Design</span>
                     <strong>{plan.interior}</strong>
                   </li>
-                                </ul>
-
+                </ul>
                 <a
                   href="#inquiry"
                   className={
@@ -1426,10 +1387,16 @@ const Franchise = () => {
         </section>
 
         {/* ---------------- THE AUREVIAN PROMISE ---------------- */}
-        <section className={`${styles.section} ${styles.sectionAlt} ${styles.promiseSection}`}>
+        <section
+          className={`${styles.section} ${styles.sectionAlt} ${styles.promiseSection}`}
+        >
           <div className={styles.promiseBg} aria-hidden="true">
-            <span className={`${styles.promiseBlur} ${styles.promiseBlurLeft}`} />
-            <span className={`${styles.promiseBlur} ${styles.promiseBlurRight}`} />
+            <span
+              className={`${styles.promiseBlur} ${styles.promiseBlurLeft}`}
+            />
+            <span
+              className={`${styles.promiseBlur} ${styles.promiseBlurRight}`}
+            />
           </div>
 
           <div className={styles.promiseInner}>
@@ -1539,6 +1506,8 @@ const Franchise = () => {
           </Reveal>
         </section>
       </main>
+
+      <Footer />
 
       {/* ---------------- STICKY CTA ---------------- */}
       <AnimatePresence>

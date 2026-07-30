@@ -17,6 +17,7 @@ import {
 } from "react-icons/fi";
 import { FaRegGem } from "react-icons/fa";
 import styles from "./Support.module.css";
+import Header from "../Layout/Header/Header";
 import Footer from "../Layout/Footer/Footer";
 import toast from "react-hot-toast";
 import { createSupportTicket, clearSupportError, clearSupportSuccess } from "../../redux/slices/supportSlice";
@@ -155,6 +156,7 @@ const Support = () => {
 
   return (
     <>
+    <Header />
       <div className={styles.supportPage}>
         <div className={styles.supportContainer}>
           {/* Hero Section */}

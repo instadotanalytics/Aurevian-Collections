@@ -4,6 +4,8 @@ import { FiArrowRight } from "react-icons/fi";
 import { PiDiamondLight, PiLeafLight, PiHeartLight } from "react-icons/pi";
 import styles from "./Story.module.css";
 import { storyData } from "./storyData";
+import Header from "../Layout/Header/Header";
+import Footer from "../Layout/Footer/Footer";
 
 /**
  * Story.jsx — "Our Story" editorial section for the Aurevian jewellery site.
@@ -479,25 +481,29 @@ function CallToAction({ data }) {
 // ---------------------------------------------------------------------------
 function Story({ data = storyData }) {
   return (
-    <main className={styles.story}>
-      <Hero data={data.hero} />
-      <EditorialQuote data={data.editorialQuote} />
+    <>
+      <Header />
+      <main className={styles.story}>
+        <Hero data={data.hero} />
+        <EditorialQuote data={data.editorialQuote} />
 
-      <EditorialSplit
-        eyebrow={data.ourStory.eyebrow}
-        heading={data.ourStory.heading}
-        paragraphs={data.ourStory.paragraphs}
-        image={data.ourStory.image}
-        imageAlt={data.ourStory.imageAlt}
-      />
+        <EditorialSplit
+          eyebrow={data.ourStory.eyebrow}
+          heading={data.ourStory.heading}
+          paragraphs={data.ourStory.paragraphs}
+          image={data.ourStory.image}
+          imageAlt={data.ourStory.imageAlt}
+        />
 
-      <JourneyTimeline items={data.journey} media={data.journeyMedia} />
-      <Craftsmanship data={data.craftsmanship} />
-      <GalleryStrip items={data.gallery} />
-      <FounderPhilosophy data={data.founder} />
-      <Legacy data={data.legacy} />
-      <CallToAction data={data.cta} />
-    </main>
+        <JourneyTimeline items={data.journey} media={data.journeyMedia} />
+        <Craftsmanship data={data.craftsmanship} />
+        <GalleryStrip items={data.gallery} />
+        <FounderPhilosophy data={data.founder} />
+        <Legacy data={data.legacy} />
+        <CallToAction data={data.cta} />
+      </main>
+      <Footer />
+    </>
   );
 }
 
