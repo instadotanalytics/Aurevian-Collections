@@ -1,3 +1,4 @@
+
 /**
  * Main App Component
  * Sets up routing and global providers with authentication
@@ -67,12 +68,17 @@ import Profile from "./Pages/Profile/Profile.jsx";
 import SellerKYC from "./Pages/Seller/SellerKYC/SellerKYC";
 import ScrollToTop from "./Pages/Seller/ScrollToTop.jsx";
 
+
+
+import Shop from "./Components/Shop/shop.jsx";
+
 // ============================================
 // ROUTES CONSTANTS
 // ============================================
 const ROUTES = {
   HOME: "/",
   ABOUT: "/about",
+  SHOP: "/shop",
   LOGIN: "/login",
   REGISTER: "/register",
   VERIFY_OTP: "/verify-otp",
@@ -209,6 +215,7 @@ const App = () => {
               </LayoutWithHeader>
             }
           />
+
           <Route
             path="/AboutUs"
             element={
@@ -271,6 +278,18 @@ const App = () => {
             element={
               <LayoutWithHeader>
                 <BecomePartner />
+              </LayoutWithHeader>
+            }
+          />
+
+          {/* ============================================
+                SHOP ROUTE - WITH HEADER
+                ============================================ */}
+          <Route
+            path={ROUTES.SHOP}
+            element={
+              <LayoutWithHeader>
+                <Shop />
               </LayoutWithHeader>
             }
           />
