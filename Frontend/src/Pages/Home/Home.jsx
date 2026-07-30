@@ -20,14 +20,13 @@ const Home = () => {
       <Header/>
       <HomeBanner />
       <ShopByCategory />
+      <Offers />
+      <OffersBanner />
+      <GiftGuide />
+      <GiftGuideBanner />
       <ShopCardCategory />
       <NewArrivalsBanner />
       <NewCollections />
-      <GiftGuideBanner />
-      <GiftGuide />
-      <OffersBanner />
-      <Offers />
-      <ShopTheLook />
       <Footer />
     </div>
   );
