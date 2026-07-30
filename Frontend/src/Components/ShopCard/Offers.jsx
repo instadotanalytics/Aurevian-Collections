@@ -1,7 +1,8 @@
 // src/Components/Offers/Offers.jsx
 
-import React, { useRef, useEffect } from "react";
-import { FiArrowRight, FiArrowLeft, FiClock, FiZap } from "react-icons/fi";
+import React, { useRef, useEffect, useState } from "react";
+import { FiArrowRight, FiArrowLeft, FiHeart, FiShoppingBag } from "react-icons/fi";
+import { FaHeart, FaStar } from "react-icons/fa";
 import styles from "./Offers.module.css";
 
 // ==========================================================
@@ -18,73 +19,111 @@ const OFFER_IMAGES = {
   gold: "https://i.pinimg.com/736x/f9/d6/06/f9d606f3f13a92ebdaa8009877864878.jpg",
 };
 
-// ==========================================================
-// OFFERS PRODUCT DATA (swap for real/dynamic data later)
-// ==========================================================
+/* ------------------------------------------------------------------
+   OFFERS DATA
+   `accent` cycles the card's color theme (ink / ivory / emerald),
+   mirroring how the reference "Daisy Bloom Ring" style cards alternate
+   dark / light / deep-color backgrounds.
+------------------------------------------------------------------ */
+const ACCENTS = ["ink", "ivory", "emerald"];
+
 const OFFER_PRODUCTS = [
-  { id: "o1", name: "Diwali Special Gold Set", price: 19999, oldPrice: 29999, discount: 33, offerTag: "Diwali Sale", image: OFFER_IMAGES.diwali },
-  { id: "o2", name: "Summer Collection Rings", price: 6999, oldPrice: 9999, discount: 30, offerTag: "Summer Deal", image: OFFER_IMAGES.summer },
-  { id: "o3", name: "Festive Gold Earrings", price: 8499, oldPrice: 12999, discount: 35, offerTag: "Festive Offer", image: OFFER_IMAGES.festive },
-  { id: "o4", name: "Clearance Sale Pendants", price: 4499, oldPrice: 7499, discount: 40, offerTag: "Clearance", image: OFFER_IMAGES.clearance },
-  { id: "o5", name: "Bridal Collection Offer", price: 15999, oldPrice: 21999, discount: 27, offerTag: "Bridal Special", image: OFFER_IMAGES.bridal },
-  { id: "o6", name: "Anniversary Diamond Set", price: 12999, oldPrice: 18999, discount: 32, offerTag: "Anniversary Deal", image: OFFER_IMAGES.anniversary },
-  { id: "o7", name: "Wedding Season Special", price: 24999, oldPrice: 34999, discount: 29, offerTag: "Wedding Season", image: OFFER_IMAGES.wedding },
-  { id: "o8", name: "Gold Rate Discount", price: 8999, oldPrice: 12999, discount: 31, offerTag: "Gold Special", image: OFFER_IMAGES.gold },
-];
+  { id: "o1", name: "Diwali Special Gold Set", badge: "New", price: 19999, oldPrice: 29999, rating: 4.8, reviews: 124, image: OFFER_IMAGES.diwali },
+  { id: "o2", name: "Summer Collection Rings", badge: "Offers", price: 6999, oldPrice: 9999, rating: 4.7, reviews: 96, image: OFFER_IMAGES.summer },
+  { id: "o3", name: "Festive Gold Earrings", badge: "Trending", price: 8499, oldPrice: 12999, rating: 4.9, reviews: 78, image: OFFER_IMAGES.festive },
+  { id: "o4", name: "Clearance Sale Pendants", badge: "Best Seller", price: 4499, oldPrice: 7499, rating: 4.6, reviews: 150, image: OFFER_IMAGES.clearance },
+  { id: "o5", name: "Bridal Collection Offer", badge: "Offers", price: 15999, oldPrice: 21999, rating: 4.9, reviews: 112, image: OFFER_IMAGES.bridal },
+  { id: "o6", name: "Anniversary Diamond Set", badge: "New", price: 12999, oldPrice: 18999, rating: 4.7, reviews: 85, image: OFFER_IMAGES.anniversary },
+  { id: "o7", name: "Wedding Season Special", badge: "Trending", price: 24999, oldPrice: 34999, rating: 4.8, reviews: 134, image: OFFER_IMAGES.wedding },
+  { id: "o8", name: "Gold Rate Discount", badge: "Best Seller", price: 8999, oldPrice: 12999, rating: 4.6, reviews: 67, image: OFFER_IMAGES.gold },
+].map((product, index) => ({
+  ...product,
+  accent: ACCENTS[index % ACCENTS.length],
+}));
+
+function StarRating({ rating }) {
+  const stars = [1, 2, 3, 4, 5];
+  return (
+    <span className={styles.stars} aria-hidden="true">
+      {stars.map((s) => (
+        <FaStar key={s} className={s <= Math.round(rating) ? styles.starFilled : styles.starEmpty} />
+      ))}
+    </span>
+  );
+}
 
 function ProductCard({ product, onClickCapture }) {
-  const savings = product.oldPrice - product.price;
+  const [wishlisted, setWishlisted] = useState(false);
+
+  const toggleWishlist = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setWishlisted((prev) => !prev);
+  };
+
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // hook up to cart logic here
+  };
 
   return (
-    <div className={styles.card}>
-      <a
-        href={`/product/${product.id}`}
-        className={styles.cardLink}
-        aria-label={product.name}
-        onClickCapture={onClickCapture}
-        draggable="false"
+    <div className={styles.cardWrapper}>
+
+    <a
+      href={`/product/${product.id}`}
+      className={`${styles.card} ${styles[`accent-${product.accent}`]}`}
+      aria-label={product.name}
+      onClickCapture={onClickCapture}
+      draggable="false"
+    >
+      <span className={styles.badge}>{product.badge}</span>
+
+      <button
+        type="button"
+        className={`${styles.wishlistBtn} ${wishlisted ? styles.wishlistBtnActive : ""}`}
+        onClick={toggleWishlist}
+        aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+        aria-pressed={wishlisted}
       >
-        <div className={styles.imageWrap}>
-          <span className={styles.offerTag}>{product.offerTag}</span>
-          <span className={styles.discountBurst}>
-            <span className={styles.discountNumber}>{product.discount}%</span>
-            <span className={styles.discountLabel}>OFF</span>
-          </span>
-
-          {product.image ? (
-            <img
-              src={product.image}
-              alt={product.name}
-              className={styles.image}
-              loading="lazy"
-              draggable="false"
-            />
-          ) : (
-            <div className={styles.imagePlaceholder} aria-hidden="true" />
-          )}
-        </div>
-
-        {/* Perforated ticket seam */}
-        <div className={styles.perforation} aria-hidden="true" />
-
-        <div className={styles.info}>
-          <h3 className={styles.title}>{product.name}</h3>
-
-          <div className={styles.priceRow}>
-            <span className={styles.price}>₹{product.price.toLocaleString("en-IN")}</span>
-            <span className={styles.oldPrice}>₹{product.oldPrice.toLocaleString("en-IN")}</span>
-          </div>
-
-          <div className={styles.savingsRow}>
-            <FiZap className={styles.savingsIcon} />
-            <span className={styles.savingsText}>Save ₹{savings.toLocaleString("en-IN")}</span>
-          </div>
-        </div>
-      </a>
-
-      <button type="button" className={styles.grabBtn}>
-        Grab This Deal
+        {wishlisted ? <FaHeart /> : <FiHeart />}
       </button>
+
+      <div className={styles.imageFrame}>
+        {product.image ? (
+          <img
+            src={product.image}
+            alt={product.name}
+            className={styles.image}
+            loading="lazy"
+            draggable="false"
+          />
+        ) : (
+          <div className={styles.imagePlaceholder} aria-hidden="true" />
+        )}
+      </div>
+
+      <div className={styles.info}>
+        <p className={styles.eyebrow}>Aurevian Collections</p>
+        <h3 className={styles.title}>{product.name}</h3>
+
+        <div className={styles.ratingRow}>
+          <StarRating rating={product.rating} />
+          <span className={styles.ratingValue}>
+            {product.rating.toFixed(1)} <span className={styles.ratingCount}>({product.reviews})</span>
+          </span>
+        </div>
+
+        <div className={styles.priceRow}>
+          <span className={styles.price}>₹{product.price.toLocaleString("en-IN")}</span>
+          <span className={styles.oldPrice}>₹{product.oldPrice.toLocaleString("en-IN")}</span>
+        </div>
+      </div>
+
+      <button type="button" className={styles.cartBtn} onClick={handleAddToCart} aria-label="Add to cart">
+        <FiShoppingBag />
+      </button>
+    </a>
     </div>
   );
 }
@@ -150,36 +189,21 @@ export default function Offers() {
     };
   }, []);
 
-  const getTimeRemaining = () => {
-    const now = new Date();
-    const end = new Date(now);
-    end.setHours(23, 59, 59, 999);
-    const diff = end - now;
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    return `${hours}h ${minutes}m`;
-  };
-
   return (
     <section className={styles.section} aria-labelledby="offers-heading">
       <div className={styles.container}>
         <div className={styles.header}>
           <div className={styles.headerText}>
-            <p className={styles.topText}>⚡ Limited Time</p>
+            <p className={styles.topText}>✦ Specially Made ✦</p>
             <h2 id="offers-heading" className={styles.heading}>
-              Exclusive Offers
+              Offers Worth The Splurge
             </h2>
-            <div className={styles.timerRow}>
-              <FiClock className={styles.timerIcon} />
-              <span className={styles.timerText}>
-                Ends in <strong>{getTimeRemaining()}</strong>
-              </span>
-            </div>
+            <p className={styles.subHeading}>Handpicked discounts on the pieces our customers love most</p>
           </div>
 
           <div className={styles.headerActions}>
             <a href="/shop/offers" className={styles.viewAllBtn}>
-              View All Offers
+              View All
               <FiArrowRight className={styles.viewAllIcon} />
             </a>
 
