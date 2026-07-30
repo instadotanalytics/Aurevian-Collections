@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------------
    ShopByCategory.module.css
    Aurevian Jewellery — premium "Shop by Category" section — v11
-   - Compact, clean layout: 8 cards visible on desktop, 4 on mobile
+   - Fully Responsive: 8 → 7 → 6 → 5 → 4 → 3 → 2 cards
    - Rotating dashed ring overlaid directly on top of each image
    - Minimal padding for clean appearance
 ------------------------------------------------------------------ */
@@ -179,7 +179,7 @@
   scroll-behavior: smooth;
   padding: 10px 4px 5px 4px;
   margin: 0;
-  justify-content: flex-start; /* Changed from center to flex-start */
+  justify-content: flex-start;
 
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -264,7 +264,6 @@
 }
 
 /* ------------------------------ card ------------------------------ */
-/* Desktop default: cards adapt to container, 8 visible at a time */
 .card {
   flex: 0 0 auto;
   width: calc((100% - 7 * 16px) / 8);
@@ -302,9 +301,6 @@
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
-}
-
-.image {
   transition: transform 0.5s ease;
 }
 
@@ -333,9 +329,7 @@
   transform: scale(1.06);
 }
 
-/* Continuously rotating dashed ring, sitting just 1px outside the
-   image circle. Slow, subtle spin — speeds up only slightly on hover.
-   Color is intentionally darker than the section's background. */
+/* Continuously rotating dashed ring */
 .ring {
   position: absolute;
   inset: -1px;
@@ -430,15 +424,74 @@
   font-size: 15px;
 }
 
-/* ------------------------------------------------------------------
-   Responsive card counts
-   Desktop (≥1180px): 8 cards visible
-   Laptop (993–1179px): 7 cards visible
-   Tablet (769–992px): 6 cards visible
-   Small tablet (641–768px): 5 cards visible
-   Mobile (≤640px): 4 cards visible
------------------------------------------------------------------- */
+/* ============================================
+   SKELETON LOADING STYLES
+   ============================================ */
 
+.skeletonImage {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e8e0d6 25%, #f2ece2 50%, #e8e0d6 75%);
+  background-size: 200% 200%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+.skeletonText {
+  width: 70%;
+  height: 14px;
+  margin: 0 auto;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #e8e0d6 25%, #f2ece2 50%, #e8e0d6 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonShimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.loadingTrack {
+  opacity: 0.6;
+  animation: fadeInContent 0.6s ease forwards;
+}
+
+.loadedTrack {
+  opacity: 0;
+  animation: fadeInContent 0.8s ease forwards;
+}
+
+@keyframes fadeInContent {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.card .skeletonImage {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.card {
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
+}
+
+/* ============================================
+   RESPONSIVE BREAKPOINTS
+   ============================================ */
+
+/* ===== LAPTOP: 7 CARDS ===== */
 @media (max-width: 1179px) {
   .track {
     gap: 14px;
@@ -455,6 +508,7 @@
   }
 }
 
+/* ===== TABLET LANDSCAPE: 6 CARDS ===== */
 @media (max-width: 992px) {
   .section {
     padding: 90px 0 8px 0;
@@ -480,6 +534,7 @@
   }
 }
 
+/* ===== TABLET PORTRAIT: 5 CARDS ===== */
 @media (max-width: 768px) {
   .section {
     padding: 80px 0 6px 0;
@@ -511,14 +566,10 @@
   }
 }
 
-/* ------------------------------------------------------------------
-   Mobile — exactly 4 clean, compact cards, side arrows hidden,
-   bottom-row arrows take over below the cards.
-   MINIMAL BOTTOM PADDING FOR MOBILE
------------------------------------------------------------------- */
+/* ===== MOBILE LARGE: 4 CARDS ===== */
 @media (max-width: 640px) {
   .section {
-    padding: 110px 0 4px 0;
+    padding: 70px 0 4px 0;
   }
 
   .container {
@@ -568,7 +619,7 @@
   }
 
   .mobileNav .navButton {
-    display: none;
+    display: flex;
   }
 
   .ctaLine {
@@ -586,41 +637,120 @@
   }
 }
 
-/* Very small phones — keep 4 cards, tighten spacing only */
-@media (max-width: 380px) {
+/* ===== MOBILE MEDIUM: 3 CARDS ===== */
+@media (max-width: 480px) {
   .section {
-    padding: 100px 0 2px 0;
-  }
-
-  .header {
-    padding-top: 8px;
+    padding: 60px 0 4px 0;
   }
 
   .track {
-    gap: 7px;
-    padding: 4px 2px 2px 2px;
-    justify-content: flex-start;
+    gap: 10px;
+    padding: 6px 2px 4px 2px;
   }
+
   .card {
-    width: calc((100% - 3 * 7px) / 4);
-    min-width: 62px;
+    width: calc((100% - 2 * 10px) / 3);
+    min-width: 80px;
   }
-  .mobileNav .navButton {
-    display: none;
+
+  .categoryName {
+    font-size: 10px;
   }
+
   .shop,
   .category {
-    font-size: 30px;
+    font-size: clamp(24px, 5vw, 32px);
   }
+
   .by {
-    font-size: 34px;
+    font-size: clamp(24px, 5vw, 32px);
   }
-  .categoryName {
-    font-size: 9.5px;
+
+  .topText {
+    font-size: 9px;
+    letter-spacing: 3px;
+  }
+
+  .headerDivider {
+    width: 80px;
+  }
+
+  .mobileNav .navButton {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
   }
 }
 
-/* Reduced motion */
+/* ===== MOBILE SMALL: 2 CARDS ===== */
+@media (max-width: 360px) {
+  .section {
+    padding: 50px 0 4px 0;
+  }
+
+  .container {
+    padding-inline: 10px;
+  }
+
+  .track {
+    gap: 8px;
+    padding: 4px 1px 3px 1px;
+  }
+
+  .card {
+    width: calc((100% - 1 * 8px) / 2);
+    min-width: 60px;
+  }
+
+  .cardLink {
+    gap: 4px;
+  }
+
+  .categoryName {
+    font-size: 9px;
+  }
+
+  .imagePlaceholderText {
+    font-size: 20px;
+  }
+
+  .ring {
+    border-width: 2px;
+  }
+
+  .shop,
+  .category {
+    font-size: 20px;
+  }
+
+  .by {
+    font-size: 20px;
+  }
+
+  .topText {
+    font-size: 8px;
+    letter-spacing: 2px;
+  }
+
+  .headerDivider {
+    width: 60px;
+  }
+
+  .headerDivider::after {
+    font-size: 10px;
+    padding: 0 8px;
+  }
+
+  .mobileNav .navButton {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+  }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
 @media (prefers-reduced-motion: reduce) {
   .imageWrap,
   .image,
@@ -634,85 +764,11 @@
   .ring {
     animation: none !important;
   }
-}
-
-/* ============================================
-   SKELETON LOADING STYLES
-   ============================================ */
-
-/* Skeleton image - circular shimmer */
-.skeletonImage {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #e8e0d6 25%, #f2ece2 50%, #e8e0d6 75%);
-  background-size: 200% 200%;
-  animation: skeletonShimmer 1.5s ease-in-out infinite;
-}
-
-/* Skeleton text - rectangular shimmer */
-.skeletonText {
-  width: 70%;
-  height: 14px;
-  margin: 0 auto;
-  border-radius: 8px;
-  background: linear-gradient(90deg, #e8e0d6 25%, #f2ece2 50%, #e8e0d6 75%);
-  background-size: 200% 100%;
-  animation: skeletonShimmer 1.5s ease-in-out infinite;
-}
-
-/* Shimmer animation */
-@keyframes skeletonShimmer {
-  0% {
-    background-position: -200% center;
-  }
-  100% {
-    background-position: 200% center;
-  }
-}
-
-/* Track loading state */
-.loadingTrack {
-  opacity: 0.6;
-  animation: fadeInContent 0.6s ease forwards;
-}
-
-.loadedTrack {
-  opacity: 0;
-  animation: fadeInContent 0.8s ease forwards;
-}
-
-@keyframes fadeInContent {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-/* Ensure skeleton cards have proper size during loading */
-.card .skeletonImage {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-}
-
-/* Smooth transition for content reveal */
-.card {
-  transition:
-    opacity 0.4s ease,
-    transform 0.4s ease;
-}
-
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
   .skeletonImage,
   .skeletonText {
     animation: none !important;
     background: #e8e0d6;
   }
-
   .loadingTrack,
   .loadedTrack {
     animation: none !important;

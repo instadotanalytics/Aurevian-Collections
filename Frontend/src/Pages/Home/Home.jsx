@@ -12,10 +12,12 @@ import Offers from "../../Components/ShopCard/Offers";
 import OffersBanner from "../../Components/Banner/OffersBanner";
 import ShopTheLook from "../../Components/ShopCard/ShopTheLook";
 import Footer from "../Layout/Footer/Footer";
+import Header from "../Layout/Header/Header";
 
 const Home = () => {
   return (
     <div>
+      <Header/>
       <HomeBanner />
       <ShopByCategory />
       <ShopCardCategory />

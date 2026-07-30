@@ -202,9 +202,9 @@ const App = () => {
           <Route
             path={ROUTES.HOME}
             element={
-              <LayoutWithHeader>
+              
                 <Home />
-              </LayoutWithHeader>
+              
             }
           />
           <Route
