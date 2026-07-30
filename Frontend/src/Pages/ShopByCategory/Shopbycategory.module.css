@@ -24,7 +24,7 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  padding: 120px 0 10px 0;
+  padding: 10px 0 10px 0;
   background: var(--ivory);
 }
 
@@ -511,7 +511,7 @@
 /* ===== TABLET LANDSCAPE: 6 CARDS ===== */
 @media (max-width: 992px) {
   .section {
-    padding: 90px 0 8px 0;
+    padding: 10px 0 8px 0;
   }
 
   .track {
@@ -537,7 +537,7 @@
 /* ===== TABLET PORTRAIT: 5 CARDS ===== */
 @media (max-width: 768px) {
   .section {
-    padding: 80px 0 6px 0;
+    padding: 10px 0 6px 0;
   }
 
   .track {
@@ -569,7 +569,7 @@
 /* ===== MOBILE LARGE: 4 CARDS ===== */
 @media (max-width: 640px) {
   .section {
-    padding: 70px 0 4px 0;
+    padding: 10px 0 4px 0;
   }
 
   .container {
@@ -640,7 +640,7 @@
 /* ===== MOBILE MEDIUM: 3 CARDS ===== */
 @media (max-width: 480px) {
   .section {
-    padding: 60px 0 4px 0;
+    padding: 10px 0 4px 0;
   }
 
   .track {
@@ -685,7 +685,7 @@
 /* ===== MOBILE SMALL: 2 CARDS ===== */
 @media (max-width: 360px) {
   .section {
-    padding: 50px 0 4px 0;
+    padding: 10px 0 4px 0;
   }
 
   .container {
