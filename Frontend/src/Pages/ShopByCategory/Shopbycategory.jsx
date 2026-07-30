@@ -1,3 +1,5 @@
+// Shopbycategory.jsx
+
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
@@ -6,12 +8,7 @@ import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import styles from "./Shopbycategory.module.css";
 import { fetchPublicHeaderConfig } from "./../../redux/slices/headerConfigSlice.js";
 
-// ✅ Fully dynamic now — no static image imports. Whatever the admin sets
-// in Header Management → Shop Mega Menu → Shop by Category is the single
-// source of truth. If a category has no image yet, we show a clean
-// initials placeholder instead of a broken/blank box.
-
-// Bare-minimum fallback list, only used if the config hasn't loaded at all
+// Fallback categories with all 8 categories pre-loaded
 const FALLBACK_CATEGORIES = [
   { id: "earrings", label: "Earrings", path: "/shop/earrings", image: "" },
   { id: "necklaces", label: "Necklaces", path: "/shop/necklaces", image: "" },
@@ -78,11 +75,8 @@ const CategoryCard = React.memo(function CategoryCard({ category }) {
               </span>
             </div>
           )}
-
-          {/* Rotating dashed ring, layered on top of the image */}
           <span className={styles.ring} aria-hidden="true" />
         </div>
-
         <h3 className={styles.categoryName}>{category.label}</h3>
       </Link>
     </motion.div>
@@ -91,17 +85,32 @@ const CategoryCard = React.memo(function CategoryCard({ category }) {
 
 export default function ShopByCategory() {
   const dispatch = useDispatch();
-  const { config } = useSelector((state) => state.headerConfig);
+  const { config, isLoading } = useSelector((state) => state.headerConfig);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Pre-populate with fallback categories immediately on mount
+  const [categories, setCategories] = useState(FALLBACK_CATEGORIES);
 
   useEffect(() => {
+    setIsMounted(true);
+
+    // If config is already loaded, use it
+    if (config?.shopMegaMenu?.categories?.length > 0) {
+      setCategories(config.shopMegaMenu.categories);
+    }
+
+    // Fetch config if not loaded
     if (!config) {
       dispatch(fetchPublicHeaderConfig());
     }
   }, [dispatch, config]);
 
-  const categories = config?.shopMegaMenu?.categories?.length
-    ? config.shopMegaMenu.categories
-    : FALLBACK_CATEGORIES;
+  // Update categories when config loads
+  useEffect(() => {
+    if (config?.shopMegaMenu?.categories?.length > 0) {
+      setCategories(config.shopMegaMenu.categories);
+    }
+  }, [config]);
 
   const trackRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -117,7 +126,12 @@ export default function ShopByCategory() {
   useEffect(() => {
     const el = trackRef.current;
     if (!el) return;
-    updateScrollState();
+
+    // Use requestAnimationFrame to ensure layout is complete
+    requestAnimationFrame(() => {
+      updateScrollState();
+    });
+
     el.addEventListener("scroll", updateScrollState, { passive: true });
     window.addEventListener("resize", updateScrollState);
     return () => {
@@ -184,6 +198,7 @@ export default function ShopByCategory() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
+            key={categories.length} // Force re-render when categories change
           >
             {categories.map((category) => (
               <CategoryCard key={category.id} category={category} />
