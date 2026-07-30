@@ -311,29 +311,6 @@
 }
 
 /* ============================================
-   LOADING STATE
-   ============================================ */
-.loadingState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: #106b47;
-  font-size: 16px;
-  gap: 16px;
-}
-
-.loadingSpinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #e8f0ed;
-  border-top-color: #106b47;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-/* ============================================
    EMPTY STATE
    ============================================ */
 .emptyState {
@@ -373,7 +350,8 @@
 }
 
 /* ============================================
-   BEAUTIFUL LOADING SCREEN OVERLAY
+   BANNER-SIZED LOADING SCREEN
+   Like Shop by Category skeleton style
    ============================================ */
 .loadingOverlay {
   position: absolute;
@@ -383,7 +361,6 @@
   height: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
   background: #f8fbfa;
   overflow: hidden;
   z-index: 50;
@@ -391,261 +368,121 @@
 
 .loadingBackground {
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background:
-    radial-gradient(
-      ellipse at 30% 40%,
-      rgba(16, 107, 71, 0.05) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      ellipse at 70% 60%,
-      rgba(16, 107, 71, 0.03) 0%,
-      transparent 50%
-    ),
-    linear-gradient(135deg, #f8fbfa 0%, #f0f5f2 100%);
-  animation: loadingBgFloat 6s ease-in-out infinite alternate;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #f4f9f6;
+  overflow: hidden;
 }
 
-@keyframes loadingBgFloat {
+/* Left-to-Right Shimmer Effect - Like Shop by Category */
+.loadingShimmer {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(244, 249, 246, 0) 0%,
+    rgba(244, 249, 246, 0.3) 30%,
+    rgba(244, 249, 246, 0.6) 50%,
+    rgba(244, 249, 246, 0.3) 70%,
+    rgba(244, 249, 246, 0) 100%
+  );
+  animation: shimmerSlide 2s ease-in-out infinite;
+}
+
+@keyframes shimmerSlide {
   0% {
-    transform: translate(0, 0) scale(1);
+    left: -100%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
   }
   100% {
-    transform: translate(2%, -2%) scale(1.02);
+    left: 200%;
+    opacity: 0;
   }
 }
 
+/* Content - Banner placeholder skeleton */
 .loadingContent {
   position: relative;
   z-index: 10;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 8%;
+  box-sizing: border-box;
+}
+
+.loadingTextBlock {
+  max-width: 46%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  text-align: center;
-  padding: 40px;
-  animation: loadingFadeIn 0.6s ease;
-}
-
-@keyframes loadingFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.loadingLogo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.loadingLogo svg {
-  animation: loadingLogoPulse 2s ease-in-out infinite;
-}
-
-@keyframes loadingLogoPulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 1;
-  }
-}
-
-.loadingLogoCircle {
-  animation: loadingCircleSpin 2s linear infinite;
-}
-
-@keyframes loadingCircleSpin {
-  from {
-    stroke-dashoffset: 138.23;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.loadingLogoDiamond {
-  animation: loadingDiamondPulse 1.5s ease-in-out infinite;
-}
-
-@keyframes loadingDiamondPulse {
-  0%,
-  100% {
-    opacity: 0.4;
-    transform: scale(0.95);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.05);
-  }
-}
-
-.loadingBrandName {
-  font-family: "Playfair Display", serif;
-  font-size: 28px;
-  font-weight: 600;
-  color: #0a2216;
-  letter-spacing: 4px;
-  animation: loadingTextFade 1.5s ease-in-out infinite;
-}
-
-@keyframes loadingTextFade {
-  0%,
-  100% {
-    opacity: 0.6;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-.loadingTextWrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  margin-top: 8px;
-}
-
-.loadingMainText {
-  font-size: 18px;
-  color: #2b4c3f;
-  font-weight: 500;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  margin: 0;
-  font-family: "Inter", sans-serif;
-}
-
-.loadingDots {
-  display: flex;
-  gap: 2px;
-  font-size: 24px;
-  font-weight: 700;
-  color: #106b47;
-}
-
-.loadingDots span {
-  animation: loadingDotBounce 1.4s ease-in-out infinite;
-}
-
-.loadingDots .dot1 {
-  animation-delay: 0s;
-}
-.loadingDots .dot2 {
-  animation-delay: 0.2s;
-}
-.loadingDots .dot3 {
-  animation-delay: 0.4s;
-}
-
-@keyframes loadingDotBounce {
-  0%,
-  80%,
-  100% {
-    transform: translateY(0);
-    opacity: 0.3;
-  }
-  40% {
-    transform: translateY(-8px);
-    opacity: 1;
-  }
-}
-
-.loadingSubText {
-  font-size: 14px;
-  color: #6b8a7d;
-  margin: -8px 0 0 0;
-  letter-spacing: 2px;
-  font-weight: 300;
-  animation: loadingTextFade 2s ease-in-out infinite 0.5s;
-}
-
-.loadingProgressWrapper {
-  display: flex;
-  align-items: center;
   gap: 14px;
-  width: 240px;
-  margin-top: 4px;
 }
 
-.loadingProgressBar {
-  flex: 1;
-  height: 2px;
-  background: rgba(16, 107, 71, 0.15);
-  border-radius: 2px;
-  overflow: hidden;
-  position: relative;
+/* Skeleton elements - Like Shop by Category */
+.loadingBrandTag {
+  width: 40%;
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #e8e0d6 25%, #f2ece2 50%, #e8e0d6 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
 }
 
-.loadingProgressFill {
-  height: 100%;
-  background: linear-gradient(90deg, #106b47, #1a8a5e);
-  border-radius: 2px;
-  transition: width 0.4s ease;
-  position: relative;
+.loadingTitle {
+  width: 85%;
+  height: 44px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #e8e0d6 25%, #f2ece2 50%, #e8e0d6 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite 0.1s;
 }
 
-.loadingProgressFill::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  top: -2px;
-  width: 8px;
-  height: 6px;
-  background: #106b47;
-  border-radius: 3px;
-  opacity: 0.6;
+.loadingSubtitle {
+  width: 60%;
+  height: 18px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #e8e0d6 25%, #f2ece2 50%, #e8e0d6 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite 0.2s;
 }
 
-.loadingProgressText {
-  font-size: 12px;
-  color: #106b47;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  min-width: 36px;
-  text-align: right;
-  font-family: "Inter", monospace;
+.loadingOffer {
+  width: 50%;
+  height: 52px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #e8e0d6 25%, #f2ece2 50%, #e8e0d6 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite 0.3s;
 }
 
-.loadingGlimmer {
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(
-    ellipse at 30% 40%,
-    rgba(255, 255, 255, 0.4) 0%,
-    transparent 50%
-  );
-  animation: loadingGlimmerMove 4s ease-in-out infinite;
-  pointer-events: none;
+.loadingButton {
+  width: 40%;
+  height: 48px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #e8e0d6 25%, #f2ece2 50%, #e8e0d6 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite 0.4s;
 }
 
-@keyframes loadingGlimmerMove {
+/* Shimmer animation - Same as Shop by Category */
+@keyframes skeletonShimmer {
   0% {
-    transform: translate(-10%, -10%) rotate(0deg) scale(1);
-  }
-  50% {
-    transform: translate(10%, 10%) rotate(5deg) scale(1.1);
+    background-position: -200% center;
   }
   100% {
-    transform: translate(-10%, -10%) rotate(0deg) scale(1);
+    background-position: 200% center;
   }
 }
 
@@ -684,6 +521,23 @@
 
   .shopBtn {
     padding: 13px 30px;
+  }
+
+  /* Loading skeleton adjustments */
+  .loadingTextBlock {
+    max-width: 58%;
+  }
+
+  .loadingTitle {
+    height: 38px;
+  }
+
+  .loadingOffer {
+    height: 44px;
+  }
+
+  .loadingButton {
+    height: 42px;
   }
 }
 
@@ -739,7 +593,6 @@
     gap: 8px;
   }
 
-  /* ✅ Hide nav arrows on mobile — autoplay handles slide transitions */
   .navArrowButton {
     display: none;
   }
@@ -754,28 +607,34 @@
     height: 8px;
   }
 
-  /* Loading Screen */
-  .loadingBrandName {
-    font-size: 22px;
-    letter-spacing: 3px;
+  /* Loading skeleton adjustments */
+  .loadingTextBlock {
+    max-width: 58%;
+    gap: 10px;
   }
 
-  .loadingMainText {
-    font-size: 15px;
-    letter-spacing: 2px;
+  .loadingBrandTag {
+    width: 50%;
+    height: 10px;
   }
 
-  .loadingProgressWrapper {
-    width: 180px;
+  .loadingTitle {
+    width: 90%;
+    height: 28px;
   }
 
-  .loadingContent {
-    gap: 16px;
-    padding: 30px;
+  .loadingSubtitle {
+    width: 70%;
+    height: 14px;
   }
 
-  .loadingLogo svg {
-    width: 36px;
+  .loadingOffer {
+    width: 60%;
+    height: 32px;
+  }
+
+  .loadingButton {
+    width: 50%;
     height: 36px;
   }
 }
@@ -832,38 +691,33 @@
     height: 6px;
   }
 
-  /* Loading Screen */
-  .loadingBrandName {
-    font-size: 18px;
-    letter-spacing: 2px;
+  /* Loading skeleton adjustments */
+  .loadingTextBlock {
+    max-width: 60%;
+    gap: 8px;
   }
 
-  .loadingMainText {
-    font-size: 13px;
-    letter-spacing: 1.5px;
+  .loadingBrandTag {
+    display: none;
   }
 
-  .loadingSubText {
-    font-size: 12px;
-    letter-spacing: 1px;
+  .loadingTitle {
+    width: 95%;
+    height: 24px;
   }
 
-  .loadingProgressWrapper {
-    width: 140px;
+  .loadingSubtitle {
+    width: 80%;
+    height: 12px;
   }
 
-  .loadingProgressText {
-    font-size: 10px;
-    min-width: 28px;
+  .loadingOffer {
+    width: 70%;
+    height: 26px;
   }
 
-  .loadingContent {
-    gap: 12px;
-    padding: 20px;
-  }
-
-  .loadingLogo svg {
-    width: 28px;
-    height: 28px;
+  .loadingButton {
+    width: 60%;
+    height: 32px;
   }
 }

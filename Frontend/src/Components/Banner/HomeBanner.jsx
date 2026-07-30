@@ -81,77 +81,25 @@ const HomeBanner = () => {
     startTimer();
   };
 
-  // ✅ Beautiful Loading State
+  // ✅ BANNER-SIZED LOADING STATE - Like Shop by Category
   if (isLoading) {
     return (
       <div className={styles.bannerContainer}>
         <div className={styles.loadingOverlay}>
-          {/* Background shimmer effect */}
-          <div className={styles.loadingBackground}></div>
+          {/* Left-to-Right Shimmer Background */}
+          <div className={styles.loadingBackground}>
+            <div className={styles.loadingShimmer}></div>
+          </div>
 
-          {/* Content */}
+          {/* Content - Just like a banner placeholder */}
           <div className={styles.loadingContent}>
-            {/* Brand Logo */}
-            <div className={styles.loadingLogo}>
-              <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                <circle
-                  cx="24"
-                  cy="24"
-                  r="22"
-                  stroke="#106b47"
-                  strokeWidth="1.5"
-                  opacity="0.2"
-                />
-                <circle
-                  cx="24"
-                  cy="24"
-                  r="22"
-                  stroke="#106b47"
-                  strokeWidth="1.5"
-                  strokeDasharray="138.23"
-                  strokeDashoffset="138.23"
-                  className={styles.loadingLogoCircle}
-                />
-                <path
-                  d="M24 14 L28 22 L36 22 L30 28 L32 36 L24 30 L16 36 L18 28 L12 22 L20 22 L24 14Z"
-                  fill="#106b47"
-                  opacity="0.6"
-                  className={styles.loadingLogoDiamond}
-                />
-              </svg>
-              <span className={styles.loadingBrandName}>Aurevian</span>
+            <div className={styles.loadingTextBlock}>
+              <div className={styles.loadingBrandTag}></div>
+              <div className={styles.loadingTitle}></div>
+              <div className={styles.loadingSubtitle}></div>
+              <div className={styles.loadingOffer}></div>
+              <div className={styles.loadingButton}></div>
             </div>
-
-            {/* Loading Text */}
-            <div className={styles.loadingTextWrapper}>
-              <p className={styles.loadingMainText}>Curating Elegance</p>
-              <div className={styles.loadingDots}>
-                <span className={styles.dot1}>.</span>
-                <span className={styles.dot2}>.</span>
-                <span className={styles.dot3}>.</span>
-              </div>
-            </div>
-
-            {/* Sub Text */}
-            <p className={styles.loadingSubText}>
-              Discover our finest collection
-            </p>
-
-            {/* Progress Bar */}
-            <div className={styles.loadingProgressWrapper}>
-              <div className={styles.loadingProgressBar}>
-                <div
-                  className={styles.loadingProgressFill}
-                  style={{ width: `${Math.min(loadingProgress, 100)}%` }}
-                ></div>
-              </div>
-              <span className={styles.loadingProgressText}>
-                {Math.round(Math.min(loadingProgress, 100))}%
-              </span>
-            </div>
-
-            {/* Glimmer Effect */}
-            <div className={styles.loadingGlimmer}></div>
           </div>
         </div>
       </div>
