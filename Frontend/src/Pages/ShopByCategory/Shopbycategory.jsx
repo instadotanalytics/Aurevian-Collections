@@ -1,4 +1,4 @@
-// Shopbycategory.jsx
+// Shopbycategory.jsx - Update the categories state and add a useEffect to handle updates
 
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -8,7 +8,7 @@ import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import styles from "./Shopbycategory.module.css";
 import { fetchPublicHeaderConfig } from "./../../redux/slices/headerConfigSlice.js";
 
-// Fallback categories with all 8 categories pre-loaded
+// Fallback categories with 8 categories pre-loaded
 const FALLBACK_CATEGORIES = [
   { id: "earrings", label: "Earrings", path: "/shop/earrings", image: "" },
   { id: "necklaces", label: "Necklaces", path: "/shop/necklaces", image: "" },
@@ -19,6 +19,17 @@ const FALLBACK_CATEGORIES = [
   { id: "nosepin", label: "Nosepin", path: "/shop/nosepin", image: "" },
   { id: "chains", label: "Chains", path: "/shop/chains", image: "" },
 ];
+
+// Create skeleton data (8 placeholders)
+const SKELETON_CATEGORIES = Array(8)
+  .fill(null)
+  .map((_, index) => ({
+    id: `skeleton-${index}`,
+    label: "",
+    path: "",
+    image: "",
+    isSkeleton: true,
+  }));
 
 const containerVariants = {
   hidden: {},
@@ -47,6 +58,21 @@ const getInitials = (label = "") =>
     .map((w) => w[0])
     .join("")
     .toUpperCase();
+
+// Skeleton Card Component
+const SkeletonCard = React.memo(function SkeletonCard() {
+  return (
+    <div className={styles.card}>
+      <div className={styles.cardLink}>
+        <div className={styles.imageWrap}>
+          <div className={styles.skeletonImage} />
+          <span className={styles.ring} aria-hidden="true" />
+        </div>
+        <div className={styles.skeletonText} />
+      </div>
+    </div>
+  );
+});
 
 const CategoryCard = React.memo(function CategoryCard({ category }) {
   const [imageFailed, setImageFailed] = useState(false);
@@ -85,21 +111,15 @@ const CategoryCard = React.memo(function CategoryCard({ category }) {
 
 export default function ShopByCategory() {
   const dispatch = useDispatch();
-  const { config, isLoading } = useSelector((state) => state.headerConfig);
-  const [isMounted, setIsMounted] = useState(false);
+  const { config, isLoading: configLoading } = useSelector(
+    (state) => state.headerConfig,
+  );
+  const [categories, setCategories] = useState(SKELETON_CATEGORIES);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showContent, setShowContent] = useState(false);
 
-  // Pre-populate with fallback categories immediately on mount
-  const [categories, setCategories] = useState(FALLBACK_CATEGORIES);
-
+  // Fetch config on mount
   useEffect(() => {
-    setIsMounted(true);
-
-    // If config is already loaded, use it
-    if (config?.shopMegaMenu?.categories?.length > 0) {
-      setCategories(config.shopMegaMenu.categories);
-    }
-
-    // Fetch config if not loaded
     if (!config) {
       dispatch(fetchPublicHeaderConfig());
     }
@@ -108,9 +128,33 @@ export default function ShopByCategory() {
   // Update categories when config loads
   useEffect(() => {
     if (config?.shopMegaMenu?.categories?.length > 0) {
-      setCategories(config.shopMegaMenu.categories);
+      const timer = setTimeout(() => {
+        setCategories(config.shopMegaMenu.categories);
+        setIsLoading(false);
+        setTimeout(() => setShowContent(true), 100);
+      }, 300);
+      return () => clearTimeout(timer);
+    } else if (config && !configLoading) {
+      const timer = setTimeout(() => {
+        setCategories(FALLBACK_CATEGORIES);
+        setIsLoading(false);
+        setTimeout(() => setShowContent(true), 100);
+      }, 300);
+      return () => clearTimeout(timer);
     }
-  }, [config]);
+  }, [config, configLoading]);
+
+  // If loading takes too long, show fallback after 2 seconds
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (isLoading) {
+        setCategories(FALLBACK_CATEGORIES);
+        setIsLoading(false);
+        setTimeout(() => setShowContent(true), 100);
+      }
+    }, 2000);
+    return () => clearTimeout(timeoutId);
+  }, [isLoading]);
 
   const trackRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -123,22 +167,33 @@ export default function ShopByCategory() {
     setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 8);
   }, []);
 
+  // Update scroll state when categories change
   useEffect(() => {
     const el = trackRef.current;
     if (!el) return;
 
-    // Use requestAnimationFrame to ensure layout is complete
+    // Use requestAnimationFrame to ensure DOM is updated
     requestAnimationFrame(() => {
       updateScrollState();
     });
 
     el.addEventListener("scroll", updateScrollState, { passive: true });
     window.addEventListener("resize", updateScrollState);
+
+    // Also update on category changes
     return () => {
       el.removeEventListener("scroll", updateScrollState);
       window.removeEventListener("resize", updateScrollState);
     };
   }, [updateScrollState, categories]);
+
+  // Force update scroll state when categories change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      updateScrollState();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [categories, updateScrollState]);
 
   const scrollByAmount = (direction) => {
     const el = trackRef.current;
@@ -148,7 +203,13 @@ export default function ShopByCategory() {
     const gap = 16;
     const distance = (cardWidth + gap) * 2 * direction;
     el.scrollBy({ left: distance, behavior: "smooth" });
+
+    // Update scroll state after scroll
+    setTimeout(() => updateScrollState(), 100);
   };
+
+  // Determine if we should show skeletons
+  const showSkeletons = isLoading || categories.some((c) => c.isSkeleton);
 
   return (
     <section
@@ -189,7 +250,7 @@ export default function ShopByCategory() {
           </button>
 
           <motion.div
-            className={styles.track}
+            className={`${styles.track} ${showSkeletons ? styles.loadingTrack : styles.loadedTrack}`}
             ref={trackRef}
             role="region"
             aria-label="Jewellery categories"
@@ -198,11 +259,15 @@ export default function ShopByCategory() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
-            key={categories.length} // Force re-render when categories change
+            key={categories.length}
           >
-            {categories.map((category) => (
-              <CategoryCard key={category.id} category={category} />
-            ))}
+            {showSkeletons
+              ? SKELETON_CATEGORIES.map((_, index) => (
+                  <SkeletonCard key={`skeleton-${index}`} />
+                ))
+              : categories.map((category) => (
+                  <CategoryCard key={category.id} category={category} />
+                ))}
           </motion.div>
 
           <button
