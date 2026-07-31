@@ -1,4 +1,3 @@
-
 /**
  * Main App Component
  * Sets up routing and global providers with authentication
@@ -35,6 +34,7 @@ import Franchise from "./Pages/About/Franchise";
 import Cart from "./Pages/Cart/Cart";
 import Wishlist from "./Pages/Wishlist/Wishlist.jsx";
 import Story from "./Pages/About/Story";
+
 // ============================================
 // AUTHENTICATION PAGES
 // ============================================
@@ -68,9 +68,13 @@ import Profile from "./Pages/Profile/Profile.jsx";
 import SellerKYC from "./Pages/Seller/SellerKYC/SellerKYC";
 import ScrollToTop from "./Pages/Seller/ScrollToTop.jsx";
 
-
-
 import Shop from "./Components/Shop/shop.jsx";
+
+// ============================================
+// PRODUCT PAGES ✅ (NEW)
+// ============================================
+// Public Product Detail Page (Storefront)
+// import ProductDetail from "./Pages/ProductDetail/ProductDetail.jsx";
 
 // ============================================
 // ROUTES CONSTANTS
@@ -98,13 +102,15 @@ const ROUTES = {
   SELLER_DOCUMENTS: "/seller/documents",
   SELLER_KYC: "/seller/kyc",
   SELLER_ORDERS: "/seller/orders",
-  SELLER_PRODUCTS: "/seller/products",
-  SELLER_FORGOT_PASSWORD: "/seller/forgot-password", // ✅ ADDED
-  SELLER_RESET_PASSWORD: "/seller/reset-password/:token", // ✅ ADDED
+  SELLER_PRODUCTS: "/seller/dashboard/products", // Updated: Products inside dashboard
+  SELLER_FORGOT_PASSWORD: "/seller/forgot-password",
+  SELLER_RESET_PASSWORD: "/seller/reset-password/:token",
   BECOME_A_PARTNER: "/become-a-partner",
   // Blog Routes
   BLOG: "/blog",
   BLOG_DETAIL: "/blog/:slug",
+  // Public Product Routes (Storefront)
+  PRODUCT_DETAIL: "/product/:slug", // ✅ NEW
 };
 
 // ============================================
@@ -194,7 +200,7 @@ const App = () => {
             },
           }}
         />
-         <ScrollToTop/>
+        <ScrollToTop/>
         <Routes>
           {/* ============================================
                 PUBLIC ROUTES - WITH HEADER
@@ -202,9 +208,9 @@ const App = () => {
           <Route
             path={ROUTES.HOME}
             element={
-              
+              <LayoutWithHeader>
                 <Home />
-              
+              </LayoutWithHeader>
             }
           />
           <Route
@@ -293,6 +299,21 @@ const App = () => {
               </LayoutWithHeader>
             }
           />
+
+          {/* ============================================
+                PUBLIC PRODUCT DETAIL ROUTE - WITH HEADER ✅
+                Storefront: Customer viewing product
+                URL: /product/:slug
+                Example: /product/diamond-pendant-necklace
+                ============================================ */}
+          {/* <Route
+            path={ROUTES.PRODUCT_DETAIL}
+            element={
+              <LayoutWithHeader>
+                <ProductDetail />
+              </LayoutWithHeader>
+            }
+          /> */}
 
           {/* ============================================
                 BLOG ROUTES - WITH HEADER ✅
@@ -480,7 +501,15 @@ const App = () => {
           />
 
           {/* ============================================
-                SELLER ROUTES - WITHOUT HEADER (Protected)
+                SELLER DASHBOARD ROUTES - WITHOUT HEADER (Protected)
+                This handles ALL seller dashboard routes including:
+                - /seller/dashboard/products
+                - /seller/dashboard/products/new
+                - /seller/dashboard/products/edit/:id
+                - /seller/dashboard/orders
+                - /seller/dashboard/earnings
+                - /seller/dashboard/upgrade
+                etc.
                 ============================================ */}
           <Route
             path={`${ROUTES.SELLER_DASHBOARD}/*`}
@@ -492,6 +521,10 @@ const App = () => {
               </SellerRoute>
             }
           />
+
+          {/* ============================================
+                SELLER KYC ROUTE
+                ============================================ */}
           <Route
             path="/seller/kyc"
             element={
@@ -500,6 +533,10 @@ const App = () => {
               </SellerRoute>
             }
           />
+
+          {/* ============================================
+                SELLER PROFILE ROUTE
+                ============================================ */}
           <Route
             path={ROUTES.SELLER_PROFILE}
             element={
@@ -517,6 +554,10 @@ const App = () => {
               </SellerRoute>
             }
           />
+
+          {/* ============================================
+                SELLER DOCUMENTS ROUTE
+                ============================================ */}
           <Route
             path={ROUTES.SELLER_DOCUMENTS}
             element={
@@ -532,6 +573,10 @@ const App = () => {
               </SellerRoute>
             }
           />
+
+          {/* ============================================
+                SELLER ORDERS ROUTE (Standalone - if needed)
+                ============================================ */}
           <Route
             path={ROUTES.SELLER_ORDERS}
             element={
@@ -545,22 +590,10 @@ const App = () => {
               </SellerRoute>
             }
           />
-          <Route
-            path={ROUTES.SELLER_PRODUCTS}
-            element={
-              <SellerRoute>
-                <LayoutWithoutHeader>
-                  <div className="p-8 text-center">
-                    <h1 className="text-3xl font-bold text-gray-800">
-                      Products
-                    </h1>
-                    <p className="text-gray-600 mt-2">Manage your products</p>
-                  </div>
-                </LayoutWithoutHeader>
-              </SellerRoute>
-            }
-          />
 
+          {/* ============================================
+                SELLER PAYMENT ROUTE
+                ============================================ */}
           <Route
             path="/seller/payment/:planId"
             element={

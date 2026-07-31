@@ -6,11 +6,12 @@ import superAdminReducer from "./slices/superAdminSlice.js";
 import sellerReducer from "./slices/sellerSlice.js";
 import bannerReducer from "./slices/bannerSlice.js";
 import blogReducer from "./slices/blogSlice.js";
-import profileReducer from "./slices/profileSlice.js"; // ✅ ADD PROFILE REDUCER
-import sellerSubscriptionReducer from "./slices/sellerSubscriptionSlice.js"; // ✅ ADD SUBSCRIPTION REDUCER
+import profileReducer from "./slices/profileSlice.js";
+import sellerSubscriptionReducer from "./slices/sellerSubscriptionSlice.js";
 import subscriptionPlanReducer from "./slices/subscriptionPlanSlice.js";
 import supportReducer from "./slices/supportSlice";
 import headerConfigReducer from "./slices/headerConfigSlice.js";
+import sellerProductReducer from "./slices/sellerProductSlice.js"; // ✅ ADD PRODUCT REDUCER
 
 export const store = configureStore({
   reducer: {
@@ -19,11 +20,12 @@ export const store = configureStore({
     seller: sellerReducer,
     banners: bannerReducer,
     blogs: blogReducer,
-    profile: profileReducer, // ✅ ADD PROFILE REDUCER HERE
-    sellerSubscription: sellerSubscriptionReducer, // ✅ ADD SUBSCRIPTION REDUCER HERE
+    profile: profileReducer,
+    sellerSubscription: sellerSubscriptionReducer,
     support: supportReducer,
     subscriptionPlans: subscriptionPlanReducer,
     headerConfig: headerConfigReducer,
+    sellerProduct: sellerProductReducer, // ✅ ADD PRODUCT REDUCER HERE
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -147,6 +149,31 @@ export const store = configureStore({
           "headerConfig/fetchAdmin/pending",
           "headerConfig/fetchAdmin/rejected",
           "headerConfig/update/fulfilled",
+
+          // ============================================
+          // SELLER PRODUCT ACTIONS ✅ NEW
+          // ============================================
+          "sellerProduct/fetchProducts/fulfilled",
+          "sellerProduct/fetchProducts/pending",
+          "sellerProduct/fetchProducts/rejected",
+          "sellerProduct/fetchCategories/fulfilled",
+          "sellerProduct/fetchCategories/pending",
+          "sellerProduct/fetchCategories/rejected",
+          "sellerProduct/createProduct/fulfilled",
+          "sellerProduct/createProduct/pending",
+          "sellerProduct/createProduct/rejected",
+          "sellerProduct/updateProduct/fulfilled",
+          "sellerProduct/updateProduct/pending",
+          "sellerProduct/updateProduct/rejected",
+          "sellerProduct/deleteProduct/fulfilled",
+          "sellerProduct/deleteProduct/pending",
+          "sellerProduct/deleteProduct/rejected",
+          "sellerProduct/fetchProductLimitStatus/fulfilled",
+          "sellerProduct/fetchProductLimitStatus/pending",
+          "sellerProduct/fetchProductLimitStatus/rejected",
+          "sellerProduct/bulkUploadProducts/fulfilled",
+          "sellerProduct/bulkUploadProducts/pending",
+          "sellerProduct/bulkUploadProducts/rejected",
         ],
 
         // ✅ Ignore these action paths
@@ -172,7 +199,17 @@ export const store = configureStore({
           "payload.lastOrder.updatedAt",
           "payload.lastOrder.startDate",
           "payload.lastOrder.endDate",
-          "meta.arg", // Fix for FormData serialization
+          "meta.arg",
+
+          // ============================================
+          // SELLER PRODUCT PATHS ✅ NEW
+          // ============================================
+          "payload.product.createdAt",
+          "payload.product.updatedAt",
+          "payload.products.*.createdAt",
+          "payload.products.*.updatedAt",
+          "payload.pagination",
+          "payload.limitStatus",
         ],
 
         // ✅ Ignore these paths in state
@@ -243,6 +280,17 @@ export const store = configureStore({
           // Header Config paths
           "headerConfig.config.updatedAt",
           "headerConfig.config.createdAt",
+
+          // ============================================
+          // SELLER PRODUCT PATHS ✅ NEW
+          // ============================================
+          "sellerProduct.products.*.createdAt",
+          "sellerProduct.products.*.updatedAt",
+          "sellerProduct.products.*.pricing.costPrice",
+          "sellerProduct.selectedProduct.createdAt",
+          "sellerProduct.selectedProduct.updatedAt",
+          "sellerProduct.pagination",
+          "sellerProduct.limitStatus",
         ],
       },
     }),

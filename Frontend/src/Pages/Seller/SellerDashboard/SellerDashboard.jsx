@@ -1,4 +1,4 @@
-// src/Pages/Seller/SellerDashboard/SellerDashboard.jsx
+// src/Pages/Seller/SellerDashboard/SellerDashboard.jsx - Update Routes
 
 import React, { useState, useEffect } from "react";
 import {
@@ -34,13 +34,15 @@ import planStyles from "./components/PlanTheme.module.css";
 // Components
 import DashboardOverview from "./components/DashboardOverview";
 import Upgrade from "./components/Upgrade";
+import ProductManagement from "./components/ProductManagement";
+import ProductForm from "./components/ProductForm";
 
 // ✅ Seller + subscription redux
 import { sellerLogout } from "../../../redux/slices/sellerSlice";
 import { fetchCurrentSubscription } from "../../../redux/slices/sellerSubscriptionSlice";
 
 // ============================================
-// PLAN THEME CONFIG — drives the premium feel across the dashboard
+// PLAN THEME CONFIG
 // ============================================
 const PLAN_THEME = {
   free: {
@@ -54,8 +56,7 @@ const PLAN_THEME = {
   silver: {
     dashboardName: "Silver Seller Dashboard",
     greeting: "Welcome to your Silver Seller Dashboard",
-    subtext:
-      "You're a Silver Verified seller — enjoy better visibility and faster settlements.",
+    subtext: "You're a Silver Verified seller — enjoy better visibility and faster settlements.",
     badgeLabel: "🩶 Silver Seller",
     color: "#94a3b8",
     gradient: "linear-gradient(135deg, #cbd5e1, #64748b)",
@@ -63,8 +64,7 @@ const PLAN_THEME = {
   gold: {
     dashboardName: "Gold Seller Dashboard",
     greeting: "Welcome to your Gold Seller Dashboard",
-    subtext:
-      "You're a Gold seller — featured placement, sponsored products, and priority support.",
+    subtext: "You're a Gold seller — featured placement, sponsored products, and priority support.",
     badgeLabel: "🥇 Gold Seller",
     color: "#d97706",
     gradient: "linear-gradient(135deg, #fbbf24, #d97706)",
@@ -72,8 +72,7 @@ const PLAN_THEME = {
   platinum: {
     dashboardName: "Platinum Seller Dashboard",
     greeting: "Welcome to your Platinum Seller Dashboard",
-    subtext:
-      "You're a Platinum partner — the highest tier, with a dedicated account manager.",
+    subtext: "You're a Platinum partner — the highest tier, with a dedicated account manager.",
     badgeLabel: "💎 Platinum Seller",
     color: "#6366f1",
     gradient: "linear-gradient(135deg, #a5b4fc, #4f46e5)",
@@ -83,10 +82,10 @@ const PLAN_THEME = {
 const getPlanTheme = (planId) => PLAN_THEME[planId] || PLAN_THEME.free;
 
 // ============================================
-// SIDEBAR MENU — id doubles as the relative route path
+// SIDEBAR MENU
 // ============================================
 const menuItems = [
-  { id: "", label: "Dashboard", icon: FiHome }, // index route
+  { id: "", label: "Dashboard", icon: FiHome },
   { id: "products", label: "Products", icon: FiPackage },
   { id: "orders", label: "Orders", icon: FiShoppingBag },
   { id: "earnings", label: "Earnings", icon: FiDollarSign },
@@ -96,7 +95,7 @@ const menuItems = [
   { id: "upgrade", label: "Upgrade", icon: FiTrendingUp },
 ];
 
-// Simple placeholder for sections that don't have a real page yet
+// Placeholder components
 const ComingSoon = ({ label }) => (
   <div className={styles.placeholderContent}>{label} Page Coming Soon</div>
 );
@@ -120,7 +119,6 @@ const DashboardHome = ({ planTheme }) => (
 );
 
 const SellerDashboard = () => {
-  // ✅ Page title
   useEffect(() => {
     document.title = "Seller Dashboard | Aurevian Collections";
   }, []);
@@ -137,12 +135,10 @@ const SellerDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // ✅ Active menu is now derived from the URL, not local state, so the
-  // sidebar highlight, browser back/forward, and page refresh all stay in sync.
   const basePath = "/seller/dashboard";
   const relativePath = location.pathname
     .replace(basePath, "")
-    .replace(/^\//, ""); // "" | "products" | "orders" | ...
+    .replace(/^\//, "");
   const activeMenu = relativePath.split("/")[0] || "";
 
   const planId =
@@ -328,7 +324,7 @@ const SellerDashboard = () => {
           />
         )}
 
-        {/* Content — each sidebar section is now a real nested route */}
+        {/* Content */}
         <main
           className={`${styles.contentArea} ${!sidebarOpen ? styles.expanded : ""
             }`}
@@ -336,24 +332,14 @@ const SellerDashboard = () => {
           <div className={styles.contentWrapper}>
             <Routes>
               <Route index element={<DashboardHome planTheme={planTheme} />} />
-              <Route
-                path="products"
-                element={<ComingSoon label="Products" />}
-              />
+              <Route path="products" element={<ProductManagement />} />
+              <Route path="products/new" element={<ProductForm />} />
+              <Route path="products/edit/:id" element={<ProductForm />} />
               <Route path="orders" element={<ComingSoon label="Orders" />} />
-              <Route
-                path="earnings"
-                element={<ComingSoon label="Earnings" />}
-              />
-              <Route
-                path="customers"
-                element={<ComingSoon label="Customers" />}
-              />
+              <Route path="earnings" element={<ComingSoon label="Earnings" />} />
+              <Route path="customers" element={<ComingSoon label="Customers" />} />
               <Route path="reviews" element={<ComingSoon label="Reviews" />} />
-              <Route
-                path="settings"
-                element={<ComingSoon label="Settings" />}
-              />
+              <Route path="settings" element={<ComingSoon label="Settings" />} />
               <Route path="upgrade" element={<Upgrade />} />
               <Route path="*" element={<Navigate to={basePath} replace />} />
             </Routes>

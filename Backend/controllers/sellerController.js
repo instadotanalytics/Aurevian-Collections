@@ -3,7 +3,8 @@
 import Seller from "../models/Seller.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import otpService from "../services/otpService.js";
+// 🛠️ FIXED: import * as use kiya taaki default export (instance) sahi se mile
+import * as otpService from "../services/otpService.js";
 import emailService from "../services/emailService.js";
 import cloudinaryService from "../services/cloudinaryService.js";
 import crypto from "crypto";
@@ -1124,10 +1125,9 @@ export const getRecentActivities = async (req, res) => {
   }
 };
 
-
-
-// backend/controllers/sellerController.js (sellerForgotPassword function)
-
+// ============================================
+// 15. SELLER FORGOT PASSWORD
+// ============================================
 export const sellerForgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -1212,8 +1212,9 @@ export const sellerForgotPassword = async (req, res) => {
     });
   }
 };
+
 // ============================================
-// 16. SELLER RESET PASSWORD (ADD THIS)
+// 16. SELLER RESET PASSWORD
 // ============================================
 export const sellerResetPassword = async (req, res) => {
   try {

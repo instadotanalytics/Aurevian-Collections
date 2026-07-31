@@ -1,9 +1,4 @@
 // ============================================
-// DNS CONFIGURATION
-// ============================================
-
-
-// ============================================
 // IMPORTS
 // ============================================
 import "dotenv/config";
@@ -35,6 +30,11 @@ import subscriptionPlanRoutes from "./routes/subscriptionPlanRoutes.js";
 import referralRoutes from "./routes/referralRoutes.js";
 import walletRoutes from "./routes/walletRoutes.js";
 import headerConfigRoutes from "./routes/headerConfigRoutes.js";
+
+// ✅ IMPORT PRODUCT ROUTES
+console.log("🔧 Importing jewelleryProductRoutes...");
+import jewelleryProductRoutes from './routes/jewelleryProductRoutes.js';
+console.log("✅ jewelleryProductRoutes imported successfully");
 
 // ============================================
 // SERVICE IMPORTS
@@ -174,6 +174,7 @@ app.get("/api", (req, res) => {
       auth: "/api/auth",
       superAdmin: "/api/super-admin",
       seller: "/api/seller",
+      sellerProducts: "/api/seller/products",
       sellerSubscription: "/api/seller/subscription",
       blog: "/api/blog",
       banners: "/api/banners",
@@ -189,44 +190,56 @@ app.get("/api", (req, res) => {
 });
 
 // ============================================
-// API ROUTES - MOUNT ALL ROUTES (REORDERED)
+// ✅ API ROUTES - FULL DEBUG VERSION
 // ============================================
-console.log("\n🔗 Registering routes:");
-console.log("  📌 /api/auth - Authentication routes");
-console.log("  📌 /api/super-admin - Super Admin routes");
-console.log("  📌 /api/seller - Seller routes");
-console.log(
-  "  📌 /api/seller/subscription - Seller Upgrade/Subscription routes",
-);
-console.log(
-  "  📌 /api/super-admin/subscription-plans - Subscription Plan Management",
-);
-console.log("  📌 /api/banners - Banner Management routes");
-console.log("  📌 /api/user-profile - User Profile routes");
-console.log("  📌 /api/blog - Blog Management routes");
-console.log("  📌 /api/referrals - Referral Code routes");
-console.log("  📌 /api/wallet - Wallet Management routes");
-console.log("  📌 /api/support - Support Ticket routes");
-console.log("  📌 /api/header-config - Header Configuration (public + admin)");
+console.log("\n" + "=".repeat(60));
+console.log("🔗 REGISTERING ROUTES");
+console.log("=".repeat(60));
 
-// REORDERED: Most specific routes first
+// ✅ PRODUCT ROUTES - SABSE PEHLE
+console.log("\n📌 Registering /api/seller/products...");
+app.use("/api/seller/products", jewelleryProductRoutes);
+console.log("✅ /api/seller/products registered");
+
+// ✅ SELLER ROUTES
+console.log("\n📌 Registering /api/seller...");
+app.use("/api/seller", sellerRoutes);
+console.log("✅ /api/seller registered");
+
+// ✅ OTHER ROUTES
+console.log("\n📌 Registering other routes...");
 app.use("/api/auth", authRoutes);
-app.use("/api/super-admin/subscription-plans", subscriptionPlanRoutes); // More specific first
-app.use("/api/super-admin", superAdminRoutes); // Then the generic parent
-app.use("/api/seller/subscription", subscriptionRoutes); // More specific first
-app.use("/api/seller", sellerRoutes); // Then the generic parent
+console.log("  ✅ /api/auth");
+app.use("/api/super-admin/subscription-plans", subscriptionPlanRoutes);
+console.log("  ✅ /api/super-admin/subscription-plans");
+app.use("/api/super-admin", superAdminRoutes);
+console.log("  ✅ /api/super-admin");
+app.use("/api/seller/subscription", subscriptionRoutes);
+console.log("  ✅ /api/seller/subscription");
 app.use("/api/banners", bannerRoutes);
+console.log("  ✅ /api/banners");
 app.use("/api/blog", blogRoutes);
+console.log("  ✅ /api/blog");
 app.use("/api/user-profile", userProfileRoutes);
+console.log("  ✅ /api/user-profile");
 app.use("/api/referrals", referralRoutes);
+console.log("  ✅ /api/referrals");
 app.use("/api/wallet", walletRoutes);
+console.log("  ✅ /api/wallet");
 app.use("/api/support", supportRoutes);
+console.log("  ✅ /api/support");
 app.use("/api/header-config", headerConfigRoutes);
+console.log("  ✅ /api/header-config");
+
+console.log("\n" + "=".repeat(60));
+console.log("✅ ALL ROUTES REGISTERED");
+console.log("=".repeat(60));
 
 // ============================================
 // 404 NOT FOUND HANDLER
 // ============================================
 app.use((req, res) => {
+  console.log(`❌ 404 Not Found: ${req.method} ${req.originalUrl}`);
   res.status(404).json({
     success: false,
     message: "Route not found",
@@ -241,7 +254,6 @@ app.use((err, req, res, next) => {
   console.error("❌ Global Error:", err.message);
   console.error("Stack:", err.stack);
 
-  // MongoDB duplicate key error
   if (err.code === 11000) {
     const field = Object.keys(err.keyPattern)[0];
     return res.status(409).json({
@@ -250,7 +262,6 @@ app.use((err, req, res, next) => {
     });
   }
 
-  // Mongoose validation error
   if (err.name === "ValidationError") {
     const messages = Object.values(err.errors).map((e) => e.message);
     return res.status(400).json({
@@ -260,7 +271,6 @@ app.use((err, req, res, next) => {
     });
   }
 
-  // JWT errors
   if (err.name === "JsonWebTokenError") {
     return res.status(401).json({
       success: false,
@@ -275,7 +285,6 @@ app.use((err, req, res, next) => {
     });
   }
 
-  // Multer errors
   if (err.name === "MulterError") {
     if (err.code === "LIMIT_FILE_SIZE") {
       return res.status(400).json({
@@ -301,7 +310,6 @@ app.use((err, req, res, next) => {
     });
   }
 
-  // Cloudinary errors
   if (err.message && err.message.includes("Cloudinary")) {
     return res.status(500).json({
       success: false,
@@ -330,34 +338,19 @@ const server = app.listen(PORT, () => {
   console.log("=".repeat(60));
   console.log(`📍 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(`🔗 Port: ${PORT}`);
-  console.log(
-    `🔗 Client URL: ${process.env.CLIENT_URL || "https://aureviancollections.in"}`,
-  );
-  console.log(
-    `🔑 Google OAuth: ${process.env.GOOGLE_CLIENT_ID ? "✅ Configured" : "❌ Not configured"}`,
-  );
-  console.log(
-    `🔐 JWT Secret: ${process.env.JWT_ACCESS_SECRET ? "✅ Configured" : "❌ Not configured"}`,
-  );
-  console.log(
-    `📊 MongoDB: ${process.env.MONGODB_URI ? "✅ Configured" : "❌ Not configured"}`,
-  );
-  console.log(
-    `📧 Email Service: ${process.env.EMAIL_USER ? "✅ Configured" : "❌ Not configured"}`,
-  );
-  console.log(
-    `📱 Twilio Service: ${process.env.TWILIO_ACCOUNT_SID ? "✅ Configured" : "❌ Not configured"}`,
-  );
-  console.log(
-    `☁️ Cloudinary: ${process.env.CLOUDINARY_CLOUD_NAME ? "✅ Configured" : "❌ Not configured"}`,
-  );
-  console.log(
-    `💳 Razorpay: ${process.env.RAZORPAY_KEY_ID ? "✅ Configured" : "⚠️  Not configured (mock mode)"}`,
-  );
+  console.log(`🔗 Client URL: ${process.env.CLIENT_URL || "https://aureviancollections.in"}`);
+  console.log(`🔑 Google OAuth: ${process.env.GOOGLE_CLIENT_ID ? "✅ Configured" : "❌ Not configured"}`);
+  console.log(`🔐 JWT Secret: ${process.env.JWT_ACCESS_SECRET ? "✅ Configured" : "❌ Not configured"}`);
+  console.log(`📊 MongoDB: ${process.env.MONGODB_URI ? "✅ Configured" : "❌ Not configured"}`);
+  console.log(`📧 Email Service: ${process.env.EMAIL_USER ? "✅ Configured" : "❌ Not configured"}`);
+  console.log(`📱 Twilio Service: ${process.env.TWILIO_ACCOUNT_SID ? "✅ Configured" : "❌ Not configured"}`);
+  console.log(`☁️ Cloudinary: ${process.env.CLOUDINARY_CLOUD_NAME ? "✅ Configured" : "❌ Not configured"}`);
+  console.log(`💳 Razorpay: ${process.env.RAZORPAY_KEY_ID ? "✅ Configured" : "⚠️ Not configured (mock mode)"}`);
   console.log("=".repeat(60));
   console.log("📌 Available Routes:");
   console.log("  🔹 /api/auth - Authentication");
   console.log("  🔹 /api/super-admin - Super Admin");
+  console.log("  🔹 /api/seller/products - Product Management ✅");
   console.log("  🔹 /api/seller - Seller");
   console.log("  🔹 /api/seller/subscription - Seller Upgrade/Subscription");
   console.log("  🔹 /api/banners - Banner Management");
@@ -366,9 +359,7 @@ const server = app.listen(PORT, () => {
   console.log("  🔹 /api/referrals - Referral Code Management");
   console.log("  🔹 /api/wallet - Wallet Management");
   console.log("  🔹 /api/support - Support Ticket Management");
-  console.log(
-    "  🔹 /api/header-config - Header Configuration (public + admin)",
-  );
+  console.log("  🔹 /api/header-config - Header Configuration");
   console.log("  🔹 /health - Health Check");
   console.log("  🔹 /api - API Info");
   console.log("=".repeat(60));
