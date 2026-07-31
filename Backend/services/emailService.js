@@ -1,53 +1,41 @@
 // backend/services/emailService.js
 
-import nodemailer from "nodemailer";
 import dotenv from "dotenv";
-
 dotenv.config();
 
 class EmailService {
-  constructor() {
-    this.transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false, // STARTTLS, not implicit SSL
-      requireTLS: true,
-      family: 4,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-      pool: true,
-      maxConnections: 5,
-      maxMessages: 100,
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 15000,
-    });
-
-    this.transporter.verify((err, success) => {
-      if (err) {
-        console.error("❌ Gmail connection failed:", err.message);
-      } else {
-        console.log("✅ Gmail transporter is ready");
-      }
-    });
-  }
-
   async sendEmail({ to, subject, html }) {
     try {
-      const info = await this.transporter.sendMail({
-        from: `"Aurevian Collections" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
-        to,
-        subject,
-        html,
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from:
+            process.env.RESEND_FROM ||
+            "Aurevian Collections <onboarding@resend.dev>",
+          to: [to],
+          subject,
+          html,
+        }),
       });
 
-      console.log("✅ Email sent:", info.messageId, "Accepted:", info.accepted);
+      const data = await response.json();
 
+      if (!response.ok) {
+        console.error("❌ Resend email error:", data);
+        return {
+          success: false,
+          error: data.message || "Resend send failed",
+        };
+      }
+
+      console.log("✅ Email sent via Resend:", data.id);
       return {
         success: true,
-        info,
+        info: data,
       };
     } catch (err) {
       console.error("❌ Email error:", err.message);
