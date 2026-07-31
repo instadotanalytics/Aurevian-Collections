@@ -19,6 +19,7 @@ class EmailService {
       connectionTimeout: 10000, // fail fast instead of hanging
       greetingTimeout: 10000,
       socketTimeout: 15000,
+      family: 4, // Force IPv4 to avoid Render's broken IPv6 route
     });
 
     this.transporter.verify((err, success) => {
