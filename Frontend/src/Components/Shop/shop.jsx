@@ -1,7 +1,27 @@
-import React from "react";
+
+import React, { useState } from "react";
 import styles from "./shop.module.css";
 import Header from "../../Pages/Layout/Header/Header";
 import Footer from "../../Pages/Layout/Footer/Footer";
+
+import shopHero from "../../assets/shophero.png";
+
+import solitaireBand from "../../assets/solitaire-band.jpg.jfif";
+import layeredChain from "../../assets/layered-chain.jpg.jfif";
+import dropStuds from "../../assets/drop-studs.jpg.jfif";
+import charmBracelet from "../../assets/charm-bracelet.jpg.jfif";
+import stackRingSet from "../../assets/stack-ring-set.jpg.jfif";
+import beadedAnklet from "../../assets/beaded-anklet.jpg.jfif";
+import bridalJewelSet from "../../assets/bridal-jewel-set.jpg.jfif";
+import hoopEarrings from "../../assets/hoop-earrings.jpg.jfif";
+import pendantChain from "../../assets/pendant-chain.jpg.jfif";
+import twistBand from "../../assets/twist-band.jpg.jfif";
+import multipleChainBracelets from "../../assets/multiple-chain-braclets.jpg.jfif";
+import pearlStuds from "../../assets/pearl-studs.jpg.jfif";
+
+import { LuSlidersHorizontal } from "react-icons/lu";
+import { FiHeart } from "react-icons/fi";
+import { FaHeart } from "react-icons/fa";
 
 const categories = [
   { name: "Rings", count: 32 },
@@ -19,8 +39,6 @@ const metals = [
   { name: "Oxidised", count: 14 },
 ];
 
-const reviewStars = ["★★★★★", "★★★★☆", "★★★☆☆", "★★☆☆☆", "★☆☆☆☆"];
-
 const promotions = ["New Arrivals", "Best Sellers", "On Sale"];
 
 const availability = [
@@ -36,7 +54,7 @@ const products = [
     name: "Aurevian Solitaire Band",
     priceNow: "₹2,100",
     priceOld: "₹3,000",
-    rating: 4.8,
+    image: solitaireBand,
   },
   {
     id: 2,
@@ -45,7 +63,7 @@ const products = [
     name: "Layla Layered Chain",
     priceNow: "₹3,400",
     priceOld: "₹4,250",
-    rating: 4.6,
+    image: layeredChain,
   },
   {
     id: 3,
@@ -54,7 +72,7 @@ const products = [
     name: "Amara Drop Studs",
     priceNow: "₹1,650",
     priceOld: "₹2,200",
-    rating: 5.0,
+    image: dropStuds,
   },
   {
     id: 4,
@@ -63,7 +81,7 @@ const products = [
     name: "Celeste Charm Bracelet",
     priceNow: "₹1,800",
     priceOld: "₹3,000",
-    rating: 4.9,
+    image: charmBracelet,
   },
   {
     id: 5,
@@ -72,7 +90,7 @@ const products = [
     name: "Noor Stack Ring Set",
     priceNow: "₹1,275",
     priceOld: "₹1,500",
-    rating: 4.7,
+    image: stackRingSet,
   },
   {
     id: 6,
@@ -81,7 +99,7 @@ const products = [
     name: "Meera Beaded Anklet",
     priceNow: "₹950",
     priceOld: "₹1,900",
-    rating: 4.5,
+    image: beadedAnklet,
   },
   {
     id: 7,
@@ -90,7 +108,7 @@ const products = [
     name: "Anaya Bridal Jewel Set",
     priceNow: "₹6,300",
     priceOld: "₹7,000",
-    rating: 5.0,
+    image: bridalJewelSet,
   },
   {
     id: 8,
@@ -99,7 +117,7 @@ const products = [
     name: "Zoya Hoop Earrings",
     priceNow: "₹1,300",
     priceOld: "₹2,000",
-    rating: 4.9,
+    image: hoopEarrings,
   },
   {
     id: 9,
@@ -108,7 +126,34 @@ const products = [
     name: "Ishani Pendant Chain",
     priceNow: "₹2,750",
     priceOld: "₹5,000",
-    rating: 4.8,
+    image: pendantChain,
+  },
+  {
+    id: 10,
+    badge: "20% off",
+    category: "Rings",
+    name: "Kavya Twist Band",
+    priceNow: "₹2,400",
+    priceOld: "₹3,000",
+    image: twistBand,
+  },
+  {
+    id: 11,
+    badge: "30% off",
+    category: "Bracelets",
+    name: "Riya Chain Bracelet",
+    priceNow: "₹1,950",
+    priceOld: "₹2,800",
+    image: multipleChainBracelets,
+  },
+  {
+    id: 12,
+    badge: "25% off",
+    category: "Earrings",
+    name: "Sana Pearl Studs",
+    priceNow: "₹1,450",
+    priceOld: "₹1,950",
+    image: pearlStuds,
   },
 ];
 
@@ -127,6 +172,40 @@ const perks = [
 ];
 
 export default function Shop() {
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [selectedFilters, setSelectedFilters] = useState(new Set());
+
+  const [wishlist, setWishlist] = useState(new Set());
+
+  const toggleWishlist = (id) => {
+    setWishlist((prev) => {
+      const next = new Set(prev);
+
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+
+      return next;
+    });
+  };
+
+  const toggleFilter = (type, value) => {
+    const key = `${type}:${value}`;
+    setSelectedFilters((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  };
+
+  const isSelected = (type, value) => selectedFilters.has(`${type}:${value}`);
+
   return (
     <div className={styles.page}>
       {/* ================= HEADER ================= */}
@@ -134,105 +213,199 @@ export default function Shop() {
 
       {/* ================= MAIN CONTENT ================= */}
       <div className={styles.mainContent}>
-        {/* ================= PAGE TITLE ================= */}
+        {/* ================= PAGE TITLE / HERO ================= */}
         <section className={styles.pageTitle}>
-          <span className={styles.pageEyebrow}>The Collection</span>
-          <h1>Shop</h1>
-          <div className={styles.titleOrnament} aria-hidden="true">
-            <span className={styles.ornamentLine}></span>
-            <span className={styles.ornamentDiamond}></span>
-            <span className={styles.ornamentLine}></span>
-          </div>
-          <p className={styles.pageSubtitle}>
-            Handcrafted fine jewellery, curated for every occasion
-          </p>
+          <img
+            src={shopHero}
+            alt="Shop Collection"
+            className={styles.heroImage}
+          />
         </section>
 
         {/* ================= SHOP BODY ================= */}
         <div className={styles.shopWrap}>
-          {/* ---------- Sidebar Filters ---------- */}
-          <aside className={styles.filters}>
-            <h3 className={styles.filtersHeading}>Filter Options</h3>
+          {/* ---------- Mobile Filter Toggle Button ---------- */}
+          <button
+            type="button"
+            className={styles.filterToggle}
+            onClick={() => setFiltersOpen((prev) => !prev)}
+            aria-expanded={filtersOpen}
+          >
+            <span className={styles.filterToggleText}>Filter Options</span>
+            <span className={styles.filterToggleIcon}>
+              <LuSlidersHorizontal />
+            </span>
+          </button>
 
-            <div className={styles.filterGroup}>
-              <h3 className={styles.groupHeading}>By Category</h3>
-              <ul>
-                {categories.map((c) => (
-                  <li key={c.name}>
-                    {c.name} <span className={styles.count}>{c.count}</span>
-                  </li>
-                ))}
-              </ul>
+          {/* ---------- Mobile backdrop (only shows when filters are open) ---------- */}
+          {filtersOpen && (
+            <div
+              className={styles.filterOverlay}
+              onClick={() => setFiltersOpen(false)}
+            />
+          )}
+
+          {/* ---------- Sidebar / Bottom-sheet Filters ---------- */}
+          <aside
+            className={`${styles.filters} ${
+              filtersOpen ? styles.filtersOpen : ""
+            }`}
+          >
+            {/* Fixed header: stays visible while the list below scrolls */}
+            <div className={styles.filtersSheetHeader}>
+              <h3 className={styles.filtersHeading}>Filter Options</h3>
+              <button
+                type="button"
+                className={styles.filtersClose}
+                onClick={() => setFiltersOpen(false)}
+                aria-label="Close filters"
+              >
+                ✕
+              </button>
             </div>
 
-            <div className={styles.filterGroup}>
-              <h3 className={styles.groupHeading}>By Metal</h3>
-              <ul>
-                {metals.map((m) => (
-                  <li key={m.name}>
-                    {m.name} <span className={styles.count}>{m.count}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className={styles.filterGroup}>
-              <h3 className={styles.groupHeading}>Price</h3>
-              <div className={styles.priceSlider}>
-                <div className={styles.fill}></div>
-                <div className={`${styles.handle} ${styles.handleLeft}`}></div>
-                <div className={`${styles.handle} ${styles.handleRight}`}></div>
+            <div className={styles.filtersInner}>
+              <div className={styles.filterGroup}>
+                <h3 className={styles.groupHeading}>By Category</h3>
+                <ul>
+                  {categories.map((c) => (
+                    <li
+                      key={c.name}
+                      className={
+                        isSelected("category", c.name) ? styles.selected : ""
+                      }
+                    >
+                      <label className={styles.checkRow}>
+                        <input
+                          type="checkbox"
+                          checked={isSelected("category", c.name)}
+                          onChange={() => toggleFilter("category", c.name)}
+                        />
+                        <span className={styles.checkLabel}>{c.name}</span>
+                      </label>
+                      <span className={styles.count}>{c.count}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <div className={styles.priceValues}>
-                <span>₹500</span>
-                <span>₹8,000</span>
+
+              <div className={styles.filterGroup}>
+                <h3 className={styles.groupHeading}>By Metal</h3>
+                <ul>
+                  {metals.map((m) => (
+                    <li
+                      key={m.name}
+                      className={
+                        isSelected("metal", m.name) ? styles.selected : ""
+                      }
+                    >
+                      <label className={styles.checkRow}>
+                        <input
+                          type="checkbox"
+                          checked={isSelected("metal", m.name)}
+                          onChange={() => toggleFilter("metal", m.name)}
+                        />
+                        <span className={styles.checkLabel}>{m.name}</span>
+                      </label>
+                      <span className={styles.count}>{m.count}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
 
-            <div className={styles.filterGroup}>
-              <h3 className={styles.groupHeading}>Review</h3>
-              <ul>
-                {reviewStars.map((s, i) => (
-                  <li key={i}>
-                    <span className={styles.stars}>{s}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              <div className={styles.filterGroup}>
+                <h3 className={styles.groupHeading}>Price</h3>
+                <div className={styles.priceSlider}>
+                  <div className={styles.fill}></div>
+                  <div
+                    className={`${styles.handle} ${styles.handleLeft}`}
+                  ></div>
+                  <div
+                    className={`${styles.handle} ${styles.handleRight}`}
+                  ></div>
+                </div>
+                <div className={styles.priceValues}>
+                  <span>₹500</span>
+                  <span>₹8,000</span>
+                </div>
+              </div>
 
-            <div className={styles.filterGroup}>
-              <h3 className={styles.groupHeading}>By Promotions</h3>
-              <ul>
-                {promotions.map((p) => (
-                  <li key={p}>{p}</li>
-                ))}
-              </ul>
-            </div>
+              <div className={styles.filterGroup}>
+                <h3 className={styles.groupHeading}>By Promotions</h3>
+                <ul>
+                  {promotions.map((p) => (
+                    <li
+                      key={p}
+                      className={
+                        isSelected("promotion", p) ? styles.selected : ""
+                      }
+                    >
+                      <label className={styles.checkRow}>
+                        <input
+                          type="checkbox"
+                          checked={isSelected("promotion", p)}
+                          onChange={() => toggleFilter("promotion", p)}
+                        />
+                        <span className={styles.checkLabel}>{p}</span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-            <div className={styles.filterGroup}>
-              <h3 className={styles.groupHeading}>Availability</h3>
-              <ul>
-                {availability.map((a) => (
-                  <li key={a.name}>
-                    {a.name} <span className={styles.count}>{a.count}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              <div className={styles.filterGroup}>
+                <h3 className={styles.groupHeading}>Availability</h3>
+                <ul>
+                  {availability.map((a) => (
+                    <li
+                      key={a.name}
+                      className={
+                        isSelected("availability", a.name)
+                          ? styles.selected
+                          : ""
+                      }
+                    >
+                      <label className={styles.checkRow}>
+                        <input
+                          type="checkbox"
+                          checked={isSelected("availability", a.name)}
+                          onChange={() =>
+                            toggleFilter("availability", a.name)
+                          }
+                        />
+                        <span className={styles.checkLabel}>{a.name}</span>
+                      </label>
+                      <span className={styles.count}>{a.count}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-            <div className={styles.promoTags}>
-              <span>Price: ₹500–₹8,000 ✕</span>
-              <span>Best Seller ✕</span>
-              <span>In Stock ✕</span>
-              <span className={styles.clear}>Clear all</span>
+              <div className={styles.promoTags}>
+                <span>Price: ₹500–₹8,000 ✕</span>
+                <span>Best Seller ✕</span>
+                <span>In Stock ✕</span>
+                <span className={styles.clear}>Clear all</span>
+              </div>
+
+              {/* Apply button, mobile only */}
+              <button
+                type="button"
+                className={styles.applyFilters}
+                onClick={() => setFiltersOpen(false)}
+              >
+                Apply Filters
+              </button>
             </div>
           </aside>
 
           {/* ---------- Product Listing ---------- */}
           <main>
             <div className={styles.toolbar}>
-              <span>Showing 1–{products.length} of 138 results</span>
-              <select>
+              <span className={styles.resultsCount}>
+                Showing 1–{products.length} of 138 results
+              </span>
+              <select className={styles.sortSelect}>
                 <option>Default Sorting</option>
                 <option>Price: Low to High</option>
                 <option>Price: High to Low</option>
@@ -246,22 +419,43 @@ export default function Shop() {
                 <div className={styles.productCard} key={p.id}>
                   <div className={styles.productMedia}>
                     <span className={styles.badge}>{p.badge}</span>
-                    <div className={styles.wishlistActions}>
-                      <button>♡</button>
-                      <button>👁</button>
-                    </div>
-                    <span className={styles.placeholderLabel}>
-                      Product Image
+                    <span className={styles.productCatOverlay}>
+                      {p.category}
                     </span>
+                    <div className={styles.wishlistActions}>
+                      <button
+                        type="button"
+                        className={`${styles.wishlistBtn} ${
+                          wishlist.has(p.id) ? styles.wishlistBtnActive : ""
+                        }`}
+                        onClick={() => toggleWishlist(p.id)}
+                        aria-label={
+                          wishlist.has(p.id)
+                            ? "Remove from wishlist"
+                            : "Add to wishlist"
+                        }
+                      >
+                        {wishlist.has(p.id) ? <FaHeart /> : <FiHeart />}
+                      </button>
+                    </div>
+                    {p.image ? (
+                      <img
+                        src={p.image}
+                        alt={p.name}
+                        className={styles.productImage}
+                      />
+                    ) : (
+                      <span className={styles.placeholderLabel}>
+                        Product Image
+                      </span>
+                    )}
                   </div>
                   <div className={styles.productInfo}>
-                    <div className={styles.productCat}>{p.category}</div>
                     <div className={styles.productName}>{p.name}</div>
                     <div className={styles.productPrice}>
                       <span className={styles.priceNow}>{p.priceNow}</span>
                       <span className={styles.priceOld}>{p.priceOld}</span>
                     </div>
-                    <span className={styles.rating}>{p.rating.toFixed(1)}</span>
                   </div>
                 </div>
               ))}
