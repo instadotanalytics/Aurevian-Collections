@@ -13,11 +13,17 @@ class EmailService {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
+      pool: true,
+      maxConnections: 5,
+      maxMessages: 100,
+      connectionTimeout: 10000, // fail fast instead of hanging
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
     });
 
     this.transporter.verify((err, success) => {
       if (err) {
-        console.error("❌ Gmail connection failed:", err);
+        console.error("❌ Gmail connection failed:", err.message);
       } else {
         console.log("✅ Gmail transporter is ready");
       }
@@ -33,19 +39,14 @@ class EmailService {
         html,
       });
 
-      console.log("========== EMAIL INFO ==========");
-      console.log("Accepted:", info.accepted);
-      console.log("Rejected:", info.rejected);
-      console.log("Response:", info.response);
-      console.log("Message ID:", info.messageId);
-      console.log("================================");
+      console.log("✅ Email sent:", info.messageId, "Accepted:", info.accepted);
 
       return {
         success: true,
         info,
       };
     } catch (err) {
-      console.error("❌ Email error:", err);
+      console.error("❌ Email error:", err.message);
       return {
         success: false,
         error: err.message,

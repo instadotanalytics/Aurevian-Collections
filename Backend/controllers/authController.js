@@ -21,23 +21,13 @@ export const googleLogin = async (req, res) => {
       });
     }
 
-    console.log("🔑 Google login attempt");
-
     let decodedToken;
     try {
       decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
-      console.log(
-        "✅ Firebase token verified for user:",
-        decodedToken.email || decodedToken.uid,
-      );
     } catch (error) {
-      console.error("❌ Firebase verification failed:", error.message);
-
       if (process.env.NODE_ENV === "development") {
-        console.log("⚠️ Using mock login in development mode");
         return handleMockLogin(req, res);
       }
-
       return res.status(401).json({
         success: false,
         message: "Invalid Firebase token",
@@ -48,9 +38,7 @@ export const googleLogin = async (req, res) => {
     let firebaseUser;
     try {
       firebaseUser = await firebaseAdmin.auth().getUser(decodedToken.uid);
-      console.log("👤 Firebase user found:", firebaseUser.email);
     } catch (userError) {
-      console.error("❌ Firebase user fetch failed:", userError.message);
       firebaseUser = {
         uid: decodedToken.uid,
         email: decodedToken.email,
@@ -63,9 +51,7 @@ export const googleLogin = async (req, res) => {
     let user;
     try {
       user = await User.findOrCreateFromFirebase(firebaseUser);
-      console.log("✅ User processed:", user.email);
     } catch (dbError) {
-      console.error("❌ Database error:", dbError.message);
       return res.status(500).json({
         success: false,
         message: "Failed to process user data",
@@ -83,11 +69,15 @@ export const googleLogin = async (req, res) => {
     const { accessToken, refreshToken } = tokenService.generateTokens(user);
     const expiresAt = tokenService.getTokenExpiry(refreshToken);
     await user.addRefreshToken(refreshToken, expiresAt);
-    await user.addLoginHistory({
-      ipAddress: req.ip || req.headers["x-forwarded-for"],
-      userAgent: req.headers["user-agent"],
-      success: true,
-    });
+
+    // Fire-and-forget: don't block the response on login history write
+    user
+      .addLoginHistory({
+        ipAddress: req.ip || req.headers["x-forwarded-for"],
+        userAgent: req.headers["user-agent"],
+        success: true,
+      })
+      .catch((err) => console.error("Login history save failed:", err.message));
 
     tokenService.setAuthCookies(res, accessToken, refreshToken);
 
@@ -128,8 +118,6 @@ export const googleLogin = async (req, res) => {
 // ============================================
 const handleMockLogin = async (req, res) => {
   try {
-    console.log("🔧 Mock login in progress...");
-
     let user = await User.findOne({ email: "test@example.com" });
     if (!user) {
       user = new User({
@@ -141,14 +129,8 @@ const handleMockLogin = async (req, res) => {
         isVerified: true,
         isActive: true,
         role: "customer",
-        profileImage: {
-          url: null,
-          publicId: null,
-        },
-        avatar: {
-          url: null,
-          publicId: null,
-        },
+        profileImage: { url: null, publicId: null },
+        avatar: { url: null, publicId: null },
       });
       await user.save();
     }
@@ -179,7 +161,6 @@ const handleMockLogin = async (req, res) => {
       token: accessToken,
     });
   } catch (error) {
-    console.error("❌ Mock login error:", error.message);
     return res.status(500).json({
       success: false,
       message: "Mock login failed",
@@ -221,31 +202,35 @@ export const register = async (req, res) => {
       authProvider: "email",
       isVerified: false,
       emailVerified: false,
-      profileImage: {
-        url: null,
-        publicId: null,
-      },
-      avatar: {
-        url: null,
-        publicId: null,
-      },
+      profileImage: { url: null, publicId: null },
+      avatar: { url: null, publicId: null },
     });
 
     await user.save();
 
     const otp = otpService.generateOTP(6);
     await otpService.storeOTP(user, otp, "email");
-    await emailService.sendOTPEmail(email, otp, "verification");
 
-    if (phone) {
-      await otpService.sendOTPviaSMS(phone, otp);
-    }
-
-    return res.status(201).json({
+    // Respond immediately; send OTP in background so the request doesn't hang
+    res.status(201).json({
       success: true,
       message: "User registered successfully. Please verify your email.",
       data: { email: user.email, userId: user._id },
     });
+
+    emailService
+      .sendOTPEmail(email, otp, "verification")
+      .catch((err) =>
+        console.error("❌ Failed to send verification email:", err.message),
+      );
+
+    if (phone) {
+      otpService
+        .sendOTPviaSMS(phone, otp)
+        .catch((err) =>
+          console.error("❌ Failed to send verification SMS:", err.message),
+        );
+    }
   } catch (error) {
     console.error("❌ Registration error:", error);
     return res.status(500).json({
@@ -286,13 +271,21 @@ export const verifyOTP = async (req, res) => {
       user.isVerified = true;
       await user.save();
 
-      await emailService.sendWelcomeEmail(user.email, user.firstName);
-      await user.addNotification({
-        type: "welcome",
-        title: "Welcome to Aurevian Collections!",
-        message: `Welcome ${user.firstName}! Your email has been verified.`,
-        link: "/dashboard",
-      });
+      // Don't block the response on the welcome email/notification
+      emailService
+        .sendWelcomeEmail(user.email, user.firstName)
+        .catch((err) => console.error("❌ Welcome email failed:", err.message));
+
+      user
+        .addNotification({
+          type: "welcome",
+          title: "Welcome to Aurevian Collections!",
+          message: `Welcome ${user.firstName}! Your email has been verified.`,
+          link: "/dashboard",
+        })
+        .catch((err) =>
+          console.error("❌ Notification save failed:", err.message),
+        );
     }
 
     await otpService.clearOTP(user);
@@ -333,16 +326,25 @@ export const resendOTP = async (req, res) => {
 
     const otp = otpService.generateOTP(6);
     await otpService.storeOTP(user, otp, "email");
-    await emailService.sendOTPEmail(email, otp, "verification");
 
-    if (user.phone) {
-      await otpService.sendOTPviaSMS(user.phone, otp);
-    }
-
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       message: "OTP resent successfully",
     });
+
+    emailService
+      .sendOTPEmail(email, otp, "verification")
+      .catch((err) =>
+        console.error("❌ Resend OTP email failed:", err.message),
+      );
+
+    if (user.phone) {
+      otpService
+        .sendOTPviaSMS(user.phone, otp)
+        .catch((err) =>
+          console.error("❌ Resend OTP SMS failed:", err.message),
+        );
+    }
   } catch (error) {
     console.error("❌ Resend OTP error:", error);
     return res.status(500).json({
@@ -384,13 +386,19 @@ export const login = async (req, res) => {
     if (!user.emailVerified) {
       const otp = otpService.generateOTP(6);
       await otpService.storeOTP(user, otp, "email");
-      await emailService.sendOTPEmail(email, otp, "verification");
 
-      return res.status(403).json({
+      res.status(403).json({
         success: false,
         message: "Email not verified. OTP sent to your email.",
         requireVerification: true,
       });
+
+      emailService
+        .sendOTPEmail(email, otp, "verification")
+        .catch((err) =>
+          console.error("❌ Verification email failed:", err.message),
+        );
+      return;
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -403,11 +411,14 @@ export const login = async (req, res) => {
     const { accessToken, refreshToken } = tokenService.generateTokens(user);
     const expiresAt = tokenService.getTokenExpiry(refreshToken);
     await user.addRefreshToken(refreshToken, expiresAt);
-    await user.addLoginHistory({
-      ipAddress: req.ip || req.headers["x-forwarded-for"],
-      userAgent: req.headers["user-agent"],
-      success: true,
-    });
+
+    user
+      .addLoginHistory({
+        ipAddress: req.ip || req.headers["x-forwarded-for"],
+        userAgent: req.headers["user-agent"],
+        success: true,
+      })
+      .catch((err) => console.error("Login history save failed:", err.message));
 
     tokenService.setAuthCookies(res, accessToken, refreshToken);
 
@@ -441,7 +452,7 @@ export const login = async (req, res) => {
 };
 
 // ============================================
-// FORGOT PASSWORD
+// FORGOT PASSWORD  ← the main fix for your reported issue
 // ============================================
 export const forgotPassword = async (req, res) => {
   try {
@@ -463,16 +474,26 @@ export const forgotPassword = async (req, res) => {
 
     const otp = otpService.generateOTP(6);
     await otpService.storeOTP(user, otp, "forgot_password");
-    await emailService.sendOTPEmail(email, otp, "forgot_password");
 
-    if (user.phone) {
-      await otpService.sendOTPviaSMS(user.phone, otp);
-    }
-
-    return res.status(200).json({
+    // Respond right away — do NOT make the client wait on SMTP/Twilio
+    res.status(200).json({
       success: true,
       message: "OTP sent to your email for password reset.",
     });
+
+    emailService
+      .sendOTPEmail(email, otp, "forgot_password")
+      .catch((err) =>
+        console.error("❌ Forgot-password email failed:", err.message),
+      );
+
+    if (user.phone) {
+      otpService
+        .sendOTPviaSMS(user.phone, otp)
+        .catch((err) =>
+          console.error("❌ Forgot-password SMS failed:", err.message),
+        );
+    }
   } catch (error) {
     console.error("❌ Forgot password error:", error);
     return res.status(500).json({
