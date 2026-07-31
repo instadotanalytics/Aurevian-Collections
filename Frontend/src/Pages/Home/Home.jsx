@@ -27,6 +27,7 @@ const Home = () => {
       <ShopCardCategory />
       <NewArrivalsBanner />
       <NewCollections />
+      <ShopTheLook/>
       <Footer />
     </div>
   );
