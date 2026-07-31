@@ -1,4 +1,4 @@
-// backend/models/User.js - ULTIMATE FIX VERSION
+// backend/models/User.js - ULTIMATE FIX VERSION (DUPLICATE INDEXES REMOVED)
 
 import mongoose from "mongoose";
 import validator from "validator";
@@ -28,7 +28,8 @@ const addressSchema = new mongoose.Schema(
       type: String,
       enum: ["Home", "Work", "Office", "Other"],
       default: "Home",
-      set: (v) => v ? v.charAt(0).toUpperCase() + v.slice(1).toLowerCase() : v,
+      set: (v) =>
+        v ? v.charAt(0).toUpperCase() + v.slice(1).toLowerCase() : v,
     },
     house: {
       type: String,
@@ -126,7 +127,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       unique: true,
       sparse: true,
-      index: true,
+      // 🛠️ FIXED: Removed 'index: true' to avoid duplicate index warning
     },
     authProvider: {
       type: String,
@@ -161,10 +162,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
       unique: true,
-      sparse: true,
+      sparse: true, // 🛠️ FIXED: Allows multiple null/undefined values without unique conflict
       default: undefined,
       validate: {
-        validator: function(v) {
+        validator: function (v) {
           return v === undefined || v === null || v.trim().length > 0;
         },
         message: "Phone cannot be empty string",
@@ -307,10 +308,12 @@ const userSchema = new mongoose.Schema(
 );
 
 // ============================================
-// INDEXES
+// 🛠️ FIXED: Duplicate indexes removed. Only unique indexes kept here.
 // ============================================
-userSchema.index({ email: 1 }, { unique: true });
-userSchema.index({ firebaseUid: 1 }, { unique: true, sparse: true });
+// Note: 'unique: true' in schema automatically creates an index.
+// So we DON'T need separate schema.index() calls for email, firebaseUid, or phone.
+
+// We only keep compound indexes for queries that don't have unique constraints:
 userSchema.index({ role: 1, isActive: 1 });
 userSchema.index({ createdAt: -1 });
 
@@ -345,7 +348,7 @@ userSchema.virtual("defaultAddress").get(function () {
 // ============================================
 userSchema.set("toJSON", {
   virtuals: true,
-  transform: function(doc, ret) {
+  transform: function (doc, ret) {
     delete ret.__v;
     return ret;
   },
@@ -358,17 +361,17 @@ userSchema.set("toObject", {
 // ============================================
 // ✅ FIXED PRE-VALIDATE - NO 'next' PARAMETER
 // ============================================
-userSchema.pre("validate", function() {
+userSchema.pre("validate", function () {
   // Ensure firstName has valid value
   if (!this.firstName || this.firstName.trim() === "") {
     this.firstName = "User";
   }
-  
+
   // Ensure lastName has valid value
   if (!this.lastName || this.lastName.trim() === "") {
     this.lastName = "";
   }
-  
+
   // Ensure fullName is set
   if (!this.fullName || this.fullName.trim() === "") {
     this.fullName = `${this.firstName} ${this.lastName}`.trim();
@@ -376,17 +379,17 @@ userSchema.pre("validate", function() {
       this.fullName = "User";
     }
   }
-  
+
   // Ensure gender has valid value
   if (!this.gender || this.gender.trim() === "") {
     this.gender = "Prefer not to say";
   }
-  
+
   // CRITICAL: Convert empty phone string to undefined
   if (this.phone === "" || this.phone === null) {
     this.phone = undefined;
   }
-  
+
   if (this.phone && this.phone.trim() === "") {
     this.phone = undefined;
   }
@@ -395,7 +398,7 @@ userSchema.pre("validate", function() {
 // ============================================
 // ✅ FIXED PRE-SAVE - NO 'next' PARAMETER
 // ============================================
-userSchema.pre("save", function() {
+userSchema.pre("save", function () {
   // Set fullName from firstName and lastName
   if (this.firstName || this.lastName) {
     const firstName = this.firstName || "User";
@@ -417,7 +420,7 @@ userSchema.pre("save", function() {
   if (this.phone === "" || this.phone === null) {
     this.phone = undefined;
   }
-  
+
   if (this.phone && this.phone.trim() === "") {
     this.phone = undefined;
   }
@@ -436,7 +439,7 @@ userSchema.pre("save", function() {
   if (!this.memberSince) {
     this.memberSince = this.createdAt || new Date();
   }
-  
+
   // Ensure email is set
   if (!this.email) {
     throw new Error("Email is required");
@@ -504,17 +507,17 @@ userSchema.statics.findByFirebaseUid = function (uid) {
   return this.findOne({ firebaseUid: uid });
 };
 
-userSchema.statics._updateExistingUser = async function(user, firebaseUser) {
+userSchema.statics._updateExistingUser = async function (user, firebaseUser) {
   try {
     console.log(`🔄 Updating existing user: ${user.email}`);
-    
+
     if (firebaseUser.displayName) {
       const parts = firebaseUser.displayName.split(" ");
       user.firstName = parts[0] || user.firstName || "User";
       user.lastName = parts.slice(1).join(" ") || user.lastName || "";
       user.fullName = firebaseUser.displayName;
     }
-    
+
     if (firebaseUser.photoURL) {
       user.profileImage = {
         url: firebaseUser.photoURL,
@@ -525,18 +528,18 @@ userSchema.statics._updateExistingUser = async function(user, firebaseUser) {
         publicId: user.avatar?.publicId || null,
       };
     }
-    
+
     if (firebaseUser.emailVerified) {
       user.emailVerified = true;
       user.isVerified = true;
     }
-    
+
     user.lastLogin = new Date();
-    
+
     if (user.phone === "" || user.phone === null) {
       user.phone = undefined;
     }
-    
+
     await user.save();
     console.log(`✅ User updated: ${user.email}`);
     return user;
@@ -546,22 +549,25 @@ userSchema.statics._updateExistingUser = async function(user, firebaseUser) {
   }
 };
 
-userSchema.statics._createNewUser = async function(firebaseUser) {
+userSchema.statics._createNewUser = async function (firebaseUser) {
   try {
-    console.log(`🆕 Creating new user for: ${firebaseUser.email || firebaseUser.uid}`);
-    
+    console.log(
+      `🆕 Creating new user for: ${firebaseUser.email || firebaseUser.uid}`,
+    );
+
     if (!firebaseUser.email) {
       throw new Error("Email is required to create a user");
     }
-    
-    const nameParts = firebaseUser.displayName 
-      ? firebaseUser.displayName.split(" ") 
+
+    const nameParts = firebaseUser.displayName
+      ? firebaseUser.displayName.split(" ")
       : ["User", ""];
-    
+
     const firstName = nameParts[0] || "User";
     const lastName = nameParts.slice(1).join(" ") || "";
-    const fullName = firebaseUser.displayName || `${firstName} ${lastName}`.trim() || "User";
-    
+    const fullName =
+      firebaseUser.displayName || `${firstName} ${lastName}`.trim() || "User";
+
     const user = new this({
       firstName: firstName,
       lastName: lastName,
@@ -583,10 +589,10 @@ userSchema.statics._createNewUser = async function(firebaseUser) {
       memberSince: new Date(),
       profileCompletion: 20,
     });
-    
+
     await user.save();
     console.log(`✅ New user created: ${user.email}`);
-    
+
     try {
       await user.addNotification({
         type: "welcome",
@@ -595,9 +601,12 @@ userSchema.statics._createNewUser = async function(firebaseUser) {
         link: "/",
       });
     } catch (notifError) {
-      console.warn("⚠️ Could not add welcome notification:", notifError.message);
+      console.warn(
+        "⚠️ Could not add welcome notification:",
+        notifError.message,
+      );
     }
-    
+
     return user;
   } catch (error) {
     console.error("❌ Error creating new user:", error.message);
@@ -605,22 +614,27 @@ userSchema.statics._createNewUser = async function(firebaseUser) {
   }
 };
 
-userSchema.statics.findOrCreateFromFirebase = async function (firebaseUser, options = {}) {
+userSchema.statics.findOrCreateFromFirebase = async function (
+  firebaseUser,
+  options = {},
+) {
   const maxRetries = 3;
   let retryCount = 0;
   let lastError = null;
-  
+
   while (retryCount < maxRetries) {
     try {
-      console.log(`🔍 Finding user with firebaseUid: ${firebaseUser.uid} (attempt ${retryCount + 1}/${maxRetries})`);
-      
+      console.log(
+        `🔍 Finding user with firebaseUid: ${firebaseUser.uid} (attempt ${retryCount + 1}/${maxRetries})`,
+      );
+
       let user = await this.findOne({ firebaseUid: firebaseUser.uid });
-      
+
       if (user) {
         console.log(`👤 User found by firebaseUid: ${user.email}`);
         return await this._updateExistingUser(user, firebaseUser);
       }
-      
+
       if (firebaseUser.email) {
         user = await this.findOne({ email: firebaseUser.email.toLowerCase() });
         if (user) {
@@ -629,49 +643,60 @@ userSchema.statics.findOrCreateFromFirebase = async function (firebaseUser, opti
           return await this._updateExistingUser(user, firebaseUser);
         }
       }
-      
+
       console.log("👤 User not found, creating new...");
       return await this._createNewUser(firebaseUser);
-      
     } catch (error) {
       lastError = error;
-      
+
       if (error.code === 11000) {
-        console.warn(`⚠️ Duplicate key error, retrying... (attempt ${retryCount + 1}/${maxRetries})`);
+        console.warn(
+          `⚠️ Duplicate key error, retrying... (attempt ${retryCount + 1}/${maxRetries})`,
+        );
         retryCount++;
-        
+
         if (retryCount === maxRetries) {
           console.log("🔍 Attempting to find conflicting user...");
-          
-          let existingUser = await this.findOne({ firebaseUid: firebaseUser.uid });
-          
+
+          let existingUser = await this.findOne({
+            firebaseUid: firebaseUser.uid,
+          });
+
           if (!existingUser && firebaseUser.email) {
-            existingUser = await this.findOne({ email: firebaseUser.email.toLowerCase() });
+            existingUser = await this.findOne({
+              email: firebaseUser.email.toLowerCase(),
+            });
           }
-          
+
           if (existingUser) {
             console.log(`✅ Found existing user: ${existingUser.email}`);
             return await this._updateExistingUser(existingUser, firebaseUser);
           }
-          
-          console.log("⚠️ Could not find existing user, attempting to create with retry...");
-          await new Promise(resolve => setTimeout(resolve, 100));
-          
+
+          console.log(
+            "⚠️ Could not find existing user, attempting to create with retry...",
+          );
+          await new Promise((resolve) => setTimeout(resolve, 100));
+
           try {
             return await this._createNewUser(firebaseUser);
           } catch (finalError) {
             if (finalError.code === 11000) {
-              const finalUser = await this.findOne({ email: firebaseUser.email.toLowerCase() });
+              const finalUser = await this.findOne({
+                email: firebaseUser.email.toLowerCase(),
+              });
               if (finalUser) {
-                console.log(`✅ Found user after final attempt: ${finalUser.email}`);
+                console.log(
+                  `✅ Found user after final attempt: ${finalUser.email}`,
+                );
                 return await this._updateExistingUser(finalUser, firebaseUser);
               }
             }
             throw finalError;
           }
         }
-        
-        await new Promise(resolve => setTimeout(resolve, 100 * retryCount));
+
+        await new Promise((resolve) => setTimeout(resolve, 100 * retryCount));
       } else {
         console.error("❌ Error in findOrCreateFromFirebase:", error.message);
         console.error("Stack:", error.stack);
@@ -679,8 +704,11 @@ userSchema.statics.findOrCreateFromFirebase = async function (firebaseUser, opti
       }
     }
   }
-  
-  throw lastError || new Error("Failed to create or find user after multiple attempts");
+
+  throw (
+    lastError ||
+    new Error("Failed to create or find user after multiple attempts")
+  );
 };
 
 const User = mongoose.model("User", userSchema);
