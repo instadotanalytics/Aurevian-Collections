@@ -8,7 +8,10 @@ dotenv.config();
 class EmailService {
   constructor() {
     this.transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
+      family: 4, // force IPv4 socket
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
@@ -16,10 +19,9 @@ class EmailService {
       pool: true,
       maxConnections: 5,
       maxMessages: 100,
-      connectionTimeout: 10000, // fail fast instead of hanging
+      connectionTimeout: 10000,
       greetingTimeout: 10000,
       socketTimeout: 15000,
-      family: 4, // Force IPv4 to avoid Render's broken IPv6 route
     });
 
     this.transporter.verify((err, success) => {
