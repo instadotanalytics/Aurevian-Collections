@@ -363,27 +363,44 @@
   }
 }
 
+/* ----------------------------------------------------------
+   MOBILE ONLY (<=640px)
+   - heading compacted so it doesn't wrap awkwardly
+   - nav arrows removed (row is already drag/swipe-scrollable)
+---------------------------------------------------------- */
 @media (max-width: 640px) {
   .section {
-    padding: 40px 12px 32px;
+    padding: 32px 12px 32px;
   }
 
   .header {
-    margin-bottom: 24px;
-    align-items: flex-start;
+    margin-bottom: 20px;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .headingWrapper {
+    gap: 2px;
+    min-width: 0;
   }
 
   .heading {
-    font-size: 24px;
+    font-size: 20px;
+    line-height: 1.2;
+  }
+
+  .heading::after {
+    margin-top: 4px;
   }
 
   .subHeading {
-    font-size: 10px;
+    font-size: 9.5px;
+    letter-spacing: 1.4px;
   }
 
-  .navBtn {
-    width: 36px;
-    height: 36px;
+  /* arrows removed on mobile — drag/swipe scroll already works */
+  .navArrows {
+    display: none;
   }
 
   .scrollContainer {
@@ -451,6 +468,10 @@
 
   .imageWrap {
     height: 145px;
+  }
+
+  .heading {
+    font-size: 18px;
   }
 }
 

@@ -1,7 +1,6 @@
 // Backend/services/otpService.js
 
 import twilio from "twilio";
-import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -17,17 +16,9 @@ class OTPService {
     } catch (error) {
       console.log("⚠️ Twilio not configured:", error.message);
     }
-
-    // Nodemailer
-    this.emailTransporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    this.emailFrom = process.env.EMAIL_FROM || process.env.EMAIL_USER;
+    // NOTE: dedicated nodemailer transporter removed here —
+    // authController always sends OTP emails via emailService.sendOTPEmail,
+    // so this class no longer needs its own Gmail connection.
   }
 
   // ============================================
@@ -45,52 +36,11 @@ class OTPService {
   }
 
   // ============================================
-  // Send Email OTP
-  // ============================================
-
-  async sendEmailOTP(email, otp, type = "verification") {
-    try {
-      const subject =
-        type === "forgot_password"
-          ? "Reset Your Password - Aurevian Collections"
-          : "Verify Your Email - Aurevian Collections";
-
-      const html = `
-      <div style="font-family:Arial;padding:20px">
-        <h2>Aurevian Collections</h2>
-
-        <p>Your OTP is:</p>
-
-        <h1 style="letter-spacing:6px">${otp}</h1>
-
-        <p>This OTP expires in 10 minutes.</p>
-      </div>
-      `;
-
-      const info = await this.emailTransporter.sendMail({
-        from: this.emailFrom,
-        to: email,
-        subject,
-        html,
-      });
-
-      return {
-        success: true,
-        messageId: info.messageId,
-      };
-    } catch (error) {
-      console.error("❌ Email OTP error:", error.message);
-
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
-  }
-
-  // ============================================
   // Send Phone OTP (Twilio Verify)
   // ============================================
+  // NOTE: Twilio Verify generates and tracks its own code server-side —
+  // it does NOT accept a code you supply. So this must be verified via
+  // verifyPhoneOTP() (Twilio's check), not against user.otp.code.
 
   async sendPhoneOTP(phone) {
     try {
@@ -157,27 +107,6 @@ class OTPService {
       console.error("❌ Phone Verification Error:", error.message);
       return false;
     }
-  }
-
-  // ============================================
-  // Common Sender
-  // ============================================
-
-  async sendOTP(contact, type, otp = null) {
-    const generatedOTP = otp || this.generateOTP();
-
-    if (type === "email") {
-      return await this.sendEmailOTP(contact, generatedOTP);
-    }
-
-    if (type === "phone") {
-      return await this.sendPhoneOTP(contact);
-    }
-
-    return {
-      success: false,
-      message: "Invalid OTP type",
-    };
   }
 
   // ============================================
@@ -248,6 +177,9 @@ class OTPService {
     return await user.save();
   }
 
+  // ============================================
+  // SMS OTP via Twilio Verify (independent of the stored email OTP)
+  // ============================================
   async sendOTPviaSMS(phone) {
     return await this.sendPhoneOTP(phone);
   }

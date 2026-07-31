@@ -1,51 +1,44 @@
 // backend/services/emailService.js
 
-import nodemailer from "nodemailer";
 import dotenv from "dotenv";
-
 dotenv.config();
 
 class EmailService {
-  constructor() {
-    this.transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    this.transporter.verify((err, success) => {
-      if (err) {
-        console.error("❌ Gmail connection failed:", err);
-      } else {
-        console.log("✅ Gmail transporter is ready");
-      }
-    });
-  }
-
   async sendEmail({ to, subject, html }) {
     try {
-      const info = await this.transporter.sendMail({
-        from: `"Aurevian Collections" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
-        to,
-        subject,
-        html,
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from:
+            process.env.RESEND_FROM ||
+            "Aurevian Collections <onboarding@resend.dev>",
+          to: [to],
+          subject,
+          html,
+        }),
       });
 
-      console.log("========== EMAIL INFO ==========");
-      console.log("Accepted:", info.accepted);
-      console.log("Rejected:", info.rejected);
-      console.log("Response:", info.response);
-      console.log("Message ID:", info.messageId);
-      console.log("================================");
+      const data = await response.json();
 
+      if (!response.ok) {
+        console.error("❌ Resend email error:", data);
+        return {
+          success: false,
+          error: data.message || "Resend send failed",
+        };
+      }
+
+      console.log("✅ Email sent via Resend:", data.id);
       return {
         success: true,
-        info,
+        info: data,
       };
     } catch (err) {
-      console.error("❌ Email error:", err);
+      console.error("❌ Email error:", err.message);
       return {
         success: false,
         error: err.message,

@@ -1,4 +1,3 @@
-
 /* src/Components/NewCollections/NewCollections.module.css */
 
 /* ==========================================================
@@ -7,6 +6,7 @@
 .section {
   --bg: #f9f5ef;
   --card-bg: #fffdf9;
+  --card-bg-deep: #f3ead9;
   --gold: #c9a45c;
   --gold-deep: #a9843f;
   --gold-soft: #d9b877;
@@ -25,13 +25,7 @@
 }
 
 /* ==========================================================
-   HEADER — two columns sitting side by side.
-   LEFT column stacks: eyebrow label → heading + rule
-   RIGHT column stacks: View All button → arrow buttons
-   Because each column is just a top-to-bottom stack, the first
-   line of each column (eyebrow / View All) always lines up,
-   and the second line of each column (heading / arrows) always
-   lines up too — on both mobile and desktop.
+   HEADER
    ========================================================== */
 .header {
   display: flex;
@@ -88,29 +82,26 @@
   background: var(--ink);
 }
 
-/* "View All" — thin gold outline pill, sits on its own top line
-   in the right column, vertically matching the eyebrow label */
 .viewAllBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   min-width: 92px;
   height: 34px;
   padding: 0 18px;
-
   background: transparent;
   border: 1px solid var(--gold);
   border-radius: 50px;
-
   font-size: 13px;
   font-weight: 600;
   color: var(--gold-deep);
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
-
-  transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease,
+    transform 0.2s ease;
 }
 
 .viewAllBtn:hover {
@@ -119,8 +110,6 @@
   transform: translateY(-2px);
 }
 
-/* Arrow buttons — sit on their own line beneath "View All",
-   right-aligned, small light-outline circles */
 .navArrows {
   display: flex;
   gap: 8px;
@@ -137,7 +126,11 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.2s ease;
 }
 
 .navBtn:hover {
@@ -152,13 +145,13 @@
 }
 
 /* ==========================================================
-   SCROLL CONTAINER — Horizontal scroll with 3 cards visible
+   SCROLL CONTAINER
    ========================================================== */
 .scrollContainer {
   display: flex;
-  gap: 14px;
+  gap: 20px;
   overflow-x: auto;
-  padding: 4px 4px 16px;
+  padding: 20px 4px 30px 20px;
   scroll-behavior: smooth;
   scroll-snap-type: x proximity;
   -webkit-overflow-scrolling: touch;
@@ -171,40 +164,128 @@
 }
 
 /* ==========================================================
-   CARD — Each card takes 1/3 of container width
+   CARD — arched top, glass effect, gold backing edge
    ========================================================== */
 .card {
-  flex: 0 0 calc(33.333% - 15px);
-  min-width: 280px;
-  max-width: 290px;
+  position: relative;
+  isolation: isolate;
+  flex: 0 0 calc(23% - 16px);
+  min-width: 210px;
+  max-width: 235px;
   scroll-snap-align: start;
+  border-radius: 60px 60px 22px 22px;
+  background: linear-gradient(
+    165deg,
+    rgba(255, 253, 249, 0.9) 0%,
+    rgba(243, 234, 217, 0.85) 100%
+  );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 14px 30px rgba(169, 132, 63, 0.16);
+  padding: 18px 14px 22px;
+  overflow: visible;
+}
+
+/* glass sheen overlay */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(255, 255, 255, 0) 45%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* thin gold backing card peeking out at the bottom */
+.card::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: -7px;
+  height: 16px;
+  border-radius: 0 0 18px 18px;
+  background: linear-gradient(90deg, var(--gold-soft), var(--gold-deep));
+  z-index: -1;
+}
+
+.cardLink {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   text-decoration: none;
   color: inherit;
-  background-color: transparent;
-  border-radius: 12px;
-  overflow: hidden;
-
- 
-   
 }
 
-@media (hover: hover) and (pointer: fine) {
- 
+/* NEW badge */
+.newBadge {
+  position: absolute;
+  top: -12px;
+  left: -12px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(155deg, var(--gold-soft), var(--gold-deep));
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  box-shadow: 0 6px 14px rgba(169, 132, 63, 0.35);
+}
 
-  
+/* wishlist heart */
+.wishlistBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(6px);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    transform 0.2s ease;
+}
+
+.wishlistBtn:hover {
+  background: var(--ink);
+  color: #fff;
+  transform: translateY(-2px);
 }
 
 /* ==========================================================
-   IMAGE WRAP
+   IMAGE MEDALLION
    ========================================================== */
-.imageWrap {
+.imageCircle {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
+  border-radius: 50%;
   overflow: hidden;
-  background: transparent;
+  background: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: inset 0 0 0 6px rgba(255, 253, 249, 0.8);
+  margin: 4px auto 14px;
 }
 
 .image {
@@ -214,50 +295,60 @@
   object-position: center;
   display: block;
   transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-  border-top-left-radius: 130px;
-  border-bottom-right-radius: 130px;
+}
+
+.card:hover .image {
+  transform: scale(1.06);
 }
 
 .imagePlaceholder {
   width: 100%;
   height: 100%;
   background: linear-gradient(150deg, #f2ece1 0%, #e6dbc6 100%);
-  border-top-left-radius: 130px;
-  border-bottom-right-radius: 130px;
 }
 
-/* ==========================================================
-   RIBBON
-   ========================================================== */
-.ribbon {
+/* bag button — gold circle, bottom-right, half-overlapping the card edge */
+.bagBtn {
   position: absolute;
-  top: 16px;
-  left: 0;
-  z-index: 2;
-  background: var(--ink);
-  color: var(--gold-soft);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  padding: 6px 14px 6px 12px;
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 7px 50%);
+  bottom: -14px;
+  right: -12px;
+  z-index: 4;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(155deg, var(--gold-soft), var(--gold-deep));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(169, 132, 63, 0.35);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.bagBtn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 10px 22px rgba(169, 132, 63, 0.45);
 }
 
 /* ==========================================================
    BODY
    ========================================================== */
 .body {
-  padding: 10px 11px 12px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 5px;
+  text-align: center;
+  padding: 0 4px;
 }
 
 .collectionTag {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 1.1px;
+  letter-spacing: 1.4px;
   text-transform: uppercase;
   color: var(--gold-deep);
   margin: 0;
@@ -265,31 +356,39 @@
 
 .title {
   font-family: "Playfair Display", "Cormorant Garamond", serif;
-  font-size: 13.5px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--ink);
   margin: 0;
   line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
 .metaRow {
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin: 1px 0 2px;
+  justify-content: center;
+  gap: 6px;
+  margin: 2px 0 4px;
+}
+
+.stars {
+  display: flex;
+  align-items: center;
+  gap: 1px;
 }
 
 .starIcon {
   color: var(--gold);
-  font-size: 10px;
+  font-size: 11px;
+}
+
+.starIconEmpty {
+  color: var(--border);
+  font-size: 11px;
 }
 
 .ratingValue {
-  font-size: 10px;
+  font-size: 11.5px;
   color: var(--text-secondary);
   font-weight: 500;
 }
@@ -297,22 +396,50 @@
 .priceRow {
   display: flex;
   align-items: baseline;
-  gap: 7px;
-  margin-top: 2px;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 4px;
 }
 
 .price {
   font-family: "Poppins", "Inter", sans-serif;
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--ink);
 }
 
 .oldPrice {
   font-family: "Poppins", "Inter", sans-serif;
-  font-size: 10.5px;
+  font-size: 12.5px;
   color: var(--text-secondary);
   text-decoration: line-through;
+}
+
+/* bag button — gold circle, bottom-right, half-overlapping the card edge */
+.bagBtn {
+  position: absolute;
+  bottom: -14px;
+  right: -14px;
+  z-index: 3;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(155deg, var(--gold-soft), var(--gold-deep));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(169, 132, 63, 0.35);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.bagBtn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 10px 22px rgba(169, 132, 63, 0.45);
 }
 
 /* ==========================================================
@@ -324,52 +451,154 @@
   }
 
   .card {
-    flex: 0 0 calc(50% - 11px);
-    min-width: 240px;
+    flex: 0 0 calc(38% - 14px);
+    min-width: 200px;
+    max-width: 220px;
   }
 }
 
-
-
-  /* Mobile: hide the slider arrows — the right column becomes
-     just the "View All" button, top-aligned with "Fresh Arrivals" */
-  @media (max-width: 768px) {
+@media (max-width: 768px) {
   .section {
-    padding: 40px 16px 44px;
+    padding: 32px 14px 36px;
   }
 
   .header {
-    margin-bottom: 22px;
+    margin-bottom: 18px;
   }
 
-  .card {
-    flex: 0 0 calc(50% - 8px);
-    min-width: 160px;
+  .topText {
+    font-size: 10px;
+    letter-spacing: 1.6px;
+  }
+
+  .heading {
+    font-size: 20px;
+    margin: 0 0 5px;
+  }
+
+  .headingRule {
+    width: 44px;
+    height: 2px;
+  }
+
+  .viewAllBtn {
+    min-width: 78px;
+    height: 32px;
+    font-size: 12px;
+    padding: 0 12px;
   }
 
   .headerRight {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 10px;
+    justify-content: center;
+    gap: 0;
   }
 
   .navArrows {
-    display: flex;
-    gap: 8px;
+    display: none;
+  }
+
+  .scrollContainer {
+    gap: 14px;
+    padding: 16px 4px 24px 16px;
+  }
+
+  .card {
+    flex: 0 0 calc(48% - 10px);
+    min-width: 155px;
+    max-width: 175px;
+    border-radius: 42px 42px 16px 16px;
+    padding: 13px 10px 16px;
+  }
+
+  .card::after {
+    left: 7px;
+    right: 7px;
+    bottom: -5px;
+    height: 11px;
+    border-radius: 0 0 13px 13px;
+  }
+
+  .newBadge {
+    top: -9px;
+    left: -9px;
+    width: 36px;
+    height: 36px;
+    font-size: 7.5px;
+  }
+
+  .wishlistBtn {
+    top: 9px;
+    right: 9px;
+    width: 24px;
+    height: 24px;
+  }
+
+  .imageCircle {
+    margin: 4px auto 10px;
+    box-shadow: inset 0 0 0 4px rgba(255, 253, 249, 0.8);
+  }
+
+  .bagBtn {
+    bottom: -10px;
+    right: -8px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .body {
+    gap: 3px;
+    padding: 0 2px;
+  }
+
+  .collectionTag {
+    font-size: 8.5px;
+    letter-spacing: 1px;
+  }
+
+  .title {
+    font-size: 13.5px;
+  }
+
+  .metaRow {
+    gap: 4px;
+    margin: 1px 0 3px;
+  }
+
+  .starIcon,
+  .starIconEmpty {
+    font-size: 9px;
+  }
+
+  .ratingValue {
+    font-size: 9.5px;
+  }
+
+  .priceRow {
+    gap: 6px;
+    margin-top: 2px;
+  }
+
+  .price {
+    font-size: 13.5px;
+  }
+
+  .oldPrice {
+    font-size: 10px;
   }
 }
 
 @media (max-width: 480px) {
-
   .header {
     display: grid;
     grid-template-columns: 1fr auto;
     grid-template-rows: auto auto;
     align-items: center;
     column-gap: 12px;
-    row-gap: 10px;
-    margin-bottom: 18px;
+    row-gap: 8px;
+    margin-bottom: 16px;
   }
 
   .headerLeft {
@@ -380,8 +609,8 @@
     grid-column: 1;
     grid-row: 1;
     margin: 0;
-    font-size: 11px;
-    letter-spacing: 2px;
+    font-size: 9.5px;
+    letter-spacing: 1.4px;
     align-self: center;
   }
 
@@ -391,13 +620,13 @@
   }
 
   .heading {
-    margin: 0 0 6px;
-    font-size: 22px;
+    margin: 0 0 5px;
+    font-size: 18px;
   }
 
   .headingRule {
-    width: 48px;
-    height: 3px;
+    width: 40px;
+    height: 2px;
   }
 
   .headerRight {
@@ -406,66 +635,59 @@
 
   .viewAllBtn {
     grid-column: 2;
-    grid-row: 1;
-
+    grid-row: 1 / span 2;
     justify-self: end;
-
-    width: 92px;
-    height: 34px;
-    font-size: 12px;
+    align-self: center;
+    width: 84px;
+    height: 32px;
+    font-size: 11.5px;
     padding: 0;
   }
 
   .navArrows {
-    grid-column: 2;
-    grid-row: 2;
-
-    justify-self: end;
-
-    display: flex;
-    gap: 8px;
+    display: none;
   }
 
-  .navBtn {
-    width: 34px;
-    height: 34px;
+  .scrollContainer {
+    gap: 12px;
+    padding: 14px 4px 22px 14px;
   }
-}
 
-@media (max-width: 420px) {
   .card {
-    flex: 0 0 calc(50% - 6px);
-    min-width: 130px;
+    flex: 0 0 calc(58% - 8px);
+    min-width: 150px;
+    max-width: 165px;
+    border-radius: 38px 38px 14px 14px;
+    padding: 12px 9px 15px;
   }
 
-  .image {
-    border-top-left-radius: 40px;
-    border-bottom-right-radius: 40px;
+  .newBadge {
+    top: -8px;
+    left: -8px;
+    width: 32px;
+    height: 32px;
+    font-size: 7px;
   }
 
-  .imagePlaceholder {
-    border-top-left-radius: 40px;
-    border-bottom-right-radius: 40px;
-  }
-}
-
-/* ==========================================================
-   REDUCED MOTION
-   ========================================================== */
-@media (prefers-reduced-motion: reduce) {
-  .card,
-  .image,
-  .viewAllBtn,
-  .navBtn {
-    transition: none !important;
+  .wishlistBtn {
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
   }
 
-  .card:hover {
-    transform: none !important;
-    
+  .bagBtn {
+    bottom: -9px;
+    right: -7px;
+    width: 30px;
+    height: 30px;
   }
 
-  .card:hover .image {
-    transform: none !important;
+  .title {
+    font-size: 12.5px;
+  }
+
+  .price {
+    font-size: 13px;
   }
 }

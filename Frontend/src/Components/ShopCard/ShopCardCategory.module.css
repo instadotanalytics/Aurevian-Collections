@@ -228,7 +228,9 @@
   height: 100%;
   object-fit: cover;
   filter: saturate(0.96);
-  transition: transform 0.5s ease, filter 0.5s ease;
+  transition:
+    transform 0.5s ease,
+    filter 0.5s ease;
   pointer-events: none;
 }
 
@@ -265,7 +267,10 @@
   height: 22px;
   border: 1.5px solid var(--gold);
   opacity: 0.7;
-  transition: opacity 0.3s ease, width 0.3s ease, height 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    width 0.3s ease,
+    height 0.3s ease;
 }
 
 .cornerTL {
@@ -364,30 +369,47 @@
 
 /* ==========================================================
    RESPONSIVE - Mobile
+   - heading compacted so it doesn't wrap awkwardly
+   - nav arrows removed (row is already drag/swipe-scrollable);
+     "View All" stays and gets the freed-up space
    ========================================================== */
 @media (max-width: 768px) {
   .section {
-    padding: 40px 12px;
+    padding: 32px 12px;
   }
 
   .header {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 10px;
+  }
+
+  .headerText {
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .topText {
+    font-size: 10px;
+    letter-spacing: 1.4px;
   }
 
   .heading {
-    font-size: 24px;
+    font-size: 19px;
+    line-height: 1.2;
+    letter-spacing: -0.2px;
   }
 
   .viewAllBtn {
     font-size: 12px;
-    padding: 7px 14px;
+    padding: 8px 14px;
   }
 
+  /* arrows removed on mobile — drag/swipe scroll already works */
   .navArrowBtn {
-    width: 34px;
-    height: 34px;
+    display: none;
   }
 
   .subHeading {
@@ -422,31 +444,25 @@
    ========================================================== */
 @media (max-width: 480px) {
   .section {
-    padding: 32px 8px;
+    padding: 28px 8px;
   }
 
   .heading {
-    font-size: 22px;
+    font-size: 18px;
   }
 
   .topText {
-    font-size: 11px;
-    letter-spacing: 2px;
+    font-size: 9.5px;
+    letter-spacing: 1.2px;
   }
 
   .navArrows {
     gap: 6px;
-    margin-top: 12px;
   }
 
   .viewAllBtn {
     font-size: 11px;
     padding: 6px 12px;
-  }
-
-  .navArrowBtn {
-    width: 30px;
-    height: 30px;
   }
 
   .card {
@@ -497,6 +513,10 @@
   .card {
     min-width: 44vw;
     max-width: 44vw;
+  }
+
+  .heading {
+    font-size: 17px;
   }
 
   .title {

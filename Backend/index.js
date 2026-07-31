@@ -1,4 +1,12 @@
 // ============================================
+
+// DNS CONFIGURATION - FORCE IPv4 (Fix for Render)
+// ============================================
+import dns from "node:dns";
+dns.setDefaultResultOrder("ipv4first");
+
+// ============================================
+
 // IMPORTS
 // ============================================
 import "dotenv/config";
@@ -73,6 +81,11 @@ await connectDB();
 // CREATE EXPRESS APP
 // ============================================
 const app = express();
+
+// ============================================
+// TRUST PROXY (For Render/Rate Limiting)
+// ============================================
+app.set("trust proxy", 1);
 
 // ============================================
 // SECURITY MIDDLEWARE
