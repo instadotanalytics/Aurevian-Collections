@@ -9,6 +9,7 @@
   --cream: #fbf6ed;
   --cream-deep: #f3ead9;
   --cream-line: #e6dac2;
+  --cream-card: #f8f0e6;
   --ink: #241d17;
   --ink-soft: #4a4038;
   --text-muted: #7a6f61;
@@ -34,10 +35,10 @@
 }
 
 /* ==========================================================
-   HERO GALLERY - No Radius, 60vh
+   HERO GALLERY - 65vh
    ========================================================== */
 .heroGallery {
-  height: 60vh;
+  height: 65vh;
   min-height: 350px;
   max-height: 650px;
   margin-bottom: clamp(20px, 3vw, 40px);
@@ -72,6 +73,7 @@
   scroll-snap-align: start;
   position: relative;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .heroSlide img {
@@ -86,45 +88,45 @@
   inset: 0;
   background: linear-gradient(
     to right,
-    rgba(20, 15, 10, 0.5) 0%,
-    rgba(20, 15, 10, 0.2) 50%,
-    rgba(20, 15, 10, 0.1) 100%
+    rgba(20, 15, 10, 0.4) 0%,
+    rgba(20, 15, 10, 0.15) 50%,
+    rgba(20, 15, 10, 0.05) 100%
   );
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: clamp(30px, 6vw, 60px);
+  padding: clamp(40px, 8vw, 80px);
 }
 
 .heroOverlayContent {
-  max-width: 500px;
+  max-width: 550px;
 }
 
 .heroTag {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.3em;
   text-transform: uppercase;
   color: var(--gold-light);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   display: block;
 }
 
 .heroTitle {
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(30px, 4vw, 52px);
+  font-size: clamp(36px, 5vw, 64px);
   font-weight: 600;
   color: #fff;
-  margin: 0 0 12px 0;
+  margin: 0 0 16px 0;
   line-height: 1.05;
 }
 
 .heroSubtitle {
-  font-size: 15px;
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0 0 20px 0;
-  line-height: 1.6;
-  max-width: 350px;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0 0 24px 0;
+  line-height: 1.7;
+  max-width: 400px;
   font-weight: 300;
 }
 
@@ -132,12 +134,12 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 28px;
+  padding: 14px 32px;
   background: var(--gold);
   color: #fff;
   border: none;
   border-radius: 40px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.05em;
   cursor: pointer;
@@ -152,26 +154,37 @@
   box-shadow: 0 8px 30px rgba(179, 135, 63, 0.4);
 }
 
-/* Navigation Arrows - Bottom with Very Close Spacing */
+.heroBtn:active {
+  transform: scale(0.96);
+}
+
+/* Navigation - Dots on top of arrows */
 .heroNavWrapper {
   position: absolute;
-  bottom: 20px;
+  bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
   gap: 8px;
   z-index: 10;
 }
 
+.heroNavArrows {
+  display: flex;
+  gap: 16px;
+}
+
 .heroNavBtn {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(6px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #fff;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -184,15 +197,19 @@
   transform: scale(1.05);
 }
 
+.heroNavBtn:active {
+  transform: scale(0.92);
+}
+
 .heroDots {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
 }
 
 .heroDot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.4);
   border: none;
@@ -203,8 +220,8 @@
 
 .heroDotActive {
   background: var(--gold);
-  width: 20px;
-  border-radius: 4px;
+  width: 28px;
+  border-radius: 5px;
 }
 
 /* ---------- Persistent Scroll Reveal with Blur ---------- */
@@ -248,7 +265,7 @@
 }
 
 /* ==========================================================
-   NEW COLLECTION - 60vh
+   NEW COLLECTION - 60vh (No Shop Button)
    ========================================================== */
 .newCollectionSection {
   min-height: 60vh;
@@ -291,35 +308,12 @@
   line-height: 1.8;
   color: var(--text-muted);
   max-width: 600px;
-  margin: 0 auto 24px;
+  margin: 0 auto;
   font-weight: 300;
 }
 
-.newCollectionBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 36px;
-  background: linear-gradient(135deg, var(--gold-light), var(--gold));
-  color: var(--ink);
-  border: none;
-  border-radius: 999px;
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  cursor: pointer;
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 14px 30px -14px rgba(179, 135, 63, 0.55);
-  font-family: "Jost", sans-serif;
-}
-
-.newCollectionBtn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 18px 36px -14px rgba(179, 135, 63, 0.65);
-}
-
 /* ==========================================================
-   Feature Section - From: Blush Set (Smaller Image)
+   Feature Section - From: Blush Set
    ========================================================== */
 .featureSection {
   display: grid;
@@ -457,6 +451,10 @@
   box-shadow: 0 18px 36px -14px rgba(179, 135, 63, 0.65);
 }
 
+.ctaBtn:active {
+  transform: scale(0.96);
+}
+
 .ctaBtn span {
   transition: transform 0.3s ease;
 }
@@ -466,7 +464,7 @@
 }
 
 /* ==========================================================
-   Shop Layout - Filter + Products (Matching /shop)
+   Shop Layout - Filter + Products
    ========================================================== */
 .shopLayout {
   display: grid;
@@ -476,7 +474,7 @@
   align-items: start;
 }
 
-/* Filter Sidebar */
+/* Filter Sidebar - Desktop */
 .filterSidebar {
   position: sticky;
   top: 120px;
@@ -576,6 +574,11 @@
   color: var(--text-muted);
 }
 
+/* Mobile Filter Trigger - Hidden on Desktop */
+.filterTrigger {
+  display: none;
+}
+
 /* Products Section */
 .productsWrapper {
   display: flex;
@@ -615,30 +618,35 @@
 }
 
 /* ==========================================================
-   Product Card - Matching /shop
+   Product Card - 3 per row, Creamy
    ========================================================== */
 .productsGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
   margin-bottom: 40px;
 }
 
 .productCard {
   display: flex;
   flex-direction: column;
-  background: white;
-  border-radius: 12px;
+  background: var(--cream-card);
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  border: 1px solid rgba(179, 135, 63, 0.08);
+  border: 1px solid var(--cream-line);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  border-radius: 0;
+  height: 100%;
 }
 
 .productCard:hover {
   transform: translateY(-6px);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
   border-color: var(--gold-light);
+}
+
+.productCard:active {
+  transform: scale(0.98);
 }
 
 .productImageWrap {
@@ -675,11 +683,13 @@
 }
 
 .productBody {
-  padding: 14px 16px 18px;
+  padding: 16px 18px 20px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  background: white;
+  gap: 4px;
+  flex: 1;
+  background: transparent;
+  justify-content: space-between;
 }
 
 .productCategory {
@@ -692,23 +702,24 @@
 
 .productName {
   font-family: "Cormorant Garamond", serif;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--ink);
   margin: 0;
   line-height: 1.3;
   font-style: italic;
+  flex: 1;
 }
 
 .productPriceRow {
   display: flex;
   align-items: baseline;
   gap: 8px;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .productCurrentPrice {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--ink);
 }
@@ -721,13 +732,13 @@
 
 .productAddBtn {
   width: 100%;
-  padding: 8px;
-  margin-top: 8px;
-  background: var(--ink);
-  color: white;
+  padding: 10px;
+  margin-top: 10px;
+  background: var(--gold);
+  color: #fff;
   border: none;
-  border-radius: 6px;
-  font-size: 12px;
+  border-radius: 30px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -738,6 +749,11 @@
 .productAddBtn:hover {
   background: var(--gold-dark);
   transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(179, 135, 63, 0.3);
+}
+
+.productAddBtn:active {
+  transform: scale(0.96);
 }
 
 /* ==========================================================
@@ -765,7 +781,7 @@
   margin: 0 0 8px;
   font-family: "Cormorant Garamond", serif;
   font-weight: 600;
-  font-size: clamp(30px, 3vw, 38px);
+  font-size: clamp(32px, 3.5vw, 42px);
   color: var(--ink);
 }
 
@@ -778,7 +794,7 @@
 
 .exploreList {
   display: flex;
-  gap: clamp(28px, 4vw, 48px);
+  gap: clamp(32px, 5vw, 56px);
   flex-wrap: wrap;
 }
 
@@ -790,15 +806,20 @@
   text-decoration: none;
   color: var(--ink);
   transition: transform 0.4s ease;
+  cursor: pointer;
 }
 
 .exploreItem:hover {
   transform: translateY(-6px);
 }
 
+.exploreItem:active {
+  transform: scale(0.94);
+}
+
 .exploreThumb {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   overflow: hidden;
   border: 2px solid var(--cream-line);
@@ -819,7 +840,7 @@
 }
 
 .exploreLabel {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
   letter-spacing: 0.03em;
 }
@@ -878,6 +899,8 @@
   aspect-ratio: 3 / 4;
   box-shadow: var(--shadow);
   background: var(--cream);
+  cursor: pointer;
+  transition: transform 0.3s ease;
 }
 
 .closingImgWrap:nth-child(2) {
@@ -886,6 +909,14 @@
 
 .closingImgWrap:nth-child(3) {
   transform: translateY(16px);
+}
+
+.closingImgWrap:hover {
+  transform: translateY(-4px) scale(1.02);
+}
+
+.closingImgWrap:active {
+  transform: scale(0.96);
 }
 
 .closingImgWrap img {
@@ -900,10 +931,130 @@
 }
 
 /* ==========================================================
-   Smooth Scroll Behavior
+   Mobile Bottom Sheet Filter
    ========================================================== */
-html {
-  scroll-behavior: smooth;
+.mobileFilterOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.mobileFilterOverlayActive {
+  display: block;
+  opacity: 1;
+}
+
+.mobileFilterSheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--cream);
+  border-radius: 24px 24px 0 0;
+  padding: 24px 20px 40px;
+  max-height: 60vh;
+  overflow-y: auto;
+  z-index: 1001;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.15);
+}
+
+.mobileFilterSheetActive {
+  transform: translateY(0);
+}
+
+.mobileFilterHandle {
+  width: 40px;
+  height: 4px;
+  background: var(--cream-line);
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+
+.mobileFilterHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.mobileFilterTitle {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.mobileFilterClose {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.mobileFilterClose:hover {
+  color: var(--ink);
+}
+
+.mobileFilterGroup {
+  margin-bottom: 20px;
+}
+
+.mobileFilterGroupLabel {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  margin: 0 0 10px 0;
+  display: block;
+}
+
+.mobileFilterOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  font-size: 15px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.mobileFilterOption input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--gold);
+  cursor: pointer;
+}
+
+.mobileFilterApply {
+  width: 100%;
+  padding: 14px;
+  background: var(--gold);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: "Jost", sans-serif;
+  margin-top: 16px;
+  transition: background 0.3s ease;
+}
+
+.mobileFilterApply:hover {
+  background: var(--gold-dark);
+}
+
+.mobileFilterApply:active {
+  transform: scale(0.96);
 }
 
 /* ==========================================================
@@ -916,39 +1067,55 @@ html {
   }
 
   .filterSidebar {
-    position: relative;
-    top: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 16px;
-    padding: 20px;
-    background: white;
-    border-radius: 16px;
-    box-shadow: var(--shadow);
+    display: none;
   }
 
-  .filterTitle {
-    grid-column: 1 / -1;
-    margin-bottom: 4px;
+  .filterTrigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--cream-card);
+    border: 1px solid var(--cream-line);
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    cursor: pointer;
+    font-family: "Jost", sans-serif;
+    transition: all 0.3s ease;
   }
 
-  .filterGroup {
-    margin-bottom: 0;
+  .filterTrigger:hover {
+    border-color: var(--gold-light);
+    background: var(--cream-deep);
+  }
+
+  .filterTrigger:active {
+    transform: scale(0.96);
+  }
+
+  .mobileFilterOverlay {
+    display: none;
+  }
+
+  .mobileFilterOverlayActive {
+    display: block;
   }
 
   .heroGallery {
-    height: 50vh;
+    height: 55vh;
     min-height: 300px;
   }
 
   .productsGrid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
 
   .exploreThumb {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
   }
 }
 
@@ -959,7 +1126,7 @@ html {
 
   .heroGallery {
     height: 45vh;
-    min-height: 280px;
+    min-height: 260px;
   }
 
   .newCollectionSection {
@@ -978,6 +1145,10 @@ html {
 
   .featureImageWrap {
     max-height: 400px;
+  }
+
+  .featureImageWrap img {
+    object-position: center 30%;
   }
 
   .closingSection {
@@ -1010,17 +1181,12 @@ html {
     justify-content: space-around;
   }
 
-  .productsGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-  }
-
   .heroOverlay {
-    padding: 24px;
+    padding: 30px;
   }
 
   .heroTitle {
-    font-size: clamp(22px, 4vw, 32px);
+    font-size: clamp(26px, 4vw, 36px);
   }
 }
 
@@ -1036,40 +1202,39 @@ html {
   }
 
   .heroOverlay {
-    padding: 16px;
+    padding: 20px;
   }
 
   .heroTitle {
-    font-size: clamp(18px, 3.5vw, 24px);
+    font-size: clamp(20px, 4vw, 28px);
   }
 
   .heroSubtitle {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .heroBtn {
-    font-size: 10px;
-    padding: 8px 16px;
+    font-size: 11px;
+    padding: 10px 20px;
   }
 
   .heroNavWrapper {
-    bottom: 12px;
-    gap: 6px;
+    bottom: 16px;
   }
 
   .heroNavBtn {
-    width: 30px;
-    height: 30px;
-    font-size: 12px;
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
   }
 
   .heroDot {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
 
   .heroDotActive {
-    width: 16px;
+    width: 20px;
   }
 
   .newCollectionSection {
@@ -1085,19 +1250,9 @@ html {
     font-size: 14px;
   }
 
-  .newCollectionBtn {
-    font-size: 12px;
-    padding: 10px 24px;
-  }
-
-  .filterSidebar {
-    grid-template-columns: 1fr 1fr;
-    padding: 14px;
-  }
-
   .productsGrid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 14px;
   }
 
   .productBody {
@@ -1114,8 +1269,9 @@ html {
     font-size: 11px;
   }
   .productAddBtn {
-    font-size: 10px;
-    padding: 6px;
+    font-size: 11px;
+    padding: 8px;
+    border-radius: 20px;
   }
 
   .exploreList {
@@ -1123,8 +1279,8 @@ html {
   }
 
   .exploreThumb {
-    width: 70px;
-    height: 70px;
+    width: 80px;
+    height: 80px;
   }
 
   .exploreLabel {
@@ -1153,6 +1309,21 @@ html {
   .productsHeader {
     flex-direction: column;
     align-items: flex-start;
+    gap: 8px;
+  }
+
+  .filterTrigger {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .mobileFilterSheet {
+    padding: 20px 16px 30px;
+    max-height: 55vh;
+  }
+
+  .featureImageWrap {
+    max-height: 300px;
   }
 }
 
@@ -1160,10 +1331,6 @@ html {
   .heroGallery {
     height: 35vh;
     min-height: 180px;
-  }
-
-  .filterSidebar {
-    grid-template-columns: 1fr;
   }
 
   .productsGrid {
@@ -1182,12 +1349,13 @@ html {
   }
   .productAddBtn {
     font-size: 9px;
-    padding: 4px;
+    padding: 5px;
+    border-radius: 16px;
   }
 
   .exploreThumb {
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
   }
 
   .exploreList {
@@ -1208,6 +1376,15 @@ html {
 
   .newCollectionTitle {
     font-size: clamp(24px, 5vw, 32px);
+  }
+
+  .mobileFilterSheet {
+    max-height: 50vh;
+    padding: 16px 12px 24px;
+  }
+
+  .featureImageWrap {
+    max-height: 250px;
   }
 }
 
@@ -1234,7 +1411,8 @@ html {
   .productCard,
   .productImage,
   .productAddBtn,
-  .heroSlide {
+  .heroSlide,
+  .mobileFilterSheet {
     transition: none !important;
   }
 
