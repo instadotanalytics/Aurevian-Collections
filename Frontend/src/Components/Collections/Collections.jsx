@@ -3,6 +3,8 @@
 import { useRef, useEffect, useState } from "react";
 import { FiFilter } from "react-icons/fi";
 import styles from "./Collections.module.css";
+import Footer from "../../Pages/Layout/Footer/Footer.jsx";
+
 
 /* ----------------------------------------------------------------
    Data — Product catalogue with categories and pricing
@@ -48,7 +50,7 @@ const HERO_SLIDES = [
     id: "hero-6",
     title: "Diamond Collection",
     subtitle: "Where brilliance meets artistry",
-    img: "https://images.unsplash.com/photo-1602751584553-8ba5f8c1f00c?q=80&w=1600&auto=format&fit=crop",
+    img: "https://images.unsplash.com/photo-1747933509433-c58152c10ee7?q=80&w=1600&auto=format&fit=crop",
     tag: "Luxury",
   },
 ];
@@ -69,36 +71,164 @@ const FEATURES = [
 ];
 
 const PRODUCTS_DATA = [
-  { id: 1, name: "Aurevian Solitaire Band", category: "Rings", price: 2100, originalPrice: 3000, discount: "30%", img: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=400&auto=format&fit=crop" },
-  { id: 2, name: "Layla Layered Chain", category: "Necklaces", price: 3400, originalPrice: 4250, discount: "20%", img: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=400&auto=format&fit=crop" },
-  { id: 3, name: "Amara Drop Studs", category: "Earrings", price: 1650, originalPrice: 2200, discount: "25%", img: "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=400&auto=format&fit=crop" },
-  { id: 4, name: "Celeste Charm Bracelet", category: "Bracelets", price: 1800, originalPrice: 3000, discount: "40%", img: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=400&auto=format&fit=crop" },
-  { id: 5, name: "Noor Stack Ring Set", category: "Rings", price: 1275, originalPrice: 1500, discount: "15%", img: "https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?q=80&w=400&auto=format&fit=crop" },
-  { id: 6, name: "Meera Beaded Anklet", category: "Anklets", price: 950, originalPrice: 1900, discount: "50%", img: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=400&auto=format&fit=crop" },
-  { id: 7, name: "Anaya Bridal Jewel Set", category: "Bridal Sets", price: 6300, originalPrice: 7000, discount: "10%", img: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=400&auto=format&fit=crop" },
-  { id: 8, name: "Zoya Hoop Earrings", category: "Earrings", price: 1300, originalPrice: 2000, discount: "35%", img: "https://images.unsplash.com/photo-1630019852942-f89202989a59?q=80&w=400&auto=format&fit=crop" },
-  { id: 9, name: "Ishani Pendant Chain", category: "Necklaces", price: 2750, originalPrice: 5000, discount: "45%", img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=400&auto=format&fit=crop" },
-  { id: 10, name: "Kavya Twist Band", category: "Rings", price: 2400, originalPrice: 3000, discount: "20%", img: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=400&auto=format&fit=crop" },
-  { id: 11, name: "Riya Chain Bracelet", category: "Bracelets", price: 1950, originalPrice: 2800, discount: "30%", img: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=400&auto=format&fit=crop" },
-  { id: 12, name: "Sana Pearl Studs", category: "Earrings", price: 1450, originalPrice: 1950, discount: "25%", img: "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=400&auto=format&fit=crop" },
-  { id: 13, name: "Tara Gold Hoops", category: "Earrings", price: 2200, originalPrice: 3200, discount: "30%", img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=400&auto=format&fit=crop" },
-  { id: 14, name: "Mira Chain Necklace", category: "Necklaces", price: 3800, originalPrice: 4800, discount: "20%", img: "https://images.unsplash.com/photo-1630019852942-f89202989a59?q=80&w=400&auto=format&fit=crop" },
-  { id: 15, name: "Rani Bridal Set", category: "Bridal Sets", price: 8500, originalPrice: 10000, discount: "15%", img: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=400&auto=format&fit=crop" },
-  { id: 16, name: "Kiran Stack Rings", category: "Rings", price: 1800, originalPrice: 2500, discount: "28%", img: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=400&auto=format&fit=crop" },
+  { 
+    id: 1, 
+    name: "Aurevian Solitaire Band", 
+    category: "Rings", 
+    price: 2100, 
+    originalPrice: 3000, 
+    discount: "30%", 
+    img: "https://i.pinimg.com/736x/bb/59/89/bb5989b8383d9956c459faeab8dd5edf.jpg" 
+  },
+  { 
+    id: 2, 
+    name: "Layla Layered Chain", 
+    category: "Necklaces", 
+    price: 3400, 
+    originalPrice: 4250, 
+    discount: "20%", 
+    img: "https://i.pinimg.com/736x/86/2b/25/862b25ffaf81d8c3a7d0b0274fcaeece.jpg" 
+  },
+  { 
+    id: 3, 
+    name: "Amara Drop Studs", 
+    category: "Earrings", 
+    price: 1650, 
+    originalPrice: 2200, 
+    discount: "25%", 
+    img: "https://i.pinimg.com/1200x/f3/5c/80/f35c80532087c3a4e690f7e9b8146e9a.jpg" 
+  },
+  { 
+    id: 4, 
+    name: "Celeste Charm Bracelet", 
+    category: "Bracelets", 
+    price: 1800, 
+    originalPrice: 3000, 
+    discount: "40%", 
+    img: "https://i.pinimg.com/1200x/2b/ce/a6/2bcea6d47021448f056e0cfe7606baae.jpg" 
+  },
+  { 
+    id: 5, 
+    name: "Noor Stack Ring Set", 
+    category: "Rings", 
+    price: 1275, 
+    originalPrice: 1500, 
+    discount: "15%", 
+    img: "https://i.pinimg.com/736x/8d/fc/3c/8dfc3cd744a87cb0ff13d52d72f6ee08.jpg" 
+  },
+  { 
+    id: 6, 
+    name: "Meera Beaded Anklet", 
+    category: "Anklets", 
+    price: 950, 
+    originalPrice: 1900, 
+    discount: "50%", 
+    img: "https://i.pinimg.com/736x/b8/fd/47/b8fd47162d9d490d27f9563c523b73ca.jpg" 
+  },
+  { 
+    id: 7, 
+    name: "Anaya Bridal Jewel Set", 
+    category: "Bridal Sets", 
+    price: 6300, 
+    originalPrice: 7000, 
+    discount: "10%", 
+    img: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=400&auto=format&fit=crop" 
+  },
+  { 
+    id: 8, 
+    name: "Zoya Hoop Earrings", 
+    category: "Earrings", 
+    price: 1300, 
+    originalPrice: 2000, 
+    discount: "35%", 
+    img: "https://i.pinimg.com/736x/5e/0a/29/5e0a29671a01bc79bb5a1c439e63bf38.jpg" 
+  },
+  { 
+    id: 9, 
+    name: "Ishani Pendant Chain", 
+    category: "Necklaces", 
+    price: 2750, 
+    originalPrice: 5000, 
+    discount: "45%", 
+    img: "https://i.pinimg.com/736x/66/97/aa/6697aacda36f5c702cce6d1b50f9f4c7.jpg" 
+  },
+  { 
+    id: 10, 
+    name: "Kavya Twist Band", 
+    category: "Rings", 
+    price: 2400, 
+    originalPrice: 3000, 
+    discount: "20%", 
+    img: "https://i.pinimg.com/736x/c4/e5/69/c4e569f088566e1b37b4e5f6b3764673.jpg" 
+  },
+  { 
+    id: 11, 
+    name: "Riya Chain Bracelet", 
+    category: "Bracelets", 
+    price: 1950, 
+    originalPrice: 2800, 
+    discount: "30%", 
+    img: "https://i.pinimg.com/736x/8c/2a/7c/8c2a7ce81b26d48d7a45faddb59fdaf3.jpg" 
+  },
+  { 
+    id: 12, 
+    name: "Sana Pearl Studs", 
+    category: "Earrings", 
+    price: 1450, 
+    originalPrice: 1950, 
+    discount: "25%", 
+    img: "https://i.pinimg.com/1200x/a1/2d/4d/a12d4d62a21c55337fdc9db2fecb8ebf.jpg" 
+  },
+  { 
+    id: 13, 
+    name: "Tara Gold Hoops", 
+    category: "Earrings", 
+    price: 2200, 
+    originalPrice: 3200, 
+    discount: "30%", 
+    img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=400&auto=format&fit=crop" 
+  },
+  { 
+    id: 14, 
+    name: "Mira Chain Necklace", 
+    category: "Necklaces", 
+    price: 3800, 
+    originalPrice: 4800, 
+    discount: "20%", 
+    img: "https://images.unsplash.com/photo-1630019852942-f89202989a59?q=80&w=400&auto=format&fit=crop" 
+  },
+  { 
+    id: 15, 
+    name: "Rani Bridal Set", 
+    category: "Bridal Sets", 
+    price: 8500, 
+    originalPrice: 10000, 
+    discount: "15%", 
+    img: "https://images.unsplash.com/photo-1588444837495-c6cfeb53f32d?q=80&w=400&auto=format&fit=crop" 
+  },
+  { 
+    id: 16, 
+    name: "Kiran Stack Rings", 
+    category: "Rings", 
+    price: 1800, 
+    originalPrice: 2500, 
+    discount: "28%", 
+    img: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=400&auto=format&fit=crop" 
+  },
 ];
 
 const CATEGORIES = [
-  { name: "Rings", img: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=300&auto=format&fit=crop" },
-  { name: "Earrings", img: "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=300&auto=format&fit=crop" },
-  { name: "Necklaces", img: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=300&auto=format&fit=crop" },
-  { name: "Bracelets", img: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=300&auto=format&fit=crop" },
-  { name: "Sets", img: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=300&auto=format&fit=crop" },
+  { name: "Rings", img: "https://i.pinimg.com/736x/a6/82/3e/a6823e9da82914a4d82fc1523be67066.jpg" },
+  { name: "Earrings", img: "https://i.pinimg.com/1200x/5e/76/04/5e76043e18239aa182fc3797456aecce.jpg" },
+  { name: "Necklaces", img: "https://i.pinimg.com/736x/fe/9d/31/fe9d315a52ea2714c6205aa391e0580b.jpg" },
+  { name: "Bracelets", img: "https://i.pinimg.com/736x/7e/91/71/7e9171bc17659925b95b79e6305418af.jpg" },
+  { name: "Sets", img: "https://i.pinimg.com/736x/ea/d9/6e/ead96ee4a4e61acb305e11c6526ab172.jpg" },
 ];
 
 const CLOSING_IMAGES = [
-  "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=500&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=500&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1630019852942-f89202989a59?q=80&w=500&auto=format&fit=crop",
+  "https://i.pinimg.com/736x/ea/96/8a/ea968ae6b41e6fd20cb2a1dac33c87ac.jpg",
+  "https://i.pinimg.com/736x/ec/40/8f/ec408f13dd8ed46477aed4d7454c7fd9.jpg",
+  "https://i.pinimg.com/1200x/b4/7e/e8/b47ee8ae94d4253ef2da698538ac5c81.jpg",
 ];
 
 const FILTER_CATEGORIES = ["All", "Rings", "Earrings", "Necklaces", "Bracelets", "Anklets", "Bridal Sets"];
@@ -185,7 +315,7 @@ export default function Collections() {
     hero.scrollTo({ left: slideWidth * currentSlide, behavior: "smooth" });
   }, [currentSlide]);
 
-  // Filter products
+  // Filter products with correct category mapping
   const filteredProducts = PRODUCTS_DATA
     .filter(p => {
       if (selectedCategory === "All") return true;
@@ -235,16 +365,37 @@ export default function Collections() {
     document.body.style.overflow = "";
   };
 
-  // Scroll to filter section (starts from bottom border of New Collection)
+  // Scroll to filter section - starts from bottom border of New Collection with more offset
   const scrollToFilter = () => {
-    const filterSection = document.getElementById("filter-section");
-    if (filterSection) {
-      const top = filterSection.getBoundingClientRect().top + window.pageYOffset;
-      window.scrollTo({ top: top - 10, behavior: "smooth" });
+    // Get the New Collection section
+    const newCollection = document.querySelector(`.${styles.newCollectionSection}`);
+    
+    if (newCollection) {
+      // Get the bottom position of New Collection section
+      const newCollectionRect = newCollection.getBoundingClientRect();
+      const newCollectionBottom = newCollectionRect.bottom + window.pageYOffset;
+      
+      // Scroll higher above the bottom to show more content
+      window.scrollTo({
+        top: newCollectionBottom - 60,
+        behavior: "smooth"
+      });
+    } else {
+      // Fallback: scroll to filter section if New Collection not found
+      const filterSection = document.getElementById("filter-section");
+      if (filterSection) {
+        const rect = filterSection.getBoundingClientRect();
+        const absoluteTop = rect.top + window.pageYOffset;
+        window.scrollTo({
+          top: absoluteTop - 40,
+          behavior: "smooth"
+        });
+      }
     }
   };
 
   return (
+    <>
     <section className={styles.collections} aria-label="Aurevian Collections">
       {/* ---------------- Hero Gallery - 65vh ---------------- */}
       <div className={styles.heroGallery}>
@@ -339,6 +490,7 @@ export default function Collections() {
                 value={priceRange[1]}
                 onChange={(e) => setPriceRange([0, Number(e.target.value)])}
                 className={styles.filterPriceInput}
+                style={{ "--_progress": `${(priceRange[1] / 7000) * 100}%` }}
               />
               <div className={styles.filterPriceRange}>
                 <span>₹0</span>
@@ -406,8 +558,8 @@ export default function Collections() {
           <Reveal as="div" className={styles.featureImageWrap} delay={0}>
             <img
               className={styles.featureImage}
-              src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=800&auto=format&fit=crop"
-              alt="The Blossom Set"
+              src="https://i.pinimg.com/736x/07/ac/c1/07acc1c388356058bb35ea2b1bb7e8c9.jpg"
+              alt="Model wearing the Blossom Set jewelry"
               loading="lazy"
             />
           </Reveal>
@@ -431,7 +583,7 @@ export default function Collections() {
               ))}
             </ul>
 
-            <button type="button" className={styles.ctaBtn}>
+            <button type="button" className={styles.ctaBtn} onClick={scrollToFilter}>
               Explore the Set <span aria-hidden="true">→</span>
             </button>
           </Reveal>
@@ -528,5 +680,7 @@ export default function Collections() {
         </button>
       </div>
     </section>
+    <Footer/>
+    </>
   );
 }
