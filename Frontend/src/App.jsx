@@ -70,6 +70,7 @@ import ScrollToTop from "./Pages/Seller/ScrollToTop.jsx";
 
 import Shop from "./Components/Shop/shop.jsx";
 import Collections from "./Components/Collections/Collections.jsx";
+import Offers from "./Components/Offers/Offers.jsx";
 
 // ============================================
 // PRODUCT PAGES ✅ (NEW)
@@ -85,6 +86,7 @@ const ROUTES = {
   ABOUT: "/about",
   SHOP: "/shop",
   COLLECTIONS: "/collections",
+  OFFERS:"/offers",
   LOGIN: "/login",
   REGISTER: "/register",
   VERIFY_OTP: "/verify-otp",
@@ -313,6 +315,20 @@ const App = () => {
               </LayoutWithHeader>
             }
           />
+
+          {/* ============================================
+                COLLECTIONS ROUTE - WITH HEADER
+                ============================================ */}
+          <Route
+            path={ROUTES.OFFERS}
+            element={
+              <LayoutWithHeader>
+                <Offers/>
+              </LayoutWithHeader>
+            }
+          />
+
+
 
           {/* ============================================
                 PUBLIC PRODUCT DETAIL ROUTE - WITH HEADER ✅
