@@ -29,6 +29,27 @@ const HERO_SLIDES = [
     img: "https://images.unsplash.com/photo-1630019925534-3d20bf3f7c2f?q=80&w=1600&auto=format&fit=crop",
     tag: "Best Seller",
   },
+  {
+    id: "hero-4",
+    title: "Luxury Redefined",
+    subtitle: "Where elegance meets craftsmanship",
+    img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=1600&auto=format&fit=crop",
+    tag: "Premium",
+  },
+  {
+    id: "hero-5",
+    title: "The Pearl Collection",
+    subtitle: "Timeless beauty, modern grace",
+    img: "https://images.unsplash.com/photo-1630019852942-f89202989a59?q=80&w=1600&auto=format&fit=crop",
+    tag: "New Arrival",
+  },
+  {
+    id: "hero-6",
+    title: "Bridal Elegance",
+    subtitle: "Celebrate your special day",
+    img: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=1600&auto=format&fit=crop",
+    tag: "Bridal",
+  },
 ];
 
 const FEATURES = [
@@ -59,6 +80,10 @@ const PRODUCTS_DATA = [
   { id: 10, name: "Kavya Twist Band", category: "Rings", price: 2400, originalPrice: 3000, discount: "20%", img: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=400&auto=format&fit=crop" },
   { id: 11, name: "Riya Chain Bracelet", category: "Bracelets", price: 1950, originalPrice: 2800, discount: "30%", img: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=400&auto=format&fit=crop" },
   { id: 12, name: "Sana Pearl Studs", category: "Earrings", price: 1450, originalPrice: 1950, discount: "25%", img: "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=400&auto=format&fit=crop" },
+  { id: 13, name: "Tara Gold Hoops", category: "Earrings", price: 2200, originalPrice: 3200, discount: "30%", img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=400&auto=format&fit=crop" },
+  { id: 14, name: "Mira Chain Necklace", category: "Necklaces", price: 3800, originalPrice: 4800, discount: "20%", img: "https://images.unsplash.com/photo-1630019852942-f89202989a59?q=80&w=400&auto=format&fit=crop" },
+  { id: 15, name: "Rani Bridal Set", category: "Bridal Sets", price: 8500, originalPrice: 10000, discount: "15%", img: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=400&auto=format&fit=crop" },
+  { id: 16, name: "Kiran Stack Rings", category: "Rings", price: 1800, originalPrice: 2500, discount: "28%", img: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=400&auto=format&fit=crop" },
 ];
 
 const CATEGORIES = [
@@ -99,10 +124,9 @@ function useReveal(options = {}) {
       ([entry]) => {
         if (entry.isIntersecting) {
           setVisible(true);
-          // Don't unobserve - this keeps animation triggering on each scroll
         }
       },
-      { threshold: 0.15, rootMargin: "0px 0px -120px 0px", ...options }
+      { threshold: 0.12, rootMargin: "0px 0px -80px 0px", ...options }
     );
 
     observer.observe(node);
@@ -157,7 +181,7 @@ export default function Collections() {
     hero.scrollTo({ left: slideWidth * currentSlide, behavior: "smooth" });
   }, [currentSlide]);
 
-  // Filter products
+  // Filter products - fixed image mapping
   const filteredProducts = PRODUCTS_DATA
     .filter(p => selectedCategory === "All" || p.category === selectedCategory)
     .filter(p => p.price >= priceRange[0] && p.price <= priceRange[1])
@@ -186,23 +210,6 @@ export default function Collections() {
     setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
   };
 
-  // Pagination helpers
-  const getPageNumbers = () => {
-    const pages = [];
-    if (totalPages <= 7) {
-      for (let i = 1; i <= totalPages; i++) pages.push(i);
-    } else {
-      pages.push(1);
-      if (currentPage > 3) pages.push('...');
-      const start = Math.max(2, currentPage - 1);
-      const end = Math.min(totalPages - 1, currentPage + 1);
-      for (let i = start; i <= end; i++) pages.push(i);
-      if (currentPage < totalPages - 2) pages.push('...');
-      pages.push(totalPages);
-    }
-    return pages;
-  };
-
   const clearAllFilters = () => {
     setSelectedCategory("All");
     setSelectedMaterial("All");
@@ -213,7 +220,7 @@ export default function Collections() {
 
   return (
     <section className={styles.collections} aria-label="Aurevian Collections">
-      {/* ---------------- Hero Gallery ---------------- */}
+      {/* ---------------- Hero Gallery - No Radius, 60vh ---------------- */}
       <div className={styles.heroGallery}>
         <div className={styles.heroTrack} ref={heroRef}>
           {HERO_SLIDES.map((slide, index) => (
@@ -231,22 +238,24 @@ export default function Collections() {
           ))}
         </div>
 
-        <button className={`${styles.heroNav} ${styles.heroNavPrev}`} onClick={prevSlide}>←</button>
-        <button className={`${styles.heroNav} ${styles.heroNavNext}`} onClick={nextSlide}>→</button>
-
-        <div className={styles.heroDots}>
-          {HERO_SLIDES.map((_, index) => (
-            <button
-              key={index}
-              className={`${styles.heroDot} ${index === currentSlide ? styles.heroDotActive : ""}`}
-              onClick={() => goToSlide(index)}
-            />
-          ))}
+        {/* Navigation - Bottom Center with Close Spacing */}
+        <div className={styles.heroNavWrapper}>
+          <button className={styles.heroNavBtn} onClick={prevSlide}>←</button>
+          <div className={styles.heroDots}>
+            {HERO_SLIDES.map((_, index) => (
+              <button
+                key={index}
+                className={`${styles.heroDot} ${index === currentSlide ? styles.heroDotActive : ""}`}
+                onClick={() => goToSlide(index)}
+              />
+            ))}
+          </div>
+          <button className={styles.heroNavBtn} onClick={nextSlide}>→</button>
         </div>
       </div>
 
       <div className={styles.container}>
-        {/* ---------------- New Collection - Full 80-90vh ---------------- */}
+        {/* ---------------- New Collection - 60vh ---------------- */}
         <Reveal as="section" className={styles.newCollectionSection} delay={100}>
           <div className={styles.newCollectionContent}>
             <span className={styles.newCollectionEyebrow}>New ✦ Collection</span>
@@ -260,43 +269,7 @@ export default function Collections() {
           </div>
         </Reveal>
 
-        {/* ---------------- Featured Set - Vintage Camera Style ---------------- */}
-        <div className={styles.featureSection}>
-          <Reveal as="div" className={styles.featureImageWrap} delay={0}>
-            <img
-              className={styles.featureImage}
-              src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=800&auto=format&fit=crop"
-              alt="The Blossom Set"
-              loading="lazy"
-            />
-          </Reveal>
-
-          <Reveal as="div" className={styles.featureContent} delay={150}>
-            <span className={styles.pill}>From: Blush Set</span>
-            <h3 className={styles.featureTitle}>Introducing The Blossom Set</h3>
-            <p className={styles.featureBody}>
-              Inspired by nature's delicate beauty, the Blossom Set brings a touch of freshness and femininity to your everyday look.
-            </p>
-
-            <ul className={styles.featureList}>
-              {FEATURES.map((f, i) => (
-                <li className={styles.featureItem} key={f.title}>
-                  <span className={styles.featureDot} aria-hidden="true">✦</span>
-                  <div>
-                    <p className={styles.featureItemTitle}>{f.title}</p>
-                    <p className={styles.featureItemBody}>{f.body}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-
-            <button type="button" className={styles.ctaBtn}>
-              Explore the Set <span aria-hidden="true">→</span>
-            </button>
-          </Reveal>
-        </div>
-
-        {/* ---------------- Shop Layout ---------------- */}
+        {/* ---------------- Shop Layout - Filter + Products ---------------- */}
         <div className={styles.shopLayout}>
           <Reveal as="aside" className={styles.filterSidebar} delay={100}>
             <h3 className={styles.filterTitle}>Filter</h3>
@@ -352,7 +325,6 @@ export default function Collections() {
               Clear All Filters
             </button>
 
-            {/* Extra filter options for height */}
             <div className={styles.filterExtra}>
               <label className={styles.filterOption}>
                 <input type="checkbox" /> In Stock Only
@@ -395,44 +367,47 @@ export default function Collections() {
                 </Reveal>
               ))}
             </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className={styles.pagination}>
-                <button 
-                  className={styles.paginationBtn} 
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                >
-                  ‹
-                </button>
-                {getPageNumbers().map((page, index) => (
-                  page === '...' ? (
-                    <span key={`ellipsis-${index}`} className={styles.paginationEllipsis}>…</span>
-                  ) : (
-                    <button
-                      key={page}
-                      className={`${styles.paginationBtn} ${currentPage === page ? styles.paginationBtnActive : ''}`}
-                      onClick={() => setCurrentPage(page)}
-                    >
-                      {page}
-                    </button>
-                  )
-                ))}
-                <button 
-                  className={styles.paginationBtn} 
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  ›
-                </button>
-              </div>
-            )}
           </div>
+        </div>
+
+        {/* ---------------- From: Blush Set - Smaller Image ---------------- */}
+        <div className={styles.featureSection}>
+          <Reveal as="div" className={styles.featureImageWrap} delay={0}>
+            <img
+              className={styles.featureImage}
+              src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=800&auto=format&fit=crop"
+              alt="The Blossom Set"
+              loading="lazy"
+            />
+          </Reveal>
+
+          <Reveal as="div" className={styles.featureContent} delay={150}>
+            <span className={styles.pill}>From: Blush Set</span>
+            <h3 className={styles.featureTitle}>Introducing The Blossom Set</h3>
+            <p className={styles.featureBody}>
+              Inspired by nature's delicate beauty, the Blossom Set brings a touch of freshness and femininity to your everyday look.
+            </p>
+
+            <ul className={styles.featureList}>
+              {FEATURES.map((f, i) => (
+                <li className={styles.featureItem} key={f.title}>
+                  <span className={styles.featureDot} aria-hidden="true">✦</span>
+                  <div>
+                    <p className={styles.featureItemTitle}>{f.title}</p>
+                    <p className={styles.featureItemBody}>{f.body}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            <button type="button" className={styles.ctaBtn}>
+              Explore the Set <span aria-hidden="true">→</span>
+            </button>
+          </Reveal>
         </div>
       </div>
 
-      {/* ---------------- Explore More ---------------- */}
+      {/* ---------------- Explore More - Larger Circles ---------------- */}
       <Reveal as="div" className={styles.exploreSection} delay={100}>
         <div className={styles.container}>
           <div className={styles.exploreInner}>
@@ -454,7 +429,7 @@ export default function Collections() {
         </div>
       </Reveal>
 
-      {/* ---------------- Closing CTA ---------------- */}
+      {/* ---------------- Shine in your own way - At the End ---------------- */}
       <div className={styles.container}>
         <div className={styles.closingSection}>
           <Reveal as="div" className={styles.closingContent} delay={100}>
