@@ -441,10 +441,15 @@
 }
 
 /* ==========================================================
-   Product Types Section
+   Products Section with Filter
    ========================================================== */
-.productTypesSection {
+.productsSection {
   margin-bottom: clamp(80px, 10vw, 120px);
+}
+
+.productsHeader {
+  text-align: center;
+  margin-bottom: 32px;
 }
 
 .sectionTitle {
@@ -452,7 +457,6 @@
   font-size: clamp(30px, 3vw, 38px);
   font-weight: 600;
   color: var(--ink);
-  text-align: center;
   margin: 0 0 8px 0;
 }
 
@@ -460,42 +464,148 @@
   font-size: 16px;
   color: var(--text-muted);
   text-align: center;
-  margin: 0 0 40px 0;
   font-weight: 300;
 }
 
-.productTypesGrid {
+/* Filter Bar */
+.filterBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--cream-card);
+  border-radius: 12px;
+  border: 1px solid var(--cream-line);
+  margin-bottom: 32px;
+}
+
+.filterLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filterLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.categoryFilters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.categoryFilterBtn {
+  padding: 6px 16px;
+  border: 1px solid var(--cream-line);
+  border-radius: 30px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: "Jost", sans-serif;
+}
+
+.categoryFilterBtn:hover {
+  border-color: var(--gold-light);
+  color: var(--ink);
+}
+
+.activeFilter {
+  background: var(--gold);
+  color: #fff;
+  border-color: var(--gold);
+}
+
+.activeFilter:hover {
+  background: var(--gold-dark);
+  border-color: var(--gold-dark);
+  color: #fff;
+}
+
+.filterRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sortSelect {
+  padding: 6px 16px;
+  border: 1px solid var(--cream-line);
+  border-radius: 30px;
+  background: #fff;
+  font-size: 12px;
+  color: var(--ink);
+  cursor: pointer;
+  font-family: "Jost", sans-serif;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.sortSelect:hover {
+  border-color: var(--gold-light);
+}
+
+.clearFilterBtn {
+  padding: 6px 16px;
+  border: 1px solid var(--cream-line);
+  border-radius: 30px;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: "Jost", sans-serif;
+}
+
+.clearFilterBtn:hover {
+  border-color: var(--gold);
+  color: var(--ink);
+  background: var(--cream);
+}
+
+/* Product Grid */
+.productsGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
 }
 
-.productTypeCard {
-  text-align: center;
+.productCard {
   background: #fff;
   border-radius: 16px;
-  padding: 20px 16px 24px;
+  overflow: hidden;
   border: 1px solid var(--cream-line);
   transition: all 0.3s ease;
 }
 
-.productTypeCard:hover {
+.productCard:hover {
   transform: translateY(-6px);
   box-shadow: var(--shadow);
   border-color: var(--gold-light);
 }
 
-.productTypeImageWrap {
+.productImageWrap {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
   overflow: hidden;
-  border-radius: 12px;
-  margin-bottom: 14px;
   background: var(--cream);
 }
 
-.productTypeImageWrap img {
+.productImageWrap img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -503,11 +613,11 @@
   transition: transform 0.6s ease;
 }
 
-.productTypeCard:hover .productTypeImageWrap img {
+.productCard:hover .productImageWrap img {
   transform: scale(1.05);
 }
 
-.productTypeTag {
+.productTag {
   position: absolute;
   top: 10px;
   left: 10px;
@@ -520,7 +630,11 @@
   letter-spacing: 0.5px;
 }
 
-.productTypeCard h4 {
+.productInfo {
+  padding: 16px 18px 20px;
+}
+
+.productInfo h4 {
   font-family: "Cormorant Garamond", serif;
   font-size: 16px;
   font-weight: 600;
@@ -534,11 +648,11 @@
 
 .stars {
   color: var(--gold);
-  font-size: 14px;
+  font-size: 13px;
   letter-spacing: 2px;
 }
 
-.productTypePrice {
+.productPrice {
   font-size: 16px;
   font-weight: 600;
   color: var(--gold-dark);
@@ -546,24 +660,29 @@
   margin-bottom: 12px;
 }
 
-.productShopBtn {
+.productBtn {
   width: 100%;
   padding: 8px;
-  background: var(--ink);
+  background: var(--gold);
   color: #fff;
   border: none;
   border-radius: 30px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: "Jost", sans-serif;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.03em;
 }
 
-.productShopBtn:hover {
+.productBtn:hover {
   background: var(--gold-dark);
   transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(179, 135, 63, 0.3);
+}
+
+.productBtn:active {
+  transform: scale(0.96);
 }
 
 /* ==========================================================
@@ -667,11 +786,11 @@
   display: block;
 }
 
-.offerItemContent {
+.offerContent {
   padding: 18px 20px 20px;
 }
 
-.offerItemContent h4 {
+.offerContent h4 {
   font-family: "Cormorant Garamond", serif;
   font-size: 17px;
   font-weight: 600;
@@ -679,14 +798,14 @@
   margin: 0 0 4px 0;
 }
 
-.offerItemContent p {
+.offerContent p {
   font-size: 13px;
   color: var(--text-muted);
   margin: 0 0 12px 0;
   font-weight: 300;
 }
 
-.offerItemBtn {
+.offerBtn {
   padding: 6px 20px;
   background: var(--gold);
   color: #fff;
@@ -699,10 +818,14 @@
   font-family: "Jost", sans-serif;
 }
 
-.offerItemBtn:hover {
+.offerBtn:hover {
   background: var(--gold-dark);
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(179, 135, 63, 0.3);
+}
+
+.offerBtn:active {
+  transform: scale(0.96);
 }
 
 /* ==========================================================
@@ -721,10 +844,6 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .productTypesGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   .radiantSection {
     grid-template-columns: 1fr;
     gap: 30px;
@@ -734,12 +853,30 @@
     max-height: 400px;
   }
 
+  .productsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .chooseTypeGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 
   .offerItemsSection {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .filterBar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .filterLeft {
+    justify-content: center;
+  }
+
+  .filterRight {
+    justify-content: center;
   }
 }
 
@@ -836,13 +973,26 @@
     font-size: 22px;
   }
 
-  .productTypesGrid {
+  .productsGrid {
     grid-template-columns: 1fr 1fr;
     gap: 16px;
   }
 
-  .productTypeCard {
-    padding: 14px 12px 18px;
+  .productInfo {
+    padding: 12px 14px 16px;
+  }
+
+  .productInfo h4 {
+    font-size: 14px;
+  }
+
+  .productPrice {
+    font-size: 14px;
+  }
+
+  .productBtn {
+    font-size: 11px;
+    padding: 6px;
   }
 
   .radiantSection {
@@ -873,12 +1023,34 @@
 
   .sectionTitle {
     font-size: clamp(24px, 4vw, 30px);
-    margin-bottom: 24px;
   }
 
   .sectionSubtitle {
     font-size: 14px;
-    margin-bottom: 24px;
+  }
+
+  .filterLeft {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .categoryFilters {
+    justify-content: center;
+  }
+
+  .filterRight {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .sortSelect {
+    width: 100%;
+  }
+
+  .clearFilterBtn {
+    text-align: center;
   }
 }
 
@@ -917,17 +1089,31 @@
     font-size: 12px;
   }
 
-  .productTypesGrid {
+  .productsGrid {
     grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
 
-  .productTypeCard {
-    padding: 10px 8px 14px;
+  .productInfo {
+    padding: 10px 10px 14px;
   }
 
-  .productTypeCard h4 {
-    font-size: 14px;
+  .productInfo h4 {
+    font-size: 12px;
+  }
+
+  .productPrice {
+    font-size: 12px;
+  }
+
+  .productBtn {
+    font-size: 10px;
+    padding: 4px;
+  }
+
+  .productTag {
+    font-size: 8px;
+    padding: 2px 8px;
   }
 
   .chooseTypeGrid {
@@ -950,6 +1136,15 @@
   .offerItemsSection {
     grid-template-columns: 1fr;
   }
+
+  .categoryFilterBtn {
+    font-size: 10px;
+    padding: 4px 12px;
+  }
+
+  .filterBar {
+    padding: 12px 14px;
+  }
 }
 
 /* ==========================================================
@@ -968,7 +1163,7 @@
   .heroSlide,
   .statItem,
   .qualityCard,
-  .productTypeCard,
+  .productCard,
   .chooseTypeItem,
   .offerItem {
     transition: none !important;
@@ -976,19 +1171,20 @@
 
   .statItem:hover,
   .qualityCard:hover,
-  .productTypeCard:hover,
+  .productCard:hover,
   .chooseTypeItem:hover,
   .offerItem:hover {
     transform: none !important;
   }
 
   .radiantImage img,
-  .productTypeImageWrap img {
+  .productImageWrap img,
+  .offerItem img {
     transition: none !important;
   }
 
   .radiantImage:hover img,
-  .productTypeCard:hover .productTypeImageWrap img {
+  .productCard:hover .productImageWrap img {
     transform: none !important;
   }
 }

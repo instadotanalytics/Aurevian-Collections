@@ -8,12 +8,12 @@ import {
   FiStar, 
   FiHeart, 
   FiShoppingBag,
-  FiDiamond,
   FiTrendingUp,
   FiShield,
   FiSun,
   FiMoon,
-  FiSparkles
+  FiZap,
+  FiFilter
 } from "react-icons/fi";
 import styles from "./Offers.module.css";
 
@@ -73,80 +73,142 @@ const STATS = [
   {
     value: "Exclusive Design",
     label: "Bespoke Creations",
-    icon: <FiDiamond />,
+    icon: <FiAward />,
     description: "Designed uniquely for you",
   },
   {
     value: "Highest Quality",
     label: "Premium Materials",
-    icon: <FiAward />,
+    icon: <FiShield />,
     description: "Certified and hallmarked",
   },
 ];
 
 const QUALITY_FEATURES = [
   {
-    icon: <FiAward className={styles.featureIconSvg} />,
+    icon: <FiAward />,
     title: "Premium Quality",
     description: "Crafted with care and the finest materials, piece by piece.",
   },
   {
-    icon: <FiSun className={styles.featureIconSvg} />,
+    icon: <FiSun />,
     title: "Lightweight & Comfortable",
     description: "Designed for all-day wear without any discomfort.",
   },
   {
-    icon: <FiGift className={styles.featureIconSvg} />,
+    icon: <FiGift />,
     title: "Perfect Gift Choice",
     description: "Beautifully packaged and ready for any occasion.",
   },
-  {
-    icon: <FiShield className={styles.featureIconSvg} />,
-    title: "Certified Authentic",
-    description: "All our jewelry is hallmarked and certified.",
-  },
 ];
 
-const PRODUCT_TYPES = [
+const ALL_PRODUCTS = [
   {
-    name: "Oat-Rice Serum",
-    price: "₹2,400",
+    id: 1,
+    name: "Gold Earring",
+    price: 2400,
     rating: 5,
-    image:
-      "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=400&auto=format&fit=crop",
+    category: "Earrings",
     tag: "Best Seller",
+    image: "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=400&auto=format&fit=crop",
   },
   {
-    name: "Oatmeal Cleansing Grains",
-    price: "₹3,200",
+    id: 2,
+    name: "Diamond Ring",
+    price: 3200,
     rating: 5,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=400&auto=format&fit=crop",
+    category: "Rings",
     tag: "New",
+    image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=400&auto=format&fit=crop",
   },
   {
-    name: "Millet Peptide Cream",
-    price: "₹4,500",
+    id: 3,
+    name: "Gold Necklace",
+    price: 4500,
     rating: 5,
-    image:
-      "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=400&auto=format&fit=crop",
+    category: "Necklaces",
     tag: "Trending",
+    image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=400&auto=format&fit=crop",
   },
   {
-    name: "Quinoa Toner",
-    price: "₹1,800",
+    id: 4,
+    name: "Pearl Bracelet",
+    price: 1800,
     rating: 4,
-    image:
-      "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=400&auto=format&fit=crop",
+    category: "Bracelets",
     tag: "Sale",
+    image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=400&auto=format&fit=crop",
+  },
+  {
+    id: 5,
+    name: "Rose Gold Studs",
+    price: 2800,
+    rating: 5,
+    category: "Earrings",
+    tag: "New",
+    image: "https://images.unsplash.com/photo-1630019852942-f89202989a59?q=80&w=400&auto=format&fit=crop",
+  },
+  {
+    id: 6,
+    name: "Platinum Band",
+    price: 5600,
+    rating: 5,
+    category: "Rings",
+    tag: "Best Seller",
+    image: "https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?q=80&w=400&auto=format&fit=crop",
+  },
+  {
+    id: 7,
+    name: "Silver Chain",
+    price: 3200,
+    rating: 4,
+    category: "Necklaces",
+    tag: "Sale",
+    image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=400&auto=format&fit=crop",
+  },
+  {
+    id: 8,
+    name: "Beaded Bracelet",
+    price: 1500,
+    rating: 4,
+    category: "Bracelets",
+    tag: "Trending",
+    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=400&auto=format&fit=crop",
   },
 ];
 
 const CATEGORIES = [
-  { name: "Ancient Grain", icon: <FiSparkles />, image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=200&auto=format&fit=crop" },
-  { name: "Fermented Grain", icon: <FiTrendingUp />, image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=200&auto=format&fit=crop" },
-  { name: "Natural Grains", icon: <FiSun />, image: "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=200&auto=format&fit=crop" },
-  { name: "Ancient Wisdom", icon: <FiMoon />, image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=200&auto=format&fit=crop" },
+  { name: "Rings", icon: <FiZap /> },
+  { name: "Earrings", icon: <FiMoon /> },
+  { name: "Necklaces", icon: <FiTrendingUp /> },
+  { name: "Bracelets", icon: <FiSun /> },
+];
+
+const OFFER_ITEMS = [
+  {
+    title: "Summer Sale",
+    description: "Get up to 40% off on selected collection",
+    image: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=400&auto=format&fit=crop",
+    cta: "Shop Sale",
+  },
+  {
+    title: "Bridal Collection",
+    description: "Exclusive designs for your special day",
+    image: "https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?q=80&w=400&auto=format&fit=crop",
+    cta: "Explore",
+  },
+  {
+    title: "Gift Sets",
+    description: "Curated gift sets for every occasion",
+    image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=400&auto=format&fit=crop",
+    cta: "Shop Gifts",
+  },
+  {
+    title: "Custom Designs",
+    description: "Create your own unique piece",
+    image: "https://images.unsplash.com/photo-1588444837495-c6cfeb53f32d?q=80&w=400&auto=format&fit=crop",
+    cta: "Start Now",
+  },
 ];
 
 /* ----------------------------------------------------------------
@@ -200,6 +262,9 @@ function Reveal({ as: Tag = "div", className = "", delay = 0, children, stagger 
 export default function Offers() {
   const heroRef = useRef(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [priceRange, setPriceRange] = useState([0, 6000]);
+  const [sortBy, setSortBy] = useState("latest");
 
   // Auto-scroll for hero offers
   useEffect(() => {
@@ -229,8 +294,24 @@ export default function Offers() {
     setCurrentSlide((prev) => (prev + 1) % HERO_OFFERS.length);
   };
 
+  // Filter products
+  const filteredProducts = ALL_PRODUCTS
+    .filter(p => selectedCategory === "All" || p.category === selectedCategory)
+    .filter(p => p.price >= priceRange[0] && p.price <= priceRange[1])
+    .sort((a, b) => {
+      if (sortBy === "price-low") return a.price - b.price;
+      if (sortBy === "price-high") return b.price - a.price;
+      return a.id - b.id;
+    });
+
   const renderStars = (rating) => {
     return "★".repeat(rating) + "☆".repeat(5 - rating);
+  };
+
+  const clearFilters = () => {
+    setSelectedCategory("All");
+    setPriceRange([0, 6000]);
+    setSortBy("latest");
   };
 
   return (
@@ -318,25 +399,69 @@ export default function Offers() {
           </div>
         </Reveal>
 
-        {/* ---------------- Product Types ---------------- */}
-        <Reveal as="div" className={styles.productTypesSection} delay={100}>
-          <h3 className={styles.sectionTitle}>Our Products</h3>
-          <p className={styles.sectionSubtitle}>
-            The ancient grain formulations for modern balance.
-          </p>
-          <div className={styles.productTypesGrid}>
-            {PRODUCT_TYPES.map((product, i) => (
-              <div key={i} className={styles.productTypeCard}>
-                <div className={styles.productTypeImageWrap}>
+        {/* ---------------- Products Section with Filter ---------------- */}
+        <Reveal as="div" className={styles.productsSection} delay={100}>
+          <div className={styles.productsHeader}>
+            <h3 className={styles.sectionTitle}>Our Products</h3>
+            <p className={styles.sectionSubtitle}>
+              Premium jewelry crafted for elegance and sophistication.
+            </p>
+          </div>
+
+          {/* Filter Bar */}
+          <div className={styles.filterBar}>
+            <div className={styles.filterLeft}>
+              <span className={styles.filterLabel}><FiFilter /> Filter</span>
+              <div className={styles.categoryFilters}>
+                <button 
+                  className={`${styles.categoryFilterBtn} ${selectedCategory === "All" ? styles.activeFilter : ""}`}
+                  onClick={() => setSelectedCategory("All")}
+                >
+                  All
+                </button>
+                {CATEGORIES.map(cat => (
+                  <button
+                    key={cat.name}
+                    className={`${styles.categoryFilterBtn} ${selectedCategory === cat.name ? styles.activeFilter : ""}`}
+                    onClick={() => setSelectedCategory(cat.name)}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className={styles.filterRight}>
+              <select 
+                className={styles.sortSelect} 
+                value={sortBy} 
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="latest">Sort by latest</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+              </select>
+              <button className={styles.clearFilterBtn} onClick={clearFilters}>
+                Clear All
+              </button>
+            </div>
+          </div>
+
+          {/* Product Grid */}
+          <div className={styles.productsGrid}>
+            {filteredProducts.map((product) => (
+              <div key={product.id} className={styles.productCard}>
+                <div className={styles.productImageWrap}>
                   <img src={product.image} alt={product.name} loading="lazy" />
-                  {product.tag && <span className={styles.productTypeTag}>{product.tag}</span>}
+                  {product.tag && <span className={styles.productTag}>{product.tag}</span>}
                 </div>
-                <h4>{product.name}</h4>
-                <div className={styles.productRating}>
-                  <span className={styles.stars}>{renderStars(product.rating)}</span>
+                <div className={styles.productInfo}>
+                  <h4>{product.name}</h4>
+                  <div className={styles.productRating}>
+                    <span className={styles.stars}>{renderStars(product.rating)}</span>
+                  </div>
+                  <span className={styles.productPrice}>₹{product.price.toLocaleString()}</span>
+                  <button className={styles.productBtn}>Add to Cart</button>
                 </div>
-                <span className={styles.productTypePrice}>{product.price}</span>
-                <button className={styles.productShopBtn}>SHOP NOW</button>
               </div>
             ))}
           </div>
@@ -365,38 +490,16 @@ export default function Offers() {
 
         {/* ---------------- Offer Items ---------------- */}
         <Reveal as="div" className={styles.offerItemsSection} delay={100} stagger>
-          <div className={styles.offerItem}>
-            <img src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=400&auto=format&fit=crop" alt="Summer Sale" loading="lazy" />
-            <div className={styles.offerItemContent}>
-              <h4>Summer Sale</h4>
-              <p>Get up to 40% off on selected collection</p>
-              <button className={styles.offerItemBtn}>Shop Sale</button>
+          {OFFER_ITEMS.map((item, i) => (
+            <div key={i} className={styles.offerItem}>
+              <img src={item.image} alt={item.title} loading="lazy" />
+              <div className={styles.offerContent}>
+                <h4>{item.title}</h4>
+                <p>{item.description}</p>
+                <button className={styles.offerBtn}>{item.cta} →</button>
+              </div>
             </div>
-          </div>
-          <div className={styles.offerItem}>
-            <img src="https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?q=80&w=400&auto=format&fit=crop" alt="Bridal Collection" loading="lazy" />
-            <div className={styles.offerItemContent}>
-              <h4>Bridal Collection</h4>
-              <p>Exclusive designs for your special day</p>
-              <button className={styles.offerItemBtn}>Explore</button>
-            </div>
-          </div>
-          <div className={styles.offerItem}>
-            <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=400&auto=format&fit=crop" alt="Gift Sets" loading="lazy" />
-            <div className={styles.offerItemContent}>
-              <h4>Gift Sets</h4>
-              <p>Curated gift sets for every occasion</p>
-              <button className={styles.offerItemBtn}>Shop Gifts</button>
-            </div>
-          </div>
-          <div className={styles.offerItem}>
-            <img src="https://images.unsplash.com/photo-1588444837495-c6cfeb53f32d?q=80&w=400&auto=format&fit=crop" alt="Custom Designs" loading="lazy" />
-            <div className={styles.offerItemContent}>
-              <h4>Custom Designs</h4>
-              <p>Create your own unique piece</p>
-              <button className={styles.offerItemBtn}>Start Now</button>
-            </div>
-          </div>
+          ))}
         </Reveal>
       </div>
     </section>
