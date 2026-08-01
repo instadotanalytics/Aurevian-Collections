@@ -69,7 +69,10 @@ import SellerKYC from "./Pages/Seller/SellerKYC/SellerKYC";
 import ScrollToTop from "./Pages/Seller/ScrollToTop.jsx";
 
 import Shop from "./Components/Shop/shop.jsx";
+
 import Gifts from "./Components/Gifts/gifts.jsx";
+import Collections from "./Components/Collections/Collections.jsx";
+
 
 // ============================================
 // PRODUCT PAGES ✅ (NEW)
@@ -84,7 +87,10 @@ const ROUTES = {
   HOME: "/",
   ABOUT: "/about",
   SHOP: "/shop",
+
   GIFTS: "/gifts",
+  COLLECTIONS: "/collections",
+
   LOGIN: "/login",
   REGISTER: "/register",
   VERIFY_OTP: "/verify-otp",
@@ -307,6 +313,18 @@ const App = () => {
             element={
               <LayoutWithHeader>
                 <Gifts />
+              </LayoutWithHeader>
+            }
+          />
+
+          {/* ============================================
+                COLLECTIONS ROUTE - WITH HEADER
+                ============================================ */}
+          <Route
+            path={ROUTES.COLLECTIONS}
+            element={
+              <LayoutWithHeader>
+                <Collections/>
               </LayoutWithHeader>
             }
           />
