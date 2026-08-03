@@ -5,209 +5,312 @@ import {
   FiTruck, 
   FiAward, 
   FiGift, 
-  FiStar, 
   FiHeart, 
-  FiShoppingBag,
   FiTrendingUp,
   FiShield,
   FiSun,
   FiMoon,
   FiZap,
-  FiFilter
+  FiFilter,
+  FiStar,
+  FiClock,
+  FiChevronLeft,
+  FiChevronRight
 } from "react-icons/fi";
 import styles from "./Offers.module.css";
+import craftImage1 from "../../assets/CraftImage1.png";
 
 /* ----------------------------------------------------------------
    Data — All offers, deals, and promotional content
 ------------------------------------------------------------------- */
 
-const HERO_OFFERS = [
-  {
-    id: "hero-1",
-    title: "Elegance In Every Detail",
-    subtitle: "Perfect For Every Occasion",
-    description:
-      "Discover our curated collection of timeless jewelry, crafted with precision and passion.",
-    cta: "Explore Collection",
-    image:
-      "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=1600&auto=format&fit=crop",
-    tag: "Limited Edition",
-  },
-  {
-    id: "hero-2",
-    title: "Beautiful In Every Detail",
-    subtitle: "Exquisite Craftsmanship",
-    description:
-      "Each piece tells a story of elegance and artistry, designed to be cherished forever.",
-    cta: "Shop Now",
-    image:
-      "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=1600&auto=format&fit=crop",
-    tag: "New Collection",
-  },
-  {
-    id: "hero-3",
-    title: "Radiant Refinement",
-    subtitle: "Timeless Elegance",
-    description:
-      "Experience the perfect blend of luxury and sophistication with our exclusive collection.",
-    cta: "Discover More",
-    image:
-      "https://images.unsplash.com/photo-1588444837495-c6cfeb53f32d?q=80&w=1600&auto=format&fit=crop",
-    tag: "Best Sellers",
-  },
-];
-
-const STATS = [
-  {
-    value: "230K",
-    label: "Happy Clients",
-    icon: <FiHeart />,
-    description: "Trusted by thousands worldwide",
-  },
-  {
-    value: "Free Shipping",
-    label: "On Orders Above ₹999",
-    icon: <FiTruck />,
-    description: "Delivered with care and elegance",
-  },
-  {
-    value: "Exclusive Design",
-    label: "Bespoke Creations",
-    icon: <FiAward />,
-    description: "Designed uniquely for you",
-  },
-  {
-    value: "Highest Quality",
-    label: "Premium Materials",
-    icon: <FiShield />,
-    description: "Certified and hallmarked",
-  },
-];
-
-const QUALITY_FEATURES = [
-  {
-    icon: <FiAward />,
-    title: "Premium Quality",
-    description: "Crafted with care and the finest materials, piece by piece.",
-  },
-  {
-    icon: <FiSun />,
-    title: "Lightweight & Comfortable",
-    description: "Designed for all-day wear without any discomfort.",
-  },
-  {
-    icon: <FiGift />,
-    title: "Perfect Gift Choice",
-    description: "Beautifully packaged and ready for any occasion.",
-  },
-];
-
 const ALL_PRODUCTS = [
   {
     id: 1,
-    name: "Gold Earring",
-    price: 2400,
+    name: "Aurevian Solitaire Band",
+    price: 2100,
+    originalPrice: 3000,
+    discount: "30% OFF",
     rating: 5,
-    category: "Earrings",
-    tag: "Best Seller",
-    image: "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=400&auto=format&fit=crop",
-  },
-  {
-    id: 2,
-    name: "Diamond Ring",
-    price: 3200,
-    rating: 5,
+    reviews: 128,
     category: "Rings",
-    tag: "New",
     image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=400&auto=format&fit=crop",
   },
   {
-    id: 3,
-    name: "Gold Necklace",
-    price: 4500,
+    id: 2,
+    name: "Layla Layered Chain",
+    price: 3400,
+    originalPrice: 4250,
+    discount: "20% OFF",
     rating: 5,
+    reviews: 95,
     category: "Necklaces",
-    tag: "Trending",
     image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=400&auto=format&fit=crop",
   },
   {
+    id: 3,
+    name: "Amara Drop Studs",
+    price: 1650,
+    originalPrice: 2200,
+    discount: "25% OFF",
+    rating: 5,
+    reviews: 76,
+    category: "Earrings",
+    image: "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=400&auto=format&fit=crop",
+  },
+  {
     id: 4,
-    name: "Pearl Bracelet",
+    name: "Celeste Charm Bracelet",
     price: 1800,
-    rating: 4,
+    originalPrice: 3000,
+    discount: "40% OFF",
+    rating: 5,
+    reviews: 54,
     category: "Bracelets",
-    tag: "Sale",
     image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=400&auto=format&fit=crop",
   },
   {
     id: 5,
-    name: "Rose Gold Studs",
-    price: 2800,
-    rating: 5,
-    category: "Earrings",
-    tag: "New",
-    image: "https://images.unsplash.com/photo-1630019852942-f89202989a59?q=80&w=400&auto=format&fit=crop",
+    name: "Noor Stack Ring Set",
+    price: 1275,
+    originalPrice: 1500,
+    discount: "15% OFF",
+    rating: 4,
+    reviews: 38,
+    category: "Rings",
+    image: "https://images.unsplash.com/photo-1602171984530-1b4b045b9cc1?q=80&w=400&auto=format&fit=crop",
   },
   {
     id: 6,
-    name: "Platinum Band",
-    price: 5600,
-    rating: 5,
-    category: "Rings",
-    tag: "Best Seller",
-    image: "https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?q=80&w=400&auto=format&fit=crop",
+    name: "Meera Beaded Anklet",
+    price: 950,
+    originalPrice: 1900,
+    discount: "50% OFF",
+    rating: 4,
+    reviews: 29,
+    category: "Anklets",
+    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=400&auto=format&fit=crop",
   },
   {
     id: 7,
-    name: "Silver Chain",
-    price: 3200,
-    rating: 4,
-    category: "Necklaces",
-    tag: "Sale",
-    image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=400&auto=format&fit=crop",
+    name: "Anaya Bridal Jewel Set",
+    price: 6300,
+    originalPrice: 7000,
+    discount: "10% OFF",
+    rating: 5,
+    reviews: 52,
+    category: "Bridal Sets",
+    image: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=400&auto=format&fit=crop",
   },
   {
     id: 8,
-    name: "Beaded Bracelet",
-    price: 1500,
+    name: "Zoya Hoop Earrings",
+    price: 1300,
+    originalPrice: 2000,
+    discount: "35% OFF",
+    rating: 5,
+    reviews: 41,
+    category: "Earrings",
+    image: "https://images.unsplash.com/photo-1630019852942-f89202989a59?q=80&w=400&auto=format&fit=crop",
+  },
+  {
+    id: 9,
+    name: "Ishani Pendant Chain",
+    price: 2750,
+    originalPrice: 5000,
+    discount: "45% OFF",
+    rating: 5,
+    reviews: 47,
+    category: "Necklaces",
+    image: "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?q=80&w=400&auto=format&fit=crop",
+  },
+  {
+    id: 10,
+    name: "Kavya Twist Band",
+    price: 2400,
+    originalPrice: 3000,
+    discount: "20% OFF",
     rating: 4,
+    reviews: 33,
+    category: "Rings",
+    image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=400&auto=format&fit=crop",
+  },
+  {
+    id: 11,
+    name: "Riya Chain Bracelet",
+    price: 1950,
+    originalPrice: 2800,
+    discount: "30% OFF",
+    rating: 4,
+    reviews: 28,
     category: "Bracelets",
-    tag: "Trending",
-    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=400&auto=format&fit=crop",
-  },
-];
-
-const CATEGORIES = [
-  { name: "Rings", icon: <FiZap /> },
-  { name: "Earrings", icon: <FiMoon /> },
-  { name: "Necklaces", icon: <FiTrendingUp /> },
-  { name: "Bracelets", icon: <FiSun /> },
-];
-
-const OFFER_ITEMS = [
-  {
-    title: "Summer Sale",
-    description: "Get up to 40% off on selected collection",
-    image: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=400&auto=format&fit=crop",
-    cta: "Shop Sale",
+    image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=400&auto=format&fit=crop",
   },
   {
-    title: "Bridal Collection",
-    description: "Exclusive designs for your special day",
-    image: "https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?q=80&w=400&auto=format&fit=crop",
-    cta: "Explore",
+    id: 12,
+    name: "Sana Pearl Studs",
+    price: 1450,
+    originalPrice: 1950,
+    discount: "25% OFF",
+    rating: 4,
+    reviews: 22,
+    category: "Earrings",
+    image: "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=400&auto=format&fit=crop",
   },
   {
-    title: "Gift Sets",
-    description: "Curated gift sets for every occasion",
+    id: 13,
+    name: "Tara Gold Hoops",
+    price: 2200,
+    originalPrice: 3200,
+    discount: "30% OFF",
+    rating: 5,
+    reviews: 35,
+    category: "Earrings",
     image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=400&auto=format&fit=crop",
-    cta: "Shop Gifts",
   },
   {
-    title: "Custom Designs",
-    description: "Create your own unique piece",
+    id: 14,
+    name: "Mira Chain Necklace",
+    price: 3800,
+    originalPrice: 4800,
+    discount: "20% OFF",
+    rating: 5,
+    reviews: 31,
+    category: "Necklaces",
+    image: "https://images.unsplash.com/photo-1630019852942-f89202989a59?q=80&w=400&auto=format&fit=crop",
+  },
+  {
+    id: 15,
+    name: "Rani Bridal Set",
+    price: 8500,
+    originalPrice: 10000,
+    discount: "15% OFF",
+    rating: 5,
+    reviews: 45,
+    category: "Bridal Sets",
     image: "https://images.unsplash.com/photo-1588444837495-c6cfeb53f32d?q=80&w=400&auto=format&fit=crop",
-    cta: "Start Now",
+  },
+  {
+    id: 16,
+    name: "Kiran Stack Rings",
+    price: 1800,
+    originalPrice: 2500,
+    discount: "28% OFF",
+    rating: 4,
+    reviews: 27,
+    category: "Rings",
+    image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=400&auto=format&fit=crop",
+  },
+  {
+    id: 17,
+    name: "Rose Gold Chain",
+    price: 2999,
+    originalPrice: 3999,
+    discount: "25% OFF",
+    rating: 4,
+    reviews: 28,
+    category: "Necklaces",
+    image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=400&auto=format&fit=crop",
+  },
+  {
+    id: 18,
+    name: "Platinum Wedding Band",
+    price: 4999,
+    originalPrice: 6999,
+    discount: "28% OFF",
+    rating: 5,
+    reviews: 35,
+    category: "Rings",
+    image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=400&auto=format&fit=crop",
+  },
+  {
+    id: 19,
+    name: "Silver Hoop Earrings",
+    price: 1499,
+    originalPrice: 1999,
+    discount: "25% OFF",
+    rating: 4,
+    reviews: 22,
+    category: "Earrings",
+    image: "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=400&auto=format&fit=crop",
+  },
+  {
+    id: 20,
+    name: "Leather Wrap Bracelet",
+    price: 1299,
+    originalPrice: 1699,
+    discount: "23% OFF",
+    rating: 4,
+    reviews: 19,
+    category: "Bracelets",
+    image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=400&auto=format&fit=crop",
+  },
+  {
+    id: 21,
+    name: "Diamond Pendant Necklace",
+    price: 5499,
+    originalPrice: 6999,
+    discount: "21% OFF",
+    rating: 5,
+    reviews: 42,
+    category: "Necklaces",
+    image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=400&auto=format&fit=crop",
+  },
+  {
+    id: 22,
+    name: "Gold Cuff Bracelet",
+    price: 2799,
+    originalPrice: 3599,
+    discount: "22% OFF",
+    rating: 4,
+    reviews: 24,
+    category: "Bracelets",
+    image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=400&auto=format&fit=crop",
+  },
+  {
+    id: 23,
+    name: "Emerald Stud Earrings",
+    price: 2399,
+    originalPrice: 3199,
+    discount: "25% OFF",
+    rating: 5,
+    reviews: 30,
+    category: "Earrings",
+    image: "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=400&auto=format&fit=crop",
+  },
+  {
+    id: 24,
+    name: "Sapphire Ring Set",
+    price: 4599,
+    originalPrice: 5999,
+    discount: "23% OFF",
+    rating: 5,
+    reviews: 38,
+    category: "Rings",
+    image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=400&auto=format&fit=crop",
+  },
+];
+
+const BOTTOM_FEATURES = [
+  {
+    icon: <FiHeart />,
+    title: "Curated with Love",
+    description: "Every piece is carefully selected for you",
+  },
+  {
+    icon: <FiTrendingUp />,
+    title: "Timeless Elegance",
+    description: "Designed to add beauty to every moment",
+  },
+  {
+    icon: <FiGift />,
+    title: "Premium Packaging",
+    description: "Luxury unboxing experience",
+  },
+  {
+    icon: <FiSun />,
+    title: "Trusted by Thousands",
+    description: "Join our community of happy customers",
   },
 ];
 
@@ -233,7 +336,7 @@ function useReveal(options = {}) {
           setVisible(true);
         }
       },
-      { threshold: 0.12, rootMargin: "0px 0px -80px 0px", ...options }
+      { threshold: 0.1, rootMargin: "0px 0px -100px 0px", ...options }
     );
 
     observer.observe(node);
@@ -260,244 +363,229 @@ function Reveal({ as: Tag = "div", className = "", delay = 0, children, stagger 
 }
 
 export default function Offers() {
-  const heroRef = useRef(null);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [priceRange, setPriceRange] = useState([0, 6000]);
-  const [sortBy, setSortBy] = useState("latest");
+  const [selectedFilter, setSelectedFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(0);
+  const [cartItems, setCartItems] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
+  const itemsPerPage = 8;
 
-  // Auto-scroll for hero offers
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % HERO_OFFERS.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  const filteredProducts = ALL_PRODUCTS.filter(p => 
+    selectedFilter === "all" || p.category.toLowerCase() === selectedFilter
+  );
 
-  // Scroll hero to current slide
-  useEffect(() => {
-    const hero = heroRef.current;
-    if (!hero) return;
-    const slideWidth = hero.offsetWidth;
-    hero.scrollTo({ left: slideWidth * currentSlide, behavior: "smooth" });
-  }, [currentSlide]);
-
-  const goToSlide = (index) => {
-    setCurrentSlide(index);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev === 0 ? HERO_OFFERS.length - 1 : prev - 1));
-  };
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % HERO_OFFERS.length);
-  };
-
-  // Filter products
-  const filteredProducts = ALL_PRODUCTS
-    .filter(p => selectedCategory === "All" || p.category === selectedCategory)
-    .filter(p => p.price >= priceRange[0] && p.price <= priceRange[1])
-    .sort((a, b) => {
-      if (sortBy === "price-low") return a.price - b.price;
-      if (sortBy === "price-high") return b.price - a.price;
-      return a.id - b.id;
-    });
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const currentProducts = filteredProducts.slice(
+    currentPage * itemsPerPage,
+    (currentPage + 1) * itemsPerPage
+  );
 
   const renderStars = (rating) => {
     return "★".repeat(rating) + "☆".repeat(5 - rating);
   };
 
-  const clearFilters = () => {
-    setSelectedCategory("All");
-    setPriceRange([0, 6000]);
-    setSortBy("latest");
+  const nextPage = () => {
+    if (currentPage < totalPages - 1) {
+      setCurrentPage(prev => prev + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(prev => prev - 1);
+    }
+  };
+
+  const toggleWishlist = (productId) => {
+    setWishlist(prev => 
+      prev.includes(productId) 
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  const handleAddToCart = (productId) => {
+    setCartItems(prev => {
+      if (prev.includes(productId)) {
+        return prev.filter(id => id !== productId);
+      }
+      return [...prev, productId];
+    });
+  };
+
+  const scrollToOffers = () => {
+    const offersSection = document.getElementById("offers-section");
+    if (offersSection) {
+      const rect = offersSection.getBoundingClientRect();
+      const top = rect.top + window.pageYOffset;
+      window.scrollTo({ top: top - 120, behavior: "smooth" });
+    }
   };
 
   return (
-    <section className={styles.offers} aria-label="Aurevian Offers & Promotions">
-      {/* ---------------- Hero Offers - Full Width ---------------- */}
-      <div className={styles.heroOffers}>
-        <div className={styles.heroTrack} ref={heroRef}>
-          {HERO_OFFERS.map((slide, index) => (
-            <div key={slide.id} className={styles.heroSlide}>
-              <img src={slide.image} alt={slide.title} loading={index === 0 ? "eager" : "lazy"} />
-              <div className={styles.heroOverlay}>
-                <div className={styles.heroContent}>
-                  <span className={styles.heroTag}>{slide.tag}</span>
-                  <h1 className={styles.heroTitle}>{slide.title}</h1>
-                  <p className={styles.heroSubtitle}>{slide.subtitle}</p>
-                  <p className={styles.heroDescription}>{slide.description}</p>
-                  <button className={styles.heroBtn}>{slide.cta} →</button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className={styles.heroNav}>
-          <button className={styles.heroNavBtn} onClick={prevSlide}>←</button>
-          <div className={styles.heroDots}>
-            {HERO_OFFERS.map((_, index) => (
-              <button
-                key={index}
-                className={`${styles.heroDot} ${index === currentSlide ? styles.heroDotActive : ""}`}
-                onClick={() => goToSlide(index)}
-              />
-            ))}
+    <section className={styles.offers} aria-label="Aurevian Exclusive Offers">
+      {/* ---------------- Hero Banner with Background Image ---------------- */}
+      <div 
+        className={styles.heroBanner}
+        style={{ backgroundImage: `url(${craftImage1})` }}
+      >
+        <div className={styles.heroOverlay}>
+          <div className={styles.heroContent}>
+            <span className={styles.heroTag}>EXCLUSIVE OFFERS</span>
+            <h1 className={styles.heroTitle}>
+              Premium Choices,<br />
+              <span>Just For You</span>
+            </h1>
+            <p className={styles.heroDescription}>
+              Explore handpicked luxury pieces at special prices for a limited time.
+            </p>
+            <button className={styles.heroBtn} onClick={scrollToOffers}>SHOP OFFERS →</button>
           </div>
-          <button className={styles.heroNavBtn} onClick={nextSlide}>→</button>
         </div>
       </div>
 
       <div className={styles.container}>
-        {/* ---------------- Stats Section ---------------- */}
-        <div className={styles.statsSection}>
-          {STATS.map((stat, i) => (
-            <Reveal as="div" key={i} delay={i * 100} className={styles.statItem}>
-              <span className={styles.statIcon}>{stat.icon}</span>
-              <h3 className={styles.statValue}>{stat.value}</h3>
-              <p className={styles.statLabel}>{stat.label}</p>
-              <span className={styles.statDescription}>{stat.description}</span>
-            </Reveal>
-          ))}
-        </div>
-
-        {/* ---------------- Quality Features Section ---------------- */}
-        <Reveal as="div" className={styles.qualitySection} delay={100}>
-          <div className={styles.qualityGrid}>
-            {QUALITY_FEATURES.map((feature, i) => (
-              <div key={i} className={styles.qualityCard}>
-                <div className={styles.qualityIconWrap}>{feature.icon}</div>
-                <h4>{feature.title}</h4>
-                <p>{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </Reveal>
-
-        {/* ---------------- The Art Of Radiant Refinement ---------------- */}
-        <Reveal as="div" className={styles.radiantSection} delay={100}>
-          <div className={styles.radiantContent}>
-            <span className={styles.radiantTag}>ELEGANCE</span>
-            <h2 className={styles.radiantTitle}>The Art Of Radiant Refinement</h2>
-            <p className={styles.radiantDescription}>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-              exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-            </p>
-            <p className={styles.radiantSubtext}>
-              Lorem ipsum dolor sit amet, consectetur adipiscing
-            </p>
-          </div>
-          <div className={styles.radiantImage}>
-            <img
-              src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=800&auto=format&fit=crop"
-              alt="Radiant Refinement"
-              loading="lazy"
-            />
-          </div>
-        </Reveal>
-
-        {/* ---------------- Products Section with Filter ---------------- */}
-        <Reveal as="div" className={styles.productsSection} delay={100}>
-          <div className={styles.productsHeader}>
-            <h3 className={styles.sectionTitle}>Our Products</h3>
-            <p className={styles.sectionSubtitle}>
-              Premium jewelry crafted for elegance and sophistication.
-            </p>
+        {/* ---------------- Limited Time Offers ---------------- */}
+        <Reveal as="div" className={styles.offersSection} delay={100}>
+          <div id="offers-section" className={styles.sectionHeader}>
+            <span className={styles.sectionTag}>LIMITED TIME OFFERS</span>
+            <h2 className={styles.sectionTitle}>Our Premium Picks</h2>
           </div>
 
-          {/* Filter Bar */}
+          {/* Filter */}
           <div className={styles.filterBar}>
-            <div className={styles.filterLeft}>
-              <span className={styles.filterLabel}><FiFilter /> Filter</span>
-              <div className={styles.categoryFilters}>
-                <button 
-                  className={`${styles.categoryFilterBtn} ${selectedCategory === "All" ? styles.activeFilter : ""}`}
-                  onClick={() => setSelectedCategory("All")}
-                >
-                  All
-                </button>
-                {CATEGORIES.map(cat => (
-                  <button
-                    key={cat.name}
-                    className={`${styles.categoryFilterBtn} ${selectedCategory === cat.name ? styles.activeFilter : ""}`}
-                    onClick={() => setSelectedCategory(cat.name)}
-                  >
-                    {cat.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className={styles.filterRight}>
-              <select 
-                className={styles.sortSelect} 
-                value={sortBy} 
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <option value="latest">Sort by latest</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-              </select>
-              <button className={styles.clearFilterBtn} onClick={clearFilters}>
-                Clear All
-              </button>
-            </div>
+            <button 
+              className={`${styles.filterBtn} ${selectedFilter === "all" ? styles.activeFilter : ""}`}
+              onClick={() => { setSelectedFilter("all"); setCurrentPage(0); }}
+            >
+              All
+            </button>
+            <button 
+              className={`${styles.filterBtn} ${selectedFilter === "rings" ? styles.activeFilter : ""}`}
+              onClick={() => { setSelectedFilter("rings"); setCurrentPage(0); }}
+            >
+              Rings
+            </button>
+            <button 
+              className={`${styles.filterBtn} ${selectedFilter === "necklaces" ? styles.activeFilter : ""}`}
+              onClick={() => { setSelectedFilter("necklaces"); setCurrentPage(0); }}
+            >
+              Necklaces
+            </button>
+            <button 
+              className={`${styles.filterBtn} ${selectedFilter === "earrings" ? styles.activeFilter : ""}`}
+              onClick={() => { setSelectedFilter("earrings"); setCurrentPage(0); }}
+            >
+              Earrings
+            </button>
+            <button 
+              className={`${styles.filterBtn} ${selectedFilter === "bracelets" ? styles.activeFilter : ""}`}
+              onClick={() => { setSelectedFilter("bracelets"); setCurrentPage(0); }}
+            >
+              Bracelets
+            </button>
+            <button 
+              className={`${styles.filterBtn} ${selectedFilter === "watches" ? styles.activeFilter : ""}`}
+              onClick={() => { setSelectedFilter("watches"); setCurrentPage(0); }}
+            >
+              Watches
+            </button>
+            <button 
+              className={`${styles.filterBtn} ${selectedFilter === "anklets" ? styles.activeFilter : ""}`}
+              onClick={() => { setSelectedFilter("anklets"); setCurrentPage(0); }}
+            >
+              Anklets
+            </button>
           </div>
 
           {/* Product Grid */}
           <div className={styles.productsGrid}>
-            {filteredProducts.map((product) => (
-              <div key={product.id} className={styles.productCard}>
-                <div className={styles.productImageWrap}>
-                  <img src={product.image} alt={product.name} loading="lazy" />
-                  {product.tag && <span className={styles.productTag}>{product.tag}</span>}
-                </div>
-                <div className={styles.productInfo}>
-                  <h4>{product.name}</h4>
-                  <div className={styles.productRating}>
-                    <span className={styles.stars}>{renderStars(product.rating)}</span>
+            {currentProducts.map((product, i) => {
+              const isInCart = cartItems.includes(product.id);
+              return (
+                <Reveal as="div" key={product.id} delay={i * 60} className={styles.productCard}>
+                  <div className={styles.productImageWrap}>
+                    <img src={product.image} alt={product.name} loading="lazy" />
+                    <span className={styles.discountBadge}>{product.discount}</span>
+                    <button 
+                      className={`${styles.wishlistBtn} ${wishlist.includes(product.id) ? styles.wishlistActive : ''}`}
+                      onClick={() => toggleWishlist(product.id)}
+                      aria-label="Add to wishlist"
+                    >
+                      <FiHeart />
+                    </button>
                   </div>
-                  <span className={styles.productPrice}>₹{product.price.toLocaleString()}</span>
-                  <button className={styles.productBtn}>Add to Cart</button>
-                </div>
-              </div>
-            ))}
+                  <div className={styles.productInfo}>
+                    <span className={styles.productCategory}>{product.category}</span>
+                    <h4>{product.name}</h4>
+                    <div className={styles.productMeta}>
+                      <span className={styles.productPrice}>₹{product.price.toLocaleString()}</span>
+                      <span className={styles.productOriginalPrice}>₹{product.originalPrice.toLocaleString()}</span>
+                    </div>
+                    <button 
+                      className={`${styles.productBtn} ${isInCart ? styles.productBtnAdded : ''}`}
+                      onClick={() => handleAddToCart(product.id)}
+                    >
+                      {isInCart ? (
+                        <>
+                          <span className={styles.productBtnIcon}>✓</span> ADDED TO CART
+                        </>
+                      ) : (
+                        'ADD TO CART'
+                      )}
+                    </button>
+                  </div>
+                </Reveal>
+              );
+            })}
+          </div>
+
+          {/* Pagination - Next/Prev Buttons */}
+          {totalPages > 1 && (
+            <div className={styles.pagination}>
+              <button 
+                className={`${styles.paginationBtn} ${currentPage === 0 ? styles.paginationDisabled : ''}`}
+                onClick={prevPage}
+                disabled={currentPage === 0}
+              >
+                <FiChevronLeft /> Prev
+              </button>
+              <span className={styles.paginationInfo}>
+                Page {currentPage + 1} of {totalPages}
+              </span>
+              <button 
+                className={`${styles.paginationBtn} ${currentPage === totalPages - 1 ? styles.paginationDisabled : ''}`}
+                onClick={nextPage}
+                disabled={currentPage === totalPages - 1}
+              >
+                Next <FiChevronRight />
+              </button>
+            </div>
+          )}
+        </Reveal>
+
+        {/* ---------------- Exclusive Premium Offer Banner ---------------- */}
+        <Reveal as="div" className={styles.premiumBanner} delay={100}>
+          <div className={styles.premiumBannerContent}>
+            <span className={styles.premiumTag}>EXCLUSIVE PREMIUM OFFER!</span>
+            <h2>Get up to 30% OFF on selected premium products.</h2>
+            <p>Limited time only. Don't miss out!</p>
+            <button className={styles.premiumBtn} onClick={scrollToOffers}>EXPLORE OFFERS →</button>
+          </div>
+          <div className={styles.premiumBadge}>
+            <span className={styles.premiumBadgeText}>UP TO</span>
+            <span className={styles.premiumBadgeNumber}>30%</span>
+            <span className={styles.premiumBadgeText}>OFF</span>
+            <button className={styles.premiumBadgeBtn} onClick={scrollToOffers}>EXPLORE OFFERS</button>
           </div>
         </Reveal>
 
-        {/* ---------------- Choose The Type Section ---------------- */}
-        <Reveal as="div" className={styles.chooseTypeSection} delay={100}>
-          <div className={styles.chooseTypeContent}>
-            <h3 className={styles.chooseTypeTitle}>Choose The Type</h3>
-            <p className={styles.chooseTypeDescription}>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec
-              ullamcorper mattis, pulvinar leo.
-            </p>
-          </div>
-          <div className={styles.chooseTypeGrid}>
-            {CATEGORIES.map((category, i) => (
-              <Reveal as="div" key={i} delay={i * 80} className={styles.chooseTypeItem}>
-                <div className={styles.chooseTypeCard}>
-                  <div className={styles.chooseTypeIcon}>{category.icon}</div>
-                  <span className={styles.chooseTypeName}>{category.name}</span>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </Reveal>
-
-        {/* ---------------- Offer Items ---------------- */}
-        <Reveal as="div" className={styles.offerItemsSection} delay={100} stagger>
-          {OFFER_ITEMS.map((item, i) => (
-            <div key={i} className={styles.offerItem}>
-              <img src={item.image} alt={item.title} loading="lazy" />
-              <div className={styles.offerContent}>
-                <h4>{item.title}</h4>
-                <p>{item.description}</p>
-                <button className={styles.offerBtn}>{item.cta} →</button>
-              </div>
+        {/* ---------------- Bottom Features ---------------- */}
+        <Reveal as="div" className={styles.bottomFeatures} delay={100} stagger>
+          {BOTTOM_FEATURES.map((feature, i) => (
+            <div key={i} className={styles.bottomFeature}>
+              <span className={styles.bottomFeatureIcon}>{feature.icon}</span>
+              <h4>{feature.title}</h4>
+              <p>{feature.description}</p>
             </div>
           ))}
         </Reveal>
