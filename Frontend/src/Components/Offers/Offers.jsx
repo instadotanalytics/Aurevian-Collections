@@ -21,6 +21,8 @@ import {
 } from "react-icons/fi";
 import styles from "./Offers.module.css";
 import craftImage1 from "../../assets/offersimg.png";
+import Footer from "../../Pages/Layout/Footer/Footer.jsx";
+
 
 /* ----------------------------------------------------------------
    Data — All offers, deals, and promotional content
@@ -80,7 +82,7 @@ const ALL_PRODUCTS = [
     rating: 4,
     reviews: 38,
     category: "Rings",
-    image: "https://images.unsplash.com/photo-1602171984530-1b4b045b9cc1?q=80&w=400&auto=format&fit=crop",
+    image: "https://i.pinimg.com/736x/32/04/d0/3204d0a5df05d1cdfd1d767cd1d8eccf.jpg",
   },
   {
     id: 6,
@@ -91,7 +93,7 @@ const ALL_PRODUCTS = [
     rating: 4,
     reviews: 29,
     category: "Anklets",
-    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=400&auto=format&fit=crop",
+    image: "https://i.pinimg.com/736x/35/5b/ed/355bed878a4c3da996b6244f83c339e1.jpg",
   },
   {
     id: 7,
@@ -146,7 +148,7 @@ const ALL_PRODUCTS = [
     rating: 4,
     reviews: 28,
     category: "Bracelets",
-    image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=400&auto=format&fit=crop",
+    image: "https://i.pinimg.com/736x/d5/bc/09/d5bc09370b18e1da5b1cc5741913d92b.jpg",
   },
   {
     id: 12,
@@ -179,7 +181,7 @@ const ALL_PRODUCTS = [
     rating: 5,
     reviews: 31,
     category: "Necklaces",
-    image: "https://images.unsplash.com/photo-1630019852942-f89202989a59?q=80&w=400&auto=format&fit=crop",
+    image: "https://i.pinimg.com/736x/7b/d6/1e/7bd61ebc3c39eaec926fbbd58e31e7f6.jpg",
   },
   {
     id: 15,
@@ -201,7 +203,7 @@ const ALL_PRODUCTS = [
     rating: 4,
     reviews: 27,
     category: "Rings",
-    image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=400&auto=format&fit=crop",
+    image: "https://i.pinimg.com/1200x/b6/78/8d/b6788de8aa0e4715a06b7de1faee565f.jpg",
   },
   {
     id: 17,
@@ -245,7 +247,7 @@ const ALL_PRODUCTS = [
     rating: 4,
     reviews: 19,
     category: "Bracelets",
-    image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=400&auto=format&fit=crop",
+    image: "https://i.pinimg.com/1200x/fe/9d/25/fe9d2554a3d7d4d53c68cb15feed779d.jpg",
   },
   {
     id: 21,
@@ -289,7 +291,7 @@ const ALL_PRODUCTS = [
     rating: 5,
     reviews: 38,
     category: "Rings",
-    image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=400&auto=format&fit=crop",
+    image: "https://i.pinimg.com/1200x/86/a7/6c/86a76cfadc6db57100dcd27746cfc836.jpg",
   },
 ];
 
@@ -424,6 +426,7 @@ export default function Offers() {
   };
 
   return (
+    <>
     <section className={styles.offers} aria-label="Aurevian Exclusive Offers">
       {/* ---------------- Hero Banner with Background Image ---------------- */}
       <div 
@@ -605,5 +608,7 @@ export default function Offers() {
         </Reveal>
       </div>
     </section>
+    <Footer/>
+    </>
   );
 }
