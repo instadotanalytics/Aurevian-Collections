@@ -1,7 +1,7 @@
 // src/Components/Collections/Collections.jsx
 
 import { useRef, useEffect, useState } from "react";
-import { FiFilter } from "react-icons/fi";
+import { FiFilter, FiHeart, FiShoppingBag, FiCheck } from "react-icons/fi";
 import styles from "./Collections.module.css";
 import Footer from "../../Pages/Layout/Footer/Footer.jsx";
 
@@ -296,6 +296,10 @@ export default function Collections() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
+  // Cart and Wishlist states
+  const [cartItems, setCartItems] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
+
   // Mobile filter sheet state
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
@@ -363,6 +367,24 @@ export default function Collections() {
   const closeMobileFilter = () => {
     setIsMobileFilterOpen(false);
     document.body.style.overflow = "";
+  };
+
+  // Cart and Wishlist handlers
+  const toggleWishlist = (productId) => {
+    setWishlist(prev => 
+      prev.includes(productId) 
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  const handleAddToCart = (productId) => {
+    setCartItems(prev => {
+      if (prev.includes(productId)) {
+        return prev.filter(id => id !== productId);
+      }
+      return [...prev, productId];
+    });
   };
 
   // Scroll to filter section - starts from bottom border of New Collection with more offset
@@ -532,23 +554,52 @@ export default function Collections() {
             </div>
 
             <div className={styles.productsGrid}>
-              {paginatedProducts.map(product => (
-                <Reveal as="div" key={product.id} delay={50} className={styles.productCard}>
-                  <div className={styles.productImageWrap}>
-                    <img className={styles.productImage} src={product.img} alt={product.name} loading="lazy" />
-                    <span className={styles.productDiscount}>{product.discount} OFF</span>
-                  </div>
-                  <div className={styles.productBody}>
-                    <span className={styles.productCategory}>{product.category}</span>
-                    <h3 className={styles.productName}>{product.name}</h3>
-                    <div className={styles.productPriceRow}>
-                      <span className={styles.productCurrentPrice}>₹{product.price.toLocaleString()}</span>
-                      <span className={styles.productOriginalPrice}>₹{product.originalPrice.toLocaleString()}</span>
+              {paginatedProducts.map(product => {
+                const isInCart = cartItems.includes(product.id);
+                const isInWishlist = wishlist.includes(product.id);
+                return (
+                  <Reveal as="div" key={product.id} delay={50} className={styles.productCard}>
+                    <div className={styles.productImageWrap}>
+                      <img className={styles.productImage} src={product.img} alt={product.name} loading="lazy" />
+                      <span className={styles.productDiscount}>{product.discount} OFF</span>
+                      <div className={styles.wishlistActions}>
+                        <button
+                          type="button"
+                          className={`${styles.wishlistBtn} ${isInWishlist ? styles.wishlistBtnActive : ''}`}
+                          onClick={() => toggleWishlist(product.id)}
+                          aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+                        >
+                          {isInWishlist ? <FiHeart fill="currentColor" /> : <FiHeart />}
+                        </button>
+                      </div>
                     </div>
-                    <button className={styles.productAddBtn}>Add to Cart</button>
-                  </div>
-                </Reveal>
-              ))}
+                    <div className={styles.productBody}>
+                      <span className={styles.productCategory}>{product.category}</span>
+                      <h3 className={styles.productName}>{product.name}</h3>
+                      <div className={styles.productPriceRow}>
+                        <span className={styles.productCurrentPrice}>₹{product.price.toLocaleString()}</span>
+                        <span className={styles.productOriginalPrice}>₹{product.originalPrice.toLocaleString()}</span>
+                      </div>
+                      <button
+                        type="button"
+                        className={`${styles.productAddBtn} ${isInCart ? styles.productAddBtnActive : ''}`}
+                        onClick={() => handleAddToCart(product.id)}
+                        disabled={isInCart}
+                      >
+                        {isInCart ? (
+                          <>
+                            <FiCheck /> Added to Cart
+                          </>
+                        ) : (
+                          <>
+                            <FiShoppingBag /> Add to Cart
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </Reveal>
+                );
+              })}
             </div>
           </div>
         </div>

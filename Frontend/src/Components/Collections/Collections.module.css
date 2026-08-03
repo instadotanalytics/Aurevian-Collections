@@ -6,16 +6,21 @@
    ========================================================== */
 
 .collections {
-  --cream: #fbf6ed;
+  --cream: #f7f2e9;
   --cream-deep: #f3ead9;
-  --cream-line: #e6dac2;
+  --cream-line: #e7e0d2;
   --cream-card: #f5ede0;
-  --ink: #241d17;
-  --ink-soft: #4a4038;
-  --text-muted: #7a6f61;
-  --gold: #b3873f;
-  --gold-light: #d9b77f;
-  --gold-dark: #8a662f;
+  --cream-card-hover: #ede0d2;
+  --cream-btn: #e8d9c8;
+  --cream-btn-hover: #f0e3d4;
+  --cream-btn-active: #f5ede0;
+  --ink: #1c1917;
+  --ink-soft: #4a4136;
+  --text-muted: #8a8072;
+  --gold: #a9812f;
+  --gold-light: #e7d5ab;
+  --gold-deep: #7c5e22;
+  --sale: #3f3626;
   --shadow: 0 24px 60px -30px rgba(36, 29, 23, 0.35);
 
   background: var(--cream);
@@ -44,8 +49,6 @@
 /* ==========================================================
    HERO GALLERY - 65vh
    ========================================================== */
-/* In Collections.module.css - Update the heroGallery height */
-
 .heroGallery {
   height: 70vh;
   min-height: 400px;
@@ -197,7 +200,7 @@
 }
 
 .heroBtn:hover {
-  background: var(--gold-dark);
+  background: var(--gold-deep);
   transform: translateY(-2px);
   box-shadow: 0 8px 30px rgba(179, 135, 63, 0.4);
 }
@@ -316,13 +319,13 @@
    NEW COLLECTION - 60vh (No Shop Button)
    ========================================================== */
 .newCollectionSection {
-  min-height: 60vh;
+  min-height: 40vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px 0;
-  margin-bottom: clamp(40px, 6vw, 80px);
-  border-bottom: 1px solid var(--cream-line);
+  /* padding: 20px 0; */
+  /* margin-bottom: clamp(40px, 6vw, 80px); */
+  /* border-bottom: 1px solid var(--cream-line); */
 }
 
 .newCollectionContent {
@@ -336,7 +339,7 @@
   font-weight: 500;
   letter-spacing: 0.4em;
   text-transform: uppercase;
-  color: var(--gold-dark);
+  color: var(--gold-deep);
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -415,7 +418,7 @@
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--gold-dark);
+  color: var(--gold-deep);
   background: var(--cream-deep);
   border: 1px solid var(--cream-line);
   border-radius: 999px;
@@ -585,7 +588,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  color: var(--gold-dark);
+  color: var(--gold-deep);
   margin: 0 0 14px 0;
   display: block;
 }
@@ -603,7 +606,7 @@
 }
 
 .filterOption:hover {
-  color: var(--gold-dark);
+  color: var(--gold-deep);
   transform: translateX(2px);
 }
 
@@ -678,7 +681,7 @@
 }
 
 .filterPriceRange span:last-child {
-  color: var(--gold-dark);
+  color: var(--gold-deep);
   font-weight: 600;
 }
 
@@ -736,7 +739,7 @@
 .filterClearBtn {
   background: none;
   border: none;
-  color: var(--gold-dark);
+  color: var(--gold-deep);
   font-size: 13px;
   cursor: pointer;
   padding: 10px 0 2px;
@@ -820,36 +823,27 @@
 }
 
 /* ==========================================================
-   Product Card - Fully Responsive
+   Product Card - Matching Offers Page Style
    ========================================================== */
 .productsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  gap: 28px;
   margin-bottom: 40px;
 }
 
 .productCard {
-  display: flex;
-  flex-direction: column;
   background: var(--cream-card);
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   border: 1px solid var(--cream-line);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-  border-radius: 6px;
-  height: 100%;
-  max-height: 380px;
+  border-radius: 0;
+  overflow: hidden;
+  transition: box-shadow 0.25s, transform 0.25s;
 }
 
 .productCard:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 40px -18px rgba(139, 102, 47, 0.35);
-  border-color: var(--gold-light);
-}
-
-.productCard:active {
-  transform: scale(0.98);
+  box-shadow: 0 14px 30px rgba(28, 25, 23, 0.09);
+  transform: translateY(-3px);
+  background: var(--cream-card-hover);
 }
 
 .productImageWrap {
@@ -857,8 +851,14 @@
   width: 100%;
   aspect-ratio: 1 / 1;
   overflow: hidden;
-  background: var(--cream);
-  border-radius: 6px 6px 0 0;
+  background: repeating-linear-gradient(
+    45deg,
+    #efe9db,
+    #efe9db 10px,
+    #e7ddc7 10px,
+    #e7ddc7 20px
+  );
+  border-bottom: 1px solid var(--cream-line);
 }
 
 .productImage {
@@ -866,7 +866,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.3s ease;
 }
 
 .productCard:hover .productImage {
@@ -875,90 +875,155 @@
 
 .productDiscount {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  background: linear-gradient(135deg, var(--gold-light), var(--gold-dark));
-  color: white;
-  font-size: 9px;
+  top: 12px;
+  left: 12px;
+  background: #ffffff;
+  color: var(--sale);
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  z-index: 2;
+  text-transform: lowercase;
   font-weight: 600;
-  padding: 3px 9px;
-  border-radius: 16px;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 10px -2px rgba(139, 102, 47, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Wishlist Button on Image */
+.wishlistActions {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+}
+
+.wishlistBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid var(--cream-line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--ink);
+  transition: transform 0.2s ease, font-size 0.2s ease, color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wishlistBtn:hover {
+  font-size: 19px;
+  color: var(--gold-deep);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(28, 25, 23, 0.18);
+}
+
+.wishlistBtn:active {
+  transform: scale(0.85);
+  background: var(--gold-light);
+  color: var(--sale);
+  box-shadow: 0 2px 6px rgba(28, 25, 23, 0.2);
+}
+
+.wishlistBtnActive {
+  color: #d9534f;
+  background: #fff;
+  border-color: #d9534f;
+}
+
+.wishlistBtnActive:hover {
+  color: #d9534f;
 }
 
 .productBody {
-  padding: 12px 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  flex: 1;
-  background: transparent;
-  justify-content: space-between;
+  padding: 12px 18px 4px;
 }
 
 .productCategory {
-  font-size: 9px;
-  font-weight: 500;
+  font-size: 10px;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--gold-dark);
+  color: var(--gold-deep);
 }
 
 .productName {
   font-family: "Cormorant Garamond", serif;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--ink);
-  margin: 0;
+  margin: 2px 0 6px 0;
   line-height: 1.3;
   font-style: italic;
-  flex: 1;
 }
 
 .productPriceRow {
   display: flex;
-  align-items: baseline;
-  gap: 6px;
-  margin-top: 2px;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
 }
 
 .productCurrentPrice {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--ink);
+  color: var(--sale);
+  font-weight: 600;
 }
 
 .productOriginalPrice {
-  font-size: 11px;
   color: var(--text-muted);
   text-decoration: line-through;
+  font-size: 13px;
 }
 
 .productAddBtn {
-  width: 100%;
-  padding: 8px;
-  margin-top: 8px;
-  background: var(--gold);
-  color: #fff;
-  border: none;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: calc(100% + 36px);
+  margin: 14px -18px -4px;
+  padding: 12px 0;
   font-family: "Jost", sans-serif;
-  letter-spacing: 0.03em;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--cream);
+  background: var(--gold);
+  border: 1px solid var(--gold);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.productAddBtn svg {
+  font-size: 14px;
 }
 
 .productAddBtn:hover {
-  background: var(--gold-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(179, 135, 63, 0.3);
+  background: var(--gold-deep);
+  border-color: var(--gold-deep);
+  box-shadow: 0 8px 18px rgba(124, 94, 34, 0.25);
 }
 
 .productAddBtn:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
+}
+
+.productAddBtnActive {
+  background: var(--gold-light);
+  color: var(--sale);
+  border-color: var(--gold-light);
+  cursor: default;
+}
+
+.productAddBtnActive:hover {
+  background: var(--gold-light);
+  color: var(--sale);
+  border-color: var(--gold-light);
+  box-shadow: none;
+  transform: none;
 }
 
 /* ==========================================================
@@ -1081,7 +1146,7 @@
 
 .closingTitle em {
   font-style: italic;
-  color: var(--gold-dark);
+  color: var(--gold-deep);
 }
 
 .closingBody {
@@ -1284,7 +1349,7 @@
 }
 
 .mobileFilterApply:hover {
-  background: var(--gold-dark);
+  background: var(--gold-deep);
 }
 
 .mobileFilterApply:active {
@@ -1325,7 +1390,7 @@
     border-radius: 30px;
     font-size: 13px;
     font-weight: 500;
-    color: var(--gold-dark);
+    color: var(--gold-deep);
     cursor: pointer;
     font-family: "Jost", sans-serif;
     transition: all 0.3s ease;
@@ -1379,7 +1444,7 @@
   }
 
   .newCollectionSection {
-    min-height: 50vh;
+    min-height: 40vh;
     padding: 15px 0;
   }
 
@@ -1503,7 +1568,7 @@
   }
 
   .newCollectionSection {
-    min-height: 40vh;
+    min-height: 30vh;
     padding: 10px 0;
   }
 
@@ -1550,6 +1615,14 @@
     padding: 2px 6px;
     top: 8px;
     left: 8px;
+  }
+
+  .wishlistBtn {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+    top: 8px;
+    right: 8px;
   }
 
   .exploreList {
@@ -1648,6 +1721,14 @@
     padding: 1px 5px;
     top: 6px;
     left: 6px;
+  }
+
+  .wishlistBtn {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
+    top: 6px;
+    right: 6px;
   }
 
   .exploreThumb {
@@ -1775,7 +1856,8 @@
   .productImage,
   .productAddBtn,
   .heroSlide,
-  .mobileFilterSheet {
+  .mobileFilterSheet,
+  .wishlistBtn {
     transition: none !important;
   }
 
@@ -1783,7 +1865,8 @@
   .featureImageWrap:hover .featureImage,
   .exploreItem:hover,
   .closingImgWrap:hover img,
-  .productCard:hover .productImage {
+  .productCard:hover .productImage,
+  .wishlistBtn:hover {
     transform: none !important;
   }
 }
