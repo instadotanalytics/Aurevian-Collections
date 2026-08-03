@@ -22,7 +22,7 @@ import pearlStuds from "../../assets/pearl-studs.jpg.jfif";
 import { LuSlidersHorizontal } from "react-icons/lu";
 import { FiHeart } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
-import { FiShoppingBag, FiCheck } from "react-icons/fi";
+import { FiShoppingBag, FiCheck, FiChevronDown } from "react-icons/fi";
 
 const categories = [
   { name: "Rings", count: 32 },
@@ -418,13 +418,16 @@ export default function Shop() {
               <span className={styles.resultsCount}>
                 Showing 1–{products.length} of 138 results
               </span>
-              <select className={styles.sortSelect}>
-                <option>Default Sorting</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
-                <option>Newest</option>
-                <option>Top Rated</option>
-              </select>
+              <div className={styles.sortWrapper}>
+                <select className={styles.sortSelect}>
+                  <option>Default Sorting</option>
+                  <option>Price: Low to High</option>
+                  <option>Price: High to Low</option>
+                  <option>Newest</option>
+                  <option>Top Rated</option>
+                </select>
+                <FiChevronDown className={styles.sortChevron} />
+              </div>
             </div>
 
             <div className={styles.productGrid}>

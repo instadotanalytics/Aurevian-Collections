@@ -465,6 +465,36 @@
   border-radius: var(--radius);
 }
 
+.sortSelect {
+  padding-right: 36px !important;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* ---------- Sort dropdown wrapper (holds the select + chevron icon) ---------- */
+.sortWrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.sortChevron {
+  position: absolute !important;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--gold-deep) !important;
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+  z-index: 5;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
 /* ---------- Product grid ---------- */
 .productGrid {
   display: grid;
@@ -602,6 +632,7 @@
 }
 
 .productInfo {
+
   padding: 12px 18px 4px;
   position: relative;
   background: transparent;
@@ -637,11 +668,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-   gap: 5px;
+  gap: 5px;
    width: calc(100% + 36px);   /* 18px left + 18px right */
-  margin: 14px -18px -4px;
+  margin: 14px -18px 0px;
   padding: 12px 0;
-
   font-family: "Jost", sans-serif;
   font-size: 12.5px;
   font-weight: 500;
@@ -1021,6 +1051,11 @@
     justify-content: flex-end;
   }
 
+  /* ----- Sort dropdown wrapper takes full width on mobile ----- */
+  .sortWrapper {
+    width: 100%;
+  }
+
   /* ----- Sort dropdown styled for mobile ----- */
   .sortSelect {
     width: 100%;
@@ -1033,9 +1068,6 @@
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237c5e22' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
     box-shadow: 0 2px 6px rgba(28, 25, 23, 0.05);
   }
 }
@@ -1080,7 +1112,8 @@
   }
 
   .productInfo {
-    padding: 10px 10px 12px;
+    /* padding: 12px 10px 12px; */
+    padding: 1px 10px 3px;
   }
 
   .productCatOverlay {
@@ -1155,6 +1188,15 @@
 
   .toolbar select {
     width: 100%;
+  }
+
+  .sortWrapper {
+    width: 100%;
+  }
+
+  .sortChevron {
+    font-size: 14px;
+    right: 12px;
   }
 
   .testimonials {

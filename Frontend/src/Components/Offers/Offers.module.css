@@ -819,16 +819,7 @@
     padding: 80px 16px 30px;
   }
 
-  /* .heroOverlay {
-    background: linear-gradient(
-      135deg,
-      rgba(20, 15, 10, 0.75) 0%,
-      rgba(20, 15, 10, 0.55) 60%,
-      rgba(20, 15, 10, 0.35) 100%
-    );
-    justify-content: flex-start;
-    align-items: center;
-  } */
+ 
 
   .heroContent {
     text-align: left;
