@@ -126,7 +126,7 @@
   display: inline-block;
   font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.4em;
+  letter-spacing: 0.5em;
   text-transform: uppercase;
   color: var(--gold-light);
   background: rgba(255, 255, 255, 0.15);

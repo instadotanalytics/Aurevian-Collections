@@ -18,7 +18,7 @@ import {
   FiChevronRight
 } from "react-icons/fi";
 import styles from "./Offers.module.css";
-import craftImage1 from "../../assets/CraftImage1.png";
+import craftImage1 from "../../assets/offersimg.png";
 
 /* ----------------------------------------------------------------
    Data — All offers, deals, and promotional content
