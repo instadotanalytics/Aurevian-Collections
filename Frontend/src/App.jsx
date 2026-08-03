@@ -91,6 +91,7 @@ const ROUTES = {
 
   GIFTS: "/gifts",
   COLLECTIONS: "/collections",
+  OFFERS: "/offers",
   LOGIN: "/login",
   REGISTER: "/register",
   VERIFY_OTP: "/verify-otp",

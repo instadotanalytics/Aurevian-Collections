@@ -15,7 +15,9 @@ import {
   FiStar,
   FiClock,
   FiChevronLeft,
-  FiChevronRight
+  FiChevronRight,
+  FiShoppingBag,
+  FiCheck
 } from "react-icons/fi";
 import styles from "./Offers.module.css";
 import craftImage1 from "../../assets/offersimg.png";
@@ -30,7 +32,7 @@ const ALL_PRODUCTS = [
     name: "Aurevian Solitaire Band",
     price: 2100,
     originalPrice: 3000,
-    discount: "30% OFF",
+    discount: "30% off",
     rating: 5,
     reviews: 128,
     category: "Rings",
@@ -41,7 +43,7 @@ const ALL_PRODUCTS = [
     name: "Layla Layered Chain",
     price: 3400,
     originalPrice: 4250,
-    discount: "20% OFF",
+    discount: "20% off",
     rating: 5,
     reviews: 95,
     category: "Necklaces",
@@ -52,7 +54,7 @@ const ALL_PRODUCTS = [
     name: "Amara Drop Studs",
     price: 1650,
     originalPrice: 2200,
-    discount: "25% OFF",
+    discount: "25% off",
     rating: 5,
     reviews: 76,
     category: "Earrings",
@@ -63,7 +65,7 @@ const ALL_PRODUCTS = [
     name: "Celeste Charm Bracelet",
     price: 1800,
     originalPrice: 3000,
-    discount: "40% OFF",
+    discount: "40% off",
     rating: 5,
     reviews: 54,
     category: "Bracelets",
@@ -74,7 +76,7 @@ const ALL_PRODUCTS = [
     name: "Noor Stack Ring Set",
     price: 1275,
     originalPrice: 1500,
-    discount: "15% OFF",
+    discount: "15% off",
     rating: 4,
     reviews: 38,
     category: "Rings",
@@ -85,7 +87,7 @@ const ALL_PRODUCTS = [
     name: "Meera Beaded Anklet",
     price: 950,
     originalPrice: 1900,
-    discount: "50% OFF",
+    discount: "50% off",
     rating: 4,
     reviews: 29,
     category: "Anklets",
@@ -96,7 +98,7 @@ const ALL_PRODUCTS = [
     name: "Anaya Bridal Jewel Set",
     price: 6300,
     originalPrice: 7000,
-    discount: "10% OFF",
+    discount: "10% off",
     rating: 5,
     reviews: 52,
     category: "Bridal Sets",
@@ -107,7 +109,7 @@ const ALL_PRODUCTS = [
     name: "Zoya Hoop Earrings",
     price: 1300,
     originalPrice: 2000,
-    discount: "35% OFF",
+    discount: "35% off",
     rating: 5,
     reviews: 41,
     category: "Earrings",
@@ -118,7 +120,7 @@ const ALL_PRODUCTS = [
     name: "Ishani Pendant Chain",
     price: 2750,
     originalPrice: 5000,
-    discount: "45% OFF",
+    discount: "45% off",
     rating: 5,
     reviews: 47,
     category: "Necklaces",
@@ -129,7 +131,7 @@ const ALL_PRODUCTS = [
     name: "Kavya Twist Band",
     price: 2400,
     originalPrice: 3000,
-    discount: "20% OFF",
+    discount: "20% off",
     rating: 4,
     reviews: 33,
     category: "Rings",
@@ -140,7 +142,7 @@ const ALL_PRODUCTS = [
     name: "Riya Chain Bracelet",
     price: 1950,
     originalPrice: 2800,
-    discount: "30% OFF",
+    discount: "30% off",
     rating: 4,
     reviews: 28,
     category: "Bracelets",
@@ -151,7 +153,7 @@ const ALL_PRODUCTS = [
     name: "Sana Pearl Studs",
     price: 1450,
     originalPrice: 1950,
-    discount: "25% OFF",
+    discount: "25% off",
     rating: 4,
     reviews: 22,
     category: "Earrings",
@@ -162,7 +164,7 @@ const ALL_PRODUCTS = [
     name: "Tara Gold Hoops",
     price: 2200,
     originalPrice: 3200,
-    discount: "30% OFF",
+    discount: "30% off",
     rating: 5,
     reviews: 35,
     category: "Earrings",
@@ -173,7 +175,7 @@ const ALL_PRODUCTS = [
     name: "Mira Chain Necklace",
     price: 3800,
     originalPrice: 4800,
-    discount: "20% OFF",
+    discount: "20% off",
     rating: 5,
     reviews: 31,
     category: "Necklaces",
@@ -184,7 +186,7 @@ const ALL_PRODUCTS = [
     name: "Rani Bridal Set",
     price: 8500,
     originalPrice: 10000,
-    discount: "15% OFF",
+    discount: "15% off",
     rating: 5,
     reviews: 45,
     category: "Bridal Sets",
@@ -195,7 +197,7 @@ const ALL_PRODUCTS = [
     name: "Kiran Stack Rings",
     price: 1800,
     originalPrice: 2500,
-    discount: "28% OFF",
+    discount: "28% off",
     rating: 4,
     reviews: 27,
     category: "Rings",
@@ -206,7 +208,7 @@ const ALL_PRODUCTS = [
     name: "Rose Gold Chain",
     price: 2999,
     originalPrice: 3999,
-    discount: "25% OFF",
+    discount: "25% off",
     rating: 4,
     reviews: 28,
     category: "Necklaces",
@@ -217,7 +219,7 @@ const ALL_PRODUCTS = [
     name: "Platinum Wedding Band",
     price: 4999,
     originalPrice: 6999,
-    discount: "28% OFF",
+    discount: "28% off",
     rating: 5,
     reviews: 35,
     category: "Rings",
@@ -228,7 +230,7 @@ const ALL_PRODUCTS = [
     name: "Silver Hoop Earrings",
     price: 1499,
     originalPrice: 1999,
-    discount: "25% OFF",
+    discount: "25% off",
     rating: 4,
     reviews: 22,
     category: "Earrings",
@@ -239,7 +241,7 @@ const ALL_PRODUCTS = [
     name: "Leather Wrap Bracelet",
     price: 1299,
     originalPrice: 1699,
-    discount: "23% OFF",
+    discount: "23% off",
     rating: 4,
     reviews: 19,
     category: "Bracelets",
@@ -250,7 +252,7 @@ const ALL_PRODUCTS = [
     name: "Diamond Pendant Necklace",
     price: 5499,
     originalPrice: 6999,
-    discount: "21% OFF",
+    discount: "21% off",
     rating: 5,
     reviews: 42,
     category: "Necklaces",
@@ -261,7 +263,7 @@ const ALL_PRODUCTS = [
     name: "Gold Cuff Bracelet",
     price: 2799,
     originalPrice: 3599,
-    discount: "22% OFF",
+    discount: "22% off",
     rating: 4,
     reviews: 24,
     category: "Bracelets",
@@ -272,7 +274,7 @@ const ALL_PRODUCTS = [
     name: "Emerald Stud Earrings",
     price: 2399,
     originalPrice: 3199,
-    discount: "25% OFF",
+    discount: "25% off",
     rating: 5,
     reviews: 30,
     category: "Earrings",
@@ -283,7 +285,7 @@ const ALL_PRODUCTS = [
     name: "Sapphire Ring Set",
     price: 4599,
     originalPrice: 5999,
-    discount: "23% OFF",
+    discount: "23% off",
     rating: 5,
     reviews: 38,
     category: "Rings",
@@ -501,36 +503,48 @@ export default function Offers() {
           <div className={styles.productsGrid}>
             {currentProducts.map((product, i) => {
               const isInCart = cartItems.includes(product.id);
+              const isInWishlist = wishlist.includes(product.id);
               return (
                 <Reveal as="div" key={product.id} delay={i * 60} className={styles.productCard}>
-                  <div className={styles.productImageWrap}>
-                    <img src={product.image} alt={product.name} loading="lazy" />
-                    <span className={styles.discountBadge}>{product.discount}</span>
-                    <button 
-                      className={`${styles.wishlistBtn} ${wishlist.includes(product.id) ? styles.wishlistActive : ''}`}
-                      onClick={() => toggleWishlist(product.id)}
-                      aria-label="Add to wishlist"
-                    >
-                      <FiHeart />
-                    </button>
+                  <div className={styles.productMedia}>
+                    <span className={styles.badge}>{product.discount}</span>
+                    {/* <span className={styles.productCatOverlay}>{product.category}</span> */}
+                    <div className={styles.wishlistActions}>
+                      <button
+                        type="button"
+                        className={`${styles.wishlistBtn} ${isInWishlist ? styles.wishlistBtnActive : ''}`}
+                        onClick={() => toggleWishlist(product.id)}
+                        aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+                      >
+                        {isInWishlist ? <FiHeart fill="currentColor" /> : <FiHeart />}
+                      </button>
+                    </div>
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className={styles.productImage}
+                    />
                   </div>
                   <div className={styles.productInfo}>
-                    <span className={styles.productCategory}>{product.category}</span>
-                    <h4>{product.name}</h4>
-                    <div className={styles.productMeta}>
-                      <span className={styles.productPrice}>₹{product.price.toLocaleString()}</span>
-                      <span className={styles.productOriginalPrice}>₹{product.originalPrice.toLocaleString()}</span>
+                    <div className={styles.productName}>{product.name}</div>
+                    <div className={styles.productPrice}>
+                      <span className={styles.priceNow}>₹{product.price.toLocaleString()}</span>
+                      <span className={styles.priceOld}>₹{product.originalPrice.toLocaleString()}</span>
                     </div>
-                    <button 
-                      className={`${styles.productBtn} ${isInCart ? styles.productBtnAdded : ''}`}
+                    <button
+                      type="button"
+                      className={`${styles.addToCartBtn} ${isInCart ? styles.addToCartBtnActive : ''}`}
                       onClick={() => handleAddToCart(product.id)}
+                      disabled={isInCart}
                     >
                       {isInCart ? (
                         <>
-                          <span className={styles.productBtnIcon}>✓</span> ADDED TO CART
+                          <FiCheck /> Added to Cart
                         </>
                       ) : (
-                        'ADD TO CART'
+                        <>
+                          <FiShoppingBag /> Add to Cart
+                        </>
                       )}
                     </button>
                   </div>
