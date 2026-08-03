@@ -91,8 +91,6 @@ const ROUTES = {
 
   GIFTS: "/gifts",
   COLLECTIONS: "/collections",
-
-  OFFERS:"/offers",
   LOGIN: "/login",
   REGISTER: "/register",
   VERIFY_OTP: "/verify-otp",
@@ -137,6 +135,7 @@ const LayoutWithHeader = ({ children }) => (
 
 // Layout without Header
 const LayoutWithoutHeader = ({ children }) => <>{children}</>;
+
 
 const App = () => {
   const dispatch = useDispatch();
