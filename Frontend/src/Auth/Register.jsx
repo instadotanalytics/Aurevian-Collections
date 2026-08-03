@@ -1,3 +1,4 @@
+// src/Components/Pages/Register/Register.jsx
 
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -48,6 +49,7 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -72,6 +74,11 @@ const Register = () => {
 
     if (password.length < 6) {
       toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    if (!acceptedTerms) {
+      toast.error("Please accept the Terms & Conditions to continue");
       return;
     }
 
@@ -274,6 +281,29 @@ const Register = () => {
                         </button>
                       </div>
                     </div>
+                  </div>
+
+                  {/* ========== TERMS & CONDITIONS CHECKBOX ========== */}
+                  <div className={styles.termsGroup}>
+                    <label className={styles.termsLabel}>
+                      <input
+                        type="checkbox"
+                        checked={acceptedTerms}
+                        onChange={() => setAcceptedTerms(!acceptedTerms)}
+                        className={styles.termsCheckbox}
+                        disabled={isLoading}
+                      />
+                      <span className={styles.termsText}>
+                        I agree to the{" "}
+                        <Link to="/terms" className={styles.termsLink}>
+                          Terms & Conditions
+                        </Link>{" "}
+                        and{" "}
+                        <Link to="/privacy-policy" className={styles.termsLink}>
+                          Privacy Policy
+                        </Link>
+                      </span>
+                    </label>
                   </div>
 
                   <button
