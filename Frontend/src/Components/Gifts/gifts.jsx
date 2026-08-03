@@ -15,7 +15,7 @@ import pearlStuds from "../../assets/pearl-studs.jpg.jfif";
 import giftHero from "../../assets/heroimageg.png";
 import giftMiddle from "../../assets/giftmiddle.png";
 
-import { FiGift, FiCheck, FiHeart, FiStar, FiShoppingBag } from "react-icons/fi";
+import { FiGift, FiCheck, FiHeart, FiStar, FiShoppingBag, FiChevronDown } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 import { LuSlidersHorizontal } from "react-icons/lu";
 
@@ -435,13 +435,16 @@ export default function Gifts() {
               <span className={styles.resultsCount}>
                 Showing 1–{featuredGifts.length} of 24 results
               </span>
-              <select className={styles.sortSelect}>
-                <option>Default Sorting</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
-                <option>Newest</option>
-                <option>Top Rated</option>
-              </select>
+              <div className={styles.sortWrapper}>
+                <select className={styles.sortSelect}>
+                  <option>Default Sorting</option>
+                  <option>Price: Low to High</option>
+                  <option>Price: High to Low</option>
+                  <option>Newest</option>
+                  <option>Top Rated</option>
+                </select>
+                <FiChevronDown className={styles.sortChevron} />
+              </div>
             </div>
 
             <div className={styles.productGrid}>
