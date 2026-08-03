@@ -1,4 +1,9 @@
+
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap");
+
+:global(html) {
+  scroll-behavior: smooth;
+}
 
 .page {
   --ink: #1c1917;
@@ -26,197 +31,455 @@
 
 .page h1,
 .page h2,
+.page h3,
 .page h4 {
   font-family: "Playfair Display", serif;
 }
 
 .page a {
   text-decoration: none;
-  color: inherit;
 }
 
-/* ---------- Hero ---------- */
+/* ---------- Hero ----------
+   Matches shop.module.css .pageTitle / .heroImage exactly:
+   fade-in wrapper + responsive aspect-ratio crop. ---------- */
 .hero {
-  background: linear-gradient(135deg, var(--ink) 0%, #2b2621 100%);
-  color: var(--gold-soft);
-  padding: 70px 40px;
-  text-align: center;
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+  animation: titleFadeUp 0.6s ease both;
+  background: #efe7d4;
+}
+
+.heroImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 21 / 8;
+  object-fit: cover;
+  object-position: center 30%;
+}
+
+@keyframes titleFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero {
+    animation: none;
+  }
+}
+
+/* ---------- Commitment / brand story section ---------- */
+.commitment {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+.commitmentGrid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 181px;
+  align-items: center;
+}
+
+.commitmentText {
+  padding: 100px;
+}
+
+.commitmentKicker {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+
+.commitmentTitle {
+  font-size: 34px;
+  line-height: 1.28;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 20px;
+  max-width: 480px;
+}
+
+.commitmentDesc {
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--muted);
+  max-width: 460px;
+  margin: 0 0 32px;
+}
+
+.featureList {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  row-gap: 16px;
+  column-gap: 24px;
+  margin-bottom: 36px;
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--sale);
+}
+
+.featureIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: var(--gold);
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.knowMoreBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: black;
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 16px 42px;
+  border-radius: 8px;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.knowMoreBtn:hover {
+  background: var(--gold-deep);
+  transform: translateY(-2px);
+}
+
+.commitmentMedia {
+  display: flex;
+  justify-content: center;
+}
+
+.commitmentImage {
+  width: 100%;
+  max-width: 440px;
+  height: auto;
+  display: block;
+}
+
+/* ============================================================
+   GIFT SHOP BODY — filters + product grid
+   ============================================================ */
+
+.shopWrap {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 40px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 50px 40px 80px;
+  align-items: start;
+  scroll-margin-top: 110px;
+}
+
+/* ---------- Mobile filter toggle button (hidden on desktop) ---------- */
+.filterToggle {
+  display: none;
+}
+
+.filterToggleText {
+  display: none;
+}
+
+.filterToggleIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filterToggleIcon svg {
+  display: block;
+}
+
+/* ---------- Mobile backdrop behind the filter sheet (hidden on desktop) ---------- */
+.filterOverlay {
+  display: none;
+}
+
+/* ---------- Filters ---------- */
+.filtersSheetHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 16px;
+  padding: 0 0 10px;
   border-bottom: 1px solid var(--line);
 }
 
-.heroInner {
-  max-width: 640px;
-  margin: 0 auto;
-}
-
-.heroKicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
+.filtersHeading {
+  font-size: 13px;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--gold);
-  border: 1px solid var(--gold);
-  padding: 6px 16px;
-  border-radius: 20px;
-  margin-bottom: 20px;
-}
-
-.heroTitle {
-  font-size: 42px;
-  font-weight: 600;
-  color: #fff;
-  margin: 0 0 14px;
-}
-
-.heroSubtitle {
-  font-size: 15px;
-  line-height: 1.7;
-  color: #d8cdb6;
   margin: 0;
-}
-
-/* ---------- Generic section wrapper ---------- */
-.section {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 56px 40px 0;
-}
-
-.sectionHeading {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-.sectionHeading h2 {
-  font-size: 26px;
-  font-weight: 600;
-  color: var(--ink);
-  margin: 0 0 8px;
-}
-
-.sectionHeading p {
-  font-size: 13.5px;
-  color: var(--muted);
-  margin: 0;
-}
-
-/* ---------- Occasion grid ---------- */
-.occasionGrid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 20px;
-}
-
-.occasionCard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 26px 14px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.occasionCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 14px 30px rgba(28, 25, 23, 0.08);
-  border-color: var(--gold);
-}
-
-.occasionIcon {
-  font-size: 30px;
-}
-
-.occasionName {
-  font-size: 13px;
-  text-align: center;
   color: var(--sale);
-  font-weight: 500;
 }
 
-/* ---------- Recipient grid ---------- */
-.recipientGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-}
-
-.recipientCard {
-  display: flex;
+/* Close (✕) button for the mobile bottom sheet, hidden on desktop */
+.filtersClose {
+  display: none;
   align-items: center;
-  gap: 14px;
-  background: var(--gold-soft);
-  border-radius: 10px;
-  padding: 22px 20px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.recipientCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 14px 30px rgba(28, 25, 23, 0.1);
-}
-
-.recipientIcon {
-  font-size: 26px;
-  width: 44px;
-  height: 44px;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
   border-radius: 50%;
   background: #fff;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.filterGroup {
+  margin-bottom: 34px;
+}
+
+.filterGroup ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ---------- Filter list item (holds a checkbox + label) ---------- */
+.filterGroup li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  padding: 7px 0;
+  color: #4a4136;
+  border-radius: 4px;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    padding 0.15s ease;
+}
+
+.filterGroup li:hover {
+  color: var(--gold-deep);
+}
+
+/* ---------- Checkbox row inside each filter item ---------- */
+.checkRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.checkRow input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  accent-color: var(--gold-deep);
+  cursor: pointer;
+}
+
+.checkLabel {
+  line-height: 1.2;
+}
+
+/* ---------- Selected / active filter state ---------- */
+.filterGroup li.selected {
+  background: var(--gold-soft);
+  color: var(--sale);
+  font-weight: 600;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.filterGroup li.selected .count {
+  color: var(--sale);
+}
+
+.groupHeading {
+  border: none;
+  padding: 0;
+  margin-bottom: 12px;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--sale);
+}
+
+.count {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.priceSlider {
+  height: 3px;
+  background: var(--line);
+  border-radius: 2px;
+  position: relative;
+  margin: 18px 0 10px;
+}
+
+.fill {
+  position: absolute;
+  left: 15%;
+  right: 35%;
+  top: 0;
+  bottom: 0;
+  background: var(--gold);
+  border-radius: 2px;
+}
+
+.handle {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  background: var(--gold);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px var(--gold);
+}
+
+.handleLeft {
+  left: 15%;
+}
+
+.handleRight {
+  left: 65%;
+}
+
+.priceValues {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.promoTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.promoTags span {
+  font-size: 11px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  color: var(--sale);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.clear {
+  color: var(--gold-deep);
+  border: none !important;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.applyFilters {
+  display: none;
+}
+
+/* ---------- Pagination ---------- */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 56px;
+  font-size: 14px;
+}
+
+.pagination a {
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--muted);
 }
 
-.recipientName {
-  font-size: 14.5px;
-  font-weight: 600;
-  color: var(--sale);
-}
-
-/* ---------- Budget pills ---------- */
-.budgetRow {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 14px;
-}
-
-.budgetPill {
-  font-size: 13.5px;
-  font-weight: 500;
-  color: var(--sale);
-  background: #fff;
-  border: 1px solid var(--gold);
-  padding: 12px 26px;
-  border-radius: 30px;
-  transition: background 0.2s ease, color 0.2s ease;
-}
-
-.budgetPill:hover {
+.pagination a.active,
+.pagination a.active:hover {
   background: var(--ink);
   color: var(--gold-soft);
   border-color: var(--ink);
 }
 
-/* ---------- Product grid (featured gifts) ---------- */
+.pagination a:hover {
+  border-color: var(--gold);
+  color: var(--gold-deep);
+}
+
+
+/* ---------- Toolbar ---------- */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 26px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.toolbar select {
+  font-family: "Jost", sans-serif;
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: var(--ink);
+  border-radius: var(--radius);
+}
+
+/* ---------- Product grid ---------- */
 .productGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
 }
 
 .productCard {
-  background: #fff;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   overflow: hidden;
   position: relative;
-  transition: box-shadow 0.25s, transform 0.25s;
+  transition:
+    box-shadow 0.25s,
+    transform 0.25s;
 }
 
 .productCard:hover {
@@ -276,13 +539,77 @@
   z-index: 2;
 }
 
+/* ---------- Category label overlay (sits on the product image) ---------- */
+.productCatOverlay {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 2;
+  font-size: 10.5px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--sale);
+  background: rgba(255, 255, 255, 0.85);
+  padding: 5px 10px;
+  border-radius: 20px;
+  backdrop-filter: blur(2px);
+}
+
+/* ---------- Wishlist / quick-view icons ---------- */
+.wishlistActions {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wishlistActions button {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--ink);
+  transition:
+    transform 0.2s ease,
+    font-size 0.2s ease,
+    color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.wishlistActions button:hover {
+  font-size: 19px;
+  color: var(--gold-deep);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(28, 25, 23, 0.18);
+}
+
+.wishlistActions button:active {
+  transform: scale(0.85);
+  background: var(--gold-soft);
+  color: var(--sale);
+  box-shadow: 0 2px 6px rgba(28, 25, 23, 0.2);
+}
+
 .productInfo {
-  padding: 16px 18px 18px;
+  padding: 12px 18px 4px;
+  position: relative;
+  background: transparent;
 }
 
 .productName {
-  font-size: 15.5px;
-  margin: 0 0 8px;
+  font-size: 16px;
+  margin: -11px -3px -2px;
   font-weight: 500;
   font-family: "Jost", sans-serif;
 }
@@ -303,6 +630,147 @@
   color: var(--muted);
   text-decoration: line-through;
   font-size: 13px;
+}
+
+/* ---------- Add to Cart button ---------- */
+.addToCartBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 5px 14px;
+  font-family: "Jost", sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--cream);
+  background: var(--gold);
+  border: 1px solid var(--gold);
+  border-radius: 30px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+.addToCartBtn svg {
+  font-size: 14px;
+}
+
+.addToCartBtn:hover {
+  background: var(--gold-deep);
+  border-color: var(--gold-deep);
+  box-shadow: 0 8px 18px rgba(124, 94, 34, 0.25);
+}
+
+.addToCartBtn:active {
+  transform: scale(0.97);
+}
+
+.addToCartBtnActive {
+  background: var(--gold-soft);
+  color: var(--sale);
+  border-color: var(--gold-soft);
+  cursor: default;
+}
+
+.addToCartBtnActive:hover {
+  background: var(--gold-soft);
+  color: var(--sale);
+  border-color: var(--gold-soft);
+  box-shadow: none;
+  transform: none;
+}
+
+/* ---------- Testimonials ---------- */
+.testimonials {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 40px 90px;
+}
+
+.testimonialsHeading {
+  text-align: center;
+  margin: 0 auto 32px;
+}
+
+.testimonialsKicker {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.testimonialsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  align-items: stretch;
+}
+
+.testimonialCard {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 100%;
+}
+
+.avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--gold-soft);
+  color: var(--sale);
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.testimonialBody {
+  min-width: 0;
+}
+
+.stars {
+  display: flex;
+  gap: 2px;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.starFilled {
+  color: var(--gold);
+  fill: var(--gold);
+}
+
+.starEmpty {
+  color: var(--line);
+}
+
+.testimonialQuote {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--sale);
+  margin: 0 0 8px;
+}
+
+.authorName {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
 }
 
 /* ---------- Perks strip ---------- */
@@ -351,79 +819,405 @@
   color: #c9bfa9;
 }
 
-/* ---------- Responsive ---------- */
-@media (max-width: 1024px) {
-  .occasionGrid {
-    grid-template-columns: repeat(3, 1fr);
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+/* ---------- Large tablets / small desktops ---------- */
+@media (max-width: 1100px) {
+  .commitment {
+    padding: 70px 32px;
   }
 
+  .testimonials {
+    padding: 0 32px 80px;
+  }
+}
+
+@media (max-width: 1024px) {
   .productGrid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
+/* ---------- Tablet ---------- */
 @media (max-width: 900px) {
   .mainContent {
     padding-top: 100px;
   }
 
-  .hero {
-    padding: 50px 24px;
+  /* FIX: don't crop the hero banner on mobile — the promo text is baked
+     into the image edge-to-edge, so a tighter aspect-ratio with
+     object-fit: cover was slicing off words on the left/right.
+     Letting the image render at its own natural ratio (no forced
+     aspect-ratio) shows the full banner with zero cropping AND zero
+     empty letterbox space above/below it. */
+  .heroImage {
+    aspect-ratio: auto;
+    height: auto;
+    object-fit: unset;
+    object-position: center;
+    background: none;
+    padding-top: 22px;
   }
 
-  .heroTitle {
-    font-size: 32px;
+  .commitment {
+    padding: 60px 24px;
   }
 
-  .section {
-    padding: 44px 20px 0;
+  .commitmentGrid {
+    grid-template-columns: 1fr;
+    gap: 40px;
   }
 
-  .recipientGrid {
+  .commitmentText {
+    order: 2;
+    /* FIX: base desktop rule sets padding: 100px, which was never
+       overridden here — that was squeezing the text into a narrow
+       column on mobile/tablet. */
+    padding: 0;
+  }
+
+  .commitmentMedia {
+    order: 1;
+  }
+
+  .commitmentTitle {
+    font-size: 28px;
+    max-width: none;
+  }
+
+  .commitmentDesc {
+    max-width: none;
+  }
+
+  .commitmentImage {
+    max-width: 360px;
+  }
+
+  .testimonialsGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .shopWrap {
+    grid-template-columns: 1fr;
+    padding: 24px 20px 60px;
+    gap: 0;
+  }
+
+  .productGrid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
 
   .perks {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
+    gap: 30px;
     padding: 30px 24px;
+  }
+
+  /* ----- Filter toggle button: text on the left, icon on the right ----- */
+  .filterToggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    padding: 5px;
+    background: none;
+    color: var(--ink);
+    border: none;
+    border-radius: 6px;
+    font-family: "Jost", sans-serif;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .filterToggleText {
+    display: inline-block;
+  }
+
+  .filterToggleIcon {
+    font-size: 16px;
+  }
+
+  .filterToggle:active {
+    transform: scale(0.96);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) inset;
+  }
+
+  /* ----- Backdrop: 30% black, sits behind the sheet, closes it on tap ----- */
+  .filterOverlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 998;
+  }
+
+  /* ----- Bottom sheet: slides up from the bottom, covers 60% of the screen.
+           Header stays fixed; only the list below it scrolls. ----- */
+  .filters {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 60vh;
+    max-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--cream);
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -10px 30px rgba(28, 25, 23, 0.3);
+    transform: translateY(100%);
+    transition: transform 0.35s ease;
+    z-index: 999;
+    overflow: hidden;
+  }
+
+  .filtersOpen {
+    transform: translateY(0);
+  }
+
+  .filtersSheetHeader {
+    flex-shrink: 0;
+    padding: 16px 18px 10px;
+    margin: 0;
+    background: var(--cream);
+  }
+
+  .filtersClose {
+    display: flex;
+  }
+
+  .filtersInner {
+    flex: 1;
+    padding: 10px 18px 22px;
+    overflow-y: auto;
+  }
+
+  /* ----- Larger, clearer checkboxes on mobile ----- */
+  .checkRow input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+  }
+
+  .filterGroup li.selected {
+    border: 1px solid var(--gold-deep);
+  }
+
+  /* ----- Hide "Showing X of Y results" on mobile ----- */
+  .resultsCount {
+    display: none;
+  }
+
+  /* ----- Toolbar becomes just the sort select, full width ----- */
+  .toolbar {
+    justify-content: flex-end;
+  }
+
+  /* ----- Sort dropdown styled for mobile ----- */
+  .sortSelect {
+    width: 100%;
+    padding: 13px 40px 13px 16px;
+    font-size: 13.5px;
+    color: var(--sale);
+    background-color: #fff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237c5e22' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    box-shadow: 0 2px 6px rgba(28, 25, 23, 0.05);
   }
 }
 
+/* ---------- Mobile ---------- */
 @media (max-width: 560px) {
-  .heroTitle {
-    font-size: 26px;
+  .commitmentTitle {
+    font-size: 24px;
   }
 
-  .heroSubtitle {
-    font-size: 13.5px;
+  .featureList {
+    grid-template-columns: 1fr;
+    row-gap: 12px;
   }
 
-  .occasionGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+  .mainContent {
+    padding-top: 80px;
   }
 
-  .occasionCard {
-    padding: 18px 10px;
+  /* FIX: same reasoning as the tablet breakpoint above — keep the full
+     banner visible with no cropping and no empty letterbox bars. */
+  .heroImage {
+    aspect-ratio: auto;
+    height: auto;
+    object-fit: unset;
+    object-position: center;
+    background: none;
+    padding-top: 28px;
+  }
+
+  .shopWrap {
+    padding: 20px 14px 48px;
   }
 
   .productGrid {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
+  }
+
+  .productCard {
+    border-radius: 4px;
   }
 
   .productInfo {
     padding: 10px 10px 12px;
   }
 
+  .productCatOverlay {
+    font-size: 8.5px;
+    letter-spacing: 1px;
+    padding: 4px 8px;
+    bottom: 8px;
+    left: 8px;
+  }
+
   .productName {
+    font-size: 12.5px;
+    margin: 4px 0 6px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .productPrice {
+    gap: 6px;
+    font-size: 12px;
+    flex-wrap: wrap;
+  }
+
+  .priceOld {
+    font-size: 10.5px;
+  }
+
+  .badge {
+    top: 8px;
+    left: 8px;
+    font-size: 9px;
+    padding: 3px 8px;
+  }
+
+  .wishlistActions {
+    top: 8px;
+    right: 8px;
+  }
+
+  .wishlistActions button {
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+  }
+
+  .wishlistActions button:hover {
+    font-size: 15px;
+  }
+
+  /* ----- Add to Cart button on small screens ----- */
+  .addToCartBtn {
+    margin-top: 8px;
+    padding: 8px 10px;
+    font-size: 10.5px;
+    gap: 6px;
+    letter-spacing: 0.6px;
+  }
+
+  .addToCartBtn svg {
+    font-size: 12px;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .toolbar select {
+    width: 100%;
+  }
+
+  .testimonials {
+    padding: 0 20px 60px;
+    margin-top: 40px;
+  }
+
+  .testimonialsGrid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .testimonialCard {
+    padding: 18px;
+  }
+
+  .perks {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 24px 20px;
+  }
+}
+
+/* ---------- Small phones ---------- */
+@media (max-width: 400px) {
+  .mainContent {
+    padding-top: 70px;
+  }
+
+  /* FIX: at the smallest widths too, keep the image at its natural
+     ratio — no cropping, no empty letterbox space. */
+  .heroImage {
+    aspect-ratio: auto;
+    height: auto;
+    object-fit: unset;
+    background: none;
+    padding-top: 38px;
+  }
+
+  .commitment {
+    padding: 44px 16px;
+  }
+
+  .commitmentTitle {
+    font-size: 21px;
+  }
+
+  .commitmentDesc {
     font-size: 13px;
   }
 
-  .budgetPill {
-    padding: 10px 18px;
-    font-size: 12.5px;
+  .productGrid {
+    gap: 10px;
+  }
+
+  .productName {
+    font-size: 12px;
+  }
+
+  .avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 12px;
   }
 }

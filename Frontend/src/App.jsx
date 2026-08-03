@@ -72,6 +72,7 @@ import Shop from "./Components/Shop/shop.jsx";
 
 import Gifts from "./Components/Gifts/gifts.jsx";
 import Collections from "./Components/Collections/Collections.jsx";
+import Offers from "./Components/Offers/Offers.jsx";
 
 
 // ============================================
@@ -90,7 +91,11 @@ const ROUTES = {
 
   GIFTS: "/gifts",
   COLLECTIONS: "/collections",
+<<<<<<< HEAD
 
+=======
+  OFFERS:"/offers",
+>>>>>>> 36e190d8888da22e02f9573d1f2a31f187c520df
   LOGIN: "/login",
   REGISTER: "/register",
   VERIFY_OTP: "/verify-otp",
@@ -328,6 +333,20 @@ const App = () => {
               </LayoutWithHeader>
             }
           />
+
+          {/* ============================================
+                COLLECTIONS ROUTE - WITH HEADER
+                ============================================ */}
+          <Route
+            path={ROUTES.OFFERS}
+            element={
+              <LayoutWithHeader>
+                <Offers/>
+              </LayoutWithHeader>
+            }
+          />
+
+
 
           {/* ============================================
                 PUBLIC PRODUCT DETAIL ROUTE - WITH HEADER ✅

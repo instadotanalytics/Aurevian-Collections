@@ -22,6 +22,7 @@ import pearlStuds from "../../assets/pearl-studs.jpg.jfif";
 import { LuSlidersHorizontal } from "react-icons/lu";
 import { FiHeart } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
+import { FiShoppingBag, FiCheck } from "react-icons/fi";
 
 const categories = [
   { name: "Rings", count: 32 },
@@ -177,6 +178,9 @@ export default function Shop() {
 
   const [wishlist, setWishlist] = useState(new Set());
 
+  // ---------- Cart state: tracks which product ids have been added ----------
+  const [cart, setCart] = useState(new Set());
+
   const toggleWishlist = (id) => {
     setWishlist((prev) => {
       const next = new Set(prev);
@@ -187,6 +191,15 @@ export default function Shop() {
         next.add(id);
       }
 
+      return next;
+    });
+  };
+
+  // ---------- Add to Cart handler ----------
+  const addToCart = (id) => {
+    setCart((prev) => {
+      const next = new Set(prev);
+      next.add(id);
       return next;
     });
   };
@@ -456,6 +469,26 @@ export default function Shop() {
                       <span className={styles.priceNow}>{p.priceNow}</span>
                       <span className={styles.priceOld}>{p.priceOld}</span>
                     </div>
+
+                    {/* ---------- Add to Cart button ---------- */}
+                    <button
+                      type="button"
+                      className={`${styles.addToCartBtn} ${
+                        cart.has(p.id) ? styles.addToCartBtnActive : ""
+                      }`}
+                      onClick={() => addToCart(p.id)}
+                      disabled={cart.has(p.id)}
+                    >
+                      {cart.has(p.id) ? (
+                        <>
+                          <FiCheck /> Added to Cart
+                        </>
+                      ) : (
+                        <>
+                          <FiShoppingBag /> Add to Cart
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
               ))}

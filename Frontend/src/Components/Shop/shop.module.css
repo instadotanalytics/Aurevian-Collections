@@ -521,7 +521,7 @@ position: absolute;
 }
 
 .productInfo {
-  padding: 16px 18px 18px;
+  padding: 12px 18px 4px;
   position: relative;
 }
 
@@ -548,6 +548,61 @@ position: absolute;
   color: var(--muted);
   text-decoration: line-through;
   font-size: 13px;
+}
+
+/* ---------- Add to Cart button ---------- */
+.addToCartBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 5px 14px;
+  font-family: "Jost", sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--cream);
+  background: var(--gold);
+  border: 1px solid var(--gold);
+  border-radius: 30px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+.addToCartBtn svg {
+  font-size: 14px;
+}
+
+.addToCartBtn:hover {
+  background: var(--gold-deep);
+  border-color: var(--gold-deep);
+  box-shadow: 0 8px 18px rgba(124, 94, 34, 0.25);
+}
+
+.addToCartBtn:active {
+  transform: scale(0.97);
+}
+
+.addToCartBtnActive {
+  background: var(--gold-soft);
+  color: var(--sale);
+  border-color: var(--gold-soft);
+  cursor: default;
+}
+
+.addToCartBtnActive:hover {
+  background: var(--gold-soft);
+  color: var(--sale);
+  border-color: var(--gold-soft);
+  box-shadow: none;
+  transform: none;
 }
 
 /* ---------- Pagination ---------- */
@@ -803,7 +858,7 @@ position: absolute;
   }
 
   .productInfo {
-    padding: 4px 10px 0px;
+    padding: 4px 10px 10px;
   }
 
   .productCatOverlay {
@@ -857,6 +912,19 @@ position: absolute;
 
   .wishlistActions button:hover {
     font-size: 15px;
+  }
+
+  /* ----- Add to Cart button on small screens ----- */
+  .addToCartBtn {
+    margin-top: 8px;
+    padding: 8px 10px;
+    font-size: 10.5px;
+    gap: 6px;
+    letter-spacing: 0.6px;
+  }
+
+  .addToCartBtn svg {
+    font-size: 12px;
   }
 
   .toolbar {
