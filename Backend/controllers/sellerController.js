@@ -3,8 +3,7 @@
 import Seller from "../models/Seller.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-// 🛠️ FIXED: import * as use kiya taaki default export (instance) sahi se mile
-import * as otpService from "../services/otpService.js";
+import otpService from "../services/otpService.js";
 import emailService from "../services/emailService.js";
 import cloudinaryService from "../services/cloudinaryService.js";
 import crypto from "crypto";
@@ -75,53 +74,49 @@ export const registerSeller = async (req, res) => {
     }
 
     if (password.length < 6) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Password must be at least 6 characters",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters",
+      });
     }
 
     // ✅ Check if seller exists
     let existingSeller = await Seller.findOne({
       email: { $regex: new RegExp(`^${email}$`, "i") },
     });
-    
+
     if (existingSeller) {
       if (existingSeller.isVerified) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "Seller already exists with this email",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "Seller already exists with this email",
+        });
       }
-      
+
       // ✅ If not verified, update existing unverified seller
       existingSeller.firstName = firstName.trim();
       existingSeller.lastName = lastName.trim();
       existingSeller.fullName = `${firstName} ${lastName}`.trim();
       existingSeller.phone = phone.trim();
-      
+
       // ✅ Hash password before saving
       const salt = await bcrypt.genSalt(12);
       existingSeller.password = await bcrypt.hash(password, salt);
-      
+
       existingSeller.storeInfo.storeName = storeName.trim();
       existingSeller.storeInfo.storeSlug = storeName
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-");
       existingSeller.status = "pending";
-      
+
       await existingSeller.save();
       console.log("✅ Existing seller updated:", existingSeller._id);
-      
-      // ✅ Send OTP
+
+      // ✅ Send Email OTP
       const emailOTP = Math.floor(100000 + Math.random() * 900000).toString();
       await existingSeller.setEmailOTP(emailOTP);
-      await otpService.sendOTP(email, "email", emailOTP);
-      
+      await emailService.sendOTPEmail(email, emailOTP, "verification");
+
       return res.status(200).json({
         success: true,
         message: "OTP sent! Please verify your email.",
@@ -143,12 +138,10 @@ export const registerSeller = async (req, res) => {
     // ✅ Check phone
     existingSeller = await Seller.findOne({ phone });
     if (existingSeller) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Seller already exists with this phone number",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Seller already exists with this phone number",
+      });
     }
 
     // ✅ Hash password
@@ -212,13 +205,14 @@ export const registerSeller = async (req, res) => {
     await seller.save();
     console.log("✅ New seller created:", seller._id);
 
-    // ✅ Send OTP
+    // ✅ Send Email OTP
     const emailOTP = Math.floor(100000 + Math.random() * 900000).toString();
     await seller.setEmailOTP(emailOTP);
-    await otpService.sendOTP(email, "email", emailOTP);
+    await emailService.sendOTPEmail(email, emailOTP, "verification");
     console.log("✅ Email OTP sent to:", email);
 
-    const phoneOtpResult = await otpService.sendOTP(phone, "phone");
+    // ✅ Send Phone OTP (Twilio Verify — generates & tracks its own code)
+    const phoneOtpResult = await otpService.sendPhoneOTP(phone);
     if (!phoneOtpResult.success) {
       console.error("❌ Failed to send phone OTP:", phoneOtpResult.error);
     }
@@ -241,13 +235,11 @@ export const registerSeller = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Registration error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Registration failed",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Registration failed",
+      error: error.message,
+    });
   }
 };
 
@@ -310,13 +302,11 @@ export const verifyEmailOTP = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Email verification error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Email verification failed",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Email verification failed",
+      error: error.message,
+    });
   }
 };
 
@@ -378,13 +368,11 @@ export const verifyPhoneOTP = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Phone verification error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Phone verification failed",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Phone verification failed",
+      error: error.message,
+    });
   }
 };
 
@@ -435,9 +423,9 @@ export const resendOTP = async (req, res) => {
     if (type === "email") {
       const newOTP = Math.floor(100000 + Math.random() * 900000).toString();
       await seller.setEmailOTP(newOTP);
-      await otpService.sendOTP(contact, "email", newOTP);
+      await emailService.sendOTPEmail(contact, newOTP, "verification");
     } else if (type === "phone") {
-      await otpService.sendOTP(contact, "phone");
+      await otpService.sendPhoneOTP(contact);
     }
 
     return res
@@ -445,13 +433,11 @@ export const resendOTP = async (req, res) => {
       .json({ success: true, message: `OTP resent to ${type} successfully` });
   } catch (error) {
     console.error("❌ Resend OTP error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to resend OTP",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to resend OTP",
+      error: error.message,
+    });
   }
 };
 
@@ -465,7 +451,7 @@ export const sellerLogin = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Email and password are required"
+        message: "Email and password are required",
       });
     }
 
@@ -476,7 +462,7 @@ export const sellerLogin = async (req, res) => {
     if (!seller) {
       return res.status(401).json({
         success: false,
-        message: "Invalid credentials"
+        message: "Invalid credentials",
       });
     }
 
@@ -499,7 +485,8 @@ export const sellerLogin = async (req, res) => {
     if (seller.status === "pending") {
       return res.status(403).json({
         success: false,
-        message: "Your account is pending approval. Please wait for verification (within 24 hours).",
+        message:
+          "Your account is pending approval. Please wait for verification (within 24 hours).",
         status: "pending",
       });
     }
@@ -523,7 +510,7 @@ export const sellerLogin = async (req, res) => {
     if (!seller.isActive) {
       return res.status(403).json({
         success: false,
-        message: "Account is deactivated"
+        message: "Account is deactivated",
       });
     }
 
@@ -533,7 +520,7 @@ export const sellerLogin = async (req, res) => {
       await seller.addLoginHistory(req.ip, req.headers["user-agent"], false);
       return res.status(401).json({
         success: false,
-        message: "Invalid credentials"
+        message: "Invalid credentials",
       });
     }
 
@@ -597,13 +584,11 @@ export const getCurrentSeller = async (req, res) => {
     return res.status(200).json({ success: true, data: seller });
   } catch (error) {
     console.error("❌ Get seller error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to get seller",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get seller",
+      error: error.message,
+    });
   }
 };
 
@@ -621,7 +606,7 @@ export const sellerLogout = async (req, res) => {
     }
 
     const isProduction = process.env.NODE_ENV === "production";
-    
+
     res.clearCookie("sellerAccessToken", {
       httpOnly: true,
       secure: isProduction,
@@ -693,22 +678,18 @@ export const refreshSellerToken = async (req, res) => {
       path: "/",
     });
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Token refreshed successfully",
-        data: { accessToken },
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Token refreshed successfully",
+      data: { accessToken },
+    });
   } catch (error) {
     console.error("❌ Refresh token error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to refresh token",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to refresh token",
+      error: error.message,
+    });
   }
 };
 
@@ -742,13 +723,11 @@ export const getSellerDashboard = async (req, res) => {
     return res.status(200).json({ success: true, data: stats });
   } catch (error) {
     console.error("❌ Get dashboard error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to get dashboard data",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get dashboard data",
+      error: error.message,
+    });
   }
 };
 
@@ -790,13 +769,11 @@ export const getRecentOrders = async (req, res) => {
     return res.status(200).json({ success: true, data: orders });
   } catch (error) {
     console.error("❌ Get orders error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to get orders",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get orders",
+      error: error.message,
+    });
   }
 };
 
@@ -852,22 +829,18 @@ export const updateSellerProfile = async (req, res) => {
 
     await seller.save();
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Profile updated successfully",
-        data: seller,
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: seller,
+    });
   } catch (error) {
     console.error("❌ Update seller error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to update profile",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update profile",
+      error: error.message,
+    });
   }
 };
 
@@ -897,12 +870,10 @@ export const uploadSellerDocuments = async (req, res) => {
       cleanPan.length !== 10 ||
       !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(cleanPan)
     ) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Please enter a valid PAN number (e.g., ABCDE1234F)",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid PAN number (e.g., ABCDE1234F)",
+      });
     }
 
     if (!aadhaarNumber) {
@@ -912,12 +883,10 @@ export const uploadSellerDocuments = async (req, res) => {
     }
     const cleanAadhaar = aadhaarNumber.trim().replace(/\s/g, "");
     if (cleanAadhaar.length !== 12 || !/^[0-9]{12}$/.test(cleanAadhaar)) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Please enter a valid 12-digit Aadhaar number",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid 12-digit Aadhaar number",
+      });
     }
 
     const existingPan = await Seller.findOne({
@@ -925,24 +894,20 @@ export const uploadSellerDocuments = async (req, res) => {
       _id: { $ne: sellerId },
     });
     if (existingPan) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "PAN number already registered with another seller",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "PAN number already registered with another seller",
+      });
     }
     const existingAadhaar = await Seller.findOne({
       "documents.aadhaarNumber": cleanAadhaar,
       _id: { $ne: sellerId },
     });
     if (existingAadhaar) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Aadhaar number already registered with another seller",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Aadhaar number already registered with another seller",
+      });
     }
 
     let parsedBankDetails = null;
@@ -1033,13 +998,11 @@ export const uploadSellerDocuments = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ KYC submit error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "KYC submission failed",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "KYC submission failed",
+      error: error.message,
+    });
   }
 };
 
@@ -1073,13 +1036,11 @@ export const getVerificationStatus = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Get verification status error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to get verification status",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get verification status",
+      error: error.message,
+    });
   }
 };
 
@@ -1115,13 +1076,11 @@ export const getRecentActivities = async (req, res) => {
     return res.status(200).json({ success: true, data: activities });
   } catch (error) {
     console.error("❌ Get activities error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to get activities",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get activities",
+      error: error.message,
+    });
   }
 };
 
@@ -1135,43 +1094,46 @@ export const sellerForgotPassword = async (req, res) => {
     if (!email) {
       return res.status(400).json({
         success: false,
-        message: "Please provide your email address"
+        message: "Please provide your email address",
       });
     }
 
-    const seller = await Seller.findOne({ 
-      email: { $regex: new RegExp(`^${email}$`, "i") } 
+    const seller = await Seller.findOne({
+      email: { $regex: new RegExp(`^${email}$`, "i") },
     });
 
     if (!seller) {
       return res.status(404).json({
         success: false,
-        message: "No seller found with this email address"
+        message: "No seller found with this email address",
       });
     }
 
     if (!seller.isActive) {
       return res.status(403).json({
         success: false,
-        message: "Your account is deactivated. Please contact support."
+        message: "Your account is deactivated. Please contact support.",
       });
     }
 
     if (seller.status === "suspended") {
       return res.status(403).json({
         success: false,
-        message: "Your account is suspended. Please contact support."
+        message: "Your account is suspended. Please contact support.",
       });
     }
 
     // ✅ Generate reset token
-    const resetToken = crypto.randomBytes(20).toString('hex');
-    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-    
+    const resetToken = crypto.randomBytes(20).toString("hex");
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+
     // ✅ Update directly with findOneAndUpdate (bypasses pre-save issues)
     await Seller.findByIdAndUpdate(seller._id, {
       resetPasswordToken: hashedToken,
-      resetPasswordExpire: Date.now() + 10 * 60 * 1000
+      resetPasswordExpire: Date.now() + 10 * 60 * 1000,
     });
 
     const resetUrl = `${process.env.CLIENT_URL}/seller/reset-password/${resetToken}`;
@@ -1180,35 +1142,36 @@ export const sellerForgotPassword = async (req, res) => {
       await emailService.sendSellerResetPasswordEmail(
         seller.email,
         seller.firstName,
-        resetUrl
+        resetUrl,
       );
-      
-      console.log('✅ Password reset email sent to:', seller.email);
-      
+
+      console.log("✅ Password reset email sent to:", seller.email);
+
       return res.status(200).json({
         success: true,
-        message: "Password reset link sent to your email. Please check your inbox."
+        message:
+          "Password reset link sent to your email. Please check your inbox.",
       });
     } catch (emailError) {
-      console.error('❌ Email send error:', emailError);
-      
+      console.error("❌ Email send error:", emailError);
+
       // ✅ Clear token if email fails
       await Seller.findByIdAndUpdate(seller._id, {
         resetPasswordToken: undefined,
-        resetPasswordExpire: undefined
+        resetPasswordExpire: undefined,
       });
-      
+
       return res.status(500).json({
         success: false,
-        message: "Failed to send reset email. Please try again."
+        message: "Failed to send reset email. Please try again.",
       });
     }
   } catch (error) {
-    console.error('❌ Forgot password error:', error);
+    console.error("❌ Forgot password error:", error);
     return res.status(500).json({
       success: false,
       message: "Failed to process request",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -1224,75 +1187,68 @@ export const sellerResetPassword = async (req, res) => {
     if (!password || !confirmPassword) {
       return res.status(400).json({
         success: false,
-        message: "Please provide password and confirm password"
+        message: "Please provide password and confirm password",
       });
     }
 
     if (password !== confirmPassword) {
       return res.status(400).json({
         success: false,
-        message: "Passwords do not match"
+        message: "Passwords do not match",
       });
     }
 
     if (password.length < 6) {
       return res.status(400).json({
         success: false,
-        message: "Password must be at least 6 characters"
+        message: "Password must be at least 6 characters",
       });
     }
 
-    // ✅ Hash the token
-    const hashedToken = crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
-    // ✅ Find seller with valid token
     const seller = await Seller.findOne({
       resetPasswordToken: hashedToken,
-      resetPasswordExpire: { $gt: Date.now() }
+      resetPasswordExpire: { $gt: Date.now() },
     });
 
     if (!seller) {
       return res.status(400).json({
         success: false,
-        message: "Invalid or expired reset token. Please request a new one."
+        message: "Invalid or expired reset token. Please request a new one.",
       });
     }
 
-    // ✅ Hash the new password
     const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // ✅ Update using findByIdAndUpdate (bypasses pre-save)
     await Seller.findByIdAndUpdate(seller._id, {
       password: hashedPassword,
       resetPasswordToken: undefined,
-      resetPasswordExpire: undefined
+      resetPasswordExpire: undefined,
     });
 
-    // ✅ Send confirmation email
     try {
       await emailService.sendSellerPasswordResetConfirmation(
         seller.email,
-        seller.firstName
+        seller.firstName,
       );
-      console.log('✅ Password reset confirmation sent to:', seller.email);
+      console.log("✅ Password reset confirmation sent to:", seller.email);
     } catch (emailError) {
-      console.error('❌ Confirmation email error:', emailError);
+      console.error("❌ Confirmation email error:", emailError);
     }
 
     return res.status(200).json({
       success: true,
-      message: "Password reset successfully! You can now login with your new password."
+      message:
+        "Password reset successfully! You can now login with your new password.",
     });
   } catch (error) {
-    console.error('❌ Reset password error:', error);
+    console.error("❌ Reset password error:", error);
     return res.status(500).json({
       success: false,
       message: "Failed to reset password",
-      error: error.message
+      error: error.message,
     });
   }
 };
