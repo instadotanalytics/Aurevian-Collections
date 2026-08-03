@@ -331,7 +331,7 @@ const App = () => {
           />
 
           {/* ============================================
-                COLLECTIONS ROUTE - WITH HEADER
+                OFFERS ROUTE - WITH HEADER
                 ============================================ */}
           <Route
             path={ROUTES.OFFERS}
