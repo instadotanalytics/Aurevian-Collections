@@ -22,12 +22,8 @@ import styles from "./PrivacyPolicy.module.css";
 import Footer from "../Pages/Layout/Footer/Footer.jsx";
 import Header from "../Pages/Layout/Header/Header.jsx";
 
-// Placeholder images — replace these with your actual images
-import bannerImage from "../assets/privacybanner.png";
-import image1 from "../assets/privacypolicy.png";
-
-import image2 from "../assets/46banner.png";
-import image3 from "../assets/46banner.png";
+// Only keep banner image
+import bannerImage from "../assets/bannerprivacy.png";
 
 /* ---------- Scroll-reveal wrapper ---------- */
 const Reveal = ({ children, delay = 0, className = "" }) => {
@@ -104,7 +100,7 @@ const PrivacyPolicy = () => {
       </div>
 
       <div className={styles.privacyPage}>
-        {/* ========== HERO BANNER - 90vh ========== */}
+        {/* ========== HERO BANNER ========== */}
         <section className={styles.hero}>
           <div className={styles.heroBg}>
             <img src={bannerImage} alt="Aurevian Collections" />
@@ -123,7 +119,7 @@ const PrivacyPolicy = () => {
           </div>
         </section>
 
-        {/* ========== SCROLL INDICATOR - Between Banner and Content ========== */}
+        {/* ========== SCROLL INDICATOR ========== */}
         <div className={styles.scrollIndicatorWrapper}>
           <span className={styles.scrollIndicatorLine} />
           <div className={styles.scrollIndicatorContent}>
@@ -134,17 +130,14 @@ const PrivacyPolicy = () => {
         </div>
 
         <div className={styles.container}>
-          {/* ========== SECTION 1: Information We Collect (Image Left) ========== */}
+          {/* ========== STEP 1: Information We Collect (Left) ========== */}
           <Reveal delay={100}>
             <section className={styles.section}>
-              <div className={styles.splitLayout}>
-                <div className={styles.splitImage}>
-                  <img src={image1} alt="Information collection" />
-                </div>
-                <div className={styles.splitContent}>
-                  <span className={styles.sectionNumber}>01</span>
-                  <h2 className={styles.sectionTitle}>Information We Collect</h2>
-                  <p className={styles.sectionLead}>
+              <div className={styles.stepLayout}>
+                <div className={styles.stepContent}>
+                  <span className={styles.stepNumber}>01</span>
+                  <h2 className={styles.stepTitle}>Information We Collect</h2>
+                  <p className={styles.stepLead}>
                     We collect information you provide directly, such as your name, email address, phone number, shipping address, and payment details when you interact with our platform.
                   </p>
                 </div>
@@ -154,17 +147,14 @@ const PrivacyPolicy = () => {
 
           <Divider />
 
-          {/* ========== SECTION 2: How We Use Information (Image Right) ========== */}
+          {/* ========== STEP 2: How We Use Information (Right) ========== */}
           <Reveal delay={150}>
             <section className={styles.section}>
-              <div className={`${styles.splitLayout} ${styles.splitReverse}`}>
-                <div className={styles.splitImage}>
-                  <img src={image2} alt="How we use information" />
-                </div>
-                <div className={styles.splitContent}>
-                  <span className={styles.sectionNumber}>02</span>
-                  <h2 className={styles.sectionTitle}>How We Use Information</h2>
-                  <p className={styles.sectionLead}>
+              <div className={`${styles.stepLayout} ${styles.stepRight}`}>
+                <div className={styles.stepContent}>
+                  <span className={styles.stepNumber}>02</span>
+                  <h2 className={styles.stepTitle}>How We Use Information</h2>
+                  <p className={styles.stepLead}>
                     We use your information to process orders, provide customer support, improve our services, personalize your experience, and send important updates about your orders.
                   </p>
                 </div>
@@ -174,32 +164,31 @@ const PrivacyPolicy = () => {
 
           <Divider />
 
-          {/* ========== SECTION 3: Cookies (No Image) ========== */}
+          {/* ========== STEP 3: Cookies (Left) ========== */}
           <Reveal delay={100}>
             <section className={styles.section}>
-              <div className={styles.centeredContent}>
-                <span className={styles.sectionNumber}>03</span>
-                <h2 className={styles.sectionTitle}>Cookies</h2>
-                <p className={styles.sectionLead}>
-                  We use cookies to enhance your browsing experience, analyze website traffic, and personalize content. You can manage your cookie preferences anytime.
-                </p>
+              <div className={styles.stepLayout}>
+                <div className={styles.stepContent}>
+                  <span className={styles.stepNumber}>03</span>
+                  <h2 className={styles.stepTitle}>Cookies</h2>
+                  <p className={styles.stepLead}>
+                    We use cookies to enhance your browsing experience, analyze website traffic, and personalize content. You can manage your cookie preferences anytime.
+                  </p>
+                </div>
               </div>
             </section>
           </Reveal>
 
           <Divider />
 
-          {/* ========== SECTION 4: Payment Security (Image Left) ========== */}
+          {/* ========== STEP 4: Payment Security (Right) ========== */}
           <Reveal delay={150}>
             <section className={styles.section}>
-              <div className={styles.splitLayout}>
-                <div className={styles.splitImage}>
-                  <img src={image3} alt="Payment security" />
-                </div>
-                <div className={styles.splitContent}>
-                  <span className={styles.sectionNumber}>04</span>
-                  <h2 className={styles.sectionTitle}>Payment Security</h2>
-                  <p className={styles.sectionLead}>
+              <div className={`${styles.stepLayout} ${styles.stepRight}`}>
+                <div className={styles.stepContent}>
+                  <span className={styles.stepNumber}>04</span>
+                  <h2 className={styles.stepTitle}>Payment Security</h2>
+                  <p className={styles.stepLead}>
                     Your payment information is encrypted and processed securely through trusted payment gateways. We do not store your full card details on our servers.
                   </p>
                 </div>
@@ -209,65 +198,73 @@ const PrivacyPolicy = () => {
 
           <Divider />
 
-          {/* ========== SECTION 5: Data Protection (No Image) ========== */}
+          {/* ========== STEP 5: Data Protection (Left) ========== */}
           <Reveal delay={100}>
             <section className={styles.section}>
-              <div className={styles.centeredContent}>
-                <span className={styles.sectionNumber}>05</span>
-                <h2 className={styles.sectionTitle}>Data Protection</h2>
-                <p className={styles.sectionLead}>
-                  We implement industry-standard security measures to protect your personal information from unauthorized access, alteration, disclosure, or destruction.
-                </p>
+              <div className={styles.stepLayout}>
+                <div className={styles.stepContent}>
+                  <span className={styles.stepNumber}>05</span>
+                  <h2 className={styles.stepTitle}>Data Protection</h2>
+                  <p className={styles.stepLead}>
+                    We implement industry-standard security measures to protect your personal information from unauthorized access, alteration, disclosure, or destruction.
+                  </p>
+                </div>
               </div>
             </section>
           </Reveal>
 
           <Divider />
 
-          {/* ========== SECTION 6: Third Party Services (No Image) ========== */}
+          {/* ========== STEP 6: Third Party Services (Right) ========== */}
           <Reveal delay={150}>
             <section className={styles.section}>
-              <div className={styles.centeredContent}>
-                <span className={styles.sectionNumber}>06</span>
-                <h2 className={styles.sectionTitle}>Third Party Services</h2>
-                <p className={styles.sectionLead}>
-                  We may share your information with trusted third-party service providers only to the extent necessary to operate our business and serve you better.
-                </p>
+              <div className={`${styles.stepLayout} ${styles.stepRight}`}>
+                <div className={styles.stepContent}>
+                  <span className={styles.stepNumber}>06</span>
+                  <h2 className={styles.stepTitle}>Third Party Services</h2>
+                  <p className={styles.stepLead}>
+                    We may share your information with trusted third-party service providers only to the extent necessary to operate our business and serve you better.
+                  </p>
+                </div>
               </div>
             </section>
           </Reveal>
 
           <Divider />
 
-          {/* ========== SECTION 7: Your Rights (No Image) ========== */}
+          {/* ========== STEP 7: Your Rights (Left) ========== */}
           <Reveal delay={100}>
             <section className={styles.section}>
-              <div className={styles.centeredContent}>
-                <span className={styles.sectionNumber}>07</span>
-                <h2 className={styles.sectionTitle}>Your Rights</h2>
-                <p className={styles.sectionLead}>
-                  You have the right to access, update, or delete your personal information. You may also opt out of marketing communications at any time.
-                </p>
+              <div className={styles.stepLayout}>
+                <div className={styles.stepContent}>
+                  <span className={styles.stepNumber}>07</span>
+                  <h2 className={styles.stepTitle}>Your Rights</h2>
+                  <p className={styles.stepLead}>
+                    You have the right to access, update, or delete your personal information. You may also opt out of marketing communications at any time.
+                  </p>
+                </div>
               </div>
             </section>
           </Reveal>
 
           <Divider />
 
-          {/* ========== SECTION 8: Contact Us (No Image) ========== */}
+          {/* ========== STEP 8: Contact Us (Right) ========== */}
           <Reveal delay={150}>
             <section className={styles.section}>
-              <div className={styles.centeredContent}>
-                <span className={styles.sectionNumber}>08</span>
-                <h2 className={styles.sectionTitle}>Contact Us</h2>
-                <p className={styles.sectionLead}>
-                  If you have any questions about this Privacy Policy or how we handle your data, please reach out to our support team. We're here to help.
-                </p>
+              <div className={`${styles.stepLayout} ${styles.stepRight}`}>
+                <div className={styles.stepContent}>
+                  <span className={styles.stepNumber}>08</span>
+                  <h2 className={styles.stepTitle}>Contact Us</h2>
+                  <p className={styles.stepLead}>
+                    If you have any questions about this Privacy Policy or how we handle your data, please reach out to our support team. We're here to help.
+                  </p>
+                </div>
               </div>
             </section>
           </Reveal>
 
-          <Divider />
+          {/* ========== NO DIVIDER HERE - Removed ========== */}
 
           {/* ========== VALUE PROPS BANNER ========== */}
           <Reveal delay={200}>
@@ -297,9 +294,10 @@ const PrivacyPolicy = () => {
             </section>
           </Reveal>
 
+          {/* ========== DIVIDER - Kept before bottom banner ========== */}
           <Divider />
 
-          {/* ========== BOTTOM BANNER - Dark Theme, Full 1200px Width ========== */}
+          {/* ========== BOTTOM BANNER ========== */}
           <Reveal delay={150}>
             <section className={styles.bottomBanner}>
               <div className={styles.bottomBannerContent}>
