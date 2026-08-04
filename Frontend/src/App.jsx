@@ -75,6 +75,9 @@ import Collections from "./Components/Collections/Collections.jsx";
 import Offers from "./Components/Offers/Offers.jsx";
 
 
+import ProductDetail from "./Pages/Layout/ProductDetail/ProductDetail";
+
+
 // ============================================
 // PRODUCT PAGES ✅ (NEW)
 // ============================================
@@ -350,14 +353,14 @@ const App = () => {
                 URL: /product/:slug
                 Example: /product/diamond-pendant-necklace
                 ============================================ */}
-          {/* <Route
+           <Route
             path={ROUTES.PRODUCT_DETAIL}
             element={
               <LayoutWithHeader>
                 <ProductDetail />
               </LayoutWithHeader>
             }
-          /> */}
+          /> 
 
           {/* ============================================
                 BLOG ROUTES - WITH HEADER ✅

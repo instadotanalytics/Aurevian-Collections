@@ -6,18 +6,18 @@ import Footer from "../../Pages/Layout/Footer/Footer";
 
 import shopHero from "../../assets/shophero.png";
 
-import solitaireBand from "../../assets/solitaire-band.jpg.jfif";
-import layeredChain from "../../assets/layered-chain.jpg.jfif";
-import dropStuds from "../../assets/drop-studs.jpg.jfif";
-import charmBracelet from "../../assets/charm-bracelet.jpg.jfif";
-import stackRingSet from "../../assets/stack-ring-set.jpg.jfif";
-import beadedAnklet from "../../assets/beaded-anklet.jpg.jfif";
-import bridalJewelSet from "../../assets/bridal-jewel-set.jpg.jfif";
-import hoopEarrings from "../../assets/hoop-earrings.jpg.jfif";
-import pendantChain from "../../assets/pendant-chain.jpg.jfif";
-import twistBand from "../../assets/twist-band.jpg.jfif";
-import multipleChainBracelets from "../../assets/multiple-chain-braclets.jpg.jfif";
-import pearlStuds from "../../assets/pearl-studs.jpg.jfif";
+import solitaireBand from "../../assets/solitaire-band.jpg";
+import layeredChain from "../../assets/layered-chain.jpg";
+import dropStuds from "../../assets/drop-studs.jpg";
+import charmBracelet from "../../assets/charm-bracelet.jpg";
+import stackRingSet from "../../assets/stack-ring-set.jpg";
+import beadedAnklet from "../../assets/beaded-anklet.jpg";
+import bridalJewelSet from "../../assets/bridal-jewel-set.jpg";
+import hoopEarrings from "../../assets/hoop-earrings.jpg";
+import pendantChain from "../../assets/pendant-chain.jpg";
+import twistBand from "../../assets/twist-band.jpg";
+import multipleChainBracelets from "../../assets/multiple-chain-braclets.jpg";
+import pearlStuds from "../../assets/pearl-studs.jpg";
 
 import { LuSlidersHorizontal } from "react-icons/lu";
 import { FiHeart } from "react-icons/fi";

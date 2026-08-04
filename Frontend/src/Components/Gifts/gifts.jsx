@@ -4,14 +4,14 @@ import styles from "./gifts.module.css";
 import Header from "../../Pages/Layout/Header/Header";
 import Footer from "../../Pages/Layout/Footer/Footer";
 
-import solitaireBand from "../../assets/solitaire-band.jpg.jfif";
-import layeredChain from "../../assets/layered-chain.jpg.jfif";
-import dropStuds from "../../assets/drop-studs.jpg.jfif";
-import charmBracelet from "../../assets/charm-bracelet.jpg.jfif";
-import bridalJewelSet from "../../assets/bridal-jewel-set.jpg.jfif";
-import hoopEarrings from "../../assets/hoop-earrings.jpg.jfif";
-import pendantChain from "../../assets/pendant-chain.jpg.jfif";
-import pearlStuds from "../../assets/pearl-studs.jpg.jfif";
+import solitaireBand from "../../assets/solitaire-band.jpg";
+import layeredChain from "../../assets/layered-chain.jpg";
+import dropStuds from "../../assets/drop-studs.jpg";
+import charmBracelet from "../../assets/charm-bracelet.jpg";
+import bridalJewelSet from "../../assets/bridal-jewel-set.jpg";
+import hoopEarrings from "../../assets/hoop-earrings.jpg";
+import pendantChain from "../../assets/pendant-chain.jpg";
+import pearlStuds from "../../assets/pearl-studs.jpg";
 import giftHero from "../../assets/heroimageg.png";
 import giftMiddle from "../../assets/giftmiddle.png";
 
