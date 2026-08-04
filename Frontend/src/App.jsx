@@ -309,9 +309,9 @@ const App = () => {
           <Route
             path={ROUTES.SHOP}
             element={
-              <LayoutWithHeader>
+             
                 <Shop />
-              </LayoutWithHeader>
+              
             }
           />
 
