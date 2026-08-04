@@ -1,10 +1,10 @@
-// src/redux/slices/sellerSlice.js
-
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://aurevian-collections.onrender.com/api";
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://aurevian-collections.onrender.com/api";
 
 // ============================================
 // HELPERS
@@ -52,6 +52,8 @@ export const verifyEmailOTP = createAsyncThunk(
   "seller/verifyEmailOTP",
   async ({ email, otp }, { rejectWithValue }) => {
     try {
+      // NOTE: confirm this route matches your backend controller —
+      // adjust the path/payload shape if your API differs.
       const response = await axios.post(`${API_URL}/seller/verify-email`, {
         email,
         otp,
@@ -92,6 +94,10 @@ export const verifyPhoneOTP = createAsyncThunk(
 );
 
 // Resend OTP
+// NOTE: `type` ('email' | 'phone') is accepted here and forwarded to the
+// backend so it knows which channel to resend on. Make sure your backend
+// route actually reads `type` from the body — the previous version dropped
+// it silently.
 export const resendOTP = createAsyncThunk(
   "seller/resendOTP",
   async ({ contact, type }, { rejectWithValue }) => {
@@ -101,7 +107,9 @@ export const resendOTP = createAsyncThunk(
         type,
       });
       if (response.data.success) {
-        toast.success(`OTP sent to ${type} successfully!`);
+        toast.success(
+          `OTP sent to your ${type === "email" ? "email" : "phone"}!`,
+        );
         return response.data;
       }
     } catch (error) {
@@ -472,6 +480,42 @@ const sellerSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
         state.status = "failed";
+      })
+
+      // ============================================
+      // VERIFY EMAIL OTP
+      // ============================================
+      .addCase(verifyEmailOTP.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(verifyEmailOTP.fulfilled, (state) => {
+        state.isLoading = false;
+        if (state.seller) {
+          state.seller.emailVerified = true;
+        }
+      })
+      .addCase(verifyEmailOTP.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+
+      // ============================================
+      // VERIFY PHONE OTP
+      // ============================================
+      .addCase(verifyPhoneOTP.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(verifyPhoneOTP.fulfilled, (state) => {
+        state.isLoading = false;
+        if (state.seller) {
+          state.seller.phoneVerified = true;
+        }
+      })
+      .addCase(verifyPhoneOTP.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
       })
 
       // ============================================
