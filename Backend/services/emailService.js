@@ -1,41 +1,50 @@
 // backend/services/emailService.js
 
 import dotenv from "dotenv";
+import nodemailer from "nodemailer";
 dotenv.config();
 
 class EmailService {
+  constructor() {
+    // Gmail SMTP transporter. Requires EMAIL_USER (your Gmail address) and
+    // EMAIL_PASS (a 16-character Gmail App Password, NOT your normal Gmail
+    // password — regular passwords are rejected by Gmail's SMTP for
+    // security). Generate one at: myaccount.google.com/apppasswords
+    // (requires 2-Step Verification to be enabled on the account).
+    this.transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    // Verify the connection once at startup so a bad credential shows up
+    // immediately in your logs instead of silently failing on first send.
+    this.transporter.verify((error) => {
+      if (error) {
+        console.error("❌ Gmail SMTP connection failed:", error.message);
+      } else {
+        console.log("✅ Gmail SMTP ready to send emails");
+      }
+    });
+  }
+
   async sendEmail({ to, subject, html }) {
     try {
-      const response = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from:
-            process.env.RESEND_FROM ||
-            "Aurevian Collections <onboarding@resend.dev>",
-          to: [to],
-          subject,
-          html,
-        }),
+      const info = await this.transporter.sendMail({
+        from:
+          process.env.EMAIL_FROM ||
+          `"Aurevian Collections" <${process.env.EMAIL_USER}>`,
+        to,
+        subject,
+        html,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        console.error("❌ Resend email error:", data);
-        return {
-          success: false,
-          error: data.message || "Resend send failed",
-        };
-      }
-
-      console.log("✅ Email sent via Resend:", data.id);
+      console.log("✅ Email sent via Gmail:", info.messageId);
       return {
         success: true,
-        info: data,
+        info,
       };
     } catch (err) {
       console.error("❌ Email error:", err.message);
