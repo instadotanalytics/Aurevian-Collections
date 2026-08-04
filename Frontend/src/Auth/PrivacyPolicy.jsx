@@ -264,7 +264,8 @@ const PrivacyPolicy = () => {
             </section>
           </Reveal>
 
-          {/* ========== NO DIVIDER HERE - Removed ========== */}
+          {/* ========== DIVIDER - Between Contact Us and Value Props ========== */}
+          <Divider />
 
           {/* ========== VALUE PROPS BANNER ========== */}
           <Reveal delay={200}>
@@ -294,8 +295,7 @@ const PrivacyPolicy = () => {
             </section>
           </Reveal>
 
-          {/* ========== DIVIDER - Kept before bottom banner ========== */}
-          <Divider />
+          {/* ========== NO DIVIDER ABOVE BOTTOM BANNER - Removed ========== */}
 
           {/* ========== BOTTOM BANNER ========== */}
           <Reveal delay={150}>
