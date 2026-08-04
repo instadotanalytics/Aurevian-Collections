@@ -387,23 +387,19 @@ export default function Collections() {
     });
   };
 
-  // Scroll to filter section - starts from bottom border of New Collection with more offset
+  // Scroll to filter section
   const scrollToFilter = () => {
-    // Get the New Collection section
     const newCollection = document.querySelector(`.${styles.newCollectionSection}`);
     
     if (newCollection) {
-      // Get the bottom position of New Collection section
       const newCollectionRect = newCollection.getBoundingClientRect();
       const newCollectionBottom = newCollectionRect.bottom + window.pageYOffset;
       
-      // Scroll higher above the bottom to show more content
       window.scrollTo({
         top: newCollectionBottom - 60,
         behavior: "smooth"
       });
     } else {
-      // Fallback: scroll to filter section if New Collection not found
       const filterSection = document.getElementById("filter-section");
       if (filterSection) {
         const rect = filterSection.getBoundingClientRect();
@@ -419,7 +415,7 @@ export default function Collections() {
   return (
     <>
     <section className={styles.collections} aria-label="Aurevian Collections">
-      {/* ---------------- Hero Gallery - 65vh ---------------- */}
+      {/* ---------------- Hero Gallery - 90vh ---------------- */}
       <div className={styles.heroGallery}>
         <div className={styles.heroTrack} ref={heroRef}>
           {HERO_SLIDES.map((slide, index) => (
@@ -430,32 +426,34 @@ export default function Collections() {
                   <span className={styles.heroTag}>{slide.tag}</span>
                   <h1 className={styles.heroTitle}>{slide.title}</h1>
                   <p className={styles.heroSubtitle}>{slide.subtitle}</p>
-                  <button className={styles.heroBtn} onClick={(e) => { e.stopPropagation(); scrollToFilter(); }}>Shop Now →</button>
+                  <button className={styles.heroBtn} onClick={(e) => { e.stopPropagation(); scrollToFilter(); }}>
+                    Shop Now <span>→</span>
+                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        <div className={styles.heroNavWrapper}>
-          <div className={styles.heroDots}>
-            {HERO_SLIDES.map((_, index) => (
-              <button
-                key={index}
-                className={`${styles.heroDot} ${index === currentSlide ? styles.heroDotActive : ""}`}
-                onClick={() => goToSlide(index)}
-              />
-            ))}
-          </div>
-          <div className={styles.heroNavArrows}>
-            <button className={styles.heroNavBtn} onClick={prevSlide}>←</button>
-            <button className={styles.heroNavBtn} onClick={nextSlide}>→</button>
-          </div>
+        {/* Navigation - Arrows on far left/right, dots at bottom center */}
+        <div className={styles.heroNavArrows}>
+          <button className={styles.heroNavBtn} onClick={prevSlide} aria-label="Previous slide">‹</button>
+          <button className={styles.heroNavBtn} onClick={nextSlide} aria-label="Next slide">›</button>
+        </div>
+        <div className={styles.heroDots}>
+          {HERO_SLIDES.map((_, index) => (
+            <button
+              key={index}
+              className={`${styles.heroDot} ${index === currentSlide ? styles.heroDotActive : ""}`}
+              onClick={() => goToSlide(index)}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
         </div>
       </div>
 
       <div className={styles.container}>
-        {/* ---------------- New Collection - No Shop Button ---------------- */}
+        {/* ---------------- New Collection ---------------- */}
         <Reveal as="section" className={styles.newCollectionSection} delay={100}>
           <div className={styles.newCollectionContent}>
             <span className={styles.newCollectionEyebrow}>New ✦ Collection</span>
@@ -635,7 +633,7 @@ export default function Collections() {
             </ul>
 
             <button type="button" className={styles.ctaBtn} onClick={scrollToFilter}>
-              Explore the Set <span aria-hidden="true">→</span>
+              Explore the Set <span>→</span>
             </button>
           </Reveal>
         </div>
@@ -669,7 +667,9 @@ export default function Collections() {
           <Reveal as="div" className={styles.closingContent} delay={100}>
             <h3 className={styles.closingTitle}>Shine in <em>your</em><br />own way!</h3>
             <p className={styles.closingBody}>Jewelry that speaks your style.</p>
-            <button type="button" className={styles.ctaBtn} onClick={scrollToFilter}>Explore the Collection <span>→</span></button>
+            <button type="button" className={styles.ctaBtn} onClick={scrollToFilter}>
+              Explore the Collection <span>→</span>
+            </button>
           </Reveal>
 
           <div className={styles.closingGallery}>
