@@ -47,12 +47,12 @@
 }
 
 /* ==========================================================
-   HERO GALLERY - 65vh
+   HERO GALLERY - 90vh
    ========================================================== */
 .heroGallery {
-  height: 70vh;
-  min-height: 400px;
-  max-height: 750px;
+  height: 80vh;
+  min-height: 500px;
+  max-height: 950px;
   margin-bottom: clamp(20px, 3vw, 40px);
   position: relative;
   overflow: hidden;
@@ -170,7 +170,7 @@
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 14px 32px;
   background: var(--gold);
   color: #fff;
@@ -184,6 +184,13 @@
   font-family: "Jost", sans-serif;
   align-self: flex-start;
   overflow: hidden;
+}
+
+.heroBtn span {
+  display: inline-block;
+  font-size: 14px;
+  width: auto;
+  min-width: 0;
 }
 
 .heroBtn::before {
@@ -209,53 +216,59 @@
   transform: scale(0.96);
 }
 
-/* Navigation - Dots on top of arrows */
-.heroNavWrapper {
+/* Navigation Arrows - Far Left and Far Right */
+.heroNavArrows {
   position: absolute;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
   display: flex;
-  flex-direction: column-reverse;
-  align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  padding: 0 16px;
+  pointer-events: none;
   z-index: 10;
 }
 
-.heroNavArrows {
-  display: flex;
-  gap: 16px;
-}
-
 .heroNavBtn {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: #fff;
-  font-size: 16px;
+  font-size: 22px;
+  font-weight: 300;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
+  pointer-events: all;
+  padding: 0;
+  line-height: 1;
 }
 
 .heroNavBtn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.08);
 }
 
 .heroNavBtn:active {
   transform: scale(0.92);
 }
 
+/* Dots at bottom center */
 .heroDots {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   gap: 8px;
   align-items: center;
+  z-index: 10;
 }
 
 .heroDot {
@@ -316,16 +329,13 @@
 }
 
 /* ==========================================================
-   NEW COLLECTION - 60vh (No Shop Button)
+   NEW COLLECTION
    ========================================================== */
 .newCollectionSection {
   min-height: 40vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* padding: 20px 0; */
-  /* margin-bottom: clamp(40px, 6vw, 80px); */
-  /* border-bottom: 1px solid var(--cream-line); */
 }
 
 .newCollectionContent {
@@ -492,7 +502,7 @@
   margin-top: 8px;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   border: none;
   cursor: pointer;
   background: linear-gradient(135deg, var(--gold-light), var(--gold));
@@ -507,6 +517,13 @@
   box-shadow: 0 14px 30px -14px rgba(179, 135, 63, 0.55);
 }
 
+.ctaBtn span {
+  display: inline-block;
+  font-size: 14px;
+  width: auto;
+  min-width: 0;
+}
+
 .ctaBtn:hover {
   transform: translateY(-3px);
   box-shadow: 0 18px 36px -14px rgba(179, 135, 63, 0.65);
@@ -514,10 +531,6 @@
 
 .ctaBtn:active {
   transform: scale(0.96);
-}
-
-.ctaBtn span {
-  transition: transform 0.3s ease;
 }
 
 .ctaBtn:hover span {
@@ -756,6 +769,10 @@
 
 .filterClearBtn::after {
   content: "→";
+  display: inline-block;
+  font-size: 13px;
+  width: auto;
+  min-width: 0;
   transition: transform 0.25s ease;
 }
 
@@ -806,7 +823,7 @@
 }
 
 .sortSelect {
-  padding: 8px 18px;
+  padding: 8px 20px;
   border: 1px solid var(--cream-line);
   border-radius: 30px;
   background: white;
@@ -823,7 +840,7 @@
 }
 
 /* ==========================================================
-   Product Card - Matching Offers Page Style
+   Product Card
    ========================================================== */
 .productsGrid {
   display: grid;
@@ -1116,7 +1133,7 @@
 }
 
 /* ==========================================================
-   Closing Section - At the End
+   Closing Section
    ========================================================== */
 .closingSection {
   display: grid;
@@ -1414,8 +1431,18 @@
   }
 
   .heroGallery {
-    height: 55vh;
-    min-height: 300px;
+    height: 75vh;
+    min-height: 400px;
+  }
+
+  .heroNavArrows {
+    padding: 0 16px;
+  }
+
+  .heroNavBtn {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
   }
 
   .productsGrid {
@@ -1439,8 +1466,18 @@
   }
 
   .heroGallery {
-    height: 45vh;
-    min-height: 260px;
+    height: 65vh;
+    min-height: 350px;
+  }
+
+  .heroNavArrows {
+    padding: 0 12px;
+  }
+
+  .heroNavBtn {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
   }
 
   .newCollectionSection {
@@ -1526,9 +1563,19 @@
   }
 
   .heroGallery {
-    height: 40vh;
-    min-height: 220px;
+    height: 55vh;
+    min-height: 300px;
     margin-bottom: 16px;
+  }
+
+  .heroNavArrows {
+    padding: 0 10px;
+  }
+
+  .heroNavBtn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
   }
 
   .heroOverlay {
@@ -1548,14 +1595,8 @@
     padding: 10px 20px;
   }
 
-  .heroNavWrapper {
+  .heroDots {
     bottom: 16px;
-  }
-
-  .heroNavBtn {
-    width: 32px;
-    height: 32px;
-    font-size: 13px;
   }
 
   .heroDot {
@@ -1684,6 +1725,21 @@
 }
 
 @media (max-width: 480px) {
+  .heroGallery {
+    height: 50vh;
+    min-height: 260px;
+  }
+
+  .heroNavArrows {
+    padding: 0 8px;
+  }
+
+  .heroNavBtn {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
   .productsGrid {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
@@ -1764,8 +1820,18 @@
 
 @media (max-width: 400px) {
   .heroGallery {
-    height: 35vh;
-    min-height: 180px;
+    height: 45vh;
+    min-height: 220px;
+  }
+
+  .heroNavArrows {
+    padding: 0 6px;
+  }
+
+  .heroNavBtn {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
   }
 
   .productsGrid {

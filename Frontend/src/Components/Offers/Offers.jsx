@@ -2,22 +2,15 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import { 
-  FiTruck, 
-  FiAward, 
-  FiGift, 
   FiHeart, 
   FiTrendingUp,
-  FiShield,
+  FiGift, 
   FiSun,
-  FiMoon,
-  FiZap,
-  FiFilter,
-  FiStar,
-  FiClock,
   FiChevronLeft,
   FiChevronRight,
   FiShoppingBag,
-  FiCheck
+  FiCheck,
+  FiFilter
 } from "react-icons/fi";
 import styles from "./Offers.module.css";
 import craftImage1 from "../../assets/offersimg.png";
@@ -34,7 +27,7 @@ const ALL_PRODUCTS = [
     name: "Aurevian Solitaire Band",
     price: 2100,
     originalPrice: 3000,
-    discount: "30% off",
+    discount: "30%",
     rating: 5,
     reviews: 128,
     category: "Rings",
@@ -45,7 +38,7 @@ const ALL_PRODUCTS = [
     name: "Layla Layered Chain",
     price: 3400,
     originalPrice: 4250,
-    discount: "20% off",
+    discount: "20%",
     rating: 5,
     reviews: 95,
     category: "Necklaces",
@@ -56,7 +49,7 @@ const ALL_PRODUCTS = [
     name: "Amara Drop Studs",
     price: 1650,
     originalPrice: 2200,
-    discount: "25% off",
+    discount: "25%",
     rating: 5,
     reviews: 76,
     category: "Earrings",
@@ -67,7 +60,7 @@ const ALL_PRODUCTS = [
     name: "Celeste Charm Bracelet",
     price: 1800,
     originalPrice: 3000,
-    discount: "40% off",
+    discount: "40%",
     rating: 5,
     reviews: 54,
     category: "Bracelets",
@@ -78,7 +71,7 @@ const ALL_PRODUCTS = [
     name: "Noor Stack Ring Set",
     price: 1275,
     originalPrice: 1500,
-    discount: "15% off",
+    discount: "15%",
     rating: 4,
     reviews: 38,
     category: "Rings",
@@ -89,7 +82,7 @@ const ALL_PRODUCTS = [
     name: "Meera Beaded Anklet",
     price: 950,
     originalPrice: 1900,
-    discount: "50% off",
+    discount: "50%",
     rating: 4,
     reviews: 29,
     category: "Anklets",
@@ -100,7 +93,7 @@ const ALL_PRODUCTS = [
     name: "Anaya Bridal Jewel Set",
     price: 6300,
     originalPrice: 7000,
-    discount: "10% off",
+    discount: "10%",
     rating: 5,
     reviews: 52,
     category: "Bridal Sets",
@@ -111,7 +104,7 @@ const ALL_PRODUCTS = [
     name: "Zoya Hoop Earrings",
     price: 1300,
     originalPrice: 2000,
-    discount: "35% off",
+    discount: "35%",
     rating: 5,
     reviews: 41,
     category: "Earrings",
@@ -122,7 +115,7 @@ const ALL_PRODUCTS = [
     name: "Ishani Pendant Chain",
     price: 2750,
     originalPrice: 5000,
-    discount: "45% off",
+    discount: "45%",
     rating: 5,
     reviews: 47,
     category: "Necklaces",
@@ -133,7 +126,7 @@ const ALL_PRODUCTS = [
     name: "Kavya Twist Band",
     price: 2400,
     originalPrice: 3000,
-    discount: "20% off",
+    discount: "20%",
     rating: 4,
     reviews: 33,
     category: "Rings",
@@ -144,7 +137,7 @@ const ALL_PRODUCTS = [
     name: "Riya Chain Bracelet",
     price: 1950,
     originalPrice: 2800,
-    discount: "30% off",
+    discount: "30%",
     rating: 4,
     reviews: 28,
     category: "Bracelets",
@@ -155,7 +148,7 @@ const ALL_PRODUCTS = [
     name: "Sana Pearl Studs",
     price: 1450,
     originalPrice: 1950,
-    discount: "25% off",
+    discount: "25%",
     rating: 4,
     reviews: 22,
     category: "Earrings",
@@ -166,7 +159,7 @@ const ALL_PRODUCTS = [
     name: "Tara Gold Hoops",
     price: 2200,
     originalPrice: 3200,
-    discount: "30% off",
+    discount: "30%",
     rating: 5,
     reviews: 35,
     category: "Earrings",
@@ -177,7 +170,7 @@ const ALL_PRODUCTS = [
     name: "Mira Chain Necklace",
     price: 3800,
     originalPrice: 4800,
-    discount: "20% off",
+    discount: "20%",
     rating: 5,
     reviews: 31,
     category: "Necklaces",
@@ -188,7 +181,7 @@ const ALL_PRODUCTS = [
     name: "Rani Bridal Set",
     price: 8500,
     originalPrice: 10000,
-    discount: "15% off",
+    discount: "15%",
     rating: 5,
     reviews: 45,
     category: "Bridal Sets",
@@ -199,7 +192,7 @@ const ALL_PRODUCTS = [
     name: "Kiran Stack Rings",
     price: 1800,
     originalPrice: 2500,
-    discount: "28% off",
+    discount: "28%",
     rating: 4,
     reviews: 27,
     category: "Rings",
@@ -210,7 +203,7 @@ const ALL_PRODUCTS = [
     name: "Rose Gold Chain",
     price: 2999,
     originalPrice: 3999,
-    discount: "25% off",
+    discount: "25%",
     rating: 4,
     reviews: 28,
     category: "Necklaces",
@@ -221,7 +214,7 @@ const ALL_PRODUCTS = [
     name: "Platinum Wedding Band",
     price: 4999,
     originalPrice: 6999,
-    discount: "28% off",
+    discount: "28%",
     rating: 5,
     reviews: 35,
     category: "Rings",
@@ -232,7 +225,7 @@ const ALL_PRODUCTS = [
     name: "Silver Hoop Earrings",
     price: 1499,
     originalPrice: 1999,
-    discount: "25% off",
+    discount: "25%",
     rating: 4,
     reviews: 22,
     category: "Earrings",
@@ -243,7 +236,7 @@ const ALL_PRODUCTS = [
     name: "Leather Wrap Bracelet",
     price: 1299,
     originalPrice: 1699,
-    discount: "23% off",
+    discount: "23%",
     rating: 4,
     reviews: 19,
     category: "Bracelets",
@@ -254,7 +247,7 @@ const ALL_PRODUCTS = [
     name: "Diamond Pendant Necklace",
     price: 5499,
     originalPrice: 6999,
-    discount: "21% off",
+    discount: "21%",
     rating: 5,
     reviews: 42,
     category: "Necklaces",
@@ -265,7 +258,7 @@ const ALL_PRODUCTS = [
     name: "Gold Cuff Bracelet",
     price: 2799,
     originalPrice: 3599,
-    discount: "22% off",
+    discount: "22%",
     rating: 4,
     reviews: 24,
     category: "Bracelets",
@@ -276,7 +269,7 @@ const ALL_PRODUCTS = [
     name: "Emerald Stud Earrings",
     price: 2399,
     originalPrice: 3199,
-    discount: "25% off",
+    discount: "25%",
     rating: 5,
     reviews: 30,
     category: "Earrings",
@@ -287,7 +280,7 @@ const ALL_PRODUCTS = [
     name: "Sapphire Ring Set",
     price: 4599,
     originalPrice: 5999,
-    discount: "23% off",
+    discount: "23%",
     rating: 5,
     reviews: 38,
     category: "Rings",
@@ -317,6 +310,11 @@ const BOTTOM_FEATURES = [
     description: "Join our community of happy customers",
   },
 ];
+
+// Filter categories matching Collections page
+const FILTER_CATEGORIES = ["All", "Rings", "Earrings", "Necklaces", "Bracelets", "Anklets", "Bridal Sets"];
+const FILTER_MATERIALS = ["All", "Gold", "Silver", "Rose Gold", "Platinum"];
+const FILTER_SIZES = ["All", "Small", "Medium", "Large"];
 
 /* ----------------------------------------------------------------
    Persistent Reveal-on-scroll with Blur Effect
@@ -367,25 +365,28 @@ function Reveal({ as: Tag = "div", className = "", delay = 0, children, stagger 
 }
 
 export default function Offers() {
-  const [selectedFilter, setSelectedFilter] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedMaterial, setSelectedMaterial] = useState("All");
+  const [selectedSize, setSelectedSize] = useState("All");
+  const [priceRange, setPriceRange] = useState([0, 7000]);
   const [currentPage, setCurrentPage] = useState(0);
   const [cartItems, setCartItems] = useState([]);
   const [wishlist, setWishlist] = useState([]);
-  const itemsPerPage = 8;
+  const itemsPerPage = 9; // 9 cards per page
 
-  const filteredProducts = ALL_PRODUCTS.filter(p => 
-    selectedFilter === "all" || p.category.toLowerCase() === selectedFilter
-  );
+  // Filter products
+  const filteredProducts = ALL_PRODUCTS
+    .filter(p => {
+      if (selectedCategory === "All") return true;
+      return p.category === selectedCategory;
+    })
+    .filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const currentProducts = filteredProducts.slice(
     currentPage * itemsPerPage,
     (currentPage + 1) * itemsPerPage
   );
-
-  const renderStars = (rating) => {
-    return "★".repeat(rating) + "☆".repeat(5 - rating);
-  };
 
   const nextPage = () => {
     if (currentPage < totalPages - 1) {
@@ -425,6 +426,14 @@ export default function Offers() {
     }
   };
 
+  const clearAllFilters = () => {
+    setSelectedCategory("All");
+    setSelectedMaterial("All");
+    setSelectedSize("All");
+    setPriceRange([0, 7000]);
+    setCurrentPage(0);
+  };
+
   return (
     <>
     <section className={styles.offers} aria-label="Aurevian Exclusive Offers">
@@ -456,128 +465,176 @@ export default function Offers() {
             <h2 className={styles.sectionTitle}>Our Premium Picks</h2>
           </div>
 
-          {/* Filter */}
-          <div className={styles.filterBar}>
-            <button 
-              className={`${styles.filterBtn} ${selectedFilter === "all" ? styles.activeFilter : ""}`}
-              onClick={() => { setSelectedFilter("all"); setCurrentPage(0); }}
-            >
-              All
-            </button>
-            <button 
-              className={`${styles.filterBtn} ${selectedFilter === "rings" ? styles.activeFilter : ""}`}
-              onClick={() => { setSelectedFilter("rings"); setCurrentPage(0); }}
-            >
-              Rings
-            </button>
-            <button 
-              className={`${styles.filterBtn} ${selectedFilter === "necklaces" ? styles.activeFilter : ""}`}
-              onClick={() => { setSelectedFilter("necklaces"); setCurrentPage(0); }}
-            >
-              Necklaces
-            </button>
-            <button 
-              className={`${styles.filterBtn} ${selectedFilter === "earrings" ? styles.activeFilter : ""}`}
-              onClick={() => { setSelectedFilter("earrings"); setCurrentPage(0); }}
-            >
-              Earrings
-            </button>
-            <button 
-              className={`${styles.filterBtn} ${selectedFilter === "bracelets" ? styles.activeFilter : ""}`}
-              onClick={() => { setSelectedFilter("bracelets"); setCurrentPage(0); }}
-            >
-              Bracelets
-            </button>
-            <button 
-              className={`${styles.filterBtn} ${selectedFilter === "watches" ? styles.activeFilter : ""}`}
-              onClick={() => { setSelectedFilter("watches"); setCurrentPage(0); }}
-            >
-              Watches
-            </button>
-            <button 
-              className={`${styles.filterBtn} ${selectedFilter === "anklets" ? styles.activeFilter : ""}`}
-              onClick={() => { setSelectedFilter("anklets"); setCurrentPage(0); }}
-            >
-              Anklets
-            </button>
-          </div>
+          {/* ---------------- Shop Layout - Filter + Products (Like Collections) ---------------- */}
+          <div className={styles.shopLayout}>
+            {/* Desktop Filter Sidebar - Same as Collections */}
+            <Reveal as="aside" className={styles.filterSidebar} delay={100}>
+              <h3 className={styles.filterTitle}>Filter</h3>
 
-          {/* Product Grid */}
-          <div className={styles.productsGrid}>
-            {currentProducts.map((product, i) => {
-              const isInCart = cartItems.includes(product.id);
-              const isInWishlist = wishlist.includes(product.id);
-              return (
-                <Reveal as="div" key={product.id} delay={i * 60} className={styles.productCard}>
-                  <div className={styles.productMedia}>
-                    <span className={styles.badge}>{product.discount}</span>
-                    {/* <span className={styles.productCatOverlay}>{product.category}</span> */}
-                    <div className={styles.wishlistActions}>
-                      <button
-                        type="button"
-                        className={`${styles.wishlistBtn} ${isInWishlist ? styles.wishlistBtnActive : ''}`}
-                        onClick={() => toggleWishlist(product.id)}
-                        aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
-                      >
-                        {isInWishlist ? <FiHeart fill="currentColor" /> : <FiHeart />}
-                      </button>
-                    </div>
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className={styles.productImage}
+              <div className={styles.filterGroup}>
+                <span className={styles.filterGroupLabel}>Category</span>
+                {FILTER_CATEGORIES.map(cat => (
+                  <label key={cat} className={styles.filterOption}>
+                    <input 
+                      type="radio" 
+                      name="category" 
+                      checked={selectedCategory === cat} 
+                      onChange={() => {
+                        setSelectedCategory(cat);
+                        setCurrentPage(0);
+                      }} 
                     />
-                  </div>
-                  <div className={styles.productInfo}>
-                    <div className={styles.productName}>{product.name}</div>
-                    <div className={styles.productPrice}>
-                      <span className={styles.priceNow}>₹{product.price.toLocaleString()}</span>
-                      <span className={styles.priceOld}>₹{product.originalPrice.toLocaleString()}</span>
-                    </div>
-                    <button
-                      type="button"
-                      className={`${styles.addToCartBtn} ${isInCart ? styles.addToCartBtnActive : ''}`}
-                      onClick={() => handleAddToCart(product.id)}
-                      disabled={isInCart}
-                    >
-                      {isInCart ? (
-                        <>
-                          <FiCheck /> Added to Cart
-                        </>
-                      ) : (
-                        <>
-                          <FiShoppingBag /> Add to Cart
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </Reveal>
-              );
-            })}
-          </div>
+                    {cat}
+                  </label>
+                ))}
+              </div>
 
-          {/* Pagination - Next/Prev Buttons */}
-          {totalPages > 1 && (
-            <div className={styles.pagination}>
-              <button 
-                className={`${styles.paginationBtn} ${currentPage === 0 ? styles.paginationDisabled : ''}`}
-                onClick={prevPage}
-                disabled={currentPage === 0}
-              >
-                <FiChevronLeft /> Prev
+              <div className={styles.filterGroup}>
+                <span className={styles.filterGroupLabel}>Material</span>
+                {FILTER_MATERIALS.map(mat => (
+                  <label key={mat} className={styles.filterOption}>
+                    <input 
+                      type="radio" 
+                      name="material" 
+                      checked={selectedMaterial === mat} 
+                      onChange={() => setSelectedMaterial(mat)} 
+                    />
+                    {mat}
+                  </label>
+                ))}
+              </div>
+
+              <div className={styles.filterGroup}>
+                <span className={styles.filterGroupLabel}>Size</span>
+                {FILTER_SIZES.map(size => (
+                  <label key={size} className={styles.filterOption}>
+                    <input 
+                      type="radio" 
+                      name="size" 
+                      checked={selectedSize === size} 
+                      onChange={() => setSelectedSize(size)} 
+                    />
+                    {size}
+                  </label>
+                ))}
+              </div>
+
+              <div className={styles.filterGroup}>
+                <span className={styles.filterGroupLabel}>Price Range</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="7000"
+                  step="100"
+                  value={priceRange[1]}
+                  onChange={(e) => setPriceRange([0, Number(e.target.value)])}
+                  className={styles.filterPriceInput}
+                  style={{ "--_progress": `${(priceRange[1] / 7000) * 100}%` }}
+                />
+                <div className={styles.filterPriceRange}>
+                  <span>₹0</span>
+                  <span>₹{priceRange[1]}</span>
+                </div>
+              </div>
+
+              <button className={styles.filterClearBtn} onClick={clearAllFilters}>
+                Clear All Filters
               </button>
-              <span className={styles.paginationInfo}>
-                Page {currentPage + 1} of {totalPages}
-              </span>
-              <button 
-                className={`${styles.paginationBtn} ${currentPage === totalPages - 1 ? styles.paginationDisabled : ''}`}
-                onClick={nextPage}
-                disabled={currentPage === totalPages - 1}
-              >
-                Next <FiChevronRight />
-              </button>
+
+              <div className={styles.filterExtra}>
+                <label className={styles.filterOption}>
+                  <input type="checkbox" /> In Stock Only
+                </label>
+                <label className={styles.filterOption}>
+                  <input type="checkbox" /> On Sale
+                </label>
+                <label className={styles.filterOption}>
+                  <input type="checkbox" /> New Arrivals
+                </label>
+              </div>
+            </Reveal>
+
+            {/* Products */}
+            <div className={styles.productsWrapper}>
+              <div className={styles.productsHeader}>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <span className={styles.productsCount}>Showing {filteredProducts.length} products</span>
+                </div>
+              </div>
+
+              <div className={styles.productsGrid}>
+                {currentProducts.map((product, i) => {
+                  const isInCart = cartItems.includes(product.id);
+                  const isInWishlist = wishlist.includes(product.id);
+                  return (
+                    <Reveal as="div" key={product.id} delay={i * 50} className={styles.productCard}>
+                      <div className={styles.productImageWrap}>
+                        <img className={styles.productImage} src={product.image} alt={product.name} loading="lazy" />
+                        <span className={styles.productDiscount}>{product.discount} OFF</span>
+                        <div className={styles.wishlistActions}>
+                          <button
+                            type="button"
+                            className={`${styles.wishlistBtn} ${isInWishlist ? styles.wishlistBtnActive : ''}`}
+                            onClick={() => toggleWishlist(product.id)}
+                            aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+                          >
+                            {isInWishlist ? <FiHeart fill="currentColor" /> : <FiHeart />}
+                          </button>
+                        </div>
+                      </div>
+                      <div className={styles.productBody}>
+                        <span className={styles.productCategory}>{product.category}</span>
+                        <h3 className={styles.productName}>{product.name}</h3>
+                        <div className={styles.productPriceRow}>
+                          <span className={styles.productCurrentPrice}>₹{product.price.toLocaleString()}</span>
+                          <span className={styles.productOriginalPrice}>₹{product.originalPrice.toLocaleString()}</span>
+                        </div>
+                        <button
+                          type="button"
+                          className={`${styles.productAddBtn} ${isInCart ? styles.productAddBtnActive : ''}`}
+                          onClick={() => handleAddToCart(product.id)}
+                          disabled={isInCart}
+                        >
+                          {isInCart ? (
+                            <>
+                              <FiCheck /> Added to Cart
+                            </>
+                          ) : (
+                            <>
+                              <FiShoppingBag /> Add to Cart
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </Reveal>
+                  );
+                })}
+              </div>
+
+              {/* Pagination - Next/Prev Buttons */}
+              {totalPages > 1 && (
+                <div className={styles.pagination}>
+                  <button 
+                    className={`${styles.paginationBtn} ${currentPage === 0 ? styles.paginationDisabled : ''}`}
+                    onClick={prevPage}
+                    disabled={currentPage === 0}
+                  >
+                    <FiChevronLeft /> Prev
+                  </button>
+                  <span className={styles.paginationInfo}>
+                    Page {currentPage + 1} of {totalPages}
+                  </span>
+                  <button 
+                    className={`${styles.paginationBtn} ${currentPage === totalPages - 1 ? styles.paginationDisabled : ''}`}
+                    onClick={nextPage}
+                    disabled={currentPage === totalPages - 1}
+                  >
+                    Next <FiChevronRight />
+                  </button>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </Reveal>
 
         {/* ---------------- Exclusive Premium Offer Banner ---------------- */}
