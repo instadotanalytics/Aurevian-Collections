@@ -11,12 +11,21 @@ class EmailService {
     // password — regular passwords are rejected by Gmail's SMTP for
     // security). Generate one at: myaccount.google.com/apppasswords
     // (requires 2-Step Verification to be enabled on the account).
+    // Using explicit host/port instead of the `service: "gmail"` shorthand
+    // because the shorthand doesn't reliably respect Node's IPv4-first DNS
+    // setting (set in server.js). On Render specifically, smtp.gmail.com
+    // sometimes resolves to an IPv6 address that Render's network can't
+    // route to (ENETUNREACH) — `family: 4` forces this connection to use
+    // IPv4 regardless of what the global DNS order does elsewhere.
     this.transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true, // true for port 465, false for port 587
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
+      family: 4,
     });
 
     // Verify the connection once at startup so a bad credential shows up
