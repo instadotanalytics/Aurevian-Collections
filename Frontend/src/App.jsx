@@ -46,6 +46,7 @@ import ResetPassword from "./Auth/ResetPassword.jsx";
 import SuperAdminLogin from "./Pages/SuperAdmin/SuperAdminLogin.jsx";
 import SuperAdminDashboard from "./Pages/SuperAdmin/SuperAdminDashboard/SuperAdminDashboard.jsx";
 import PrivacyPolicy from "./Auth/PrivacyPolicy.jsx";
+import Terms from "./Auth/Terms.jsx";
 
 // ============================================
 // SELLER PAGES
@@ -102,6 +103,7 @@ const ROUTES = {
   FORGOT_PASSWORD: "/forgot-password",
   RESET_PASSWORD: "/reset-password",
   PRIVACY_POLICY : "/privacy-policy",
+  TERMS : "/terms",
   DASHBOARD: "/",
   PROFILE: "/profile",
   STORY: "/stories",
@@ -459,6 +461,14 @@ const App = () => {
             }
           />
 
+<Route
+            path={ROUTES.TERMS}
+            element={
+                <LayoutWithoutHeader>
+                  <Terms />
+                </LayoutWithoutHeader>
+            }
+          />
 
           {/* ============================================
                 SUPER ADMIN ROUTES - WITHOUT HEADER
