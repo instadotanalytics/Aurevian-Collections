@@ -279,7 +279,7 @@ class EmailService {
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px 10px 0 0;">
-          <h1 style="margin: 0;">🎉 Welcome!</h1>
+          <h1 style="margin: 0;">Welcome!</h1>
         </div>
         <div style="padding: 30px; background: white; border-radius: 0 0 10px 10px; border: 1px solid #eee;">
           <h2 style="color: #333; margin-top: 0;">Hi ${name},</h2>
