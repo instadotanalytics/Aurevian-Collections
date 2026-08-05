@@ -559,7 +559,10 @@ export default function Collections() {
                   <Reveal as="div" key={product.id} delay={50} className={styles.productCard}>
                     <div className={styles.productImageWrap}>
                       <img className={styles.productImage} src={product.img} alt={product.name} loading="lazy" />
+                      {/* Discount badge - top left */}
                       <span className={styles.productDiscount}>{product.discount} OFF</span>
+                      {/* Category overlay on image - bottom left */}
+                      <span className={styles.productCategoryOverlay}>{product.category}</span>
                       <div className={styles.wishlistActions}>
                         <button
                           type="button"
@@ -572,7 +575,6 @@ export default function Collections() {
                       </div>
                     </div>
                     <div className={styles.productBody}>
-                      <span className={styles.productCategory}>{product.category}</span>
                       <h3 className={styles.productName}>{product.name}</h3>
                       <div className={styles.productPriceRow}>
                         <span className={styles.productCurrentPrice}>₹{product.price.toLocaleString()}</span>
