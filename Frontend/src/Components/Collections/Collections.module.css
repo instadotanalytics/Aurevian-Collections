@@ -896,7 +896,7 @@
   left: 12px;
   background: #ffffff;
   color: var(--sale);
-  font-size: 13px;
+  font-size: 12px;
   letter-spacing: 1px;
   padding: 5px 10px;
   border-radius: 20px;
@@ -940,7 +940,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1;
   cursor: pointer;
   color: var(--ink);
@@ -948,7 +948,7 @@
 }
 
 .wishlistBtn:hover {
-  font-size: 19px;
+  font-size: 18px;
   color: var(--gold-deep);
   transform: translateY(-2px);
   box-shadow: 0 6px 14px rgba(28, 25, 23, 0.18);
@@ -1774,7 +1774,7 @@
   }
 
   .productDiscount {
-    font-size: 12px;
+    font-size: 11px;
     padding: 4px 8px;
     top: 10px;
     left: 10px;
@@ -1790,9 +1790,9 @@
   .wishlistBtn {
     width: 30px;
     height: 30px;
-    font-size: 14px;
-    top: 10px;
-    right: 10px;
+    font-size: 13px;
+    top: 8px;
+    right: 8px;
   }
 
   /* Explore More - Reduced padding on mobile */
@@ -1978,7 +1978,7 @@
   }
 
   .productDiscount {
-    font-size: 10px;
+    font-size: 9px;
     padding: 3px 7px;
     top: 8px;
     left: 8px;
@@ -1995,8 +1995,8 @@
     width: 28px;
     height: 28px;
     font-size: 12px;
-    top: 8px;
-    right: 8px;
+    top: 6px;
+    right: 6px;
   }
 
   /* Explore More - Further reduced padding on small mobile */
@@ -2127,8 +2127,8 @@
   }
 
   .productDiscount {
-    font-size: 10px;
-    padding: 2px 6px;
+    font-size: 9px;
+    padding: 3px 7px;
     top: 6px;
     left: 6px;
   }
@@ -2143,9 +2143,9 @@
   .wishlistBtn {
     width: 24px;
     height: 24px;
-    font-size: 10px;
-    top: 6px;
-    right: 6px;
+    font-size: 11px;
+    top: 4px;
+    right: 4px;
   }
 
   /* Explore More - Optimized for extra small */
