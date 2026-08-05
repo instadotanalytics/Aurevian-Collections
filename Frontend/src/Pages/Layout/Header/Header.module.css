@@ -787,7 +787,7 @@
 
 .drawerSubPanel.expanded {
   max-height: 1200px;
-  padding: 4px 0;
+  /* padding: 4px 0; */
 }
 
 /* ==========================================================
