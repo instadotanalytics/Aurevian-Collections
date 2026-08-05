@@ -37,6 +37,13 @@ class EmailService {
       connectionTimeout: 10000,
       greetingTimeout: 10000,
       socketTimeout: 10000,
+      // ✅ pool connections instead of opening a fresh TCP+TLS handshake
+      // per email — repeated handshakes under load are what commonly get
+      // rate-limited/dropped on shared cloud IPs (Render), causing the
+      // intermittent "works sometimes, not others" behavior.
+      pool: true,
+      maxConnections: 3,
+      maxMessages: 50,
     });
 
     // Verify the connection once at startup so a bad credential shows up
@@ -62,7 +69,7 @@ class EmailService {
     });
   }
 
-  async sendEmail({ to, subject, html }) {
+  async sendEmail({ to, subject, html }, retryCount = 0) {
     try {
       const info = await this.transporter.sendMail({
         from:
@@ -98,6 +105,22 @@ class EmailService {
       // possible failure modes this actually is.
       console.error("❌ Email error:", err.message);
       console.error("   code:", err.code, "| responseCode:", err.responseCode);
+
+      // ✅ Retry once on transient connection errors (ETIMEDOUT, ECONNECTION,
+      // ESOCKET) — these are the ones responsible for "sometimes fails,
+      // sometimes doesn't" on the same working credentials.
+      const transientCodes = [
+        "ETIMEDOUT",
+        "ECONNECTION",
+        "ESOCKET",
+        "ECONNRESET",
+      ];
+      if (transientCodes.includes(err.code) && retryCount < 1) {
+        console.log("🔁 Retrying email send after transient error...");
+        await new Promise((r) => setTimeout(r, 1500));
+        return this.sendEmail({ to, subject, html }, retryCount + 1);
+      }
+
       return {
         success: false,
         error: err.message,
