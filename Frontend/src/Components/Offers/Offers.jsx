@@ -1,4 +1,4 @@
-// src/Components/Offers/Offers.jsx - Complete updated file
+// src/Components/Offers/Offers.jsx - Complete file
 
 import React, { useRef, useEffect, useState } from "react";
 import { 
@@ -12,6 +12,7 @@ import {
   FiCheck,
   FiFilter
 } from "react-icons/fi";
+import { LuSlidersHorizontal } from "react-icons/lu";
 import styles from "./Offers.module.css";
 import craftImage1 from "../../assets/offersimg.png";
 import Footer from "../../Pages/Layout/Footer/Footer.jsx";
@@ -372,6 +373,7 @@ export default function Offers() {
   const [currentPage, setCurrentPage] = useState(0);
   const [cartItems, setCartItems] = useState([]);
   const [wishlist, setWishlist] = useState([]);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const itemsPerPage = 9;
 
   // Filter products
@@ -437,6 +439,26 @@ export default function Offers() {
     setCurrentPage(0);
   };
 
+  const openFilters = () => {
+    setFiltersOpen(true);
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.width = "100%";
+    document.body.style.top = `-${window.scrollY}px`;
+  };
+
+  const closeFilters = () => {
+    const scrollY = document.body.style.top;
+    setFiltersOpen(false);
+    document.body.style.overflow = "";
+    document.body.style.position = "";
+    document.body.style.width = "";
+    document.body.style.top = "";
+    if (scrollY) {
+      window.scrollTo(0, parseInt(scrollY || '0', 10) * -1);
+    }
+  };
+
   return (
     <>
     <section className={styles.offers} aria-label="Aurevian Exclusive Offers">
@@ -468,10 +490,23 @@ export default function Offers() {
             <h2 className={styles.sectionTitle}>Our Premium Picks</h2>
           </div>
 
-          {/* ---------------- Shop Layout - Filter + Products (Like Collections) ---------------- */}
+          {/* ---------------- Mobile Filter Toggle Button ---------------- */}
+          <button
+            type="button"
+            className={styles.filterToggle}
+            onClick={openFilters}
+            aria-expanded={filtersOpen}
+          >
+            <span className={styles.filterToggleText}>Filter Options</span>
+            <span className={styles.filterToggleIcon}>
+              <LuSlidersHorizontal />
+            </span>
+          </button>
+
+          {/* ---------------- Shop Layout - Filter Sidebar + Products ---------------- */}
           <div className={styles.shopLayout}>
-            {/* Desktop Filter Sidebar - Same as Collections */}
-            <Reveal as="aside" className={styles.filterSidebar} delay={100}>
+            {/* Desktop Filter Sidebar */}
+            <aside className={styles.filterSidebar}>
               <h3 className={styles.filterTitle}>Filter</h3>
 
               <div className={styles.filterGroup}>
@@ -556,7 +591,7 @@ export default function Offers() {
                   <input type="checkbox" /> New Arrivals
                 </label>
               </div>
-            </Reveal>
+            </aside>
 
             {/* Products */}
             <div className={styles.productsWrapper}>
@@ -667,6 +702,110 @@ export default function Offers() {
             </div>
           ))}
         </Reveal>
+      </div>
+
+      {/* ---------------- Mobile Bottom Sheet Filter ---------------- */}
+      {filtersOpen && (
+        <div
+          className={styles.filterOverlay}
+          onClick={closeFilters}
+        />
+      )}
+      
+      <div
+        className={`${styles.mobileFilterSheet} ${
+          filtersOpen ? styles.mobileFilterSheetOpen : ""
+        }`}
+      >
+        <div className={styles.mobileFilterSheetHeader}>
+          <h3 className={styles.mobileFilterTitle}>Filter Options</h3>
+          <button
+            type="button"
+            className={styles.mobileFilterClose}
+            onClick={closeFilters}
+            aria-label="Close filters"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className={styles.mobileFilterInner}>
+          <div className={styles.filterGroup}>
+            <span className={styles.filterGroupLabel}>Category</span>
+            {FILTER_CATEGORIES.map(cat => (
+              <label key={cat} className={styles.mobileFilterOption}>
+                <input 
+                  type="radio" 
+                  name="mobile_category" 
+                  checked={selectedCategory === cat} 
+                  onChange={() => {
+                    setSelectedCategory(cat);
+                    setCurrentPage(0);
+                  }} 
+                />
+                {cat}
+              </label>
+            ))}
+          </div>
+
+          <div className={styles.filterGroup}>
+            <span className={styles.filterGroupLabel}>Material</span>
+            {FILTER_MATERIALS.map(mat => (
+              <label key={mat} className={styles.mobileFilterOption}>
+                <input 
+                  type="radio" 
+                  name="mobile_material" 
+                  checked={selectedMaterial === mat} 
+                  onChange={() => setSelectedMaterial(mat)} 
+                />
+                {mat}
+              </label>
+            ))}
+          </div>
+
+          <div className={styles.filterGroup}>
+            <span className={styles.filterGroupLabel}>Size</span>
+            {FILTER_SIZES.map(size => (
+              <label key={size} className={styles.mobileFilterOption}>
+                <input 
+                  type="radio" 
+                  name="mobile_size" 
+                  checked={selectedSize === size} 
+                  onChange={() => setSelectedSize(size)} 
+                />
+                {size}
+              </label>
+            ))}
+          </div>
+
+          <div className={styles.filterGroup}>
+            <span className={styles.filterGroupLabel}>Price Range</span>
+            <input
+              type="range"
+              min="0"
+              max="7000"
+              step="100"
+              value={priceRange[1]}
+              onChange={(e) => setPriceRange([0, Number(e.target.value)])}
+              className={styles.filterPriceInput}
+              style={{ "--_progress": `${(priceRange[1] / 7000) * 100}%` }}
+            />
+            <div className={styles.filterPriceRange}>
+              <span>₹0</span>
+              <span>₹{priceRange[1]}</span>
+            </div>
+          </div>
+
+          <button 
+            className={styles.mobileFilterApply} 
+            onClick={() => {
+              closeFilters();
+              setTimeout(scrollToOffers, 100);
+            }}
+          >
+            Apply Filters
+          </button>
+        </div>
       </div>
     </section>
     <Footer/>
