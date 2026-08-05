@@ -1815,7 +1815,7 @@
   }
 
   .exploreList {
-    gap: 16px;
+    gap: 20px;
     justify-content: center;
   }
 
@@ -2019,7 +2019,7 @@
   }
 
   .exploreList {
-    gap: 12px;
+    gap: 30px 50px;
   }
 
   .exploreThumb {
@@ -2168,7 +2168,7 @@
   }
 
   .exploreList {
-    gap: 10px;
+    gap: 30px;
   }
 
   .exploreThumb {
