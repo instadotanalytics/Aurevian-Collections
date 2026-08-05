@@ -896,7 +896,7 @@
   left: 12px;
   background: #ffffff;
   color: var(--sale);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 1px;
   padding: 5px 10px;
   border-radius: 20px;
@@ -1774,7 +1774,7 @@
   }
 
   .productDiscount {
-    font-size: 10px;
+    font-size: 12px;
     padding: 4px 8px;
     top: 10px;
     left: 10px;
@@ -1978,7 +1978,7 @@
   }
 
   .productDiscount {
-    font-size: 9px;
+    font-size: 10px;
     padding: 3px 7px;
     top: 8px;
     left: 8px;

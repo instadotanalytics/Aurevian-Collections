@@ -407,7 +407,7 @@ export default function Collections() {
       const newCollectionBottom = newCollectionRect.bottom + window.pageYOffset;
       
       window.scrollTo({
-        top: newCollectionBottom - 60,
+        top: newCollectionBottom - 300,
         behavior: "smooth"
       });
     } else {
