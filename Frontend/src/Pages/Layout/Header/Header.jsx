@@ -1,4 +1,4 @@
-// src/Pages/Layout/Header/Header.jsx — full file with mobile bottom nav
+// src/Pages/Layout/Header/Header.jsx - Fixed scroll lock
 
 import React, { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -75,6 +75,9 @@ const Header = ({
 
   const navbarRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(0);
+  
+  // ✅ Store scroll position to restore later
+  const scrollYRef = useRef(0);
 
   // ✅ Fetch the admin-managed header content once on mount
   useEffect(() => {
@@ -167,10 +170,45 @@ const Header = ({
     return () => document.removeEventListener("keydown", handleEscape);
   }, []);
 
+  // ✅ FIXED: Proper body scroll lock for mobile drawer and search
   useEffect(() => {
-    document.body.style.overflow = mobileOpen || searchOpen ? "hidden" : "";
+    const isLocked = mobileOpen || searchOpen;
+    
+    if (isLocked) {
+      // Save current scroll position
+      scrollYRef.current = window.scrollY;
+      
+      // Lock body scroll
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollYRef.current}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Restore body scroll
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      
+      // Restore scroll position
+      if (scrollYRef.current) {
+        window.scrollTo(0, scrollYRef.current);
+        scrollYRef.current = 0;
+      }
+    }
+
     return () => {
-      document.body.style.overflow = "";
+      // Cleanup on unmount
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
     };
   }, [mobileOpen, searchOpen]);
 
@@ -871,7 +909,7 @@ const Header = ({
       </aside>
 
       {/* ==========================================================
-           MOBILE BOTTOM NAVIGATION (NEW)
+           MOBILE BOTTOM NAVIGATION
            ========================================================== */}
       <nav className={styles.mobileBottomNav} aria-label="Mobile bottom navigation">
         <Link to="/" className={styles.bottomNavItem}>
