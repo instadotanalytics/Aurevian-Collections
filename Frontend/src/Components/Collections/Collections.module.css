@@ -149,7 +149,7 @@
 
 .heroTitle {
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(36px, 5vw, 64px);
+  font-size: clamp(40px, 5vw, 64px);
   font-weight: 600;
   color: #fff;
   margin: 0 0 16px 0;
@@ -362,7 +362,7 @@
 
 .newCollectionTitle {
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(45px, 8vw, 60px);
+  font-size: clamp(50px, 8vw, 60px);
   font-weight: 500;
   color: var(--ink);
   margin: 0 0 10px 0;
@@ -371,7 +371,7 @@
 }
 
 .newCollectionDesc {
-  font-size: 18px;
+  font-size: 19px;
   line-height: 1.8;
   color: var(--text-muted);
   max-width: 600px;
@@ -1086,13 +1086,13 @@
   margin: 0 0 6px;
   font-family: "Cormorant Garamond", serif;
   font-weight: 600;
-  font-size: clamp(28px, 3vw, 38px);
+  font-size: clamp(34px, 3vw, 38px);
   color: var(--ink);
 }
 
 .exploreHeading p {
   margin: 0;
-  font-size: 15px;
+  font-size: 16px;
   color: var(--text-muted);
   font-weight: 300;
 }
@@ -1145,7 +1145,7 @@
 }
 
 .exploreLabel {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 500;
   letter-spacing: 0.03em;
 }
@@ -1471,7 +1471,7 @@
   }
 
   .heroGallery {
-    height: 75vh;
+    height: 70vh;
     min-height: 400px;
   }
 
@@ -1516,7 +1516,7 @@
   }
 
   .heroGallery {
-    height: 65vh;
+    height: 60vh;
     min-height: 350px;
   }
 
@@ -1549,11 +1549,11 @@
   }
 
   .newCollectionTitle {
-    font-size: clamp(36px, 7vw, 56px);
+    font-size: clamp(40px, 7vw, 56px);
   }
 
   .newCollectionDesc {
-    font-size: 16px;
+    font-size: 17px;
   }
 
   .featureSection {
@@ -1614,7 +1614,7 @@
   }
 
   .exploreLabel {
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .heroOverlay {
@@ -1622,7 +1622,7 @@
   }
 
   .heroTitle {
-    font-size: clamp(26px, 4vw, 36px);
+    font-size: clamp(30px, 4vw, 36px);
   }
 
   .productsGrid {
@@ -1663,7 +1663,7 @@
   }
 
   .heroGallery {
-    height: 55vh;
+    height: 50vh;
     min-height: 300px;
     margin-bottom: 16px;
   }
@@ -1696,7 +1696,7 @@
   }
 
   .heroTitle {
-    font-size: clamp(26px, 5vw, 30px);
+    font-size: clamp(30px, 5vw, 30px);
   }
 
   .heroSubtitle {
@@ -1714,11 +1714,11 @@
   }
 
   .newCollectionTitle {
-    font-size: clamp(32px, 6vw, 42px);
+    font-size: clamp(35px, 6vw, 42px);
   }
 
   .newCollectionDesc {
-    font-size: 15px;
+    font-size: 16px;
   }
 
   .newCollectionEyebrow {
@@ -1807,11 +1807,11 @@
   }
 
   .exploreHeading h3 {
-    font-size: 24px;
+    font-size: 26px;
   }
 
   .exploreHeading p {
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .exploreList {
@@ -1825,7 +1825,7 @@
   }
 
   .exploreLabel {
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .exploreItem {
@@ -1905,7 +1905,7 @@
 /* --- Small Mobile --- */
 @media (max-width: 480px) {
   .heroGallery {
-    height: 50vh;
+    height: 45vh;
     min-height: 260px;
   }
 
@@ -1929,11 +1929,11 @@
   }
 
   .newCollectionTitle {
-    font-size: clamp(28px, 5vw, 34px);
+    font-size: clamp(32px, 5vw, 34px);
   }
 
   .newCollectionDesc {
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .productsGrid {
@@ -2011,11 +2011,11 @@
   }
 
   .exploreHeading h3 {
-    font-size: 22px;
+    font-size: 24px;
   }
 
   .exploreHeading p {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .exploreList {
@@ -2028,7 +2028,7 @@
   }
 
   .exploreLabel {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .exploreItem {
@@ -2069,7 +2069,7 @@
 /* --- Extra Small Mobile --- */
 @media (max-width: 400px) {
   .heroGallery {
-    height: 45vh;
+    height: 35vh;
     min-height: 220px;
   }
 
@@ -2080,11 +2080,11 @@
   }
 
   .newCollectionTitle {
-    font-size: clamp(24px, 4vw, 28px);
+    font-size: clamp(30px, 4vw, 28px);
   }
 
   .newCollectionDesc {
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .productsGrid {
@@ -2160,15 +2160,15 @@
   }
 
   .exploreHeading h3 {
-    font-size: 20px;
+    font-size: 22px;
   }
 
   .exploreHeading p {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .exploreList {
-    gap: 30px;
+    gap: 20px 28px;
   }
 
   .exploreThumb {
@@ -2177,7 +2177,7 @@
   }
 
   .exploreLabel {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .closingGallery {
