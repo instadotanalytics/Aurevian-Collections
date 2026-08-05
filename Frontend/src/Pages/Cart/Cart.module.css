@@ -1,7 +1,7 @@
-/* Cart.module.css */
+/* src/Pages/Cart/Cart.module.css - Complete updated file */
 
 /* ============================================
-   VARIABLES
+   VARIABLES - Aurevian Premium Theme
    ============================================ */
 :root {
   --gold: #d4af37;
@@ -9,14 +9,17 @@
   --gold-dark: #b8962e;
   --gold-gradient: linear-gradient(135deg, #d4af37 0%, #c9a84c 50%, #b8962e 100%);
   --cream: #fcf9f5;
-  --dark: #1a1a1a;
-  --gray: #6b6b6b;
-  --light-gray: #f5f5f5;
+  --cream-light: #fdfaf5;
+  --dark: #1a1714;
+  --dark-soft: #3d352e;
+  --gray: #6b635a;
+  --gray-light: #e8e3dc;
   --border: #e8e3dc;
-  --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  --shadow-hover: 0 4px 24px rgba(0, 0, 0, 0.1);
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow: 0 2px 16px rgba(26, 23, 20, 0.04);
+  --shadow-hover: 0 8px 32px rgba(26, 23, 20, 0.08);
+  --transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
+
 
 /* ============================================
    CART PAGE
@@ -25,9 +28,11 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 0 2rem;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 140px 0 40px;
+  font-family: 'Jost', -apple-system, BlinkMacSystemFont, sans-serif;
   min-height: 80vh;
+  /* background: #ffffff; */
+  color: var(--dark);
 }
 
 /* ============================================
@@ -35,120 +40,52 @@
    ============================================ */
 .heroSection {
   text-align: center;
-  padding: 3rem 1rem 2rem;
-  margin-bottom: 1.5rem;
-  background: white;
+  padding: 40px 20px 32px;
+  margin-bottom: 16px;
   position: relative;
-  overflow: hidden;
-}
-
-.heroSection::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -30%;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, transparent 70%);
-  border-radius: 50%;
-}
-
-.heroSection::after {
-  content: '';
-  position: absolute;
-  bottom: -40%;
-  left: -20%;
-  width: 250px;
-  height: 250px;
-  background: radial-gradient(circle, rgba(212, 175, 55, 0.03) 0%, transparent 70%);
-  border-radius: 50%;
+  /* background: #ffffff; */
 }
 
 .heroContent {
-  position: relative;
-  z-index: 1;
+  max-width: 640px;
+  margin: 0 auto;
 }
 
 .heroBadge {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.3rem 1.2rem;
-  background: var(--gold-light);
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
   color: var(--gold-dark);
-  border-radius: 50px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  margin-bottom: 0.8rem;
-  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
 }
 
 .heroBadgeIcon {
   color: var(--gold);
+  font-size: 14px;
 }
 
 .heroTitle {
   font-family: 'Playfair Display', serif;
-  font-size: 2.5rem;
-  font-weight: 700;
+  font-size: clamp(35px, 4.5vw, 48px);
+  font-weight: 500;
   color: var(--dark);
-  margin: 0.5rem 0;
+  margin: 8px 0 12px;
+  letter-spacing: -0.01em;
 }
 
 .heroDescription {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
   color: var(--gray);
-  font-size: 0.95rem;
+  font-size: 16px;
+  font-weight: 300;
   margin: 0;
-}
-
-/* ============================================
-   STATS BAR
-   ============================================ */
-.statsBar {
-  display: flex;
-  align-items: center;
-  justify-content: space-evenly;
-  gap: 2rem;
-  background: linear-gradient(135deg, #fcf9f5 0%, #f8f2ea 100%);
-  padding: 1rem 2rem;
-  border-radius: 12px;
-  margin-bottom: 2rem;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-  flex-wrap: wrap;
-}
-
-.statItem {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.statNumber {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--dark);
-  white-space: nowrap;
-}
-
-.rupeeIcon {
-  font-size: 0.85rem;
-  margin-right: 0.1rem;
-}
-
-.statLabel {
-  font-size: 0.8rem;
-  color: var(--gray);
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.statDivider {
-  width: 1px;
-  height: 30px;
-  background: var(--border);
 }
 
 /* ============================================
@@ -156,39 +93,17 @@
    ============================================ */
 .cartContainer {
   display: flex;
-  gap: 2rem;
+  gap: 40px;
+  margin-top: 24px;
 }
 
 .cartItemsSection {
   flex: 1;
-  background: white;
-  border-radius: 16px;
+  background: #ffffff;
   border: 1px solid var(--border);
   overflow: hidden;
   box-shadow: var(--shadow);
 }
-
-/* ============================================
-   TABLE HEADER
-   ============================================ */
-.tableHeader {
-  display: grid;
-  grid-template-columns: 1fr 130px 105px 115px 50px;
-  padding: 1rem 1.5rem;
-  background: var(--gold-gradient);
-  border-bottom: 1px solid var(--border);
-  font-weight: 600;
-  font-size: 0.75rem;
-  color: #fff;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.thProduct { text-align: left; }
-.thPrice { text-align: center; }
-.thQuantity { text-align: center; }
-.thSubtotal { text-align: center; }
-.thAction { text-align: center; }
 
 /* ============================================
    CART CARD
@@ -203,11 +118,11 @@
 }
 
 .cartCard:hover {
-  background: #fdfcfb;
+  background: var(--cream);
 }
 
 .cardContent {
-  padding: 1.2rem 1.5rem;
+  padding: 20px 24px;
 }
 
 /* ============================================
@@ -215,13 +130,13 @@
    ============================================ */
 .desktopView {
   display: grid;
-  grid-template-columns: 1fr 130px 105px 115px 50px;
+  grid-template-columns: 1fr 140px 120px 120px 50px;
   align-items: center;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 /* ============================================
-   MOBILE VIEW - Hidden on Desktop
+   MOBILE VIEW
    ============================================ */
 .mobileView {
   display: none;
@@ -232,17 +147,17 @@
    ============================================ */
 .productCell {
   display: flex;
-  gap: 1rem;
+  gap: 16px;
   align-items: center;
 }
 
 .imageWrapper {
   position: relative;
   flex-shrink: 0;
-  width: 80px;
-  height: 80px;
-  background: var(--light-gray);
-  border-radius: 10px;
+  width: 110px;
+  height: 110px;
+  background: var(--gray-light);
+  border-radius: 4px;
   overflow: hidden;
 }
 
@@ -255,14 +170,15 @@
 .outOfStockOverlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(26, 23, 20, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 0.65rem;
-  font-weight: 600;
+  font-size: 10px;
+  font-weight: 500;
   text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .productInfo {
@@ -271,38 +187,44 @@
 }
 
 .productName {
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-family: 'Playfair Display', serif;
+  font-size: 17px;
+  font-weight: 500;
   color: var(--dark);
-  margin: 0 0 0.2rem 0;
+  margin: 0 0 4px 0;
+  line-height: 1.3;
 }
 
 .productVariant {
-  font-size: 0.8rem;
+  font-size: 15px;
   color: var(--gray);
   margin: 0;
+  font-weight: 300;
 }
 
 .productSize {
-  font-size: 0.75rem;
+  font-size: 14px;
   color: var(--gray);
-  margin: 0 0 0.3rem 0;
+  margin: 0 0 4px 0;
+  font-weight: 300;
 }
 
 .availability {
-  margin-top: 0.2rem;
+  margin-top: 4px;
 }
 
 .inStock {
-  font-size: 0.7rem;
+  font-size: 13px;
   color: #2e7d32;
-  font-weight: 500;
+  font-weight: 400;
+  letter-spacing: 0.02em;
 }
 
 .outOfStock {
-  font-size: 0.7rem;
+  font-size: 12px;
   color: #c62828;
-  font-weight: 500;
+  font-weight: 400;
+  letter-spacing: 0.02em;
 }
 
 /* ============================================
@@ -316,30 +238,30 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.1rem;
+  gap: 2px;
 }
 
 .currentPrice {
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 500;
   color: var(--dark);
 }
 
 .rupeeIconSmall {
-  font-size: 0.7rem;
-  margin-right: 0.05rem;
+  font-size: 12px;
+  margin-right: 1px;
 }
 
 .oldPrice {
-  font-size: 0.75rem;
+  font-size: 15px;
   color: var(--gray);
   text-decoration: line-through;
 }
 
 .savings {
-  font-size: 0.65rem;
+  font-size: 14px;
   color: #2e7d32;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 /* ============================================
@@ -353,15 +275,15 @@
 .quantityControls {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 4px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 4px;
   overflow: hidden;
 }
 
 .quantityButton {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border: none;
   background: transparent;
   color: var(--dark);
@@ -370,11 +292,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.8rem;
+  font-size: 14px;
 }
 
 .quantityButton:hover:not(:disabled) {
-  background: var(--light-gray);
+  background: var(--gray-light);
 }
 
 .quantityButton:disabled {
@@ -383,10 +305,10 @@
 }
 
 .quantityValue {
-  min-width: 28px;
+  min-width: 30px;
   text-align: center;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 15px;
   color: var(--dark);
 }
 
@@ -398,8 +320,8 @@
 }
 
 .subtotalPrice {
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 500;
   color: var(--dark);
 }
 
@@ -428,11 +350,34 @@
   border-color: #c62828;
   color: #c62828;
   background: #fce4ec;
-  transform: rotate(90deg);
 }
 
 .removeButtonMobile {
   display: none;
+}
+
+/* ============================================
+   MOBILE ACTIONS
+   ============================================ */
+.mobileActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 38px;
+  flex-shrink: 0;
+}
+
+.availabilityMobile {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.availabilityMobile .inStock {
+  color: #2e7d32;
+}
+
+.availabilityMobile .outOfStock {
+  color: #c62828;
 }
 
 /* ============================================
@@ -441,14 +386,14 @@
 .orderSummary {
   flex: 0 0 340px;
   position: sticky;
-  top: 2rem;
+  top: 160px;
+  align-self: flex-start;
 }
 
 .summaryCard {
-  background: white;
-  border-radius: 16px;
+  background: #ffffff;
   border: 1px solid var(--border);
-  padding: 1.2rem 1.5rem;
+  padding: 28px 32px;
   box-shadow: var(--shadow);
 }
 
@@ -456,21 +401,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
-  margin-bottom: 1.2rem;
-  padding-bottom: 0.8rem;
-  border-bottom: 2px solid var(--border);
+  gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
 }
 
 .summaryIcon {
-  font-size: 1.4rem;
+  font-size: 20px;
   color: var(--gold);
 }
 
 .summaryTitle {
   font-family: 'Playfair Display', serif;
-  font-size: 1.3rem;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 500;
   color: var(--dark);
   margin: 0;
 }
@@ -478,63 +423,62 @@
 .summaryRow {
   display: flex;
   justify-content: space-between;
-  padding: 0.6rem 0;
-  font-size: 0.9rem;
+  padding: 8px 0;
+  font-size: 14px;
   color: var(--gray);
 }
 
 .summaryRow span:last-child {
+  font-weight: 400;
+  color: var(--dark);
+}
+
+/* Removed extra divider - only keep before total */
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  margin-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.totalLabel {
+  font-size: 16px;
   font-weight: 500;
   color: var(--dark);
 }
 
-.divider {
-  height: 1px;
-  background: var(--border);
-  margin: 0.8rem 0;
-}
-
-.totalRow {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.8rem 0;
-}
-
-.totalLabel {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--dark);
-}
-
 .totalAmount {
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 600;
   color: var(--gold-dark);
+  font-family: 'Playfair Display', serif;
 }
 
 .rupeeIconLarge {
-  font-size: 1rem;
-  margin-right: 0.1rem;
+  font-size: 16px;
+  margin-right: 2px;
 }
 
 .checkoutButton {
   width: 100%;
-  padding: 0.9rem;
+  padding: 14px;
   background: var(--gold-gradient);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
+  font-family: 'Jost', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   cursor: pointer;
   transition: var(--transition);
-  margin-top: 1rem;
-  letter-spacing: 0.5px;
+  margin-top: 16px;
 }
 
 .checkoutButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.3);
 }
 
 /* ============================================
@@ -543,87 +487,63 @@
 .trustSection {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
-  margin-top: 1.2rem;
-  padding-top: 1.2rem;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
   border-top: 1px solid var(--border);
 }
 
 .trustCard {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  padding: 0.6rem 0.8rem;
-  border-radius: 8px;
+  gap: 12px;
+  padding: 8px 12px;
   transition: var(--transition);
 }
 
 .trustCard:hover {
-  background: var(--light-gray);
+  background: var(--cream);
 }
 
 .trustIcon {
-  font-size: 1.2rem;
+  font-size: 20px;
   color: var(--gold);
   flex-shrink: 0;
+  opacity: 0.6;
 }
 
 .trustInfo h4 {
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 500;
   color: var(--dark);
   margin: 0;
 }
 
 .trustInfo p {
-  font-size: 0.7rem;
+  font-size: 14px;
   color: var(--gray);
   margin: 0;
+  font-weight: 300;
 }
 
 /* ============================================
-   WHY AUREVIAN SECTION
+   WHY AUREVIAN - Premium Editorial
    ============================================ */
 .whyAurevian {
-  margin-top: 3rem;
-  padding: 3rem 2rem;
-  background: linear-gradient(135deg, #ffeed7 0%, #f8f2ea 100%);
-  border-radius: 16px;
+  margin-top: 60px;
+  padding: 60px 40px;
+  background: #ffffff;
+  border: 1px solid var(--border);
   box-shadow: var(--shadow);
   position: relative;
-  overflow: hidden;
-}
-
-.whyAurevian::before {
-  content: '';
-  position: absolute;
-  top: -30%;
-  right: -20%;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(212, 175, 55, 0.04) 0%, transparent 70%);
-  border-radius: 50%;
-}
-
-.whyAurevian::after {
-  content: '';
-  position: absolute;
-  bottom: -30%;
-  left: -10%;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(212, 175, 55, 0.03) 0%, transparent 70%);
-  border-radius: 50%;
 }
 
 .whyContent {
   display: flex;
-  gap: 1.5rem;
+  gap: 60px;
   align-items: center;
-  max-width: 1100px;
+  max-width: 1000px;
   margin: 0 auto;
-  position: relative;
-  z-index: 1;
 }
 
 .whyLeft {
@@ -632,49 +552,84 @@
 
 .whyBadge {
   display: inline-block;
-  font-size: 0.8rem;
-  color: var(--gold);
-  font-weight: 600;
-  letter-spacing: 2px;
-  margin-bottom: 0.5rem;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+  margin-bottom: 12px;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
 }
 
 .whyTitle {
   font-family: 'Playfair Display', serif;
-  font-size: 2.2rem;
-  font-weight: 700;
+  font-size: clamp(28px, 3.5vw, 40px);
+  font-weight: 500;
   color: var(--dark);
-  margin: 0 0 1rem 0;
-  line-height: 1.2;
+  margin: 0 0 16px 0;
+  line-height: 1.15;
 }
 
 .whyDesc {
-  font-size: 0.95rem;
+  font-size: 15px;
   line-height: 1.8;
   color: var(--gray);
-  margin: 0 0 0.8rem 0;
+  margin: 0 0 24px 0;
+  font-weight: 300;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+}
+
+.whyFeatures {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  align-items: flex-start;
+}
+
+.whyFeature {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 15px;
+  color: var(--dark-soft);
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+.whyFeature strong {
+  font-weight: 500;
+  color: var(--dark);
+}
+
+.whyFeatureIcon {
+  color: var(--gold);
+  font-size: 13px;
+  opacity: 0.5;
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .whyRight {
-  flex: 0 0 320px;
+  flex: 0 0 280px;
 }
 
 .whyImage {
   width: 100%;
-  height: 350px;
-  border-radius: 12px;
-  overflow: hidden;
+  height: 280px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  padding: 20px;
+  background:black;
+  border: 1px solid var(--border);
 }
 
 .whyImageLogo {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  transition: transform 0.4s ease;
 }
 
 /* ============================================
@@ -685,60 +640,64 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4rem 2rem;
-  background: white;
-  border-radius: 16px;
+  padding: 80px 40px;
+  background: #ffffff;
   border: 1px solid var(--border);
   text-align: center;
 }
 
 .emptyIconWrapper {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  background: var(--gold-light);
+  background: var(--cream);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 24px;
 }
 
 .emptyIcon {
-  font-size: 3rem;
+  font-size: 32px;
   color: var(--gold);
 }
 
 .emptyTitle {
   font-family: 'Playfair Display', serif;
-  font-size: 1.8rem;
+  font-size: 28px;
+  font-weight: 500;
   color: var(--dark);
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
 }
 
 .emptyDescription {
   color: var(--gray);
-  margin-bottom: 1.5rem;
+  margin-bottom: 24px;
+  font-weight: 300;
 }
 
 .exploreButton {
-  padding: 0.8rem 2.5rem;
+  padding: 12px 32px;
   background: var(--gold-gradient);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
+  font-family: 'Jost', sans-serif;
+  font-size: 13px;
   font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   cursor: pointer;
   transition: var(--transition);
+  text-decoration: none;
 }
 
 .exploreButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.3);
 }
 
 /* ============================================
-   RESPONSIVE - FIXED MOBILE LAYOUT
+   RESPONSIVE
    ============================================ */
 @media (max-width: 1024px) {
   .cartContainer {
@@ -749,10 +708,6 @@
     flex: 1;
     width: 100%;
     position: static;
-  }
-
-  .tableHeader {
-    display: none;
   }
 
   .desktopView {
@@ -788,21 +743,24 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 0.8rem;
+    gap: 12px;
+  }
+
+  .mobileActions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 38px;
+    flex-shrink: 0;
   }
 
   .mobileBottomRow {
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
-    padding-top: 0.8rem;
+    gap: 8px;
+    padding-top: 12px;
     border-top: 1px solid var(--border);
-    margin-top: 0.5rem;
-  }
-
-  .mobilePriceRow {
-    display: flex;
-    align-items: center;
+    margin-top: 8px;
   }
 
   .mobilePriceRow .priceCell {
@@ -814,16 +772,7 @@
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: flex-start;
-    gap: 0.4rem;
-  }
-
-  /* QUANTITY ROW - Below remove button */
-  .mobileQuantityRow {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    width: 100%;
-    margin-top: 0.3rem;
+    gap: 6px;
   }
 
   .mobileQuantityRow .quantityCell {
@@ -834,268 +783,221 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.5rem;
-    padding-top: 0.5rem;
-    /* REMOVED: border-top: 1px solid var(--border); */
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    margin-top: 4px;
   }
 
   .subtotalLabel {
-    font-size: 0.85rem;
+    font-size: 15px;
     color: var(--gray);
-    font-weight: 500;
+    font-weight: 400;
   }
 
   .mobileSubtotalRow .subtotalPrice {
-    font-size: 0.95rem;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 500;
     color: var(--dark);
-  }
-
-  .productCell {
-    flex: 1;
   }
 
   .whyContent {
     flex-direction: column;
     text-align: center;
+    gap: 32px;
   }
 
   .whyRight {
     flex: 1;
     width: 100%;
-  }
-
-  .whyImage {
-    height: 250px;
-  }
-}
-
-@media (max-width: 768px) {
-  .cartPage {
-    padding: 0 1rem 2rem;
-  }
-
-  .heroTitle {
-    font-size: 1.8rem;
-  }
-
-  .statsBar {
-    gap: 0.8rem;
-    padding: 0.8rem 1rem;
-  }
-
-  .statDivider {
-    display: none;
-  }
-
-  .statItem {
-    flex: 1;
-    justify-content: center;
-    min-width: 60px;
-  }
-
-  .statNumber {
-    font-size: 1rem;
-  }
-
-  .statLabel {
-    font-size: 0.7rem;
-  }
-
-  .imageWrapper {
-    width: 70px;
-    height: 70px;
-  }
-
-  .productName {
-    font-size: 0.85rem;
-  }
-
-  .productVariant {
-    font-size: 0.75rem;
-  }
-
-  .productSize {
-    font-size: 0.7rem;
-  }
-
-  .whyTitle {
-    font-size: 1.6rem;
-  }
-
-  .whyAurevian {
-    padding: 2rem 1.5rem;
+    max-width: 280px;
   }
 
   .whyImage {
     height: 200px;
   }
 
+  .whyFeatures {
+    align-items: left;
+  }
+
+  .whyFeature {
+    text-align: left;
+  }
+
+  .cartPage {
+    padding: 120px 20px 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .cartPage {
+    padding: 100px 16px 40px;
+  }
+
+  .heroSection {
+    padding: 50px 16px 20px;
+  }
+
+  .heroTitle {
+    font-size: 28px;
+  }
+
+  .heroDescription {
+    font-size: 14px;
+  }
+
+  .cardContent {
+    padding: 16px;
+  }
+
+  .productName {
+    font-size: 15px;
+  }
+
+  .productVariant {
+    font-size: 14px;
+  }
+
+  .productSize {
+    font-size: 13px;
+  }
+
+  .imageWrapper {
+    width: 90px;
+    height: 90px;
+  }
+
+  .currentPrice {
+    font-size: 17px;
+  }
+
+  .oldPrice {
+    font-size: 14px;
+  }
+
+  .savings {
+    font-size: 13px;
+  }
+
+  .whyAurevian {
+    padding: 40px 24px;
+    margin-top: 40px;
+  }
+
+  .whyTitle {
+    font-size: 26px;
+  }
+
+  .whyDesc {
+    font-size: 14px;
+  }
+
   .summaryCard {
-    padding: 1rem;
+    padding: 20px 24px;
   }
 
-  /* Mobile layout adjustment */
-  .mobileTopRow {
-    flex-wrap: wrap;
+  .totalAmount {
+    font-size: 20px;
   }
 
-  /* Quantity row below remove button */
-  .mobileQuantityRow {
-    margin-top: 0.5rem;
-    width: 100%;
+  .mobileActions {
+    gap: 36px;
   }
 
-  /* REMOVED: border-top from mobileSubtotalRow */
-  .mobileSubtotalRow {
-    padding-top: 0.5rem;
+  .availabilityMobile {
+    font-size: 11px;
   }
 }
 
 @media (max-width: 480px) {
-  .heroTitle {
-    font-size: 1.4rem;
+  .cartPage {
+    padding: 80px 12px 30px;
   }
 
-  .heroSection {
-    padding: 2rem 1rem 1.5rem;
+  .heroTitle {
+    font-size: 24px;
   }
 
   .heroBadge {
-    font-size: 0.65rem;
-    padding: 0.2rem 0.8rem;
-  }
-
-  .statsBar {
-    gap: 0.4rem;
-    padding: 0.6rem;
-  }
-
-  .statNumber {
-    font-size: 0.8rem;
-  }
-
-  .statLabel {
-    font-size: 0.55rem;
-  }
-
-  .cardContent {
-    padding: 0.8rem;
+    font-size: 10px;
   }
 
   .imageWrapper {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
   }
 
   .productName {
-    font-size: 0.8rem;
+    font-size: 14px;
   }
 
   .productVariant {
-    font-size: 0.7rem;
+    font-size: 13px;
   }
 
   .productSize {
-    font-size: 0.65rem;
+    font-size: 13px;
   }
 
   .currentPrice {
-    font-size: 0.85rem;
+    font-size: 15px;
   }
 
   .oldPrice {
-    font-size: 0.65rem;
+    font-size: 13px;
   }
 
   .savings {
-    font-size: 0.6rem;
-  }
-
-  .quantityControls {
-    gap: 0.1rem;
+    font-size: 12px;
   }
 
   .quantityButton {
-    width: 24px;
-    height: 24px;
-    font-size: 0.65rem;
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
   }
 
   .quantityValue {
-    min-width: 20px;
-    font-size: 0.75rem;
+    min-width: 24px;
+    font-size: 13px;
   }
 
   .mobileSubtotalRow .subtotalPrice {
-    font-size: 0.85rem;
-  }
-
-  .subtotalLabel {
-    font-size: 0.75rem;
-  }
-
-  .totalAmount {
-    font-size: 1.2rem;
-  }
-
-  .checkoutButton {
-    font-size: 0.85rem;
-    padding: 0.7rem;
-  }
-
-  .whyTitle {
-    font-size: 1.3rem;
-  }
-
-  .whyDesc {
-    font-size: 0.8rem;
-  }
-
-  .whyImage {
-    height: 150px;
-    padding: 1rem;
-  }
-
-  .whyAurevian {
-    padding: 1.5rem 1rem;
-  }
-
-  .trustCard {
-    padding: 0.4rem 0.6rem;
-  }
-
-  .trustInfo h4 {
-    font-size: 0.7rem;
-  }
-
-  .trustInfo p {
-    font-size: 0.6rem;
+    font-size: 15px;
   }
 
   .summaryCard {
-    padding: 0.8rem;
-  }
-
-  .summaryTitle {
-    font-size: 1.1rem;
-  }
-
-  .summaryRow {
-    font-size: 0.8rem;
-    padding: 0.4rem 0;
-  }
-
-  .totalLabel {
-    font-size: 0.95rem;
+    padding: 16px 16px;
   }
 
   .totalAmount {
-    font-size: 1.1rem;
+    font-size: 18px;
   }
 
-  .mobileBottomRow {
-    gap: 0.4rem;
+  .checkoutButton {
+    font-size: 12px;
+    padding: 12px;
+  }
+
+  .whyAurevian {
+    padding: 32px 16px;
+  }
+
+  .whyTitle {
+    font-size: 22px;
+  }
+
+  .whyDesc {
+    font-size: 13px;
+  }
+
+  .whyFeature {
+    font-size: 14px;
+  }
+
+  .whyImage {
+    height: 160px;
   }
 
   .removeButtonMobile {
@@ -1103,24 +1005,36 @@
     height: 28px;
   }
 
-  .removeButtonMobile svg {
-    width: 14px;
-    height: 14px;
+  .mobileActions {
+    gap: 30px;
   }
 
-  /* Quantity row below remove button - Full width */
-  .mobileQuantityRow {
-    margin-top: 0.5rem;
-    width: 100%;
+  .availabilityMobile {
+    font-size: 10px;
   }
 
-  .mobileQuantityRow .quantityControls {
-    width: 100%;
-    justify-content: center;
+  .trustCard {
+    padding: 6px 8px;
   }
 
-  /* REMOVED: border-top from mobileSubtotalRow */
+  .trustIcon {
+    font-size: 18px;
+  }
+
+  .trustInfo h4 {
+    font-size: 14px;
+  }
+
+  .trustInfo p {
+    font-size: 13px;
+  }
+
+  .mobileBottomRow {
+    gap: 6px;
+    padding-top: 8px;
+  }
+
   .mobileSubtotalRow {
-    padding-top: 0.4rem;
+    padding-top: 6px;
   }
 }
