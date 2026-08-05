@@ -1,4 +1,4 @@
-/* src/Components/Collections/Collections.module.css */
+/* src/Components/Collections/Collections.module.css - Complete updated file */
 
 /* ==========================================================
    Aurevian — Collections
@@ -47,7 +47,7 @@
 }
 
 /* ==========================================================
-   HERO GALLERY - 90vh
+   HERO GALLERY - With bottom navigation
    ========================================================== */
 .heroGallery {
   height: 80vh;
@@ -216,42 +216,42 @@
   transform: scale(0.96);
 }
 
-/* Navigation Arrows - Far Left and Far Right */
-.heroNavArrows {
+/* Navigation - Arrows at bottom center with dots */
+.heroNavWrapper {
   position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  transform: translateY(-50%);
-  display: flex;
-  justify-content: space-between;
-  padding: 0 16px;
-  pointer-events: none;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 10;
 }
 
+.heroNavArrows {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .heroNavBtn {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: #fff;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 300;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
-  pointer-events: all;
   padding: 0;
   line-height: 1;
 }
 
 .heroNavBtn:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.3);
   transform: scale(1.08);
 }
 
@@ -259,16 +259,11 @@
   transform: scale(0.92);
 }
 
-/* Dots at bottom center */
+/* Dots */
 .heroDots {
-  position: absolute;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   gap: 8px;
   align-items: center;
-  z-index: 10;
 }
 
 .heroDot {
@@ -329,13 +324,14 @@
 }
 
 /* ==========================================================
-   NEW COLLECTION
+   NEW COLLECTION - Bigger text
    ========================================================== */
 .newCollectionSection {
   min-height: 40vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 30px 0;
 }
 
 .newCollectionContent {
@@ -345,7 +341,7 @@
 }
 
 .newCollectionEyebrow {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.4em;
   text-transform: uppercase;
@@ -353,29 +349,29 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .newCollectionEyebrow::before,
 .newCollectionEyebrow::after {
   content: "";
-  width: 24px;
+  width: 30px;
   height: 1px;
   background: var(--gold-light);
 }
 
 .newCollectionTitle {
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(44px, 8vw, 72px);
+  font-size: clamp(45px, 8vw, 60px);
   font-weight: 500;
   color: var(--ink);
-  margin: 0 0 16px 0;
+  margin: 0 0 10px 0;
   line-height: 0.95;
   letter-spacing: 0.01em;
 }
 
 .newCollectionDesc {
-  font-size: 17px;
+  font-size: 18px;
   line-height: 1.8;
   color: var(--text-muted);
   max-width: 600px;
@@ -1066,13 +1062,13 @@
 }
 
 /* ==========================================================
-   Explore More - Larger Circles
+   Explore More - Reduced padding
    ========================================================== */
 .exploreSection {
   background: var(--cream-deep);
-  margin: clamp(60px, 8vw, 100px) 0;
-  padding: clamp(50px, 6vw, 80px) 0;
-  min-height: 50vh;
+  margin: clamp(40px, 6vw, 80px) 0;
+  padding: clamp(30px, 4vw, 50px) 0;
+  min-height: 40vh;
   display: flex;
   align-items: center;
 }
@@ -1082,28 +1078,28 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 40px;
+  gap: 30px;
   width: 100%;
 }
 
 .exploreHeading h3 {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   font-family: "Cormorant Garamond", serif;
   font-weight: 600;
-  font-size: clamp(32px, 3.5vw, 42px);
+  font-size: clamp(28px, 3vw, 38px);
   color: var(--ink);
 }
 
 .exploreHeading p {
   margin: 0;
-  font-size: 16px;
+  font-size: 15px;
   color: var(--text-muted);
   font-weight: 300;
 }
 
 .exploreList {
   display: flex;
-  gap: clamp(32px, 5vw, 56px);
+  gap: clamp(24px, 4vw, 48px);
   flex-wrap: wrap;
 }
 
@@ -1240,41 +1236,86 @@
 }
 
 /* ==========================================================
-   Mobile Bottom Sheet Filter
+   Mobile Filter Toggle (Like Offers)
    ========================================================== */
-.mobileFilterOverlay {
+.filterToggle {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--cream-card);
+  border: 1px solid var(--cream-line);
+  border-radius: 8px;
+  font-family: "Jost", sans-serif;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink);
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: all 0.2s ease;
+}
+
+.filterToggle:hover {
+  border-color: var(--gold);
+}
+
+.filterToggle:active {
+  transform: scale(0.98);
+}
+
+.filterToggleText {
+  font-weight: 500;
+}
+
+.filterToggleIcon {
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+}
+
+/* ==========================================================
+   Mobile Filter Overlay
+   ========================================================== */
+.filterOverlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 998;
 }
 
-.mobileFilterOverlayActive {
+.filterOverlay {
   display: block;
-  opacity: 1;
 }
 
+/* ==========================================================
+   Mobile Filter Sheet - Bottom Sheet with scrolling fix
+   ========================================================== */
 .mobileFilterSheet {
   position: fixed;
-  bottom: 0;
   left: 0;
   right: 0;
-  background: var(--cream);
-  border-radius: 24px 24px 0 0;
-  padding: 24px 20px 40px;
+  bottom: 0;
+  height: 60vh;
   max-height: 60vh;
-  overflow-y: auto;
-  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  background: var(--cream);
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -10px 30px rgba(28, 25, 23, 0.3);
   transform: translateY(100%);
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.15);
+  transition: transform 0.35s ease;
+  z-index: 999;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .mobileFilterSheetActive {
   transform: translateY(0);
+  pointer-events: all;
 }
 
 .mobileFilterHandle {
@@ -1282,27 +1323,32 @@
   height: 4px;
   background: var(--cream-line);
   border-radius: 2px;
-  margin: 0 auto 20px;
+  margin: 12px auto 8px;
+  flex-shrink: 0;
 }
 
 .mobileFilterHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  padding: 8px 20px 12px;
+  border-bottom: 1px solid var(--cream-line);
+  flex-shrink: 0;
+  background: var(--cream);
 }
 
 .mobileFilterTitle {
   font-family: "Cormorant Garamond", serif;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--ink);
+  margin: 0;
 }
 
 .mobileFilterClose {
   background: none;
   border: none;
-  font-size: 24px;
+  font-size: 22px;
   color: var(--text-muted);
   cursor: pointer;
   padding: 4px;
@@ -1310,6 +1356,14 @@
 
 .mobileFilterClose:hover {
   color: var(--ink);
+}
+
+.mobileFilterContent {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 20px 20px;
+  overscroll-behavior: contain;
 }
 
 .mobileFilterGroup {
@@ -1336,40 +1390,12 @@
   cursor: pointer;
 }
 
-.mobileFilterOption input[type="checkbox"] {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 19px;
-  height: 19px;
-  border: 1.5px solid var(--cream-line);
-  border-radius: 4px;
-  background: #fff;
+.mobileFilterOption input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--gold-deep);
   cursor: pointer;
-  position: relative;
   flex-shrink: 0;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
-}
-
-.mobileFilterOption input[type="checkbox"]::after {
-  content: "";
-  position: absolute;
-  left: 6px;
-  top: 2px;
-  width: 4px;
-  height: 9px;
-  border: solid var(--gold);
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg) scale(0);
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.mobileFilterOption input[type="checkbox"]:checked {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(179, 135, 63, 0.12);
-}
-
-.mobileFilterOption input[type="checkbox"]:checked::after {
-  transform: rotate(45deg) scale(1);
 }
 
 .mobileFilterApply {
@@ -1378,13 +1404,14 @@
   background: var(--gold);
   color: white;
   border: none;
-  border-radius: 30px;
+  border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   font-family: "Jost", sans-serif;
-  margin-top: 16px;
+  margin-top: 8px;
   transition: background 0.3s ease;
+  flex-shrink: 0;
 }
 
 .mobileFilterApply:hover {
@@ -1396,7 +1423,7 @@
 }
 
 /* ==========================================================
-   RESPONSIVE - ONLY CHANGES FOR READABILITY
+   RESPONSIVE
    ========================================================== */
 
 /* --- Tablet --- */
@@ -1435,11 +1462,11 @@
     transform: scale(0.96);
   }
 
-  .mobileFilterOverlay {
-    display: none;
+  .filterToggle {
+    display: flex;
   }
 
-  .mobileFilterOverlayActive {
+  .filterOverlay {
     display: block;
   }
 
@@ -1448,14 +1475,14 @@
     min-height: 400px;
   }
 
-  .heroNavArrows {
-    padding: 0 16px;
+  .heroNavBtn {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
   }
 
-  .heroNavBtn {
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
+  .heroNavWrapper {
+    bottom: 20px;
   }
 
   .productsGrid {
@@ -1475,6 +1502,11 @@
     width: calc(100% + 32px);
     margin: 12px -16px -4px;
   }
+
+  .mobileFilterSheet {
+    height: 60vh;
+    max-height: 60vh;
+  }
 }
 
 /* --- Mobile Landscape / Small Tablet --- */
@@ -1488,23 +1520,40 @@
     min-height: 350px;
   }
 
-  .heroNavArrows {
-    padding: 0 12px;
+  .heroNavBtn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
   }
 
-  .heroNavBtn {
-    width: 36px;
-    height: 36px;
-    font-size: 16px;
+  .heroNavWrapper {
+    bottom: 16px;
+  }
+
+  .heroNavArrows {
+    gap: 12px;
+  }
+
+  .heroDot {
+    width: 8px;
+    height: 8px;
+  }
+
+  .heroDotActive {
+    width: 20px;
   }
 
   .newCollectionSection {
     min-height: 40vh;
-    padding: 15px 0;
+    padding: 20px 0;
   }
 
   .newCollectionTitle {
     font-size: clamp(36px, 7vw, 56px);
+  }
+
+  .newCollectionDesc {
+    font-size: 16px;
   }
 
   .featureSection {
@@ -1542,19 +1591,30 @@
   }
 
   .exploreSection {
-    padding: 40px 20px;
-    min-height: auto;
+    padding: 25px 0;
+    margin: 30px 0;
+    min-height: 30vh;
   }
 
   .exploreInner {
     flex-direction: column;
     align-items: flex-start;
-    gap: 32px;
+    gap: 24px;
   }
 
   .exploreList {
     width: 100%;
     justify-content: space-around;
+    gap: 20px;
+  }
+
+  .exploreThumb {
+    width: 90px;
+    height: 90px;
+  }
+
+  .exploreLabel {
+    font-size: 14px;
   }
 
   .heroOverlay {
@@ -1584,24 +1644,15 @@
   }
   
   .productCategoryOverlay {
-    font-size: 9px;
+    font-size: 10px;
     padding: 3px 8px;
     bottom: 10px;
     left: 10px;
   }
 
-  /* BIGGER EXPLORE CIRCLES ON TABLET */
-  .exploreThumb {
-    width: 100px;
-    height: 100px;
-  }
-
-  .exploreLabel {
-    font-size: 15px;
-  }
-
-  .exploreList {
-    gap: 24px;
+  .mobileFilterSheet {
+    height: 60vh;
+    max-height: 60vh;
   }
 }
 
@@ -1617,14 +1668,27 @@
     margin-bottom: 16px;
   }
 
-  .heroNavArrows {
-    padding: 0 10px;
+  .heroNavBtn {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
   }
 
-  .heroNavBtn {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
+  .heroNavWrapper {
+    bottom: 12px;
+  }
+
+  .heroNavArrows {
+    gap: 8px;
+  }
+
+  .heroDot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .heroDotActive {
+    width: 16px;
   }
 
   .heroOverlay {
@@ -1632,42 +1696,38 @@
   }
 
   .heroTitle {
-    font-size: clamp(20px, 4vw, 28px);
+    font-size: clamp(26px, 5vw, 30px);
   }
 
   .heroSubtitle {
-    font-size: 13px;
+    font-size: 15px;
   }
 
   .heroBtn {
-    font-size: 11px;
-    padding: 10px 20px;
-  }
-
-  .heroDots {
-    bottom: 16px;
-  }
-
-  .heroDot {
-    width: 8px;
-    height: 8px;
-  }
-
-  .heroDotActive {
-    width: 20px;
+    font-size: 13px;
+    padding: 8px 15px;
   }
 
   .newCollectionSection {
-    min-height: 30vh;
-    padding: 10px 0;
+    min-height: 27vh;
+    /* padding: 15px 0; */
   }
 
   .newCollectionTitle {
-    font-size: clamp(28px, 6vw, 40px);
+    font-size: clamp(32px, 6vw, 42px);
   }
 
   .newCollectionDesc {
-    font-size: 14px;
+    font-size: 15px;
+  }
+
+  .newCollectionEyebrow {
+    font-size: 12px;
+  }
+
+  .newCollectionEyebrow::before,
+  .newCollectionEyebrow::after {
+    width: 20px;
   }
 
   .productsGrid {
@@ -1721,7 +1781,7 @@
   }
 
   .productCategoryOverlay {
-    font-size: 9px;
+    font-size: 10px;
     padding: 3px 8px;
     bottom: 10px;
     left: 10px;
@@ -1735,35 +1795,41 @@
     right: 10px;
   }
 
-  /* BIGGER EXPLORE CIRCLES ON MOBILE */
-  .exploreThumb {
-    width: 90px;
-    height: 90px;
+  /* Explore More - Reduced padding on mobile */
+  .exploreSection {
+    margin: 25px 0;
+    padding: 20px 0;
+    min-height: 25vh;
   }
 
-  .exploreLabel {
-    font-size: 14px;
+  .exploreInner {
+    gap: 20px;
+  }
+
+  .exploreHeading h3 {
+    font-size: 24px;
+  }
+
+  .exploreHeading p {
+    font-size: 13px;
   }
 
   .exploreList {
-    gap: 20px;
+    gap: 16px;
     justify-content: center;
+  }
+
+  .exploreThumb {
+    width: 80px;
+    height: 80px;
+  }
+
+  .exploreLabel {
+    font-size: 13px;
   }
 
   .exploreItem {
     gap: 10px;
-  }
-
-  .exploreHeading h3 {
-    font-size: 28px;
-  }
-
-  .exploreHeading p {
-    font-size: 14px;
-  }
-
-  .exploreInner {
-    gap: 28px;
   }
 
   .closingGallery {
@@ -1796,18 +1862,43 @@
     padding: 6px 12px;
   }
 
-  .mobileFilterSheet {
-    padding: 20px 16px 30px;
-    max-height: 55vh;
-  }
-
   .featureImageWrap {
     max-height: 280px;
     width: 100%;
   }
 
   .featureImage {
-    object-position: center 35%;
+    object-position: center 60%;
+  }
+
+  .mobileFilterSheet {
+    height: 65vh;
+    max-height: 65vh;
+  }
+
+  .mobileFilterHandle {
+    margin: 10px auto 6px;
+  }
+
+  .mobileFilterHeader {
+    padding: 6px 16px 10px;
+  }
+
+  .mobileFilterTitle {
+    font-size: 18px;
+  }
+
+  .mobileFilterContent {
+    padding: 0 16px 16px;
+  }
+
+  .mobileFilterGroup {
+    margin-bottom: 16px;
+  }
+
+  .mobileFilterApply {
+    padding: 12px;
+    font-size: 15px;
   }
 }
 
@@ -1818,14 +1909,31 @@
     min-height: 260px;
   }
 
-  .heroNavArrows {
-    padding: 0 8px;
+  .heroNavBtn {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
   }
 
-  .heroNavBtn {
-    width: 28px;
-    height: 28px;
-    font-size: 12px;
+  .heroNavArrows {
+    gap: 6px;
+  }
+
+  .heroDot {
+    width: 5px;
+    height: 5px;
+  }
+
+  .heroDotActive {
+    width: 14px;
+  }
+
+  .newCollectionTitle {
+    font-size: clamp(28px, 5vw, 34px);
+  }
+
+  .newCollectionDesc {
+    font-size: 14px;
   }
 
   .productsGrid {
@@ -1877,7 +1985,7 @@
   }
 
   .productCategoryOverlay {
-    font-size: 8px;
+    font-size: 9px;
     padding: 2px 7px;
     bottom: 8px;
     left: 8px;
@@ -1891,18 +1999,36 @@
     right: 8px;
   }
 
-  /* BIGGER EXPLORE CIRCLES ON SMALL MOBILE */
-  .exploreThumb {
-    width: 80px;
-    height: 80px;
+  /* Explore More - Further reduced padding on small mobile */
+  .exploreSection {
+    margin: 20px 0;
+    padding: 16px 0;
+    min-height: 20vh;
   }
 
-  .exploreLabel {
-    font-size: 13px;
+  .exploreInner {
+    gap: 16px;
+  }
+
+  .exploreHeading h3 {
+    font-size: 22px;
+  }
+
+  .exploreHeading p {
+    font-size: 12px;
   }
 
   .exploreList {
-    gap: 16px;
+    gap: 12px;
+  }
+
+  .exploreThumb {
+    width: 70px;
+    height: 70px;
+  }
+
+  .exploreLabel {
+    font-size: 12px;
   }
 
   .exploreItem {
@@ -1917,13 +2043,22 @@
     border-radius: 8px;
   }
 
-  .newCollectionTitle {
-    font-size: clamp(24px, 5vw, 32px);
+  .mobileFilterSheet {
+    height: 70vh;
+    max-height: 70vh;
   }
 
-  .mobileFilterSheet {
-    max-height: 50vh;
-    padding: 16px 12px 24px;
+  .mobileFilterContent {
+    padding: 0 14px 14px;
+  }
+
+  .mobileFilterGroup {
+    margin-bottom: 14px;
+  }
+
+  .mobileFilterApply {
+    padding: 10px;
+    font-size: 14px;
   }
 
   .featureImageWrap {
@@ -1938,14 +2073,18 @@
     min-height: 220px;
   }
 
-  .heroNavArrows {
-    padding: 0 6px;
+  .heroNavBtn {
+    width: 22px;
+    height: 22px;
+    font-size: 9px;
   }
 
-  .heroNavBtn {
-    width: 24px;
-    height: 24px;
-    font-size: 10px;
+  .newCollectionTitle {
+    font-size: clamp(24px, 4vw, 28px);
+  }
+
+  .newCollectionDesc {
+    font-size: 14px;
   }
 
   .productsGrid {
@@ -1988,14 +2127,14 @@
   }
 
   .productDiscount {
-    font-size: 8px;
+    font-size: 10px;
     padding: 2px 6px;
     top: 6px;
     left: 6px;
   }
 
   .productCategoryOverlay {
-    font-size: 7px;
+    font-size: 8px;
     padding: 2px 6px;
     bottom: 6px;
     left: 6px;
@@ -2009,18 +2148,36 @@
     right: 6px;
   }
 
-  /* BIGGER EXPLORE CIRCLES ON EXTRA SMALL MOBILE */
-  .exploreThumb {
-    width: 70px;
-    height: 70px;
+  /* Explore More - Optimized for extra small */
+  .exploreSection {
+    margin: 15px 0;
+    padding: 12px 0;
+    min-height: 15vh;
   }
 
-  .exploreLabel {
-    font-size: 12px;
+  .exploreInner {
+    gap: 12px;
+  }
+
+  .exploreHeading h3 {
+    font-size: 20px;
+  }
+
+  .exploreHeading p {
+    font-size: 11px;
   }
 
   .exploreList {
-    gap: 12px;
+    gap: 10px;
+  }
+
+  .exploreThumb {
+    width: 60px;
+    height: 60px;
+  }
+
+  .exploreLabel {
+    font-size: 11px;
   }
 
   .closingGallery {
@@ -2031,13 +2188,17 @@
     border-radius: 6px;
   }
 
-  .newCollectionTitle {
-    font-size: clamp(20px, 4vw, 28px);
+  .mobileFilterContent {
+    padding: 0 12px 70px;
   }
 
-  .mobileFilterSheet {
-    max-height: 45vh;
-    padding: 14px 10px 20px;
+  .mobileFilterGroup {
+    margin-bottom: 12px;
+  }
+
+  .mobileFilterApply {
+    padding: 13px;
+    font-size: 14px;
   }
 
   .featureImageWrap {
@@ -2045,6 +2206,22 @@
   }
 }
 
+/* ==========================================================
+   Hide mobile filter on desktop
+   ========================================================== */
+@media (min-width: 1025px) {
+  .filterOverlay {
+    display: none !important;
+  }
+  
+  .mobileFilterSheet {
+    display: none !important;
+  }
+}
+
+/* ==========================================================
+   REDUCED MOTION
+   ========================================================== */
 @media (prefers-reduced-motion: reduce) {
   .reveal,
   .revealStagger > * {

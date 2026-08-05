@@ -1,7 +1,8 @@
-// src/Components/Collections/Collections.jsx
+// src/Components/Collections/Collections.jsx - Complete updated file
 
 import { useRef, useEffect, useState } from "react";
 import { FiFilter, FiHeart, FiShoppingBag, FiCheck } from "react-icons/fi";
+import { LuSlidersHorizontal } from "react-icons/lu";
 import styles from "./Collections.module.css";
 import Footer from "../../Pages/Layout/Footer/Footer.jsx";
 
@@ -362,11 +363,21 @@ export default function Collections() {
   const openMobileFilter = () => {
     setIsMobileFilterOpen(true);
     document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.width = "100%";
+    document.body.style.top = `-${window.scrollY}px`;
   };
 
   const closeMobileFilter = () => {
+    const scrollY = document.body.style.top;
     setIsMobileFilterOpen(false);
     document.body.style.overflow = "";
+    document.body.style.position = "";
+    document.body.style.width = "";
+    document.body.style.top = "";
+    if (scrollY) {
+      window.scrollTo(0, parseInt(scrollY || '0', 10) * -1);
+    }
   };
 
   // Cart and Wishlist handlers
@@ -435,20 +446,22 @@ export default function Collections() {
           ))}
         </div>
 
-        {/* Navigation - Arrows on far left/right, dots at bottom center */}
-        <div className={styles.heroNavArrows}>
-          <button className={styles.heroNavBtn} onClick={prevSlide} aria-label="Previous slide">‹</button>
-          <button className={styles.heroNavBtn} onClick={nextSlide} aria-label="Next slide">›</button>
-        </div>
-        <div className={styles.heroDots}>
-          {HERO_SLIDES.map((_, index) => (
-            <button
-              key={index}
-              className={`${styles.heroDot} ${index === currentSlide ? styles.heroDotActive : ""}`}
-              onClick={() => goToSlide(index)}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
+        {/* Navigation - Arrows at bottom center, dots next to arrows */}
+        <div className={styles.heroNavWrapper}>
+          <div className={styles.heroNavArrows}>
+            <button className={styles.heroNavBtn} onClick={prevSlide} aria-label="Previous slide">‹</button>
+            <div className={styles.heroDots}>
+              {HERO_SLIDES.map((_, index) => (
+                <button
+                  key={index}
+                  className={`${styles.heroDot} ${index === currentSlide ? styles.heroDotActive : ""}`}
+                  onClick={() => goToSlide(index)}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+            <button className={styles.heroNavBtn} onClick={nextSlide} aria-label="Next slide">›</button>
+          </div>
         </div>
       </div>
 
@@ -463,6 +476,19 @@ export default function Collections() {
             </p>
           </div>
         </Reveal>
+
+        {/* ---------------- Mobile Filter Toggle Button ---------------- */}
+        <button
+          type="button"
+          className={styles.filterToggle}
+          onClick={openMobileFilter}
+          aria-expanded={isMobileFilterOpen}
+        >
+          <span className={styles.filterToggleText}>Filter Options</span>
+          <span className={styles.filterToggleIcon}>
+            <LuSlidersHorizontal />
+          </span>
+        </button>
 
         {/* ---------------- Shop Layout - Filter + Products ---------------- */}
         <div id="filter-section" className={styles.shopLayout}>
@@ -540,9 +566,6 @@ export default function Collections() {
             <div className={styles.productsHeader}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <span className={styles.productsCount}>Showing {filteredProducts.length} products</span>
-                <button className={styles.filterTrigger} onClick={openMobileFilter}>
-                  <FiFilter size={16} /> Filter
-                </button>
               </div>
               <select className={styles.sortSelect} value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
                 <option value="latest">Sort by latest</option>
@@ -684,13 +707,17 @@ export default function Collections() {
         </div>
       </div>
 
-      {/* ---------------- Mobile Filter Bottom Sheet ---------------- */}
-      <div 
-        className={`${styles.mobileFilterOverlay} ${isMobileFilterOpen ? styles.mobileFilterOverlayActive : ""}`}
-        onClick={closeMobileFilter}
-      />
+      {/* ---------------- Mobile Bottom Sheet Filter ---------------- */}
+      {isMobileFilterOpen && (
+        <div
+          className={styles.filterOverlay}
+          onClick={closeMobileFilter}
+        />
+      )}
       
-      <div className={`${styles.mobileFilterSheet} ${isMobileFilterOpen ? styles.mobileFilterSheetActive : ""}`}>
+      <div
+        className={`${styles.mobileFilterSheet} ${isMobileFilterOpen ? styles.mobileFilterSheetActive : ""}`}
+      >
         <div className={styles.mobileFilterHandle} />
         
         <div className={styles.mobileFilterHeader}>
@@ -698,39 +725,41 @@ export default function Collections() {
           <button className={styles.mobileFilterClose} onClick={closeMobileFilter}>✕</button>
         </div>
 
-        <div className={styles.mobileFilterGroup}>
-          <span className={styles.mobileFilterGroupLabel}>Category</span>
-          {FILTER_CATEGORIES.map(cat => (
-            <label key={cat} className={styles.mobileFilterOption}>
-              <input type="checkbox" checked={selectedCategory === cat} onChange={() => setSelectedCategory(cat)} />
-              {cat}
-            </label>
-          ))}
-        </div>
+        <div className={styles.mobileFilterContent}>
+          <div className={styles.mobileFilterGroup}>
+            <span className={styles.mobileFilterGroupLabel}>Category</span>
+            {FILTER_CATEGORIES.map(cat => (
+              <label key={cat} className={styles.mobileFilterOption}>
+                <input type="radio" name="mobile_category" checked={selectedCategory === cat} onChange={() => setSelectedCategory(cat)} />
+                {cat}
+              </label>
+            ))}
+          </div>
 
-        <div className={styles.mobileFilterGroup}>
-          <span className={styles.mobileFilterGroupLabel}>Material</span>
-          {FILTER_MATERIALS.map(mat => (
-            <label key={mat} className={styles.mobileFilterOption}>
-              <input type="checkbox" checked={selectedMaterial === mat} onChange={() => setSelectedMaterial(mat)} />
-              {mat}
-            </label>
-          ))}
-        </div>
+          <div className={styles.mobileFilterGroup}>
+            <span className={styles.mobileFilterGroupLabel}>Material</span>
+            {FILTER_MATERIALS.map(mat => (
+              <label key={mat} className={styles.mobileFilterOption}>
+                <input type="radio" name="mobile_material" checked={selectedMaterial === mat} onChange={() => setSelectedMaterial(mat)} />
+                {mat}
+              </label>
+            ))}
+          </div>
 
-        <div className={styles.mobileFilterGroup}>
-          <span className={styles.mobileFilterGroupLabel}>Size</span>
-          {FILTER_SIZES.map(size => (
-            <label key={size} className={styles.mobileFilterOption}>
-              <input type="checkbox" checked={selectedSize === size} onChange={() => setSelectedSize(size)} />
-              {size}
-            </label>
-          ))}
-        </div>
+          <div className={styles.mobileFilterGroup}>
+            <span className={styles.mobileFilterGroupLabel}>Size</span>
+            {FILTER_SIZES.map(size => (
+              <label key={size} className={styles.mobileFilterOption}>
+                <input type="radio" name="mobile_size" checked={selectedSize === size} onChange={() => setSelectedSize(size)} />
+                {size}
+              </label>
+            ))}
+          </div>
 
-        <button className={styles.mobileFilterApply} onClick={closeMobileFilter}>
-          Apply Filters
-        </button>
+          <button className={styles.mobileFilterApply} onClick={closeMobileFilter}>
+            Apply Filters
+          </button>
+        </div>
       </div>
     </section>
     <Footer/>
