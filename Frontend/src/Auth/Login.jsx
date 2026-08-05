@@ -1,3 +1,5 @@
+// src/Components/Pages/Login/Login.jsx - Complete updated file
+
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
@@ -143,8 +145,8 @@ const Login = () => {
 
               <div className={styles.heroCtas}>
                 <Link to="/collections" className={styles.ctaPrimary}>
-  Explore Collection
-</Link>
+                  Explore Collection
+                </Link>
                 <a href="#why-aurevian" className={styles.ctaSecondary}>
                   Learn More
                 </a>
@@ -161,7 +163,7 @@ const Login = () => {
               </ul>
             </div>
 
-            {/* ---------- Right: login card (functionality untouched) ---------- */}
+            {/* ---------- Right: login card ---------- */}
             <div className={styles.heroRight}>
               <div className={styles.card}>
                 {/* Logo */}
@@ -257,6 +259,17 @@ const Login = () => {
                     Create Account
                   </Link>
                 </p>
+
+                {/* ========== Privacy & Terms ========== */}
+                <div className={styles.legalLinks}>
+                  <Link to="/privacy-policy" className={styles.legalLink}>
+                    Privacy Policy
+                  </Link>
+                  <span className={styles.legalDivider}>•</span>
+                  <Link to="/terms" className={styles.legalLink}>
+                    Terms &amp; Conditions
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
@@ -295,7 +308,7 @@ const Login = () => {
           </div>
         </section>
 
-        {/* ========================= CRAFTSMANSHIP (image + content) ========================= */}
+        {/* ========================= CRAFTSMANSHIP ========================= */}
         <section className={styles.craftSection} aria-labelledby="craft-heading">
           <div className={styles.craftInner}>
             <div className={styles.craftImageWrap}>
@@ -334,9 +347,9 @@ const Login = () => {
                 ))}
               </ul>
 
-          <Link to="/collections" className={styles.craftCta}>
-  Explore The Collection
-</Link>
+              <Link to="/collections" className={styles.craftCta}>
+                Explore The Collection
+              </Link>
             </div>
           </div>
         </section>

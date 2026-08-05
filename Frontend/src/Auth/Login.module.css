@@ -497,7 +497,6 @@
   content: "";
   position: absolute;
   left: 0;
-  
   width: 100%;
   height: 1px;
   background: var(--border);
@@ -527,6 +526,39 @@
 
 .footerLink:hover {
   color: var(--ink);
+}
+
+/* ==========================================================
+   LEGAL LINKS - Privacy & Terms (Added)
+========================================================== */
+.legalLinks {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.legalLink {
+  font-size: 14px;
+  color: var(--ink-soft);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  letter-spacing: 0.02em;
+}
+
+.legalLink:hover {
+  color: var(--gold-deep);
+  text-decoration: underline;
+}
+
+.legalDivider {
+  font-size: 10px;
+  color: var(--border);
+  user-select: none;
 }
 
 /* ==========================================================
@@ -865,8 +897,9 @@
 .eyeButton:focus-visible,
 .forgotLink:focus-visible,
 .footerLink:focus-visible,
+.legalLink:focus-visible,
 .input:focus-visible {
-  /* outline: 2px solid var(--gold-1); */
+  outline: 2px solid var(--gold-1);
   outline-offset: 2px;
 }
 
@@ -890,7 +923,6 @@
 }
 
 /* Tablets — stack hero, keep why-section 2-col */
-
 @media (max-width: 1023px) {
   .heroInner {
     display: flex;
@@ -952,8 +984,6 @@
     text-align: left;
   }
 }
-
-
 
 /* Stats + why-rows: always two per row from tablet down to the smallest phones */
 @media (max-width: 1023px) {
@@ -1057,6 +1087,17 @@
   .craftCta {
     width: 100%;
   }
+
+  /* Legal Links - Mobile */
+  .legalLinks {
+    gap: 6px;
+    margin-top: 12px;
+    padding-top: 10px;
+  }
+
+  .legalLink {
+    font-size: 13px;
+  }
 }
 
 /* Small phones */
@@ -1072,5 +1113,17 @@
   .craftAccentTop,
   .craftAccentBottom {
     display: none;
+  }
+
+  .legalLinks {
+    gap: 4px;
+  }
+
+  .legalLink {
+    font-size: 13px;
+  }
+
+  .legalDivider {
+    font-size: 8px;
   }
 }
