@@ -541,7 +541,7 @@
 }
 
 .termsText {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--ink-soft);
   line-height: 1.5;
 }
@@ -999,7 +999,7 @@
   }
 
   .termsText {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .termsCheckbox {
@@ -1123,7 +1123,7 @@
   }
 
   .termsText {
-    font-size: 11px;
+    font-size: 13px;
   }
 
   .termsCheckbox {
