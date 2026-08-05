@@ -23,7 +23,7 @@ import Footer from "../Pages/Layout/Footer/Footer.jsx";
 import Header from "../Pages/Layout/Header/Header.jsx";
 
 // Only keep banner image
-import bannerImage from "../assets/bannerprivacy.png";
+import bannerImage from "../assets/BannerPrivacy.png";
 
 /* ---------- Scroll-reveal wrapper ---------- */
 const Reveal = ({ children, delay = 0, className = "" }) => {
