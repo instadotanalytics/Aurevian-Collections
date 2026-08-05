@@ -1,4 +1,4 @@
-// src/Components/Offers/Offers.jsx
+// src/Components/Offers/Offers.jsx - Complete updated file
 
 import React, { useRef, useEffect, useState } from "react";
 import { 
@@ -372,7 +372,7 @@ export default function Offers() {
   const [currentPage, setCurrentPage] = useState(0);
   const [cartItems, setCartItems] = useState([]);
   const [wishlist, setWishlist] = useState([]);
-  const itemsPerPage = 9; // 9 cards per page
+  const itemsPerPage = 9;
 
   // Filter products
   const filteredProducts = ALL_PRODUCTS
@@ -388,15 +388,27 @@ export default function Offers() {
     (currentPage + 1) * itemsPerPage
   );
 
+  // Scroll to offers section function
+  const scrollToOffers = () => {
+    const offersSection = document.getElementById("offers-section");
+    if (offersSection) {
+      const rect = offersSection.getBoundingClientRect();
+      const top = rect.top + window.pageYOffset;
+      window.scrollTo({ top: top - 120, behavior: "smooth" });
+    }
+  };
+
   const nextPage = () => {
     if (currentPage < totalPages - 1) {
       setCurrentPage(prev => prev + 1);
+      setTimeout(scrollToOffers, 100);
     }
   };
 
   const prevPage = () => {
     if (currentPage > 0) {
       setCurrentPage(prev => prev - 1);
+      setTimeout(scrollToOffers, 100);
     }
   };
 
@@ -415,15 +427,6 @@ export default function Offers() {
       }
       return [...prev, productId];
     });
-  };
-
-  const scrollToOffers = () => {
-    const offersSection = document.getElementById("offers-section");
-    if (offersSection) {
-      const rect = offersSection.getBoundingClientRect();
-      const top = rect.top + window.pageYOffset;
-      window.scrollTo({ top: top - 120, behavior: "smooth" });
-    }
   };
 
   const clearAllFilters = () => {
@@ -482,6 +485,7 @@ export default function Offers() {
                       onChange={() => {
                         setSelectedCategory(cat);
                         setCurrentPage(0);
+                        setTimeout(scrollToOffers, 100);
                       }} 
                     />
                     {cat}
@@ -571,6 +575,7 @@ export default function Offers() {
                       <div className={styles.productImageWrap}>
                         <img className={styles.productImage} src={product.image} alt={product.name} loading="lazy" />
                         <span className={styles.productDiscount}>{product.discount} OFF</span>
+                        <span className={styles.productCategoryOverlay}>{product.category}</span>
                         <div className={styles.wishlistActions}>
                           <button
                             type="button"
@@ -583,7 +588,6 @@ export default function Offers() {
                         </div>
                       </div>
                       <div className={styles.productBody}>
-                        <span className={styles.productCategory}>{product.category}</span>
                         <h3 className={styles.productName}>{product.name}</h3>
                         <div className={styles.productPriceRow}>
                           <span className={styles.productCurrentPrice}>₹{product.price.toLocaleString()}</span>
