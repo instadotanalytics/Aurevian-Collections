@@ -1,31 +1,42 @@
-// backend/services/emailService.js
-
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
 dotenv.config();
 
 class EmailService {
   constructor() {
-    // Gmail SMTP transporter. Requires EMAIL_USER (your Gmail address) and
-    // EMAIL_PASS (a 16-character Gmail App Password, NOT your normal Gmail
-    // password — regular passwords are rejected by Gmail's SMTP for
-    // security). Generate one at: myaccount.google.com/apppasswords
-    // (requires 2-Step Verification to be enabled on the account).
-    // Using explicit host/port instead of the `service: "gmail"` shorthand
-    // because the shorthand doesn't reliably respect Node's IPv4-first DNS
-    // setting (set in server.js). On Render specifically, smtp.gmail.com
-    // sometimes resolves to an IPv6 address that Render's network can't
-    // route to (ENETUNREACH) — `family: 4` forces this connection to use
-    // IPv4 regardless of what the global DNS order does elsewhere.
+    // ✅ Loudly fail fast if creds are missing entirely — this is the #1
+    // cause of "email never sends, no error shown" reports.
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error(
+        "❌ EMAIL_USER or EMAIL_PASS is missing from your .env file. " +
+          "Email sending WILL fail silently until these are set.",
+      );
+    }
+
+    // ✅ Strip accidental whitespace — Gmail App Passwords are displayed as
+    // "abcd efgh ijkl mnop" (with spaces) and people frequently paste them
+    // as-is into .env. Gmail's SMTP auth rejects the password with spaces
+    // included, and that failure surfaces as a generic "Invalid login" that
+    // looks identical to a genuinely wrong password.
+    const emailUser = (process.env.EMAIL_USER || "").trim();
+    const emailPass = (process.env.EMAIL_PASS || "").replace(/\s+/g, "");
+
     this.transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 465,
       secure: true, // true for port 465, false for port 587
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: emailUser,
+        pass: emailPass,
       },
       family: 4,
+      // ✅ Explicit timeouts so a blocked/filtered port 465 (common on
+      // college/office/corporate networks and some cloud egress rules)
+      // fails fast with a clear timeout error instead of hanging silently
+      // for the default ~2 minutes.
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
     });
 
     // Verify the connection once at startup so a bad credential shows up
@@ -33,8 +44,20 @@ class EmailService {
     this.transporter.verify((error) => {
       if (error) {
         console.error("❌ Gmail SMTP connection failed:", error.message);
+        console.error(
+          "   → If this says 'Invalid login' or 'Username and Password not accepted': " +
+            "your EMAIL_PASS is not a valid Gmail App Password. Generate one at " +
+            "myaccount.google.com/apppasswords (requires 2-Step Verification enabled).",
+        );
+        console.error(
+          "   → If this says 'ETIMEDOUT' or 'ESOCKET' or hangs: your network/firewall " +
+            "is blocking outbound port 465. Try switching networks or ask your " +
+            "network admin to allow smtp.gmail.com:465.",
+        );
       } else {
-        console.log("✅ Gmail SMTP ready to send emails");
+        console.log(
+          "✅ Gmail SMTP ready to send emails (verified with Google)",
+        );
       }
     });
   }
@@ -50,16 +73,35 @@ class EmailService {
         html,
       });
 
-      console.log("✅ Email sent via Gmail:", info.messageId);
+      // ✅ Gmail can accept a send (no thrown error) yet still not deliver
+      // it — info.accepted / info.rejected tells us what Gmail itself did
+      // with the recipient address. Log both so a silently-dropped
+      // recipient shows up here instead of just "disappearing".
+      console.log("✅ Email accepted by Gmail:", info.messageId);
+      console.log("   accepted:", info.accepted, "| rejected:", info.rejected);
+      if (info.rejected && info.rejected.length > 0) {
+        console.error("❌ Gmail rejected these recipients:", info.rejected);
+        return {
+          success: false,
+          error: `Gmail rejected recipient(s): ${info.rejected.join(", ")}`,
+        };
+      }
+
       return {
         success: true,
         info,
       };
     } catch (err) {
+      // ✅ Print the FULL error, not just .message — nodemailer/Gmail errors
+      // carry a `.code` (EAUTH, ETIMEDOUT, ECONNECTION, ESOCKET) and
+      // `.responseCode` that are essential for diagnosing which of the many
+      // possible failure modes this actually is.
       console.error("❌ Email error:", err.message);
+      console.error("   code:", err.code, "| responseCode:", err.responseCode);
       return {
         success: false,
         error: err.message,
+        code: err.code,
       };
     }
   }

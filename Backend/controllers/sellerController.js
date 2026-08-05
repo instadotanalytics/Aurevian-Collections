@@ -1,5 +1,3 @@
-// backend/controllers/sellerController.js
-
 import Seller from "../models/Seller.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
@@ -85,6 +83,12 @@ export const registerSeller = async (req, res) => {
       email: { $regex: new RegExp(`^${email}$`, "i") },
     });
 
+    // Initialize delivery status
+    let otpDeliveryStatus = {
+      email: false,
+      phone: false,
+    };
+
     if (existingSeller) {
       if (existingSeller.isVerified) {
         return res.status(400).json({
@@ -112,14 +116,35 @@ export const registerSeller = async (req, res) => {
       await existingSeller.save();
       console.log("✅ Existing seller updated:", existingSeller._id);
 
-      // ✅ Send Email OTP
+      // ✅ Send Email OTP with tracking
       const emailOTP = Math.floor(100000 + Math.random() * 900000).toString();
       await existingSeller.setEmailOTP(emailOTP);
-      await emailService.sendOTPEmail(email, emailOTP, "verification");
+      const emailResult = await emailService.sendOTPEmail(
+        email,
+        emailOTP,
+        "verification",
+      );
+      if (!emailResult.success) {
+        console.error("❌ Email OTP failed to send:", emailResult.error);
+        otpDeliveryStatus.email = false;
+      } else {
+        console.log("✅ Email OTP sent to:", email);
+        otpDeliveryStatus.email = true;
+      }
+
+      // ✅ Send Phone OTP with tracking (Twilio Verify — generates & tracks its own code)
+      const phoneOtpResult = await otpService.sendPhoneOTP(phone);
+      if (!phoneOtpResult.success) {
+        console.error("❌ Failed to send phone OTP:", phoneOtpResult.error);
+        otpDeliveryStatus.phone = false;
+      } else {
+        console.log("✅ Phone OTP sent to:", phone);
+        otpDeliveryStatus.phone = true;
+      }
 
       return res.status(200).json({
         success: true,
-        message: "OTP sent! Please verify your email.",
+        message: "OTP sent! Please verify your email and phone.",
         data: {
           _id: existingSeller._id,
           email: existingSeller.email,
@@ -132,6 +157,7 @@ export const registerSeller = async (req, res) => {
           email: !existingSeller.emailVerified,
           phone: !existingSeller.phoneVerified,
         },
+        otpDeliveryStatus, // ✅ NEW: per-channel delivery status
       });
     }
 
@@ -155,7 +181,7 @@ export const registerSeller = async (req, res) => {
       fullName: `${firstName} ${lastName}`.trim(),
       email: email.toLowerCase().trim(),
       phone: phone.trim(),
-      password: hashedPassword, // ✅ Store hashed password
+      password: hashedPassword,
       storeInfo: {
         storeName: storeName.trim(),
         storeSlug: storeName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
@@ -205,16 +231,30 @@ export const registerSeller = async (req, res) => {
     await seller.save();
     console.log("✅ New seller created:", seller._id);
 
-    // ✅ Send Email OTP
+    // ✅ Send Email OTP with tracking
     const emailOTP = Math.floor(100000 + Math.random() * 900000).toString();
     await seller.setEmailOTP(emailOTP);
-    await emailService.sendOTPEmail(email, emailOTP, "verification");
-    console.log("✅ Email OTP sent to:", email);
+    const emailResult = await emailService.sendOTPEmail(
+      email,
+      emailOTP,
+      "verification",
+    );
+    if (!emailResult.success) {
+      console.error("❌ Email OTP failed to send:", emailResult.error);
+      otpDeliveryStatus.email = false;
+    } else {
+      console.log("✅ Email OTP sent to:", email);
+      otpDeliveryStatus.email = true;
+    }
 
-    // ✅ Send Phone OTP (Twilio Verify — generates & tracks its own code)
+    // ✅ Send Phone OTP with tracking (Twilio Verify — generates & tracks its own code)
     const phoneOtpResult = await otpService.sendPhoneOTP(phone);
     if (!phoneOtpResult.success) {
       console.error("❌ Failed to send phone OTP:", phoneOtpResult.error);
+      otpDeliveryStatus.phone = false;
+    } else {
+      console.log("✅ Phone OTP sent to:", phone);
+      otpDeliveryStatus.phone = true;
     }
 
     return res.status(201).json({
@@ -232,6 +272,7 @@ export const registerSeller = async (req, res) => {
         email: !seller.emailVerified,
         phone: !seller.phoneVerified,
       },
+      otpDeliveryStatus, // ✅ NEW: per-channel delivery status
     });
   } catch (error) {
     console.error("❌ Registration error:", error);
@@ -390,6 +431,11 @@ export const resendOTP = async (req, res) => {
     }
 
     let seller;
+    let otpDeliveryStatus = {
+      email: false,
+      phone: false,
+    };
+
     if (type === "email") {
       seller = await Seller.findOne({
         email: { $regex: new RegExp(`^${contact}$`, "i") },
@@ -423,14 +469,62 @@ export const resendOTP = async (req, res) => {
     if (type === "email") {
       const newOTP = Math.floor(100000 + Math.random() * 900000).toString();
       await seller.setEmailOTP(newOTP);
-      await emailService.sendOTPEmail(contact, newOTP, "verification");
+      const emailResult = await emailService.sendOTPEmail(
+        contact,
+        newOTP,
+        "verification",
+      );
+      if (!emailResult.success) {
+        console.error("❌ Email OTP failed to resend:", emailResult.error);
+        otpDeliveryStatus.email = false;
+      } else {
+        console.log("✅ Email OTP resent to:", contact);
+        otpDeliveryStatus.email = true;
+      }
+      // ✅ Also send phone OTP if not verified yet
+      if (!seller.phoneVerified) {
+        const phoneResult = await otpService.sendPhoneOTP(seller.phone);
+        if (!phoneResult.success) {
+          console.error("❌ Phone OTP failed to resend:", phoneResult.error);
+          otpDeliveryStatus.phone = false;
+        } else {
+          console.log("✅ Phone OTP resent to:", seller.phone);
+          otpDeliveryStatus.phone = true;
+        }
+      }
     } else if (type === "phone") {
-      await otpService.sendPhoneOTP(contact);
+      const phoneResult = await otpService.sendPhoneOTP(contact);
+      if (!phoneResult.success) {
+        console.error("❌ Phone OTP failed to resend:", phoneResult.error);
+        otpDeliveryStatus.phone = false;
+      } else {
+        console.log("✅ Phone OTP resent to:", contact);
+        otpDeliveryStatus.phone = true;
+      }
+      // ✅ Also send email OTP if not verified yet
+      if (!seller.emailVerified) {
+        const newOTP = Math.floor(100000 + Math.random() * 900000).toString();
+        await seller.setEmailOTP(newOTP);
+        const emailResult = await emailService.sendOTPEmail(
+          seller.email,
+          newOTP,
+          "verification",
+        );
+        if (!emailResult.success) {
+          console.error("❌ Email OTP failed to resend:", emailResult.error);
+          otpDeliveryStatus.email = false;
+        } else {
+          console.log("✅ Email OTP resent to:", seller.email);
+          otpDeliveryStatus.email = true;
+        }
+      }
     }
 
-    return res
-      .status(200)
-      .json({ success: true, message: `OTP resent to ${type} successfully` });
+    return res.status(200).json({
+      success: true,
+      message: `OTP resent to ${type} successfully`,
+      otpDeliveryStatus, // ✅ NEW: per-channel delivery status
+    });
   } catch (error) {
     console.error("❌ Resend OTP error:", error);
     return res.status(500).json({

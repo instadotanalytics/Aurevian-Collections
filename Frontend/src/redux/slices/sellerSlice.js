@@ -37,7 +37,25 @@ export const registerSeller = createAsyncThunk(
         // Store email and phone for OTP verification
         localStorage.setItem("sellerEmail", sellerData.email);
         localStorage.setItem("sellerPhone", sellerData.phone);
-        return response.data.data;
+
+        // ✅ Log the OTP delivery status from the response
+        if (response.data.otpDeliveryStatus) {
+          console.log(
+            "📊 OTP Delivery Status:",
+            response.data.otpDeliveryStatus,
+          );
+          console.log(
+            "📧 Email OTP:",
+            response.data.otpDeliveryStatus.email ? "✅ Sent" : "❌ Failed",
+          );
+          console.log(
+            "📱 Phone OTP:",
+            response.data.otpDeliveryStatus.phone ? "✅ Sent" : "❌ Failed",
+          );
+        }
+
+        // Return the full response data including otpDeliveryStatus
+        return response.data;
       }
     } catch (error) {
       const message = error.response?.data?.message || "Registration failed";
@@ -52,8 +70,6 @@ export const verifyEmailOTP = createAsyncThunk(
   "seller/verifyEmailOTP",
   async ({ email, otp }, { rejectWithValue }) => {
     try {
-      // NOTE: confirm this route matches your backend controller —
-      // adjust the path/payload shape if your API differs.
       const response = await axios.post(`${API_URL}/seller/verify-email`, {
         email,
         otp,
@@ -94,10 +110,6 @@ export const verifyPhoneOTP = createAsyncThunk(
 );
 
 // Resend OTP
-// NOTE: `type` ('email' | 'phone') is accepted here and forwarded to the
-// backend so it knows which channel to resend on. Make sure your backend
-// route actually reads `type` from the body — the previous version dropped
-// it silently.
 export const resendOTP = createAsyncThunk(
   "seller/resendOTP",
   async ({ contact, type }, { rejectWithValue }) => {
@@ -107,9 +119,33 @@ export const resendOTP = createAsyncThunk(
         type,
       });
       if (response.data.success) {
-        toast.success(
-          `OTP sent to your ${type === "email" ? "email" : "phone"}!`,
-        );
+        // ✅ Log the delivery status from the response
+        if (response.data.otpDeliveryStatus) {
+          const { email, phone } = response.data.otpDeliveryStatus;
+          console.log(
+            "📊 Resend OTP Delivery Status:",
+            response.data.otpDeliveryStatus,
+          );
+
+          // Show specific toast messages based on delivery status
+          if (email && phone) {
+            toast.success("✅ OTPs resent successfully!");
+          } else if (email && !phone) {
+            toast.warning(
+              "⚠️ Email OTP resent, but phone OTP failed. Please check your phone number.",
+            );
+          } else if (!email && phone) {
+            toast.warning(
+              "⚠️ Phone OTP resent, but email OTP failed. Please check your email.",
+            );
+          } else {
+            toast.error("❌ Failed to resend OTPs. Please try again.");
+          }
+        } else {
+          toast.success(
+            `OTP sent to your ${type === "email" ? "email" : "phone"}!`,
+          );
+        }
         return response.data;
       }
     } catch (error) {
@@ -216,7 +252,6 @@ export const uploadSellerDocuments = createAsyncThunk(
       );
       if (response.data.success) {
         toast.success("Documents uploaded successfully!");
-        // Controller returns: { documents, kycStatus, status }
         return response.data.data;
       }
     } catch (error) {
@@ -352,6 +387,7 @@ const initialState = {
   recentActivities: [],
   registrationData: null,
   verificationStatus: null,
+  otpDeliveryStatus: null, // ✅ Store OTP delivery status
 };
 
 const sellerSlice = createSlice({
@@ -369,6 +405,10 @@ const sellerSlice = createSlice({
       state.recentOrders = [];
       state.recentActivities = [];
       state.status = "idle";
+      state.otpDeliveryStatus = null;
+    },
+    clearOtpDeliveryStatus: (state) => {
+      state.otpDeliveryStatus = null;
     },
   },
   extraReducers: (builder) => {
@@ -380,18 +420,44 @@ const sellerSlice = createSlice({
         state.isLoading = true;
         state.error = null;
         state.status = "loading";
+        state.otpDeliveryStatus = null;
       })
       .addCase(registerSeller.fulfilled, (state, action) => {
         state.isLoading = false;
         state.registrationData = action.payload;
-        state.seller = action.payload;
+        // ✅ The seller data might be nested under 'data' or directly in payload
+        state.seller =
+          action.payload.data?.seller || action.payload.data || action.payload;
         state.isAuthenticated = false;
         state.status = "succeeded";
+
+        // ✅ Store OTP delivery status
+        state.otpDeliveryStatus = action.payload.otpDeliveryStatus || null;
+
+        // ✅ Show specific toast messages based on delivery status
+        if (state.otpDeliveryStatus) {
+          const { email, phone } = state.otpDeliveryStatus;
+
+          if (email && phone) {
+            toast.success("✅ OTPs sent successfully to email and phone!");
+          } else if (email && !phone) {
+            toast.warning(
+              "⚠️ Email OTP sent, but phone OTP failed to send. Please check your phone number.",
+            );
+          } else if (!email && phone) {
+            toast.warning(
+              "⚠️ Phone OTP sent, but email OTP failed to send. Please check your email.",
+            );
+          } else {
+            toast.error("❌ Failed to send OTPs. Please try again.");
+          }
+        }
       })
       .addCase(registerSeller.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
         state.status = "failed";
+        state.otpDeliveryStatus = null;
       })
 
       // ============================================
@@ -463,7 +529,6 @@ const sellerSlice = createSlice({
       })
       .addCase(uploadSellerDocuments.fulfilled, (state, action) => {
         state.isLoading = false;
-        // action.payload = { documents, kycStatus, status } from controller
         if (state.seller) {
           state.seller.documents = action.payload.documents;
 
@@ -471,7 +536,7 @@ const sellerSlice = createSlice({
             state.seller.verification = {};
           }
           state.seller.verification.kycStatus = action.payload.kycStatus;
-          state.seller.kycStatus = action.payload.kycStatus; // keep top-level in sync too
+          state.seller.kycStatus = action.payload.kycStatus;
           state.seller.status = action.payload.status;
         }
         state.status = "succeeded";
@@ -516,6 +581,25 @@ const sellerSlice = createSlice({
       .addCase(verifyPhoneOTP.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+      })
+
+      // ============================================
+      // RESEND OTP
+      // ============================================
+      .addCase(resendOTP.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+        state.otpDeliveryStatus = null;
+      })
+      .addCase(resendOTP.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.otpDeliveryStatus = action.payload.otpDeliveryStatus || null;
+        state.status = "succeeded";
+      })
+      .addCase(resendOTP.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+        state.status = "failed";
       })
 
       // ============================================
@@ -565,9 +649,11 @@ const sellerSlice = createSlice({
         state.recentOrders = [];
         state.recentActivities = [];
         state.status = "idle";
+        state.otpDeliveryStatus = null;
       });
   },
 });
 
-export const { clearSellerError, resetSellerState } = sellerSlice.actions;
+export const { clearSellerError, resetSellerState, clearOtpDeliveryStatus } =
+  sellerSlice.actions;
 export default sellerSlice.reducer;
