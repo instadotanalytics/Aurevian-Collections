@@ -442,7 +442,7 @@
 
 .featureBody {
   margin: 0;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.8;
   color: var(--text-muted);
   max-width: 42ch;
@@ -488,7 +488,7 @@
 
 .featureItemBody {
   margin: 0;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
   color: var(--text-muted);
   font-weight: 300;
@@ -1086,13 +1086,13 @@
   margin: 0 0 6px;
   font-family: "Cormorant Garamond", serif;
   font-weight: 600;
-  font-size: clamp(34px, 3vw, 38px);
+  font-size: clamp(38px, 3vw, 38px);
   color: var(--ink);
 }
 
 .exploreHeading p {
   margin: 0;
-  font-size: 16px;
+  font-size: 18px;
   color: var(--text-muted);
   font-weight: 300;
 }
@@ -1807,11 +1807,11 @@
   }
 
   .exploreHeading h3 {
-    font-size: 26px;
+    font-size: 28px;
   }
 
   .exploreHeading p {
-    font-size: 14px;
+    font-size: 16px;
   }
 
   .exploreList {
@@ -2011,11 +2011,11 @@
   }
 
   .exploreHeading h3 {
-    font-size: 24px;
+    font-size: 26px;
   }
 
   .exploreHeading p {
-    font-size: 13px;
+    font-size: 15px;
   }
 
   .exploreList {
@@ -2160,11 +2160,11 @@
   }
 
   .exploreHeading h3 {
-    font-size: 22px;
+    font-size: 24px;
   }
 
   .exploreHeading p {
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .exploreList {
