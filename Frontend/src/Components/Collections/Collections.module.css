@@ -149,7 +149,7 @@
 
 .heroTitle {
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(40px, 5vw, 64px);
+  font-size: clamp(36px, 5vw, 64px);
   font-weight: 600;
   color: #fff;
   margin: 0 0 16px 0;
@@ -324,7 +324,7 @@
 }
 
 /* ==========================================================
-   NEW COLLECTION - Bigger text
+   NEW COLLECTION
    ========================================================== */
 .newCollectionSection {
   min-height: 40vh;
@@ -362,16 +362,16 @@
 
 .newCollectionTitle {
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(50px, 8vw, 60px);
+  font-size: clamp(48px, 8vw, 72px);
   font-weight: 500;
   color: var(--ink);
-  margin: 0 0 10px 0;
+  margin: 0 0 18px 0;
   line-height: 0.95;
   letter-spacing: 0.01em;
 }
 
 .newCollectionDesc {
-  font-size: 19px;
+  font-size: 18px;
   line-height: 1.8;
   color: var(--text-muted);
   max-width: 600px;
@@ -380,187 +380,103 @@
 }
 
 /* ==========================================================
-   Feature Section - From: Blush Set
+   Mobile Filter Toggle
    ========================================================== */
-.featureSection {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(40px, 6vw, 80px);
+.filterToggle {
+  display: none;
   align-items: center;
-  margin-bottom: clamp(60px, 8vw, 100px);
-  min-height: 50vh;
-}
-
-.featureImageWrap {
-  position: relative;
-  aspect-ratio: 3 / 4;
-  background: var(--cream);
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  max-height: 500px;
-}
-
-.featureImage {
+  justify-content: space-between;
+  gap: 10px;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.featureImageWrap:hover .featureImage {
-  transform: scale(1.02);
-}
-
-.featureContent {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 18px;
-}
-
-.pill {
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--gold-deep);
-  background: var(--cream-deep);
+  padding: 12px 16px;
+  background: var(--cream-card);
   border: 1px solid var(--cream-line);
-  border-radius: 999px;
-  padding: 8px 20px;
-}
-
-.featureTitle {
-  margin: 0;
-  font-family: "Cormorant Garamond", serif;
-  font-weight: 500;
-  font-size: clamp(30px, 3.5vw, 40px);
-  line-height: 1.1;
-  color: var(--ink);
-}
-
-.featureBody {
-  margin: 0;
-  font-size: 16px;
-  line-height: 1.8;
-  color: var(--text-muted);
-  max-width: 42ch;
-  font-weight: 300;
-}
-
-.featureList {
-  list-style: none;
-  margin: 8px 0 4px;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  width: 100%;
-}
-
-.featureItem {
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-}
-
-.featureDot {
-  flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--ink);
-  color: var(--gold-light);
-  font-size: 11px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 2px;
-}
-
-.featureItemTitle {
-  margin: 0 0 2px;
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--ink);
-}
-
-.featureItemBody {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--text-muted);
-  font-weight: 300;
-}
-
-.ctaBtn {
-  margin-top: 8px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: none;
-  cursor: pointer;
-  background: linear-gradient(135deg, var(--gold-light), var(--gold));
-  color: var(--ink);
+  border-radius: 8px;
   font-family: "Jost", sans-serif;
-  font-size: 14px;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink);
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: all 0.2s ease;
+}
+
+.filterToggle:hover {
+  border-color: var(--gold);
+}
+
+.filterToggle:active {
+  transform: scale(0.98);
+}
+
+.filterToggleText {
   font-weight: 500;
-  letter-spacing: 0.02em;
-  padding: 14px 28px;
-  border-radius: 999px;
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 14px 30px -14px rgba(179, 135, 63, 0.55);
 }
 
-.ctaBtn span {
-  display: inline-block;
-  font-size: 14px;
-  width: auto;
-  min-width: 0;
-}
-
-.ctaBtn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 18px 36px -14px rgba(179, 135, 63, 0.65);
-}
-
-.ctaBtn:active {
-  transform: scale(0.96);
-}
-
-.ctaBtn:hover span {
-  transform: translateX(4px);
+.filterToggleIcon {
+  font-size: 18px;
+  display: flex;
+  align-items: center;
 }
 
 /* ==========================================================
-   Shop Layout - Filter + Products
+   Shop Layout - 90vh Container with Sticky Filter + Scrollable Products
    ========================================================== */
 .shopLayout {
   display: grid;
   grid-template-columns: 260px 1fr;
   gap: 40px;
-  margin-bottom: clamp(60px, 8vw, 100px);
-  align-items: start;
+  height: 80vh;
+  max-height: 80vh;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 60px;
 }
 
-/* Filter Sidebar - Desktop */
+/* Filter Sidebar - Desktop - Sticky and Compact */
 .filterSidebar {
   position: sticky;
-  top: 120px;
+  top: 0;
   align-self: flex-start;
   background: linear-gradient(180deg, #fffdf9 0%, var(--cream-card) 100%);
   border: 1px solid var(--cream-line);
   border-radius: 4px;
-  padding: 32px 28px 28px;
+  padding: 28px 24px 20px;
   box-shadow: 0 20px 50px -34px rgba(36, 29, 23, 0.45);
   box-sizing: border-box;
   width: 100%;
+  height: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+/* Custom scrollbar for filter sidebar */
+.filterSidebar::-webkit-scrollbar {
+  width: 3px;
+}
+
+.filterSidebar::-webkit-scrollbar-track {
+  background: var(--cream-line);
+  border-radius: 4px;
+}
+
+.filterSidebar::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 4px;
+}
+
+.filterSidebar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold) var(--cream-line);
 }
 
 .filterTitle {
   font-family: "Cormorant Garamond", serif;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 600;
   margin: 0 0 4px 0;
   color: var(--ink);
@@ -568,6 +484,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-shrink: 0;
 }
 
 .filterTitle::before {
@@ -584,12 +501,14 @@
   display: block;
   width: 100%;
   height: 1px;
-  margin: 16px 0 24px;
+  margin: 12px 0 18px;
   background: linear-gradient(to right, var(--gold-light), var(--cream-line) 60%, transparent);
+  flex-shrink: 0;
 }
 
 .filterGroup {
-  margin-bottom: 26px;
+  margin-bottom: 18px;
+  flex-shrink: 0;
 }
 
 .filterGroupLabel {
@@ -598,15 +517,15 @@
   text-transform: uppercase;
   letter-spacing: 0.16em;
   color: var(--gold-deep);
-  margin: 0 0 14px 0;
+  margin: 0 0 10px 0;
   display: block;
 }
 
 .filterOption {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 7px 0;
+  gap: 10px;
+  padding: 6px 0;
   cursor: pointer;
   transition: color 0.25s ease, transform 0.25s ease;
   font-size: 14px;
@@ -624,8 +543,8 @@
 .filterOption input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
-  width: 17px;
-  height: 17px;
+  width: 16px;
+  height: 16px;
   border: 1.5px solid var(--cream-line);
   background: #fff;
   cursor: pointer;
@@ -655,10 +574,10 @@
 .filterOption input[type="checkbox"]::after {
   content: "";
   position: absolute;
-  left: 5px;
+  left: 4px;
   top: 1px;
   width: 4px;
-  height: 8px;
+  height: 7px;
   border: solid var(--gold);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg) scale(0);
@@ -685,7 +604,7 @@
   justify-content: space-between;
   font-size: 13px;
   color: var(--text-muted);
-  margin-top: 10px;
+  margin-top: 8px;
   font-weight: 500;
 }
 
@@ -709,8 +628,8 @@
 .filterPriceInput::-webkit-slider-thumb {
   appearance: none;
   -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: #fff;
   border: 3px solid var(--gold);
@@ -724,8 +643,8 @@
 }
 
 .filterPriceInput::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: #fff;
   border: 3px solid var(--gold);
@@ -761,6 +680,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
 }
 
 .filterClearBtn::after {
@@ -782,38 +702,52 @@
 }
 
 .filterExtra {
-  margin-top: 18px;
-  padding-top: 20px;
+  margin-top: 14px;
+  padding-top: 16px;
   border-top: 1px dashed var(--cream-line);
+  flex-shrink: 0;
 }
 
 .filterExtra .filterOption {
   font-size: 13px;
   color: var(--text-muted);
+  padding: 4px 0;
 }
 
-/* Mobile Filter Trigger - Hidden on Desktop */
-.filterTrigger {
-  display: none;
-}
-
-/* Products Section */
+/* Products Section - Scrollable with hidden scrollbar */
 .productsWrapper {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.productsWrapper::-webkit-scrollbar {
+  display: none;
 }
 
 .productsHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   flex-wrap: wrap;
   gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--cream-line);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  background: var(--cream);
+  z-index: 5;
 }
 
 .productsCount {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-muted);
   font-weight: 400;
 }
@@ -841,8 +775,10 @@
 .productsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 28px;
-  margin-bottom: 40px;
+  gap: 20px;
+  margin-bottom: 16px;
+  flex: 1;
+  align-content: start;
 }
 
 .productCard {
@@ -854,6 +790,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 330px;
 }
 
 .productCard:hover {
@@ -875,6 +812,7 @@
     #e7ddc7 20px
   );
   border-bottom: 1px solid var(--cream-line);
+  flex-shrink: 0;
 }
 
 .productImage {
@@ -896,7 +834,7 @@
   left: 12px;
   background: #ffffff;
   color: var(--sale);
-  font-size: 12px;
+  font-size: 11px;
   letter-spacing: 1px;
   padding: 5px 10px;
   border-radius: 20px;
@@ -973,20 +911,26 @@
 
 /* Product Body - Flex column to ensure button stays at bottom */
 .productBody {
-  padding: 12px 18px 4px;
+  padding: 12px 16px 4px;
   display: flex;
   flex-direction: column;
   flex: 1;
+  justify-content: space-between;
+  gap: 4px;
 }
 
-.productName {
-  font-family: "Cormorant Garamond", serif;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--ink);
-  margin: 0 0 6px 0;
-  line-height: 1.3;
-  font-style: italic;
+.productName{
+    font-family: "Jost", "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0 0 6px 0;
+    line-height: 1.3;
+    font-style: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .productPriceRow {
@@ -994,7 +938,8 @@
   align-items: center;
   gap: 10px;
   font-size: 14px;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+  flex-wrap: wrap;
 }
 
 .productCurrentPrice {
@@ -1008,32 +953,33 @@
   font-size: 13px;
 }
 
-/* Add to Cart Button - Always visible with min-height */
+/* Add to Cart Button - No radius */
 .productAddBtn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
-  width: calc(100% + 36px);
-  margin: 14px -18px -4px;
-  padding: 12px 0;
+  width: calc(100% + 32px);
+  margin: 10px -16px -4px;
+  padding: 11px 0;
   font-family: "Jost", sans-serif;
-  font-size: 12.5px;
+  font-size: 11.5px;
   font-weight: 500;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
   color: var(--cream);
   background: var(--gold);
   border: 1px solid var(--gold);
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
-  min-height: 44px;
+  min-height: 40px;
   flex-shrink: 0;
   margin-top: auto;
+  border-radius: 0;
 }
 
 .productAddBtn svg {
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .productAddBtn:hover {
@@ -1062,7 +1008,7 @@
 }
 
 /* ==========================================================
-   Explore More - Reduced padding
+   Explore More
    ========================================================== */
 .exploreSection {
   background: var(--cream-deep);
@@ -1086,13 +1032,13 @@
   margin: 0 0 6px;
   font-family: "Cormorant Garamond", serif;
   font-weight: 600;
-  font-size: clamp(38px, 3vw, 38px);
+  font-size: clamp(28px, 3vw, 38px);
   color: var(--ink);
 }
 
 .exploreHeading p {
   margin: 0;
-  font-size: 18px;
+  font-size: 15px;
   color: var(--text-muted);
   font-weight: 300;
 }
@@ -1145,7 +1091,7 @@
 }
 
 .exploreLabel {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 500;
   letter-spacing: 0.03em;
 }
@@ -1233,47 +1179,6 @@
 
 .closingImgWrap:hover img {
   transform: scale(1.06);
-}
-
-/* ==========================================================
-   Mobile Filter Toggle (Like Offers)
-   ========================================================== */
-.filterToggle {
-  display: none;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  width: 100%;
-  padding: 12px 16px;
-  background: var(--cream-card);
-  border: 1px solid var(--cream-line);
-  border-radius: 8px;
-  font-family: "Jost", sans-serif;
-  font-size: 13px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--ink);
-  cursor: pointer;
-  margin-bottom: 20px;
-  transition: all 0.2s ease;
-}
-
-.filterToggle:hover {
-  border-color: var(--gold);
-}
-
-.filterToggle:active {
-  transform: scale(0.98);
-}
-
-.filterToggleText {
-  font-weight: 500;
-}
-
-.filterToggleIcon {
-  font-size: 18px;
-  display: flex;
-  align-items: center;
 }
 
 /* ==========================================================
@@ -1409,7 +1314,7 @@
   font-weight: 600;
   cursor: pointer;
   font-family: "Jost", sans-serif;
-  margin-top: 8px;
+  margin-top: 5px;
   transition: background 0.3s ease;
   flex-shrink: 0;
 }
@@ -1423,43 +1328,174 @@
 }
 
 /* ==========================================================
-   RESPONSIVE
+   Feature Section - From: Blush Set
    ========================================================== */
+.featureSection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 6vw, 80px);
+  align-items: center;
+  margin-bottom: clamp(60px, 8vw, 100px);
+  min-height: 50vh;
+}
 
-/* --- Tablet --- */
+.featureImageWrap {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  background: var(--cream);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  max-height: 500px;
+}
+
+.featureImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.featureImageWrap:hover .featureImage {
+  transform: scale(1.02);
+}
+
+.featureContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.pill {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  background: var(--cream-deep);
+  border: 1px solid var(--cream-line);
+  border-radius: 999px;
+  padding: 8px 20px;
+}
+
+.featureTitle {
+  margin: 0;
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 500;
+  font-size: clamp(30px, 3.5vw, 40px);
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.featureBody {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--text-muted);
+  max-width: 42ch;
+  font-weight: 300;
+}
+
+.featureList {
+  list-style: none;
+  margin: 8px 0 4px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.featureItem {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.featureDot {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--gold-light);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.featureItemTitle {
+  margin: 0 0 2px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.featureItemBody {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  font-weight: 300;
+}
+
+.ctaBtn {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  color: var(--ink);
+  font-family: "Jost", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  padding: 14px 28px;
+  border-radius: 999px;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 14px 30px -14px rgba(179, 135, 63, 0.55);
+}
+
+.ctaBtn span {
+  display: inline-block;
+  font-size: 14px;
+  width: auto;
+  min-width: 0;
+}
+
+.ctaBtn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 36px -14px rgba(179, 135, 63, 0.65);
+}
+
+.ctaBtn:active {
+  transform: scale(0.96);
+}
+
+.ctaBtn:hover span {
+  transform: translateX(4px);
+}
+
+/* ==========================================================
+   Responsive
+   ========================================================== */
 @media (max-width: 1024px) {
   .shopLayout {
     grid-template-columns: 1fr;
-    gap: 30px;
+    gap: 0;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    margin-bottom: 40px;
   }
 
   .filterSidebar {
     display: none;
-  }
-
-  .filterTrigger {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background: var(--cream-card);
-    border: 1px solid var(--gold-light);
-    border-radius: 30px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--gold-deep);
-    cursor: pointer;
-    font-family: "Jost", sans-serif;
-    transition: all 0.3s ease;
-  }
-
-  .filterTrigger:hover {
-    border-color: var(--gold-light);
-    background: var(--cream-deep);
-  }
-
-  .filterTrigger:active {
-    transform: scale(0.96);
   }
 
   .filterToggle {
@@ -1471,7 +1507,7 @@
   }
 
   .heroGallery {
-    height: 70vh;
+    height: 75vh;
     min-height: 400px;
   }
 
@@ -1485,9 +1521,26 @@
     bottom: 20px;
   }
 
+  .productsWrapper {
+    height: auto;
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .productsHeader {
+    position: relative;
+    background: transparent;
+    border-bottom: none;
+    margin-bottom: 16px;
+  }
+
   .productsGrid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    gap: 16px;
+  }
+
+  .productCard {
+    min-height: 310px;
   }
 
   .exploreThumb {
@@ -1496,27 +1549,18 @@
   }
 
   .productAddBtn {
-    min-height: 40px;
-    padding: 10px 0;
-    font-size: 11px;
     width: calc(100% + 32px);
-    margin: 12px -16px -4px;
-  }
-
-  .mobileFilterSheet {
-    height: 60vh;
-    max-height: 60vh;
+    margin: 10px -16px -4px;
   }
 }
 
-/* --- Mobile Landscape / Small Tablet --- */
 @media (max-width: 860px) {
   .collections {
     padding: 100px 0 30px;
   }
 
   .heroGallery {
-    height: 60vh;
+    height: 65vh;
     min-height: 350px;
   }
 
@@ -1549,11 +1593,11 @@
   }
 
   .newCollectionTitle {
-    font-size: clamp(40px, 7vw, 56px);
+    font-size: clamp(36px, 7vw, 56px);
   }
 
   .newCollectionDesc {
-    font-size: 17px;
+    font-size: 16px;
   }
 
   .featureSection {
@@ -1614,7 +1658,7 @@
   }
 
   .exploreLabel {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .heroOverlay {
@@ -1622,48 +1666,44 @@
   }
 
   .heroTitle {
-    font-size: clamp(30px, 4vw, 36px);
+    font-size: clamp(26px, 4vw, 36px);
   }
 
   .productsGrid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    gap: 16px;
+  }
+
+  .productCard {
+    min-height: 290px;
   }
 
   .productAddBtn {
-    min-height: 38px;
-    padding: 8px 0;
-    font-size: 10.5px;
     width: calc(100% + 28px);
     margin: 10px -14px -4px;
-    letter-spacing: 0.8px;
   }
-  
-  .productAddBtn svg {
-    font-size: 12px;
-  }
-  
+
   .productCategoryOverlay {
-    font-size: 10px;
+    font-size: 9px;
     padding: 3px 8px;
     bottom: 10px;
     left: 10px;
   }
 
-  .mobileFilterSheet {
-    height: 60vh;
-    max-height: 60vh;
+  .productsHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 }
 
-/* --- Mobile Portrait --- */
 @media (max-width: 640px) {
   .collections {
     padding: 80px 0 20px;
   }
 
   .heroGallery {
-    height: 50vh;
+    height: 55vh;
     min-height: 300px;
     margin-bottom: 16px;
   }
@@ -1696,29 +1736,29 @@
   }
 
   .heroTitle {
-    font-size: clamp(30px, 5vw, 30px);
+    font-size: clamp(20px, 4vw, 28px);
   }
 
   .heroSubtitle {
-    font-size: 15px;
+    font-size: 13px;
   }
 
   .heroBtn {
-    font-size: 13px;
-    padding: 8px 15px;
+    font-size: 11px;
+    padding: 10px 20px;
   }
 
   .newCollectionSection {
-    min-height: 27vh;
-    /* padding: 15px 0; */
+    min-height: 30vh;
+    padding: 15px 0;
   }
 
   .newCollectionTitle {
-    font-size: clamp(35px, 6vw, 42px);
+    font-size: clamp(32px, 6vw, 42px);
   }
 
   .newCollectionDesc {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .newCollectionEyebrow {
@@ -1731,57 +1771,53 @@
   }
 
   .productsGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
   }
 
-  /* BIGGER TEXT ON MOBILE CARDS */
+  .productCard {
+    min-height: 260px;
+  }
+
   .productBody {
-    padding: 12px 14px 12px;
+    padding: 10px 12px 10px;
+    gap: 3px;
   }
 
   .productName {
-    font-size: 16px;
-    margin-bottom: 6px;
-  }
-
-  .productPriceRow {
-    font-size: 15px;
-    gap: 10px;
-    margin-bottom: 6px;
-  }
-
-  .productCurrentPrice {
-    font-size: 16px;
-    font-weight: 700;
-  }
-
-  .productOriginalPrice {
     font-size: 13px;
   }
 
-  .productAddBtn {
-    min-height: 42px;
-    padding: 10px 0;
-    font-size: 11px;
-    letter-spacing: 0.6px;
-    width: calc(100% + 28px);
-    margin: 10px -14px -4px;
+  .productPriceRow {
+    font-size: 13px;
+    gap: 8px;
   }
 
-  .productAddBtn svg {
-    font-size: 14px;
+  .productCurrentPrice {
+    font-size: 13px;
+  }
+
+  .productOriginalPrice {
+    font-size: 11px;
+  }
+
+  .productAddBtn {
+    font-size: 10px;
+    min-height: 36px;
+    padding: 9px 0;
+    width: calc(100% + 24px);
+    margin: 8px -12px -4px;
   }
 
   .productDiscount {
-    font-size: 11px;
+    font-size: 10px;
     padding: 4px 8px;
     top: 10px;
     left: 10px;
   }
 
   .productCategoryOverlay {
-    font-size: 10px;
+    font-size: 9px;
     padding: 3px 8px;
     bottom: 10px;
     left: 10px;
@@ -1791,32 +1827,8 @@
     width: 30px;
     height: 30px;
     font-size: 13px;
-    top: 8px;
-    right: 8px;
-  }
-
-  /* Explore More - Reduced padding on mobile */
-  .exploreSection {
-    margin: 25px 0;
-    padding: 20px 0;
-    min-height: 25vh;
-  }
-
-  .exploreInner {
-    gap: 20px;
-  }
-
-  .exploreHeading h3 {
-    font-size: 28px;
-  }
-
-  .exploreHeading p {
-    font-size: 16px;
-  }
-
-  .exploreList {
-    gap: 20px;
-    justify-content: center;
+    top: 10px;
+    right: 10px;
   }
 
   .exploreThumb {
@@ -1825,7 +1837,12 @@
   }
 
   .exploreLabel {
-    font-size: 14px;
+    font-size: 13px;
+  }
+
+  .exploreList {
+    gap: 16px;
+    justify-content: center;
   }
 
   .exploreItem {
@@ -1857,7 +1874,7 @@
     gap: 8px;
   }
 
-  .filterTrigger {
+  .filterToggle {
     font-size: 12px;
     padding: 6px 12px;
   }
@@ -1868,12 +1885,12 @@
   }
 
   .featureImage {
-    object-position: center 60%;
+    object-position: center 35%;
   }
 
   .mobileFilterSheet {
-    height: 65vh;
-    max-height: 65vh;
+    height: 60vh;
+    max-height: 60vh;
   }
 
   .mobileFilterHandle {
@@ -1889,7 +1906,7 @@
   }
 
   .mobileFilterContent {
-    padding: 0 16px 16px;
+    padding: 16px;
   }
 
   .mobileFilterGroup {
@@ -1902,10 +1919,9 @@
   }
 }
 
-/* --- Small Mobile --- */
 @media (max-width: 480px) {
   .heroGallery {
-    height: 45vh;
+    height: 50vh;
     min-height: 260px;
   }
 
@@ -1929,52 +1945,44 @@
   }
 
   .newCollectionTitle {
-    font-size: clamp(32px, 5vw, 34px);
+    font-size: clamp(28px, 5vw, 34px);
   }
 
   .newCollectionDesc {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .productsGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
   }
 
-  /* KEEP TEXT READABLE ON SMALL MOBILE */
+  .productCard {
+    min-height: 240px;
+  }
+
   .productBody {
-    padding: 10px 12px 10px;
+    padding: 8px 10px 8px;
   }
 
   .productName {
-    font-size: 15px;
-    margin-bottom: 4px;
-  }
-
-  .productPriceRow {
-    font-size: 14px;
-    gap: 8px;
-  }
-
-  .productCurrentPrice {
-    font-size: 15px;
-  }
-
-  .productOriginalPrice {
     font-size: 12px;
   }
 
-  .productAddBtn {
-    min-height: 38px;
-    padding: 8px 0;
-    font-size: 10px;
-    letter-spacing: 0.4px;
-    width: calc(100% + 24px);
-    margin: 8px -12px -4px;
+  .productCurrentPrice {
+    font-size: 12px;
   }
 
-  .productAddBtn svg {
-    font-size: 13px;
+  .productOriginalPrice {
+    font-size: 10px;
+  }
+
+  .productAddBtn {
+    font-size: 9px;
+    min-height: 32px;
+    padding: 7px 0;
+    width: calc(100% + 20px);
+    margin: 6px -10px -4px;
   }
 
   .productDiscount {
@@ -1985,7 +1993,7 @@
   }
 
   .productCategoryOverlay {
-    font-size: 9px;
+    font-size: 8px;
     padding: 2px 7px;
     bottom: 8px;
     left: 8px;
@@ -1994,32 +2002,9 @@
   .wishlistBtn {
     width: 28px;
     height: 28px;
-    font-size: 12px;
-    top: 6px;
-    right: 6px;
-  }
-
-  /* Explore More - Further reduced padding on small mobile */
-  .exploreSection {
-    margin: 20px 0;
-    padding: 16px 0;
-    min-height: 20vh;
-  }
-
-  .exploreInner {
-    gap: 16px;
-  }
-
-  .exploreHeading h3 {
-    font-size: 26px;
-  }
-
-  .exploreHeading p {
-    font-size: 15px;
-  }
-
-  .exploreList {
-    gap: 30px 50px;
+    font-size: 11px;
+    top: 8px;
+    right: 8px;
   }
 
   .exploreThumb {
@@ -2028,7 +2013,11 @@
   }
 
   .exploreLabel {
-    font-size: 13px;
+    font-size: 12px;
+  }
+
+  .exploreList {
+    gap: 12px;
   }
 
   .exploreItem {
@@ -2044,12 +2033,12 @@
   }
 
   .mobileFilterSheet {
-    height: 70vh;
-    max-height: 70vh;
+    height: 65vh;
+    max-height: 65vh;
   }
 
   .mobileFilterContent {
-    padding: 0 14px 14px;
+    padding:14px;
   }
 
   .mobileFilterGroup {
@@ -2066,10 +2055,9 @@
   }
 }
 
-/* --- Extra Small Mobile --- */
-@media (max-width: 400px) {
+@media (max-width: 380px) {
   .heroGallery {
-    height: 35vh;
+    height: 45vh;
     min-height: 220px;
   }
 
@@ -2080,95 +2068,44 @@
   }
 
   .newCollectionTitle {
-    font-size: clamp(30px, 4vw, 28px);
+    font-size: clamp(24px, 4vw, 28px);
   }
 
   .newCollectionDesc {
-    font-size: 15px;
+    font-size: 13px;
   }
 
   .productsGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
 
-  /* KEEP TEXT READABLE ON EXTRA SMALL MOBILE */
+  .productCard {
+    min-height: 220px;
+  }
+
   .productBody {
-    padding: 8px 10px 8px;
+    padding: 6px 8px 0;
   }
 
   .productName {
-    font-size: 14px;
-  }
-
-  .productPriceRow {
-    font-size: 13px;
-    gap: 6px;
-  }
-
-  .productCurrentPrice {
-    font-size: 14px;
-  }
-
-  .productOriginalPrice {
-    font-size: 11px;
-  }
-
-  .productAddBtn {
-    min-height: 34px;
-    padding: 6px 0;
-    font-size: 9px;
-    width: calc(100% + 20px);
-    margin: 6px -10px -4px;
-  }
-
-  .productAddBtn svg {
     font-size: 12px;
   }
 
-  .productDiscount {
-    font-size: 9px;
-    padding: 3px 7px;
-    top: 6px;
-    left: 6px;
-  }
-
-  .productCategoryOverlay {
-    font-size: 8px;
-    padding: 2px 6px;
-    bottom: 6px;
-    left: 6px;
-  }
-
-  .wishlistBtn {
-    width: 24px;
-    height: 24px;
+  .productCurrentPrice {
     font-size: 11px;
-    top: 4px;
-    right: 4px;
   }
 
-  /* Explore More - Optimized for extra small */
-  .exploreSection {
-    margin: 15px 0;
-    padding: 12px 0;
-    min-height: 15vh;
+  .productOriginalPrice {
+    font-size: 9px;
   }
 
-  .exploreInner {
-    gap: 12px;
-  }
-
-  .exploreHeading h3 {
-    font-size: 24px;
-  }
-
-  .exploreHeading p {
-    font-size: 14px;
-  }
-
-  .exploreList {
-    gap: 20px 28px;
+  .productAddBtn {
+    font-size: 8px;
+    min-height: 28px;
+    padding: 5px 0;
+    width: calc(100% + 16px);
+    margin: 4px -8px -4px;
   }
 
   .exploreThumb {
@@ -2177,7 +2114,11 @@
   }
 
   .exploreLabel {
-    font-size: 12px;
+    font-size: 11px;
+  }
+
+  .exploreList {
+    gap: 10px;
   }
 
   .closingGallery {
@@ -2188,17 +2129,9 @@
     border-radius: 6px;
   }
 
-  .mobileFilterContent {
-    padding: 0 12px 70px;
-  }
-
-  .mobileFilterGroup {
-    margin-bottom: 12px;
-  }
-
-  .mobileFilterApply {
-    padding: 13px;
-    font-size: 14px;
+  .mobileFilterSheet {
+    max-height: 70vh;
+    padding: 14px 10px 55px;
   }
 
   .featureImageWrap {
@@ -2220,7 +2153,7 @@
 }
 
 /* ==========================================================
-   REDUCED MOTION
+   Reduced Motion
    ========================================================== */
 @media (prefers-reduced-motion: reduce) {
   .reveal,

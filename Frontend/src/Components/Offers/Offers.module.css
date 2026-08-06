@@ -689,7 +689,6 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 40px;
 }
 
 .productPriceRow {
@@ -1289,7 +1288,6 @@
 
   .productName {
     font-size: 14px;
-    min-height: 36px;
   }
   .productCurrentPrice {
     font-size: 14px;
@@ -1436,7 +1434,6 @@
 
   .productName {
     font-size: 13px;
-    min-height: 32px;
   }
   .productCurrentPrice {
     font-size: 13px;
@@ -1541,7 +1538,6 @@
 
   .productName {
     font-size: 12px;
-    min-height: 28px;
   }
   .productCurrentPrice {
     font-size: 12px;
