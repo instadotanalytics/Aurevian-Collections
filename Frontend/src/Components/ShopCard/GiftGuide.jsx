@@ -1,7 +1,8 @@
+
 // src/Components/GiftGuide/GiftGuide.jsx
 
-import React, { useRef } from "react";
-import { FiArrowRight, FiArrowLeft } from "react-icons/fi";
+import React, { useRef, useState } from "react";
+import { FiArrowRight, FiArrowLeft, FiHeart } from "react-icons/fi";
 import styles from "./GiftGuide.module.css";
 
 // ==========================================================
@@ -32,44 +33,69 @@ const GIFT_PRODUCTS = [
   { id: "g8", name: "Corporate Gifting Set", price: 19999, oldPrice: 25999, image: GIFT_IMAGES.corporate },
 ];
 
-function ProductCard({ product }) {
+function ProductCard({ product, isWishlisted, onToggleWishlist }) {
+  const handleWishlistClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onToggleWishlist(product.id);
+  };
+
   return (
     <div className={styles.card}>
-      <a href={`/product/${product.id}`} className={styles.cardLink} aria-label={product.name}>
-        <div className={styles.imageWrap}>
-          {product.image ? (
-            <img
-              src={product.image}
-              alt={product.name}
-              className={styles.image}
-              loading="lazy"
-            />
-          ) : (
-            <div className={styles.imagePlaceholder} aria-hidden="true" />
-          )}
-        </div>
-
-        <div className={styles.content}>
-          <h3 className={styles.title}>{product.name}</h3>
-
-          <div className={styles.priceRow}>
-            <span className={styles.price}>₹{product.price.toLocaleString("en-IN")}</span>
-            {product.oldPrice ? (
-              <span className={styles.oldPrice}>₹{product.oldPrice.toLocaleString("en-IN")}</span>
-            ) : null}
-          </div>
-        </div>
-      </a>
-
-      <button type="button" className={styles.addToCartBtn}>
-        Add To Cart
+      {/* Wishlist button lives OUTSIDE the clipped cardInner so the
+          arch-shaped overflow:hidden never cuts it off */}
+      <button
+        type="button"
+        className={`${styles.wishlistBtn} ${isWishlisted ? styles.wishlistBtnActive : ""}`}
+        onClick={handleWishlistClick}
+        aria-pressed={isWishlisted}
+        aria-label={
+          isWishlisted
+            ? `Remove ${product.name} from wishlist`
+            : `Add ${product.name} to wishlist`
+        }
+      >
+        <FiHeart className={styles.wishlistIcon} />
       </button>
+
+      <div className={styles.cardInner}>
+        <a href={`/product/${product.id}`} className={styles.cardLink} aria-label={product.name}>
+          <div className={styles.imageWrap}>
+            {product.image ? (
+              <img
+                src={product.image}
+                alt={product.name}
+                className={styles.image}
+                loading="lazy"
+              />
+            ) : (
+              <div className={styles.imagePlaceholder} aria-hidden="true" />
+            )}
+          </div>
+
+          <div className={styles.content}>
+            <h3 className={styles.title}>{product.name}</h3>
+
+            <div className={styles.priceRow}>
+              <span className={styles.price}>₹{product.price.toLocaleString("en-IN")}</span>
+              {product.oldPrice ? (
+                <span className={styles.oldPrice}>₹{product.oldPrice.toLocaleString("en-IN")}</span>
+              ) : null}
+            </div>
+          </div>
+        </a>
+
+        <button type="button" className={styles.addToCartBtn}>
+          Add To Cart
+        </button>
+      </div>
     </div>
   );
 }
 
 export default function GiftGuide() {
   const scrollContainerRef = useRef(null);
+  const [wishlist, setWishlist] = useState(() => new Set());
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -83,10 +109,22 @@ export default function GiftGuide() {
     }
   };
 
+  const toggleWishlist = (productId) => {
+    setWishlist((prev) => {
+      const next = new Set(prev);
+      if (next.has(productId)) {
+        next.delete(productId);
+      } else {
+        next.add(productId);
+      }
+      return next;
+    });
+  };
+
   return (
     <section className={styles.section} aria-labelledby="gift-guide-heading">
       <div className={styles.container}>
-        
+
         {/* --- DECORATIVE TOP ORNAMENT --- */}
         <div className={styles.topOrnament} aria-hidden="true">
           <span className={styles.ornamentLine}></span>
@@ -124,7 +162,12 @@ export default function GiftGuide() {
 
         <div className={styles.scrollContainer} ref={scrollContainerRef}>
           {GIFT_PRODUCTS.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard
+              key={product.id}
+              product={product}
+              isWishlisted={wishlist.has(product.id)}
+              onToggleWishlist={toggleWishlist}
+            />
           ))}
         </div>
 

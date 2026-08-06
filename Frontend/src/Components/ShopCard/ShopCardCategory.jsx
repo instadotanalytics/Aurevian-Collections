@@ -1,7 +1,8 @@
+
 // src/Components/ShopCardCategory/ShopCardCategory.jsx
 
-import React, { useRef, useEffect } from "react";
-import { FiArrowRight, FiArrowLeft } from "react-icons/fi";
+import React, { useRef, useEffect, useState } from "react";
+import { FiArrowRight, FiArrowLeft, FiHeart } from "react-icons/fi";
 import styles from "./ShopCardCategory.module.css";
 
 // ==========================================================
@@ -32,44 +33,85 @@ const PRODUCTS = [
   { id: "p8", name: "Diamond Cut Nose Pin", category: "Nose Pin", price: 599, oldPrice: 899, image: JEWELLERY_IMAGES.nosepin },
 ];
 
-function ProductCard({ product }) {
+function ProductCard({ product, isWishlisted, onToggleWishlist, onAddToCart }) {
+  const handleWishlistClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onToggleWishlist(product.id);
+  };
+
+  const handleAddToCartClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onAddToCart(product);
+  };
+
   return (
-    <a href={`/product/${product.id}`} className={styles.card} aria-label={product.name}>
-      <div className={styles.frame}>
-        <div className={styles.imageWrap}>
-          {product.image ? (
-            <img
-              src={product.image}
-              alt={product.name}
-              className={styles.image}
-              loading="lazy"
-              draggable="false"
-            />
-          ) : (
-            <div className={styles.imagePlaceholder} aria-hidden="true" />
-          )}
+    // NOTE: outer element is a plain div (not the link itself) so the
+    // wishlist <button> and the "Add To Cart" <button> can live outside
+    // the <a> — buttons can't be nested inside anchors in valid HTML.
+    <div className={styles.card}>
+      <a href={`/product/${product.id}`} className={styles.cardLink} aria-label={product.name}>
+        <div className={styles.frame}>
+          <div className={styles.imageWrap}>
+            {product.image ? (
+              <img
+                src={product.image}
+                alt={product.name}
+                className={styles.image}
+                loading="lazy"
+                draggable="false"
+              />
+            ) : (
+              <div className={styles.imagePlaceholder} aria-hidden="true" />
+            )}
+          </div>
+          <span className={styles.cornerTL} aria-hidden="true" />
+          <span className={styles.cornerBR} aria-hidden="true" />
         </div>
-        <span className={styles.cornerTL} aria-hidden="true" />
-        <span className={styles.cornerBR} aria-hidden="true" />
-      </div>
 
-      <div className={styles.info}>
-        <p className={styles.category}>{product.category}</p>
-        <h3 className={styles.title}>{product.name}</h3>
+        <div className={styles.info}>
+          <p className={styles.category}>{product.category}</p>
+          <h3 className={styles.title}>{product.name}</h3>
 
-        <div className={styles.priceRow}>
-          {product.oldPrice ? (
-            <span className={styles.oldPrice}>₹{product.oldPrice.toLocaleString("en-IN")}</span>
-          ) : null}
-          <span className={styles.price}>₹{product.price.toLocaleString("en-IN")}</span>
+          <div className={styles.priceRow}>
+            {product.oldPrice ? (
+              <span className={styles.oldPrice}>₹{product.oldPrice.toLocaleString("en-IN")}</span>
+            ) : null}
+            <span className={styles.price}>₹{product.price.toLocaleString("en-IN")}</span>
+          </div>
         </div>
-      </div>
-    </a>
+      </a>
+
+      <button
+        type="button"
+        className={`${styles.wishlistBtn} ${isWishlisted ? styles.wishlistBtnActive : ""}`}
+        onClick={handleWishlistClick}
+        aria-pressed={isWishlisted}
+        aria-label={
+          isWishlisted
+            ? `Remove ${product.name} from wishlist`
+            : `Add ${product.name} to wishlist`
+        }
+      >
+        <FiHeart className={styles.wishlistIcon} />
+      </button>
+
+      <button
+        type="button"
+        className={styles.addToCartBtn}
+        onClick={handleAddToCartClick}
+        aria-label={`Add ${product.name} to cart`}
+      >
+        Add To Cart
+      </button>
+    </div>
   );
 }
 
 export default function ShopCardCategory() {
   const scrollContainerRef = useRef(null);
+  const [wishlist, setWishlist] = useState(() => new Set());
 
   // Drag-to-scroll (click + drag with the cursor, left to right)
   const dragState = useRef({ isDown: false, startX: 0, startScrollLeft: 0, moved: false });
@@ -112,6 +154,23 @@ export default function ShopCardCategory() {
       e.preventDefault();
       e.stopPropagation();
     }
+  };
+
+  const toggleWishlist = (productId) => {
+    setWishlist((prev) => {
+      const next = new Set(prev);
+      if (next.has(productId)) {
+        next.delete(productId);
+      } else {
+        next.add(productId);
+      }
+      return next;
+    });
+  };
+
+  const handleAddToCart = (product) => {
+    // Hook this up to your real cart logic/state/context as needed.
+    console.log("Added to cart:", product);
   };
 
   useEffect(() => {
@@ -172,7 +231,13 @@ export default function ShopCardCategory() {
             onClickCapture={handleClickCapture}
           >
             {PRODUCTS.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                isWishlisted={wishlist.has(product.id)}
+                onToggleWishlist={toggleWishlist}
+                onAddToCart={handleAddToCart}
+              />
             ))}
           </div>
         </div>

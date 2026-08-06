@@ -1,3 +1,4 @@
+
 /* src/Components/GiftGuide/GiftGuide.module.css */
 
 /* ==========================================================
@@ -24,7 +25,7 @@
 }
 
 .container {
-  max-width: 1280px;
+  max-width: 1130px;
   margin: 0 auto;
   position: relative;
   z-index: 1;
@@ -117,7 +118,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: none; /* Removed hover transition */
+  transition: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
@@ -126,7 +127,6 @@
   color: #fff;
   border-color: var(--gold);
   box-shadow: 0 4px 12px var(--gold-light);
-  /* Removed transform: scale(1.05) */
 }
 
 /* ==========================================================
@@ -136,11 +136,11 @@
   display: flex;
   gap: 24px;
   overflow-x: auto;
+  overflow-y: visible;
   padding: 10px 4px 16px;
   scroll-behavior: smooth;
   scroll-snap-type: x proximity;
   -webkit-overflow-scrolling: touch;
-  /* Subtle gradient fade on the right edge */
   mask-image: linear-gradient(to right, black 95%, transparent 100%);
   -webkit-mask-image: linear-gradient(to right, black 95%, transparent 100%);
 }
@@ -157,27 +157,82 @@
 
 /* ==========================================================
    ARCH CARD (Refined)
+   ==========================================================
+   IMPORTANT: .card itself is now just an unclipped positioning
+   context (overflow: visible). All the arch clipping, background,
+   and shadow live on .cardInner instead. This lets .wishlistBtn
+   sit on top of the arch without being cut off by the big
+   border-radius + overflow:hidden combo.
    ========================================================== */
 .card {
   flex: 0 0 auto;
   width: 240px;
   scroll-snap-align: start;
+  position: relative;
+  overflow: visible; /* so the wishlist button is never clipped */
+}
+
+.cardInner {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
   background: var(--blush);
   border-radius: 135px 135px 16px 16px;
   padding: 0 0 20px;
-  overflow: hidden;
-  transition: none; /* Removed all hover transitions */
+  overflow: hidden; /* clips the image into the arch shape */
   box-shadow: 0 8px 24px -12px rgba(120, 90, 40, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
-.card:hover {
-  /* Removed transform: translateY(-8px) */
-  /* Removed box-shadow change */
-  /* Removed border-color change */
+/* ==========================================================
+   WISHLIST BUTTON
+   ========================================================== */
+.wishlistBtn {
+  position: absolute;
+  top: 55px;
+  right: 14px;
+  z-index: 5;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  padding: 0;
+}
+
+.wishlistBtn:hover {
+  background: #ffffff;
+}
+
+.wishlistBtn:active {
+  transform: scale(0.9);
+}
+
+.wishlistIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--ink);
+  opacity: 0.65;
+  transition: color 0.2s ease, opacity 0.2s ease, fill 0.2s ease;
+  display: block;
+}
+
+.wishlistBtnActive {
+  background: #ffffff;
+}
+
+.wishlistBtnActive .wishlistIcon {
+  color: #d6455f;
+  fill: #d6455f;
+  opacity: 1;
 }
 
 .cardLink {
@@ -215,11 +270,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: none; /* Removed zoom transition */
-}
-
-.card:hover .image {
-  /* Removed transform: scale(1.08) */
+  transition: none;
 }
 
 .imagePlaceholder {
@@ -297,14 +348,8 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: none; /* Removed hover transitions */
+  transition: none;
   box-shadow: 0 4px 12px var(--gold-light);
-}
-
-.addToCartBtn:hover {
-  /* Removed background change */
-  /* Removed transform: scale(1.02) */
-  /* Removed box-shadow change */
 }
 
 .addToCartBtn:active {
@@ -331,13 +376,7 @@
   text-decoration: none;
   padding: 8px 20px;
   border-bottom: 1px solid transparent;
-  transition: none; /* Removed hover transition */
-}
-
-.viewAllLink:hover {
-  /* Removed color change */
-  /* Removed border change */
-  /* Removed gap change */
+  transition: none;
 }
 
 /* ==========================================================
@@ -350,6 +389,9 @@
 
   .card {
     width: 210px;
+  }
+
+  .cardInner {
     border-radius: 120px 120px 14px 14px;
   }
 
@@ -398,7 +440,6 @@
     letter-spacing: 1.4px;
   }
 
-  /* arrows removed on mobile — drag/swipe scroll already works */
   .navArrows {
     display: none;
   }
@@ -413,6 +454,9 @@
   .card {
     width: 50vw;
     min-width: 165px;
+  }
+
+  .cardInner {
     border-radius: 100px 100px 12px 12px;
   }
 
@@ -458,6 +502,18 @@
   .viewAllLink {
     font-size: 12px;
   }
+
+  .wishlistBtn {
+    width: 30px;
+    height: 30px;
+    top: 10px;
+    right: 10px;
+  }
+
+  .wishlistIcon {
+    width: 14px;
+    height: 14px;
+  }
 }
 
 @media (max-width: 380px) {
@@ -483,19 +539,17 @@
   .image,
   .navBtn,
   .addToCartBtn,
-  .viewAllLink {
+  .viewAllLink,
+  .wishlistBtn,
+  .wishlistIcon {
     transition: none !important;
   }
 
-  .card:hover {
-    transform: none !important;
-  }
-
-  .card:hover .image {
-    transform: none !important;
-  }
-
   .addToCartBtn:hover {
+    transform: none !important;
+  }
+
+  .wishlistBtn:active {
     transform: none !important;
   }
 }
