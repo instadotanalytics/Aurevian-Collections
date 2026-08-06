@@ -1,4 +1,4 @@
-// src/Pages/Seller/SellerDashboard/components/ProductForm.jsx
+// src/Pages/Seller/SellerDashboard/components/ProductFormWizard.jsx
 
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,6 +11,17 @@ import {
   FiTrash2,
   FiSave,
   FiImage,
+  FiChevronRight,
+  FiChevronLeft,
+  FiCheck,
+  FiPackage,
+  FiDollarSign,
+  FiShoppingBag,
+  FiTruck,
+  FiSearch,
+  FiInfo,
+  FiCamera,
+  FiSettings,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import styles from "./ProductForm.module.css";
@@ -23,7 +34,7 @@ import {
 } from "../../../../redux/slices/sellerProductSlice";
 
 // ============================================
-// CONSTANTS
+// CONSTANTS (Same as before)
 // ============================================
 const MATERIALS = [
   'Gold', 'Silver', 'Platinum', 'Rose Gold', 'White Gold',
@@ -67,19 +78,29 @@ const STYLES = [
 ];
 
 const GENDERS = ['Men', 'Women', 'Unisex', 'Kids'];
-
 const AVAILABILITY_OPTIONS = ['In Stock', 'Out of Stock', 'Pre Order'];
-
 const STATUS_OPTIONS = ['Draft', 'Pending', 'Published', 'Scheduled'];
-
 const WARRANTY_DURATIONS = [
   '1 Month', '3 Months', '6 Months', '1 Year', '2 Years', '5 Years', 'Lifetime'
 ];
 
 // ============================================
-// PRODUCT FORM COMPONENT
+// STEP CONFIGURATION
 // ============================================
-const ProductForm = () => {
+const STEPS = [
+  { id: 1, name: "Basic Info", icon: FiInfo },
+  { id: 2, name: "Images", icon: FiCamera },
+  { id: 3, name: "Pricing", icon: FiDollarSign },
+  { id: 4, name: "Inventory", icon: FiShoppingBag },
+  { id: 5, name: "Specifications", icon: FiSettings },
+  { id: 6, name: "Shipping", icon: FiTruck },
+  { id: 7, name: "SEO & Status", icon: FiSearch },
+];
+
+// ============================================
+// MAIN COMPONENT
+// ============================================
+const ProductFormWizard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
@@ -89,23 +110,42 @@ const ProductForm = () => {
     (state) => state.sellerProduct
   );
 
+  // ==========================================
+  // STATE - Current Step
+  // ==========================================
+  const [currentStep, setCurrentStep] = useState(1);
+  const [completedSteps, setCompletedSteps] = useState(new Set());
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ==========================================
+  // STATE - Form Data
+  // ==========================================
   const [formData, setFormData] = useState({
+    // Step 1: Basic Info
     productName: "",
     shortDescription: "",
     fullDescription: "",
     brand: "",
     categoryId: "",
     subCategoryId: "",
+
+    // Step 2: Images
     thumbnail: null,
     images: [],
+
+    // Step 3: Pricing
     originalPrice: "",
     salePrice: "",
     currency: "INR",
     taxIncluded: true,
+
+    // Step 4: Inventory
     stockQuantity: "",
     minOrderQty: 1,
     maxOrderQty: "",
     availability: "In Stock",
+
+    // Step 5: Specifications
     material: "Gold",
     plating: "None",
     stoneType: "None",
@@ -121,6 +161,8 @@ const ProductForm = () => {
     gender: "Unisex",
     hasVariants: false,
     variants: [],
+
+    // Step 6: Shipping
     shippingWeight: "",
     shippingWeightUnit: "g",
     shippingLength: "",
@@ -133,6 +175,8 @@ const ProductForm = () => {
     returnDays: 7,
     warrantyAvailable: false,
     warrantyDuration: "1 Year",
+
+    // Step 7: SEO & Status
     seoTitle: "",
     seoDescription: "",
     seoKeywords: "",
@@ -145,20 +189,22 @@ const ProductForm = () => {
     status: "Draft",
   });
 
+  // ==========================================
+  // STATE - Image Previews
+  // ==========================================
   const [imagePreviews, setImagePreviews] = useState([]);
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
-  const [uploadingImages, setUploadingImages] = useState(false);
   const fileInputRef = useRef(null);
 
-  // Fetch categories on mount
+  // ==========================================
+  // EFFECTS
+  // ==========================================
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
 
-  // If edit, fetch product data
   useEffect(() => {
     if (isEdit) {
-      // We'll get product from the list or fetch it
       if (!selectedProduct) {
         dispatch(fetchProducts({}));
       } else {
@@ -167,6 +213,9 @@ const ProductForm = () => {
     }
   }, [isEdit, selectedProduct]);
 
+  // ==========================================
+  // POPULATE FORM (For Edit)
+  // ==========================================
   const populateForm = (product) => {
     setFormData({
       productName: product.productName || "",
@@ -224,7 +273,6 @@ const ProductForm = () => {
       status: product.status || "Draft",
     });
 
-    // Set image previews
     if (product.images && product.images.length > 0) {
       setImagePreviews(product.images.map(img => ({
         url: img.url,
@@ -242,9 +290,15 @@ const ProductForm = () => {
         isExisting: true,
       });
     }
+
+    // Mark all steps as completed for edit mode
+    const allSteps = new Set([1, 2, 3, 4, 5, 6, 7]);
+    setCompletedSteps(allSteps);
   };
 
-  // Handle text input changes
+  // ==========================================
+  // HANDLERS - Input Changes
+  // ==========================================
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -253,21 +307,20 @@ const ProductForm = () => {
     });
   };
 
-  // Handle thumbnail upload
+  // ==========================================
+  // HANDLERS - Image Upload
+  // ==========================================
   const handleThumbnailUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     if (!file.type.startsWith("image/")) {
       toast.error("Please select an image file");
       return;
     }
-
     if (file.size > 10 * 1024 * 1024) {
       toast.error("Image must be under 10MB");
       return;
     }
-
     setFormData({ ...formData, thumbnail: file });
     setThumbnailPreview({
       url: URL.createObjectURL(file),
@@ -275,49 +328,38 @@ const ProductForm = () => {
     });
   };
 
-  // Handle multiple images upload
   const handleImagesUpload = (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
-
     const invalidFiles = files.filter(f => !f.type.startsWith("image/"));
     if (invalidFiles.length) {
       toast.error(`${invalidFiles.length} file(s) are not images`);
       return;
     }
-
     const oversized = files.filter(f => f.size > 10 * 1024 * 1024);
     if (oversized.length) {
       toast.error(`${oversized.length} file(s) exceed 10MB limit`);
       return;
     }
-
     const newImages = files.map(file => ({
       file,
       url: URL.createObjectURL(file),
       isExisting: false,
     }));
-
     setImagePreviews([...imagePreviews, ...newImages]);
     setFormData({
       ...formData,
       images: [...formData.images, ...files],
     });
-
-    // Reset input
     e.target.value = "";
   };
 
-  // Remove image
   const removeImage = (index) => {
     const newPreviews = [...imagePreviews];
     const removed = newPreviews.splice(index, 1)[0];
-    
-    // Revoke URL if it's a blob
     if (!removed.isExisting && removed.url) {
       URL.revokeObjectURL(removed.url);
     }
-
     setImagePreviews(newPreviews);
     setFormData({
       ...formData,
@@ -325,7 +367,6 @@ const ProductForm = () => {
     });
   };
 
-  // Remove thumbnail
   const removeThumbnail = () => {
     if (thumbnailPreview && !thumbnailPreview.isExisting) {
       URL.revokeObjectURL(thumbnailPreview.url);
@@ -334,7 +375,9 @@ const ProductForm = () => {
     setFormData({ ...formData, thumbnail: null });
   };
 
-  // Handle variant management
+  // ==========================================
+  // HANDLERS - Variants
+  // ==========================================
   const addVariant = () => {
     setFormData({
       ...formData,
@@ -361,7 +404,6 @@ const ProductForm = () => {
   const updateVariant = (index, field, value) => {
     const newVariants = [...formData.variants];
     const keys = field.split(".");
-    
     if (keys.length === 1) {
       newVariants[index][field] = value;
     } else if (keys.length === 2) {
@@ -369,42 +411,123 @@ const ProductForm = () => {
     } else if (keys.length === 3) {
       newVariants[index][keys[0]][keys[1]][keys[2]] = value;
     }
-    
     setFormData({ ...formData, variants: newVariants });
   };
 
-  // Submit form
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // ==========================================
+  // STEP NAVIGATION
+  // ==========================================
+  const goToStep = (step) => {
+    if (step >= 1 && step <= 7) {
+      setCurrentStep(step);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
 
-    // Validate required fields
-    if (!formData.productName) {
-      toast.error("Product name is required");
-      return;
+  const nextStep = () => {
+    if (validateStep(currentStep)) {
+      const newCompleted = new Set(completedSteps);
+      newCompleted.add(currentStep);
+      setCompletedSteps(newCompleted);
+      if (currentStep < 7) {
+        setCurrentStep(currentStep + 1);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     }
-    if (!formData.brand) {
-      toast.error("Brand is required");
-      return;
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
-    if (!formData.categoryId) {
-      toast.error("Category is required");
-      return;
+  };
+
+  // ==========================================
+  // VALIDATION
+  // ==========================================
+  const validateStep = (step) => {
+    switch (step) {
+      case 1: // Basic Info
+        if (!formData.productName) {
+          toast.error("Product name is required");
+          return false;
+        }
+        if (!formData.brand) {
+          toast.error("Brand is required");
+          return false;
+        }
+        if (!formData.categoryId) {
+          toast.error("Category is required");
+          return false;
+        }
+        return true;
+
+      case 2: // Images
+        if (!formData.thumbnail) {
+          toast.error("Thumbnail image is required");
+          return false;
+        }
+        if (imagePreviews.length < 2) {
+          toast.error("Minimum 2 product images are required");
+          return false;
+        }
+        return true;
+
+      case 3: // Pricing
+        if (!formData.originalPrice) {
+          toast.error("Original price is required");
+          return false;
+        }
+        if (parseFloat(formData.originalPrice) <= 0) {
+          toast.error("Original price must be greater than 0");
+          return false;
+        }
+        return true;
+
+      case 4: // Inventory
+        if (!formData.stockQuantity) {
+          toast.error("Stock quantity is required");
+          return false;
+        }
+        if (parseInt(formData.stockQuantity) < 0) {
+          toast.error("Stock quantity cannot be negative");
+          return false;
+        }
+        return true;
+
+      case 5: // Specifications
+        return true; // All fields have defaults
+
+      case 6: // Shipping
+        if (!formData.shippingWeight) {
+          toast.error("Shipping weight is required");
+          return false;
+        }
+        if (!formData.shippingLength || !formData.shippingWidth || !formData.shippingHeight) {
+          toast.error("Shipping dimensions are required");
+          return false;
+        }
+        return true;
+
+      case 7: // SEO & Status
+        return true;
+
+      default:
+        return true;
     }
-    if (!formData.thumbnail) {
-      toast.error("Thumbnail image is required");
-      return;
-    }
-    if (imagePreviews.length < 2) {
-      toast.error("Minimum 2 product images are required");
-      return;
-    }
-    if (!formData.originalPrice) {
-      toast.error("Original price is required");
-      return;
-    }
-    if (!formData.stockQuantity) {
-      toast.error("Stock quantity is required");
-      return;
+  };
+
+  // ==========================================
+  // SUBMIT FORM
+  // ==========================================
+  const handleSubmit = async () => {
+    // Validate all steps before submit
+    for (let step = 1; step <= 7; step++) {
+      if (!validateStep(step)) {
+        setCurrentStep(step);
+        return;
+      }
     }
 
     // Check product limit
@@ -413,11 +536,11 @@ const ProductForm = () => {
       return;
     }
 
+    setIsSubmitting(true);
     try {
-      // Create form data for submission
       const submitData = { ...formData };
-      submitData.images = formData.images; // Files
-      submitData.thumbnail = formData.thumbnail; // File
+      submitData.images = formData.images;
+      submitData.thumbnail = formData.thumbnail;
 
       // Clean up empty values
       if (!submitData.salePrice) delete submitData.salePrice;
@@ -440,13 +563,87 @@ const ProductForm = () => {
         result = await dispatch(createProduct(submitData)).unwrap();
         toast.success("Product created successfully");
       }
-
       navigate("/seller/dashboard/products");
     } catch (error) {
       toast.error(error || "Failed to save product");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  // ==========================================
+  // RENDER - Step Content
+  // ==========================================
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return <StepBasicInfo formData={formData} handleInputChange={handleInputChange} categories={categories} />;
+      case 2:
+        return <StepImages
+          formData={formData}
+          handleInputChange={handleInputChange}
+          thumbnailPreview={thumbnailPreview}
+          imagePreviews={imagePreviews}
+          handleThumbnailUpload={handleThumbnailUpload}
+          handleImagesUpload={handleImagesUpload}
+          removeThumbnail={removeThumbnail}
+          removeImage={removeImage}
+          fileInputRef={fileInputRef}
+        />;
+      case 3:
+        return <StepPricing formData={formData} handleInputChange={handleInputChange} />;
+      case 4:
+        return <StepInventory formData={formData} handleInputChange={handleInputChange} />;
+      case 5:
+        return <StepSpecifications formData={formData} handleInputChange={handleInputChange} addVariant={addVariant} removeVariant={removeVariant} updateVariant={updateVariant} />;
+      case 6:
+        return <StepShipping formData={formData} handleInputChange={handleInputChange} />;
+      case 7:
+        return <StepSEO formData={formData} handleInputChange={handleInputChange} />;
+      default:
+        return null;
+    }
+  };
+
+  // ==========================================
+  // RENDER - Progress Bar
+  // ==========================================
+  const renderProgressBar = () => {
+    const progress = (currentStep / 7) * 100;
+    return (
+      <div className={styles.progressWrapper}>
+        <div className={styles.progressBar}>
+          <div
+            className={styles.progressFill}
+            style={{ width: `${progress}%` }}
+          ></div>
+        </div>
+        <div className={styles.progressSteps}>
+          {STEPS.map((step) => {
+            const isCompleted = completedSteps.has(step.id);
+            const isActive = currentStep === step.id;
+            const Icon = step.icon;
+            return (
+              <div
+                key={step.id}
+                className={`${styles.stepIndicator} ${isActive ? styles.active : ''} ${isCompleted ? styles.completed : ''}`}
+                onClick={() => isCompleted && goToStep(step.id)}
+              >
+                <div className={styles.stepCircle}>
+                  {isCompleted ? <FiCheck size={16} /> : <Icon size={16} />}
+                </div>
+                <span className={styles.stepLabel}>{step.name}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // ==========================================
+  // MAIN RENDER
+  // ==========================================
   if (isLoading && isEdit) {
     return (
       <div className={styles.loadingContainer}>
@@ -458,11 +655,9 @@ const ProductForm = () => {
 
   return (
     <div className={styles.container}>
+      {/* Header */}
       <div className={styles.header}>
-        <button
-          className={styles.backBtn}
-          onClick={() => navigate("/seller/dashboard/products")}
-        >
+        <button className={styles.backBtn} onClick={() => navigate("/seller/dashboard/products")}>
           <FiArrowLeft size={20} />
           Back to Products
         </button>
@@ -471,875 +666,665 @@ const ProductForm = () => {
         </h1>
         {limitStatus && !isEdit && (
           <span className={styles.limitInfo}>
-            {limitStatus.isUnlimited ? (
-              "Unlimited products"
-            ) : (
-              `${limitStatus.remaining} slots remaining`
-            )}
+            {limitStatus.isUnlimited ? "Unlimited products" : `${limitStatus.remaining} slots remaining`}
           </span>
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className={styles.form}>
-        <div className={styles.formGrid}>
-          {/* Left Column */}
-          <div className={styles.leftColumn}>
-            {/* Basic Information */}
-            <div className={styles.section}>
-              <h2>Basic Information</h2>
-              <div className={styles.formGroup}>
-                <label>Product Name *</label>
-                <input
-                  type="text"
-                  name="productName"
-                  value={formData.productName}
-                  onChange={handleInputChange}
-                  placeholder="e.g. Diamond Pendant Necklace"
-                  required
-                />
-              </div>
+      {/* Progress Bar */}
+      {renderProgressBar()}
 
-              <div className={styles.formGroup}>
-                <label>Brand *</label>
-                <input
-                  type="text"
-                  name="brand"
-                  value={formData.brand}
-                  onChange={handleInputChange}
-                  placeholder="e.g. Aurevian Collection"
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Short Description</label>
-                <textarea
-                  name="shortDescription"
-                  value={formData.shortDescription}
-                  onChange={handleInputChange}
-                  placeholder="Brief description (max 500 characters)"
-                  maxLength={500}
-                  rows={2}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Full Description</label>
-                <textarea
-                  name="fullDescription"
-                  value={formData.fullDescription}
-                  onChange={handleInputChange}
-                  placeholder="Detailed product description"
-                  rows={5}
-                />
-              </div>
-            </div>
-
-            {/* Category */}
-            <div className={styles.section}>
-              <h2>Category</h2>
-              <div className={styles.formGroup}>
-                <label>Category *</label>
-                <select
-                  name="categoryId"
-                  value={formData.categoryId}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">Select Category</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {formData.categoryId && (
-                <div className={styles.formGroup}>
-                  <label>Sub Category</label>
-                  <select
-                    name="subCategoryId"
-                    value={formData.subCategoryId}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Select Sub Category</option>
-                    {categories
-                      .filter(cat => cat.id !== formData.categoryId)
-                      .map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.label}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-              )}
-            </div>
-
-            {/* Product Images */}
-            <div className={styles.section}>
-              <h2>Product Images</h2>
-              
-              <div className={styles.thumbnailSection}>
-                <label>Thumbnail Image *</label>
-                <div className={styles.thumbnailUpload}>
-                  {thumbnailPreview ? (
-                    <div className={styles.thumbnailPreview}>
-                      <img src={thumbnailPreview.url} alt="Thumbnail" />
-                      <button
-                        type="button"
-                        className={styles.removeImageBtn}
-                        onClick={removeThumbnail}
-                      >
-                        <FiX size={18} />
-                      </button>
-                    </div>
-                  ) : (
-                    <div
-                      className={styles.uploadArea}
-                      onClick={() => document.getElementById("thumbnailInput").click()}
-                    >
-                      <FiImage size={40} />
-                      <p>Click to upload thumbnail</p>
-                      <span>JPG, PNG, WebP (Max 10MB)</span>
-                    </div>
-                  )}
-                  <input
-                    id="thumbnailInput"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleThumbnailUpload}
-                    style={{ display: "none" }}
-                  />
-                </div>
-              </div>
-
-              <div className={styles.imagesSection}>
-                <label>Product Images * (Min 2)</label>
-                <div className={styles.imageGrid}>
-                  {imagePreviews.map((img, index) => (
-                    <div key={index} className={styles.imagePreview}>
-                      <img src={img.url} alt={`Product ${index + 1}`} />
-                      <button
-                        type="button"
-                        className={styles.removeImageBtn}
-                        onClick={() => removeImage(index)}
-                      >
-                        <FiX size={18} />
-                      </button>
-                    </div>
-                  ))}
-                  
-                  <div
-                    className={styles.addImageBox}
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <FiPlus size={30} />
-                    <span>Add Image</span>
-                  </div>
-                </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImagesUpload}
-                  style={{ display: "none" }}
-                />
-                <p className={styles.hint}>
-                  {imagePreviews.length} of minimum 2 images uploaded
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column */}
-          <div className={styles.rightColumn}>
-            {/* Pricing */}
-            <div className={styles.section}>
-              <h2>Pricing</h2>
-              <div className={styles.formGroup}>
-                <label>Original Price * (₹)</label>
-                <input
-                  type="number"
-                  name="originalPrice"
-                  value={formData.originalPrice}
-                  onChange={handleInputChange}
-                  placeholder="0"
-                  min="0"
-                  step="0.01"
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Sale Price (₹)</label>
-                <input
-                  type="number"
-                  name="salePrice"
-                  value={formData.salePrice}
-                  onChange={handleInputChange}
-                  placeholder="0"
-                  min="0"
-                  step="0.01"
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Currency</label>
-                <select
-                  name="currency"
-                  value={formData.currency}
-                  onChange={handleInputChange}
-                >
-                  <option value="INR">INR (₹)</option>
-                  <option value="USD">USD ($)</option>
-                  <option value="EUR">EUR (€)</option>
-                </select>
-              </div>
-
-              <div className={styles.checkboxGroup}>
-                <input
-                  type="checkbox"
-                  name="taxIncluded"
-                  checked={formData.taxIncluded}
-                  onChange={handleInputChange}
-                />
-                <label>Tax Included in Price</label>
-              </div>
-            </div>
-
-            {/* Inventory */}
-            <div className={styles.section}>
-              <h2>Inventory</h2>
-              <div className={styles.formGroup}>
-                <label>Stock Quantity *</label>
-                <input
-                  type="number"
-                  name="stockQuantity"
-                  value={formData.stockQuantity}
-                  onChange={handleInputChange}
-                  placeholder="0"
-                  min="0"
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Minimum Order Quantity</label>
-                <input
-                  type="number"
-                  name="minOrderQty"
-                  value={formData.minOrderQty}
-                  onChange={handleInputChange}
-                  min="1"
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Maximum Order Quantity</label>
-                <input
-                  type="number"
-                  name="maxOrderQty"
-                  value={formData.maxOrderQty}
-                  onChange={handleInputChange}
-                  min="1"
-                  placeholder="Unlimited"
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Availability</label>
-                <select
-                  name="availability"
-                  value={formData.availability}
-                  onChange={handleInputChange}
-                >
-                  {AVAILABILITY_OPTIONS.map(opt => (
-                    <option key={opt} value={opt}>{opt}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Jewellery Specifications */}
-            <div className={styles.section}>
-              <h2>Jewellery Specifications</h2>
-              
-              <div className={styles.formGroup}>
-                <label>Material *</label>
-                <select
-                  name="material"
-                  value={formData.material}
-                  onChange={handleInputChange}
-                  required
-                >
-                  {MATERIALS.map(mat => (
-                    <option key={mat} value={mat}>{mat}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Plating</label>
-                <select
-                  name="plating"
-                  value={formData.plating}
-                  onChange={handleInputChange}
-                >
-                  {PLATING_OPTIONS.map(opt => (
-                    <option key={opt} value={opt}>{opt}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Stone Type</label>
-                <select
-                  name="stoneType"
-                  value={formData.stoneType}
-                  onChange={handleInputChange}
-                >
-                  {STONE_TYPES.map(type => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Stone Color</label>
-                <select
-                  name="stoneColor"
-                  value={formData.stoneColor}
-                  onChange={handleInputChange}
-                >
-                  {STONE_COLORS.map(color => (
-                    <option key={color} value={color}>{color}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Finish</label>
-                <select
-                  name="finish"
-                  value={formData.finish}
-                  onChange={handleInputChange}
-                >
-                  {FINISH_OPTIONS.map(opt => (
-                    <option key={opt} value={opt}>{opt}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className={styles.row}>
-                <div className={styles.formGroup}>
-                  <label>Weight</label>
-                  <input
-                    type="number"
-                    name="weight"
-                    value={formData.weight}
-                    onChange={handleInputChange}
-                    placeholder="0"
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Unit</label>
-                  <select
-                    name="weightUnit"
-                    value={formData.weightUnit}
-                    onChange={handleInputChange}
-                  >
-                    <option value="g">g</option>
-                    <option value="mg">mg</option>
-                    <option value="oz">oz</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Size</label>
-                <select
-                  name="size"
-                  value={formData.size}
-                  onChange={handleInputChange}
-                >
-                  {SIZES.map(size => (
-                    <option key={size} value={size}>{size}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className={styles.checkboxGroup}>
-                <input
-                  type="checkbox"
-                  name="adjustable"
-                  checked={formData.adjustable}
-                  onChange={handleInputChange}
-                />
-                <label>Adjustable</label>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Occasion</label>
-                <select
-                  name="occasion"
-                  value={formData.occasion}
-                  onChange={handleInputChange}
-                >
-                  {OCCASIONS.map(occ => (
-                    <option key={occ} value={occ}>{occ}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Style</label>
-                <select
-                  name="style"
-                  value={formData.style}
-                  onChange={handleInputChange}
-                >
-                  {STYLES.map(style => (
-                    <option key={style} value={style}>{style}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Collection</label>
-                <input
-                  type="text"
-                  name="collection"
-                  value={formData.collection}
-                  onChange={handleInputChange}
-                  placeholder="e.g. Bridal Collection 2024"
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Gender</label>
-                <select
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleInputChange}
-                >
-                  {GENDERS.map(g => (
-                    <option key={g} value={g}>{g}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Variants */}
-            <div className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <h2>Product Variants</h2>
-                <label className={styles.checkboxGroup}>
-                  <input
-                    type="checkbox"
-                    name="hasVariants"
-                    checked={formData.hasVariants}
-                    onChange={handleInputChange}
-                  />
-                  <span>Enable Variants</span>
-                </label>
-              </div>
-
-              {formData.hasVariants && (
-                <>
-                  <button
-                    type="button"
-                    className={styles.addVariantBtn}
-                    onClick={addVariant}
-                  >
-                    <FiPlus size={16} />
-                    Add Variant
-                  </button>
-
-                  {formData.variants.map((variant, index) => (
-                    <div key={index} className={styles.variantCard}>
-                      <div className={styles.variantHeader}>
-                        <span>Variant {index + 1}</span>
-                        <button
-                          type="button"
-                          className={styles.removeVariantBtn}
-                          onClick={() => removeVariant(index)}
-                        >
-                          <FiTrash2 size={16} />
-                        </button>
-                      </div>
-
-                      <div className={styles.variantFields}>
-                        <div className={styles.row}>
-                          <div className={styles.formGroup}>
-                            <label>SKU</label>
-                            <input
-                              type="text"
-                              value={variant.sku}
-                              onChange={(e) => updateVariant(index, "sku", e.target.value)}
-                              placeholder="SKU"
-                            />
-                          </div>
-                          <div className={styles.formGroup}>
-                            <label>Color</label>
-                            <input
-                              type="text"
-                              value={variant.attributes.color}
-                              onChange={(e) => updateVariant(index, "attributes.color", e.target.value)}
-                              placeholder="Color"
-                            />
-                          </div>
-                          <div className={styles.formGroup}>
-                            <label>Size</label>
-                            <input
-                              type="text"
-                              value={variant.attributes.size}
-                              onChange={(e) => updateVariant(index, "attributes.size", e.target.value)}
-                              placeholder="Size"
-                            />
-                          </div>
-                        </div>
-
-                        <div className={styles.row}>
-                          <div className={styles.formGroup}>
-                            <label>Original Price</label>
-                            <input
-                              type="number"
-                              value={variant.price.originalPrice}
-                              onChange={(e) => updateVariant(index, "price.originalPrice", parseFloat(e.target.value))}
-                              placeholder="0"
-                            />
-                          </div>
-                          <div className={styles.formGroup}>
-                            <label>Sale Price</label>
-                            <input
-                              type="number"
-                              value={variant.price.salePrice}
-                              onChange={(e) => updateVariant(index, "price.salePrice", parseFloat(e.target.value))}
-                              placeholder="0"
-                            />
-                          </div>
-                          <div className={styles.formGroup}>
-                            <label>Stock</label>
-                            <input
-                              type="number"
-                              value={variant.stock.quantity}
-                              onChange={(e) => updateVariant(index, "stock.quantity", parseInt(e.target.value))}
-                              placeholder="0"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </>
-              )}
-            </div>
-
-            {/* Shipping */}
-            <div className={styles.section}>
-              <h2>Shipping</h2>
-              <p className={styles.note}>
-                Shipping charges are calculated dynamically via Shiprocket API.
-              </p>
-
-              <div className={styles.row}>
-                <div className={styles.formGroup}>
-                  <label>Weight *</label>
-                  <input
-                    type="number"
-                    name="shippingWeight"
-                    value={formData.shippingWeight}
-                    onChange={handleInputChange}
-                    placeholder="0"
-                    min="0"
-                    step="0.01"
-                    required
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Unit</label>
-                  <select
-                    name="shippingWeightUnit"
-                    value={formData.shippingWeightUnit}
-                    onChange={handleInputChange}
-                  >
-                    <option value="g">g</option>
-                    <option value="kg">kg</option>
-                    <option value="oz">oz</option>
-                    <option value="lb">lb</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className={styles.row}>
-                <div className={styles.formGroup}>
-                  <label>Length * (cm)</label>
-                  <input
-                    type="number"
-                    name="shippingLength"
-                    value={formData.shippingLength}
-                    onChange={handleInputChange}
-                    placeholder="0"
-                    min="0"
-                    step="0.1"
-                    required
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Width * (cm)</label>
-                  <input
-                    type="number"
-                    name="shippingWidth"
-                    value={formData.shippingWidth}
-                    onChange={handleInputChange}
-                    placeholder="0"
-                    min="0"
-                    step="0.1"
-                    required
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Height * (cm)</label>
-                  <input
-                    type="number"
-                    name="shippingHeight"
-                    value={formData.shippingHeight}
-                    onChange={handleInputChange}
-                    placeholder="0"
-                    min="0"
-                    step="0.1"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className={styles.checkboxGroup}>
-                <input
-                  type="checkbox"
-                  name="freeShipping"
-                  checked={formData.freeShipping}
-                  onChange={handleInputChange}
-                />
-                <label>Free Shipping</label>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Shipping Type</label>
-                <select
-                  name="shippingType"
-                  value={formData.shippingType}
-                  onChange={handleInputChange}
-                >
-                  <option value="Seller Pays">Seller Pays</option>
-                  <option value="Customer Pays">Customer Pays</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Return Policy */}
-            <div className={styles.section}>
-              <h2>Return Policy</h2>
-              
-              <div className={styles.checkboxGroup}>
-                <input
-                  type="checkbox"
-                  name="returnAvailable"
-                  checked={formData.returnAvailable}
-                  onChange={handleInputChange}
-                />
-                <label>Returns Available</label>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Return Days</label>
-                <input
-                  type="number"
-                  name="returnDays"
-                  value={formData.returnDays}
-                  onChange={handleInputChange}
-                  min="0"
-                />
-              </div>
-
-              <div className={styles.checkboxGroup}>
-                <input
-                  type="checkbox"
-                  name="warrantyAvailable"
-                  checked={formData.warrantyAvailable}
-                  onChange={handleInputChange}
-                />
-                <label>Warranty Available</label>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Warranty Duration</label>
-                <select
-                  name="warrantyDuration"
-                  value={formData.warrantyDuration}
-                  onChange={handleInputChange}
-                >
-                  {WARRANTY_DURATIONS.map(dur => (
-                    <option key={dur} value={dur}>{dur}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* SEO */}
-            <div className={styles.section}>
-              <h2>SEO</h2>
-              <p className={styles.note}>
-                Optimize your product for search engines.
-              </p>
-
-              <div className={styles.formGroup}>
-                <label>SEO Title</label>
-                <input
-                  type="text"
-                  name="seoTitle"
-                  value={formData.seoTitle}
-                  onChange={handleInputChange}
-                  placeholder="SEO Title (max 60 characters)"
-                  maxLength={60}
-                />
-                <span className={styles.charCount}>
-                  {formData.seoTitle?.length || 0}/60
-                </span>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>SEO Description</label>
-                <textarea
-                  name="seoDescription"
-                  value={formData.seoDescription}
-                  onChange={handleInputChange}
-                  placeholder="SEO Description (max 160 characters)"
-                  maxLength={160}
-                  rows={2}
-                />
-                <span className={styles.charCount}>
-                  {formData.seoDescription?.length || 0}/160
-                </span>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>SEO Keywords</label>
-                <input
-                  type="text"
-                  name="seoKeywords"
-                  value={formData.seoKeywords}
-                  onChange={handleInputChange}
-                  placeholder="Comma separated keywords"
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Canonical URL</label>
-                <input
-                  type="url"
-                  name="canonicalUrl"
-                  value={formData.canonicalUrl}
-                  onChange={handleInputChange}
-                  placeholder="https://aureviancollections.in/product/..."
-                />
-              </div>
-            </div>
-
-            {/* Product Labels */}
-            <div className={styles.section}>
-              <h2>Product Labels</h2>
-              <div className={styles.labelsGrid}>
-                <div className={styles.checkboxGroup}>
-                  <input
-                    type="checkbox"
-                    name="featured"
-                    checked={formData.featured}
-                    onChange={handleInputChange}
-                  />
-                  <label>⭐ Featured</label>
-                </div>
-                <div className={styles.checkboxGroup}>
-                  <input
-                    type="checkbox"
-                    name="trending"
-                    checked={formData.trending}
-                    onChange={handleInputChange}
-                  />
-                  <label>🔥 Trending</label>
-                </div>
-                <div className={styles.checkboxGroup}>
-                  <input
-                    type="checkbox"
-                    name="bestSeller"
-                    checked={formData.bestSeller}
-                    onChange={handleInputChange}
-                  />
-                  <label>🏆 Best Seller</label>
-                </div>
-                <div className={styles.checkboxGroup}>
-                  <input
-                    type="checkbox"
-                    name="newArrival"
-                    checked={formData.newArrival}
-                    onChange={handleInputChange}
-                  />
-                  <label>✨ New Arrival</label>
-                </div>
-                <div className={styles.checkboxGroup}>
-                  <input
-                    type="checkbox"
-                    name="flashSale"
-                    checked={formData.flashSale}
-                    onChange={handleInputChange}
-                  />
-                  <label>⚡ Flash Sale</label>
-                </div>
-              </div>
-            </div>
-
-            {/* Status */}
-            <div className={styles.section}>
-              <h2>Status</h2>
-              <div className={styles.formGroup}>
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                >
-                  {STATUS_OPTIONS.map(opt => (
-                    <option key={opt} value={opt}>{opt}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
+      {/* Form Content */}
+      <div className={styles.formContainer}>
+        <div className={styles.stepContent}>
+          {renderStepContent()}
         </div>
+      </div>
 
-        {/* Form Actions */}
-        <div className={styles.formActions}>
-          <button
-            type="button"
-            className={styles.cancelBtn}
-            onClick={() => navigate("/seller/dashboard/products")}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className={styles.submitBtn}
-            disabled={isLoading}
-          >
-            <FiSave size={18} />
-            {isLoading ? "Saving..." : isEdit ? "Update Product" : "Create Product"}
-          </button>
+      {/* Navigation Buttons */}
+      <div className={styles.navigation}>
+        <button
+          className={styles.prevBtn}
+          onClick={prevStep}
+          disabled={currentStep === 1}
+        >
+          <FiChevronLeft size={18} />
+          Previous
+        </button>
+        <div className={styles.navRight}>
+          <span className={styles.stepCounter}>
+            Step {currentStep} of 7
+          </span>
+          {currentStep === 7 ? (
+            <button
+              className={styles.submitBtn}
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
+              <FiSave size={18} />
+              {isSubmitting ? "Saving..." : isEdit ? "Update Product" : "Create Product"}
+            </button>
+          ) : (
+            <button
+              className={styles.nextBtn}
+              onClick={nextStep}
+            >
+              Next
+              <FiChevronRight size={18} />
+            </button>
+          )}
         </div>
-      </form>
+      </div>
     </div>
   );
 };
 
-export default ProductForm;
+export default ProductFormWizard;
+
+// ============================================
+// STEP 1: BASIC INFO
+// ============================================
+const StepBasicInfo = ({ formData, handleInputChange, categories }) => {
+  return (
+    <div className={styles.stepContainer}>
+      <div className={styles.stepHeader}>
+        <h2>📝 Basic Information</h2>
+        <p>Enter the fundamental details about your product</p>
+      </div>
+
+      <div className={styles.stepBody}>
+        <div className={styles.formGroup}>
+          <label>Product Name *</label>
+          <input
+            type="text"
+            name="productName"
+            value={formData.productName}
+            onChange={handleInputChange}
+            placeholder="e.g. Diamond Pendant Necklace"
+          />
+          <span className={styles.hint}>Be descriptive and include key details</span>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Brand *</label>
+          <input
+            type="text"
+            name="brand"
+            value={formData.brand}
+            onChange={handleInputChange}
+            placeholder="e.g. Aurevian Collection"
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Category *</label>
+          <select
+            name="categoryId"
+            value={formData.categoryId}
+            onChange={handleInputChange}
+          >
+            <option value="">Select Category</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>{cat.label}</option>
+            ))}
+          </select>
+        </div>
+
+        {formData.categoryId && (
+          <div className={styles.formGroup}>
+            <label>Sub Category</label>
+            <select
+              name="subCategoryId"
+              value={formData.subCategoryId}
+              onChange={handleInputChange}
+            >
+              <option value="">Select Sub Category</option>
+              {categories
+                .filter(cat => cat.id !== formData.categoryId)
+                .map((cat) => (
+                  <option key={cat.id} value={cat.id}>{cat.label}</option>
+                ))}
+            </select>
+          </div>
+        )}
+
+        <div className={styles.formGroup}>
+          <label>Short Description</label>
+          <textarea
+            name="shortDescription"
+            value={formData.shortDescription}
+            onChange={handleInputChange}
+            placeholder="Brief description (max 500 characters)"
+            maxLength={500}
+            rows={2}
+          />
+          <span className={styles.charCount}>
+            {formData.shortDescription?.length || 0}/500
+          </span>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Full Description</label>
+          <textarea
+            name="fullDescription"
+            value={formData.fullDescription}
+            onChange={handleInputChange}
+            placeholder="Detailed product description with features and benefits"
+            rows={5}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// STEP 2: IMAGES
+// ============================================
+const StepImages = ({
+  formData,
+  thumbnailPreview,
+  imagePreviews,
+  handleThumbnailUpload,
+  handleImagesUpload,
+  removeThumbnail,
+  removeImage,
+  fileInputRef,
+}) => {
+  return (
+    <div className={styles.stepContainer}>
+      <div className={styles.stepHeader}>
+        <h2>📸 Product Images</h2>
+        <p>Upload high-quality images to showcase your product</p>
+      </div>
+
+      <div className={styles.stepBody}>
+        <div className={styles.thumbnailSection}>
+          <label>Thumbnail Image *</label>
+          <div className={styles.thumbnailUpload}>
+            {thumbnailPreview ? (
+              <div className={styles.thumbnailPreview}>
+                <img src={thumbnailPreview.url} alt="Thumbnail" />
+                <button type="button" className={styles.removeImageBtn} onClick={removeThumbnail}>
+                  <FiX size={18} />
+                </button>
+              </div>
+            ) : (
+              <div className={styles.uploadArea} onClick={() => document.getElementById("thumbnailInput").click()}>
+                <FiImage size={40} />
+                <p>Click to upload thumbnail</p>
+                <span>JPG, PNG, WebP (Max 10MB)</span>
+              </div>
+            )}
+            <input id="thumbnailInput" type="file" accept="image/*" onChange={handleThumbnailUpload} style={{ display: "none" }} />
+          </div>
+        </div>
+
+        <div className={styles.imagesSection}>
+          <label>Product Images * (Min 2)</label>
+          <div className={styles.imageGrid}>
+            {imagePreviews.map((img, index) => (
+              <div key={index} className={styles.imagePreview}>
+                <img src={img.url} alt={`Product ${index + 1}`} />
+                <button type="button" className={styles.removeImageBtn} onClick={() => removeImage(index)}>
+                  <FiX size={18} />
+                </button>
+              </div>
+            ))}
+            <div className={styles.addImageBox} onClick={() => fileInputRef.current?.click()}>
+              <FiPlus size={30} />
+              <span>Add Image</span>
+            </div>
+          </div>
+          <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImagesUpload} style={{ display: "none" }} />
+          <p className={styles.hint}>{imagePreviews.length} of minimum 2 images uploaded</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// STEP 3: PRICING
+// ============================================
+const StepPricing = ({ formData, handleInputChange }) => {
+  return (
+    <div className={styles.stepContainer}>
+      <div className={styles.stepHeader}>
+        <h2>💰 Pricing</h2>
+        <p>Set the price and currency for your product</p>
+      </div>
+
+      <div className={styles.stepBody}>
+        <div className={styles.formGroup}>
+          <label>Original Price * (₹)</label>
+          <input
+            type="number"
+            name="originalPrice"
+            value={formData.originalPrice}
+            onChange={handleInputChange}
+            placeholder="0.00"
+            min="0"
+            step="0.01"
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Sale Price (₹)</label>
+          <input
+            type="number"
+            name="salePrice"
+            value={formData.salePrice}
+            onChange={handleInputChange}
+            placeholder="0.00"
+            min="0"
+            step="0.01"
+          />
+          <span className={styles.hint}>Leave empty if not on sale</span>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Currency</label>
+          <select name="currency" value={formData.currency} onChange={handleInputChange}>
+            <option value="INR">INR (₹)</option>
+            <option value="USD">USD ($)</option>
+            <option value="EUR">EUR (€)</option>
+          </select>
+        </div>
+
+        <div className={styles.checkboxGroup}>
+          <input type="checkbox" name="taxIncluded" checked={formData.taxIncluded} onChange={handleInputChange} />
+          <label>Tax Included in Price</label>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// STEP 4: INVENTORY
+// ============================================
+const StepInventory = ({ formData, handleInputChange }) => {
+  return (
+    <div className={styles.stepContainer}>
+      <div className={styles.stepHeader}>
+        <h2>📦 Inventory</h2>
+        <p>Manage stock and availability</p>
+      </div>
+
+      <div className={styles.stepBody}>
+        <div className={styles.formGroup}>
+          <label>Stock Quantity *</label>
+          <input
+            type="number"
+            name="stockQuantity"
+            value={formData.stockQuantity}
+            onChange={handleInputChange}
+            placeholder="0"
+            min="0"
+          />
+        </div>
+
+        <div className={styles.row}>
+          <div className={styles.formGroup}>
+            <label>Minimum Order Quantity</label>
+            <input
+              type="number"
+              name="minOrderQty"
+              value={formData.minOrderQty}
+              onChange={handleInputChange}
+              min="1"
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label>Maximum Order Quantity</label>
+            <input
+              type="number"
+              name="maxOrderQty"
+              value={formData.maxOrderQty}
+              onChange={handleInputChange}
+              min="1"
+              placeholder="Unlimited"
+            />
+          </div>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Availability</label>
+          <select name="availability" value={formData.availability} onChange={handleInputChange}>
+            {AVAILABILITY_OPTIONS.map(opt => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// STEP 5: SPECIFICATIONS
+// ============================================
+const StepSpecifications = ({ formData, handleInputChange, addVariant, removeVariant, updateVariant }) => {
+  return (
+    <div className={styles.stepContainer}>
+      <div className={styles.stepHeader}>
+        <h2>⚙️ Specifications</h2>
+        <p>Detailed jewelry specifications and variants</p>
+      </div>
+
+      <div className={styles.stepBody}>
+        <div className={styles.row}>
+          <div className={styles.formGroup}>
+            <label>Material *</label>
+            <select name="material" value={formData.material} onChange={handleInputChange}>
+              {MATERIALS.map(mat => <option key={mat} value={mat}>{mat}</option>)}
+            </select>
+          </div>
+          <div className={styles.formGroup}>
+            <label>Plating</label>
+            <select name="plating" value={formData.plating} onChange={handleInputChange}>
+              {PLATING_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            </select>
+          </div>
+        </div>
+
+        <div className={styles.row}>
+          <div className={styles.formGroup}>
+            <label>Stone Type</label>
+            <select name="stoneType" value={formData.stoneType} onChange={handleInputChange}>
+              {STONE_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
+            </select>
+          </div>
+          <div className={styles.formGroup}>
+            <label>Stone Color</label>
+            <select name="stoneColor" value={formData.stoneColor} onChange={handleInputChange}>
+              {STONE_COLORS.map(color => <option key={color} value={color}>{color}</option>)}
+            </select>
+          </div>
+        </div>
+
+        <div className={styles.row}>
+          <div className={styles.formGroup}>
+            <label>Finish</label>
+            <select name="finish" value={formData.finish} onChange={handleInputChange}>
+              {FINISH_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            </select>
+          </div>
+          <div className={styles.formGroup}>
+            <label>Size</label>
+            <select name="size" value={formData.size} onChange={handleInputChange}>
+              {SIZES.map(size => <option key={size} value={size}>{size}</option>)}
+            </select>
+          </div>
+        </div>
+
+        <div className={styles.row}>
+          <div className={styles.formGroup}>
+            <label>Weight</label>
+            <input type="number" name="weight" value={formData.weight} onChange={handleInputChange} placeholder="0" min="0" step="0.01" />
+          </div>
+          <div className={styles.formGroup}>
+            <label>Unit</label>
+            <select name="weightUnit" value={formData.weightUnit} onChange={handleInputChange}>
+              <option value="g">g</option>
+              <option value="mg">mg</option>
+              <option value="oz">oz</option>
+            </select>
+          </div>
+        </div>
+
+        <div className={styles.row}>
+          <div className={styles.formGroup}>
+            <label>Occasion</label>
+            <select name="occasion" value={formData.occasion} onChange={handleInputChange}>
+              {OCCASIONS.map(occ => <option key={occ} value={occ}>{occ}</option>)}
+            </select>
+          </div>
+          <div className={styles.formGroup}>
+            <label>Style</label>
+            <select name="style" value={formData.style} onChange={handleInputChange}>
+              {STYLES.map(style => <option key={style} value={style}>{style}</option>)}
+            </select>
+          </div>
+        </div>
+
+        <div className={styles.row}>
+          <div className={styles.formGroup}>
+            <label>Collection</label>
+            <input type="text" name="collection" value={formData.collection} onChange={handleInputChange} placeholder="e.g. Bridal Collection 2024" />
+          </div>
+          <div className={styles.formGroup}>
+            <label>Gender</label>
+            <select name="gender" value={formData.gender} onChange={handleInputChange}>
+              {GENDERS.map(g => <option key={g} value={g}>{g}</option>)}
+            </select>
+          </div>
+        </div>
+
+        <div className={styles.checkboxGroup}>
+          <input type="checkbox" name="adjustable" checked={formData.adjustable} onChange={handleInputChange} />
+          <label>Adjustable</label>
+        </div>
+
+        <div className={styles.variantsSection}>
+          <div className={styles.sectionHeader}>
+            <label>Product Variants</label>
+            <div className={styles.checkboxGroup}>
+              <input type="checkbox" name="hasVariants" checked={formData.hasVariants} onChange={handleInputChange} />
+              <span>Enable Variants</span>
+            </div>
+          </div>
+
+          {formData.hasVariants && (
+            <>
+              <button type="button" className={styles.addVariantBtn} onClick={addVariant}>
+                <FiPlus size={16} /> Add Variant
+              </button>
+              {formData.variants.map((variant, index) => (
+                <div key={index} className={styles.variantCard}>
+                  <div className={styles.variantHeader}>
+                    <span>Variant {index + 1}</span>
+                    <button type="button" className={styles.removeVariantBtn} onClick={() => removeVariant(index)}>
+                      <FiTrash2 size={16} />
+                    </button>
+                  </div>
+                  <div className={styles.variantFields}>
+                    <div className={styles.row}>
+                      <div className={styles.formGroup}>
+                        <label>SKU</label>
+                        <input type="text" value={variant.sku} onChange={(e) => updateVariant(index, "sku", e.target.value)} placeholder="SKU" />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Color</label>
+                        <input type="text" value={variant.attributes.color} onChange={(e) => updateVariant(index, "attributes.color", e.target.value)} placeholder="Color" />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Size</label>
+                        <input type="text" value={variant.attributes.size} onChange={(e) => updateVariant(index, "attributes.size", e.target.value)} placeholder="Size" />
+                      </div>
+                    </div>
+                    <div className={styles.row}>
+                      <div className={styles.formGroup}>
+                        <label>Original Price</label>
+                        <input type="number" value={variant.price.originalPrice} onChange={(e) => updateVariant(index, "price.originalPrice", parseFloat(e.target.value))} placeholder="0" />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Sale Price</label>
+                        <input type="number" value={variant.price.salePrice} onChange={(e) => updateVariant(index, "price.salePrice", parseFloat(e.target.value))} placeholder="0" />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Stock</label>
+                        <input type="number" value={variant.stock.quantity} onChange={(e) => updateVariant(index, "stock.quantity", parseInt(e.target.value))} placeholder="0" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// STEP 6: SHIPPING
+// ============================================
+const StepShipping = ({ formData, handleInputChange }) => {
+  return (
+    <div className={styles.stepContainer}>
+      <div className={styles.stepHeader}>
+        <h2>🚚 Shipping</h2>
+        <p>Shipping charges are calculated dynamically via Shiprocket API</p>
+      </div>
+
+      <div className={styles.stepBody}>
+        <div className={styles.row}>
+          <div className={styles.formGroup}>
+            <label>Weight *</label>
+            <input type="number" name="shippingWeight" value={formData.shippingWeight} onChange={handleInputChange} placeholder="0" min="0" step="0.01" />
+          </div>
+          <div className={styles.formGroup}>
+            <label>Unit</label>
+            <select name="shippingWeightUnit" value={formData.shippingWeightUnit} onChange={handleInputChange}>
+              <option value="g">g</option>
+              <option value="kg">kg</option>
+              <option value="oz">oz</option>
+              <option value="lb">lb</option>
+            </select>
+          </div>
+        </div>
+
+        <div className={styles.row}>
+          <div className={styles.formGroup}>
+            <label>Length * (cm)</label>
+            <input type="number" name="shippingLength" value={formData.shippingLength} onChange={handleInputChange} placeholder="0" min="0" step="0.1" />
+          </div>
+          <div className={styles.formGroup}>
+            <label>Width * (cm)</label>
+            <input type="number" name="shippingWidth" value={formData.shippingWidth} onChange={handleInputChange} placeholder="0" min="0" step="0.1" />
+          </div>
+          <div className={styles.formGroup}>
+            <label>Height * (cm)</label>
+            <input type="number" name="shippingHeight" value={formData.shippingHeight} onChange={handleInputChange} placeholder="0" min="0" step="0.1" />
+          </div>
+        </div>
+
+        <div className={styles.checkboxGroup}>
+          <input type="checkbox" name="freeShipping" checked={formData.freeShipping} onChange={handleInputChange} />
+          <label>Free Shipping</label>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Shipping Type</label>
+          <select name="shippingType" value={formData.shippingType} onChange={handleInputChange}>
+            <option value="Seller Pays">Seller Pays</option>
+            <option value="Customer Pays">Customer Pays</option>
+          </select>
+        </div>
+
+        <hr className={styles.divider} />
+
+        <h3 className={styles.subHeading}>Return & Warranty</h3>
+
+        <div className={styles.checkboxGroup}>
+          <input type="checkbox" name="returnAvailable" checked={formData.returnAvailable} onChange={handleInputChange} />
+          <label>Returns Available</label>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Return Days</label>
+          <input type="number" name="returnDays" value={formData.returnDays} onChange={handleInputChange} min="0" />
+        </div>
+
+        <div className={styles.checkboxGroup}>
+          <input type="checkbox" name="warrantyAvailable" checked={formData.warrantyAvailable} onChange={handleInputChange} />
+          <label>Warranty Available</label>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Warranty Duration</label>
+          <select name="warrantyDuration" value={formData.warrantyDuration} onChange={handleInputChange}>
+            {WARRANTY_DURATIONS.map(dur => <option key={dur} value={dur}>{dur}</option>)}
+          </select>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// STEP 7: SEO & STATUS
+// ============================================
+const StepSEO = ({ formData, handleInputChange }) => {
+  return (
+    <div className={styles.stepContainer}>
+      <div className={styles.stepHeader}>
+        <h2>🔍 SEO & Status</h2>
+        <p>Optimize for search engines and set product status</p>
+      </div>
+
+      <div className={styles.stepBody}>
+        <div className={styles.formGroup}>
+          <label>SEO Title</label>
+          <input type="text" name="seoTitle" value={formData.seoTitle} onChange={handleInputChange} placeholder="SEO Title (max 60 characters)" maxLength={60} />
+          <span className={styles.charCount}>{formData.seoTitle?.length || 0}/60</span>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>SEO Description</label>
+          <textarea name="seoDescription" value={formData.seoDescription} onChange={handleInputChange} placeholder="SEO Description (max 160 characters)" maxLength={160} rows={2} />
+          <span className={styles.charCount}>{formData.seoDescription?.length || 0}/160</span>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>SEO Keywords</label>
+          <input type="text" name="seoKeywords" value={formData.seoKeywords} onChange={handleInputChange} placeholder="Comma separated keywords" />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Canonical URL</label>
+          <input type="url" name="canonicalUrl" value={formData.canonicalUrl} onChange={handleInputChange} placeholder="https://aureviancollections.in/product/..." />
+        </div>
+
+        <hr className={styles.divider} />
+
+        <h3 className={styles.subHeading}>Product Labels</h3>
+
+        <div className={styles.labelsGrid}>
+          <div className={styles.checkboxGroup}>
+            <input type="checkbox" name="featured" checked={formData.featured} onChange={handleInputChange} />
+            <label>⭐ Featured</label>
+          </div>
+          <div className={styles.checkboxGroup}>
+            <input type="checkbox" name="trending" checked={formData.trending} onChange={handleInputChange} />
+            <label>🔥 Trending</label>
+          </div>
+          <div className={styles.checkboxGroup}>
+            <input type="checkbox" name="bestSeller" checked={formData.bestSeller} onChange={handleInputChange} />
+            <label>🏆 Best Seller</label>
+          </div>
+          <div className={styles.checkboxGroup}>
+            <input type="checkbox" name="newArrival" checked={formData.newArrival} onChange={handleInputChange} />
+            <label>✨ New Arrival</label>
+          </div>
+          <div className={styles.checkboxGroup}>
+            <input type="checkbox" name="flashSale" checked={formData.flashSale} onChange={handleInputChange} />
+            <label>⚡ Flash Sale</label>
+          </div>
+        </div>
+
+        <hr className={styles.divider} />
+
+        <div className={styles.formGroup}>
+          <label>Status</label>
+          <select name="status" value={formData.status} onChange={handleInputChange}>
+            {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+          </select>
+        </div>
+      </div>
+    </div>
+  );
+};
