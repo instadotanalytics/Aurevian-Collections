@@ -1,4 +1,4 @@
-// src/Components/Offers/Offers.jsx - Complete file
+// src/Components/Offers/Offers.jsx - Complete updated file
 
 import React, { useRef, useEffect, useState } from "react";
 import { 
@@ -467,19 +467,7 @@ export default function Offers() {
         className={styles.heroBanner}
         style={{ backgroundImage: `url(${craftImage1})` }}
       >
-        <div className={styles.heroOverlay}>
-          <div className={styles.heroContent}>
-            <span className={styles.heroTag}>EXCLUSIVE OFFERS</span>
-            <h1 className={styles.heroTitle}>
-              Premium Choices,<br />
-              <span>Just For You</span>
-            </h1>
-            <p className={styles.heroDescription}>
-              Explore handpicked luxury pieces at special prices for a limited time.
-            </p>
-            <button className={styles.heroBtn} onClick={scrollToOffers}>SHOP OFFERS →</button>
-          </div>
-        </div>
+        <div className={styles.heroOverlay} />
       </div>
 
       <div className={styles.container}>
@@ -505,7 +493,7 @@ export default function Offers() {
 
           {/* ---------------- Shop Layout - Filter Sidebar + Products ---------------- */}
           <div className={styles.shopLayout}>
-            {/* Desktop Filter Sidebar */}
+            {/* Desktop Filter Sidebar - Sticky and Compact */}
             <aside className={styles.filterSidebar}>
               <h3 className={styles.filterTitle}>Filter</h3>
 
@@ -593,7 +581,7 @@ export default function Offers() {
               </div>
             </aside>
 
-            {/* Products */}
+            {/* Products - Scrollable */}
             <div className={styles.productsWrapper}>
               <div className={styles.productsHeader}>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -650,7 +638,7 @@ export default function Offers() {
                 })}
               </div>
 
-              {/* Pagination - Next/Prev Buttons */}
+              {/* Pagination - Sticky at bottom */}
               {totalPages > 1 && (
                 <div className={styles.pagination}>
                   <button 
