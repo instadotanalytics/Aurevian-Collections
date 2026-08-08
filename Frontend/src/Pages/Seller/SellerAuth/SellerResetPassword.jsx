@@ -6,11 +6,12 @@ import { FiLock, FiEye, FiEyeOff, FiArrowLeft, FiShield, FiCheckCircle } from 'r
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import styles from './SellerResetPassword.module.css';
+import Header from '../../Layout/Header/Header';
 
 const SellerResetPassword = () => {
   const { token } = useParams();
   const navigate = useNavigate();
-  
+
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -56,11 +57,11 @@ const SellerResetPassword = () => {
         password,
         confirmPassword
       });
-      
+
       if (response.data.success) {
         setIsSuccess(true);
         toast.success('Password reset successfully!');
-        
+
         // Redirect to login after 3 seconds
         setTimeout(() => {
           navigate('/seller/login');
@@ -120,107 +121,110 @@ const SellerResetPassword = () => {
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.card}>
-        {/* Back Button */}
-        <Link to="/seller/login" className={styles.backButton}>
-          <FiArrowLeft size={18} />
-          <span>Back to Login</span>
-        </Link>
+    <>
+    <Header/>
+      <div className={styles.container}>
+        <div className={styles.card}>
+          {/* Back Button */}
+          <Link to="/seller/login" className={styles.backButton}>
+            <FiArrowLeft size={18} />
+            <span>Back to Login</span>
+          </Link>
 
-        {/* Header */}
-        <div className={styles.header}>
-          <div className={styles.iconWrapper}>
-            <FiShield className={styles.shieldIcon} />
-          </div>
-          <h1 className={styles.title}>Set New Password</h1>
-          <p className={styles.subtitle}>
-            Enter your new password below.
-          </p>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>New Password</label>
-            <div className={styles.inputWrapper}>
-              <FiLock className={styles.inputIcon} />
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`${styles.input} ${error ? styles.inputError : ''}`}
-                placeholder="Enter new password"
-                disabled={isLoading}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className={styles.eyeButton}
-              >
-                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-              </button>
+          {/* Header */}
+          <div className={styles.header}>
+            <div className={styles.iconWrapper}>
+              <FiShield className={styles.shieldIcon} />
             </div>
+            <h1 className={styles.title}>Set New Password</h1>
+            <p className={styles.subtitle}>
+              Enter your new password below.
+            </p>
           </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Confirm Password</label>
-            <div className={styles.inputWrapper}>
-              <FiLock className={styles.inputIcon} />
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className={`${styles.input} ${error ? styles.inputError : ''}`}
-                placeholder="Confirm new password"
-                disabled={isLoading}
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className={styles.eyeButton}
-              >
-                {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-              </button>
+          {/* Form */}
+          <form onSubmit={handleSubmit} className={styles.form}>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>New Password</label>
+              <div className={styles.inputWrapper}>
+                <FiLock className={styles.inputIcon} />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={`${styles.input} ${error ? styles.inputError : ''}`}
+                  placeholder="Enter new password"
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className={styles.eyeButton}
+                >
+                  {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                </button>
+              </div>
             </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Confirm Password</label>
+              <div className={styles.inputWrapper}>
+                <FiLock className={styles.inputIcon} />
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className={`${styles.input} ${error ? styles.inputError : ''}`}
+                  placeholder="Confirm new password"
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className={styles.eyeButton}
+                >
+                  {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            {error && <p className={styles.errorText}>{error}</p>}
+
+            <div className={styles.passwordRequirements}>
+              <p className={styles.requirementsTitle}>Password must contain:</p>
+              <ul className={styles.requirementsList}>
+                <li className={password.length >= 6 ? styles.requirementMet : ''}>
+                  ✓ At least 6 characters
+                </li>
+                <li className={password.length >= 8 ? styles.requirementMet : ''}>
+                  ✓ At least 8 characters (recommended)
+                </li>
+              </ul>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={styles.submitButton}
+            >
+              {isLoading ? (
+                <>
+                  <span className={styles.spinner}></span>
+                  Resetting Password...
+                </>
+              ) : (
+                'Reset Password'
+              )}
+            </button>
+          </form>
+
+          <div className={styles.footer}>
+            <p>© {new Date().getFullYear()} Aurevian Collections. All rights reserved.</p>
           </div>
-
-          {error && <p className={styles.errorText}>{error}</p>}
-
-          <div className={styles.passwordRequirements}>
-            <p className={styles.requirementsTitle}>Password must contain:</p>
-            <ul className={styles.requirementsList}>
-              <li className={password.length >= 6 ? styles.requirementMet : ''}>
-                ✓ At least 6 characters
-              </li>
-              <li className={password.length >= 8 ? styles.requirementMet : ''}>
-                ✓ At least 8 characters (recommended)
-              </li>
-            </ul>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={styles.submitButton}
-          >
-            {isLoading ? (
-              <>
-                <span className={styles.spinner}></span>
-                Resetting Password...
-              </>
-            ) : (
-              'Reset Password'
-            )}
-          </button>
-        </form>
-
-        <div className={styles.footer}>
-          <p>© {new Date().getFullYear()} Aurevian Collections. All rights reserved.</p>
         </div>
       </div>
-    </div>
-  );
+      </>
+      );
 };
 
-export default SellerResetPassword;
+      export default SellerResetPassword;

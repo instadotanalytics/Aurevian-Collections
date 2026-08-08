@@ -1132,6 +1132,7 @@ const Franchise = () => {
 
   return (
     <>
+    <Header/>
       <Helmet>
         <title>Aurevian Jewellery Franchise | Become a Franchise Partner</title>
         <meta

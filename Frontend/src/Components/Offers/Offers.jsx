@@ -19,6 +19,7 @@ import styles from "./Offers.module.css";
 import craftImage1 from "../../assets/offersimg.png";
 import Footer from "../../Pages/Layout/Footer/Footer.jsx";
 import { fetchProductsByPlacement } from "../../redux/slices/storefrontProductSlice";
+import Header from "../../Pages/Layout/Header/Header.jsx";
 
 /* ----------------------------------------------------------------
    Data — All offers, deals, and promotional content
@@ -220,6 +221,7 @@ export default function Offers() {
 
   return (
     <>
+    <Header/>
       <section className={styles.offers} aria-label="Aurevian Exclusive Offers">
         {/* ---------------- Hero Banner with Background Image ---------------- */}
         <div

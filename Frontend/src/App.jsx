@@ -226,75 +226,57 @@ const App = () => {
           <Route
             path={ROUTES.HOME}
             element={
-              <LayoutWithHeader>
                 <Home />
-              </LayoutWithHeader>
             }
           />
           <Route
             path={ROUTES.ABOUT}
             element={
-              <LayoutWithHeader>
                 <AboutUs />
-              </LayoutWithHeader>
             }
           />
 
           <Route
             path="/AboutUs"
             element={
-              <LayoutWithHeader>
                 <AboutUs />
-              </LayoutWithHeader>
             }
           />
           <Route
             path="/stories"
             element={
-              <LayoutWithHeader>
                 <Story />
-              </LayoutWithHeader>
             }
           />
           <Route
             path="/why-aurevian"
             element={
-              <LayoutWithHeader>
                 <WhyAurevian />
-              </LayoutWithHeader>
             }
           />
           <Route
             path="/contact"
             element={
-              <LayoutWithHeader>
                 <Contact />
-              </LayoutWithHeader>
             }
           />
           <Route
             path="/support"
             element={
-              <LayoutWithHeader>
                 <Support />
-              </LayoutWithHeader>
             }
           />
           <Route
             path="/franchise"
             element={
-              <LayoutWithHeader>
                 <Franchise />
-              </LayoutWithHeader>
             }
           />
           <Route path="/cart" element={<Cart />} />
           <Route
             path="/wishlist"
             element={
-              <LayoutWithHeader>
                 <Wishlist />
-              </LayoutWithHeader>
             }
           />
           <Route
@@ -316,9 +298,7 @@ const App = () => {
           <Route
             path={ROUTES.BECOME_A_PARTNER}
             element={
-              <LayoutWithHeader>
                 <BecomePartner />
-              </LayoutWithHeader>
             }
           />
 
@@ -330,9 +310,7 @@ const App = () => {
           <Route
             path={ROUTES.GIFTS}
             element={
-              <LayoutWithHeader>
                 <Gifts />
-              </LayoutWithHeader>
             }
           />
 
@@ -342,9 +320,7 @@ const App = () => {
           <Route
             path={ROUTES.COLLECTIONS}
             element={
-              <LayoutWithHeader>
                 <Collections />
-              </LayoutWithHeader>
             }
           />
 
@@ -354,9 +330,7 @@ const App = () => {
           <Route
             path={ROUTES.OFFERS}
             element={
-              <LayoutWithHeader>
                 <Offers />
-              </LayoutWithHeader>
             }
           />
 
@@ -369,9 +343,7 @@ const App = () => {
           <Route
             path={ROUTES.PRODUCT_DETAIL}
             element={
-              <LayoutWithHeader>
                 <ProductDetail />
-              </LayoutWithHeader>
             }
           />
 
@@ -381,17 +353,13 @@ const App = () => {
           <Route
             path={ROUTES.BLOG}
             element={
-              <LayoutWithHeader>
                 <BlogList />
-              </LayoutWithHeader>
             }
           />
           <Route
             path={ROUTES.BLOG_DETAIL}
             element={
-              <LayoutWithHeader>
                 <BlogDetail />
-              </LayoutWithHeader>
             }
           />
 

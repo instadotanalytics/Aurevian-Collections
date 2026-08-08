@@ -19,6 +19,7 @@ import {
   FiCheck,
 } from 'react-icons/fi';
 import styles from './BlogDetail.module.css';
+import Header from '../Layout/Header/Header';
 
 const BlogDetail = () => {
   const { slug } = useParams();
@@ -117,6 +118,7 @@ const BlogDetail = () => {
 
   return (
     <>
+    <Header/>
       {/* ✅ HELMET FOR SEO */}
       <Helmet>
         {/* Primary Meta Tags */}

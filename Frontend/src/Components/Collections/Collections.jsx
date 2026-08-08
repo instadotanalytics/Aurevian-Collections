@@ -9,6 +9,7 @@ import { LuSlidersHorizontal } from "react-icons/lu";
 import styles from "./Collections.module.css";
 import Footer from "../../Pages/Layout/Footer/Footer.jsx";
 import { fetchProductsByPlacement } from "../../redux/slices/storefrontProductSlice";
+import Header from "../../Pages/Layout/Header/Header.jsx";
 
 const API_URL =
   import.meta.env.VITE_API_URL ||
@@ -320,6 +321,7 @@ export default function Collections() {
 
   return (
     <>
+    <Header/>
       <section className={styles.collections} aria-label="Aurevian Collections">
         {/* ---------------- Hero Gallery - 90vh (UNCHANGED) ---------------- */}
         <div className={styles.heroGallery}>

@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { fetchBlogs } from '../../redux/slices/blogSlice';
 import { FiClock, FiEye, FiCalendar, FiSearch, FiArrowRight, FiX } from 'react-icons/fi';
 import styles from './BlogList.module.css';
+import Header from '../Layout/Header/Header';
 
 const BlogList = () => {
   const dispatch = useDispatch();
@@ -121,155 +122,158 @@ const BlogList = () => {
   }
 
   return (
-    <div className={styles.blogPage}>
-      <div className={styles.container}>
-        {/* Hero / Header */}
-        <div className={styles.hero}>
-          <div className={styles.header}>
-            <span className={styles.headerTag}>Aurevian Journal</span>
-            <h1>Discover the latest trends, guides, and stories from the world of fine jewellery</h1>
-            <p className={styles.heroSubtitle}>
-              Curated reading on craftsmanship, diamonds and the art of fine jewellery — for those who
-              appreciate the story behind every piece.
-            </p>
+    <>
+    <Header/>
+      <div className={styles.blogPage}>
+        <div className={styles.container}>
+          {/* Hero / Header */}
+          <div className={styles.hero}>
+            <div className={styles.header}>
+              <span className={styles.headerTag}>Aurevian Journal</span>
+              <h1>Discover the latest trends, guides, and stories from the world of fine jewellery</h1>
+              <p className={styles.heroSubtitle}>
+                Curated reading on craftsmanship, diamonds and the art of fine jewellery — for those who
+                appreciate the story behind every piece.
+              </p>
 
-            {/* ✅ Search Form with clear button */}
-            <form onSubmit={handleSearchSubmit} className={styles.searchForm}>
-              <div className={styles.searchWrapper}>
-                <FiSearch className={styles.searchIcon} />
-                <input
-                  type="text"
-                  placeholder="Search articles..."
-                  value={searchInputValue}
-                  onChange={handleSearchInputChange}
-                  className={styles.searchInput}
-                  aria-label="Search articles"
-                />
-                {searchInputValue && (
-                  <button
-                    type="button"
-                    className={styles.clearBtn}
-                    onClick={handleClearSearch}
-                    aria-label="Clear search"
-                  >
-                    <FiX size={16} />
+              {/* ✅ Search Form with clear button */}
+              <form onSubmit={handleSearchSubmit} className={styles.searchForm}>
+                <div className={styles.searchWrapper}>
+                  <FiSearch className={styles.searchIcon} />
+                  <input
+                    type="text"
+                    placeholder="Search articles..."
+                    value={searchInputValue}
+                    onChange={handleSearchInputChange}
+                    className={styles.searchInput}
+                    aria-label="Search articles"
+                  />
+                  {searchInputValue && (
+                    <button
+                      type="button"
+                      className={styles.clearBtn}
+                      onClick={handleClearSearch}
+                      aria-label="Clear search"
+                    >
+                      <FiX size={16} />
+                    </button>
+                  )}
+                  <button type="submit" className={styles.searchBtn}>
+                    Search
                   </button>
-                )}
-                <button type="submit" className={styles.searchBtn}>
-                  Search
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-
-        {/* Categories */}
-        <div className={styles.categories}>
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              className={`${styles.categoryBtn} ${selectedCategory === cat ? styles.active : ''}`}
-              onClick={() => handleCategoryChange(cat)}
-              aria-pressed={selectedCategory === cat}
-            >
-              {cat === 'all' ? 'All' : cat.charAt(0).toUpperCase() + cat.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        {/* ✅ Show search results info */}
-        {searchTerm && (
-          <div className={styles.searchInfo}>
-            <span>
-              Showing results for: <strong>"{searchTerm}"</strong>
-            </span>
-            <button onClick={handleClearSearch} className={styles.clearSearchBtn}>
-              <FiX size={14} /> Clear
-            </button>
-          </div>
-        )}
-
-        {/* Blog List */}
-        {blogs && blogs.length > 0 ? (
-          <>
-            <div className={styles.blogGrid}>
-              {blogs.map((blog, index) => (
-                <Link
-                  to={`/blog/${blog.slug}`}
-                  key={blog._id}
-                  className={styles.blogCard}
-                >
-                  <div className={styles.cardImage}>
-                    <img
-                      src={blog.featuredImage?.url}
-                      alt={blog.featuredImage?.alt || blog.title}
-                      loading={index === 0 ? 'eager' : 'lazy'}
-                    />
-                  </div>
-
-                  <div className={styles.cardContent}>
-                    <div className={styles.cardBadgeRow}>
-                      <span className={styles.cardCategory}>{blog.category}</span>
-                      <span className={styles.cardDate}>
-                        <FiCalendar size={11} />
-                        {formatDate(blog.publishedAt)}
-                      </span>
-                    </div>
-                    <h2 className={styles.cardTitle}>{blog.title}</h2>
-                    <p className={styles.cardExcerpt}>{blog.excerpt}</p>
-                    <div className={styles.cardMeta}>
-                      <span>
-                        <FiClock size={13} />
-                        {blog.readingTime || 1} min read
-                      </span>
-                      <span>
-                        <FiEye size={13} />
-                        {blog.views || 0}
-                      </span>
-                    </div>
-                    <span className={styles.readBtn}>
-                      Read Article <FiArrowRight />
-                    </span>
-                  </div>
-                </Link>
-              ))}
+                </div>
+              </form>
             </div>
-
-            {/* Pagination */}
-            {pagination && pagination.pages > 1 && (
-              <div className={styles.pagination}>
-                <button
-                  className={styles.pageBtn}
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </button>
-                <span className={styles.pageInfo}>
-                  Page {currentPage} of {pagination.pages}
-                </span>
-                <button
-                  className={styles.pageBtn}
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  disabled={currentPage === pagination.pages}
-                >
-                  Next
-                </button>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className={styles.emptyState}>
-            <h3>No articles found</h3>
-            <p>
-              {searchTerm 
-                ? `No results found for "${searchTerm}". Try a different search.` 
-                : 'Check back later for new content.'}
-            </p>
           </div>
-        )}
+
+          {/* Categories */}
+          <div className={styles.categories}>
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                className={`${styles.categoryBtn} ${selectedCategory === cat ? styles.active : ''}`}
+                onClick={() => handleCategoryChange(cat)}
+                aria-pressed={selectedCategory === cat}
+              >
+                {cat === 'all' ? 'All' : cat.charAt(0).toUpperCase() + cat.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {/* ✅ Show search results info */}
+          {searchTerm && (
+            <div className={styles.searchInfo}>
+              <span>
+                Showing results for: <strong>"{searchTerm}"</strong>
+              </span>
+              <button onClick={handleClearSearch} className={styles.clearSearchBtn}>
+                <FiX size={14} /> Clear
+              </button>
+            </div>
+          )}
+
+          {/* Blog List */}
+          {blogs && blogs.length > 0 ? (
+            <>
+              <div className={styles.blogGrid}>
+                {blogs.map((blog, index) => (
+                  <Link
+                    to={`/blog/${blog.slug}`}
+                    key={blog._id}
+                    className={styles.blogCard}
+                  >
+                    <div className={styles.cardImage}>
+                      <img
+                        src={blog.featuredImage?.url}
+                        alt={blog.featuredImage?.alt || blog.title}
+                        loading={index === 0 ? 'eager' : 'lazy'}
+                      />
+                    </div>
+
+                    <div className={styles.cardContent}>
+                      <div className={styles.cardBadgeRow}>
+                        <span className={styles.cardCategory}>{blog.category}</span>
+                        <span className={styles.cardDate}>
+                          <FiCalendar size={11} />
+                          {formatDate(blog.publishedAt)}
+                        </span>
+                      </div>
+                      <h2 className={styles.cardTitle}>{blog.title}</h2>
+                      <p className={styles.cardExcerpt}>{blog.excerpt}</p>
+                      <div className={styles.cardMeta}>
+                        <span>
+                          <FiClock size={13} />
+                          {blog.readingTime || 1} min read
+                        </span>
+                        <span>
+                          <FiEye size={13} />
+                          {blog.views || 0}
+                        </span>
+                      </div>
+                      <span className={styles.readBtn}>
+                        Read Article <FiArrowRight />
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+
+              {/* Pagination */}
+              {pagination && pagination.pages > 1 && (
+                <div className={styles.pagination}>
+                  <button
+                    className={styles.pageBtn}
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </button>
+                  <span className={styles.pageInfo}>
+                    Page {currentPage} of {pagination.pages}
+                  </span>
+                  <button
+                    className={styles.pageBtn}
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage === pagination.pages}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className={styles.emptyState}>
+              <h3>No articles found</h3>
+              <p>
+                {searchTerm
+                  ? `No results found for "${searchTerm}". Try a different search.`
+                  : 'Check back later for new content.'}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

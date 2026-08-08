@@ -39,6 +39,7 @@ import Orders from "./components/Orders";
 
 import { sellerLogout } from "../../../redux/slices/sellerSlice";
 import { fetchCurrentSubscription } from "../../../redux/slices/sellerSubscriptionSlice";
+import Header from "../../Layout/Header/Header";
 
 const PLAN_THEME = {
   free: {
@@ -180,108 +181,57 @@ const SellerDashboard = () => {
   };
 
   return (
-    <div className={styles.dashboardContainer}>
-      <header className={styles.topHeader}>
-        <div className={styles.headerLeft}>
-          <button
-            className={styles.menuToggle}
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            <FiMenu size={24} />
-          </button>
-
-          <button
-            className={styles.sidebarToggle}
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            {sidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-          </button>
-
-          <div className={styles.headerLogo}>
-            <FiShield className={styles.logoIcon} />
-            <span className={styles.logoText}>{planTheme.dashboardName}</span>
-            {planTheme.badgeLabel && (
-              <span
-                className={planStyles.planBadge}
-                style={{ background: planTheme.gradient }}
-              >
-                {planTheme.badgeLabel}
-              </span>
-            )}
-          </div>
-
-          <div className={styles.headerSearch}>
-            <FiSearch className={styles.searchIcon} />
-            <input
-              type="text"
-              placeholder="Search..."
-              className={styles.searchInput}
-            />
-          </div>
-        </div>
-
-        <div className={styles.headerRight}>
-          <button className={styles.notificationBtn}>
-            <FiBell size={20} />
-            <span className={styles.notificationBadge}>0</span>
-          </button>
-
-          <div className={styles.adminProfile}>
-            <div
-              className={`${styles.avatar} ${planStyles.avatarRing}`}
-              style={{ "--plan-color": planTheme.color }}
+    <>
+    <Header/>
+      <div className={styles.dashboardContainer}>
+        <header className={styles.topHeader}>
+          <div className={styles.headerLeft}>
+            <button
+              className={styles.menuToggle}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
-              {seller?.profileImage ? (
-                <img src={seller.profileImage} alt="Seller" />
-              ) : (
-                <span>{seller?.firstName?.charAt(0) || "S"}</span>
+              <FiMenu size={24} />
+            </button>
+
+            <button
+              className={styles.sidebarToggle}
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+            >
+              {sidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+            </button>
+
+            <div className={styles.headerLogo}>
+              <FiShield className={styles.logoIcon} />
+              <span className={styles.logoText}>{planTheme.dashboardName}</span>
+              {planTheme.badgeLabel && (
+                <span
+                  className={planStyles.planBadge}
+                  style={{ background: planTheme.gradient }}
+                >
+                  {planTheme.badgeLabel}
+                </span>
               )}
             </div>
 
-            <div className={styles.adminInfo}>
-              <span className={styles.adminName}>
-                {seller?.firstName || "Seller"} {seller?.lastName || ""}
-              </span>
-              <span className={styles.adminRole}>
-                {planTheme.badgeLabel || "Seller"}
-              </span>
+            <div className={styles.headerSearch}>
+              <FiSearch className={styles.searchIcon} />
+              <input
+                type="text"
+                placeholder="Search..."
+                className={styles.searchInput}
+              />
             </div>
+          </div>
 
-            <button onClick={handleLogout} className={styles.logoutBtn}>
-              <FiLogOut size={18} />
+          <div className={styles.headerRight}>
+            <button className={styles.notificationBtn}>
+              <FiBell size={20} />
+              <span className={styles.notificationBadge}>0</span>
             </button>
-          </div>
-        </div>
-      </header>
 
-      <div className={styles.mainContent}>
-        <aside
-          className={`${styles.sidebar} ${
-            sidebarOpen ? styles.open : styles.closed
-          } ${mobileMenuOpen ? styles.mobileOpen : ""}`}
-        >
-          <div className={styles.sidebarNav}>
-            {menuItems.map((item) => (
-              <button
-                key={item.id || "dashboard"}
-                onClick={() => handleMenuClick(item.id)}
-                className={`${styles.navItem} ${
-                  activeMenu === item.id ? styles.active : ""
-                }`}
-              >
-                <item.icon className={styles.navIcon} />
-                <span className={styles.navLabel}>{item.label}</span>
-                {activeMenu === item.id && (
-                  <div className={styles.activeIndicator} />
-                )}
-              </button>
-            ))}
-          </div>
-
-          <div className={styles.sidebarFooter}>
-            <div className={styles.sidebarUser}>
+            <div className={styles.adminProfile}>
               <div
-                className={`${styles.sidebarAvatar} ${planStyles.avatarRing}`}
+                className={`${styles.avatar} ${planStyles.avatarRing}`}
                 style={{ "--plan-color": planTheme.color }}
               >
                 {seller?.profileImage ? (
@@ -291,65 +241,116 @@ const SellerDashboard = () => {
                 )}
               </div>
 
-              {sidebarOpen && (
-                <div className={styles.sidebarUserInfo}>
-                  <span className={styles.sidebarUserName}>
-                    {seller?.firstName} {seller?.lastName}
-                  </span>
-                  <span className={styles.sidebarUserRole}>
-                    {planTheme.badgeLabel || "Seller"}
-                  </span>
-                </div>
-              )}
+              <div className={styles.adminInfo}>
+                <span className={styles.adminName}>
+                  {seller?.firstName || "Seller"} {seller?.lastName || ""}
+                </span>
+                <span className={styles.adminRole}>
+                  {planTheme.badgeLabel || "Seller"}
+                </span>
+              </div>
+
+              <button onClick={handleLogout} className={styles.logoutBtn}>
+                <FiLogOut size={18} />
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <div className={styles.mainContent}>
+          <aside
+            className={`${styles.sidebar} ${sidebarOpen ? styles.open : styles.closed
+              } ${mobileMenuOpen ? styles.mobileOpen : ""}`}
+          >
+            <div className={styles.sidebarNav}>
+              {menuItems.map((item) => (
+                <button
+                  key={item.id || "dashboard"}
+                  onClick={() => handleMenuClick(item.id)}
+                  className={`${styles.navItem} ${activeMenu === item.id ? styles.active : ""
+                    }`}
+                >
+                  <item.icon className={styles.navIcon} />
+                  <span className={styles.navLabel}>{item.label}</span>
+                  {activeMenu === item.id && (
+                    <div className={styles.activeIndicator} />
+                  )}
+                </button>
+              ))}
             </div>
 
-            <button className={styles.sidebarLogout} onClick={handleLogout}>
-              <FiLogOut size={18} />
-              {sidebarOpen && <span>Logout</span>}
-            </button>
-          </div>
-        </aside>
+            <div className={styles.sidebarFooter}>
+              <div className={styles.sidebarUser}>
+                <div
+                  className={`${styles.sidebarAvatar} ${planStyles.avatarRing}`}
+                  style={{ "--plan-color": planTheme.color }}
+                >
+                  {seller?.profileImage ? (
+                    <img src={seller.profileImage} alt="Seller" />
+                  ) : (
+                    <span>{seller?.firstName?.charAt(0) || "S"}</span>
+                  )}
+                </div>
 
-        {mobileMenuOpen && (
-          <div
-            className={styles.overlay}
-            onClick={() => setMobileMenuOpen(false)}
-          />
-        )}
+                {sidebarOpen && (
+                  <div className={styles.sidebarUserInfo}>
+                    <span className={styles.sidebarUserName}>
+                      {seller?.firstName} {seller?.lastName}
+                    </span>
+                    <span className={styles.sidebarUserRole}>
+                      {planTheme.badgeLabel || "Seller"}
+                    </span>
+                  </div>
+                )}
+              </div>
 
-        <main
-          className={`${styles.contentArea} ${
-            !sidebarOpen ? styles.expanded : ""
-          }`}
-        >
-          <div className={styles.contentWrapper}>
-            <Routes>
-              <Route index element={<DashboardHome planTheme={planTheme} />} />
-              <Route path="products" element={<ProductManagement />} />
-              <Route path="products/new" element={<ProductForm />} />
-              <Route path="products/edit/:id" element={<ProductForm />} />
-              <Route path="orders" element={<Orders />} />
-              <Route
-                path="earnings"
-                element={<ComingSoon label="Earnings" />}
-              />
-              <Route
-                path="customers"
-                element={<ComingSoon label="Customers" />}
-              />
-              <Route path="reviews" element={<ComingSoon label="Reviews" />} />
-              <Route
-                path="settings"
-                element={<ComingSoon label="Settings" />}
-              />
-              <Route path="upgrade" element={<Upgrade />} />
-              <Route path="*" element={<Navigate to={basePath} replace />} />
-            </Routes>
-          </div>
-        </main>
+              <button className={styles.sidebarLogout} onClick={handleLogout}>
+                <FiLogOut size={18} />
+                {sidebarOpen && <span>Logout</span>}
+              </button>
+            </div>
+          </aside>
+
+          {mobileMenuOpen && (
+            <div
+              className={styles.overlay}
+              onClick={() => setMobileMenuOpen(false)}
+            />
+          )}
+
+          <main
+            className={`${styles.contentArea} ${!sidebarOpen ? styles.expanded : ""
+              }`}
+          >
+            <div className={styles.contentWrapper}>
+              <Routes>
+                <Route index element={<DashboardHome planTheme={planTheme} />} />
+                <Route path="products" element={<ProductManagement />} />
+                <Route path="products/new" element={<ProductForm />} />
+                <Route path="products/edit/:id" element={<ProductForm />} />
+                <Route path="orders" element={<Orders />} />
+                <Route
+                  path="earnings"
+                  element={<ComingSoon label="Earnings" />}
+                />
+                <Route
+                  path="customers"
+                  element={<ComingSoon label="Customers" />}
+                />
+                <Route path="reviews" element={<ComingSoon label="Reviews" />} />
+                <Route
+                  path="settings"
+                  element={<ComingSoon label="Settings" />}
+                />
+                <Route path="upgrade" element={<Upgrade />} />
+                <Route path="*" element={<Navigate to={basePath} replace />} />
+              </Routes>
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
-  );
+      </>
+      );
 };
 
-export default SellerDashboard;
+      export default SellerDashboard;
