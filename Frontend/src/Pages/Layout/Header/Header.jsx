@@ -1,4 +1,4 @@
-// src/Pages/Layout/Header/Header.jsx - Fixed scroll lock
+// src/Pages/Layout/Header/Header.jsx
 
 import React, { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,17 +20,14 @@ import {
   FiBox,
   FiGrid,
   FiGift,
-  FiTag
+  FiTag,
 } from "react-icons/fi";
-import {
-  FaUserPlus, FaUserCheck
-} from "react-icons/fa6";
+import { FaUserPlus, FaUserCheck } from "react-icons/fa6";
 
 import styles from "./Header.module.css";
 
 import AnnouncementBar from "./AnnouncementBar";
 import SearchPanel from "./Searchpanel";
-// ✅ Static NavData is now only the LOADING-STATE fallback
 import {
   mainNav as fallbackMainNav,
   aboutDropdown as fallbackAboutDropdown,
@@ -39,9 +36,10 @@ import {
 import logo from "../../../assets/newlogo.png";
 import { logoutUser } from "../../../redux/slices/authSlice.js";
 import { fetchPublicHeaderConfig } from "../../../redux/slices/headerConfigSlice.js";
+import { fetchCart } from "../../../redux/slices/cartSlice.js";
+import { fetchWishlist } from "../../../redux/slices/wishlistSlice.js";
 import toast from "react-hot-toast";
 
-// Placeholder "recent searches"
 const defaultRecentSearches = [
   "Bridal lehenga",
   "Gold earrings",
@@ -49,16 +47,16 @@ const defaultRecentSearches = [
   "Men's watches",
 ];
 
-const Header = ({
-  cartCount = 0,
-  wishlistCount = 0,
-  onSearchSubmit,
-  logoHref = "/",
-}) => {
+const Header = ({ onSearchSubmit, logoHref = "/" }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const { config } = useSelector((state) => state.headerConfig);
+  const cartItems = useSelector((state) => state.cart.items);
+  const wishlistItems = useSelector((state) => state.wishlist.items);
+
+  const cartCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
+  const wishlistCount = wishlistItems.length;
 
   const avatarUrl = user?.profileImage?.url || user?.avatar?.url || null;
 
@@ -75,16 +73,20 @@ const Header = ({
 
   const navbarRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(0);
-  
-  // ✅ Store scroll position to restore later
+
   const scrollYRef = useRef(0);
 
-  // ✅ Fetch the admin-managed header content once on mount
   useEffect(() => {
     dispatch(fetchPublicHeaderConfig());
   }, [dispatch]);
 
-  // ✅ Derive every content block from the live config, falling back to static defaults
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(fetchCart());
+      dispatch(fetchWishlist());
+    }
+  }, [dispatch, isAuthenticated]);
+
   const announcements = config?.announcements?.length
     ? config.announcements
     : undefined;
@@ -105,7 +107,6 @@ const Header = ({
     ? config.aboutDropdown
     : fallbackAboutDropdown || [];
 
-  // Mobile drawer columns are built from the same dynamic data
   const mobileShopColumns = [
     { id: "category", label: "Shop by Category", items: shopCategories },
     { id: "quicklinks", label: "Quick Links", items: shopQuickLinks },
@@ -118,7 +119,6 @@ const Header = ({
     { id: "budget", label: "By Budget", items: giftGuide.byBudget },
   ];
 
-  // ---- Header height tracking ----
   useEffect(() => {
     const node = navbarRef.current;
     if (!node) return;
@@ -170,31 +170,25 @@ const Header = ({
     return () => document.removeEventListener("keydown", handleEscape);
   }, []);
 
-  // ✅ FIXED: Proper body scroll lock for mobile drawer and search
   useEffect(() => {
     const isLocked = mobileOpen || searchOpen;
-    
+
     if (isLocked) {
-      // Save current scroll position
       scrollYRef.current = window.scrollY;
-      
-      // Lock body scroll
-      document.body.style.position = 'fixed';
+      document.body.style.position = "fixed";
       document.body.style.top = `-${scrollYRef.current}px`;
-      document.body.style.left = '0';
-      document.body.style.right = '0';
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      document.body.style.left = "0";
+      document.body.style.right = "0";
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
     } else {
-      // Restore body scroll
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.width = '';
-      document.body.style.overflow = '';
-      
-      // Restore scroll position
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.width = "";
+      document.body.style.overflow = "";
+
       if (scrollYRef.current) {
         window.scrollTo(0, scrollYRef.current);
         scrollYRef.current = 0;
@@ -202,13 +196,12 @@ const Header = ({
     }
 
     return () => {
-      // Cleanup on unmount
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.width = '';
-      document.body.style.overflow = '';
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.width = "";
+      document.body.style.overflow = "";
     };
   }, [mobileOpen, searchOpen]);
 
@@ -306,11 +299,11 @@ const Header = ({
 
   const accountMenuItems = isAuthenticated
     ? [
-      { icon: FiUserIcon, label: "Profile", path: "/profile" },
-      { icon: FiOrders, label: "My Orders", path: "/orders" },
-      { icon: FiHeart, label: "Wishlist", path: "/wishlist" },
-      { icon: FiSettings, label: "Settings", path: "/settings" },
-    ]
+        { icon: FiUserIcon, label: "Profile", path: "/profile" },
+        { icon: FiOrders, label: "My Orders", path: "/orders" },
+        { icon: FiHeart, label: "Wishlist", path: "/wishlist" },
+        { icon: FiSettings, label: "Settings", path: "/settings" },
+      ]
     : [];
 
   const toggleMobileShopSub = (id) => {
@@ -908,10 +901,10 @@ const Header = ({
         </div>
       </aside>
 
-      {/* ==========================================================
-           MOBILE BOTTOM NAVIGATION
-           ========================================================== */}
-      <nav className={styles.mobileBottomNav} aria-label="Mobile bottom navigation">
+      <nav
+        className={styles.mobileBottomNav}
+        aria-label="Mobile bottom navigation"
+      >
         <Link to="/" className={styles.bottomNavItem}>
           <FiHome className={styles.bottomNavIcon} />
           <span className={styles.bottomNavLabel}>Home</span>
@@ -933,7 +926,6 @@ const Header = ({
           <span className={styles.bottomNavLabel}>Offers</span>
         </Link>
       </nav>
-
     </header>
   );
 };

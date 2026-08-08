@@ -10,13 +10,6 @@ const API_URL =
 // HELPERS
 // ============================================
 
-/**
- * Returns the KYC status for a seller object regardless of which
- * endpoint populated it. `sellerLogin` returns kycStatus at the top
- * level (seller.kycStatus), while `fetchCurrentSeller`/`getCurrentSeller`
- * returns the full document with it nested at seller.verification.kycStatus.
- * This normalizes both shapes.
- */
 export const getKycStatus = (seller) =>
   seller?.kyc?.status || seller?.kycStatus || "not_submitted";
 
@@ -34,11 +27,9 @@ export const registerSeller = createAsyncThunk(
         sellerData,
       );
       if (response.data.success) {
-        // Store email and phone for OTP verification
         localStorage.setItem("sellerEmail", sellerData.email);
         localStorage.setItem("sellerPhone", sellerData.phone);
 
-        // ✅ Log the OTP delivery status from the response
         if (response.data.otpDeliveryStatus) {
           console.log(
             "📊 OTP Delivery Status:",
@@ -54,7 +45,6 @@ export const registerSeller = createAsyncThunk(
           );
         }
 
-        // Return the full response data including otpDeliveryStatus
         return response.data;
       }
     } catch (error) {
@@ -119,7 +109,6 @@ export const resendOTP = createAsyncThunk(
         type,
       });
       if (response.data.success) {
-        // ✅ Log the delivery status from the response
         if (response.data.otpDeliveryStatus) {
           const { email, phone } = response.data.otpDeliveryStatus;
           console.log(
@@ -127,15 +116,14 @@ export const resendOTP = createAsyncThunk(
             response.data.otpDeliveryStatus,
           );
 
-          // Show specific toast messages based on delivery status
           if (email && phone) {
             toast.success("✅ OTPs resent successfully!");
           } else if (email && !phone) {
-            toast.warning(
+            toast.error(
               "⚠️ Email OTP resent, but phone OTP failed. Please check your phone number.",
             );
           } else if (!email && phone) {
-            toast.warning(
+            toast.error(
               "⚠️ Phone OTP resent, but email OTP failed. Please check your email.",
             );
           } else {
@@ -381,13 +369,13 @@ const initialState = {
   ordersLoading: false,
   activitiesLoading: false,
   error: null,
-  status: "idle", // idle | loading | succeeded | failed
+  status: "idle",
   dashboardStats: null,
   recentOrders: [],
   recentActivities: [],
   registrationData: null,
   verificationStatus: null,
-  otpDeliveryStatus: null, // ✅ Store OTP delivery status
+  otpDeliveryStatus: null,
 };
 
 const sellerSlice = createSlice({
@@ -425,27 +413,23 @@ const sellerSlice = createSlice({
       .addCase(registerSeller.fulfilled, (state, action) => {
         state.isLoading = false;
         state.registrationData = action.payload;
-        // ✅ The seller data might be nested under 'data' or directly in payload
         state.seller =
           action.payload.data?.seller || action.payload.data || action.payload;
         state.isAuthenticated = false;
         state.status = "succeeded";
-
-        // ✅ Store OTP delivery status
         state.otpDeliveryStatus = action.payload.otpDeliveryStatus || null;
 
-        // ✅ Show specific toast messages based on delivery status
         if (state.otpDeliveryStatus) {
           const { email, phone } = state.otpDeliveryStatus;
 
           if (email && phone) {
             toast.success("✅ OTPs sent successfully to email and phone!");
           } else if (email && !phone) {
-            toast.warning(
+            toast.error(
               "⚠️ Email OTP sent, but phone OTP failed to send. Please check your phone number.",
             );
           } else if (!email && phone) {
-            toast.warning(
+            toast.error(
               "⚠️ Phone OTP sent, but email OTP failed to send. Please check your email.",
             );
           } else {

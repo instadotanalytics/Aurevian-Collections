@@ -1,4 +1,6 @@
-import express from 'express';
+// backend/routes/jewelleryProductRoutes.js
+
+import express from "express";
 import {
   createProduct,
   getSellerProducts,
@@ -8,9 +10,11 @@ import {
   deleteProduct,
   getProductLimitStatus,
   bulkUploadProducts,
-} from '../controllers/jewelleryProductController.js';
-import { protectSeller } from '../middleware/sellerAuth.js';
-import upload, { handleMulterError } from '../middleware/upload.js';
+  getProductsByPlacement,
+  getPlacementCounts,
+} from "../controllers/jewelleryProductController.js";
+import { protectSeller } from "../middleware/sellerAuth.js";
+import upload, { handleMulterError } from "../middleware/upload.js";
 
 console.log("🔧 Creating jewelleryProductRoutes router...");
 const router = express.Router();
@@ -19,7 +23,7 @@ console.log("✅ jewelleryProductRoutes router created");
 // ============================================
 // ✅ TEST ROUTE - SABSE PEHLE (FOR DEBUG)
 // ============================================
-router.get('/test', (req, res) => {
+router.get("/test", (req, res) => {
   console.log("✅ /test route HIT!");
   res.json({
     success: true,
@@ -31,11 +35,13 @@ router.get('/test', (req, res) => {
       products: "/",
       limitStatus: "/limit-status",
       bulkUpload: "/bulk-upload",
+      placements: "/placements/:placement",
+      placementCounts: "/placements/counts",
       productBySlug: "/:slug",
       createProduct: "POST /",
       updateProduct: "PUT /:id",
       deleteProduct: "DELETE /:id",
-    }
+    },
   });
 });
 console.log("  📌 /test route registered ✅");
@@ -43,108 +49,167 @@ console.log("  📌 /test route registered ✅");
 // ============================================
 // PUBLIC ROUTES - No auth required
 // ============================================
-router.get('/categories', (req, res, next) => {
-  console.log("🔍 /categories route called");
-  next();
-}, getProductCategories);
+router.get(
+  "/categories",
+  (req, res, next) => {
+    console.log("🔍 /categories route called");
+    next();
+  },
+  getProductCategories,
+);
 console.log("  📌 /categories route registered ✅");
 
-router.get('/:slug', (req, res, next) => {
-  console.log("🔍 /:slug route called with slug:", req.params.slug);
-  next();
-}, getProductBySlug);
-console.log("  📌 /:slug route registered ✅");
+// ============================================
+// PUBLIC ROUTES - Storefront Pages
+// ============================================
+router.get(
+  "/placements/:placement",
+  (req, res, next) => {
+    console.log(
+      "🔍 /placements/:placement route called with:",
+      req.params.placement,
+    );
+    next();
+  },
+  getProductsByPlacement,
+);
+console.log("  📌 /placements/:placement route registered ✅");
 
 // ============================================
-// ALL ROUTES BELOW REQUIRE SELLER AUTHENTICATION
+// ✅ FIXED: PROTECTED ROUTES — protectSeller applied PER ROUTE now,
+// instead of via a blanket router.use(protectSeller). A blanket
+// router.use() also silently protects any route registered after it,
+// which is exactly what broke the public GET /:slug route below.
 // ============================================
-console.log("🔧 Applying protectSeller middleware...");
-router.use((req, res, next) => {
-  console.log("🔑 Request received:", req.method, req.originalUrl);
-  console.log("🔑 Authorization header:", req.headers.authorization || "❌ No auth header");
-  next();
-});
-router.use(protectSeller);
-console.log("  📌 protectSeller middleware applied ✅");
 
-// ============================================
 // PRODUCT LIMIT STATUS
-// ============================================
-router.get('/limit-status', (req, res, next) => {
-  console.log("🔍 /limit-status route called");
-  next();
-}, getProductLimitStatus);
+router.get(
+  "/limit-status",
+  protectSeller,
+  (req, res, next) => {
+    console.log("🔍 /limit-status route called");
+    next();
+  },
+  getProductLimitStatus,
+);
 console.log("  📌 /limit-status route registered ✅");
 
-// ============================================
+// Placement counts for seller dashboard
+router.get(
+  "/placements/counts",
+  protectSeller,
+  (req, res, next) => {
+    console.log("🔍 /placements/counts route called");
+    next();
+  },
+  getPlacementCounts,
+);
+console.log("  📌 /placements/counts route registered ✅");
+
 // BULK UPLOAD (Silver+ Plans Only)
-// ============================================
-router.post('/bulk-upload', (req, res, next) => {
-  console.log("🔍 /bulk-upload route called");
-  next();
-}, bulkUploadProducts);
+router.post(
+  "/bulk-upload",
+  protectSeller,
+  (req, res, next) => {
+    console.log("🔍 /bulk-upload route called");
+    next();
+  },
+  bulkUploadProducts,
+);
 console.log("  📌 /bulk-upload route registered ✅");
 
-// ============================================
-// CRUD OPERATIONS
-// ============================================
+// CREATE PRODUCT
 router.post(
-  '/',
+  "/",
+  protectSeller,
   (req, res, next) => {
     console.log("🔍 POST / route called");
     console.log("📦 Request body:", req.body);
     next();
   },
   upload.fields([
-    { name: 'thumbnail', maxCount: 1 },
-    { name: 'images', maxCount: 15 },
-    { name: 'variantImages', maxCount: 20 },
+    { name: "thumbnail", maxCount: 1 },
+    { name: "images", maxCount: 15 },
+    { name: "variantImages", maxCount: 20 },
   ]),
   handleMulterError,
-  createProduct
+  createProduct,
 );
 console.log("  📌 POST / route registered ✅");
 
-router.get('/', (req, res, next) => {
-  console.log("🔍 GET / route called");
-  console.log("📊 Query params:", req.query);
-  next();
-}, getSellerProducts);
+// GET SELLER PRODUCTS
+router.get(
+  "/",
+  protectSeller,
+  (req, res, next) => {
+    console.log("🔍 GET / route called");
+    console.log("📊 Query params:", req.query);
+    next();
+  },
+  getSellerProducts,
+);
 console.log("  📌 GET / route registered ✅");
 
+// UPDATE PRODUCT
 router.put(
-  '/:id',
+  "/:id",
+  protectSeller,
   (req, res, next) => {
     console.log("🔍 PUT /:id route called with id:", req.params.id);
     next();
   },
   upload.fields([
-    { name: 'thumbnail', maxCount: 1 },
-    { name: 'images', maxCount: 15 },
-    { name: 'variantImages', maxCount: 20 },
+    { name: "thumbnail", maxCount: 1 },
+    { name: "images", maxCount: 15 },
+    { name: "variantImages", maxCount: 20 },
   ]),
   handleMulterError,
-  updateProduct
+  updateProduct,
 );
 console.log("  📌 PUT /:id route registered ✅");
 
-router.delete('/:id', (req, res, next) => {
-  console.log("🔍 DELETE /:id route called with id:", req.params.id);
-  next();
-}, deleteProduct);
+// DELETE PRODUCT
+router.delete(
+  "/:id",
+  protectSeller,
+  (req, res, next) => {
+    console.log("🔍 DELETE /:id route called with id:", req.params.id);
+    next();
+  },
+  deleteProduct,
+);
 console.log("  📌 DELETE /:id route registered ✅");
 
+// ============================================
+// PUBLIC ROUTES - Catch-all (MUST BE LAST!)
+// No protectSeller here — this is the customer-facing storefront route.
+// It's registered after /limit-status, /placements/counts, etc. so those
+// exact-path routes are matched first; only unmatched single-segment
+// GETs fall through to this one.
+// ============================================
+router.get(
+  "/:slug",
+  (req, res, next) => {
+    console.log("🔍 /:slug route called with slug:", req.params.slug);
+    next();
+  },
+  getProductBySlug,
+);
+console.log("  📌 /:slug route registered ✅ (public, MUST BE LAST)");
+
 console.log("✅ jewelleryProductRoutes fully configured");
-console.log("📌 Available routes in this router:");
-console.log("  GET  /test");
-console.log("  GET  /categories");
-console.log("  GET  /:slug");
-console.log("  GET  /limit-status");
-console.log("  POST /bulk-upload");
-console.log("  POST /");
-console.log("  GET  /");
-console.log("  PUT  /:id");
-console.log("  DELETE /:id");
+console.log("📌 Available routes in this router (in order):");
+console.log("  ✅ GET  /test (public)");
+console.log("  ✅ GET  /categories (public)");
+console.log("  ✅ GET  /placements/:placement (public)");
+console.log("  🔒 GET  /limit-status (protected)");
+console.log("  🔒 GET  /placements/counts (protected)");
+console.log("  🔒 POST /bulk-upload (protected)");
+console.log("  🔒 POST / (protected)");
+console.log("  🔒 GET  / (protected)");
+console.log("  🔒 PUT  /:id (protected)");
+console.log("  🔒 DELETE /:id (protected)");
+console.log("  ✅ GET  /:slug (public - LAST!)");
 
 export default router;
 console.log("✅ jewelleryProductRoutes exported");

@@ -1,162 +1,24 @@
+// src/Pages/Shop/Shop.jsx
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import axios from "axios";
 import styles from "./shop.module.css";
 import Header from "../../Pages/Layout/Header/Header";
 import Footer from "../../Pages/Layout/Footer/Footer";
-
 import shopHero from "../../assets/shophero.png";
-
-import solitaireBand from "../../assets/solitaire-band.jpg";
-import layeredChain from "../../assets/layered-chain.jpg";
-import dropStuds from "../../assets/drop-studs.jpg";
-import charmBracelet from "../../assets/charm-bracelet.jpg";
-import stackRingSet from "../../assets/stack-ring-set.jpg";
-import beadedAnklet from "../../assets/beaded-anklet.jpg";
-import bridalJewelSet from "../../assets/bridal-jewel-set.jpg";
-import hoopEarrings from "../../assets/hoop-earrings.jpg";
-import pendantChain from "../../assets/pendant-chain.jpg";
-import twistBand from "../../assets/twist-band.jpg";
-import multipleChainBracelets from "../../assets/multiple-chain-braclets.jpg";
-import pearlStuds from "../../assets/pearl-studs.jpg";
 
 import { LuSlidersHorizontal } from "react-icons/lu";
 import { FiHeart } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 import { FiShoppingBag, FiCheck, FiChevronDown } from "react-icons/fi";
 
-const categories = [
-  { name: "Rings", count: 32 },
-  { name: "Necklaces", count: 28 },
-  { name: "Earrings", count: 40 },
-  { name: "Bracelets", count: 19 },
-  { name: "Anklets", count: 11 },
-  { name: "Bridal Sets", count: 8 },
-];
+import { fetchProductsByPlacement } from "../../redux/slices/storefrontProductSlice";
 
-const metals = [
-  { name: "Gold Plated", count: 36 },
-  { name: "Rose Gold", count: 24 },
-  { name: "Silver", count: 21 },
-  { name: "Oxidised", count: 14 },
-];
-
-const promotions = ["New Arrivals", "Best Sellers", "On Sale"];
-
-const availability = [
-  { name: "In Stock", count: 98 },
-  { name: "Out of Stock", count: 6 },
-];
-
-const products = [
-  {
-    id: 1,
-    badge: "30% off",
-    category: "Rings",
-    name: "Aurevian Solitaire Band",
-    priceNow: "₹2,100",
-    priceOld: "₹3,000",
-    image: solitaireBand,
-  },
-  {
-    id: 2,
-    badge: "20% off",
-    category: "Necklaces",
-    name: "Layla Layered Chain",
-    priceNow: "₹3,400",
-    priceOld: "₹4,250",
-    image: layeredChain,
-  },
-  {
-    id: 3,
-    badge: "25% off",
-    category: "Earrings",
-    name: "Amara Drop Studs",
-    priceNow: "₹1,650",
-    priceOld: "₹2,200",
-    image: dropStuds,
-  },
-  {
-    id: 4,
-    badge: "40% off",
-    category: "Bracelets",
-    name: "Celeste Charm Bracelet",
-    priceNow: "₹1,800",
-    priceOld: "₹3,000",
-    image: charmBracelet,
-  },
-  {
-    id: 5,
-    badge: "15% off",
-    category: "Rings",
-    name: "Noor Stack Ring Set",
-    priceNow: "₹1,275",
-    priceOld: "₹1,500",
-    image: stackRingSet,
-  },
-  {
-    id: 6,
-    badge: "50% off",
-    category: "Anklets",
-    name: "Meera Beaded Anklet",
-    priceNow: "₹950",
-    priceOld: "₹1,900",
-    image: beadedAnklet,
-  },
-  {
-    id: 7,
-    badge: "10% off",
-    category: "Bridal Sets",
-    name: "Anaya Bridal Jewel Set",
-    priceNow: "₹6,300",
-    priceOld: "₹7,000",
-    image: bridalJewelSet,
-  },
-  {
-    id: 8,
-    badge: "35% off",
-    category: "Earrings",
-    name: "Zoya Hoop Earrings",
-    priceNow: "₹1,300",
-    priceOld: "₹2,000",
-    image: hoopEarrings,
-  },
-  {
-    id: 9,
-    badge: "45% off",
-    category: "Necklaces",
-    name: "Ishani Pendant Chain",
-    priceNow: "₹2,750",
-    priceOld: "₹5,000",
-    image: pendantChain,
-  },
-  {
-    id: 10,
-    badge: "20% off",
-    category: "Rings",
-    name: "Kavya Twist Band",
-    priceNow: "₹2,400",
-    priceOld: "₹3,000",
-    image: twistBand,
-  },
-  {
-    id: 11,
-    badge: "30% off",
-    category: "Bracelets",
-    name: "Riya Chain Bracelet",
-    priceNow: "₹1,950",
-    priceOld: "₹2,800",
-    image: multipleChainBracelets,
-  },
-  {
-    id: 12,
-    badge: "25% off",
-    category: "Earrings",
-    name: "Sana Pearl Studs",
-    priceNow: "₹1,450",
-    priceOld: "₹1,950",
-    image: pearlStuds,
-  },
-];
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://aurevian-collections.onrender.com/api";
 
 const perks = [
   {
@@ -173,60 +35,73 @@ const perks = [
 ];
 
 export default function Shop() {
+  const dispatch = useDispatch();
+  const { byPlacement, isLoading } = useSelector(
+    (state) => state.storefrontProduct,
+  );
+  const shopData = byPlacement.shop || {
+    products: [],
+    pagination: { page: 1, totalPages: 1, total: 0 },
+  };
+
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [selectedFilters, setSelectedFilters] = useState(new Set());
-
   const [wishlist, setWishlist] = useState(new Set());
-
-  // ---------- Cart state: tracks which product ids have been added ----------
   const [cart, setCart] = useState(new Set());
+  const [categories, setCategories] = useState([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
+  const [sort, setSort] = useState("");
+  const [page, setPage] = useState(1);
+
+  // Fetch categories from API
+  useEffect(() => {
+    axios
+      .get(`${API_URL}/seller/products/categories`)
+      .then((res) => {
+        const data = res.data.data || [];
+        setCategories(data);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch categories:", err);
+        setCategories([]);
+      });
+  }, []);
+
+  // Fetch products when filters change
+  useEffect(() => {
+    dispatch(
+      fetchProductsByPlacement({
+        placement: "shop",
+        page,
+        limit: 12,
+        categoryId: selectedCategoryId || undefined,
+        sort: sort || undefined,
+      }),
+    );
+  }, [dispatch, page, selectedCategoryId, sort]);
 
   const toggleWishlist = (id) => {
     setWishlist((prev) => {
       const next = new Set(prev);
-
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-
+      next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
   };
 
-  // ---------- Add to Cart handler ----------
   const addToCart = (id) => {
-    setCart((prev) => {
-      const next = new Set(prev);
-      next.add(id);
-      return next;
-    });
+    setCart((prev) => new Set(prev).add(id));
   };
 
-  const toggleFilter = (type, value) => {
-    const key = `${type}:${value}`;
-    setSelectedFilters((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) {
-        next.delete(key);
-      } else {
-        next.add(key);
-      }
-      return next;
-    });
+  const products = shopData.products || [];
+  const { total, totalPages } = shopData.pagination || {
+    total: 0,
+    totalPages: 1,
   };
-
-  const isSelected = (type, value) => selectedFilters.has(`${type}:${value}`);
 
   return (
     <div className={styles.page}>
-      {/* ================= HEADER ================= */}
       <Header />
-
-      {/* ================= MAIN CONTENT ================= */}
       <div className={styles.mainContent}>
-        {/* ================= PAGE TITLE / HERO ================= */}
+        {/* Hero Section */}
         <section className={styles.pageTitle}>
           <img
             src={shopHero}
@@ -235,9 +110,9 @@ export default function Shop() {
           />
         </section>
 
-        {/* ================= SHOP BODY ================= */}
+        {/* Shop Content */}
         <div className={styles.shopWrap}>
-          {/* ---------- Mobile Filter Toggle Button ---------- */}
+          {/* Filter Toggle Button (Mobile) */}
           <button
             type="button"
             className={styles.filterToggle}
@@ -250,7 +125,7 @@ export default function Shop() {
             </span>
           </button>
 
-          {/* ---------- Mobile backdrop (only shows when filters are open) ---------- */}
+          {/* Filter Overlay */}
           {filtersOpen && (
             <div
               className={styles.filterOverlay}
@@ -258,13 +133,10 @@ export default function Shop() {
             />
           )}
 
-          {/* ---------- Sidebar / Bottom-sheet Filters ---------- */}
+          {/* Filters Sidebar */}
           <aside
-            className={`${styles.filters} ${
-              filtersOpen ? styles.filtersOpen : ""
-            }`}
+            className={`${styles.filters} ${filtersOpen ? styles.filtersOpen : ""}`}
           >
-            {/* Fixed header: stays visible while the list below scrolls */}
             <div className={styles.filtersSheetHeader}>
               <h3 className={styles.filtersHeading}>Filter Options</h3>
               <button
@@ -278,130 +150,49 @@ export default function Shop() {
             </div>
 
             <div className={styles.filtersInner}>
+              {/* Category Filter */}
               <div className={styles.filterGroup}>
                 <h3 className={styles.groupHeading}>By Category</h3>
                 <ul>
+                  <li
+                    className={selectedCategoryId === "" ? styles.selected : ""}
+                  >
+                    <label className={styles.checkRow}>
+                      <input
+                        type="radio"
+                        checked={selectedCategoryId === ""}
+                        onChange={() => {
+                          setSelectedCategoryId("");
+                          setPage(1);
+                        }}
+                      />
+                      <span className={styles.checkLabel}>All</span>
+                    </label>
+                  </li>
                   {categories.map((c) => (
                     <li
-                      key={c.name}
+                      key={c.id}
                       className={
-                        isSelected("category", c.name) ? styles.selected : ""
+                        selectedCategoryId === c.id ? styles.selected : ""
                       }
                     >
                       <label className={styles.checkRow}>
                         <input
-                          type="checkbox"
-                          checked={isSelected("category", c.name)}
-                          onChange={() => toggleFilter("category", c.name)}
+                          type="radio"
+                          checked={selectedCategoryId === c.id}
+                          onChange={() => {
+                            setSelectedCategoryId(c.id);
+                            setPage(1);
+                          }}
                         />
-                        <span className={styles.checkLabel}>{c.name}</span>
-                      </label>
-                      <span className={styles.count}>{c.count}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className={styles.filterGroup}>
-                <h3 className={styles.groupHeading}>By Metal</h3>
-                <ul>
-                  {metals.map((m) => (
-                    <li
-                      key={m.name}
-                      className={
-                        isSelected("metal", m.name) ? styles.selected : ""
-                      }
-                    >
-                      <label className={styles.checkRow}>
-                        <input
-                          type="checkbox"
-                          checked={isSelected("metal", m.name)}
-                          onChange={() => toggleFilter("metal", m.name)}
-                        />
-                        <span className={styles.checkLabel}>{m.name}</span>
-                      </label>
-                      <span className={styles.count}>{m.count}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className={styles.filterGroup}>
-                <h3 className={styles.groupHeading}>Price</h3>
-                <div className={styles.priceSlider}>
-                  <div className={styles.fill}></div>
-                  <div
-                    className={`${styles.handle} ${styles.handleLeft}`}
-                  ></div>
-                  <div
-                    className={`${styles.handle} ${styles.handleRight}`}
-                  ></div>
-                </div>
-                <div className={styles.priceValues}>
-                  <span>₹500</span>
-                  <span>₹8,000</span>
-                </div>
-              </div>
-
-              <div className={styles.filterGroup}>
-                <h3 className={styles.groupHeading}>By Promotions</h3>
-                <ul>
-                  {promotions.map((p) => (
-                    <li
-                      key={p}
-                      className={
-                        isSelected("promotion", p) ? styles.selected : ""
-                      }
-                    >
-                      <label className={styles.checkRow}>
-                        <input
-                          type="checkbox"
-                          checked={isSelected("promotion", p)}
-                          onChange={() => toggleFilter("promotion", p)}
-                        />
-                        <span className={styles.checkLabel}>{p}</span>
+                        <span className={styles.checkLabel}>{c.label}</span>
                       </label>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              <div className={styles.filterGroup}>
-                <h3 className={styles.groupHeading}>Availability</h3>
-                <ul>
-                  {availability.map((a) => (
-                    <li
-                      key={a.name}
-                      className={
-                        isSelected("availability", a.name)
-                          ? styles.selected
-                          : ""
-                      }
-                    >
-                      <label className={styles.checkRow}>
-                        <input
-                          type="checkbox"
-                          checked={isSelected("availability", a.name)}
-                          onChange={() =>
-                            toggleFilter("availability", a.name)
-                          }
-                        />
-                        <span className={styles.checkLabel}>{a.name}</span>
-                      </label>
-                      <span className={styles.count}>{a.count}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className={styles.promoTags}>
-                <span>Price: ₹500–₹8,000 ✕</span>
-                <span>Best Seller ✕</span>
-                <span>In Stock ✕</span>
-                <span className={styles.clear}>Clear all</span>
-              </div>
-
-              {/* Apply button, mobile only */}
+              {/* Apply Filters Button (Mobile) */}
               <button
                 type="button"
                 className={styles.applyFilters}
@@ -412,77 +203,107 @@ export default function Shop() {
             </div>
           </aside>
 
-          {/* ---------- Product Listing ---------- */}
+          {/* Product Grid */}
           <main>
+            {/* Toolbar */}
             <div className={styles.toolbar}>
               <span className={styles.resultsCount}>
-                Showing 1–{products.length} of 138 results
+                {isLoading
+                  ? "Loading..."
+                  : `Showing ${products.length} of ${total} results`}
               </span>
               <div className={styles.sortWrapper}>
-                <select className={styles.sortSelect}>
-                  <option>Default Sorting</option>
-                  <option>Price: Low to High</option>
-                  <option>Price: High to Low</option>
-                  <option>Newest</option>
-                  <option>Top Rated</option>
+                <select
+                  className={styles.sortSelect}
+                  value={sort}
+                  onChange={(e) => {
+                    setSort(e.target.value);
+                    setPage(1);
+                  }}
+                >
+                  <option value="">Default Sorting</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
                 </select>
                 <FiChevronDown className={styles.sortChevron} />
               </div>
             </div>
 
+            {/* Products */}
             <div className={styles.productGrid}>
               {products.map((p) => (
-                <div className={styles.productCard} key={p.id}>
-                  <div className={styles.productMedia}>
-                    <span className={styles.badge}>{p.badge}</span>
+                <div className={styles.productCard} key={p._id}>
+                  <Link
+                    to={`/product/${p.productSlug}`}
+                    className={styles.productMedia}
+                  >
+                    {p.pricing?.salePrice && p.pricing?.originalPrice && (
+                      <span className={styles.badge}>
+                        {Math.round(
+                          ((p.pricing.originalPrice - p.pricing.salePrice) /
+                            p.pricing.originalPrice) *
+                            100,
+                        )}
+                        % off
+                      </span>
+                    )}
                     <span className={styles.productCatOverlay}>
-                      {p.category}
+                      {p.category?.categoryData?.label || "Uncategorized"}
                     </span>
                     <div className={styles.wishlistActions}>
                       <button
                         type="button"
-                        className={`${styles.wishlistBtn} ${
-                          wishlist.has(p.id) ? styles.wishlistBtnActive : ""
-                        }`}
-                        onClick={() => toggleWishlist(p.id)}
+                        className={`${styles.wishlistBtn} ${wishlist.has(p._id) ? styles.wishlistBtnActive : ""}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleWishlist(p._id);
+                        }}
                         aria-label={
-                          wishlist.has(p.id)
+                          wishlist.has(p._id)
                             ? "Remove from wishlist"
                             : "Add to wishlist"
                         }
                       >
-                        {wishlist.has(p.id) ? <FaHeart /> : <FiHeart />}
+                        {wishlist.has(p._id) ? <FaHeart /> : <FiHeart />}
                       </button>
                     </div>
-                    {p.image ? (
-                      <img
-                        src={p.image}
-                        alt={p.name}
-                        className={styles.productImage}
-                      />
-                    ) : (
-                      <span className={styles.placeholderLabel}>
-                        Product Image
-                      </span>
-                    )}
-                  </div>
+                    <img
+                      src={p.thumbnail?.url || "/placeholder-image.jpg"}
+                      alt={p.productName}
+                      className={styles.productImage}
+                      onError={(e) => {
+                        e.target.src = "/placeholder-image.jpg";
+                      }}
+                    />
+                  </Link>
                   <div className={styles.productInfo}>
-                    <div className={styles.productName}>{p.name}</div>
+                    <Link
+                      to={`/product/${p.productSlug}`}
+                      className={styles.productName}
+                    >
+                      {p.productName}
+                    </Link>
                     <div className={styles.productPrice}>
-                      <span className={styles.priceNow}>{p.priceNow}</span>
-                      <span className={styles.priceOld}>{p.priceOld}</span>
+                      <span className={styles.priceNow}>
+                        ₹
+                        {(
+                          p.pricing?.salePrice || p.pricing?.originalPrice
+                        )?.toLocaleString() || "0"}
+                      </span>
+                      {p.pricing?.salePrice && p.pricing?.originalPrice && (
+                        <span className={styles.priceOld}>
+                          ₹{p.pricing.originalPrice.toLocaleString()}
+                        </span>
+                      )}
                     </div>
-
-                    {/* ---------- Add to Cart button ---------- */}
                     <button
                       type="button"
-                      className={`${styles.addToCartBtn} ${
-                        cart.has(p.id) ? styles.addToCartBtnActive : ""
-                      }`}
-                      onClick={() => addToCart(p.id)}
-                      disabled={cart.has(p.id)}
+                      className={`${styles.addToCartBtn} ${cart.has(p._id) ? styles.addToCartBtnActive : ""}`}
+                      onClick={() => addToCart(p._id)}
+                      disabled={cart.has(p._id)}
                     >
-                      {cart.has(p.id) ? (
+                      {cart.has(p._id) ? (
                         <>
                           <FiCheck /> Added to Cart
                         </>
@@ -497,22 +318,48 @@ export default function Shop() {
               ))}
             </div>
 
-            {/* ---------- Pagination ---------- */}
-            <div className={styles.pagination}>
-              <a href="#">‹</a>
-              <a href="#" className={styles.active}>
-                1
-              </a>
-              <a href="#">2</a>
-              <a href="#">3</a>
-              <a href="#">…</a>
-              <a href="#">12</a>
-              <a href="#">›</a>
-            </div>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className={styles.pagination}>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (page > 1) setPage(page - 1);
+                  }}
+                >
+                  ‹
+                </a>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (n) => (
+                    <a
+                      key={n}
+                      href="#"
+                      className={n === page ? styles.active : ""}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPage(n);
+                      }}
+                    >
+                      {n}
+                    </a>
+                  ),
+                )}
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (page < totalPages) setPage(page + 1);
+                  }}
+                >
+                  ›
+                </a>
+              </div>
+            )}
           </main>
         </div>
 
-        {/* ================= PERKS STRIP ================= */}
+        {/* Perks Section */}
         <section className={styles.perks}>
           {perks.map((perk) => (
             <div className={styles.perk} key={perk.title}>
@@ -525,8 +372,6 @@ export default function Shop() {
           ))}
         </section>
       </div>
-
-      {/* ================= FOOTER ================= */}
       <Footer />
     </div>
   );

@@ -11,7 +11,11 @@ import sellerSubscriptionReducer from "./slices/sellerSubscriptionSlice.js";
 import subscriptionPlanReducer from "./slices/subscriptionPlanSlice.js";
 import supportReducer from "./slices/supportSlice";
 import headerConfigReducer from "./slices/headerConfigSlice.js";
-import sellerProductReducer from "./slices/sellerProductSlice.js"; // ✅ ADD PRODUCT REDUCER
+import sellerProductReducer from "./slices/sellerProductSlice.js";
+import storefrontProductReducer from "./slices/storefrontProductSlice.js";
+import cartReducer from "./slices/cartSlice.js";
+import wishlistReducer from "./slices/wishlistSlice.js";
+import orderReducer from "./slices/orderSlice.js";
 
 export const store = configureStore({
   reducer: {
@@ -25,7 +29,11 @@ export const store = configureStore({
     support: supportReducer,
     subscriptionPlans: subscriptionPlanReducer,
     headerConfig: headerConfigReducer,
-    sellerProduct: sellerProductReducer, // ✅ ADD PRODUCT REDUCER HERE
+    sellerProduct: sellerProductReducer,
+    storefrontProduct: storefrontProductReducer,
+    cart: cartReducer,
+    wishlist: wishlistReducer,
+    orders: orderReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -150,9 +158,7 @@ export const store = configureStore({
           "headerConfig/fetchAdmin/rejected",
           "headerConfig/update/fulfilled",
 
-          // ============================================
-          // SELLER PRODUCT ACTIONS ✅ NEW
-          // ============================================
+          // Seller Product actions
           "sellerProduct/fetchProducts/fulfilled",
           "sellerProduct/fetchProducts/pending",
           "sellerProduct/fetchProducts/rejected",
@@ -174,6 +180,31 @@ export const store = configureStore({
           "sellerProduct/bulkUploadProducts/fulfilled",
           "sellerProduct/bulkUploadProducts/pending",
           "sellerProduct/bulkUploadProducts/rejected",
+
+          // ✅ Storefront Product actions
+          "storefrontProducts/fetchByPlacement/fulfilled",
+          "storefrontProducts/fetchByPlacement/pending",
+          "storefrontProducts/fetchByPlacement/rejected",
+          "storefrontProducts/fetchBySlug/fulfilled",
+          "storefrontProducts/fetchBySlug/pending",
+          "storefrontProducts/fetchBySlug/rejected",
+
+          // ✅ Cart actions
+          "cart/fetch/fulfilled",
+          "cart/addItem/fulfilled",
+          "cart/updateItem/fulfilled",
+          "cart/removeItem/fulfilled",
+          "cart/clear/fulfilled",
+
+          // ✅ Wishlist actions
+          "wishlist/fetch/fulfilled",
+          "wishlist/toggle/fulfilled",
+          "wishlist/remove/fulfilled",
+
+          // ✅ Order actions
+          "orders/fetchMine/fulfilled",
+          "orders/fetchSeller/fulfilled",
+          "orders/updateSellerStatus/fulfilled",
         ],
 
         // ✅ Ignore these action paths
@@ -201,15 +232,26 @@ export const store = configureStore({
           "payload.lastOrder.endDate",
           "meta.arg",
 
-          // ============================================
-          // SELLER PRODUCT PATHS ✅ NEW
-          // ============================================
+          // Seller Product paths
           "payload.product.createdAt",
           "payload.product.updatedAt",
           "payload.products.*.createdAt",
           "payload.products.*.updatedAt",
           "payload.pagination",
           "payload.limitStatus",
+
+          // ✅ Storefront Product paths
+          "payload.products.*.createdAt",
+          "payload.products.*.updatedAt",
+          "payload.pagination",
+          "payload.placement",
+
+          // ✅ Cart paths
+          "payload.items.*.addedAt",
+          "payload.createdAt",
+
+          // ✅ Order paths
+          "payload.placedAt",
         ],
 
         // ✅ Ignore these paths in state
@@ -281,9 +323,7 @@ export const store = configureStore({
           "headerConfig.config.updatedAt",
           "headerConfig.config.createdAt",
 
-          // ============================================
-          // SELLER PRODUCT PATHS ✅ NEW
-          // ============================================
+          // Seller Product paths
           "sellerProduct.products.*.createdAt",
           "sellerProduct.products.*.updatedAt",
           "sellerProduct.products.*.pricing.costPrice",
@@ -291,6 +331,23 @@ export const store = configureStore({
           "sellerProduct.selectedProduct.updatedAt",
           "sellerProduct.pagination",
           "sellerProduct.limitStatus",
+
+          // ✅ Storefront Product paths
+          "storefrontProduct.byPlacement.*.products.*.createdAt",
+          "storefrontProduct.byPlacement.*.products.*.updatedAt",
+          "storefrontProduct.byPlacement.*.pagination",
+          "storefrontProduct.currentProduct.createdAt",
+          "storefrontProduct.currentProduct.updatedAt",
+
+          // ✅ Cart paths
+          "cart.items",
+
+          // ✅ Wishlist paths
+          "wishlist.items",
+
+          // ✅ Order paths
+          "orders.myOrders",
+          "orders.sellerOrders",
         ],
       },
     }),

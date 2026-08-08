@@ -15,11 +15,12 @@ cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
+  timeout: 60000, // ✅ 60 second timeout
 });
 
 class CloudinaryService {
   /* ==========================================================
-     Upload Buffer (Memory Storage)
+     Upload Buffer (Memory Storage) - WITH RETRY LOGIC
   ========================================================== */
 
   async uploadBuffer(buffer, folder = "banners", options = {}) {
@@ -28,41 +29,78 @@ class CloudinaryService {
         throw new Error("No buffer provided");
       }
 
-      const result = await new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          {
-            folder: `aurevian/${folder}`,
-            resource_type: "auto",
-            ...options,
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          },
-        );
+      // ✅ Add timeout and retry logic
+      const maxRetries = 3;
+      let lastError = null;
 
-        Readable.from(buffer).pipe(uploadStream);
-      });
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          console.log(`📤 Upload attempt ${attempt}/${maxRetries}...`);
 
-      console.log(`✅ Uploaded: ${result.public_id}`);
+          const result = await new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+              {
+                folder: `aurevian/${folder}`,
+                resource_type: "auto",
+                timeout: 60000, // ✅ 60 second timeout per attempt
+                ...options,
+              },
+              (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+              },
+            );
 
-      return {
-        success: true,
-        url: result.secure_url,
-        publicId: result.public_id,
-        assetId: result.asset_id,
-        format: result.format,
-        bytes: result.bytes,
-        width: result.width,
-        height: result.height,
-        createdAt: result.created_at,
-      };
+            // ✅ Handle stream timeout
+            const timeoutId = setTimeout(() => {
+              uploadStream.destroy(new Error("Upload timeout"));
+            }, 65000); // Slightly longer than Cloudinary timeout
+
+            uploadStream.on("finish", () => {
+              clearTimeout(timeoutId);
+            });
+
+            uploadStream.on("error", (err) => {
+              clearTimeout(timeoutId);
+              reject(err);
+            });
+
+            Readable.from(buffer).pipe(uploadStream);
+          });
+
+          console.log(`✅ Uploaded: ${result.public_id}`);
+
+          return {
+            success: true,
+            url: result.secure_url,
+            publicId: result.public_id,
+            assetId: result.asset_id,
+            format: result.format,
+            bytes: result.bytes,
+            width: result.width,
+            height: result.height,
+            createdAt: result.created_at,
+          };
+        } catch (error) {
+          lastError = error;
+          console.warn(`⚠️ Upload attempt ${attempt} failed:`, error.message);
+
+          if (attempt < maxRetries) {
+            // ✅ Wait before retry (exponential backoff)
+            const waitTime = attempt * 2000;
+            console.log(`⏳ Waiting ${waitTime}ms before retry...`);
+            await new Promise((resolve) => setTimeout(resolve, waitTime));
+          }
+        }
+      }
+
+      throw lastError || new Error("All upload attempts failed");
     } catch (error) {
       console.error("❌ Cloudinary Upload Error:", error.message);
 
       return {
         success: false,
-        error: error.message,
+        error: error.message || "Failed to upload to Cloudinary",
       };
     }
   }
@@ -84,6 +122,7 @@ class CloudinaryService {
       const result = await cloudinary.uploader.upload(filePath, {
         folder: `aurevian/${folder}`,
         resource_type: "auto",
+        timeout: 60000, // ✅ 60 second timeout
         ...options,
       });
 
