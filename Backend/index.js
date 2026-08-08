@@ -1,8 +1,15 @@
 // ============================================
+import dns from "node:dns";
+
+dns.setServers([
+  "8.8.8.8",
+  "8.8.4.4",
+]);
+
+dns.setDefaultResultOrder("ipv4first");// ============================================
+
 // DNS CONFIGURATION - FORCE IPv4 (Fix for Render)
 // ============================================
-import dns from "node:dns";
-dns.setDefaultResultOrder("ipv4first");
 
 // ============================================
 // IMPORTS
