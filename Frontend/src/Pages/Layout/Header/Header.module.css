@@ -74,7 +74,7 @@
 }
 
 .logoImage {
-  height: 68px;
+  height: 150px;
   width: auto;
   object-fit: contain;
   display: block;
@@ -707,7 +707,7 @@
 }
 
 .drawerLogoImage {
-  height: 42px;
+  height: 150px;
   width: auto;
   display: block;
   object-fit: contain;
@@ -1595,7 +1595,7 @@
   }
 
   .logoImage {
-    height: 57px;
+    height: 150px;
     max-width: 34vw;
     object-fit: contain;
   }
@@ -1689,7 +1689,7 @@
   }
 
   .logoImage {
-    height: 54px;
+    height: 150px;
     max-width: 32vw;
   }
 
