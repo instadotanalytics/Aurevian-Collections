@@ -37,51 +37,152 @@ import {
 // CONSTANTS (Same as before)
 // ============================================
 const MATERIALS = [
-  'Gold', 'Silver', 'Platinum', 'Rose Gold', 'White Gold',
-  'Sterling Silver', 'Brass', 'Copper', 'Titanium', 'Palladium', 'Steel', 'Other'
+  "Gold",
+  "Silver",
+  "Platinum",
+  "Rose Gold",
+  "White Gold",
+  "Sterling Silver",
+  "Brass",
+  "Copper",
+  "Titanium",
+  "Palladium",
+  "Steel",
+  "Other",
 ];
 
 const PLATING_OPTIONS = [
-  'Gold Plated', 'Silver Plated', 'Rhodium Plated', 'Rose Gold Plated',
-  'White Gold Plated', 'None', 'Other'
+  "Gold Plated",
+  "Silver Plated",
+  "Rhodium Plated",
+  "Rose Gold Plated",
+  "White Gold Plated",
+  "None",
+  "Other",
 ];
 
 const STONE_TYPES = [
-  'Diamond', 'Ruby', 'Emerald', 'Sapphire', 'Pearl', 'Cubic Zirconia',
-  'Moissanite', 'Topaz', 'Amethyst', 'Garnet', 'Opal', 'Turquoise', 'None', 'Other'
+  "Diamond",
+  "Ruby",
+  "Emerald",
+  "Sapphire",
+  "Pearl",
+  "Cubic Zirconia",
+  "Moissanite",
+  "Topaz",
+  "Amethyst",
+  "Garnet",
+  "Opal",
+  "Turquoise",
+  "None",
+  "Other",
 ];
 
 const STONE_COLORS = [
-  'White', 'Yellow', 'Blue', 'Red', 'Green', 'Pink', 'Purple', 'Black',
-  'Clear', 'Champagne', 'Rose', 'Other'
+  "White",
+  "Yellow",
+  "Blue",
+  "Red",
+  "Green",
+  "Pink",
+  "Purple",
+  "Black",
+  "Clear",
+  "Champagne",
+  "Rose",
+  "Other",
 ];
 
 const FINISH_OPTIONS = [
-  'Polished', 'Matte', 'Brushed', 'Hammered', 'Textured', 'Antique', 'Mirror', 'Satin', 'Other'
+  "Polished",
+  "Matte",
+  "Brushed",
+  "Hammered",
+  "Textured",
+  "Antique",
+  "Mirror",
+  "Satin",
+  "Other",
 ];
 
 const SIZES = [
-  'XS', 'S', 'M', 'L', 'XL', 'XXL', '6', '7', '8', '9', '10', '11', '12',
-  'Free Size', 'Adjustable', 'Custom', 'Other'
+  "XS",
+  "S",
+  "M",
+  "L",
+  "XL",
+  "XXL",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+  "Free Size",
+  "Adjustable",
+  "Custom",
+  "Other",
 ];
 
 const OCCASIONS = [
-  'Wedding', 'Engagement', 'Anniversary', 'Birthday', 'Casual', 'Party',
-  'Festive', 'Professional', 'Gift', 'Daily Wear', 'Valentine',
-  'Mother\'s Day', 'Graduation', 'Other'
+  "Wedding",
+  "Engagement",
+  "Anniversary",
+  "Birthday",
+  "Casual",
+  "Party",
+  "Festive",
+  "Professional",
+  "Gift",
+  "Daily Wear",
+  "Valentine",
+  "Mother's Day",
+  "Graduation",
+  "Other",
 ];
 
 const STYLES = [
-  'Classic', 'Modern', 'Vintage', 'Antique', 'Minimalist', 'Statement',
-  'Bohemian', 'Ethnic', 'Contemporary', 'Art Deco', 'Victorian',
-  'Romantic', 'Geometric', 'Floral', 'Other'
+  "Classic",
+  "Modern",
+  "Vintage",
+  "Antique",
+  "Minimalist",
+  "Statement",
+  "Bohemian",
+  "Ethnic",
+  "Contemporary",
+  "Art Deco",
+  "Victorian",
+  "Romantic",
+  "Geometric",
+  "Floral",
+  "Other",
 ];
 
-const GENDERS = ['Men', 'Women', 'Unisex', 'Kids'];
-const AVAILABILITY_OPTIONS = ['In Stock', 'Out of Stock', 'Pre Order'];
-const STATUS_OPTIONS = ['Draft', 'Pending', 'Published', 'Scheduled'];
+const GENDERS = ["Men", "Women", "Unisex", "Kids"];
+const AVAILABILITY_OPTIONS = ["In Stock", "Out of Stock", "Pre Order"];
+const STATUS_OPTIONS = ["Draft", "Pending", "Published", "Scheduled"];
 const WARRANTY_DURATIONS = [
-  '1 Month', '3 Months', '6 Months', '1 Year', '2 Years', '5 Years', 'Lifetime'
+  "1 Month",
+  "3 Months",
+  "6 Months",
+  "1 Year",
+  "2 Years",
+  "5 Years",
+  "Lifetime",
+];
+
+// ============================================
+// ✅ NEW: PLACEMENT OPTIONS
+// Controls which storefront pages/sections a product appears on,
+// in addition to its automatic category page listing.
+// ============================================
+const PLACEMENT_OPTIONS = [
+  { value: "shop", label: "Shop Page" },
+  { value: "collections", label: "Collections Page" },
+  { value: "gifts", label: "Gift Guide" },
+  { value: "offers", label: "Offers Page" },
 ];
 
 // ============================================
@@ -107,7 +208,7 @@ const ProductFormWizard = () => {
   const isEdit = !!id;
 
   const { categories, isLoading, selectedProduct, limitStatus } = useSelector(
-    (state) => state.sellerProduct
+    (state) => state.sellerProduct,
   );
 
   // ==========================================
@@ -128,6 +229,8 @@ const ProductFormWizard = () => {
     brand: "",
     categoryId: "",
     subCategoryId: "",
+    // ✅ NEW: placements the seller wants this product to appear in
+    placements: [],
 
     // Step 2: Images
     thumbnail: null,
@@ -224,12 +327,17 @@ const ProductFormWizard = () => {
       brand: product.brand || "",
       categoryId: product.category?.categoryId || "",
       subCategoryId: product.category?.subCategoryId || "",
+      // ✅ NEW
+      placements: product.placements || [],
       thumbnail: null,
       images: [],
       originalPrice: product.pricing?.originalPrice || "",
       salePrice: product.pricing?.salePrice || "",
       currency: product.pricing?.currency || "INR",
-      taxIncluded: product.pricing?.taxIncluded !== undefined ? product.pricing.taxIncluded : true,
+      taxIncluded:
+        product.pricing?.taxIncluded !== undefined
+          ? product.pricing.taxIncluded
+          : true,
       stockQuantity: product.inventory?.stockQuantity || "",
       minOrderQty: product.inventory?.minOrderQty || 1,
       maxOrderQty: product.inventory?.maxOrderQty || "",
@@ -257,7 +365,10 @@ const ProductFormWizard = () => {
       shippingDimensionUnit: product.shipping?.dimensions?.unit || "cm",
       freeShipping: product.shipping?.freeShipping || false,
       shippingType: product.shipping?.shippingType || "Customer Pays",
-      returnAvailable: product.returnPolicy?.returnAvailable !== undefined ? product.returnPolicy.returnAvailable : true,
+      returnAvailable:
+        product.returnPolicy?.returnAvailable !== undefined
+          ? product.returnPolicy.returnAvailable
+          : true,
       returnDays: product.returnPolicy?.returnDays || 7,
       warrantyAvailable: product.returnPolicy?.warrantyAvailable || false,
       warrantyDuration: product.returnPolicy?.warrantyDuration || "1 Year",
@@ -274,12 +385,14 @@ const ProductFormWizard = () => {
     });
 
     if (product.images && product.images.length > 0) {
-      setImagePreviews(product.images.map(img => ({
-        url: img.url,
-        publicId: img.publicId,
-        altText: img.altText || "",
-        isExisting: true,
-      })));
+      setImagePreviews(
+        product.images.map((img) => ({
+          url: img.url,
+          publicId: img.publicId,
+          altText: img.altText || "",
+          isExisting: true,
+        })),
+      );
     }
 
     if (product.thumbnail) {
@@ -308,6 +421,28 @@ const ProductFormWizard = () => {
   };
 
   // ==========================================
+  // ✅ NEW: HANDLERS - Placements
+  // ==========================================
+  const togglePlacement = (value) => {
+    setFormData((prev) => ({
+      ...prev,
+      placements: prev.placements.includes(value)
+        ? prev.placements.filter((p) => p !== value)
+        : [...prev.placements, value],
+    }));
+  };
+
+  const toggleAllPlacements = () => {
+    setFormData((prev) => ({
+      ...prev,
+      placements:
+        prev.placements.length === PLACEMENT_OPTIONS.length
+          ? []
+          : PLACEMENT_OPTIONS.map((p) => p.value),
+    }));
+  };
+
+  // ==========================================
   // HANDLERS - Image Upload
   // ==========================================
   const handleThumbnailUpload = (e) => {
@@ -331,17 +466,17 @@ const ProductFormWizard = () => {
   const handleImagesUpload = (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
-    const invalidFiles = files.filter(f => !f.type.startsWith("image/"));
+    const invalidFiles = files.filter((f) => !f.type.startsWith("image/"));
     if (invalidFiles.length) {
       toast.error(`${invalidFiles.length} file(s) are not images`);
       return;
     }
-    const oversized = files.filter(f => f.size > 10 * 1024 * 1024);
+    const oversized = files.filter((f) => f.size > 10 * 1024 * 1024);
     if (oversized.length) {
       toast.error(`${oversized.length} file(s) exceed 10MB limit`);
       return;
     }
-    const newImages = files.map(file => ({
+    const newImages = files.map((file) => ({
       file,
       url: URL.createObjectURL(file),
       isExisting: false,
@@ -504,7 +639,11 @@ const ProductFormWizard = () => {
           toast.error("Shipping weight is required");
           return false;
         }
-        if (!formData.shippingLength || !formData.shippingWidth || !formData.shippingHeight) {
+        if (
+          !formData.shippingLength ||
+          !formData.shippingWidth ||
+          !formData.shippingHeight
+        ) {
           toast.error("Shipping dimensions are required");
           return false;
         }
@@ -531,8 +670,15 @@ const ProductFormWizard = () => {
     }
 
     // Check product limit
-    if (!isEdit && limitStatus && !limitStatus.isUnlimited && limitStatus.remaining <= 0) {
-      toast.error(`Product limit reached. You have ${limitStatus.remaining} slots remaining.`);
+    if (
+      !isEdit &&
+      limitStatus &&
+      !limitStatus.isUnlimited &&
+      limitStatus.remaining <= 0
+    ) {
+      toast.error(
+        `Product limit reached. You have ${limitStatus.remaining} slots remaining.`,
+      );
       return;
     }
 
@@ -541,6 +687,7 @@ const ProductFormWizard = () => {
       const submitData = { ...formData };
       submitData.images = formData.images;
       submitData.thumbnail = formData.thumbnail;
+      // placements travels as-is (array); the slice JSON-stringifies it for FormData
 
       // Clean up empty values
       if (!submitData.salePrice) delete submitData.salePrice;
@@ -554,10 +701,12 @@ const ProductFormWizard = () => {
 
       let result;
       if (isEdit) {
-        result = await dispatch(updateProduct({
-          id,
-          productData: submitData,
-        })).unwrap();
+        result = await dispatch(
+          updateProduct({
+            id,
+            productData: submitData,
+          }),
+        ).unwrap();
         toast.success("Product updated successfully");
       } else {
         result = await dispatch(createProduct(submitData)).unwrap();
@@ -577,29 +726,64 @@ const ProductFormWizard = () => {
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
-        return <StepBasicInfo formData={formData} handleInputChange={handleInputChange} categories={categories} />;
+        return (
+          <StepBasicInfo
+            formData={formData}
+            handleInputChange={handleInputChange}
+            categories={categories}
+            togglePlacement={togglePlacement}
+            toggleAllPlacements={toggleAllPlacements}
+          />
+        );
       case 2:
-        return <StepImages
-          formData={formData}
-          handleInputChange={handleInputChange}
-          thumbnailPreview={thumbnailPreview}
-          imagePreviews={imagePreviews}
-          handleThumbnailUpload={handleThumbnailUpload}
-          handleImagesUpload={handleImagesUpload}
-          removeThumbnail={removeThumbnail}
-          removeImage={removeImage}
-          fileInputRef={fileInputRef}
-        />;
+        return (
+          <StepImages
+            formData={formData}
+            handleInputChange={handleInputChange}
+            thumbnailPreview={thumbnailPreview}
+            imagePreviews={imagePreviews}
+            handleThumbnailUpload={handleThumbnailUpload}
+            handleImagesUpload={handleImagesUpload}
+            removeThumbnail={removeThumbnail}
+            removeImage={removeImage}
+            fileInputRef={fileInputRef}
+          />
+        );
       case 3:
-        return <StepPricing formData={formData} handleInputChange={handleInputChange} />;
+        return (
+          <StepPricing
+            formData={formData}
+            handleInputChange={handleInputChange}
+          />
+        );
       case 4:
-        return <StepInventory formData={formData} handleInputChange={handleInputChange} />;
+        return (
+          <StepInventory
+            formData={formData}
+            handleInputChange={handleInputChange}
+          />
+        );
       case 5:
-        return <StepSpecifications formData={formData} handleInputChange={handleInputChange} addVariant={addVariant} removeVariant={removeVariant} updateVariant={updateVariant} />;
+        return (
+          <StepSpecifications
+            formData={formData}
+            handleInputChange={handleInputChange}
+            addVariant={addVariant}
+            removeVariant={removeVariant}
+            updateVariant={updateVariant}
+          />
+        );
       case 6:
-        return <StepShipping formData={formData} handleInputChange={handleInputChange} />;
+        return (
+          <StepShipping
+            formData={formData}
+            handleInputChange={handleInputChange}
+          />
+        );
       case 7:
-        return <StepSEO formData={formData} handleInputChange={handleInputChange} />;
+        return (
+          <StepSEO formData={formData} handleInputChange={handleInputChange} />
+        );
       default:
         return null;
     }
@@ -626,7 +810,7 @@ const ProductFormWizard = () => {
             return (
               <div
                 key={step.id}
-                className={`${styles.stepIndicator} ${isActive ? styles.active : ''} ${isCompleted ? styles.completed : ''}`}
+                className={`${styles.stepIndicator} ${isActive ? styles.active : ""} ${isCompleted ? styles.completed : ""}`}
                 onClick={() => isCompleted && goToStep(step.id)}
               >
                 <div className={styles.stepCircle}>
@@ -657,7 +841,10 @@ const ProductFormWizard = () => {
     <div className={styles.container}>
       {/* Header */}
       <div className={styles.header}>
-        <button className={styles.backBtn} onClick={() => navigate("/seller/dashboard/products")}>
+        <button
+          className={styles.backBtn}
+          onClick={() => navigate("/seller/dashboard/products")}
+        >
           <FiArrowLeft size={20} />
           Back to Products
         </button>
@@ -666,7 +853,9 @@ const ProductFormWizard = () => {
         </h1>
         {limitStatus && !isEdit && (
           <span className={styles.limitInfo}>
-            {limitStatus.isUnlimited ? "Unlimited products" : `${limitStatus.remaining} slots remaining`}
+            {limitStatus.isUnlimited
+              ? "Unlimited products"
+              : `${limitStatus.remaining} slots remaining`}
           </span>
         )}
       </div>
@@ -676,9 +865,7 @@ const ProductFormWizard = () => {
 
       {/* Form Content */}
       <div className={styles.formContainer}>
-        <div className={styles.stepContent}>
-          {renderStepContent()}
-        </div>
+        <div className={styles.stepContent}>{renderStepContent()}</div>
       </div>
 
       {/* Navigation Buttons */}
@@ -692,9 +879,7 @@ const ProductFormWizard = () => {
           Previous
         </button>
         <div className={styles.navRight}>
-          <span className={styles.stepCounter}>
-            Step {currentStep} of 7
-          </span>
+          <span className={styles.stepCounter}>Step {currentStep} of 7</span>
           {currentStep === 7 ? (
             <button
               className={styles.submitBtn}
@@ -702,13 +887,14 @@ const ProductFormWizard = () => {
               disabled={isSubmitting}
             >
               <FiSave size={18} />
-              {isSubmitting ? "Saving..." : isEdit ? "Update Product" : "Create Product"}
+              {isSubmitting
+                ? "Saving..."
+                : isEdit
+                  ? "Update Product"
+                  : "Create Product"}
             </button>
           ) : (
-            <button
-              className={styles.nextBtn}
-              onClick={nextStep}
-            >
+            <button className={styles.nextBtn} onClick={nextStep}>
               Next
               <FiChevronRight size={18} />
             </button>
@@ -724,7 +910,13 @@ export default ProductFormWizard;
 // ============================================
 // STEP 1: BASIC INFO
 // ============================================
-const StepBasicInfo = ({ formData, handleInputChange, categories }) => {
+const StepBasicInfo = ({
+  formData,
+  handleInputChange,
+  categories,
+  togglePlacement,
+  toggleAllPlacements,
+}) => {
   return (
     <div className={styles.stepContainer}>
       <div className={styles.stepHeader}>
@@ -742,7 +934,9 @@ const StepBasicInfo = ({ formData, handleInputChange, categories }) => {
             onChange={handleInputChange}
             placeholder="e.g. Diamond Pendant Necklace"
           />
-          <span className={styles.hint}>Be descriptive and include key details</span>
+          <span className={styles.hint}>
+            Be descriptive and include key details
+          </span>
         </div>
 
         <div className={styles.formGroup}>
@@ -765,7 +959,9 @@ const StepBasicInfo = ({ formData, handleInputChange, categories }) => {
           >
             <option value="">Select Category</option>
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>{cat.label}</option>
+              <option key={cat.id} value={cat.id}>
+                {cat.label}
+              </option>
             ))}
           </select>
         </div>
@@ -780,13 +976,42 @@ const StepBasicInfo = ({ formData, handleInputChange, categories }) => {
             >
               <option value="">Select Sub Category</option>
               {categories
-                .filter(cat => cat.id !== formData.categoryId)
+                .filter((cat) => cat.id !== formData.categoryId)
                 .map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.label}</option>
+                  <option key={cat.id} value={cat.id}>
+                    {cat.label}
+                  </option>
                 ))}
             </select>
           </div>
         )}
+
+        {/* ✅ NEW: Placement selection */}
+        <div className={styles.formGroup}>
+          <label>Show this product on</label>
+          <div className={styles.checkboxGroup}>
+            <input
+              type="checkbox"
+              checked={formData.placements.length === PLACEMENT_OPTIONS.length}
+              onChange={toggleAllPlacements}
+            />
+            <label>All</label>
+          </div>
+          {PLACEMENT_OPTIONS.map((opt) => (
+            <div key={opt.value} className={styles.checkboxGroup}>
+              <input
+                type="checkbox"
+                checked={formData.placements.includes(opt.value)}
+                onChange={() => togglePlacement(opt.value)}
+              />
+              <label>{opt.label}</label>
+            </div>
+          ))}
+          <span className={styles.hint}>
+            It's always visible on its category page regardless of these
+            choices.
+          </span>
+        </div>
 
         <div className={styles.formGroup}>
           <label>Short Description</label>
@@ -845,18 +1070,33 @@ const StepImages = ({
             {thumbnailPreview ? (
               <div className={styles.thumbnailPreview}>
                 <img src={thumbnailPreview.url} alt="Thumbnail" />
-                <button type="button" className={styles.removeImageBtn} onClick={removeThumbnail}>
+                <button
+                  type="button"
+                  className={styles.removeImageBtn}
+                  onClick={removeThumbnail}
+                >
                   <FiX size={18} />
                 </button>
               </div>
             ) : (
-              <div className={styles.uploadArea} onClick={() => document.getElementById("thumbnailInput").click()}>
+              <div
+                className={styles.uploadArea}
+                onClick={() =>
+                  document.getElementById("thumbnailInput").click()
+                }
+              >
                 <FiImage size={40} />
                 <p>Click to upload thumbnail</p>
                 <span>JPG, PNG, WebP (Max 10MB)</span>
               </div>
             )}
-            <input id="thumbnailInput" type="file" accept="image/*" onChange={handleThumbnailUpload} style={{ display: "none" }} />
+            <input
+              id="thumbnailInput"
+              type="file"
+              accept="image/*"
+              onChange={handleThumbnailUpload}
+              style={{ display: "none" }}
+            />
           </div>
         </div>
 
@@ -866,18 +1106,34 @@ const StepImages = ({
             {imagePreviews.map((img, index) => (
               <div key={index} className={styles.imagePreview}>
                 <img src={img.url} alt={`Product ${index + 1}`} />
-                <button type="button" className={styles.removeImageBtn} onClick={() => removeImage(index)}>
+                <button
+                  type="button"
+                  className={styles.removeImageBtn}
+                  onClick={() => removeImage(index)}
+                >
                   <FiX size={18} />
                 </button>
               </div>
             ))}
-            <div className={styles.addImageBox} onClick={() => fileInputRef.current?.click()}>
+            <div
+              className={styles.addImageBox}
+              onClick={() => fileInputRef.current?.click()}
+            >
               <FiPlus size={30} />
               <span>Add Image</span>
             </div>
           </div>
-          <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImagesUpload} style={{ display: "none" }} />
-          <p className={styles.hint}>{imagePreviews.length} of minimum 2 images uploaded</p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImagesUpload}
+            style={{ display: "none" }}
+          />
+          <p className={styles.hint}>
+            {imagePreviews.length} of minimum 2 images uploaded
+          </p>
         </div>
       </div>
     </div>
@@ -925,7 +1181,11 @@ const StepPricing = ({ formData, handleInputChange }) => {
 
         <div className={styles.formGroup}>
           <label>Currency</label>
-          <select name="currency" value={formData.currency} onChange={handleInputChange}>
+          <select
+            name="currency"
+            value={formData.currency}
+            onChange={handleInputChange}
+          >
             <option value="INR">INR (₹)</option>
             <option value="USD">USD ($)</option>
             <option value="EUR">EUR (€)</option>
@@ -933,7 +1193,12 @@ const StepPricing = ({ formData, handleInputChange }) => {
         </div>
 
         <div className={styles.checkboxGroup}>
-          <input type="checkbox" name="taxIncluded" checked={formData.taxIncluded} onChange={handleInputChange} />
+          <input
+            type="checkbox"
+            name="taxIncluded"
+            checked={formData.taxIncluded}
+            onChange={handleInputChange}
+          />
           <label>Tax Included in Price</label>
         </div>
       </div>
@@ -991,9 +1256,15 @@ const StepInventory = ({ formData, handleInputChange }) => {
 
         <div className={styles.formGroup}>
           <label>Availability</label>
-          <select name="availability" value={formData.availability} onChange={handleInputChange}>
-            {AVAILABILITY_OPTIONS.map(opt => (
-              <option key={opt} value={opt}>{opt}</option>
+          <select
+            name="availability"
+            value={formData.availability}
+            onChange={handleInputChange}
+          >
+            {AVAILABILITY_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
             ))}
           </select>
         </div>
@@ -1005,7 +1276,13 @@ const StepInventory = ({ formData, handleInputChange }) => {
 // ============================================
 // STEP 5: SPECIFICATIONS
 // ============================================
-const StepSpecifications = ({ formData, handleInputChange, addVariant, removeVariant, updateVariant }) => {
+const StepSpecifications = ({
+  formData,
+  handleInputChange,
+  addVariant,
+  removeVariant,
+  updateVariant,
+}) => {
   return (
     <div className={styles.stepContainer}>
       <div className={styles.stepHeader}>
@@ -1017,14 +1294,30 @@ const StepSpecifications = ({ formData, handleInputChange, addVariant, removeVar
         <div className={styles.row}>
           <div className={styles.formGroup}>
             <label>Material *</label>
-            <select name="material" value={formData.material} onChange={handleInputChange}>
-              {MATERIALS.map(mat => <option key={mat} value={mat}>{mat}</option>)}
+            <select
+              name="material"
+              value={formData.material}
+              onChange={handleInputChange}
+            >
+              {MATERIALS.map((mat) => (
+                <option key={mat} value={mat}>
+                  {mat}
+                </option>
+              ))}
             </select>
           </div>
           <div className={styles.formGroup}>
             <label>Plating</label>
-            <select name="plating" value={formData.plating} onChange={handleInputChange}>
-              {PLATING_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            <select
+              name="plating"
+              value={formData.plating}
+              onChange={handleInputChange}
+            >
+              {PLATING_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -1032,14 +1325,30 @@ const StepSpecifications = ({ formData, handleInputChange, addVariant, removeVar
         <div className={styles.row}>
           <div className={styles.formGroup}>
             <label>Stone Type</label>
-            <select name="stoneType" value={formData.stoneType} onChange={handleInputChange}>
-              {STONE_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
+            <select
+              name="stoneType"
+              value={formData.stoneType}
+              onChange={handleInputChange}
+            >
+              {STONE_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
             </select>
           </div>
           <div className={styles.formGroup}>
             <label>Stone Color</label>
-            <select name="stoneColor" value={formData.stoneColor} onChange={handleInputChange}>
-              {STONE_COLORS.map(color => <option key={color} value={color}>{color}</option>)}
+            <select
+              name="stoneColor"
+              value={formData.stoneColor}
+              onChange={handleInputChange}
+            >
+              {STONE_COLORS.map((color) => (
+                <option key={color} value={color}>
+                  {color}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -1047,14 +1356,30 @@ const StepSpecifications = ({ formData, handleInputChange, addVariant, removeVar
         <div className={styles.row}>
           <div className={styles.formGroup}>
             <label>Finish</label>
-            <select name="finish" value={formData.finish} onChange={handleInputChange}>
-              {FINISH_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            <select
+              name="finish"
+              value={formData.finish}
+              onChange={handleInputChange}
+            >
+              {FINISH_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
             </select>
           </div>
           <div className={styles.formGroup}>
             <label>Size</label>
-            <select name="size" value={formData.size} onChange={handleInputChange}>
-              {SIZES.map(size => <option key={size} value={size}>{size}</option>)}
+            <select
+              name="size"
+              value={formData.size}
+              onChange={handleInputChange}
+            >
+              {SIZES.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -1062,11 +1387,23 @@ const StepSpecifications = ({ formData, handleInputChange, addVariant, removeVar
         <div className={styles.row}>
           <div className={styles.formGroup}>
             <label>Weight</label>
-            <input type="number" name="weight" value={formData.weight} onChange={handleInputChange} placeholder="0" min="0" step="0.01" />
+            <input
+              type="number"
+              name="weight"
+              value={formData.weight}
+              onChange={handleInputChange}
+              placeholder="0"
+              min="0"
+              step="0.01"
+            />
           </div>
           <div className={styles.formGroup}>
             <label>Unit</label>
-            <select name="weightUnit" value={formData.weightUnit} onChange={handleInputChange}>
+            <select
+              name="weightUnit"
+              value={formData.weightUnit}
+              onChange={handleInputChange}
+            >
               <option value="g">g</option>
               <option value="mg">mg</option>
               <option value="oz">oz</option>
@@ -1077,14 +1414,30 @@ const StepSpecifications = ({ formData, handleInputChange, addVariant, removeVar
         <div className={styles.row}>
           <div className={styles.formGroup}>
             <label>Occasion</label>
-            <select name="occasion" value={formData.occasion} onChange={handleInputChange}>
-              {OCCASIONS.map(occ => <option key={occ} value={occ}>{occ}</option>)}
+            <select
+              name="occasion"
+              value={formData.occasion}
+              onChange={handleInputChange}
+            >
+              {OCCASIONS.map((occ) => (
+                <option key={occ} value={occ}>
+                  {occ}
+                </option>
+              ))}
             </select>
           </div>
           <div className={styles.formGroup}>
             <label>Style</label>
-            <select name="style" value={formData.style} onChange={handleInputChange}>
-              {STYLES.map(style => <option key={style} value={style}>{style}</option>)}
+            <select
+              name="style"
+              value={formData.style}
+              onChange={handleInputChange}
+            >
+              {STYLES.map((style) => (
+                <option key={style} value={style}>
+                  {style}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -1092,18 +1445,37 @@ const StepSpecifications = ({ formData, handleInputChange, addVariant, removeVar
         <div className={styles.row}>
           <div className={styles.formGroup}>
             <label>Collection</label>
-            <input type="text" name="collection" value={formData.collection} onChange={handleInputChange} placeholder="e.g. Bridal Collection 2024" />
+            <input
+              type="text"
+              name="collection"
+              value={formData.collection}
+              onChange={handleInputChange}
+              placeholder="e.g. Bridal Collection 2024"
+            />
           </div>
           <div className={styles.formGroup}>
             <label>Gender</label>
-            <select name="gender" value={formData.gender} onChange={handleInputChange}>
-              {GENDERS.map(g => <option key={g} value={g}>{g}</option>)}
+            <select
+              name="gender"
+              value={formData.gender}
+              onChange={handleInputChange}
+            >
+              {GENDERS.map((g) => (
+                <option key={g} value={g}>
+                  {g}
+                </option>
+              ))}
             </select>
           </div>
         </div>
 
         <div className={styles.checkboxGroup}>
-          <input type="checkbox" name="adjustable" checked={formData.adjustable} onChange={handleInputChange} />
+          <input
+            type="checkbox"
+            name="adjustable"
+            checked={formData.adjustable}
+            onChange={handleInputChange}
+          />
           <label>Adjustable</label>
         </div>
 
@@ -1111,21 +1483,34 @@ const StepSpecifications = ({ formData, handleInputChange, addVariant, removeVar
           <div className={styles.sectionHeader}>
             <label>Product Variants</label>
             <div className={styles.checkboxGroup}>
-              <input type="checkbox" name="hasVariants" checked={formData.hasVariants} onChange={handleInputChange} />
+              <input
+                type="checkbox"
+                name="hasVariants"
+                checked={formData.hasVariants}
+                onChange={handleInputChange}
+              />
               <span>Enable Variants</span>
             </div>
           </div>
 
           {formData.hasVariants && (
             <>
-              <button type="button" className={styles.addVariantBtn} onClick={addVariant}>
+              <button
+                type="button"
+                className={styles.addVariantBtn}
+                onClick={addVariant}
+              >
                 <FiPlus size={16} /> Add Variant
               </button>
               {formData.variants.map((variant, index) => (
                 <div key={index} className={styles.variantCard}>
                   <div className={styles.variantHeader}>
                     <span>Variant {index + 1}</span>
-                    <button type="button" className={styles.removeVariantBtn} onClick={() => removeVariant(index)}>
+                    <button
+                      type="button"
+                      className={styles.removeVariantBtn}
+                      onClick={() => removeVariant(index)}
+                    >
                       <FiTrash2 size={16} />
                     </button>
                   </div>
@@ -1133,29 +1518,91 @@ const StepSpecifications = ({ formData, handleInputChange, addVariant, removeVar
                     <div className={styles.row}>
                       <div className={styles.formGroup}>
                         <label>SKU</label>
-                        <input type="text" value={variant.sku} onChange={(e) => updateVariant(index, "sku", e.target.value)} placeholder="SKU" />
+                        <input
+                          type="text"
+                          value={variant.sku}
+                          onChange={(e) =>
+                            updateVariant(index, "sku", e.target.value)
+                          }
+                          placeholder="SKU"
+                        />
                       </div>
                       <div className={styles.formGroup}>
                         <label>Color</label>
-                        <input type="text" value={variant.attributes.color} onChange={(e) => updateVariant(index, "attributes.color", e.target.value)} placeholder="Color" />
+                        <input
+                          type="text"
+                          value={variant.attributes.color}
+                          onChange={(e) =>
+                            updateVariant(
+                              index,
+                              "attributes.color",
+                              e.target.value,
+                            )
+                          }
+                          placeholder="Color"
+                        />
                       </div>
                       <div className={styles.formGroup}>
                         <label>Size</label>
-                        <input type="text" value={variant.attributes.size} onChange={(e) => updateVariant(index, "attributes.size", e.target.value)} placeholder="Size" />
+                        <input
+                          type="text"
+                          value={variant.attributes.size}
+                          onChange={(e) =>
+                            updateVariant(
+                              index,
+                              "attributes.size",
+                              e.target.value,
+                            )
+                          }
+                          placeholder="Size"
+                        />
                       </div>
                     </div>
                     <div className={styles.row}>
                       <div className={styles.formGroup}>
                         <label>Original Price</label>
-                        <input type="number" value={variant.price.originalPrice} onChange={(e) => updateVariant(index, "price.originalPrice", parseFloat(e.target.value))} placeholder="0" />
+                        <input
+                          type="number"
+                          value={variant.price.originalPrice}
+                          onChange={(e) =>
+                            updateVariant(
+                              index,
+                              "price.originalPrice",
+                              parseFloat(e.target.value),
+                            )
+                          }
+                          placeholder="0"
+                        />
                       </div>
                       <div className={styles.formGroup}>
                         <label>Sale Price</label>
-                        <input type="number" value={variant.price.salePrice} onChange={(e) => updateVariant(index, "price.salePrice", parseFloat(e.target.value))} placeholder="0" />
+                        <input
+                          type="number"
+                          value={variant.price.salePrice}
+                          onChange={(e) =>
+                            updateVariant(
+                              index,
+                              "price.salePrice",
+                              parseFloat(e.target.value),
+                            )
+                          }
+                          placeholder="0"
+                        />
                       </div>
                       <div className={styles.formGroup}>
                         <label>Stock</label>
-                        <input type="number" value={variant.stock.quantity} onChange={(e) => updateVariant(index, "stock.quantity", parseInt(e.target.value))} placeholder="0" />
+                        <input
+                          type="number"
+                          value={variant.stock.quantity}
+                          onChange={(e) =>
+                            updateVariant(
+                              index,
+                              "stock.quantity",
+                              parseInt(e.target.value),
+                            )
+                          }
+                          placeholder="0"
+                        />
                       </div>
                     </div>
                   </div>
@@ -1184,11 +1631,23 @@ const StepShipping = ({ formData, handleInputChange }) => {
         <div className={styles.row}>
           <div className={styles.formGroup}>
             <label>Weight *</label>
-            <input type="number" name="shippingWeight" value={formData.shippingWeight} onChange={handleInputChange} placeholder="0" min="0" step="0.01" />
+            <input
+              type="number"
+              name="shippingWeight"
+              value={formData.shippingWeight}
+              onChange={handleInputChange}
+              placeholder="0"
+              min="0"
+              step="0.01"
+            />
           </div>
           <div className={styles.formGroup}>
             <label>Unit</label>
-            <select name="shippingWeightUnit" value={formData.shippingWeightUnit} onChange={handleInputChange}>
+            <select
+              name="shippingWeightUnit"
+              value={formData.shippingWeightUnit}
+              onChange={handleInputChange}
+            >
               <option value="g">g</option>
               <option value="kg">kg</option>
               <option value="oz">oz</option>
@@ -1200,26 +1659,59 @@ const StepShipping = ({ formData, handleInputChange }) => {
         <div className={styles.row}>
           <div className={styles.formGroup}>
             <label>Length * (cm)</label>
-            <input type="number" name="shippingLength" value={formData.shippingLength} onChange={handleInputChange} placeholder="0" min="0" step="0.1" />
+            <input
+              type="number"
+              name="shippingLength"
+              value={formData.shippingLength}
+              onChange={handleInputChange}
+              placeholder="0"
+              min="0"
+              step="0.1"
+            />
           </div>
           <div className={styles.formGroup}>
             <label>Width * (cm)</label>
-            <input type="number" name="shippingWidth" value={formData.shippingWidth} onChange={handleInputChange} placeholder="0" min="0" step="0.1" />
+            <input
+              type="number"
+              name="shippingWidth"
+              value={formData.shippingWidth}
+              onChange={handleInputChange}
+              placeholder="0"
+              min="0"
+              step="0.1"
+            />
           </div>
           <div className={styles.formGroup}>
             <label>Height * (cm)</label>
-            <input type="number" name="shippingHeight" value={formData.shippingHeight} onChange={handleInputChange} placeholder="0" min="0" step="0.1" />
+            <input
+              type="number"
+              name="shippingHeight"
+              value={formData.shippingHeight}
+              onChange={handleInputChange}
+              placeholder="0"
+              min="0"
+              step="0.1"
+            />
           </div>
         </div>
 
         <div className={styles.checkboxGroup}>
-          <input type="checkbox" name="freeShipping" checked={formData.freeShipping} onChange={handleInputChange} />
+          <input
+            type="checkbox"
+            name="freeShipping"
+            checked={formData.freeShipping}
+            onChange={handleInputChange}
+          />
           <label>Free Shipping</label>
         </div>
 
         <div className={styles.formGroup}>
           <label>Shipping Type</label>
-          <select name="shippingType" value={formData.shippingType} onChange={handleInputChange}>
+          <select
+            name="shippingType"
+            value={formData.shippingType}
+            onChange={handleInputChange}
+          >
             <option value="Seller Pays">Seller Pays</option>
             <option value="Customer Pays">Customer Pays</option>
           </select>
@@ -1230,24 +1722,48 @@ const StepShipping = ({ formData, handleInputChange }) => {
         <h3 className={styles.subHeading}>Return & Warranty</h3>
 
         <div className={styles.checkboxGroup}>
-          <input type="checkbox" name="returnAvailable" checked={formData.returnAvailable} onChange={handleInputChange} />
+          <input
+            type="checkbox"
+            name="returnAvailable"
+            checked={formData.returnAvailable}
+            onChange={handleInputChange}
+          />
           <label>Returns Available</label>
         </div>
 
         <div className={styles.formGroup}>
           <label>Return Days</label>
-          <input type="number" name="returnDays" value={formData.returnDays} onChange={handleInputChange} min="0" />
+          <input
+            type="number"
+            name="returnDays"
+            value={formData.returnDays}
+            onChange={handleInputChange}
+            min="0"
+          />
         </div>
 
         <div className={styles.checkboxGroup}>
-          <input type="checkbox" name="warrantyAvailable" checked={formData.warrantyAvailable} onChange={handleInputChange} />
+          <input
+            type="checkbox"
+            name="warrantyAvailable"
+            checked={formData.warrantyAvailable}
+            onChange={handleInputChange}
+          />
           <label>Warranty Available</label>
         </div>
 
         <div className={styles.formGroup}>
           <label>Warranty Duration</label>
-          <select name="warrantyDuration" value={formData.warrantyDuration} onChange={handleInputChange}>
-            {WARRANTY_DURATIONS.map(dur => <option key={dur} value={dur}>{dur}</option>)}
+          <select
+            name="warrantyDuration"
+            value={formData.warrantyDuration}
+            onChange={handleInputChange}
+          >
+            {WARRANTY_DURATIONS.map((dur) => (
+              <option key={dur} value={dur}>
+                {dur}
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -1269,24 +1785,54 @@ const StepSEO = ({ formData, handleInputChange }) => {
       <div className={styles.stepBody}>
         <div className={styles.formGroup}>
           <label>SEO Title</label>
-          <input type="text" name="seoTitle" value={formData.seoTitle} onChange={handleInputChange} placeholder="SEO Title (max 60 characters)" maxLength={60} />
-          <span className={styles.charCount}>{formData.seoTitle?.length || 0}/60</span>
+          <input
+            type="text"
+            name="seoTitle"
+            value={formData.seoTitle}
+            onChange={handleInputChange}
+            placeholder="SEO Title (max 60 characters)"
+            maxLength={60}
+          />
+          <span className={styles.charCount}>
+            {formData.seoTitle?.length || 0}/60
+          </span>
         </div>
 
         <div className={styles.formGroup}>
           <label>SEO Description</label>
-          <textarea name="seoDescription" value={formData.seoDescription} onChange={handleInputChange} placeholder="SEO Description (max 160 characters)" maxLength={160} rows={2} />
-          <span className={styles.charCount}>{formData.seoDescription?.length || 0}/160</span>
+          <textarea
+            name="seoDescription"
+            value={formData.seoDescription}
+            onChange={handleInputChange}
+            placeholder="SEO Description (max 160 characters)"
+            maxLength={160}
+            rows={2}
+          />
+          <span className={styles.charCount}>
+            {formData.seoDescription?.length || 0}/160
+          </span>
         </div>
 
         <div className={styles.formGroup}>
           <label>SEO Keywords</label>
-          <input type="text" name="seoKeywords" value={formData.seoKeywords} onChange={handleInputChange} placeholder="Comma separated keywords" />
+          <input
+            type="text"
+            name="seoKeywords"
+            value={formData.seoKeywords}
+            onChange={handleInputChange}
+            placeholder="Comma separated keywords"
+          />
         </div>
 
         <div className={styles.formGroup}>
           <label>Canonical URL</label>
-          <input type="url" name="canonicalUrl" value={formData.canonicalUrl} onChange={handleInputChange} placeholder="https://aureviancollections.in/product/..." />
+          <input
+            type="url"
+            name="canonicalUrl"
+            value={formData.canonicalUrl}
+            onChange={handleInputChange}
+            placeholder="https://aureviancollections.in/product/..."
+          />
         </div>
 
         <hr className={styles.divider} />
@@ -1295,23 +1841,48 @@ const StepSEO = ({ formData, handleInputChange }) => {
 
         <div className={styles.labelsGrid}>
           <div className={styles.checkboxGroup}>
-            <input type="checkbox" name="featured" checked={formData.featured} onChange={handleInputChange} />
+            <input
+              type="checkbox"
+              name="featured"
+              checked={formData.featured}
+              onChange={handleInputChange}
+            />
             <label>⭐ Featured</label>
           </div>
           <div className={styles.checkboxGroup}>
-            <input type="checkbox" name="trending" checked={formData.trending} onChange={handleInputChange} />
+            <input
+              type="checkbox"
+              name="trending"
+              checked={formData.trending}
+              onChange={handleInputChange}
+            />
             <label>🔥 Trending</label>
           </div>
           <div className={styles.checkboxGroup}>
-            <input type="checkbox" name="bestSeller" checked={formData.bestSeller} onChange={handleInputChange} />
+            <input
+              type="checkbox"
+              name="bestSeller"
+              checked={formData.bestSeller}
+              onChange={handleInputChange}
+            />
             <label>🏆 Best Seller</label>
           </div>
           <div className={styles.checkboxGroup}>
-            <input type="checkbox" name="newArrival" checked={formData.newArrival} onChange={handleInputChange} />
+            <input
+              type="checkbox"
+              name="newArrival"
+              checked={formData.newArrival}
+              onChange={handleInputChange}
+            />
             <label>✨ New Arrival</label>
           </div>
           <div className={styles.checkboxGroup}>
-            <input type="checkbox" name="flashSale" checked={formData.flashSale} onChange={handleInputChange} />
+            <input
+              type="checkbox"
+              name="flashSale"
+              checked={formData.flashSale}
+              onChange={handleInputChange}
+            />
             <label>⚡ Flash Sale</label>
           </div>
         </div>
@@ -1320,8 +1891,16 @@ const StepSEO = ({ formData, handleInputChange }) => {
 
         <div className={styles.formGroup}>
           <label>Status</label>
-          <select name="status" value={formData.status} onChange={handleInputChange}>
-            {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+          <select
+            name="status"
+            value={formData.status}
+            onChange={handleInputChange}
+          >
+            {STATUS_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
           </select>
         </div>
       </div>

@@ -33,6 +33,8 @@ import AboutUs from "./Pages/About/AboutUs";
 import Franchise from "./Pages/About/Franchise";
 import Cart from "./Pages/Cart/Cart";
 import Wishlist from "./Pages/Wishlist/Wishlist.jsx";
+import Checkout from "./Pages/Checkout/Checkout.jsx";
+import OrdersPage from "./Pages/Orders/OrdersPage.jsx";
 import Story from "./Pages/About/Story";
 
 // ============================================
@@ -76,9 +78,7 @@ import Gifts from "./Components/Gifts/gifts.jsx";
 import Collections from "./Components/Collections/Collections.jsx";
 import Offers from "./Components/Offers/Offers.jsx";
 
-
 import ProductDetail from "./Pages/Layout/ProductDetail/ProductDetail";
-
 
 // ============================================
 // PRODUCT PAGES ✅ (NEW)
@@ -102,11 +102,13 @@ const ROUTES = {
   VERIFY_OTP: "/verify-otp",
   FORGOT_PASSWORD: "/forgot-password",
   RESET_PASSWORD: "/reset-password",
-  PRIVACY_POLICY : "/privacy-policy",
-  TERMS : "/terms",
+  PRIVACY_POLICY: "/privacy-policy",
+  TERMS: "/terms",
   DASHBOARD: "/",
   PROFILE: "/profile",
   STORY: "/stories",
+  ORDERS: "/orders",
+  CHECKOUT: "/checkout",
   SUPER_ADMIN_LOGIN: "/super-admin/login",
   SUPER_ADMIN_DASHBOARD: "/super-admin/dashboard",
   // Seller Routes
@@ -143,7 +145,6 @@ const LayoutWithHeader = ({ children }) => (
 
 // Layout without Header
 const LayoutWithoutHeader = ({ children }) => <>{children}</>;
-
 
 const App = () => {
   const dispatch = useDispatch();
@@ -217,7 +218,7 @@ const App = () => {
             },
           }}
         />
-        <ScrollToTop/>
+        <ScrollToTop />
         <Routes>
           {/* ============================================
                 PUBLIC ROUTES - WITH HEADER
@@ -297,6 +298,22 @@ const App = () => {
             }
           />
           <Route
+            path={ROUTES.CHECKOUT}
+            element={
+              <PrivateRoute>
+                <Checkout />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ORDERS}
+            element={
+              <PrivateRoute>
+                <OrdersPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path={ROUTES.BECOME_A_PARTNER}
             element={
               <LayoutWithHeader>
@@ -308,16 +325,9 @@ const App = () => {
           {/* ============================================
                 SHOP ROUTE - WITH HEADER
                 ============================================ */}
-          <Route
-            path={ROUTES.SHOP}
-            element={
-             
-                <Shop />
-              
-            }
-          />
+          <Route path={ROUTES.SHOP} element={<Shop />} />
 
-<Route
+          <Route
             path={ROUTES.GIFTS}
             element={
               <LayoutWithHeader>
@@ -333,7 +343,7 @@ const App = () => {
             path={ROUTES.COLLECTIONS}
             element={
               <LayoutWithHeader>
-                <Collections/>
+                <Collections />
               </LayoutWithHeader>
             }
           />
@@ -345,12 +355,10 @@ const App = () => {
             path={ROUTES.OFFERS}
             element={
               <LayoutWithHeader>
-                <Offers/>
+                <Offers />
               </LayoutWithHeader>
             }
           />
-
-
 
           {/* ============================================
                 PUBLIC PRODUCT DETAIL ROUTE - WITH HEADER ✅
@@ -358,14 +366,14 @@ const App = () => {
                 URL: /product/:slug
                 Example: /product/diamond-pendant-necklace
                 ============================================ */}
-           <Route
+          <Route
             path={ROUTES.PRODUCT_DETAIL}
             element={
               <LayoutWithHeader>
                 <ProductDetail />
               </LayoutWithHeader>
             }
-          /> 
+          />
 
           {/* ============================================
                 BLOG ROUTES - WITH HEADER ✅
@@ -452,21 +460,21 @@ const App = () => {
             }
           />
 
-            <Route
+          <Route
             path={ROUTES.PRIVACY_POLICY}
             element={
-                <LayoutWithoutHeader>
-                  <PrivacyPolicy />
-                </LayoutWithoutHeader>
+              <LayoutWithoutHeader>
+                <PrivacyPolicy />
+              </LayoutWithoutHeader>
             }
           />
 
-<Route
+          <Route
             path={ROUTES.TERMS}
             element={
-                <LayoutWithoutHeader>
-                  <Terms />
-                </LayoutWithoutHeader>
+              <LayoutWithoutHeader>
+                <Terms />
+              </LayoutWithoutHeader>
             }
           />
 

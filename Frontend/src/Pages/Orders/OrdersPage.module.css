@@ -1,0 +1,126 @@
+/* src/Pages/Orders/OrdersPage.module.css */
+.ordersPage {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+  min-height: 60vh;
+}
+.pageTitle {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 28px;
+  color: #111;
+}
+.loadingText {
+  color: #888;
+  text-align: center;
+  padding: 40px 0;
+}
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 60px 0;
+  color: #888;
+}
+.shopBtn {
+  margin-top: 8px;
+  padding: 12px 28px;
+  border-radius: 999px;
+  background: #111;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+.ordersList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.orderCard {
+  border: 1px solid #eee;
+  border-radius: 16px;
+  padding: 20px;
+  background: #fff;
+}
+.orderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+.orderNumber {
+  font-weight: 700;
+  font-size: 15px;
+  color: #111;
+  margin: 0;
+}
+.orderDate {
+  font-size: 12.5px;
+  color: #888;
+  margin: 2px 0 0;
+}
+.statusBadge {
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: capitalize;
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+.orderItems {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.orderItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.orderItem img {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #eee;
+}
+.orderItem div {
+  flex: 1;
+}
+.itemName {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #111;
+  margin: 0;
+}
+.itemQty {
+  font-size: 12px;
+  color: #888;
+  margin: 2px 0 0;
+}
+.orderItem span {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+}
+.orderFooter {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 14px;
+  font-size: 13px;
+  color: #555;
+  text-transform: capitalize;
+}
+.orderTotal {
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  color: #111;
+}

@@ -1,4 +1,4 @@
-// src/Pages/Seller/SellerDashboard/SellerDashboard.jsx - Update Routes
+// src/Pages/Seller/SellerDashboard/SellerDashboard.jsx
 
 import React, { useState, useEffect } from "react";
 import {
@@ -31,19 +31,15 @@ import toast from "react-hot-toast";
 import styles from "./SellerDashboard.module.css";
 import planStyles from "./components/PlanTheme.module.css";
 
-// Components
 import DashboardOverview from "./components/DashboardOverview";
 import Upgrade from "./components/Upgrade";
 import ProductManagement from "./components/ProductManagement";
 import ProductForm from "./components/ProductForm";
+import Orders from "./components/Orders";
 
-// ✅ Seller + subscription redux
 import { sellerLogout } from "../../../redux/slices/sellerSlice";
 import { fetchCurrentSubscription } from "../../../redux/slices/sellerSubscriptionSlice";
 
-// ============================================
-// PLAN THEME CONFIG
-// ============================================
 const PLAN_THEME = {
   free: {
     dashboardName: "Seller Dashboard",
@@ -56,7 +52,8 @@ const PLAN_THEME = {
   silver: {
     dashboardName: "Silver Seller Dashboard",
     greeting: "Welcome to your Silver Seller Dashboard",
-    subtext: "You're a Silver Verified seller — enjoy better visibility and faster settlements.",
+    subtext:
+      "You're a Silver Verified seller — enjoy better visibility and faster settlements.",
     badgeLabel: "🩶 Silver Seller",
     color: "#94a3b8",
     gradient: "linear-gradient(135deg, #cbd5e1, #64748b)",
@@ -64,7 +61,8 @@ const PLAN_THEME = {
   gold: {
     dashboardName: "Gold Seller Dashboard",
     greeting: "Welcome to your Gold Seller Dashboard",
-    subtext: "You're a Gold seller — featured placement, sponsored products, and priority support.",
+    subtext:
+      "You're a Gold seller — featured placement, sponsored products, and priority support.",
     badgeLabel: "🥇 Gold Seller",
     color: "#d97706",
     gradient: "linear-gradient(135deg, #fbbf24, #d97706)",
@@ -72,7 +70,8 @@ const PLAN_THEME = {
   platinum: {
     dashboardName: "Platinum Seller Dashboard",
     greeting: "Welcome to your Platinum Seller Dashboard",
-    subtext: "You're a Platinum partner — the highest tier, with a dedicated account manager.",
+    subtext:
+      "You're a Platinum partner — the highest tier, with a dedicated account manager.",
     badgeLabel: "💎 Platinum Seller",
     color: "#6366f1",
     gradient: "linear-gradient(135deg, #a5b4fc, #4f46e5)",
@@ -81,9 +80,6 @@ const PLAN_THEME = {
 
 const getPlanTheme = (planId) => PLAN_THEME[planId] || PLAN_THEME.free;
 
-// ============================================
-// SIDEBAR MENU
-// ============================================
 const menuItems = [
   { id: "", label: "Dashboard", icon: FiHome },
   { id: "products", label: "Products", icon: FiPackage },
@@ -95,7 +91,6 @@ const menuItems = [
   { id: "upgrade", label: "Upgrade", icon: FiTrendingUp },
 ];
 
-// Placeholder components
 const ComingSoon = ({ label }) => (
   <div className={styles.placeholderContent}>{label} Page Coming Soon</div>
 );
@@ -186,7 +181,6 @@ const SellerDashboard = () => {
 
   return (
     <div className={styles.dashboardContainer}>
-      {/* TOP HEADER */}
       <header className={styles.topHeader}>
         <div className={styles.headerLeft}>
           <button
@@ -260,20 +254,20 @@ const SellerDashboard = () => {
         </div>
       </header>
 
-      {/* MAIN CONTENT */}
       <div className={styles.mainContent}>
-        {/* Sidebar */}
         <aside
-          className={`${styles.sidebar} ${sidebarOpen ? styles.open : styles.closed
-            } ${mobileMenuOpen ? styles.mobileOpen : ""}`}
+          className={`${styles.sidebar} ${
+            sidebarOpen ? styles.open : styles.closed
+          } ${mobileMenuOpen ? styles.mobileOpen : ""}`}
         >
           <div className={styles.sidebarNav}>
             {menuItems.map((item) => (
               <button
                 key={item.id || "dashboard"}
                 onClick={() => handleMenuClick(item.id)}
-                className={`${styles.navItem} ${activeMenu === item.id ? styles.active : ""
-                  }`}
+                className={`${styles.navItem} ${
+                  activeMenu === item.id ? styles.active : ""
+                }`}
               >
                 <item.icon className={styles.navIcon} />
                 <span className={styles.navLabel}>{item.label}</span>
@@ -316,7 +310,6 @@ const SellerDashboard = () => {
           </div>
         </aside>
 
-        {/* Mobile Overlay */}
         {mobileMenuOpen && (
           <div
             className={styles.overlay}
@@ -324,10 +317,10 @@ const SellerDashboard = () => {
           />
         )}
 
-        {/* Content */}
         <main
-          className={`${styles.contentArea} ${!sidebarOpen ? styles.expanded : ""
-            }`}
+          className={`${styles.contentArea} ${
+            !sidebarOpen ? styles.expanded : ""
+          }`}
         >
           <div className={styles.contentWrapper}>
             <Routes>
@@ -335,11 +328,20 @@ const SellerDashboard = () => {
               <Route path="products" element={<ProductManagement />} />
               <Route path="products/new" element={<ProductForm />} />
               <Route path="products/edit/:id" element={<ProductForm />} />
-              <Route path="orders" element={<ComingSoon label="Orders" />} />
-              <Route path="earnings" element={<ComingSoon label="Earnings" />} />
-              <Route path="customers" element={<ComingSoon label="Customers" />} />
+              <Route path="orders" element={<Orders />} />
+              <Route
+                path="earnings"
+                element={<ComingSoon label="Earnings" />}
+              />
+              <Route
+                path="customers"
+                element={<ComingSoon label="Customers" />}
+              />
               <Route path="reviews" element={<ComingSoon label="Reviews" />} />
-              <Route path="settings" element={<ComingSoon label="Settings" />} />
+              <Route
+                path="settings"
+                element={<ComingSoon label="Settings" />}
+              />
               <Route path="upgrade" element={<Upgrade />} />
               <Route path="*" element={<Navigate to={basePath} replace />} />
             </Routes>

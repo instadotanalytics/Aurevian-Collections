@@ -1,4 +1,4 @@
-// src/Pages/Seller/SellerDashboard/components/ProductManagement.jsx
+// src/Pages/Seller/SellerDashboard/ProductManagement.jsx
 
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -6,150 +6,352 @@ import { useNavigate } from "react-router-dom";
 import {
   FiPlus,
   FiSearch,
-  FiFilter,
   FiEdit2,
   FiTrash2,
   FiEye,
-  FiCopy,
-  FiDownload,
-  FiUpload,
   FiPackage,
   FiDollarSign,
-  FiClock,
+  FiGrid,
+  FiChevronLeft,
+  FiChevronRight,
+  FiFilter,
+  FiX,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import styles from "./ProductManagement.module.css";
 
 import {
   fetchProducts,
-  fetchCategories,
   deleteProduct,
   fetchProductLimitStatus,
+  fetchPlacementCounts,
 } from "../../../../redux/slices/sellerProductSlice";
 
 const ProductManagement = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { products, categories, isLoading, pagination, limitStatus } = useSelector(
-    (state) => state.sellerProduct
-  );
 
-  const [filters, setFilters] = useState({
-    status: "",
-    categoryId: "",
-    search: "",
-    page: 1,
-  });
+  const { products, isLoading, pagination, limitStatus, placementCounts } =
+    useSelector((state) => state.sellerProduct);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [showBulkUpload, setShowBulkUpload] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchCategories());
+    fetchProductData();
+    dispatch(fetchPlacementCounts());
+  }, [currentPage, statusFilter, categoryFilter, searchTerm]);
+
+  const fetchProductData = () => {
+    const params = {
+      page: currentPage,
+      limit: 20,
+      status: statusFilter || undefined,
+      categoryId: categoryFilter || undefined,
+      search: searchTerm || undefined,
+    };
+    dispatch(fetchProducts(params));
     dispatch(fetchProductLimitStatus());
-  }, [dispatch]);
-
-  useEffect(() => {
-    dispatch(fetchProducts(filters));
-  }, [dispatch, filters]);
+  };
 
   const handleSearch = (e) => {
-    setFilters({ ...filters, search: e.target.value, page: 1 });
+    e.preventDefault();
+    setCurrentPage(1);
+    fetchProductData();
   };
 
-  const handleFilterChange = (key, value) => {
-    setFilters({ ...filters, [key]: value, page: 1 });
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("");
+    setCategoryFilter("");
+    setCurrentPage(1);
   };
 
-  const handlePageChange = (newPage) => {
-    setFilters({ ...filters, page: newPage });
+  const handleEdit = (product) => {
+    navigate(`/seller/dashboard/products/edit/${product._id}`);
   };
 
-  const handleDelete = async () => {
+  const handleDeleteClick = (product) => {
+    setSelectedProduct(product);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
     if (!selectedProduct) return;
+    setIsDeleting(true);
     try {
       await dispatch(deleteProduct(selectedProduct._id)).unwrap();
-      toast.success("Product deleted successfully");
+      toast.success("Product archived successfully");
       setShowDeleteModal(false);
       setSelectedProduct(null);
+      fetchProductData();
+      dispatch(fetchPlacementCounts());
     } catch (error) {
       toast.error(error || "Failed to delete product");
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= pagination.totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const handleViewProduct = (product) => {
+    navigate(`/product/${product.productSlug}`);
   };
 
   const getStatusBadge = (status) => {
     const statusMap = {
-      Draft: { color: "#64748b", bg: "rgba(100, 116, 139, 0.1)" },
-      Pending: { color: "#f59e0b", bg: "rgba(245, 158, 11, 0.1)" },
-      Published: { color: "#10b981", bg: "rgba(16, 185, 129, 0.1)" },
-      Scheduled: { color: "#3b82f6", bg: "rgba(59, 130, 246, 0.1)" },
-      Archived: { color: "#ef4444", bg: "rgba(239, 68, 68, 0.1)" },
-      Rejected: { color: "#ef4444", bg: "rgba(239, 68, 68, 0.1)" },
+      Draft: { className: styles.statusDraft, label: "Draft" },
+      Pending: { className: styles.statusPending, label: "Pending" },
+      Published: { className: styles.statusPublished, label: "Published" },
+      Scheduled: { className: styles.statusScheduled, label: "Scheduled" },
+      Archived: { className: styles.statusArchived, label: "Archived" },
+      Rejected: { className: styles.statusRejected, label: "Rejected" },
     };
-    const style = statusMap[status] || statusMap.Draft;
+    const statusInfo = statusMap[status] || statusMap.Draft;
     return (
-      <span
-        className={styles.statusBadge}
-        style={{ color: style.color, background: style.bg }}
-      >
-        {status}
+      <span className={`${styles.statusBadge} ${statusInfo.className}`}>
+        {statusInfo.label}
       </span>
     );
   };
 
-  const getAvailabilityBadge = (availability) => {
-    const map = {
-      "In Stock": { color: "#10b981", bg: "rgba(16, 185, 129, 0.1)" },
-      "Out of Stock": { color: "#ef4444", bg: "rgba(239, 68, 68, 0.1)" },
-      "Pre Order": { color: "#f59e0b", bg: "rgba(245, 158, 11, 0.1)" },
-    };
-    const style = map[availability] || map["Out of Stock"];
-    return (
-      <span
-        className={styles.statusBadge}
-        style={{ color: style.color, background: style.bg }}
-      >
-        {availability}
-      </span>
-    );
-  };
+  const renderProductCard = (product) => {
+    const displayPrice =
+      product.pricing?.salePrice || product.pricing?.originalPrice;
+    const hasDiscount =
+      product.pricing?.salePrice &&
+      product.pricing?.salePrice < product.pricing?.originalPrice;
 
-  if (isLoading && products.length === 0) {
     return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.spinner}></div>
-        <p>Loading products...</p>
+      <div key={product._id} className={styles.productCard}>
+        <div className={styles.productImage}>
+          <img
+            src={product.thumbnail?.url || "/placeholder-image.jpg"}
+            alt={product.productName}
+            onError={(e) => {
+              e.target.src = "/placeholder-image.jpg";
+            }}
+          />
+          {product.labels?.featured && (
+            <span className={styles.featuredBadge}>⭐ Featured</span>
+          )}
+          {product.labels?.bestSeller && (
+            <span className={styles.bestSellerBadge}>🏆 Best Seller</span>
+          )}
+        </div>
+
+        <div className={styles.productInfo}>
+          <h3 className={styles.productName}>{product.productName}</h3>
+          <p className={styles.productBrand}>{product.brand}</p>
+          <div className={styles.productMeta}>
+            <span className={styles.productPrice}>
+              ₹{displayPrice?.toLocaleString() || "0"}
+              {hasDiscount && (
+                <span className={styles.originalPrice}>
+                  ₹{product.pricing.originalPrice?.toLocaleString()}
+                </span>
+              )}
+            </span>
+            {hasDiscount && (
+              <span className={styles.discountBadge}>
+                {Math.round(
+                  ((product.pricing.originalPrice - product.pricing.salePrice) /
+                    product.pricing.originalPrice) *
+                    100,
+                )}
+                % OFF
+              </span>
+            )}
+          </div>
+          <div className={styles.productStock}>
+            <span className={styles.stockLabel}>Stock:</span>
+            <span
+              className={
+                product.inventory?.stockQuantity > 0
+                  ? styles.inStock
+                  : styles.outOfStock
+              }
+            >
+              {product.inventory?.stockQuantity > 0
+                ? `${product.inventory.stockQuantity} units`
+                : "Out of Stock"}
+            </span>
+          </div>
+          <div className={styles.productStatus}>
+            {getStatusBadge(product.status)}
+          </div>
+          {product.placements && product.placements.length > 0 && (
+            <div className={styles.productStock}>
+              <span className={styles.stockLabel}>Visible on:</span>
+              <span className={styles.inStock}>
+                {product.placements.join(", ")}
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div className={styles.productActions}>
+          <button
+            className={styles.actionBtn}
+            onClick={() => handleViewProduct(product)}
+            title="View Product"
+          >
+            <FiEye size={16} />
+          </button>
+          <button
+            className={styles.actionBtn}
+            onClick={() => handleEdit(product)}
+            title="Edit Product"
+          >
+            <FiEdit2 size={16} />
+          </button>
+          <button
+            className={`${styles.actionBtn} ${styles.deleteBtn}`}
+            onClick={() => handleDeleteClick(product)}
+            title="Archive Product"
+          >
+            <FiTrash2 size={16} />
+          </button>
+        </div>
       </div>
     );
-  }
+  };
+
+  const renderEmptyState = () => {
+    return (
+      <div className={styles.emptyState}>
+        <FiPackage size={60} />
+        <h3>No products found</h3>
+        <p>
+          {searchTerm || statusFilter || categoryFilter
+            ? "Try adjusting your filters or search terms"
+            : "Start selling by adding your first product"}
+        </p>
+        {!searchTerm && !statusFilter && !categoryFilter && (
+          <button
+            className={styles.addFirstProductBtn}
+            onClick={() => navigate("/seller/dashboard/products/new")}
+          >
+            <FiPlus size={18} />
+            Add Your First Product
+          </button>
+        )}
+        {(searchTerm || statusFilter || categoryFilter) && (
+          <button
+            className={styles.clearFiltersBtn}
+            onClick={handleClearFilters}
+          >
+            <FiX size={18} />
+            Clear All Filters
+          </button>
+        )}
+      </div>
+    );
+  };
+
+  const renderDeleteModal = () => {
+    if (!showDeleteModal) return null;
+    return (
+      <div
+        className={styles.modalOverlay}
+        onClick={() => setShowDeleteModal(false)}
+      >
+        <div
+          className={styles.modalContent}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className={styles.modalHeader}>
+            <h3>Archive Product</h3>
+            <button
+              className={styles.modalCloseBtn}
+              onClick={() => setShowDeleteModal(false)}
+            >
+              <FiX size={20} />
+            </button>
+          </div>
+          <div className={styles.modalBody}>
+            <p>
+              Are you sure you want to archive "{selectedProduct?.productName}"?
+            </p>
+            <p className={styles.modalWarning}>
+              This product will be hidden from your store but you can restore it
+              later.
+            </p>
+          </div>
+          <div className={styles.modalFooter}>
+            <button
+              className={styles.modalCancelBtn}
+              onClick={() => setShowDeleteModal(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </button>
+            <button
+              className={styles.modalConfirmBtn}
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Archiving..." : "Archive Product"}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className={styles.container}>
-      {/* Header */}
       <div className={styles.header}>
-        <div>
+        <div className={styles.headerLeft}>
           <h1 className={styles.title}>Products</h1>
-          {limitStatus && (
-            <p className={styles.subtitle}>
-              {limitStatus.isUnlimited ? (
-                "Unlimited products available"
-              ) : (
-                `${limitStatus.used} of ${limitStatus.limit} products used (${limitStatus.remaining} remaining)`
-              )}
-            </p>
-          )}
+          <span className={styles.productCount}>
+            {pagination.total || 0} products
+          </span>
         </div>
-        <div className={styles.headerActions}>
+        <div className={styles.headerRight}>
+          {placementCounts && (
+            <div className={styles.placementCounts}>
+              <span className={styles.placementLabel}>
+                <FiGrid size={14} />
+                Placements:
+              </span>
+              <span className={styles.placementItem}>
+                Shop: <strong>{placementCounts.shop || 0}</strong>
+              </span>
+              <span className={styles.placementItem}>
+                Collections: <strong>{placementCounts.collections || 0}</strong>
+              </span>
+              <span className={styles.placementItem}>
+                Gifts: <strong>{placementCounts.gifts || 0}</strong>
+              </span>
+              <span className={styles.placementItem}>
+                Offers: <strong>{placementCounts.offers || 0}</strong>
+              </span>
+            </div>
+          )}
+
+          {limitStatus && (
+            <div className={styles.limitStatus}>
+              <span className={styles.limitLabel}>
+                {limitStatus.isUnlimited
+                  ? "♾️ Unlimited"
+                  : `${limitStatus.remaining} slots remaining`}
+              </span>
+            </div>
+          )}
+
           <button
-            className={styles.bulkUploadBtn}
-            onClick={() => setShowBulkUpload(true)}
-          >
-            <FiUpload size={18} />
-            Bulk Upload
-          </button>
-          <button
-            className={styles.addProductBtn}
+            className={styles.addBtn}
             onClick={() => navigate("/seller/dashboard/products/new")}
           >
             <FiPlus size={18} />
@@ -158,24 +360,25 @@ const ProductManagement = () => {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className={styles.filtersBar}>
-        <div className={styles.searchWrapper}>
-          <FiSearch className={styles.searchIcon} />
+      <div className={styles.filters}>
+        <form className={styles.searchForm} onSubmit={handleSearch}>
           <input
             type="text"
-            placeholder="Search products..."
-            value={filters.search}
-            onChange={handleSearch}
             className={styles.searchInput}
+            placeholder="Search products..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
-        </div>
+          <button type="submit" className={styles.searchBtn}>
+            <FiSearch size={18} />
+          </button>
+        </form>
 
         <div className={styles.filterGroup}>
           <select
-            value={filters.status}
-            onChange={(e) => handleFilterChange("status", e.target.value)}
             className={styles.filterSelect}
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
           >
             <option value="">All Status</option>
             <option value="Draft">Draft</option>
@@ -183,188 +386,98 @@ const ProductManagement = () => {
             <option value="Published">Published</option>
             <option value="Scheduled">Scheduled</option>
             <option value="Archived">Archived</option>
-            <option value="Rejected">Rejected</option>
           </select>
 
           <select
-            value={filters.categoryId}
-            onChange={(e) => handleFilterChange("categoryId", e.target.value)}
             className={styles.filterSelect}
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
           >
             <option value="">All Categories</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.label}
-              </option>
-            ))}
           </select>
+
+          {(searchTerm || statusFilter || categoryFilter) && (
+            <button
+              className={styles.clearFiltersBtn}
+              onClick={handleClearFilters}
+            >
+              <FiX size={16} />
+              Clear
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Product Grid */}
-      {products.length === 0 ? (
-        <div className={styles.emptyState}>
-          <FiPackage className={styles.emptyIcon} />
-          <h3>No products yet</h3>
-          <p>Start adding your jewellery products to sell on Aurevian Collections.</p>
+      {isLoading ? (
+        <div className={styles.loadingContainer}>
+          <div className={styles.spinner}></div>
+          <p>Loading products...</p>
+        </div>
+      ) : products.length === 0 ? (
+        renderEmptyState()
+      ) : (
+        <div className={styles.productsGrid}>
+          {products.map(renderProductCard)}
+        </div>
+      )}
+
+      {pagination.totalPages > 1 && (
+        <div className={styles.pagination}>
           <button
-            className={styles.addProductBtn}
-            onClick={() => navigate("/seller/dashboard/products/new")}
+            className={styles.paginationBtn}
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
           >
-            <FiPlus size={18} />
-            Add Your First Product
+            <FiChevronLeft size={18} />
+          </button>
+
+          <div className={styles.paginationPages}>
+            {[...Array(pagination.totalPages)].map((_, index) => {
+              const page = index + 1;
+              const isActive = page === currentPage;
+              const isNearCurrent = Math.abs(page - currentPage) <= 2;
+              const isFirst = page === 1;
+              const isLast = page === pagination.totalPages;
+
+              if (isNearCurrent || isFirst || isLast) {
+                return (
+                  <button
+                    key={page}
+                    className={`${styles.pageBtn} ${isActive ? styles.activePage : ""}`}
+                    onClick={() => handlePageChange(page)}
+                  >
+                    {page}
+                  </button>
+                );
+              }
+
+              if (
+                (page === currentPage - 3 && currentPage > 4) ||
+                (page === currentPage + 3 &&
+                  currentPage < pagination.totalPages - 3)
+              ) {
+                return (
+                  <span key={page} className={styles.pageDots}>
+                    ...
+                  </span>
+                );
+              }
+
+              return null;
+            })}
+          </div>
+
+          <button
+            className={styles.paginationBtn}
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === pagination.totalPages}
+          >
+            <FiChevronRight size={18} />
           </button>
         </div>
-      ) : (
-        <>
-          <div className={styles.productGrid}>
-            {products.map((product) => (
-              <div key={product._id} className={styles.productCard}>
-                <div className={styles.productImageWrapper}>
-                  <img
-                    src={product.thumbnail?.url || "/placeholder.jpg"}
-                    alt={product.productName}
-                    className={styles.productImage}
-                  />
-                  {product.labels?.featured && (
-                    <span className={styles.featuredBadge}>Featured</span>
-                  )}
-                  {product.labels?.bestSeller && (
-                    <span className={styles.bestSellerBadge}>Best Seller</span>
-                  )}
-                </div>
-
-                <div className={styles.productInfo}>
-                  <h3 className={styles.productName}>{product.productName}</h3>
-                  <p className={styles.productBrand}>{product.brand}</p>
-                  
-                  <div className={styles.productMeta}>
-                    <div className={styles.priceInfo}>
-                      <span className={styles.originalPrice}>
-                        ₹{product.pricing.originalPrice}
-                      </span>
-                      {product.pricing.salePrice && (
-                        <span className={styles.salePrice}>
-                          ₹{product.pricing.salePrice}
-                        </span>
-                      )}
-                    </div>
-                    <div className={styles.stockInfo}>
-                      {getAvailabilityBadge(product.inventory.availability)}
-                      <span className={styles.stockCount}>
-                        {product.inventory.stockQuantity} units
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className={styles.productFooter}>
-                    <div className={styles.statusGroup}>
-                      {getStatusBadge(product.status)}
-                      <span className={styles.dateInfo}>
-                        <FiClock size={14} />
-                        {new Date(product.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-
-                    <div className={styles.actionButtons}>
-                      <button
-                        className={styles.actionBtn}
-                        onClick={() => navigate(`/product/${product.productSlug}`)}
-                        title="View"
-                      >
-                        <FiEye size={16} />
-                      </button>
-                      <button
-                        className={styles.actionBtn}
-                        onClick={() => navigate(`/seller/dashboard/products/edit/${product._id}`)}
-                        title="Edit"
-                      >
-                        <FiEdit2 size={16} />
-                      </button>
-                      <button
-                        className={`${styles.actionBtn} ${styles.danger}`}
-                        onClick={() => {
-                          setSelectedProduct(product);
-                          setShowDeleteModal(true);
-                        }}
-                        title="Delete"
-                      >
-                        <FiTrash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Pagination */}
-          {pagination.totalPages > 1 && (
-            <div className={styles.pagination}>
-              <button
-                onClick={() => handlePageChange(pagination.page - 1)}
-                disabled={pagination.page === 1}
-                className={styles.pageBtn}
-              >
-                Previous
-              </button>
-              <span className={styles.pageInfo}>
-                Page {pagination.page} of {pagination.totalPages}
-              </span>
-              <button
-                onClick={() => handlePageChange(pagination.page + 1)}
-                disabled={pagination.page === pagination.totalPages}
-                className={styles.pageBtn}
-              >
-                Next
-              </button>
-            </div>
-          )}
-        </>
       )}
 
-      {/* Delete Modal */}
-      {showDeleteModal && (
-        <div className={styles.modalOverlay} onClick={() => setShowDeleteModal(false)}>
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <h3>Delete Product</h3>
-            <p>
-              Are you sure you want to delete "{selectedProduct?.productName}"?
-              This action cannot be undone.
-            </p>
-            <div className={styles.modalActions}>
-              <button
-                className={styles.cancelBtn}
-                onClick={() => setShowDeleteModal(false)}
-              >
-                Cancel
-              </button>
-              <button className={styles.deleteBtn} onClick={handleDelete}>
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Bulk Upload Modal - To be implemented */}
-      {showBulkUpload && (
-        <div className={styles.modalOverlay} onClick={() => setShowBulkUpload(false)}>
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <h3>Bulk Upload Products</h3>
-            <p>Upload multiple products at once using CSV/JSON format.</p>
-            <p className={styles.note}>Available for Silver, Gold, and Platinum plans only.</p>
-            <div className={styles.modalActions}>
-              <button
-                className={styles.cancelBtn}
-                onClick={() => setShowBulkUpload(false)}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {renderDeleteModal()}
     </div>
   );
 };

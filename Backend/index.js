@@ -1,12 +1,10 @@
 // ============================================
-
 // DNS CONFIGURATION - FORCE IPv4 (Fix for Render)
 // ============================================
 import dns from "node:dns";
 dns.setDefaultResultOrder("ipv4first");
 
 // ============================================
-
 // IMPORTS
 // ============================================
 import "dotenv/config";
@@ -38,10 +36,13 @@ import subscriptionPlanRoutes from "./routes/subscriptionPlanRoutes.js";
 import referralRoutes from "./routes/referralRoutes.js";
 import walletRoutes from "./routes/walletRoutes.js";
 import headerConfigRoutes from "./routes/headerConfigRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js";
+import wishlistRoutes from "./routes/wishlistRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
 
 // ✅ IMPORT PRODUCT ROUTES
 console.log("🔧 Importing jewelleryProductRoutes...");
-import jewelleryProductRoutes from './routes/jewelleryProductRoutes.js';
+import jewelleryProductRoutes from "./routes/jewelleryProductRoutes.js";
 console.log("✅ jewelleryProductRoutes imported successfully");
 
 // ============================================
@@ -196,6 +197,9 @@ app.get("/api", (req, res) => {
       wallet: "/api/wallet",
       support: "/api/support",
       headerConfig: "/api/header-config",
+      cart: "/api/cart",
+      wishlist: "/api/wishlist",
+      orders: "/api/orders",
       health: "/health",
     },
     documentation: "Contact support for API documentation",
@@ -209,17 +213,14 @@ console.log("\n" + "=".repeat(60));
 console.log("🔗 REGISTERING ROUTES");
 console.log("=".repeat(60));
 
-// ✅ PRODUCT ROUTES - SABSE PEHLE
 console.log("\n📌 Registering /api/seller/products...");
 app.use("/api/seller/products", jewelleryProductRoutes);
 console.log("✅ /api/seller/products registered");
 
-// ✅ SELLER ROUTES
 console.log("\n📌 Registering /api/seller...");
 app.use("/api/seller", sellerRoutes);
 console.log("✅ /api/seller registered");
 
-// ✅ OTHER ROUTES
 console.log("\n📌 Registering other routes...");
 app.use("/api/auth", authRoutes);
 console.log("  ✅ /api/auth");
@@ -243,6 +244,12 @@ app.use("/api/support", supportRoutes);
 console.log("  ✅ /api/support");
 app.use("/api/header-config", headerConfigRoutes);
 console.log("  ✅ /api/header-config");
+app.use("/api/cart", cartRoutes);
+console.log("  ✅ /api/cart");
+app.use("/api/wishlist", wishlistRoutes);
+console.log("  ✅ /api/wishlist");
+app.use("/api/orders", orderRoutes);
+console.log("  ✅ /api/orders");
 
 console.log("\n" + "=".repeat(60));
 console.log("✅ ALL ROUTES REGISTERED");
@@ -351,14 +358,30 @@ const server = app.listen(PORT, () => {
   console.log("=".repeat(60));
   console.log(`📍 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(`🔗 Port: ${PORT}`);
-  console.log(`🔗 Client URL: ${process.env.CLIENT_URL || "https://aureviancollections.in"}`);
-  console.log(`🔑 Google OAuth: ${process.env.GOOGLE_CLIENT_ID ? "✅ Configured" : "❌ Not configured"}`);
-  console.log(`🔐 JWT Secret: ${process.env.JWT_ACCESS_SECRET ? "✅ Configured" : "❌ Not configured"}`);
-  console.log(`📊 MongoDB: ${process.env.MONGODB_URI ? "✅ Configured" : "❌ Not configured"}`);
-  console.log(`📧 Email Service: ${process.env.EMAIL_USER ? "✅ Configured" : "❌ Not configured"}`);
-  console.log(`📱 Twilio Service: ${process.env.TWILIO_ACCOUNT_SID ? "✅ Configured" : "❌ Not configured"}`);
-  console.log(`☁️ Cloudinary: ${process.env.CLOUDINARY_CLOUD_NAME ? "✅ Configured" : "❌ Not configured"}`);
-  console.log(`💳 Razorpay: ${process.env.RAZORPAY_KEY_ID ? "✅ Configured" : "⚠️ Not configured (mock mode)"}`);
+  console.log(
+    `🔗 Client URL: ${process.env.CLIENT_URL || "https://aureviancollections.in"}`,
+  );
+  console.log(
+    `🔑 Google OAuth: ${process.env.GOOGLE_CLIENT_ID ? "✅ Configured" : "❌ Not configured"}`,
+  );
+  console.log(
+    `🔐 JWT Secret: ${process.env.JWT_ACCESS_SECRET ? "✅ Configured" : "❌ Not configured"}`,
+  );
+  console.log(
+    `📊 MongoDB: ${process.env.MONGODB_URI ? "✅ Configured" : "❌ Not configured"}`,
+  );
+  console.log(
+    `📧 Email Service: ${process.env.EMAIL_USER ? "✅ Configured" : "❌ Not configured"}`,
+  );
+  console.log(
+    `📱 Twilio Service: ${process.env.TWILIO_ACCOUNT_SID ? "✅ Configured" : "❌ Not configured"}`,
+  );
+  console.log(
+    `☁️ Cloudinary: ${process.env.CLOUDINARY_CLOUD_NAME ? "✅ Configured" : "❌ Not configured"}`,
+  );
+  console.log(
+    `💳 Razorpay: ${process.env.RAZORPAY_KEY_ID ? "✅ Configured" : "⚠️ Not configured (mock mode)"}`,
+  );
   console.log("=".repeat(60));
   console.log("📌 Available Routes:");
   console.log("  🔹 /api/auth - Authentication");
@@ -373,6 +396,9 @@ const server = app.listen(PORT, () => {
   console.log("  🔹 /api/wallet - Wallet Management");
   console.log("  🔹 /api/support - Support Ticket Management");
   console.log("  🔹 /api/header-config - Header Configuration");
+  console.log("  🔹 /api/cart - Cart");
+  console.log("  🔹 /api/wishlist - Wishlist");
+  console.log("  🔹 /api/orders - Orders");
   console.log("  🔹 /health - Health Check");
   console.log("  🔹 /api - API Info");
   console.log("=".repeat(60));

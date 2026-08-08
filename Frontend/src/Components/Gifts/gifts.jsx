@@ -1,23 +1,26 @@
+// src/Pages/Gifts/Gifts.jsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import styles from "./gifts.module.css";
 import Header from "../../Pages/Layout/Header/Header";
 import Footer from "../../Pages/Layout/Footer/Footer";
-
-import solitaireBand from "../../assets/solitaire-band.jpg";
-import layeredChain from "../../assets/layered-chain.jpg";
-import dropStuds from "../../assets/drop-studs.jpg";
-import charmBracelet from "../../assets/charm-bracelet.jpg";
-import bridalJewelSet from "../../assets/bridal-jewel-set.jpg";
-import hoopEarrings from "../../assets/hoop-earrings.jpg";
-import pendantChain from "../../assets/pendant-chain.jpg";
-import pearlStuds from "../../assets/pearl-studs.jpg";
 import giftHero from "../../assets/heroimageg.png";
 import giftMiddle from "../../assets/giftmiddle.png";
 
-import { FiGift, FiCheck, FiHeart, FiStar, FiShoppingBag, FiChevronDown } from "react-icons/fi";
+import {
+  FiGift,
+  FiCheck,
+  FiHeart,
+  FiStar,
+  FiShoppingBag,
+  FiChevronDown,
+} from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 import { LuSlidersHorizontal } from "react-icons/lu";
+
+import { fetchProductsByPlacement } from "../../redux/slices/storefrontProductSlice";
 
 const jewelHighlights = [
   ["Brilliant Cut Quality", "Natural Color Grade"],
@@ -54,81 +57,6 @@ const promotions = ["Gift Wrapped", "Best Seller", "Trending", "Premium Gift"];
 const availability = [
   { name: "In Stock", count: 72 },
   { name: "Out of Stock", count: 4 },
-];
-
-const featuredGifts = [
-  {
-    id: 1,
-    badge: "Gift Wrapped",
-    category: "Anniversary",
-    name: "Aurevian Solitaire Band",
-    priceNow: "₹2,100",
-    priceOld: "₹3,000",
-    image: solitaireBand,
-  },
-  {
-    id: 2,
-    badge: "Best Seller",
-    category: "Wedding",
-    name: "Layla Layered Chain",
-    priceNow: "₹3,400",
-    priceOld: "₹4,250",
-    image: layeredChain,
-  },
-  {
-    id: 3,
-    badge: "Gift Wrapped",
-    category: "Birthday",
-    name: "Amara Drop Studs",
-    priceNow: "₹1,650",
-    priceOld: "₹2,200",
-    image: dropStuds,
-  },
-  {
-    id: 4,
-    badge: "Trending",
-    category: "Just Because",
-    name: "Celeste Charm Bracelet",
-    priceNow: "₹1,800",
-    priceOld: "₹3,000",
-    image: charmBracelet,
-  },
-  {
-    id: 5,
-    badge: "Premium Gift",
-    category: "Wedding",
-    name: "Anaya Bridal Jewel Set",
-    priceNow: "₹6,300",
-    priceOld: "₹7,000",
-    image: bridalJewelSet,
-  },
-  {
-    id: 6,
-    badge: "Gift Wrapped",
-    category: "Valentine's Day",
-    name: "Zoya Hoop Earrings",
-    priceNow: "₹1,300",
-    priceOld: "₹2,000",
-    image: hoopEarrings,
-  },
-  {
-    id: 7,
-    badge: "Best Seller",
-    category: "Mother's Day",
-    name: "Ishani Pendant Chain",
-    priceNow: "₹2,750",
-    priceOld: "₹5,000",
-    image: pendantChain,
-  },
-  {
-    id: 8,
-    badge: "Gift Wrapped",
-    category: "Birthday",
-    name: "Sana Pearl Studs",
-    priceNow: "₹1,450",
-    priceOld: "₹1,950",
-    image: pearlStuds,
-  },
 ];
 
 const testimonials = [
@@ -171,12 +99,38 @@ const perks = [
 ];
 
 export default function Gifts() {
+  const dispatch = useDispatch();
+  const { byPlacement, isLoading } = useSelector(
+    (state) => state.storefrontProduct,
+  );
+  const giftsData = byPlacement.gifts || {
+    products: [],
+    pagination: { page: 1, totalPages: 1, total: 0 },
+  };
+
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState(new Set());
   const [wishlist, setWishlist] = useState(new Set());
-
-  // ---------- Cart state: tracks which product ids have been added ----------
   const [cart, setCart] = useState(new Set());
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  const products = giftsData.products || [];
+  const { total, totalPages } = giftsData.pagination || {
+    total: 0,
+    totalPages: 1,
+  };
+
+  // Fetch products when page changes
+  useEffect(() => {
+    dispatch(
+      fetchProductsByPlacement({
+        placement: "gifts",
+        page: currentPage,
+        limit: itemsPerPage,
+      }),
+    );
+  }, [dispatch, currentPage]);
 
   const toggleWishlist = (id) => {
     setWishlist((prev) => {
@@ -190,7 +144,6 @@ export default function Gifts() {
     });
   };
 
-  // ---------- Add to Cart handler ----------
   const addToCart = (id) => {
     setCart((prev) => {
       const next = new Set(prev);
@@ -216,12 +169,10 @@ export default function Gifts() {
 
   return (
     <div className={styles.page}>
-      {/* ================= HEADER ================= */}
       <Header />
 
-      {/* ================= MAIN CONTENT ================= */}
       <div className={styles.mainContent}>
-        {/* ================= HERO ================= */}
+        {/* ================= HERO (UNCHANGED) ================= */}
         <section className={styles.hero}>
           <img
             src={giftHero}
@@ -245,7 +196,7 @@ export default function Gifts() {
             </span>
           </button>
 
-          {/* ---------- Mobile backdrop (only shows when filters are open) ---------- */}
+          {/* ---------- Mobile backdrop ---------- */}
           {filtersOpen && (
             <div
               className={styles.filterOverlay}
@@ -259,7 +210,6 @@ export default function Gifts() {
               filtersOpen ? styles.filtersOpen : ""
             }`}
           >
-            {/* Fixed header: stays visible while the list below scrolls */}
             <div className={styles.filtersSheetHeader}>
               <h3 className={styles.filtersHeading}>Filter Options</h3>
               <button
@@ -418,7 +368,6 @@ export default function Gifts() {
                 <span className={styles.clear}>Clear all</span>
               </div>
 
-              {/* Apply button, mobile only */}
               <button
                 type="button"
                 className={styles.applyFilters}
@@ -433,7 +382,9 @@ export default function Gifts() {
           <main>
             <div className={styles.toolbar}>
               <span className={styles.resultsCount}>
-                Showing 1–{featuredGifts.length} of 24 results
+                {isLoading
+                  ? "Loading..."
+                  : `Showing ${products.length} of ${total} results`}
               </span>
               <div className={styles.sortWrapper}>
                 <select className={styles.sortSelect}>
@@ -448,90 +399,149 @@ export default function Gifts() {
             </div>
 
             <div className={styles.productGrid}>
-              {featuredGifts.map((p) => (
-                <div className={styles.productCard} key={p.id}>
-                  <div className={styles.productMedia}>
-                    <span className={styles.badge}>{p.badge}</span>
-                    <span className={styles.productCatOverlay}>
-                      {p.category}
-                    </span>
-                    <div className={styles.wishlistActions}>
+              {products.map((p) => {
+                const discount =
+                  p.pricing?.salePrice && p.pricing?.originalPrice
+                    ? Math.round(
+                        ((p.pricing.originalPrice - p.pricing.salePrice) /
+                          p.pricing.originalPrice) *
+                          100,
+                      )
+                    : 0;
+                return (
+                  <div className={styles.productCard} key={p._id}>
+                    {/* ✅ NEW: navigate to product detail page */}
+                    <Link
+                      to={`/product/${p.productSlug}`}
+                      className={styles.productMedia}
+                    >
+                      {discount > 0 && (
+                        <span className={styles.badge}>{discount}% off</span>
+                      )}
+                      <span className={styles.productCatOverlay}>
+                        {p.category?.categoryData?.label || "Gift"}
+                      </span>
+                      <div className={styles.wishlistActions}>
+                        <button
+                          type="button"
+                          className={`${styles.wishlistBtn} ${
+                            wishlist.has(p._id) ? styles.wishlistBtnActive : ""
+                          }`}
+                          onClick={(e) => {
+                            e.preventDefault(); // ✅ NEW: don't trigger Link navigation
+                            e.stopPropagation();
+                            toggleWishlist(p._id);
+                          }}
+                          aria-label={
+                            wishlist.has(p._id)
+                              ? "Remove from wishlist"
+                              : "Add to wishlist"
+                          }
+                        >
+                          {wishlist.has(p._id) ? <FaHeart /> : <FiHeart />}
+                        </button>
+                      </div>
+                      {p.thumbnail?.url ? (
+                        <img
+                          src={p.thumbnail.url}
+                          alt={p.productName}
+                          className={styles.productImage}
+                        />
+                      ) : (
+                        <span className={styles.placeholderLabel}>
+                          Product Image
+                        </span>
+                      )}
+                    </Link>
+                    <div className={styles.productInfo}>
+                      {/* ✅ NEW: product name also links */}
+                      <Link
+                        to={`/product/${p.productSlug}`}
+                        className={styles.productName}
+                      >
+                        {p.productName}
+                      </Link>
+                      <div className={styles.productPrice}>
+                        <span className={styles.priceNow}>
+                          ₹
+                          {(
+                            p.pricing?.salePrice || p.pricing?.originalPrice
+                          )?.toLocaleString() || "0"}
+                        </span>
+                        {p.pricing?.salePrice && p.pricing?.originalPrice && (
+                          <span className={styles.priceOld}>
+                            ₹{p.pricing.originalPrice.toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+
                       <button
                         type="button"
-                        className={`${styles.wishlistBtn} ${
-                          wishlist.has(p.id) ? styles.wishlistBtnActive : ""
+                        className={`${styles.addToCartBtn} ${
+                          cart.has(p._id) ? styles.addToCartBtnActive : ""
                         }`}
-                        onClick={() => toggleWishlist(p.id)}
-                        aria-label={
-                          wishlist.has(p.id)
-                            ? "Remove from wishlist"
-                            : "Add to wishlist"
-                        }
+                        onClick={() => addToCart(p._id)}
+                        disabled={cart.has(p._id)}
                       >
-                        {wishlist.has(p.id) ? <FaHeart /> : <FiHeart />}
+                        {cart.has(p._id) ? (
+                          <>
+                            <FiCheck /> Added to Cart
+                          </>
+                        ) : (
+                          <>
+                            <FiShoppingBag /> Add to Cart
+                          </>
+                        )}
                       </button>
                     </div>
-                    {p.image ? (
-                      <img
-                        src={p.image}
-                        alt={p.name}
-                        className={styles.productImage}
-                      />
-                    ) : (
-                      <span className={styles.placeholderLabel}>
-                        Product Image
-                      </span>
-                    )}
                   </div>
-                  <div className={styles.productInfo}>
-                    <div className={styles.productName}>{p.name}</div>
-                    <div className={styles.productPrice}>
-                      <span className={styles.priceNow}>{p.priceNow}</span>
-                      <span className={styles.priceOld}>{p.priceOld}</span>
-                    </div>
+                );
+              })}
+            </div>
 
-                    {/* ---------- Add to Cart button ---------- */}
-                    <button
-                      type="button"
-                      className={`${styles.addToCartBtn} ${
-                        cart.has(p.id) ? styles.addToCartBtnActive : ""
-                      }`}
-                      onClick={() => addToCart(p.id)}
-                      disabled={cart.has(p.id)}
+            {/* ---------- Pagination ---------- */}
+            {totalPages > 1 && (
+              <div className={styles.pagination}>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage > 1) setCurrentPage(currentPage - 1);
+                  }}
+                >
+                  ‹
+                </a>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (n) => (
+                    <a
+                      key={n}
+                      href="#"
+                      className={n === currentPage ? styles.active : ""}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentPage(n);
+                      }}
                     >
-                      {cart.has(p.id) ? (
-                        <>
-                          <FiCheck /> Added to Cart
-                        </>
-                      ) : (
-                        <>
-                          <FiShoppingBag /> Add to Cart
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
- {/* ---------- Pagination ---------- */}
-            <div className={styles.pagination}>
-              <a href="#">‹</a>
-              <a href="#" className={styles.active}>
-                1
-              </a>
-              <a href="#">2</a>
-              <a href="#">3</a>
-              <a href="#">…</a>
-              <a href="#">12</a>
-              <a href="#">›</a>
-            </div>
-          
-
+                      {n}
+                    </a>
+                  ),
+                )}
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage < totalPages)
+                      setCurrentPage(currentPage + 1);
+                  }}
+                >
+                  ›
+                </a>
+              </div>
+            )}
           </main>
         </div>
 
-        {/* ================= TESTIMONIALS ================= */}
+        {/* ================= TESTIMONIALS (UNCHANGED) ================= */}
         <section className={styles.testimonials}>
           <div className={styles.testimonialsHeading}>
             <span className={styles.testimonialsKicker}>
@@ -562,7 +572,7 @@ export default function Gifts() {
           </div>
         </section>
 
-        {/* ================= COMMITMENT / BRAND STORY ================= */}
+        {/* ================= COMMITMENT / BRAND STORY (UNCHANGED) ================= */}
         <section className={styles.commitment}>
           <div className={styles.commitmentGrid}>
             <div className={styles.commitmentText}>
@@ -613,7 +623,7 @@ export default function Gifts() {
           </div>
         </section>
 
-        {/* ================= PERKS STRIP ================= */}
+        {/* ================= PERKS STRIP (UNCHANGED) ================= */}
         <section className={styles.perks}>
           {perks.map((perk) => (
             <div className={styles.perk} key={perk.title}>
@@ -627,7 +637,6 @@ export default function Gifts() {
         </section>
       </div>
 
-      {/* ================= FOOTER ================= */}
       <Footer />
     </div>
   );
