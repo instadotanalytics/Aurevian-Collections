@@ -228,23 +228,7 @@ export default function Offers() {
           className={styles.heroBanner}
           style={{ backgroundImage: `url(${craftImage1})` }}
         >
-          <div className={styles.heroOverlay}>
-            <div className={styles.heroContent}>
-              <span className={styles.heroTag}>EXCLUSIVE OFFERS</span>
-              <h1 className={styles.heroTitle}>
-                Premium Choices,
-                <br />
-                <span>Just For You</span>
-              </h1>
-              <p className={styles.heroDescription}>
-                Explore handpicked luxury pieces at special prices for a limited
-                time.
-              </p>
-              <button className={styles.heroBtn} onClick={scrollToOffers}>
-                SHOP OFFERS →
-              </button>
-            </div>
-          </div>
+          
         </div>
 
         <div className={styles.container}>
