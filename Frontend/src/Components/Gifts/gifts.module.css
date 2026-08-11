@@ -1,3 +1,4 @@
+/* src/Pages/Gifts/gifts.module.css */
 
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap");
 
@@ -15,6 +16,9 @@
   --muted: #8a8072;
   --sale: #3f3626;
   --radius: 2px;
+  --ink-soft: #4a4136;
+  --cream-card: #f5ede0;
+  --cream-line: #e7e0d2;
 
   font-family: "Jost", sans-serif;
   color: var(--ink);
@@ -25,7 +29,7 @@
 }
 
 .mainContent {
-  padding-top: 120px; /* Account for fixed header */
+  padding-top: 120px;
   flex: 1;
 }
 
@@ -40,9 +44,7 @@
   text-decoration: none;
 }
 
-/* ---------- Hero ----------
-   Matches shop.module.css .pageTitle / .heroImage exactly:
-   fade-in wrapper + responsive aspect-ratio crop. ---------- */
+/* ---------- Hero ---------- */
 .hero {
   position: relative;
   width: 100%;
@@ -93,7 +95,7 @@
 }
 
 .commitmentText {
-  padding: 100px;
+  padding: 100px 0;
 }
 
 .commitmentKicker {
@@ -200,326 +202,449 @@
   scroll-margin-top: 110px;
 }
 
-/* ---------- Mobile filter toggle button (hidden on desktop) ---------- */
+/* ---------- Mobile filter toggle button (Matches Collections) ---------- */
 .filterToggle {
   display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--cream-card);
+  border: 1px solid var(--cream-line);
+  border-radius: 8px;
+  font-family: "Jost", sans-serif;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink);
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: all 0.2s ease;
+}
+
+.filterToggle:hover {
+  border-color: var(--gold);
+}
+
+.filterToggle:active {
+  transform: scale(0.98);
 }
 
 .filterToggleText {
-  display: none;
+  font-weight: 500;
 }
 
 .filterToggleIcon {
-  display: inline-flex;
+  font-size: 18px;
+  display: flex;
   align-items: center;
-  justify-content: center;
 }
 
-.filterToggleIcon svg {
+/* ---------- Mobile backdrop ---------- */
+.filterOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 998;
+}
+
+.filterOverlay {
   display: block;
 }
 
-/* ---------- Mobile backdrop behind the filter sheet (hidden on desktop) ---------- */
-.filterOverlay {
-  display: none;
+/* ---------- Desktop Filters Sidebar (Matches Collections) ---------- */
+.filters {
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  background: linear-gradient(180deg, #fffdf9 0%, var(--cream-card) 100%);
+  border: 1px solid var(--cream-line);
+  border-radius: 4px;
+  padding: 28px 24px 20px;
+  box-shadow: 0 20px 50px -34px rgba(36, 29, 23, 0.45);
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
 }
 
-/* ---------- Filters ---------- */
-.filtersSheetHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin: 0 0 16px;
-  padding: 0 0 10px;
-  border-bottom: 1px solid var(--line);
+/* Custom scrollbar for filter sidebar */
+.filters::-webkit-scrollbar {
+  width: 3px;
+}
+
+.filters::-webkit-scrollbar-track {
+  background: var(--cream-line);
+  border-radius: 4px;
+}
+
+.filters::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 4px;
+}
+
+.filters {
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold) var(--cream-line);
 }
 
 .filtersHeading {
-  font-size: 13px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin: 0;
-  color: var(--sale);
-}
-
-/* Close (✕) button for the mobile bottom sheet, hidden on desktop */
-.filtersClose {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  flex-shrink: 0;
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  background: #fff;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
   color: var(--ink);
-  font-size: 14px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.filterGroup {
-  margin-bottom: 34px;
-}
-
-.filterGroup ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-/* ---------- Filter list item (holds a checkbox + label) ---------- */
-.filterGroup li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 14px;
-  padding: 7px 0;
-  color: #4a4136;
-  border-radius: 4px;
-  transition:
-    background 0.15s ease,
-    color 0.15s ease,
-    padding 0.15s ease;
-}
-
-.filterGroup li:hover {
-  color: var(--gold-deep);
-}
-
-/* ---------- Checkbox row inside each filter item ---------- */
-.checkRow {
+  letter-spacing: 0.02em;
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-shrink: 0;
+}
+
+.filtersHeading::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid var(--gold);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+.filters::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 1px;
+  margin: 12px 0 18px;
+  background: linear-gradient(to right, var(--gold-soft), var(--cream-line) 60%, transparent);
+  flex-shrink: 0;
+}
+
+.filterGroup {
+  margin-bottom: 18px;
+  flex-shrink: 0;
+}
+
+.filterGroupLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--gold-deep);
+  margin: 0 0 10px 0;
+  display: block;
+}
+
+.filterOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
   cursor: pointer;
+  transition: color 0.25s ease, transform 0.25s ease;
+  font-size: 14px;
+  color: var(--ink-soft);
+  font-weight: 400;
+}
+
+.filterOption:hover {
+  color: var(--gold-deep);
+  transform: translateX(2px);
+}
+
+/* Custom elegant radio controls */
+.filterOption input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--cream-line);
+  background: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  border-radius: 50%;
+}
+
+.filterOption input[type="radio"]::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--gold);
+  transform: scale(0);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.filterOption input[type="radio"]:checked {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(179, 135, 63, 0.12);
+}
+
+.filterOption input[type="radio"]:checked::after {
+  transform: scale(1);
+}
+
+.filterPriceRange {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+.filterPriceRange span:last-child {
+  color: var(--gold-deep);
+  font-weight: 600;
+}
+
+/* Custom elegant range slider */
+.filterPriceInput {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  background: linear-gradient(to right, var(--gold) 0%, var(--gold) var(--_progress, 50%), var(--cream-line) var(--_progress, 50%), var(--cream-line) 100%);
+  height: 3px;
+  border-radius: 2px;
+  outline: none;
+}
+
+.filterPriceInput::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--gold);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(179, 135, 63, 0.4);
+  transition: transform 0.2s ease;
+}
+
+.filterPriceInput::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.filterPriceInput::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--gold);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(179, 135, 63, 0.4);
+}
+
+.filterPriceInput::-moz-range-track {
+  background: var(--cream-line);
+  height: 3px;
+  border-radius: 2px;
+}
+
+.filterPriceInput::-moz-range-progress {
+  background: var(--gold);
+  height: 3px;
+  border-radius: 2px;
+}
+
+.filterClearBtn {
+  background: none;
+  border: none;
+  color: var(--gold-deep);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 10px 0 2px;
+  font-family: "Jost", sans-serif;
+  transition: color 0.2s ease, letter-spacing 0.2s ease;
+  letter-spacing: 0.04em;
+  margin-top: 6px;
+  text-transform: uppercase;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.filterClearBtn::after {
+  content: "→";
+  display: inline-block;
+  font-size: 13px;
+  width: auto;
+  min-width: 0;
+  transition: transform 0.25s ease;
+}
+
+.filterClearBtn:hover {
+  color: var(--ink);
+  letter-spacing: 0.07em;
+}
+
+.filterClearBtn:hover::after {
+  transform: translateX(3px);
+}
+
+/* ---------- Products Wrapper ---------- */
+.productsWrapper {
+  display: flex;
+  flex-direction: column;
   flex: 1;
 }
 
-.checkRow input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  accent-color: var(--gold-deep);
-  cursor: pointer;
-}
-
-.checkLabel {
-  line-height: 1.2;
-}
-
-/* ---------- Selected / active filter state ---------- */
-.filterGroup li.selected {
-  background: var(--gold-soft);
-  color: var(--sale);
-  font-weight: 600;
-  padding-left: 10px;
-  padding-right: 10px;
-}
-
-.filterGroup li.selected .count {
-  color: var(--sale);
-}
-
-.groupHeading {
-  border: none;
-  padding: 0;
-  margin-bottom: 12px;
-  font-size: 13px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--sale);
-}
-
-.count {
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.priceSlider {
-  height: 3px;
-  background: var(--line);
-  border-radius: 2px;
-  position: relative;
-  margin: 18px 0 10px;
-}
-
-.fill {
-  position: absolute;
-  left: 15%;
-  right: 35%;
-  top: 0;
-  bottom: 0;
-  background: var(--gold);
-  border-radius: 2px;
-}
-
-.handle {
-  position: absolute;
-  top: 50%;
-  width: 12px;
-  height: 12px;
-  background: var(--gold);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  border: 2px solid #fff;
-  box-shadow: 0 0 0 1px var(--gold);
-}
-
-.handleLeft {
-  left: 15%;
-}
-
-.handleRight {
-  left: 65%;
-}
-
-.priceValues {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.promoTags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.promoTags span {
-  font-size: 11px;
-  padding: 6px 12px;
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  color: var(--sale);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.clear {
-  color: var(--gold-deep);
-  border: none !important;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.applyFilters {
-  display: none;
-}
-
-/* ---------- Pagination ---------- */
-.pagination {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 56px;
-  font-size: 14px;
-}
-
-.pagination a {
-  width: 34px;
-  height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  color: var(--muted);
-}
-
-.pagination a.active,
-.pagination a.active:hover {
-  background: var(--ink);
-  color: var(--gold-soft);
-  border-color: var(--ink);
-}
-
-.pagination a:hover {
-  border-color: var(--gold);
-  color: var(--gold-deep);
-}
-
-
-/* ---------- Toolbar ---------- */
+/* ---------- Toolbar (Matches Collections) ---------- */
 .toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 26px;
-  font-size: 13px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--cream-line);
+}
+
+.resultsCount {
+  font-size: 15px;
   color: var(--muted);
+  font-weight: 400;
 }
 
-.toolbar select {
-  font-family: "Jost", sans-serif;
-  border: 1px solid var(--line);
-  background: #fff;
-  padding: 8px 14px;
-  font-size: 13px;
-  color: var(--ink);
-  border-radius: var(--radius);
-}
-
-.sortSelect {
-  padding-right: 36px !important;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-}
-
-/* ---------- Sort dropdown wrapper (holds the select + chevron icon) ---------- */
+/* ---------- Custom Sort Dropdown ---------- */
 .sortWrapper {
   position: relative;
   display: inline-flex;
   align-items: center;
 }
 
-.sortChevron {
-  position: absolute !important;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  color: var(--gold-deep) !important;
-  font-size: 16px !important;
-  width: 16px !important;
-  height: 16px !important;
-  z-index: 5;
-  display: flex !important;
+.sortButton {
+  display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 18px;
+  border: 1px solid var(--cream-line);
+  border-radius: 30px;
+  background: white;
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+  font-family: "Jost", sans-serif;
+  transition: border-color 0.2s ease;
+  min-width: 140px;
+  position: relative;
+  z-index: 1;
+}
+
+.sortButton:hover {
+  border-color: var(--gold-soft);
+}
+
+.sortButton:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(179, 135, 63, 0.1);
+  outline: none;
+}
+
+.sortChevron {
+  font-size: 14px !important;
+  width: 14px !important;
+  height: 14px !important;
+  color: var(--gold-deep) !important;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.sortChevronOpen {
+  transform: rotate(180deg);
+}
+
+/* ---------- Sort Dropdown Menu ---------- */
+.sortDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  background: white;
+  border: 1px solid var(--cream-line);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(28, 25, 23, 0.12);
+  padding: 6px 0;
+  z-index: 100;
+  min-width: 200px;
+  overflow: hidden;
+}
+
+.sortOption {
+  display: block;
+  width: 100%;
+  padding: 10px 18px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-family: "Jost", sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.sortOption:hover {
+  background: var(--cream);
+  color: var(--gold-deep);
+}
+
+.sortOptionActive {
+  background: var(--gold-soft);
+  color: var(--gold-deep);
+  font-weight: 500;
+}
+
+.sortOptionActive:hover {
+  background: var(--gold-soft);
+  color: var(--gold-deep);
 }
 
 /* ---------- Product grid ---------- */
 .productGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 28px;
+  gap: 20px;
+  flex: 1;
 }
 
 .productCard {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  background: var(--cream-card);
+  border: 1px solid var(--cream-line);
+  border-radius: 0;
   overflow: hidden;
-  position: relative;
-  transition:
-    box-shadow 0.25s,
-    transform 0.25s;
+  transition: box-shadow 0.25s, transform 0.25s;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 330px;
 }
 
 .productCard:hover {
   box-shadow: 0 14px 30px rgba(28, 25, 23, 0.09);
   transform: translateY(-3px);
+  background: var(--cream-card-hover);
 }
 
 .productMedia {
   position: relative;
+  width: 100%;
   aspect-ratio: 1 / 1;
+  overflow: hidden;
   background: repeating-linear-gradient(
     45deg,
     #efe9db,
@@ -527,11 +652,8 @@
     #e7ddc7 10px,
     #e7ddc7 20px
   );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-bottom: 1px solid var(--line);
-  overflow: hidden;
+  border-bottom: 1px solid var(--cream-line);
+  flex-shrink: 0;
 }
 
 .placeholderLabel {
@@ -556,93 +678,112 @@
   transform: scale(1.05);
 }
 
+/* ---------- Discount Badge ---------- */
 .badge {
   position: absolute;
   top: 12px;
   left: 12px;
-  background: var(--sale);
-  color: #f4e9cf;
+  background: #ffffff;
+  color: var(--sale);
   font-size: 11px;
   letter-spacing: 1px;
   padding: 5px 10px;
   border-radius: 20px;
   z-index: 2;
+  text-transform: lowercase;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-/* ---------- Category label overlay (sits on the product image) ---------- */
+/* ---------- Category overlay ---------- */
 .productCatOverlay {
   position: absolute;
   bottom: 12px;
   left: 12px;
   z-index: 2;
-  font-size: 10.5px;
-  letter-spacing: 1.5px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--sale);
+  color: var(--gold-deep);
   background: rgba(255, 255, 255, 0.85);
-  padding: 5px 10px;
+  padding: 4px 10px;
   border-radius: 20px;
   backdrop-filter: blur(2px);
+  font-weight: 600;
 }
 
-/* ---------- Wishlist / quick-view icons ---------- */
+/* ---------- Wishlist button ---------- */
 .wishlistActions {
   position: absolute;
   top: 14px;
   right: 14px;
   z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-.wishlistActions button {
+.wishlistBtn {
   width: 34px;
   height: 34px;
   border-radius: 50%;
   background: #fff;
-  border: 1px solid var(--line);
+  border: 1px solid var(--cream-line);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1;
   cursor: pointer;
   color: var(--ink);
-  transition:
-    transform 0.2s ease,
-    font-size 0.2s ease,
-    color 0.2s ease,
-    background 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: transform 0.2s ease, font-size 0.2s ease, color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
-.wishlistActions button:hover {
-  font-size: 19px;
+.wishlistBtn:hover {
+  font-size: 18px;
   color: var(--gold-deep);
   transform: translateY(-2px);
   box-shadow: 0 6px 14px rgba(28, 25, 23, 0.18);
 }
 
-.wishlistActions button:active {
+.wishlistBtn:active {
   transform: scale(0.85);
   background: var(--gold-soft);
   color: var(--sale);
   box-shadow: 0 2px 6px rgba(28, 25, 23, 0.2);
 }
 
-.productInfo {
+.wishlistBtnActive {
+  color: #d9534f;
+  background: #fff;
+  border-color: #d9534f;
+}
 
-  padding: 12px 18px 4px;
-  position: relative;
+.wishlistBtnActive:hover {
+  color: #d9534f;
+}
+
+/* ---------- Product Info ---------- */
+.productInfo {
+  padding: 12px 16px 4px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: space-between;
+  gap: 4px;
   background: transparent;
 }
 
 .productName {
-  font-size: 16px;
-  margin: -11px -3px -2px;
+  font-family: "Jost", "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
   font-weight: 500;
-  font-family: "Jost", sans-serif;
+  color: var(--ink);
+  margin: 0 0 6px 0;
+  line-height: 1.3;
+  font-style: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-transform: capitalize;
 }
 
 .productPrice {
@@ -650,6 +791,8 @@
   align-items: center;
   gap: 10px;
   font-size: 14px;
+  margin-bottom: 2px;
+  flex-wrap: wrap;
 }
 
 .priceNow {
@@ -669,36 +812,36 @@
   align-items: center;
   justify-content: center;
   gap: 5px;
-   width: calc(100% + 36px);   /* 18px left + 18px right */
-  margin: 14px -18px 0px;
-  padding: 12px 0;
+  width: calc(100% + 32px);
+  margin: 10px -16px -4px;
+  padding: 11px 0;
   font-family: "Jost", sans-serif;
-  font-size: 12.5px;
+  font-size: 11.5px;
   font-weight: 500;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
   color: var(--cream);
   background: var(--gold);
   border: 1px solid var(--gold);
   cursor: pointer;
-  transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    transform 0.15s ease,
-    box-shadow 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  min-height: 40px;
+  flex-shrink: 0;
+  margin-top: auto;
+  border-radius: 0;
 }
 
 .addToCartBtn svg {
-  font-size: 14px;
+  font-size: 13px;
 }
 
-.addToCartBtn:hover {
+.addToCartBtn:hover:not(:disabled) {
   background: var(--gold-deep);
   border-color: var(--gold-deep);
   box-shadow: 0 8px 18px rgba(124, 94, 34, 0.25);
 }
 
-.addToCartBtn:active {
+.addToCartBtn:active:not(:disabled) {
   transform: scale(0.97);
 }
 
@@ -715,6 +858,78 @@
   border-color: var(--gold-soft);
   box-shadow: none;
   transform: none;
+}
+
+.addToCartBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---------- Pagination ---------- */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 56px;
+}
+
+.paginationBtn {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--cream-line);
+  border-radius: 50%;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  font-family: "Jost", sans-serif;
+}
+
+.paginationBtn:hover:not(:disabled) {
+  border-color: var(--gold);
+  color: var(--gold-deep);
+}
+
+.paginationBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.pageBtn {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--cream-line);
+  border-radius: 50%;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  font-family: "Jost", sans-serif;
+}
+
+.pageBtn:hover {
+  border-color: var(--gold);
+  color: var(--gold-deep);
+}
+
+.activePage {
+  background: var(--ink);
+  color: var(--gold-soft);
+  border-color: var(--ink);
+}
+
+.activePage:hover {
+  background: var(--ink);
+  color: var(--gold-soft);
+  border-color: var(--ink);
 }
 
 /* ---------- Testimonials ---------- */
@@ -747,7 +962,7 @@
 
 .testimonialCard {
   background: #fff;
-  border: 1px solid var(--line);
+  border: 1px solid var(--cream-line);
   border-radius: 12px;
   padding: 20px 22px;
   display: flex;
@@ -787,7 +1002,7 @@
 }
 
 .starEmpty {
-  color: var(--line);
+  color: var(--cream-line);
 }
 
 .testimonialQuote {
@@ -850,6 +1065,137 @@
 }
 
 /* ============================================================
+   Mobile Bottom Sheet Filter (Matches Collections)
+   ============================================================ */
+.mobileFilterSheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 60vh;
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--cream);
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -10px 30px rgba(28, 25, 23, 0.3);
+  transform: translateY(100%);
+  transition: transform 0.35s ease;
+  z-index: 999;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.mobileFilterSheetActive {
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+.mobileFilterHandle {
+  width: 40px;
+  height: 4px;
+  background: var(--cream-line);
+  border-radius: 2px;
+  margin: 12px auto 8px;
+  flex-shrink: 0;
+}
+
+.mobileFilterHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 20px 12px;
+  border-bottom: 1px solid var(--cream-line);
+  flex-shrink: 0;
+  background: var(--cream);
+}
+
+.mobileFilterTitle {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+}
+
+.mobileFilterClose {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.mobileFilterClose:hover {
+  color: var(--ink);
+}
+
+.mobileFilterContent {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 20px 20px;
+  overscroll-behavior: contain;
+}
+
+.mobileFilterGroup {
+  margin-bottom: 20px;
+}
+
+.mobileFilterGroupLabel {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin: 0 0 10px 0;
+  display: block;
+}
+
+.mobileFilterOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  font-size: 15px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.mobileFilterOption input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--gold-deep);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.mobileFilterApply {
+  width: 100%;
+  padding: 14px;
+  background: var(--gold);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: "Jost", sans-serif;
+  margin-top: 5px;
+  transition: background 0.3s ease;
+  flex-shrink: 0;
+}
+
+.mobileFilterApply:hover {
+  background: var(--gold-deep);
+}
+
+.mobileFilterApply:active {
+  transform: scale(0.96);
+}
+
+/* ============================================================
    RESPONSIVE
    ============================================================ */
 
@@ -876,12 +1222,6 @@
     padding-top: 100px;
   }
 
-  /* FIX: don't crop the hero banner on mobile — the promo text is baked
-     into the image edge-to-edge, so a tighter aspect-ratio with
-     object-fit: cover was slicing off words on the left/right.
-     Letting the image render at its own natural ratio (no forced
-     aspect-ratio) shows the full banner with zero cropping AND zero
-     empty letterbox space above/below it. */
   .heroImage {
     aspect-ratio: auto;
     height: auto;
@@ -902,9 +1242,6 @@
 
   .commitmentText {
     order: 2;
-    /* FIX: base desktop rule sets padding: 100px, which was never
-       overridden here — that was squeezing the text into a narrow
-       column on mobile/tablet. */
     padding: 0;
   }
 
@@ -936,6 +1273,18 @@
     gap: 0;
   }
 
+  .filterToggle {
+    display: flex;
+  }
+
+  .filterOverlay {
+    display: block;
+  }
+
+  .filters {
+    display: none;
+  }
+
   .productGrid {
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
@@ -946,129 +1295,27 @@
     padding: 30px 24px;
   }
 
-  /* ----- Filter toggle button: text on the left, icon on the right ----- */
-  .filterToggle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    width: 100%;
-    padding: 5px;
-    background: none;
-    color: var(--ink);
-    border: none;
-    border-radius: 6px;
-    font-family: "Jost", sans-serif;
-    font-size: 13px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition:
-      transform 0.15s ease,
-      box-shadow 0.15s ease;
-  }
-
-  .filterToggleText {
-    display: inline-block;
-  }
-
-  .filterToggleIcon {
-    font-size: 16px;
-  }
-
-  .filterToggle:active {
-    transform: scale(0.96);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) inset;
-  }
-
-  /* ----- Backdrop: 30% black, sits behind the sheet, closes it on tap ----- */
-  .filterOverlay {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.3);
-    z-index: 998;
-  }
-
-  /* ----- Bottom sheet: slides up from the bottom, covers 60% of the screen.
-           Header stays fixed; only the list below it scrolls. ----- */
-  .filters {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 60vh;
-    max-height: 60vh;
-    display: flex;
-    flex-direction: column;
-    background: var(--cream);
-    border-radius: 16px 16px 0 0;
-    box-shadow: 0 -10px 30px rgba(28, 25, 23, 0.3);
-    transform: translateY(100%);
-    transition: transform 0.35s ease;
-    z-index: 999;
-    overflow: hidden;
-  }
-
-  .filtersOpen {
-    transform: translateY(0);
-  }
-
-  .filtersSheetHeader {
-    flex-shrink: 0;
-    padding: 16px 18px 10px;
-    margin: 0;
-    background: var(--cream);
-  }
-
-  .filtersClose {
-    display: flex;
-  }
-
-  .filtersInner {
-    flex: 1;
-    padding: 10px 18px 22px;
-    overflow-y: auto;
-  }
-
-  /* ----- Larger, clearer checkboxes on mobile ----- */
-  .checkRow input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-  }
-
-  .filterGroup li.selected {
-    border: 1px solid var(--gold-deep);
-  }
-
-  /* ----- Hide "Showing X of Y results" on mobile ----- */
   .resultsCount {
-    display: none;
+    display: inline-block;
+    font-size: 15px;
   }
 
-  /* ----- Toolbar becomes just the sort select, full width ----- */
   .toolbar {
-    justify-content: flex-end;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
   }
 
-  /* ----- Sort dropdown wrapper takes full width on mobile ----- */
-  .sortWrapper {
-    width: 100%;
+  .sortButton {
+    min-width: 150px;
+    padding: 8px 16px;
+    font-size: 13px;
   }
 
-  /* ----- Sort dropdown styled for mobile ----- */
-  .sortSelect {
-    width: 100%;
-    padding: 13px 40px 13px 16px;
-    font-size: 13.5px;
-    color: var(--sale);
-    background-color: #fff;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    box-shadow: 0 2px 6px rgba(28, 25, 23, 0.05);
+  .sortDropdown {
+    min-width: 180px;
+    right: 0;
+    left: auto;
   }
 }
 
@@ -1087,8 +1334,6 @@
     padding-top: 80px;
   }
 
-  /* FIX: same reasoning as the tablet breakpoint above — keep the full
-     banner visible with no cropping and no empty letterbox bars. */
   .heroImage {
     aspect-ratio: auto;
     height: auto;
@@ -1102,77 +1347,77 @@
     padding: 20px 14px 48px;
   }
 
+  .filterToggle {
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+
+  .filterToggleText {
+    font-size: 12px;
+  }
+
   .productGrid {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
   }
 
   .productCard {
-    border-radius: 4px;
+    min-height: 260px;
   }
 
   .productInfo {
-    /* padding: 12px 10px 12px; */
-    padding: 1px 10px 3px;
-  }
-
-  .productCatOverlay {
-    font-size: 8.5px;
-    letter-spacing: 1px;
-    padding: 4px 8px;
-    bottom: 8px;
-    left: 8px;
+    padding: 10px 12px 10px;
+    gap: 3px;
   }
 
   .productName {
-    font-size: 12.5px;
-    margin: 4px 0 6px;
-    line-height: 1.3;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    font-size: 13px;
   }
 
   .productPrice {
-    gap: 6px;
-    font-size: 12px;
-    flex-wrap: wrap;
+    font-size: 13px;
+    gap: 8px;
+  }
+
+  .priceNow {
+    font-size: 13px;
   }
 
   .priceOld {
-    font-size: 10.5px;
+    font-size: 11px;
   }
 
   .badge {
-    top: 8px;
-    left: 8px;
+    font-size: 10px;
+    padding: 4px 8px;
+    top: 10px;
+    left: 10px;
+  }
+
+  .productCatOverlay {
     font-size: 9px;
     padding: 3px 8px;
+    bottom: 10px;
+    left: 10px;
   }
 
   .wishlistActions {
-    top: 8px;
-    right: 8px;
+    top: 10px;
+    right: 10px;
   }
 
-  .wishlistActions button {
-    width: 26px;
-    height: 26px;
-    font-size: 12px;
+  .wishlistBtn {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
   }
 
-  .wishlistActions button:hover {
-    font-size: 15px;
-  }
-
-  /* ----- Add to Cart button on small screens ----- */
   .addToCartBtn {
-    margin-top: 8px;
-    padding: 8px 10px;
-    font-size: 10.5px;
-    gap: 6px;
-    letter-spacing: 0.6px;
+    font-size: 10px;
+    min-height: 36px;
+    padding: 9px 0;
+    width: calc(100% + 24px);
+    margin: 8px -12px -4px;
   }
 
   .addToCartBtn svg {
@@ -1182,21 +1427,47 @@
   .toolbar {
     flex-direction: column;
     align-items: flex-start;
-    gap: 10px;
-    margin-bottom: 18px;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
   }
 
-  .toolbar select {
-    width: 100%;
+  .resultsCount {
+    font-size: 14px;
   }
 
   .sortWrapper {
     width: 100%;
   }
 
-  .sortChevron {
+  .sortButton {
+    width: 100%;
+    min-width: unset;
+    padding: 10px 16px;
+    justify-content: space-between;
+  }
+
+  .sortDropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    min-width: unset;
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 8px 30px rgba(28, 25, 23, 0.15);
+  }
+
+  .sortOption {
+    padding: 12px 16px;
     font-size: 14px;
-    right: 12px;
+  }
+
+  .sortChevron {
+    right: 14px;
+    font-size: 14px !important;
+    width: 14px !important;
+    height: 14px !important;
   }
 
   .testimonials {
@@ -1219,6 +1490,38 @@
     gap: 20px;
     padding: 24px 20px;
   }
+
+  .mobileFilterSheet {
+    height: 60vh;
+    max-height: 60vh;
+  }
+
+  .mobileFilterHandle {
+    margin: 10px auto 6px;
+  }
+
+  .mobileFilterHeader {
+    padding: 6px 16px 10px;
+  }
+
+  .mobileFilterTitle {
+    font-size: 18px;
+  }
+
+  .mobileFilterContent {
+    padding: 16px;
+  }
+
+  .mobileFilterGroup {
+    margin-bottom: 16px;
+  }
+
+  .mobileFilterApply {
+    padding: 12px;
+    font-size: 15px;
+        margin-bottom: 50px;
+
+  }
 }
 
 /* ---------- Small phones ---------- */
@@ -1227,8 +1530,6 @@
     padding-top: 70px;
   }
 
-  /* FIX: at the smallest widths too, keep the image at its natural
-     ratio — no cropping, no empty letterbox space. */
   .heroImage {
     aspect-ratio: auto;
     height: auto;
@@ -1253,13 +1554,130 @@
     gap: 10px;
   }
 
+  .productCard {
+    min-height: 240px;
+  }
+
+  .productInfo {
+    padding: 8px 10px 8px;
+  }
+
   .productName {
     font-size: 12px;
+  }
+
+  .priceNow {
+    font-size: 12px;
+  }
+
+  .priceOld {
+    font-size: 10px;
+  }
+
+  .addToCartBtn {
+    font-size: 9px;
+    min-height: 32px;
+    padding: 7px 0;
+    width: calc(100% + 20px);
+    margin: 6px -10px -4px;
+  }
+
+  .badge {
+    font-size: 9px;
+    padding: 3px 7px;
+    top: 8px;
+    left: 8px;
+  }
+
+  .productCatOverlay {
+    font-size: 8px;
+    padding: 2px 7px;
+    bottom: 8px;
+    left: 8px;
+  }
+
+  .wishlistBtn {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+    top: 8px;
+    right: 8px;
   }
 
   .avatar {
     width: 44px;
     height: 44px;
     font-size: 12px;
+  }
+
+  .filterToggle {
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+
+  .filterToggleText {
+    font-size: 11px;
+  }
+
+  .sortButton {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+
+  .sortOption {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .mobileFilterSheet {
+    height: 65vh;
+    max-height: 65vh;
+  }
+
+  .mobileFilterContent {
+    padding: 14px;
+  }
+
+  .mobileFilterGroup {
+    margin-bottom: 14px;
+  }
+
+  .mobileFilterApply {
+    padding: 10px;
+    font-size: 14px;
+    margin-bottom: 50px;
+  }
+}
+
+/* ---------- Hide mobile filter on desktop ---------- */
+@media (min-width: 901px) {
+  .filterOverlay {
+    display: none !important;
+  }
+  
+  .mobileFilterSheet {
+    display: none !important;
+  }
+}
+
+/* ---------- Reduced Motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .hero {
+    animation: none !important;
+  }
+
+  .productCard,
+  .productImage,
+  .addToCartBtn,
+  .wishlistBtn,
+  .mobileFilterSheet {
+    transition: none !important;
+  }
+
+  .productCard:hover .productImage,
+  .productCard:hover,
+  .wishlistBtn:hover,
+  .addToCartBtn:hover {
+    transform: none !important;
   }
 }
