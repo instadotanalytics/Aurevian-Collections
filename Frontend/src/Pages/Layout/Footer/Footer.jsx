@@ -48,8 +48,8 @@ const aboutDropdown = [
 ];
 
 const policyLinks = [
-  { id: "shipping", label: "Shipping Policy", path: "/policies/shipping" },
-  { id: "returns", label:  "Exchange", path: "/policies/returns" },
+  
+
   { id: "privacy", label: "Privacy Policy", path: "/policies/privacy" },
   { id: "terms", label: "Terms of Service", path: "/policies/terms" },
 ];
@@ -82,13 +82,57 @@ const YoutubeIcon = (props) => (
   </svg>
 );
 
+const PinterestIcon = (props) => (
+  <svg
+    viewBox="0 0 24 24"
+    width="15"
+    height="15"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.6"
+    {...props}
+  >
+    <path d="M12 3.5a8.5 8.5 0 0 0-3.1 16.4c-.1-1.4 0-3 .35-4.3l1.1-4.6s-.28-.57-.28-1.4c0-1.3.76-2.28 1.7-2.28.8 0 1.18.6 1.18 1.32 0 .8-.5 2-.75 3.1-.22.93.47 1.69 1.4 1.69 1.68 0 2.98-1.77 2.98-4.32 0-2.26-1.62-3.84-3.94-3.84-2.68 0-4.25 2.01-4.25 4.09 0 .81.31 1.68.7 2.15.08.1.09.19.07.3l-.26 1.06c-.04.17-.14.21-.32.13-1.2-.56-1.95-2.3-1.95-3.7 0-3.01 2.19-5.78 6.31-5.78 3.31 0 5.88 2.36 5.88 5.51 0 3.29-2.07 5.94-4.94 5.94-.97 0-1.88-.5-2.19-1.09l-.6 2.27c-.22.83-.82 1.87-1.22 2.5.92.28 1.89.43 2.9.43A8.5 8.5 0 1 0 12 3.5Z" />
+  </svg>
+);
+
+const WhatsappIcon = (props) => (
+  <svg
+    viewBox="0 0 24 24"
+    width="15"
+    height="15"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.6"
+    {...props}
+  >
+    <path d="M20 11.5a8 8 0 0 1-11.8 7L4 20l1.5-4.1A8 8 0 1 1 20 11.5Z" />
+    <path d="M8.5 8.5c.2-.4.4-.4.7-.4h.5c.2 0 .4.1.5.4l.7 1.5c.1.2.1.4-.1.6l-.5.6c.6 1.1 1.5 2 2.6 2.6l.6-.5c.2-.2.4-.2.6-.1l1.5.7c.3.1.4.3.4.5v.5c0 .3-.1.5-.4.7-.4.2-.9.3-1.4.2-2.7-.5-5.7-3.5-6.2-6.2-.1-.5 0-1 .2-1.4Z" />
+  </svg>
+);
+
+
 const socialIcons = [
   {
     Icon: InstagramIcon,
-    href: "https://www.instagram.com/aureviancollections?igsh=bDc1NHBlcWJxeG5o&utm_source=qr",
+    href: "https://www.instagram.com/aureviancollections.in?igsh=MWs4a2diMjF0MTA2Yg==",
   },
-  { Icon: FacebookIcon, href: "#" },
-  { Icon: YoutubeIcon, href: "#" },
+  {
+    Icon: FacebookIcon,
+    href: "https://www.facebook.com/profile.php?id=61592830934451",
+  },
+  {
+    Icon: YoutubeIcon,
+    href: "https://www.youtube.com/@AurevianCollections",
+  },
+  {
+    Icon: PinterestIcon,
+    href: "https://pin.it/7a79gBqeR",
+  },
+  {
+    Icon: WhatsappIcon,
+    href: "https://wa.link/gui67i",
+  },
 ];
 
 function ChainDivider() {
@@ -120,7 +164,7 @@ function FooterLink({ href, children }) {
 export default function Footer() {
   return (
     <footer className={styles.footer}>
-      <div className={styles.topLine} />
+      
 
       <div className={styles.container}>
         <div className={styles.grid}>
@@ -224,9 +268,7 @@ export default function Footer() {
       </div>
 
       {/* decorative chain link divider */}
-      <div className={styles.chainStrip}>
-        <ChainDivider />
-      </div>
+      
 
       {/* bottom bar */}
       <div className={styles.bottomBar}>
@@ -234,13 +276,7 @@ export default function Footer() {
           <p className={styles.copyright}>
             © {new Date().getFullYear()} Aurevian. All rights reserved.
           </p>
-          <div className={styles.paymentRow}>
-            {["Visa", "Mastercard", "UPI", "RuPay"].map((method) => (
-              <span key={method} className={styles.paymentTag}>
-                {method}
-              </span>
-            ))}
-          </div>
+          
         </div>
       </div>
     </footer>
