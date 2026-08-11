@@ -1,8 +1,8 @@
 
-import React, { useState } from "react";
-import { Mail, Phone, MapPin, ArrowRight } from "lucide-react";
+import React from "react";
+import { Mail, Phone, MapPin } from "lucide-react";
 import styles from "./Footer.module.css";
-import logo from "../../../assets/Aurevianlogo.png";
+import logo from "../../../assets/newlogo1.png";
 
 /* ------------------------------------------------------------------
  * Data (mirrors navData.js shape — swap for your real imports:
@@ -49,7 +49,7 @@ const aboutDropdown = [
 
 const policyLinks = [
   { id: "shipping", label: "Shipping Policy", path: "/policies/shipping" },
-  { id: "returns", label: "Returns & Exchange", path: "/policies/returns" },
+  { id: "returns", label:  "Exchange", path: "/policies/returns" },
   { id: "privacy", label: "Privacy Policy", path: "/policies/privacy" },
   { id: "terms", label: "Terms of Service", path: "/policies/terms" },
 ];
@@ -118,17 +118,6 @@ function FooterLink({ href, children }) {
 }
 
 export default function Footer() {
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
-
-  const handleSubscribe = (e) => {
-    e.preventDefault();
-    if (!email.trim()) return;
-    setSubscribed(true);
-    setEmail("");
-    setTimeout(() => setSubscribed(false), 3500);
-  };
-
   return (
     <footer className={styles.footer}>
       <div className={styles.topLine} />
@@ -176,7 +165,7 @@ export default function Footer() {
           </div>
 
           {/* Link columns */}
-          <div className={styles.linkCol}>
+          <div className={`${styles.linkCol} ${styles.shopCol}`}>
             <FooterHeading>Shop</FooterHeading>
             <ul className={styles.linkList}>
               {shopCategories.map((item) => (
@@ -187,7 +176,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div className={styles.linkCol}>
+          <div className={`${styles.linkCol} ${styles.collectionsCol}`}>
             <FooterHeading>Collections</FooterHeading>
             <ul className={styles.linkList}>
               {collectionsDropdown.map((item) => (
@@ -198,7 +187,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div className={styles.linkCol}>
+          <div className={`${styles.linkCol} ${styles.giftCol}`}>
             <FooterHeading>Gift Guide</FooterHeading>
             <ul className={styles.linkList}>
               {giftGuide.byOccasion.map((item) => (
@@ -212,25 +201,6 @@ export default function Footer() {
                 </FooterLink>
               ))}
             </ul>
-          </div>
-
-          {/* Newsletter */}
-          <div className={styles.linkCol}>
-            <FooterHeading>Stay In Touch</FooterHeading>
-            <p className={styles.newsletterText}>New arrivals, first look.</p>
-            <form onSubmit={handleSubscribe} className={styles.newsletterForm}>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Your email"
-                className={styles.emailInput}
-              />
-              <button type="submit" className={styles.subscribeBtn}>
-                {subscribed ? "Subscribed" : "Subscribe"}
-                {!subscribed && <ArrowRight size={13} />}
-              </button>
-            </form>
           </div>
         </div>
 

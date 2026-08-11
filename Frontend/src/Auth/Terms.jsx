@@ -301,15 +301,14 @@ export default function Terms() {
               whileInView="visible"
               viewport={viewportOnce}
             >
-              <h2>9. Returns, Exchanges &amp; Refunds</h2>
+              <h2>9. Exchanges</h2>
               <p>
-                We offer a 15-day exchange window from the date of delivery
-                for unworn, unused items in their original packaging with
-                tags intact. Earrings and other items classified as personal
-                care products may not be eligible for return due to hygiene
-                reasons, unless defective. Approved refunds are credited to
-                the original payment method within 7–10 business days of us
-                receiving the returned item.
+               
+
+We offer a 15-day exchange window from the date of delivery for unworn, unused items in their original packaging with tags intact. Earrings and other items classified as personal care products may not be eligible for exchange due to hygiene reasons, unless defective.
+
+To initiate an exchange, please contact our support team with your order number and reason for the exchange. Items showing signs of wear, missing original packaging, or not meeting our exchange conditions may be declined. Customised or made-to-order pieces are not eligible for exchange unless defective.
+
               </p>
               <p>
                 To initiate a return or exchange, contact our support team
