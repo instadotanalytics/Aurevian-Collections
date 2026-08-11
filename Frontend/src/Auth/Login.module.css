@@ -54,7 +54,7 @@
   flex: 1;
   display: flex;
   align-items: center;
-  padding: 60px 24px;
+  padding: 135px 24px;
   overflow: hidden;
   scroll-margin-top: 76px;
   min-height: calc(100vh - 76px);
@@ -104,7 +104,7 @@
   z-index: 1;
   width: 100%;
   max-width: 1130px;
-  margin: 40px auto;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -302,15 +302,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  margin-bottom: 0.85rem;
 }
 
 .cardLogoImage {
-  height: 55px;
+  height: 50px;
   width: auto;
-  max-width: 130px;
+  max-width: 180px;
   object-fit: contain;
-  display: block;
 }
 
 .header {
@@ -951,7 +950,6 @@
   .card {
     max-width: 420px;
     width: 100%;
-    
   }
 
   .heroDesc {
@@ -1010,7 +1008,7 @@
 @media (max-width: 768px) {
   .hero {
     min-height: auto;
-    padding: 40px 16px 60px;
+    padding: 135px 16px 60px;
   }
 
   .heroFeatures {
@@ -1048,7 +1046,7 @@
 @media (max-width: 640px) {
   .card {
     max-width: 100%;
-    padding: 34px 20px;
+    padding: 22px 20px;
     border-radius: 20px;
   }
 
@@ -1105,7 +1103,7 @@
 /* Small phones */
 @media (max-width: 480px) {
   .hero {
-    padding: 30px 16px;
+    padding: 125px 16px;
   }
 
   .craftImageWrap {
