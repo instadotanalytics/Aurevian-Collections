@@ -100,7 +100,7 @@
   z-index: 1;
   width: 100%;
   max-width: 1130px;
-  margin: 40px auto;
+  margin: 70px auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1031,6 +1031,10 @@
 
   .heroHeading {
     font-size: 24px;
+  }
+
+  .heroInner{
+    margin:90px auto;
   }
 
   .heroEyebrow {
