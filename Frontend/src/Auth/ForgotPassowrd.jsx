@@ -15,8 +15,9 @@ import {
 } from "react-icons/fi";
 import Header from "../Pages/Layout/Header/Header";
 import Footer from "../Pages/Layout/Footer/Footer";
-import logo from "../assets/Aurevianlogo.png";
 import styles from "./ForgotPassword.module.css";
+import logo from "../assets/newlogo1.png";
+
 
 /* ------------------------------------------------------------------
    Static content — reassurances shown beside the hero copy
@@ -132,8 +133,6 @@ const ForgotPassword = () => {
             {/* ---------- Right: forgot password form ---------- */}
             <div className={styles.heroRight}>
               <div className={styles.card}>
-          
-
                 <div className={styles.cardLogo}>
                   <img src={logo} alt="Aurevian" className={styles.cardLogoImage} />
                 </div>
