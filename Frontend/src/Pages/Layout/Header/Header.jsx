@@ -90,7 +90,13 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
   const announcements = config?.announcements?.length
     ? config.announcements
     : undefined;
-  const mainNav = config?.mainNav?.length ? config.mainNav : fallbackMainNav;
+  const mainNav = (
+  config?.mainNav?.length ? config.mainNav : fallbackMainNav
+).map((item) =>
+  item.id === "gift-guide"
+    ? { ...item, path: "/gifts" }
+    : item
+);
   const shopCategories = config?.shopMegaMenu?.categories || [];
   const shopQuickLinks = config?.shopMegaMenu?.quickLinks || [];
   const shopByStyle = config?.shopMegaMenu?.byStyle || [];
