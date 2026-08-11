@@ -899,9 +899,9 @@ const SellerRegister = () => {
             {/* Right Side - Form */}
             <div className={styles.rightPanel}>
               <div className={styles.header}>
-                <div className={styles.headerIcon}>
+                {/* <div className={styles.headerIcon}>
                   <FiAward className={styles.headerIconSvg} />
-                </div>
+                </div> */}
                 <h1 className={styles.title}>Become a Seller</h1>
                 <p className={styles.subtitle}>Complete your registration to start selling on Aurevian</p>
               </div>
