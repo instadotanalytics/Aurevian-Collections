@@ -2,13 +2,19 @@
 
 import { useRef, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom"; // ✅ NEW
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import toast from "react-hot-toast";
 import { FiFilter, FiHeart, FiShoppingBag, FiCheck } from "react-icons/fi";
 import { LuSlidersHorizontal } from "react-icons/lu";
 import styles from "./Collections.module.css";
 import Footer from "../../Pages/Layout/Footer/Footer.jsx";
 import { fetchProductsByPlacement } from "../../redux/slices/storefrontProductSlice";
+import { addItemToCart } from "../../redux/slices/cartSlice";
+import {
+  toggleWishlistItem,
+  fetchWishlist,
+} from "../../redux/slices/wishlistSlice";
 
 const API_URL =
   import.meta.env.VITE_API_URL ||
@@ -176,9 +182,14 @@ function Reveal({
 
 export default function Collections() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { byPlacement, isLoading } = useSelector(
     (state) => state.storefrontProduct,
   );
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const cartItems = useSelector((state) => state.cart.items);
+  const wishlistItems = useSelector((state) => state.wishlist.items);
+
   const collectionsData = byPlacement.collections || {
     products: [],
     pagination: { page: 1, totalPages: 1, total: 0 },
@@ -194,9 +205,7 @@ export default function Collections() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
-  // Cart and Wishlist states
-  const [cartItems, setCartItems] = useState([]);
-  const [wishlist, setWishlist] = useState([]);
+  const [cartLoadingId, setCartLoadingId] = useState(null);
 
   // Mobile filter sheet state
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -218,6 +227,12 @@ export default function Collections() {
       }),
     );
   }, [dispatch, currentPage, selectedCategory, sortBy]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(fetchWishlist());
+    }
+  }, [dispatch, isAuthenticated]);
 
   // Auto-scroll for hero gallery
   useEffect(() => {
@@ -273,22 +288,35 @@ export default function Collections() {
     }
   };
 
-  // Cart and Wishlist handlers
-  const toggleWishlist = (productId) => {
-    setWishlist((prev) =>
-      prev.includes(productId)
-        ? prev.filter((id) => id !== productId)
-        : [...prev, productId],
-    );
+  const requireAuth = () => {
+    if (!isAuthenticated) {
+      toast.error("Please login to continue");
+      navigate("/login", { state: { from: "/collections" } });
+      return false;
+    }
+    return true;
   };
 
-  const handleAddToCart = (productId) => {
-    setCartItems((prev) => {
-      if (prev.includes(productId)) {
-        return prev.filter((id) => id !== productId);
-      }
-      return [...prev, productId];
-    });
+  const isInCart = (id) => cartItems.some((i) => i.product === id);
+  const isInWishlist = (id) =>
+    wishlistItems.some((i) => (i.product?._id || i.product) === id);
+
+  const toggleWishlist = (productId) => {
+    if (!requireAuth()) return;
+    dispatch(toggleWishlistItem(productId)).catch(() => {});
+  };
+
+  const handleAddToCart = async (productId) => {
+    if (!requireAuth()) return;
+    try {
+      setCartLoadingId(productId);
+      await dispatch(addItemToCart({ productId, quantity: 1 })).unwrap();
+      toast.success("Added to cart");
+    } catch (err) {
+      toast.error(err || "Failed to add to cart");
+    } finally {
+      setCartLoadingId(null);
+    }
   };
 
   // Scroll to filter section
@@ -490,8 +518,9 @@ export default function Collections() {
 
               <div className={styles.productsGrid}>
                 {products.map((product) => {
-                  const isInCart = cartItems.includes(product._id);
-                  const isInWishlist = wishlist.includes(product._id);
+                  const inCart = isInCart(product._id);
+                  const inWishlist = isInWishlist(product._id);
+                  const addingToCart = cartLoadingId === product._id;
                   const discount =
                     product.pricing?.salePrice && product.pricing?.originalPrice
                       ? Math.round(
@@ -508,7 +537,7 @@ export default function Collections() {
                       delay={50}
                       className={styles.productCard}
                     >
-                      {/* ✅ NEW: navigate to product detail page */}
+                      {/* navigate to product detail page */}
                       <Link
                         to={`/product/${product.productSlug}`}
                         className={styles.productImageWrap}
@@ -531,19 +560,19 @@ export default function Collections() {
                         <div className={styles.wishlistActions}>
                           <button
                             type="button"
-                            className={`${styles.wishlistBtn} ${isInWishlist ? styles.wishlistBtnActive : ""}`}
+                            className={`${styles.wishlistBtn} ${inWishlist ? styles.wishlistBtnActive : ""}`}
                             onClick={(e) => {
-                              e.preventDefault(); // ✅ NEW: don't trigger Link navigation
+                              e.preventDefault();
                               e.stopPropagation();
                               toggleWishlist(product._id);
                             }}
                             aria-label={
-                              isInWishlist
+                              inWishlist
                                 ? "Remove from wishlist"
                                 : "Add to wishlist"
                             }
                           >
-                            {isInWishlist ? (
+                            {inWishlist ? (
                               <FiHeart fill="currentColor" />
                             ) : (
                               <FiHeart />
@@ -552,7 +581,7 @@ export default function Collections() {
                         </div>
                       </Link>
                       <div className={styles.productBody}>
-                        {/* ✅ NEW: product name also links */}
+                        {/* product name also links */}
                         <Link
                           to={`/product/${product.productSlug}`}
                           className={styles.productName}
@@ -577,17 +606,18 @@ export default function Collections() {
                         </div>
                         <button
                           type="button"
-                          className={`${styles.productAddBtn} ${isInCart ? styles.productAddBtnActive : ""}`}
+                          className={`${styles.productAddBtn} ${inCart ? styles.productAddBtnActive : ""}`}
                           onClick={() => handleAddToCart(product._id)}
-                          disabled={isInCart}
+                          disabled={inCart || addingToCart}
                         >
-                          {isInCart ? (
+                          {inCart ? (
                             <>
                               <FiCheck /> Added to Cart
                             </>
                           ) : (
                             <>
-                              <FiShoppingBag /> Add to Cart
+                              <FiShoppingBag />{" "}
+                              {addingToCart ? "Adding..." : "Add to Cart"}
                             </>
                           )}
                         </button>

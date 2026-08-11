@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import toast from "react-hot-toast";
 import styles from "./shop.module.css";
 import Header from "../../Pages/Layout/Header/Header";
 import Footer from "../../Pages/Layout/Footer/Footer";
@@ -15,6 +16,11 @@ import { FaHeart } from "react-icons/fa";
 import { FiShoppingBag, FiCheck, FiChevronDown } from "react-icons/fi";
 
 import { fetchProductsByPlacement } from "../../redux/slices/storefrontProductSlice";
+import { addItemToCart } from "../../redux/slices/cartSlice";
+import {
+  toggleWishlistItem,
+  fetchWishlist,
+} from "../../redux/slices/wishlistSlice";
 
 const API_URL =
   import.meta.env.VITE_API_URL ||
@@ -36,23 +42,26 @@ const perks = [
 
 export default function Shop() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { byPlacement, isLoading } = useSelector(
     (state) => state.storefrontProduct,
   );
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const cartItems = useSelector((state) => state.cart.items);
+  const wishlistItems = useSelector((state) => state.wishlist.items);
+
   const shopData = byPlacement.shop || {
     products: [],
     pagination: { page: 1, totalPages: 1, total: 0 },
   };
 
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [wishlist, setWishlist] = useState(new Set());
-  const [cart, setCart] = useState(new Set());
   const [categories, setCategories] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [sort, setSort] = useState("");
   const [page, setPage] = useState(1);
+  const [cartLoadingId, setCartLoadingId] = useState(null);
 
-  // Fetch categories from API
   useEffect(() => {
     axios
       .get(`${API_URL}/seller/products/categories`)
@@ -66,7 +75,6 @@ export default function Shop() {
       });
   }, []);
 
-  // Fetch products when filters change
   useEffect(() => {
     dispatch(
       fetchProductsByPlacement({
@@ -79,16 +87,41 @@ export default function Shop() {
     );
   }, [dispatch, page, selectedCategoryId, sort]);
 
-  const toggleWishlist = (id) => {
-    setWishlist((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(fetchWishlist());
+    }
+  }, [dispatch, isAuthenticated]);
+
+  const requireAuth = () => {
+    if (!isAuthenticated) {
+      toast.error("Please login to continue");
+      navigate("/login", { state: { from: "/shop" } });
+      return false;
+    }
+    return true;
   };
 
-  const addToCart = (id) => {
-    setCart((prev) => new Set(prev).add(id));
+  const isInCart = (id) => cartItems.some((i) => i.product === id);
+  const isInWishlist = (id) =>
+    wishlistItems.some((i) => (i.product?._id || i.product) === id);
+
+  const handleToggleWishlist = (id) => {
+    if (!requireAuth()) return;
+    dispatch(toggleWishlistItem(id)).catch(() => {});
+  };
+
+  const handleAddToCart = async (id) => {
+    if (!requireAuth()) return;
+    try {
+      setCartLoadingId(id);
+      await dispatch(addItemToCart({ productId: id, quantity: 1 })).unwrap();
+      toast.success("Added to cart");
+    } catch (err) {
+      toast.error(err || "Failed to add to cart");
+    } finally {
+      setCartLoadingId(null);
+    }
   };
 
   const products = shopData.products || [];
@@ -231,91 +264,97 @@ export default function Shop() {
 
             {/* Products */}
             <div className={styles.productGrid}>
-              {products.map((p) => (
-                <div className={styles.productCard} key={p._id}>
-                  <Link
-                    to={`/product/${p.productSlug}`}
-                    className={styles.productMedia}
-                  >
-                    {p.pricing?.salePrice && p.pricing?.originalPrice && (
-                      <span className={styles.badge}>
-                        {Math.round(
-                          ((p.pricing.originalPrice - p.pricing.salePrice) /
-                            p.pricing.originalPrice) *
-                            100,
-                        )}
-                        % off
-                      </span>
-                    )}
-                    <span className={styles.productCatOverlay}>
-                      {p.category?.categoryData?.label || "Uncategorized"}
-                    </span>
-                    <div className={styles.wishlistActions}>
-                      <button
-                        type="button"
-                        className={`${styles.wishlistBtn} ${wishlist.has(p._id) ? styles.wishlistBtnActive : ""}`}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          toggleWishlist(p._id);
-                        }}
-                        aria-label={
-                          wishlist.has(p._id)
-                            ? "Remove from wishlist"
-                            : "Add to wishlist"
-                        }
-                      >
-                        {wishlist.has(p._id) ? <FaHeart /> : <FiHeart />}
-                      </button>
-                    </div>
-                    <img
-                      src={p.thumbnail?.url || "/placeholder-image.jpg"}
-                      alt={p.productName}
-                      className={styles.productImage}
-                      onError={(e) => {
-                        e.target.src = "/placeholder-image.jpg";
-                      }}
-                    />
-                  </Link>
-                  <div className={styles.productInfo}>
+              {products.map((p) => {
+                const inCart = isInCart(p._id);
+                const inWishlist = isInWishlist(p._id);
+                const addingToCart = cartLoadingId === p._id;
+                return (
+                  <div className={styles.productCard} key={p._id}>
                     <Link
                       to={`/product/${p.productSlug}`}
-                      className={styles.productName}
+                      className={styles.productMedia}
                     >
-                      {p.productName}
-                    </Link>
-                    <div className={styles.productPrice}>
-                      <span className={styles.priceNow}>
-                        ₹
-                        {(
-                          p.pricing?.salePrice || p.pricing?.originalPrice
-                        )?.toLocaleString() || "0"}
-                      </span>
                       {p.pricing?.salePrice && p.pricing?.originalPrice && (
-                        <span className={styles.priceOld}>
-                          ₹{p.pricing.originalPrice.toLocaleString()}
+                        <span className={styles.badge}>
+                          {Math.round(
+                            ((p.pricing.originalPrice - p.pricing.salePrice) /
+                              p.pricing.originalPrice) *
+                              100,
+                          )}
+                          % off
                         </span>
                       )}
+                      <span className={styles.productCatOverlay}>
+                        {p.category?.categoryData?.label || "Uncategorized"}
+                      </span>
+                      <div className={styles.wishlistActions}>
+                        <button
+                          type="button"
+                          className={`${styles.wishlistBtn} ${inWishlist ? styles.wishlistBtnActive : ""}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleToggleWishlist(p._id);
+                          }}
+                          aria-label={
+                            inWishlist
+                              ? "Remove from wishlist"
+                              : "Add to wishlist"
+                          }
+                        >
+                          {inWishlist ? <FaHeart /> : <FiHeart />}
+                        </button>
+                      </div>
+                      <img
+                        src={p.thumbnail?.url || "/placeholder-image.jpg"}
+                        alt={p.productName}
+                        className={styles.productImage}
+                        onError={(e) => {
+                          e.target.src = "/placeholder-image.jpg";
+                        }}
+                      />
+                    </Link>
+                    <div className={styles.productInfo}>
+                      <Link
+                        to={`/product/${p.productSlug}`}
+                        className={styles.productName}
+                      >
+                        {p.productName}
+                      </Link>
+                      <div className={styles.productPrice}>
+                        <span className={styles.priceNow}>
+                          ₹
+                          {(
+                            p.pricing?.salePrice || p.pricing?.originalPrice
+                          )?.toLocaleString() || "0"}
+                        </span>
+                        {p.pricing?.salePrice && p.pricing?.originalPrice && (
+                          <span className={styles.priceOld}>
+                            ₹{p.pricing.originalPrice.toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        className={`${styles.addToCartBtn} ${inCart ? styles.addToCartBtnActive : ""}`}
+                        onClick={() => handleAddToCart(p._id)}
+                        disabled={inCart || addingToCart}
+                      >
+                        {inCart ? (
+                          <>
+                            <FiCheck /> Added to Cart
+                          </>
+                        ) : (
+                          <>
+                            <FiShoppingBag />{" "}
+                            {addingToCart ? "Adding..." : "Add to Cart"}
+                          </>
+                        )}
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      className={`${styles.addToCartBtn} ${cart.has(p._id) ? styles.addToCartBtnActive : ""}`}
-                      onClick={() => addToCart(p._id)}
-                      disabled={cart.has(p._id)}
-                    >
-                      {cart.has(p._id) ? (
-                        <>
-                          <FiCheck /> Added to Cart
-                        </>
-                      ) : (
-                        <>
-                          <FiShoppingBag /> Add to Cart
-                        </>
-                      )}
-                    </button>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Pagination */}

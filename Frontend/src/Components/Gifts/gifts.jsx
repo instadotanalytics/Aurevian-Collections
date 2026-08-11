@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import styles from "./gifts.module.css";
 import Header from "../../Pages/Layout/Header/Header";
 import Footer from "../../Pages/Layout/Footer/Footer";
@@ -21,6 +22,11 @@ import { FaHeart } from "react-icons/fa";
 import { LuSlidersHorizontal } from "react-icons/lu";
 
 import { fetchProductsByPlacement } from "../../redux/slices/storefrontProductSlice";
+import { addItemToCart } from "../../redux/slices/cartSlice";
+import {
+  toggleWishlistItem,
+  fetchWishlist,
+} from "../../redux/slices/wishlistSlice";
 
 const jewelHighlights = [
   ["Brilliant Cut Quality", "Natural Color Grade"],
@@ -100,9 +106,14 @@ const perks = [
 
 export default function Gifts() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { byPlacement, isLoading } = useSelector(
     (state) => state.storefrontProduct,
   );
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const cartItems = useSelector((state) => state.cart.items);
+  const wishlistItems = useSelector((state) => state.wishlist.items);
+
   const giftsData = byPlacement.gifts || {
     products: [],
     pagination: { page: 1, totalPages: 1, total: 0 },
@@ -110,9 +121,8 @@ export default function Gifts() {
 
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState(new Set());
-  const [wishlist, setWishlist] = useState(new Set());
-  const [cart, setCart] = useState(new Set());
   const [currentPage, setCurrentPage] = useState(1);
+  const [cartLoadingId, setCartLoadingId] = useState(null);
   const itemsPerPage = 8;
 
   const products = giftsData.products || [];
@@ -132,24 +142,41 @@ export default function Gifts() {
     );
   }, [dispatch, currentPage]);
 
-  const toggleWishlist = (id) => {
-    setWishlist((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(fetchWishlist());
+    }
+  }, [dispatch, isAuthenticated]);
+
+  const requireAuth = () => {
+    if (!isAuthenticated) {
+      toast.error("Please login to continue");
+      navigate("/login", { state: { from: "/gifts" } });
+      return false;
+    }
+    return true;
   };
 
-  const addToCart = (id) => {
-    setCart((prev) => {
-      const next = new Set(prev);
-      next.add(id);
-      return next;
-    });
+  const isInCart = (id) => cartItems.some((i) => i.product === id);
+  const isInWishlist = (id) =>
+    wishlistItems.some((i) => (i.product?._id || i.product) === id);
+
+  const toggleWishlist = (id) => {
+    if (!requireAuth()) return;
+    dispatch(toggleWishlistItem(id)).catch(() => {});
+  };
+
+  const addToCart = async (id) => {
+    if (!requireAuth()) return;
+    try {
+      setCartLoadingId(id);
+      await dispatch(addItemToCart({ productId: id, quantity: 1 })).unwrap();
+      toast.success("Added to cart");
+    } catch (err) {
+      toast.error(err || "Failed to add to cart");
+    } finally {
+      setCartLoadingId(null);
+    }
   };
 
   const toggleFilter = (type, value) => {
@@ -408,9 +435,12 @@ export default function Gifts() {
                           100,
                       )
                     : 0;
+                const inCart = isInCart(p._id);
+                const inWishlist = isInWishlist(p._id);
+                const addingToCart = cartLoadingId === p._id;
                 return (
                   <div className={styles.productCard} key={p._id}>
-                    {/* ✅ NEW: navigate to product detail page */}
+                    {/* navigate to product detail page */}
                     <Link
                       to={`/product/${p.productSlug}`}
                       className={styles.productMedia}
@@ -425,20 +455,20 @@ export default function Gifts() {
                         <button
                           type="button"
                           className={`${styles.wishlistBtn} ${
-                            wishlist.has(p._id) ? styles.wishlistBtnActive : ""
+                            inWishlist ? styles.wishlistBtnActive : ""
                           }`}
                           onClick={(e) => {
-                            e.preventDefault(); // ✅ NEW: don't trigger Link navigation
+                            e.preventDefault();
                             e.stopPropagation();
                             toggleWishlist(p._id);
                           }}
                           aria-label={
-                            wishlist.has(p._id)
+                            inWishlist
                               ? "Remove from wishlist"
                               : "Add to wishlist"
                           }
                         >
-                          {wishlist.has(p._id) ? <FaHeart /> : <FiHeart />}
+                          {inWishlist ? <FaHeart /> : <FiHeart />}
                         </button>
                       </div>
                       {p.thumbnail?.url ? (
@@ -454,7 +484,7 @@ export default function Gifts() {
                       )}
                     </Link>
                     <div className={styles.productInfo}>
-                      {/* ✅ NEW: product name also links */}
+                      {/* product name also links */}
                       <Link
                         to={`/product/${p.productSlug}`}
                         className={styles.productName}
@@ -478,18 +508,19 @@ export default function Gifts() {
                       <button
                         type="button"
                         className={`${styles.addToCartBtn} ${
-                          cart.has(p._id) ? styles.addToCartBtnActive : ""
+                          inCart ? styles.addToCartBtnActive : ""
                         }`}
                         onClick={() => addToCart(p._id)}
-                        disabled={cart.has(p._id)}
+                        disabled={inCart || addingToCart}
                       >
-                        {cart.has(p._id) ? (
+                        {inCart ? (
                           <>
                             <FiCheck /> Added to Cart
                           </>
                         ) : (
                           <>
-                            <FiShoppingBag /> Add to Cart
+                            <FiShoppingBag />{" "}
+                            {addingToCart ? "Adding..." : "Add to Cart"}
                           </>
                         )}
                       </button>

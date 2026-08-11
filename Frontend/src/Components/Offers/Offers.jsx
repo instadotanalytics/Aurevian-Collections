@@ -2,7 +2,8 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import {
   FiHeart,
   FiTrendingUp,
@@ -19,6 +20,11 @@ import styles from "./Offers.module.css";
 import craftImage1 from "../../assets/offersimg.png";
 import Footer from "../../Pages/Layout/Footer/Footer.jsx";
 import { fetchProductsByPlacement } from "../../redux/slices/storefrontProductSlice";
+import { addItemToCart } from "../../redux/slices/cartSlice";
+import {
+  toggleWishlistItem,
+  fetchWishlist,
+} from "../../redux/slices/wishlistSlice";
 
 /* ----------------------------------------------------------------
    Data — All offers, deals, and promotional content
@@ -117,9 +123,14 @@ function Reveal({
 
 export default function Offers() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { byPlacement, isLoading } = useSelector(
     (state) => state.storefrontProduct,
   );
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const cartItems = useSelector((state) => state.cart.items);
+  const wishlistItems = useSelector((state) => state.wishlist.items);
+
   const offersData = byPlacement.offers || {
     products: [],
     pagination: { page: 1, totalPages: 1, total: 0 },
@@ -128,8 +139,7 @@ export default function Offers() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [priceRange, setPriceRange] = useState([0, 7000]);
   const [currentPage, setCurrentPage] = useState(0);
-  const [cartItems, setCartItems] = useState([]);
-  const [wishlist, setWishlist] = useState([]);
+  const [cartLoadingId, setCartLoadingId] = useState(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const itemsPerPage = 9;
 
@@ -150,6 +160,12 @@ export default function Offers() {
       }),
     );
   }, [dispatch, currentPage, selectedCategory]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(fetchWishlist());
+    }
+  }, [dispatch, isAuthenticated]);
 
   // Scroll to offers section function
   const scrollToOffers = () => {
@@ -175,21 +191,35 @@ export default function Offers() {
     }
   };
 
-  const toggleWishlist = (productId) => {
-    setWishlist((prev) =>
-      prev.includes(productId)
-        ? prev.filter((id) => id !== productId)
-        : [...prev, productId],
-    );
+  const requireAuth = () => {
+    if (!isAuthenticated) {
+      toast.error("Please login to continue");
+      navigate("/login", { state: { from: "/offers" } });
+      return false;
+    }
+    return true;
   };
 
-  const handleAddToCart = (productId) => {
-    setCartItems((prev) => {
-      if (prev.includes(productId)) {
-        return prev.filter((id) => id !== productId);
-      }
-      return [...prev, productId];
-    });
+  const isInCart = (id) => cartItems.some((i) => i.product === id);
+  const isInWishlist = (id) =>
+    wishlistItems.some((i) => (i.product?._id || i.product) === id);
+
+  const toggleWishlist = (productId) => {
+    if (!requireAuth()) return;
+    dispatch(toggleWishlistItem(productId)).catch(() => {});
+  };
+
+  const handleAddToCart = async (productId) => {
+    if (!requireAuth()) return;
+    try {
+      setCartLoadingId(productId);
+      await dispatch(addItemToCart({ productId, quantity: 1 })).unwrap();
+      toast.success("Added to cart");
+    } catch (err) {
+      toast.error(err || "Failed to add to cart");
+    } finally {
+      setCartLoadingId(null);
+    }
   };
 
   const clearAllFilters = () => {
@@ -339,8 +369,9 @@ export default function Offers() {
 
                 <div className={styles.productsGrid}>
                   {products.map((product, i) => {
-                    const isInCart = cartItems.includes(product._id);
-                    const isInWishlist = wishlist.includes(product._id);
+                    const inCart = isInCart(product._id);
+                    const inWishlist = isInWishlist(product._id);
+                    const addingToCart = cartLoadingId === product._id;
                     const discount =
                       product.pricing?.salePrice &&
                       product.pricing?.originalPrice
@@ -380,19 +411,19 @@ export default function Offers() {
                           <div className={styles.wishlistActions}>
                             <button
                               type="button"
-                              className={`${styles.wishlistBtn} ${isInWishlist ? styles.wishlistBtnActive : ""}`}
+                              className={`${styles.wishlistBtn} ${inWishlist ? styles.wishlistBtnActive : ""}`}
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 toggleWishlist(product._id);
                               }}
                               aria-label={
-                                isInWishlist
+                                inWishlist
                                   ? "Remove from wishlist"
                                   : "Add to wishlist"
                               }
                             >
-                              {isInWishlist ? (
+                              {inWishlist ? (
                                 <FiHeart fill="currentColor" />
                               ) : (
                                 <FiHeart />
@@ -425,17 +456,18 @@ export default function Offers() {
                           </div>
                           <button
                             type="button"
-                            className={`${styles.productAddBtn} ${isInCart ? styles.productAddBtnActive : ""}`}
+                            className={`${styles.productAddBtn} ${inCart ? styles.productAddBtnActive : ""}`}
                             onClick={() => handleAddToCart(product._id)}
-                            disabled={isInCart}
+                            disabled={inCart || addingToCart}
                           >
-                            {isInCart ? (
+                            {inCart ? (
                               <>
                                 <FiCheck /> Added to Cart
                               </>
                             ) : (
                               <>
-                                <FiShoppingBag /> Add to Cart
+                                <FiShoppingBag />{" "}
+                                {addingToCart ? "Adding..." : "Add to Cart"}
                               </>
                             )}
                           </button>
