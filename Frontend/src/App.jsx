@@ -77,6 +77,7 @@ import Shop from "./Components/Shop/shop.jsx";
 import Gifts from "./Components/Gifts/gifts.jsx";
 import Collections from "./Components/Collections/Collections.jsx";
 import Offers from "./Components/Offers/Offers.jsx";
+import GiftGuide from "./Components/ShopCard/GiftGuide.jsx";
 
 import ProductDetail from "./Pages/Layout/ProductDetail/ProductDetail";
 
@@ -97,6 +98,7 @@ const ROUTES = {
   GIFTS: "/gifts",
   COLLECTIONS: "/collections",
   OFFERS: "/offers",
+  GIFT_GUIDE: "/gift-guide",
   LOGIN: "/login",
   REGISTER: "/register",
   VERIFY_OTP: "/verify-otp",
@@ -332,6 +334,13 @@ const App = () => {
             element={
                 <Offers />
             }
+          />
+
+          <Route 
+          path={ROUTES.GIFT_GUIDE} 
+          element={
+          <GiftGuide />
+          } 
           />
 
           {/* ============================================

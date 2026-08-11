@@ -18,7 +18,7 @@
   --gold-light: #8a6a26;
   --gold-deep: #7a5e22;
 
-   background: rgba(238, 215, 191);
+   background: transparent;
   color: var(--ink);
   color: var(--paper);
   position: relative;

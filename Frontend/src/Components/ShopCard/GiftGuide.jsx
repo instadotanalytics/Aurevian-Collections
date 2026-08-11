@@ -4,6 +4,8 @@
 import React, { useRef, useState } from "react";
 import { FiArrowRight, FiArrowLeft, FiHeart } from "react-icons/fi";
 import styles from "./GiftGuide.module.css";
+import Header from "../../Pages/Layout/Header/Header";
+import Footer from "../../Pages/Layout/Footer/Footer";
 
 // ==========================================================
 // GIFT GUIDE IMAGES
@@ -122,63 +124,69 @@ export default function GiftGuide() {
   };
 
   return (
-    <section className={styles.section} aria-labelledby="gift-guide-heading">
-      <div className={styles.container}>
+    <>
+      <Header />
 
-        {/* --- DECORATIVE TOP ORNAMENT --- */}
-        <div className={styles.topOrnament} aria-hidden="true">
-          <span className={styles.ornamentLine}></span>
-          <span className={styles.ornamentDiamond}>✦</span>
-          <span className={styles.ornamentLine}></span>
-        </div>
+      <section className={styles.section} aria-labelledby="gift-guide-heading">
+        <div className={styles.container}>
 
-        <div className={styles.header}>
-          <div className={styles.headingWrapper}>
-            <span className={styles.subHeading}>Curated for you</span>
-            <h2 id="gift-guide-heading" className={styles.heading}>
-              You May Also Like
-            </h2>
+          {/* --- DECORATIVE TOP ORNAMENT --- */}
+          <div className={styles.topOrnament} aria-hidden="true">
+            <span className={styles.ornamentLine}></span>
+            <span className={styles.ornamentDiamond}>✦</span>
+            <span className={styles.ornamentLine}></span>
           </div>
 
-          <div className={styles.navArrows}>
-            <button
-              type="button"
-              className={styles.navBtn}
-              onClick={scrollLeft}
-              aria-label="Scroll left"
-            >
-              <FiArrowLeft size={18} />
-            </button>
-            <button
-              type="button"
-              className={styles.navBtn}
-              onClick={scrollRight}
-              aria-label="Scroll right"
-            >
-              <FiArrowRight size={18} />
-            </button>
+          <div className={styles.header}>
+            <div className={styles.headingWrapper}>
+              <span className={styles.subHeading}>Curated for you</span>
+              <h2 id="gift-guide-heading" className={styles.heading}>
+                You May Also Like
+              </h2>
+            </div>
+
+            <div className={styles.navArrows}>
+              <button
+                type="button"
+                className={styles.navBtn}
+                onClick={scrollLeft}
+                aria-label="Scroll left"
+              >
+                <FiArrowLeft size={18} />
+              </button>
+              <button
+                type="button"
+                className={styles.navBtn}
+                onClick={scrollRight}
+                aria-label="Scroll right"
+              >
+                <FiArrowRight size={18} />
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div className={styles.scrollContainer} ref={scrollContainerRef}>
-          {GIFT_PRODUCTS.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              isWishlisted={wishlist.has(product.id)}
-              onToggleWishlist={toggleWishlist}
-            />
-          ))}
-        </div>
+          <div className={styles.scrollContainer} ref={scrollContainerRef}>
+            {GIFT_PRODUCTS.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                isWishlisted={wishlist.has(product.id)}
+                onToggleWishlist={toggleWishlist}
+              />
+            ))}
+          </div>
 
-        {/* --- VIEW ALL LINK AT BOTTOM --- */}
-        <div className={styles.footerLink}>
-          <a href="/gifts" className={styles.viewAllLink}>
-            Explore All Gifts <FiArrowRight />
-          </a>
-        </div>
+          {/* --- VIEW ALL LINK AT BOTTOM --- */}
+          <div className={styles.footerLink}>
+            <a href="/gifts" className={styles.viewAllLink}>
+              Explore All Gifts <FiArrowRight />
+            </a>
+          </div>
 
-      </div>
-    </section>
+        </div>
+      </section>
+
+      <Footer />
+    </>
   );
 }
