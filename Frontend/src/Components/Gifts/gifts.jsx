@@ -195,480 +195,482 @@ export default function Gifts() {
   const isSelected = (type, value) => selectedFilters.has(`${type}:${value}`);
 
   return (
-    <div className={styles.page}>
+    <>
       <Header />
-
-      <div className={styles.mainContent}>
-        {/* ================= HERO (UNCHANGED) ================= */}
-        <section className={styles.hero}>
-          <img
-            src={giftHero}
-            alt="Timeless gifts for every celebration"
-            className={styles.heroImage}
-          />
-        </section>
-
-        {/* ================= GIFT SHOP BODY (FILTERS + GRID) ================= */}
-        <div className={styles.shopWrap} id="shopSection">
-          {/* ---------- Mobile Filter Toggle Button ---------- */}
-          <button
-            type="button"
-            className={styles.filterToggle}
-            onClick={() => setFiltersOpen((prev) => !prev)}
-            aria-expanded={filtersOpen}
-          >
-            <span className={styles.filterToggleText}>Filter Options</span>
-            <span className={styles.filterToggleIcon}>
-              <LuSlidersHorizontal />
-            </span>
-          </button>
-
-          {/* ---------- Mobile backdrop ---------- */}
-          {filtersOpen && (
-            <div
-              className={styles.filterOverlay}
-              onClick={() => setFiltersOpen(false)}
+      <div className={styles.page}>
+        <div className={styles.mainContent}>
+          {/* ================= HERO (UNCHANGED) ================= */}
+          <section className={styles.hero}>
+            <img
+              src={giftHero}
+              alt="Timeless gifts for every celebration"
+              className={styles.heroImage}
             />
-          )}
+          </section>
 
-          {/* ---------- Sidebar / Bottom-sheet Filters ---------- */}
-          <aside
-            className={`${styles.filters} ${
-              filtersOpen ? styles.filtersOpen : ""
-            }`}
-          >
-            <div className={styles.filtersSheetHeader}>
-              <h3 className={styles.filtersHeading}>Filter Options</h3>
-              <button
-                type="button"
-                className={styles.filtersClose}
-                onClick={() => setFiltersOpen(false)}
-                aria-label="Close filters"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className={styles.filtersInner}>
-              <div className={styles.filterGroup}>
-                <h3 className={styles.groupHeading}>By Occasion</h3>
-                <ul>
-                  {occasions.map((o) => (
-                    <li
-                      key={o.name}
-                      className={
-                        isSelected("occasion", o.name) ? styles.selected : ""
-                      }
-                    >
-                      <label className={styles.checkRow}>
-                        <input
-                          type="checkbox"
-                          checked={isSelected("occasion", o.name)}
-                          onChange={() => toggleFilter("occasion", o.name)}
-                        />
-                        <span className={styles.checkLabel}>{o.name}</span>
-                      </label>
-                      <span className={styles.count}>{o.count}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className={styles.filterGroup}>
-                <h3 className={styles.groupHeading}>By Recipient</h3>
-                <ul>
-                  {recipients.map((r) => (
-                    <li
-                      key={r.name}
-                      className={
-                        isSelected("recipient", r.name) ? styles.selected : ""
-                      }
-                    >
-                      <label className={styles.checkRow}>
-                        <input
-                          type="checkbox"
-                          checked={isSelected("recipient", r.name)}
-                          onChange={() => toggleFilter("recipient", r.name)}
-                        />
-                        <span className={styles.checkLabel}>{r.name}</span>
-                      </label>
-                      <span className={styles.count}>{r.count}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className={styles.filterGroup}>
-                <h3 className={styles.groupHeading}>Price</h3>
-                <div className={styles.priceSlider}>
-                  <div className={styles.fill}></div>
-                  <div
-                    className={`${styles.handle} ${styles.handleLeft}`}
-                  ></div>
-                  <div
-                    className={`${styles.handle} ${styles.handleRight}`}
-                  ></div>
-                </div>
-                <div className={styles.priceValues}>
-                  <span>₹500</span>
-                  <span>₹8,000</span>
-                </div>
-              </div>
-
-              <div className={styles.filterGroup}>
-                <h3 className={styles.groupHeading}>By Budget</h3>
-                <ul>
-                  {budgets.map((b) => (
-                    <li
-                      key={b.name}
-                      className={
-                        isSelected("budget", b.name) ? styles.selected : ""
-                      }
-                    >
-                      <label className={styles.checkRow}>
-                        <input
-                          type="checkbox"
-                          checked={isSelected("budget", b.name)}
-                          onChange={() => toggleFilter("budget", b.name)}
-                        />
-                        <span className={styles.checkLabel}>{b.name}</span>
-                      </label>
-                      <span className={styles.count}>{b.count}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className={styles.filterGroup}>
-                <h3 className={styles.groupHeading}>By Promotions</h3>
-                <ul>
-                  {promotions.map((p) => (
-                    <li
-                      key={p}
-                      className={
-                        isSelected("promotion", p) ? styles.selected : ""
-                      }
-                    >
-                      <label className={styles.checkRow}>
-                        <input
-                          type="checkbox"
-                          checked={isSelected("promotion", p)}
-                          onChange={() => toggleFilter("promotion", p)}
-                        />
-                        <span className={styles.checkLabel}>{p}</span>
-                      </label>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className={styles.filterGroup}>
-                <h3 className={styles.groupHeading}>Availability</h3>
-                <ul>
-                  {availability.map((a) => (
-                    <li
-                      key={a.name}
-                      className={
-                        isSelected("availability", a.name)
-                          ? styles.selected
-                          : ""
-                      }
-                    >
-                      <label className={styles.checkRow}>
-                        <input
-                          type="checkbox"
-                          checked={isSelected("availability", a.name)}
-                          onChange={() => toggleFilter("availability", a.name)}
-                        />
-                        <span className={styles.checkLabel}>{a.name}</span>
-                      </label>
-                      <span className={styles.count}>{a.count}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className={styles.promoTags}>
-                <span>Price: ₹500–₹8,000 ✕</span>
-                <span>Best Seller ✕</span>
-                <span>In Stock ✕</span>
-                <span className={styles.clear}>Clear all</span>
-              </div>
-
-              <button
-                type="button"
-                className={styles.applyFilters}
-                onClick={() => setFiltersOpen(false)}
-              >
-                Apply Filters
-              </button>
-            </div>
-          </aside>
-
-          {/* ---------- Product Listing ---------- */}
-          <main>
-            <div className={styles.toolbar}>
-              <span className={styles.resultsCount}>
-                {isLoading
-                  ? "Loading..."
-                  : `Showing ${products.length} of ${total} results`}
+          {/* ================= GIFT SHOP BODY (FILTERS + GRID) ================= */}
+          <div className={styles.shopWrap} id="shopSection">
+            {/* ---------- Mobile Filter Toggle Button ---------- */}
+            <button
+              type="button"
+              className={styles.filterToggle}
+              onClick={() => setFiltersOpen((prev) => !prev)}
+              aria-expanded={filtersOpen}
+            >
+              <span className={styles.filterToggleText}>Filter Options</span>
+              <span className={styles.filterToggleIcon}>
+                <LuSlidersHorizontal />
               </span>
-              <div className={styles.sortWrapper}>
-                <select className={styles.sortSelect}>
-                  <option>Default Sorting</option>
-                  <option>Price: Low to High</option>
-                  <option>Price: High to Low</option>
-                  <option>Newest</option>
-                  <option>Top Rated</option>
-                </select>
-                <FiChevronDown className={styles.sortChevron} />
-              </div>
-            </div>
+            </button>
 
-            <div className={styles.productGrid}>
-              {products.map((p) => {
-                const discount =
-                  p.pricing?.salePrice && p.pricing?.originalPrice
-                    ? Math.round(
-                        ((p.pricing.originalPrice - p.pricing.salePrice) /
-                          p.pricing.originalPrice) *
-                          100,
-                      )
-                    : 0;
-                const inCart = isInCart(p._id);
-                const inWishlist = isInWishlist(p._id);
-                const addingToCart = cartLoadingId === p._id;
-                return (
-                  <div className={styles.productCard} key={p._id}>
-                    {/* navigate to product detail page */}
-                    <Link
-                      to={`/product/${p.productSlug}`}
-                      className={styles.productMedia}
-                    >
-                      {discount > 0 && (
-                        <span className={styles.badge}>{discount}% off</span>
-                      )}
-                      <span className={styles.productCatOverlay}>
-                        {p.category?.categoryData?.label || "Gift"}
-                      </span>
-                      <div className={styles.wishlistActions}>
-                        <button
-                          type="button"
-                          className={`${styles.wishlistBtn} ${
-                            inWishlist ? styles.wishlistBtnActive : ""
-                          }`}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            toggleWishlist(p._id);
-                          }}
-                          aria-label={
-                            inWishlist
-                              ? "Remove from wishlist"
-                              : "Add to wishlist"
-                          }
-                        >
-                          {inWishlist ? <FaHeart /> : <FiHeart />}
-                        </button>
-                      </div>
-                      {p.thumbnail?.url ? (
-                        <img
-                          src={p.thumbnail.url}
-                          alt={p.productName}
-                          className={styles.productImage}
-                        />
-                      ) : (
-                        <span className={styles.placeholderLabel}>
-                          Product Image
-                        </span>
-                      )}
-                    </Link>
-                    <div className={styles.productInfo}>
-                      {/* product name also links */}
+            {/* ---------- Mobile backdrop ---------- */}
+            {filtersOpen && (
+              <div
+                className={styles.filterOverlay}
+                onClick={() => setFiltersOpen(false)}
+              />
+            )}
+
+            {/* ---------- Sidebar / Bottom-sheet Filters ---------- */}
+            <aside
+              className={`${styles.filters} ${
+                filtersOpen ? styles.filtersOpen : ""
+              }`}
+            >
+              <div className={styles.filtersSheetHeader}>
+                <h3 className={styles.filtersHeading}>Filter Options</h3>
+                <button
+                  type="button"
+                  className={styles.filtersClose}
+                  onClick={() => setFiltersOpen(false)}
+                  aria-label="Close filters"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className={styles.filtersInner}>
+                <div className={styles.filterGroup}>
+                  <h3 className={styles.groupHeading}>By Occasion</h3>
+                  <ul>
+                    {occasions.map((o) => (
+                      <li
+                        key={o.name}
+                        className={
+                          isSelected("occasion", o.name) ? styles.selected : ""
+                        }
+                      >
+                        <label className={styles.checkRow}>
+                          <input
+                            type="checkbox"
+                            checked={isSelected("occasion", o.name)}
+                            onChange={() => toggleFilter("occasion", o.name)}
+                          />
+                          <span className={styles.checkLabel}>{o.name}</span>
+                        </label>
+                        <span className={styles.count}>{o.count}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className={styles.filterGroup}>
+                  <h3 className={styles.groupHeading}>By Recipient</h3>
+                  <ul>
+                    {recipients.map((r) => (
+                      <li
+                        key={r.name}
+                        className={
+                          isSelected("recipient", r.name) ? styles.selected : ""
+                        }
+                      >
+                        <label className={styles.checkRow}>
+                          <input
+                            type="checkbox"
+                            checked={isSelected("recipient", r.name)}
+                            onChange={() => toggleFilter("recipient", r.name)}
+                          />
+                          <span className={styles.checkLabel}>{r.name}</span>
+                        </label>
+                        <span className={styles.count}>{r.count}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className={styles.filterGroup}>
+                  <h3 className={styles.groupHeading}>Price</h3>
+                  <div className={styles.priceSlider}>
+                    <div className={styles.fill}></div>
+                    <div
+                      className={`${styles.handle} ${styles.handleLeft}`}
+                    ></div>
+                    <div
+                      className={`${styles.handle} ${styles.handleRight}`}
+                    ></div>
+                  </div>
+                  <div className={styles.priceValues}>
+                    <span>₹500</span>
+                    <span>₹8,000</span>
+                  </div>
+                </div>
+
+                <div className={styles.filterGroup}>
+                  <h3 className={styles.groupHeading}>By Budget</h3>
+                  <ul>
+                    {budgets.map((b) => (
+                      <li
+                        key={b.name}
+                        className={
+                          isSelected("budget", b.name) ? styles.selected : ""
+                        }
+                      >
+                        <label className={styles.checkRow}>
+                          <input
+                            type="checkbox"
+                            checked={isSelected("budget", b.name)}
+                            onChange={() => toggleFilter("budget", b.name)}
+                          />
+                          <span className={styles.checkLabel}>{b.name}</span>
+                        </label>
+                        <span className={styles.count}>{b.count}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className={styles.filterGroup}>
+                  <h3 className={styles.groupHeading}>By Promotions</h3>
+                  <ul>
+                    {promotions.map((p) => (
+                      <li
+                        key={p}
+                        className={
+                          isSelected("promotion", p) ? styles.selected : ""
+                        }
+                      >
+                        <label className={styles.checkRow}>
+                          <input
+                            type="checkbox"
+                            checked={isSelected("promotion", p)}
+                            onChange={() => toggleFilter("promotion", p)}
+                          />
+                          <span className={styles.checkLabel}>{p}</span>
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className={styles.filterGroup}>
+                  <h3 className={styles.groupHeading}>Availability</h3>
+                  <ul>
+                    {availability.map((a) => (
+                      <li
+                        key={a.name}
+                        className={
+                          isSelected("availability", a.name)
+                            ? styles.selected
+                            : ""
+                        }
+                      >
+                        <label className={styles.checkRow}>
+                          <input
+                            type="checkbox"
+                            checked={isSelected("availability", a.name)}
+                            onChange={() =>
+                              toggleFilter("availability", a.name)
+                            }
+                          />
+                          <span className={styles.checkLabel}>{a.name}</span>
+                        </label>
+                        <span className={styles.count}>{a.count}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className={styles.promoTags}>
+                  <span>Price: ₹500–₹8,000 ✕</span>
+                  <span>Best Seller ✕</span>
+                  <span>In Stock ✕</span>
+                  <span className={styles.clear}>Clear all</span>
+                </div>
+
+                <button
+                  type="button"
+                  className={styles.applyFilters}
+                  onClick={() => setFiltersOpen(false)}
+                >
+                  Apply Filters
+                </button>
+              </div>
+            </aside>
+
+            {/* ---------- Product Listing ---------- */}
+            <main>
+              <div className={styles.toolbar}>
+                <span className={styles.resultsCount}>
+                  {isLoading
+                    ? "Loading..."
+                    : `Showing ${products.length} of ${total} results`}
+                </span>
+                <div className={styles.sortWrapper}>
+                  <select className={styles.sortSelect}>
+                    <option>Default Sorting</option>
+                    <option>Price: Low to High</option>
+                    <option>Price: High to Low</option>
+                    <option>Newest</option>
+                    <option>Top Rated</option>
+                  </select>
+                  <FiChevronDown className={styles.sortChevron} />
+                </div>
+              </div>
+
+              <div className={styles.productGrid}>
+                {products.map((p) => {
+                  const discount =
+                    p.pricing?.salePrice && p.pricing?.originalPrice
+                      ? Math.round(
+                          ((p.pricing.originalPrice - p.pricing.salePrice) /
+                            p.pricing.originalPrice) *
+                            100,
+                        )
+                      : 0;
+                  const inCart = isInCart(p._id);
+                  const inWishlist = isInWishlist(p._id);
+                  const addingToCart = cartLoadingId === p._id;
+                  return (
+                    <div className={styles.productCard} key={p._id}>
+                      {/* navigate to product detail page */}
                       <Link
                         to={`/product/${p.productSlug}`}
-                        className={styles.productName}
+                        className={styles.productMedia}
                       >
-                        {p.productName}
-                      </Link>
-                      <div className={styles.productPrice}>
-                        <span className={styles.priceNow}>
-                          ₹
-                          {(
-                            p.pricing?.salePrice || p.pricing?.originalPrice
-                          )?.toLocaleString() || "0"}
+                        {discount > 0 && (
+                          <span className={styles.badge}>{discount}% off</span>
+                        )}
+                        <span className={styles.productCatOverlay}>
+                          {p.category?.categoryData?.label || "Gift"}
                         </span>
-                        {p.pricing?.salePrice && p.pricing?.originalPrice && (
-                          <span className={styles.priceOld}>
-                            ₹{p.pricing.originalPrice.toLocaleString()}
+                        <div className={styles.wishlistActions}>
+                          <button
+                            type="button"
+                            className={`${styles.wishlistBtn} ${
+                              inWishlist ? styles.wishlistBtnActive : ""
+                            }`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              toggleWishlist(p._id);
+                            }}
+                            aria-label={
+                              inWishlist
+                                ? "Remove from wishlist"
+                                : "Add to wishlist"
+                            }
+                          >
+                            {inWishlist ? <FaHeart /> : <FiHeart />}
+                          </button>
+                        </div>
+                        {p.thumbnail?.url ? (
+                          <img
+                            src={p.thumbnail.url}
+                            alt={p.productName}
+                            className={styles.productImage}
+                          />
+                        ) : (
+                          <span className={styles.placeholderLabel}>
+                            Product Image
                           </span>
                         )}
+                      </Link>
+                      <div className={styles.productInfo}>
+                        {/* product name also links */}
+                        <Link
+                          to={`/product/${p.productSlug}`}
+                          className={styles.productName}
+                        >
+                          {p.productName}
+                        </Link>
+                        <div className={styles.productPrice}>
+                          <span className={styles.priceNow}>
+                            ₹
+                            {(
+                              p.pricing?.salePrice || p.pricing?.originalPrice
+                            )?.toLocaleString() || "0"}
+                          </span>
+                          {p.pricing?.salePrice && p.pricing?.originalPrice && (
+                            <span className={styles.priceOld}>
+                              ₹{p.pricing.originalPrice.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          className={`${styles.addToCartBtn} ${
+                            inCart ? styles.addToCartBtnActive : ""
+                          }`}
+                          onClick={() => addToCart(p._id)}
+                          disabled={inCart || addingToCart}
+                        >
+                          {inCart ? (
+                            <>
+                              <FiCheck /> Added to Cart
+                            </>
+                          ) : (
+                            <>
+                              <FiShoppingBag />{" "}
+                              {addingToCart ? "Adding..." : "Add to Cart"}
+                            </>
+                          )}
+                        </button>
                       </div>
-
-                      <button
-                        type="button"
-                        className={`${styles.addToCartBtn} ${
-                          inCart ? styles.addToCartBtnActive : ""
-                        }`}
-                        onClick={() => addToCart(p._id)}
-                        disabled={inCart || addingToCart}
-                      >
-                        {inCart ? (
-                          <>
-                            <FiCheck /> Added to Cart
-                          </>
-                        ) : (
-                          <>
-                            <FiShoppingBag />{" "}
-                            {addingToCart ? "Adding..." : "Add to Cart"}
-                          </>
-                        )}
-                      </button>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* ---------- Pagination ---------- */}
-            {totalPages > 1 && (
-              <div className={styles.pagination}>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (currentPage > 1) setCurrentPage(currentPage - 1);
-                  }}
-                >
-                  ‹
-                </a>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (n) => (
-                    <a
-                      key={n}
-                      href="#"
-                      className={n === currentPage ? styles.active : ""}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setCurrentPage(n);
-                      }}
-                    >
-                      {n}
-                    </a>
-                  ),
-                )}
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (currentPage < totalPages)
-                      setCurrentPage(currentPage + 1);
-                  }}
-                >
-                  ›
-                </a>
+                  );
+                })}
               </div>
-            )}
-          </main>
-        </div>
 
-        {/* ================= TESTIMONIALS (UNCHANGED) ================= */}
-        <section className={styles.testimonials}>
-          <div className={styles.testimonialsHeading}>
-            <span className={styles.testimonialsKicker}>
-              Love From Our Customers
-            </span>
+              {/* ---------- Pagination ---------- */}
+              {totalPages > 1 && (
+                <div className={styles.pagination}>
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (currentPage > 1) setCurrentPage(currentPage - 1);
+                    }}
+                  >
+                    ‹
+                  </a>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (n) => (
+                      <a
+                        key={n}
+                        href="#"
+                        className={n === currentPage ? styles.active : ""}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage(n);
+                        }}
+                      >
+                        {n}
+                      </a>
+                    ),
+                  )}
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (currentPage < totalPages)
+                        setCurrentPage(currentPage + 1);
+                    }}
+                  >
+                    ›
+                  </a>
+                </div>
+              )}
+            </main>
           </div>
 
-          <div className={styles.testimonialsGrid}>
-            {testimonials.map((t) => (
-              <div className={styles.testimonialCard} key={t.name}>
-                <span className={styles.avatar}>{t.initials}</span>
-                <div className={styles.testimonialBody}>
-                  <div className={styles.stars}>
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <FiStar
-                        key={i}
-                        className={
-                          i < t.rating ? styles.starFilled : styles.starEmpty
-                        }
-                      />
-                    ))}
+          {/* ================= TESTIMONIALS (UNCHANGED) ================= */}
+          <section className={styles.testimonials}>
+            <div className={styles.testimonialsHeading}>
+              <span className={styles.testimonialsKicker}>
+                Love From Our Customers
+              </span>
+            </div>
+
+            <div className={styles.testimonialsGrid}>
+              {testimonials.map((t) => (
+                <div className={styles.testimonialCard} key={t.name}>
+                  <span className={styles.avatar}>{t.initials}</span>
+                  <div className={styles.testimonialBody}>
+                    <div className={styles.stars}>
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <FiStar
+                          key={i}
+                          className={
+                            i < t.rating ? styles.starFilled : styles.starEmpty
+                          }
+                        />
+                      ))}
+                    </div>
+                    <p className={styles.testimonialQuote}>"{t.quote}"</p>
+                    <div className={styles.authorName}>– {t.name}</div>
                   </div>
-                  <p className={styles.testimonialQuote}>"{t.quote}"</p>
-                  <div className={styles.authorName}>– {t.name}</div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ================= COMMITMENT / BRAND STORY (UNCHANGED) ================= */}
+          <section className={styles.commitment}>
+            <div className={styles.commitmentGrid}>
+              <div className={styles.commitmentText}>
+                <span className={styles.commitmentKicker}>
+                  Jewels As Unique As You
+                </span>
+                <h2 className={styles.commitmentTitle}>
+                  Commitment, Forever, In Every Sparkling Jewel
+                </h2>
+                <p className={styles.commitmentDesc}>
+                  Every piece we craft is built on precision and care, from the
+                  first cut to the final polish. We pair timeless design with
+                  honest quality, so what you gift carries meaning that lasts
+                  well beyond the moment it's opened.
+                </p>
+
+                <div className={styles.featureList}>
+                  {jewelHighlights.map((pair, idx) => (
+                    <React.Fragment key={idx}>
+                      <div className={styles.featureItem}>
+                        <span className={styles.featureIcon}>
+                          <FiCheck />
+                        </span>
+                        {pair[0]}
+                      </div>
+                      <div className={styles.featureItem}>
+                        <span className={styles.featureIcon}>
+                          <FiCheck />
+                        </span>
+                        {pair[1]}
+                      </div>
+                    </React.Fragment>
+                  ))}
+                </div>
+
+                <a href="#shopSection" className={styles.knowMoreBtn}>
+                  Shop
+                </a>
+              </div>
+
+              <div className={styles.commitmentMedia}>
+                <img
+                  src={giftMiddle}
+                  alt="Model wearing layered gold jewellery"
+                  className={styles.commitmentImage}
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* ================= PERKS STRIP (UNCHANGED) ================= */}
+          <section className={styles.perks}>
+            {perks.map((perk) => (
+              <div className={styles.perk} key={perk.title}>
+                <div className={styles.icon}>{perk.icon}</div>
+                <div>
+                  <h4>{perk.title}</h4>
+                  <p>{perk.text}</p>
                 </div>
               </div>
             ))}
-          </div>
-        </section>
+          </section>
+        </div>
 
-        {/* ================= COMMITMENT / BRAND STORY (UNCHANGED) ================= */}
-        <section className={styles.commitment}>
-          <div className={styles.commitmentGrid}>
-            <div className={styles.commitmentText}>
-              <span className={styles.commitmentKicker}>
-                Jewels As Unique As You
-              </span>
-              <h2 className={styles.commitmentTitle}>
-                Commitment, Forever, In Every Sparkling Jewel
-              </h2>
-              <p className={styles.commitmentDesc}>
-                Every piece we craft is built on precision and care, from the
-                first cut to the final polish. We pair timeless design with
-                honest quality, so what you gift carries meaning that lasts well
-                beyond the moment it's opened.
-              </p>
-
-              <div className={styles.featureList}>
-                {jewelHighlights.map((pair, idx) => (
-                  <React.Fragment key={idx}>
-                    <div className={styles.featureItem}>
-                      <span className={styles.featureIcon}>
-                        <FiCheck />
-                      </span>
-                      {pair[0]}
-                    </div>
-                    <div className={styles.featureItem}>
-                      <span className={styles.featureIcon}>
-                        <FiCheck />
-                      </span>
-                      {pair[1]}
-                    </div>
-                  </React.Fragment>
-                ))}
-              </div>
-
-              <a href="#shopSection" className={styles.knowMoreBtn}>
-                Shop
-              </a>
-            </div>
-
-            <div className={styles.commitmentMedia}>
-              <img
-                src={giftMiddle}
-                alt="Model wearing layered gold jewellery"
-                className={styles.commitmentImage}
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* ================= PERKS STRIP (UNCHANGED) ================= */}
-        <section className={styles.perks}>
-          {perks.map((perk) => (
-            <div className={styles.perk} key={perk.title}>
-              <div className={styles.icon}>{perk.icon}</div>
-              <div>
-                <h4>{perk.title}</h4>
-                <p>{perk.text}</p>
-              </div>
-            </div>
-          ))}
-        </section>
+        <Footer />
       </div>
-
-      <Footer />
-    </div>
+    </>
   );
 }

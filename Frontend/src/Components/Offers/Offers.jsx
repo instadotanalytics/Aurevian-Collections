@@ -19,6 +19,7 @@ import { LuSlidersHorizontal } from "react-icons/lu";
 import styles from "./Offers.module.css";
 import craftImage1 from "../../assets/offersimg.png";
 import Footer from "../../Pages/Layout/Footer/Footer.jsx";
+import Header from "../../Pages/Layout/Header/Header.jsx";
 import { fetchProductsByPlacement } from "../../redux/slices/storefrontProductSlice";
 import { addItemToCart } from "../../redux/slices/cartSlice";
 import {
@@ -250,30 +251,13 @@ export default function Offers() {
 
   return (
     <>
+      <Header />
       <section className={styles.offers} aria-label="Aurevian Exclusive Offers">
         {/* ---------------- Hero Banner with Background Image ---------------- */}
         <div
           className={styles.heroBanner}
           style={{ backgroundImage: `url(${craftImage1})` }}
-        >
-          <div className={styles.heroOverlay}>
-            <div className={styles.heroContent}>
-              <span className={styles.heroTag}>EXCLUSIVE OFFERS</span>
-              <h1 className={styles.heroTitle}>
-                Premium Choices,
-                <br />
-                <span>Just For You</span>
-              </h1>
-              <p className={styles.heroDescription}>
-                Explore handpicked luxury pieces at special prices for a limited
-                time.
-              </p>
-              <button className={styles.heroBtn} onClick={scrollToOffers}>
-                SHOP OFFERS →
-              </button>
-            </div>
-          </div>
-        </div>
+        ></div>
 
         <div className={styles.container}>
           {/* ---------------- Limited Time Offers ---------------- */}

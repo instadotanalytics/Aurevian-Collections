@@ -5,6 +5,7 @@ import { verifyOTP, resendOTP } from "../redux/slices/authSlice.js";
 import toast from "react-hot-toast";
 import { FiArrowLeft, FiMail, FiRefreshCw } from "react-icons/fi";
 import styles from "./VerifyOTP.module.css";
+import Header from "../Pages/Layout/Header/Header.jsx";
 
 const VerifyOTP = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -41,7 +42,7 @@ const VerifyOTP = () => {
 
   const handleChange = (index, value) => {
     if (value.length > 1) return;
-    
+
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
@@ -62,15 +63,15 @@ const VerifyOTP = () => {
     const pastedData = e.clipboardData.getData("text").slice(0, 6);
     const otpArray = pastedData.split("");
     const newOtp = [...otp];
-    
+
     otpArray.forEach((char, index) => {
       if (index < 6) {
         newOtp[index] = char;
       }
     });
-    
+
     setOtp(newOtp);
-    
+
     const lastIndex = Math.min(otpArray.length, 5);
     if (inputRefs.current[lastIndex]) {
       inputRefs.current[lastIndex].focus();
@@ -79,7 +80,7 @@ const VerifyOTP = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const otpCode = otp.join("");
     if (otpCode.length !== 6) {
       toast.error("Please enter all 6 digits");
@@ -89,7 +90,7 @@ const VerifyOTP = () => {
     try {
       setIsLoading(true);
       await dispatch(verifyOTP({ email, otp: otpCode, type: "email" })).unwrap();
-      
+
       toast.success("Email verified successfully!");
       navigate("/login");
     } catch (error) {
@@ -119,71 +120,74 @@ const VerifyOTP = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.card}>
-        <Link to="/login" className={styles.backButton}>
-          <FiArrowLeft />
-          <span>Back to Login</span>
-        </Link>
+    <>
+    <Header/>
+      <div className={styles.container}>
+        <div className={styles.card}>
+          <Link to="/login" className={styles.backButton}>
+            <FiArrowLeft />
+            <span>Back to Login</span>
+          </Link>
 
-        <div className={styles.header}>
-          <div className={styles.iconWrapper}>
-            <FiMail className={styles.mailIcon} />
-          </div>
-          <h1 className={styles.title}>Verify Your Email</h1>
-          <p className={styles.subtitle}>
-            We sent a 6-digit code to <strong>{email}</strong>
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.otpContainer}>
-            {otp.map((digit, index) => (
-              <input
-                key={index}
-                ref={(el) => (inputRefs.current[index] = el)}
-                type="text"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleChange(index, e.target.value)}
-                onKeyDown={(e) => handleKeyDown(index, e)}
-                onPaste={handlePaste}
-                className={`${styles.otpInput} ${digit ? styles.filled : ""}`}
-                disabled={isLoading}
-                autoFocus={index === 0}
-              />
-            ))}
+          <div className={styles.header}>
+            <div className={styles.iconWrapper}>
+              <FiMail className={styles.mailIcon} />
+            </div>
+            <h1 className={styles.title}>Verify Your Email</h1>
+            <p className={styles.subtitle}>
+              We sent a 6-digit code to <strong>{email}</strong>
+            </p>
           </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={styles.submitButton}
-          >
-            {isLoading ? "Verifying..." : "Verify Email"}
-          </button>
-        </form>
+          <form onSubmit={handleSubmit} className={styles.form}>
+            <div className={styles.otpContainer}>
+              {otp.map((digit, index) => (
+                <input
+                  key={index}
+                  ref={(el) => (inputRefs.current[index] = el)}
+                  type="text"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleChange(index, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(index, e)}
+                  onPaste={handlePaste}
+                  className={`${styles.otpInput} ${digit ? styles.filled : ""}`}
+                  disabled={isLoading}
+                  autoFocus={index === 0}
+                />
+              ))}
+            </div>
 
-        <div className={styles.resendSection}>
-          <p className={styles.resendText}>
-            Didn't receive the code?{" "}
-            {canResend ? (
-              <button onClick={handleResend} className={styles.resendButton}>
-                <FiRefreshCw className={styles.resendIcon} />
-                Resend OTP
-              </button>
-            ) : (
-              <span className={styles.timer}>Resend in {timer}s</span>
-            )}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={styles.submitButton}
+            >
+              {isLoading ? "Verifying..." : "Verify Email"}
+            </button>
+          </form>
+
+          <div className={styles.resendSection}>
+            <p className={styles.resendText}>
+              Didn't receive the code?{" "}
+              {canResend ? (
+                <button onClick={handleResend} className={styles.resendButton}>
+                  <FiRefreshCw className={styles.resendIcon} />
+                  Resend OTP
+                </button>
+              ) : (
+                <span className={styles.timer}>Resend in {timer}s</span>
+              )}
+            </p>
+          </div>
+
+          <p className={styles.footerText}>
+            Check your spam folder if you don't see the email
           </p>
         </div>
-
-        <p className={styles.footerText}>
-          Check your spam folder if you don't see the email
-        </p>
       </div>
-    </div>
-  );
+      </>
+      );
 };
 
-export default VerifyOTP;
+      export default VerifyOTP;

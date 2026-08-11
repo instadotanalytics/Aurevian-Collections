@@ -84,7 +84,8 @@
    Hero Banner - Only image, no content
    ========================================================== */
 .heroBanner {
-  height: 90vh;
+  height: 85vh;
+  margin-top: 120px;
   min-height: 450px;
   max-height: 750px;
   display: flex;
@@ -1410,9 +1411,10 @@
 
 @media (max-width: 480px) {
   .heroBanner {
-    height: 35vh;
+    height: 30vh;
     min-height: 220px;
     max-height: 350px;
+    margin-top: 105px;
   }
 
   .sectionTitle {

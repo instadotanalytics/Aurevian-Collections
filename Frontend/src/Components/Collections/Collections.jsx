@@ -9,6 +9,7 @@ import { FiFilter, FiHeart, FiShoppingBag, FiCheck } from "react-icons/fi";
 import { LuSlidersHorizontal } from "react-icons/lu";
 import styles from "./Collections.module.css";
 import Footer from "../../Pages/Layout/Footer/Footer.jsx";
+import Header from "../../Pages/Layout/Header/Header.jsx";
 import { fetchProductsByPlacement } from "../../redux/slices/storefrontProductSlice";
 import { addItemToCart } from "../../redux/slices/cartSlice";
 import {
@@ -348,6 +349,7 @@ export default function Collections() {
 
   return (
     <>
+      <Header />
       <section className={styles.collections} aria-label="Aurevian Collections">
         {/* ---------------- Hero Gallery - 90vh (UNCHANGED) ---------------- */}
         <div className={styles.heroGallery}>

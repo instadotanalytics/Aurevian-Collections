@@ -1,3 +1,4 @@
+
 // src/Components/Pages/Register/Register.jsx
 
 import React, { useState } from "react";
@@ -20,8 +21,7 @@ import {
 } from "react-icons/fi";
 import Header from "../Pages/Layout/Header/Header";
 import Footer from "../Pages/Layout/Footer/Footer";
-import logo from "../assets/Aurevianlogo.png";
-
+import logo from "../assets/newlogo1.png";
 import styles from "./Register.module.css";
 
 const PERKS = [

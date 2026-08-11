@@ -12,6 +12,7 @@ import {
   removeWishlistItem,
 } from "../../redux/slices/wishlistSlice";
 import { addItemToCart } from "../../redux/slices/cartSlice";
+import Header from "../Layout/Header/Header";
 
 const Wishlist = () => {
   const navigate = useNavigate();
@@ -44,6 +45,8 @@ const Wishlist = () => {
 
   if (!isAuthenticated) {
     return (
+      <>
+      <Header/>
       <div className={styles.wishlistContainer}>
         <div className={styles.emptyWishlist}>
           <FaHeart className={styles.emptyHeart} />
@@ -54,11 +57,14 @@ const Wishlist = () => {
         </div>
         <Footer />
       </div>
+      </>
     );
   }
 
   return (
-    <div className={styles.wishlistContainer}>
+    <>
+    <Header/>
+        <div className={styles.wishlistContainer}>
       <div className={styles.shippingBanner}>
         <span>✦ FREE SHIPPING ON ALL ORDERS ABOVE ₹1999 ✦</span>
       </div>
@@ -147,6 +153,7 @@ const Wishlist = () => {
       </div>
       <Footer />
     </div>
+    </>
   );
 };
 

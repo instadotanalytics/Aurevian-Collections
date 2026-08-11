@@ -22,9 +22,10 @@ import {
 import { FaGem } from "react-icons/fa";
 import Header from "../Pages/Layout/Header/Header";
 import Footer from "../Pages/Layout/Footer/Footer";
-import logo from "../assets/Aurevianlogo.png";
 import craftImage from "../assets/jewellery-craft.png";
 import styles from "./Login.module.css";
+import logo from "../assets/newlogo1.png";
+
 
 /* ------------------------------------------------------------------
    Static content — hero features, "why choose us" rows, craft points
@@ -167,9 +168,11 @@ const Login = () => {
             <div className={styles.heroRight}>
               <div className={styles.card}>
                 {/* Logo */}
+                
                 <div className={styles.cardLogo}>
-                  <img src={logo} alt="Aurevian" className={styles.cardLogoImage} />
-                </div>
+                                  <img src={logo} alt="Aurevian" className={styles.cardLogoImage} />
+                                </div>
+                
 
                 {/* Header */}
                 <div className={styles.header}>

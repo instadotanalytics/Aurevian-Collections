@@ -21,6 +21,7 @@ import styles from './BecomePartner.module.css';
 import Contactimg from "../../assets/partner.png";
 import B1Image from "../../assets/b1.png";
 import Footer from "../Layout/Footer/Footer";
+import Header from '../Layout/Header/Header';
 
 const BecomePartner = () => {
   const navigate = useNavigate();
@@ -107,6 +108,7 @@ const BecomePartner = () => {
 
   return (
     <>
+    <Header/>
     <div className={styles.page}>
       <div className={styles.contentWrapper}>
         {/* Hero Section */}
