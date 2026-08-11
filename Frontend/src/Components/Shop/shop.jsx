@@ -1,3 +1,4 @@
+
 // src/Pages/Shop/Shop.jsx
 
 import React, { useEffect, useState } from "react";
@@ -55,12 +56,15 @@ export default function Shop() {
     pagination: { page: 1, totalPages: 1, total: 0 },
   };
 
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
+  const [priceRange, setPriceRange] = useState([0, 7000]);
   const [sort, setSort] = useState("");
   const [page, setPage] = useState(1);
   const [cartLoadingId, setCartLoadingId] = useState(null);
+
+  // Mobile filter sheet state (matches Collections behavior)
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   useEffect(() => {
     axios
@@ -124,6 +128,34 @@ export default function Shop() {
     }
   };
 
+  const clearAllFilters = () => {
+    setSelectedCategoryId("");
+    setPriceRange([0, 7000]);
+    setSort("");
+    setPage(1);
+  };
+
+  // Mobile filter sheet open/close — locks body scroll, matches Collections
+  const openMobileFilter = () => {
+    setIsMobileFilterOpen(true);
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.width = "100%";
+    document.body.style.top = `-${window.scrollY}px`;
+  };
+
+  const closeMobileFilter = () => {
+    const scrollY = document.body.style.top;
+    setIsMobileFilterOpen(false);
+    document.body.style.overflow = "";
+    document.body.style.position = "";
+    document.body.style.width = "";
+    document.body.style.top = "";
+    if (scrollY) {
+      window.scrollTo(0, parseInt(scrollY || "0", 10) * -1);
+    }
+  };
+
   const products = shopData.products || [];
   const { total, totalPages } = shopData.pagination || {
     total: 0,
@@ -145,12 +177,12 @@ export default function Shop() {
 
         {/* Shop Content */}
         <div className={styles.shopWrap}>
-          {/* Filter Toggle Button (Mobile) */}
+          {/* Mobile Filter Toggle Button */}
           <button
             type="button"
             className={styles.filterToggle}
-            onClick={() => setFiltersOpen((prev) => !prev)}
-            aria-expanded={filtersOpen}
+            onClick={openMobileFilter}
+            aria-expanded={isMobileFilterOpen}
           >
             <span className={styles.filterToggleText}>Filter Options</span>
             <span className={styles.filterToggleIcon}>
@@ -158,82 +190,61 @@ export default function Shop() {
             </span>
           </button>
 
-          {/* Filter Overlay */}
-          {filtersOpen && (
-            <div
-              className={styles.filterOverlay}
-              onClick={() => setFiltersOpen(false)}
-            />
-          )}
+          {/* Desktop Filter Sidebar */}
+          <aside className={styles.filterSidebar}>
+            <h3 className={styles.filterTitle}>Filter</h3>
 
-          {/* Filters Sidebar */}
-          <aside
-            className={`${styles.filters} ${filtersOpen ? styles.filtersOpen : ""}`}
-          >
-            <div className={styles.filtersSheetHeader}>
-              <h3 className={styles.filtersHeading}>Filter Options</h3>
-              <button
-                type="button"
-                className={styles.filtersClose}
-                onClick={() => setFiltersOpen(false)}
-                aria-label="Close filters"
-              >
-                ✕
-              </button>
+            <div className={styles.filterGroup}>
+              <span className={styles.filterGroupLabel}>Category</span>
+              <label className={styles.filterOption}>
+                <input
+                  type="radio"
+                  name="category"
+                  checked={selectedCategoryId === ""}
+                  onChange={() => {
+                    setSelectedCategoryId("");
+                    setPage(1);
+                  }}
+                />
+                All
+              </label>
+              {categories.map((c) => (
+                <label key={c.id} className={styles.filterOption}>
+                  <input
+                    type="radio"
+                    name="category"
+                    checked={selectedCategoryId === c.id}
+                    onChange={() => {
+                      setSelectedCategoryId(c.id);
+                      setPage(1);
+                    }}
+                  />
+                  {c.label}
+                </label>
+              ))}
             </div>
 
-            <div className={styles.filtersInner}>
-              {/* Category Filter */}
-              <div className={styles.filterGroup}>
-                <h3 className={styles.groupHeading}>By Category</h3>
-                <ul>
-                  <li
-                    className={selectedCategoryId === "" ? styles.selected : ""}
-                  >
-                    <label className={styles.checkRow}>
-                      <input
-                        type="radio"
-                        checked={selectedCategoryId === ""}
-                        onChange={() => {
-                          setSelectedCategoryId("");
-                          setPage(1);
-                        }}
-                      />
-                      <span className={styles.checkLabel}>All</span>
-                    </label>
-                  </li>
-                  {categories.map((c) => (
-                    <li
-                      key={c.id}
-                      className={
-                        selectedCategoryId === c.id ? styles.selected : ""
-                      }
-                    >
-                      <label className={styles.checkRow}>
-                        <input
-                          type="radio"
-                          checked={selectedCategoryId === c.id}
-                          onChange={() => {
-                            setSelectedCategoryId(c.id);
-                            setPage(1);
-                          }}
-                        />
-                        <span className={styles.checkLabel}>{c.label}</span>
-                      </label>
-                    </li>
-                  ))}
-                </ul>
+            <div className={styles.filterGroup}>
+              <span className={styles.filterGroupLabel}>Price Range</span>
+              <input
+                type="range"
+                min="0"
+                max="7000"
+                step="100"
+                value={priceRange[1]}
+                onChange={(e) => setPriceRange([0, Number(e.target.value)])}
+                className={styles.filterPriceInput}
+                style={{ "--_progress": `${(priceRange[1] / 7000) * 100}%` }}
+              />
+              <div className={styles.filterPriceRange}>
+                <span>₹0</span>
+                <span>₹{priceRange[1]}</span>
               </div>
-
-              {/* Apply Filters Button (Mobile) */}
-              <button
-                type="button"
-                className={styles.applyFilters}
-                onClick={() => setFiltersOpen(false)}
-              >
-                Apply Filters
-              </button>
             </div>
+
+            <button className={styles.filterClearBtn} onClick={clearAllFilters}>
+              Clear All Filters
+            </button>
           </aside>
 
           {/* Product Grid */}
@@ -410,6 +421,90 @@ export default function Shop() {
             </div>
           ))}
         </section>
+
+        {/* Mobile Bottom Sheet Filter (matches Collections exactly) */}
+        {isMobileFilterOpen && (
+          <div className={styles.filterOverlay} onClick={closeMobileFilter} />
+        )}
+
+        <div
+          className={`${styles.mobileFilterSheet} ${isMobileFilterOpen ? styles.mobileFilterSheetActive : ""}`}
+        >
+          <div className={styles.mobileFilterHandle} />
+
+          <div className={styles.mobileFilterHeader}>
+            <h3 className={styles.mobileFilterTitle}>Filter</h3>
+            <button
+              className={styles.mobileFilterClose}
+              onClick={closeMobileFilter}
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className={styles.mobileFilterContent}>
+            <div className={styles.mobileFilterGroup}>
+              <span className={styles.mobileFilterGroupLabel}>Category</span>
+              <label className={styles.mobileFilterOption}>
+                <input
+                  type="radio"
+                  name="mobile_category"
+                  checked={selectedCategoryId === ""}
+                  onChange={() => {
+                    setSelectedCategoryId("");
+                    setPage(1);
+                  }}
+                />
+                All
+              </label>
+              {categories.map((c) => (
+                <label key={c.id} className={styles.mobileFilterOption}>
+                  <input
+                    type="radio"
+                    name="mobile_category"
+                    checked={selectedCategoryId === c.id}
+                    onChange={() => {
+                      setSelectedCategoryId(c.id);
+                      setPage(1);
+                    }}
+                  />
+                  {c.label}
+                </label>
+              ))}
+            </div>
+
+            <div className={styles.mobileFilterGroup}>
+              <span className={styles.mobileFilterGroupLabel}>
+                Price Range
+              </span>
+              <input
+                type="range"
+                min="0"
+                max="7000"
+                step="100"
+                value={priceRange[1]}
+                onChange={(e) => setPriceRange([0, Number(e.target.value)])}
+                className={styles.filterPriceInput}
+                style={{ "--_progress": `${(priceRange[1] / 7000) * 100}%` }}
+              />
+              <div className={styles.filterPriceRange}>
+                <span>₹0</span>
+                <span>₹{priceRange[1]}</span>
+              </div>
+            </div>
+
+            <button className={styles.filterClearBtn} onClick={clearAllFilters}>
+              Clear All Filters
+            </button>
+
+            <button
+              className={styles.mobileFilterApply}
+              onClick={closeMobileFilter}
+            >
+              Apply Filters
+            </button>
+          </div>
+        </div>
       </div>
       <Footer />
     </div>
