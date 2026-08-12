@@ -392,13 +392,14 @@ export default function ProductDetail() {
               </button>
 
               <button
-                type="button"
-                className={styles.buyNowBtn}
-                onClick={handleBuyNow}
-                disabled={!inStock}
-              >
-                <FiZap /> Buy Now
-              </button>
+  type="button"
+  className={styles.buyNowBtn}
+  onClick={handleBuyNow}
+  disabled={!inStock}
+>
+  <FiShoppingBag />
+  <span>Buy Now</span>
+</button>
             </div>
 
             <div className={styles.perksRow}>
