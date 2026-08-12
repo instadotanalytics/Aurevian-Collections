@@ -24,7 +24,7 @@ const RecentOrders = ({ orders = [] }) => {
     <div className={styles.recentOrders}>
       <div className={styles.header}>
         <h3>Recent Orders</h3>
-        <Link to="/seller/orders" className={styles.viewAll}>
+        <Link to="/seller/dashboard/orders" className={styles.viewAll}>
           View All →
         </Link>
       </div>

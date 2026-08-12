@@ -1,7 +1,14 @@
+/* src/Pages/Seller/SellerDashboard/components/DashboardOverview.module.css */
+
 .dashboardOverview {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 24px;
+  padding-top: 28px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 /* ================= KYC BANNER ================= */
@@ -13,19 +20,23 @@
   gap: 20px;
   flex-wrap: wrap;
   padding: 20px 24px;
-  border-radius: 14px;
+  border-radius: 16px;
   background: linear-gradient(
     135deg,
-    rgba(245, 158, 11, 0.12),
-    rgba(245, 158, 11, 0.04)
+    rgba(217, 119, 6, 0.08),
+    rgba(217, 119, 6, 0.02)
   );
-  border: 1px solid rgba(245, 158, 11, 0.25);
+  border: 1px solid rgba(217, 119, 6, 0.2);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .kycBannerLeft {
   display: flex;
   align-items: flex-start;
   gap: 16px;
+  flex: 1;
+  min-width: 0;
 }
 
 .kycIconWrap {
@@ -33,23 +44,23 @@
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  background: rgba(245, 158, 11, 0.15);
-  color: #f59e0b;
+  background: rgba(217, 119, 6, 0.12);
+  color: #d97706;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 19px;
 }
 
 .kycTitle {
-  color: #ffffff;
+  color: var(--ink);
   font-size: 15px;
   font-weight: 700;
   margin-bottom: 4px;
 }
 
 .kycText {
-  color: #b8b8b8;
+  color: var(--ink-soft);
   font-size: 13.5px;
   line-height: 1.5;
   max-width: 560px;
@@ -62,17 +73,18 @@
   white-space: nowrap;
   padding: 11px 20px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #c8a86e, #d9b67f);
-  color: #1a1a1a;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: #ffffff;
   font-weight: 700;
   font-size: 14px;
   text-decoration: none;
-  transition: 0.3s;
+  transition: 0.25s ease;
+  flex-shrink: 0;
 }
 
 .kycBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(200, 168, 110, 0.25);
+  box-shadow: 0 10px 22px rgba(200, 168, 110, 0.3);
 }
 
 /* ================= HEADER ================= */
@@ -83,17 +95,12 @@
   align-items: flex-start;
   gap: 20px;
   flex-wrap: wrap;
-}
-
-.welcome {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 8px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .subtitle {
-  color: #9ca3af;
+  color: var(--ink-soft);
   font-size: 15px;
 }
 
@@ -102,60 +109,53 @@
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
-}
-
-.addProductBtn {
-  border: none;
-  outline: none;
-  cursor: pointer;
-  padding: 12px 24px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #c8a86e, #d9b67f);
-  color: white;
-  font-weight: 600;
-  transition: 0.3s;
-}
-
-.addProductBtn:hover {
-  transform: translateY(-2px);
+  flex-shrink: 0;
 }
 
 .storeStatus {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 10px 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 9px 16px;
   border-radius: 10px;
+  white-space: nowrap;
 }
 
 .statusDot {
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .active {
   background: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
 }
 
 .pending {
   background: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.18);
 }
 
 .statusText {
   display: flex;
   align-items: center;
-  color: white;
-  font-size: 14px;
+  color: var(--ink);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
 /* ================= STATS ================= */
 
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* ================= CONTENT ================= */
@@ -163,17 +163,36 @@
 .mainContent {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 24px;
+  gap: 22px;
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.leftColumn,
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+  overflow: hidden;
+}
+
 .rightColumn {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 22px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 /* ================= RESPONSIVE ================= */
+
+@media (max-width: 1200px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
 
 @media (max-width: 1024px) {
   .mainContent {
@@ -182,12 +201,14 @@
 }
 
 @media (max-width: 768px) {
-  .welcome {
-    font-size: 1.7rem;
+  .dashboardOverview {
+    padding-top: 16px;
+    gap: 16px;
   }
 
   .statsGrid {
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
 
   .header {
@@ -195,37 +216,107 @@
     align-items: flex-start;
   }
 
+  .headerActions {
+    width: 100%;
+  }
+
+  .storeStatus {
+    width: 100%;
+    justify-content: center;
+  }
+
   .kycBanner {
     flex-direction: column;
     align-items: flex-start;
+    padding: 16px;
+  }
+
+  .kycBannerLeft {
+    width: 100%;
+  }
+
+  .kycText {
+    max-width: 100%;
   }
 
   .kycBtn {
     width: 100%;
     justify-content: center;
   }
+
+  .mainContent {
+    gap: 16px;
+  }
+
+  .leftColumn,
+  .rightColumn {
+    gap: 16px;
+  }
 }
 
 @media (max-width: 480px) {
-  .statsGrid {
-    grid-template-columns: 1fr;
+  .dashboardOverview {
+    padding-top: 12px;
+    gap: 12px;
   }
 
-  .addProductBtn {
-    width: 100%;
+  .statsGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
   }
 
   .headerActions {
-    width: 100%;
     flex-direction: column;
     align-items: stretch;
   }
 
   .storeStatus {
     justify-content: center;
+    padding: 8px 12px;
+  }
+
+  .kycBanner {
+    padding: 14px;
+    border-radius: 12px;
   }
 
   .kycBannerLeft {
+    gap: 10px;
+  }
+
+  .kycIconWrap {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .kycTitle {
+    font-size: 14px;
+  }
+
+  .kycText {
+    font-size: 12.5px;
+  }
+
+  .kycBtn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .statusText {
+    font-size: 12.5px;
+  }
+
+  .mainContent {
+    gap: 12px;
+  }
+
+  .leftColumn,
+  .rightColumn {
     gap: 12px;
   }
 }
