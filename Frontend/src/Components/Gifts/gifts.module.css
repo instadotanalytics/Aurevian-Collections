@@ -202,7 +202,7 @@
   scroll-margin-top: 110px;
 }
 
-/* ---------- Mobile filter toggle button (Matches Collections) ---------- */
+/* ---------- Mobile filter toggle button ---------- */
 .filterToggle {
   display: none;
   align-items: center;
@@ -254,7 +254,7 @@
   display: block;
 }
 
-/* ---------- Desktop Filters Sidebar (Matches Collections) ---------- */
+/* ---------- Desktop Filters Sidebar ---------- */
 .filters {
   position: sticky;
   top: 0;
@@ -501,7 +501,7 @@
   flex: 1;
 }
 
-/* ---------- Toolbar (Matches Collections) ---------- */
+/* ---------- Toolbar ---------- */
 .toolbar {
   display: flex;
   justify-content: space-between;
@@ -540,9 +540,10 @@
   cursor: pointer;
   font-family: "Jost", sans-serif;
   transition: border-color 0.2s ease;
-  min-width: 140px;
+  width: 170px;
   position: relative;
   z-index: 1;
+  white-space: nowrap;
 }
 
 .sortButton:hover {
@@ -553,6 +554,11 @@
   border-color: var(--gold);
   box-shadow: 0 0 0 3px rgba(179, 135, 63, 0.1);
   outline: none;
+}
+
+.sortButton span {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sortChevron {
@@ -572,7 +578,6 @@
 .sortDropdown {
   position: absolute;
   top: calc(100% + 8px);
-  right: 0;
   left: 0;
   background: white;
   border: 1px solid var(--cream-line);
@@ -580,7 +585,7 @@
   box-shadow: 0 12px 40px rgba(28, 25, 23, 0.12);
   padding: 6px 0;
   z-index: 100;
-  min-width: 200px;
+  width: 170px;
   overflow: hidden;
 }
 
@@ -596,6 +601,7 @@
   color: var(--ink);
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
 }
 
 .sortOption:hover {
@@ -1065,7 +1071,7 @@
 }
 
 /* ============================================================
-   Mobile Bottom Sheet Filter (Matches Collections)
+   Mobile Bottom Sheet Filter
    ============================================================ */
 .mobileFilterSheet {
   position: fixed;
@@ -1307,15 +1313,13 @@
   }
 
   .sortButton {
-    min-width: 150px;
+    width: 160px;
     padding: 8px 16px;
     font-size: 13px;
   }
 
   .sortDropdown {
-    min-width: 180px;
-    right: 0;
-    left: auto;
+    width: 160px;
   }
 }
 
@@ -1425,49 +1429,43 @@
   }
 
   .toolbar {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
     gap: 8px;
     margin-bottom: 16px;
     padding-bottom: 12px;
   }
 
   .resultsCount {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .sortWrapper {
-    width: 100%;
+    flex-shrink: 0;
   }
 
   .sortButton {
-    width: 100%;
+    width: 150px;
+    padding: 8px 14px;
+    font-size: 12px;
     min-width: unset;
-    padding: 10px 16px;
-    justify-content: space-between;
   }
 
   .sortDropdown {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    right: 0;
-    min-width: unset;
-    width: 100%;
+    width: 150px;
+    top: calc(100% + 6px);
     border-radius: 10px;
-    box-shadow: 0 8px 30px rgba(28, 25, 23, 0.15);
   }
 
   .sortOption {
-    padding: 12px 16px;
-    font-size: 14px;
+    padding: 10px 14px;
+    font-size: 12px;
   }
 
   .sortChevron {
-    right: 14px;
-    font-size: 14px !important;
-    width: 14px !important;
-    height: 14px !important;
+    font-size: 12px !important;
+    width: 12px !important;
+    height: 12px !important;
   }
 
   .testimonials {
@@ -1519,8 +1517,6 @@
   .mobileFilterApply {
     padding: 12px;
     font-size: 15px;
-        margin-bottom: 50px;
-
   }
 }
 
@@ -1620,13 +1616,24 @@
   }
 
   .sortButton {
-    padding: 8px 14px;
-    font-size: 12px;
+    width: 130px;
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .sortDropdown {
+    width: 130px;
   }
 
   .sortOption {
-    padding: 10px 14px;
-    font-size: 13px;
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+
+  .sortChevron {
+    font-size: 12px !important;
+    width: 12px !important;
+    height: 12px !important;
   }
 
   .mobileFilterSheet {
@@ -1645,7 +1652,6 @@
   .mobileFilterApply {
     padding: 10px;
     font-size: 14px;
-    margin-bottom: 50px;
   }
 }
 

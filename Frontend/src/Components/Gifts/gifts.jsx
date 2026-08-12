@@ -1,4 +1,4 @@
-// src/Pages/Gifts/Gifts.jsx - Updated with custom dropdown
+// src/Pages/Gifts/Gifts.jsx
 
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
