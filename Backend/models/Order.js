@@ -49,6 +49,7 @@ const shippingSchema = new mongoose.Schema(
     },
     returnShipmentId: String,
     returnStatus: String,
+    lastError: String, // ✅ NEW — real Shiprocket rejection reason, human-readable
     lastSyncedAt: Date,
   },
   { _id: false },

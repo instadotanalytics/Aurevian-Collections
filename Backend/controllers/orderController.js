@@ -5,10 +5,10 @@ import JewelleryProduct from "../models/JewelleryProduct.js";
 import razorpayService from "../services/razorpayService.js";
 import {
   createShipmentForOrder,
-  calculateShippingRate, // ✅ NEW
-  getItemWeightKg, // ✅ NEW
-  isValidIndianPincode, // ✅ NEW
-  ShippingUnavailableError, // ✅ NEW
+  calculateShippingRate,
+  getItemWeightKg,
+  isValidIndianPincode,
+  ShippingUnavailableError,
 } from "./shippingController.js";
 
 const getProductSnapshot = (product) => {
@@ -25,12 +25,6 @@ const getProductSnapshot = (product) => {
 const generateOrderNumber = () =>
   `AUR${Date.now()}${Math.floor(Math.random() * 900 + 100)}`;
 
-// ============================================
-// Build order items + totals + total weight.
-// Shared by createRazorpayOrder and createCODOrder. Shipping fee is
-// deliberately NOT computed here — it needs paymentMethod, which differs
-// per caller, so it's resolved separately via resolveShippingFee().
-// ============================================
 const buildOrderItemsAndTotals = async (items) => {
   const orderItems = [];
   let itemsTotal = 0;
@@ -79,11 +73,6 @@ const buildOrderItemsAndTotals = async (items) => {
   return { orderItems, itemsTotal, totalWeightKg };
 };
 
-// ============================================
-// ✅ NEW: authoritative shipping-fee resolution.
-// Always recomputed server-side from Shiprocket — no client-supplied
-// shipping number is ever accepted or trusted, here or anywhere else.
-// ============================================
 const resolveShippingFee = async ({ pincode, weightKg, paymentMethod }) => {
   try {
     const rate = await calculateShippingRate({
@@ -107,10 +96,6 @@ const resolveShippingFee = async ({ pincode, weightKg, paymentMethod }) => {
   }
 };
 
-// ============================================
-// ✅ NEW (extracted, unchanged behavior): decrement stock + clear cart
-// Shared post-order-confirmation logic (was inline in verifyRazorpayPayment).
-// ============================================
 const finalizeInventoryAndCart = async (order, userId) => {
   for (const item of order.items) {
     try {
@@ -145,9 +130,6 @@ const finalizeInventoryAndCart = async (order, userId) => {
   }
 };
 
-// ✅ FIXED: pincode is now format-validated (exactly 6 digits), not just
-// "present". This is what stops orders reaching the shipping-fee step with
-// a garbage pincode.
 const validateShippingAddress = (shippingAddress) => {
   return !!(
     shippingAddress &&
@@ -188,9 +170,6 @@ export const createRazorpayOrder = async (req, res) => {
         .json({ success: false, message: e.message });
     }
 
-    // ✅ FIXED: this replaces `itemsTotal > 5000 ? 0 : 49`. The fee below
-    // comes from a live Shiprocket serviceability/rate call — never a
-    // fixed number, never something the client could have sent.
     let shippingFee;
     try {
       shippingFee = await resolveShippingFee({
@@ -315,9 +294,6 @@ export const verifyRazorpayPayment = async (req, res) => {
 
     await finalizeInventoryAndCart(order, userId);
 
-    // Wrapped so a Shiprocket failure never breaks the payment-verification
-    // response — the order is still correctly marked paid either way.
-    // Duplicate-shipment protection lives inside createShipmentForOrder.
     try {
       await createShipmentForOrder(order._id);
     } catch (shipErr) {
@@ -342,9 +318,6 @@ export const verifyRazorpayPayment = async (req, res) => {
   }
 };
 
-// ============================================
-// COD ORDER CREATION
-// ============================================
 export const createCODOrder = async (req, res) => {
   try {
     const userId = req.user._id || req.user.id;
@@ -403,14 +376,13 @@ export const createCODOrder = async (req, res) => {
       shippingFee,
       totalAmount,
       paymentMethod: "cod",
-      paymentStatus: "pending", // collected on delivery
+      paymentStatus: "pending",
       orderStatus: "processing",
       placedAt: new Date(),
     });
 
     await finalizeInventoryAndCart(order, userId);
 
-    // COD orders ship without upfront payment — create the shipment immediately.
     try {
       await createShipmentForOrder(order._id);
     } catch (shipErr) {
@@ -519,6 +491,25 @@ export const getSellerOrders = async (req, res) => {
   }
 };
 
+// ✅ NEW: statuses that only make sense once Shiprocket has actually
+// created a shipment for this order. This is the fix for the reported bug:
+// a seller could previously set orderStatus to "ready_to_ship" (or
+// shipped/delivered/etc.) from the dashboard dropdown with zero validation,
+// even while shipping.status was "CREATE_FAILED" and no Shiprocket
+// shipment existed — producing exactly the inconsistent state reported
+// (paymentStatus: paid, orderStatus: ready_to_ship, shipping.status:
+// CREATE_FAILED). These statuses should only be reachable via the
+// Shiprocket webhook or the internal shipping pipeline (schedulePickup,
+// etc.), which already require shipping.awbCode/shipmentId to exist before
+// touching orderStatus.
+const SHIPMENT_DEPENDENT_STATUSES = [
+  "ready_to_ship",
+  "shipped",
+  "in_transit",
+  "out_for_delivery",
+  "delivered",
+];
+
 export const updateOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -548,6 +539,20 @@ export const updateOrderStatus = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, message: "Order not found" });
+
+    // ✅ NEW: reject manual writes into a shipment-dependent status when no
+    // Shiprocket shipment actually exists for this order yet.
+    if (
+      SHIPMENT_DEPENDENT_STATUSES.includes(status) &&
+      !order.shipping?.shipmentId
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot set order status to "${status}" — no Shiprocket shipment exists yet for this order (shipping.status: ${
+          order.shipping?.status || "none"
+        }). Resolve the Shiprocket shipment creation issue first.`,
+      });
+    }
 
     order.orderStatus = status;
     await order.save();

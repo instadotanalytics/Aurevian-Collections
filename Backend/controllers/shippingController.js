@@ -53,6 +53,59 @@ function isOwnerOrAdmin(order, req) {
 }
 
 // ============================================
+// ✅ NEW: PICKUP LOCATION VALIDATION
+// Shiprocket's Create Order API silently "succeeds" (HTTP 200, no
+// order_id/shipment_id) when pickup_location doesn't match a nickname
+// registered in Settings > Pickup Addresses. This catches that BEFORE
+// wasting a create call, and tells you exactly what's registered.
+// ============================================
+let pickupLocationCache = { names: null, fetchedAt: 0 };
+const PICKUP_CACHE_TTL_MS = 10 * 60 * 1000;
+
+async function assertPickupLocationExists(pickupLocation) {
+  const now = Date.now();
+  const cacheStale =
+    !pickupLocationCache.names ||
+    now - pickupLocationCache.fetchedAt > PICKUP_CACHE_TTL_MS;
+
+  if (cacheStale) {
+    try {
+      const result = await shiprocketService.getPickupLocations();
+      const addresses = result?.data?.shipping_address || [];
+      pickupLocationCache = {
+        names: addresses.map((a) => a.pickup_location),
+        fetchedAt: now,
+      };
+    } catch (err) {
+      // If we can't even fetch pickup locations (auth/network issue),
+      // don't block the flow on this check — let the actual create call
+      // surface the real error as before. This is a fast-fail optimization,
+      // not the only line of defense.
+      console.error(
+        "⚠️ Could not fetch Shiprocket pickup locations for validation:",
+        err.message,
+      );
+      return;
+    }
+  }
+
+  if (
+    pickupLocationCache.names &&
+    !pickupLocationCache.names.includes(pickupLocation)
+  ) {
+    const err = new Error(
+      `SHIPROCKET_PICKUP_LOCATION "${pickupLocation}" does not match any pickup ` +
+        `location nickname registered in Shiprocket. This is a config value, not ` +
+        `a street address. Registered pickup locations on this account: ` +
+        `${pickupLocationCache.names.length ? pickupLocationCache.names.join(", ") : "(none found — add one in Shiprocket > Settings > Pickup Addresses)"}. ` +
+        `Update SHIPROCKET_PICKUP_LOCATION in .env to match one exactly.`,
+    );
+    err.status = 500;
+    throw err;
+  }
+}
+
+// ============================================
 // ✅ NEW: WEIGHT HELPER — single source of truth for "how much does this
 // product weigh, in kg, per unit". Shared by shipment creation and rate
 // quoting so the two never drift apart. Falls back to 50g/unit only for
@@ -229,6 +282,9 @@ export async function createShipmentForOrder(orderId) {
     throw new Error("SHIPROCKET_PICKUP_LOCATION is not configured");
   }
 
+  // ✅ NEW — fail fast with a real reason instead of a silent 200-with-no-IDs
+  await assertPickupLocationExists(pickupLocation);
+
   // Gather live weight/dimensions/SKU per item — these aren't stored on the
   // Order snapshot, so we look them up on JewelleryProduct at ship time.
   let totalWeightKg = 0;
@@ -308,7 +364,49 @@ export async function createShipmentForOrder(orderId) {
     weight,
   };
 
-  const result = await shiprocketService.createOrder(payload);
+  // ✅ TEMP DEV LOGGING — safe: this payload never contains Shiprocket
+  // credentials, tokens, JWTs, or Razorpay secrets. It's exactly what's
+  // being sent to Shiprocket's Create Order API for this order.
+  console.log("========== SHIPROCKET CREATE ORDER REQUEST ==========");
+  console.log("Aurevian Order:", order.orderNumber);
+  console.log("Payload:", JSON.stringify(payload, null, 2));
+  console.log("=======================================================");
+
+  let result;
+  try {
+    result = await shiprocketService.createOrder(payload);
+  } catch (err) {
+    // Covers thrown 4xx/5xx from Shiprocket (shiprocketRequest() throws a
+    // ShiprocketError with the real HTTP status in err.statusCode and the
+    // real Shiprocket response body in err.details).
+    console.error(
+      "========== SHIPROCKET CREATE ORDER FAILED (HTTP ERROR) ==========",
+    );
+    console.error("Aurevian Order:", order.orderNumber);
+    console.error("HTTP Status:", err.statusCode ?? "unknown");
+    console.error("Shiprocket Response:", err.details ?? null);
+    console.error("Error Message:", err.message);
+    console.error(
+      "===================================================================",
+    );
+
+    order.shipping = order.shipping || {};
+    order.shipping.provider = "shiprocket";
+    order.shipping.status = "CREATE_FAILED";
+    order.shipping.lastError = err.message; // ✅ NEW: store the reason
+    order.shipping.lastSyncedAt = new Date();
+    await order.save();
+
+    throw err;
+  }
+
+  // ✅ TEMP DEV LOGGING — the request succeeded at the HTTP level (200).
+  // Whether it's a REAL success is checked right below.
+  console.log("========== SHIPROCKET CREATE ORDER RESPONSE ==========");
+  console.log("Aurevian Order:", order.orderNumber);
+  console.log("HTTP Status: 200 (request completed)");
+  console.log("Response body:", JSON.stringify(result, null, 2));
+  console.log("========================================================");
 
   // ✅ FIXED — this is the actual bug: Shiprocket's /orders/create/adhoc
   // endpoint frequently responds with HTTP 200 even when the order was
@@ -328,13 +426,20 @@ export async function createShipmentForOrder(orderId) {
       "Shiprocket did not return an order_id/shipment_id";
 
     console.error(
-      `❌ Shiprocket order creation failed for ${order.orderNumber} — no order_id/shipment_id in response. Reason: ${reason}. Full response:`,
-      result,
+      "========== SHIPROCKET CREATE ORDER FAILED (200 OK, NO IDS) ==========",
+    );
+    console.error("Aurevian Order:", order.orderNumber);
+    console.error("HTTP Status: 200");
+    console.error("Shiprocket Response:", result);
+    console.error("Reason:", reason);
+    console.error(
+      "=======================================================================",
     );
 
     order.shipping = order.shipping || {};
     order.shipping.provider = "shiprocket";
     order.shipping.status = "CREATE_FAILED";
+    order.shipping.lastError = reason; // ✅ NEW: store the reason
     order.shipping.lastSyncedAt = new Date();
     await order.save();
 
@@ -350,6 +455,7 @@ export async function createShipmentForOrder(orderId) {
   order.shipping.shiprocketOrderId = String(result.order_id);
   order.shipping.shipmentId = String(result.shipment_id);
   order.shipping.status = result.status || "NEW";
+  order.shipping.lastError = undefined; // ✅ NEW — clear any stale failure reason
   if (result.status_code != null) {
     order.shipping.statusCode = String(result.status_code);
   }
@@ -373,6 +479,9 @@ export async function createShipmentForOrder(orderId) {
       `⚠️ Auto AWB assignment failed for order ${order.orderNumber}:`,
       awbErr.message,
     );
+    // Store the AWB error in lastError so admins can see what went wrong
+    order.shipping.lastError = awbErr.message;
+    await order.save();
   }
 
   return { alreadyExists: false, order };

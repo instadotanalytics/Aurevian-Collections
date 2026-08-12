@@ -66,10 +66,13 @@ export async function generateToken() {
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok || !data.token) {
+    // ✅ Safe: logs status + Shiprocket's own message, never the
+    // email/password that were sent or any token.
     console.error(
-      "❌ Shiprocket authentication failed:",
+      "❌ Shiprocket authentication FAILED — HTTP",
       res.status,
-      data?.message || data,
+      "— Response:",
+      data,
     );
     throw new ShiprocketError(
       "Shiprocket authentication failed — check credentials",
@@ -79,6 +82,8 @@ export async function generateToken() {
   }
 
   tokenCache = { token: data.token, expiresAt: Date.now() + TOKEN_LIFETIME_MS };
+  // ✅ NEW: confirms auth succeeded without ever printing the token itself.
+  console.log("✅ Shiprocket authentication: SUCCESS (new token cached)");
   return data.token;
 }
 
@@ -124,6 +129,9 @@ async function shiprocketRequest(
   const data = await res.json().catch(() => ({}));
 
   if (res.status === 401 && !_isRetry) {
+    console.warn(
+      `⚠️ Shiprocket returned 401 on [${method} ${path}] — forcing token refresh and retrying once`,
+    );
     tokenCache = { token: null, expiresAt: 0 };
     return shiprocketRequest(path, { method, body }, true);
   }
@@ -253,6 +261,15 @@ export async function createReturnOrder(payload) {
   });
 }
 
+// ============================================
+// ✅ NEW: PICKUP LOCATIONS
+// Used to validate SHIPROCKET_PICKUP_LOCATION against what's actually
+// registered on the account, BEFORE attempting order creation.
+// ============================================
+export async function getPickupLocations() {
+  return shiprocketRequest("/settings/company/pickup");
+}
+
 export default {
   isConfigured,
   generateToken,
@@ -266,5 +283,6 @@ export default {
   trackByShipmentId,
   cancelOrder,
   createReturnOrder,
+  getPickupLocations, // ✅ NEW
   ShiprocketError,
 };
