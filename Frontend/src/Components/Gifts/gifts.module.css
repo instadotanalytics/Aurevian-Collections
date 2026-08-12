@@ -790,6 +790,8 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-transform: capitalize;
+  font-family: "Jost", sans-serif;
+  color: black;
 }
 
 .productPrice {
