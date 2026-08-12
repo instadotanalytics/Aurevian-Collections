@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { FaRupeeSign, FaBoxOpen } from "react-icons/fa";
+import { FiTruck } from "react-icons/fi";
 import Header from "../Layout/Header/Header";
 import Footer from "../Layout/Footer/Footer";
 import styles from "./OrdersPage.module.css";
@@ -11,9 +12,32 @@ import { fetchMyOrders } from "../../redux/slices/orderSlice";
 const statusColor = {
   placed: "#6b7280",
   processing: "#d97706",
+  ready_to_ship: "#d97706",
   shipped: "#2563eb",
+  in_transit: "#2563eb",
+  out_for_delivery: "#2563eb",
   delivered: "#16a34a",
   cancelled: "#dc2626",
+  rto: "#dc2626",
+  return_initiated: "#b45309",
+  returned: "#6b7280",
+};
+
+// ✅ NEW: human-readable labels for the fuller status enum the Order model
+// already supports (backend/models/Order.js) — the old version only ever
+// rendered "placed/processing/shipped/delivered/cancelled" verbatim.
+const statusLabel = {
+  placed: "Placed",
+  processing: "Confirmed",
+  ready_to_ship: "Courier Assigned",
+  shipped: "Shipped",
+  in_transit: "In Transit",
+  out_for_delivery: "Out for Delivery",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
+  rto: "Returned to Origin",
+  return_initiated: "Return in Progress",
+  returned: "Returned",
 };
 
 const OrdersPage = () => {
@@ -45,7 +69,11 @@ const OrdersPage = () => {
 
         <div className={styles.ordersList}>
           {myOrders.map((order) => (
-            <div className={styles.orderCard} key={order._id}>
+            <Link
+              to={`/orders/${order._id}`}
+              className={styles.orderCard}
+              key={order._id}
+            >
               <div className={styles.orderHeader}>
                 <div>
                   <p className={styles.orderNumber}>#{order.orderNumber}</p>
@@ -63,7 +91,7 @@ const OrdersPage = () => {
                     background: statusColor[order.orderStatus] || "#6b7280",
                   }}
                 >
-                  {order.orderStatus}
+                  {statusLabel[order.orderStatus] || order.orderStatus}
                 </span>
               </div>
 
@@ -83,6 +111,19 @@ const OrdersPage = () => {
                 ))}
               </div>
 
+              {/* ✅ NEW: courier/AWB surfaced directly on the list, using
+                  data the backend already returns on every order document —
+                  no new API call needed. */}
+              {order.shipping?.awbCode && (
+                <div className={styles.shippingLine}>
+                  <FiTruck size={13} />
+                  <span>
+                    {order.shipping.courierName || "Courier"} · AWB{" "}
+                    {order.shipping.awbCode}
+                  </span>
+                </div>
+              )}
+
               <div className={styles.orderFooter}>
                 <span>Payment: {order.paymentStatus}</span>
                 <span className={styles.orderTotal}>
@@ -90,7 +131,11 @@ const OrdersPage = () => {
                   {order.totalAmount.toLocaleString("en-IN")}
                 </span>
               </div>
-            </div>
+
+              <span className={styles.viewDetailLink}>
+                View details & tracking →
+              </span>
+            </Link>
           ))}
         </div>
       </div>

@@ -19,6 +19,41 @@ const orderItemSchema = new mongoose.Schema(
   { _id: false },
 );
 
+// ============================================
+// ✅ NEW: SHIPPING SUBDOCUMENT (Shiprocket)
+// ============================================
+const shippingSchema = new mongoose.Schema(
+  {
+    provider: { type: String, default: "shiprocket" },
+    shiprocketOrderId: String,
+    shipmentId: String,
+    awbCode: String,
+    courierName: String,
+    courierId: String,
+    trackingUrl: String,
+    labelUrl: String,
+    manifestUrl: String,
+    status: String, // raw Shiprocket status text, latest known
+    statusCode: String, // raw Shiprocket current_status_id, used for webhook idempotency
+    estimatedDeliveryDate: Date,
+    pickupScheduledAt: Date,
+    shippedAt: Date,
+    deliveredAt: Date,
+    cancelledAt: Date,
+    paymentMethod: String, // "Prepaid" | "COD" as sent to Shiprocket
+    weight: Number, // kg, as computed/sent at shipment creation
+    dimensions: {
+      length: Number,
+      breadth: Number,
+      height: Number,
+    },
+    returnShipmentId: String,
+    returnStatus: String,
+    lastSyncedAt: Date,
+  },
+  { _id: false },
+);
+
 const orderSchema = new mongoose.Schema(
   {
     orderNumber: { type: String, unique: true, required: true },
@@ -40,7 +75,7 @@ const orderSchema = new mongoose.Schema(
     itemsTotal: { type: Number, required: true },
     shippingFee: { type: Number, default: 0 },
     totalAmount: { type: Number, required: true },
-    paymentMethod: { type: String, default: "razorpay" },
+    paymentMethod: { type: String, default: "razorpay" }, // "razorpay" | "cod"
     paymentStatus: {
       type: String,
       enum: ["pending", "paid", "failed"],
@@ -53,15 +88,31 @@ const orderSchema = new mongoose.Schema(
     },
     orderStatus: {
       type: String,
-      enum: ["placed", "processing", "shipped", "delivered", "cancelled"],
+      enum: [
+        "placed",
+        "processing",
+        "ready_to_ship", // ✅ NEW: pickup scheduled
+        "shipped", // picked up by courier
+        "in_transit", // ✅ NEW
+        "out_for_delivery", // ✅ NEW
+        "delivered",
+        "rto", // ✅ NEW: return to origin
+        "return_initiated", // ✅ NEW
+        "returned", // ✅ NEW
+        "cancelled",
+      ],
       default: "placed",
     },
     placedAt: { type: Date },
+    // ✅ NEW
+    shipping: { type: shippingSchema, default: () => ({}) },
   },
   { timestamps: true },
 );
 
 orderSchema.index({ user: 1, createdAt: -1 });
 orderSchema.index({ "items.seller": 1, createdAt: -1 });
+orderSchema.index({ "shipping.awbCode": 1 });
+orderSchema.index({ "shipping.shiprocketOrderId": 1 });
 
 export default mongoose.model("Order", orderSchema);

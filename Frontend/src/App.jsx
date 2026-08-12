@@ -35,6 +35,8 @@ import Cart from "./Pages/Cart/Cart";
 import Wishlist from "./Pages/Wishlist/Wishlist.jsx";
 import Checkout from "./Pages/Checkout/Checkout.jsx";
 import OrdersPage from "./Pages/Orders/OrdersPage.jsx";
+import OrderSuccess from "./Pages/Orders/OrderSuccess.jsx";
+import OrderDetail from "./Pages/Orders/OrderDetail.jsx";
 import Story from "./Pages/About/Story";
 
 // ============================================
@@ -111,6 +113,8 @@ const ROUTES = {
   STORY: "/stories",
   ORDERS: "/orders",
   CHECKOUT: "/checkout",
+  ORDER_SUCCESS: "/order-success/:orderId",
+  ORDER_DETAIL: "/orders/:id",
   SUPER_ADMIN_LOGIN: "/super-admin/login",
   SUPER_ADMIN_DASHBOARD: "/super-admin/dashboard",
   // Seller Routes
@@ -225,62 +229,17 @@ const App = () => {
           {/* ============================================
                 PUBLIC ROUTES - WITH HEADER
                 ============================================ */}
-          <Route
-            path={ROUTES.HOME}
-            element={
-                <Home />
-            }
-          />
-          <Route
-            path={ROUTES.ABOUT}
-            element={
-                <AboutUs />
-            }
-          />
+          <Route path={ROUTES.HOME} element={<Home />} />
+          <Route path={ROUTES.ABOUT} element={<AboutUs />} />
 
-          <Route
-            path="/AboutUs"
-            element={
-                <AboutUs />
-            }
-          />
-          <Route
-            path="/stories"
-            element={
-                <Story />
-            }
-          />
-          <Route
-            path="/why-aurevian"
-            element={
-                <WhyAurevian />
-            }
-          />
-          <Route
-            path="/contact"
-            element={
-                <Contact />
-            }
-          />
-          <Route
-            path="/support"
-            element={
-                <Support />
-            }
-          />
-          <Route
-            path="/franchise"
-            element={
-                <Franchise />
-            }
-          />
+          <Route path="/AboutUs" element={<AboutUs />} />
+          <Route path="/stories" element={<Story />} />
+          <Route path="/why-aurevian" element={<WhyAurevian />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/support" element={<Support />} />
+          <Route path="/franchise" element={<Franchise />} />
           <Route path="/cart" element={<Cart />} />
-          <Route
-            path="/wishlist"
-            element={
-                <Wishlist />
-            }
-          />
+          <Route path="/wishlist" element={<Wishlist />} />
           <Route
             path={ROUTES.CHECKOUT}
             element={
@@ -297,24 +256,14 @@ const App = () => {
               </PrivateRoute>
             }
           />
-          <Route
-            path={ROUTES.BECOME_A_PARTNER}
-            element={
-                <BecomePartner />
-            }
-          />
+          <Route path={ROUTES.BECOME_A_PARTNER} element={<BecomePartner />} />
 
           {/* ============================================
                 SHOP ROUTE - WITH HEADER
                 ============================================ */}
           <Route path={ROUTES.SHOP} element={<Shop />} />
 
-          <Route
-            path={ROUTES.GIFTS}
-            element={
-                <Gifts />
-            }
-          />
+          <Route path={ROUTES.GIFTS} element={<Gifts />} />
 
           <Route
   path={ROUTES.GIFT_GUIDE}
@@ -324,22 +273,12 @@ const App = () => {
           {/* ============================================
                 COLLECTIONS ROUTE - WITH HEADER
                 ============================================ */}
-          <Route
-            path={ROUTES.COLLECTIONS}
-            element={
-                <Collections />
-            }
-          />
+          <Route path={ROUTES.COLLECTIONS} element={<Collections />} />
 
           {/* ============================================
                 OFFERS ROUTE - WITH HEADER
                 ============================================ */}
-          <Route
-            path={ROUTES.OFFERS}
-            element={
-                <Offers />
-            }
-          />
+          <Route path={ROUTES.OFFERS} element={<Offers />} />
 
   
 
@@ -349,28 +288,13 @@ const App = () => {
                 URL: /product/:slug
                 Example: /product/diamond-pendant-necklace
                 ============================================ */}
-          <Route
-            path={ROUTES.PRODUCT_DETAIL}
-            element={
-                <ProductDetail />
-            }
-          />
+          <Route path={ROUTES.PRODUCT_DETAIL} element={<ProductDetail />} />
 
           {/* ============================================
                 BLOG ROUTES - WITH HEADER ✅
                 ============================================ */}
-          <Route
-            path={ROUTES.BLOG}
-            element={
-                <BlogList />
-            }
-          />
-          <Route
-            path={ROUTES.BLOG_DETAIL}
-            element={
-                <BlogDetail />
-            }
-          />
+          <Route path={ROUTES.BLOG} element={<BlogList />} />
+          <Route path={ROUTES.BLOG_DETAIL} element={<BlogDetail />} />
 
           {/* ============================================
                 AUTH ROUTES - WITHOUT HEADER
@@ -688,6 +612,26 @@ const App = () => {
             element={
               <PrivateRoute>
                 <Profile />
+              </PrivateRoute>
+            }
+          />
+
+          {/* ============================================
+                ORDER SUCCESS & ORDER DETAIL ROUTES - WITH HEADER
+                ============================================ */}
+          <Route
+            path={ROUTES.ORDER_SUCCESS}
+            element={
+              <PrivateRoute>
+                <OrderSuccess />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ORDER_DETAIL}
+            element={
+              <PrivateRoute>
+                <OrderDetail />
               </PrivateRoute>
             }
           />

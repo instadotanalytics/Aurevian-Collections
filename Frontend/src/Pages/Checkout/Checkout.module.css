@@ -148,3 +148,46 @@
   display: flex;
   align-items: center;
 }
+
+.shippingHint {
+  font-size: 13px;
+  color: #999;
+  font-style: italic;
+}
+
+.shippingChecking {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  color: #555;
+}
+
+.shippingError {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #b3261e;
+  text-align: right;
+  max-width: 220px;
+}
+
+.spinIcon {
+  animation: checkoutSpin 0.8s linear infinite;
+}
+
+@keyframes checkoutSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.courierNote {
+  font-size: 12.5px;
+  color: #777;
+  margin: -4px 0 4px;
+}

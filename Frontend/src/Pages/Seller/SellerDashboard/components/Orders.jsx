@@ -2,6 +2,7 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FaRupeeSign } from "react-icons/fa";
+import { FiTruck } from "react-icons/fi";
 import toast from "react-hot-toast";
 import styles from "./Orders.module.css";
 import {
@@ -12,7 +13,10 @@ import {
 const STATUS_OPTIONS = [
   "placed",
   "processing",
+  "ready_to_ship",
   "shipped",
+  "in_transit",
+  "out_for_delivery",
   "delivered",
   "cancelled",
 ];
@@ -83,6 +87,25 @@ const Orders = () => {
                 </div>
               ))}
             </div>
+
+            {/* ✅ NEW: shipping info — this data was already coming back
+                from GET /api/orders/seller/all (order.shipping in the
+                controller response), it just wasn't rendered anywhere. */}
+            {order.shipping &&
+              (order.shipping.courierName ||
+                order.shipping.awbCode ||
+                order.shipping.status) && (
+                <div className={styles.shippingInfo}>
+                  <FiTruck size={13} />
+                  <span>
+                    {order.shipping.courierName || "Courier not yet assigned"}
+                    {order.shipping.awbCode
+                      ? ` · AWB ${order.shipping.awbCode}`
+                      : ""}
+                    {order.shipping.status ? ` · ${order.shipping.status}` : ""}
+                  </span>
+                </div>
+              )}
 
             <div className={styles.orderFooter}>
               <span className={styles.subtotal}>
