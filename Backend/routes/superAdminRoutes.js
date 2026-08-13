@@ -20,6 +20,13 @@ import {
   getAllPayments,
   getPaymentStats,
 } from "../controllers/superAdminController.js";
+// ✅ NEW: "Sellers & Products" admin view layer
+import {
+  getSellersWithProductCounts,
+  getSellerProductStatsAdmin,
+  getSellerProductsAdmin,
+  getSellerProductDetailAdmin,
+} from "../controllers/superAdminProductManagementController.js";
 import { protectSuperAdmin } from "../middleware/superAdminAuth.js";
 
 const router = express.Router();
@@ -58,6 +65,17 @@ router.put("/sellers/:id/suspend", suspendSeller);
 router.put("/sellers/:id/unsuspend", unsuspendSeller);
 router.put("/sellers/:id/verify-kyc", verifySellerKyc);
 router.delete("/sellers/:id", deleteSeller);
+
+// ============================================
+// ✅ NEW: SELLERS & PRODUCTS (admin view/management layer)
+// Registered under the SAME protectSuperAdmin guard above — no separate
+// auth needed. Product routes are scoped by seller.sellerId, so one seller
+// can never see another seller's products through these endpoints either.
+// ============================================
+router.get("/sellers-products", getSellersWithProductCounts);
+router.get("/sellers/:id/product-stats", getSellerProductStatsAdmin);
+router.get("/sellers/:id/products", getSellerProductsAdmin);
+router.get("/sellers/:id/products/:productId", getSellerProductDetailAdmin);
 
 // ============================================
 // PAYMENTS

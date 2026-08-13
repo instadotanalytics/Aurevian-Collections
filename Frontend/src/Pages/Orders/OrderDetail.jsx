@@ -11,6 +11,7 @@ import styles from "../../Components/OrderDetailView/OrderDetailView.module.css"
 const OrderDetail = () => {
   const { id } = useParams();
   const [order, setOrder] = useState(null);
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 

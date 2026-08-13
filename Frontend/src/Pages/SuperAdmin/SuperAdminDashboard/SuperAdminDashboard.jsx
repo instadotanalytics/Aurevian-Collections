@@ -67,6 +67,9 @@ import SubscriptionPlanManagement from "../components/SubscriptionPlanManagement
 import HeaderManagement from "../components/HeaderManagement/HeaderManagement";
 import OrdersManagement from "../components/OrdersManagement/OrdersManagement";
 import OrderHistory from "../components/OrderHistory/OrderHistory.jsx";
+// ✅ NEW: Sellers & Products
+import SellersProducts from "../components/SellersProducts/SellersProducts.jsx";
+import SellerProductsPage from "../components/SellersProducts/SellerProductsPage.jsx";
 
 const SuperAdminDashboard = () => {
   // ✅ Page title
@@ -76,16 +79,21 @@ const SuperAdminDashboard = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { section, id } = useParams();
+  const { section, id, sellerId } = useParams();
   const { user, isAuthenticated, isLoading } = useSelector(
     (state) => state.superAdmin,
   );
 
   const hasVerified = useRef(false);
 
-  // ✅ If an :id param is present we're on the seller-details/:id route
-  // regardless of :section (that route never populates :section — see App.jsx)
-  const activeMenu = id ? "seller-details" : section || "dashboard";
+  // ✅ Route precedence: /seller-details/:id and /sellers-products/:sellerId
+  // are both more specific than the generic /:section route, so they're
+  // checked first here — same pattern as the existing seller-details logic.
+  const activeMenu = sellerId
+    ? "seller-products-detail"
+    : id
+      ? "seller-details"
+      : section || "dashboard";
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedSeller, setSelectedSeller] = useState(null);
@@ -182,6 +190,15 @@ const SuperAdminDashboard = () => {
     goToSection("sellers");
   };
 
+  // ✅ NEW: navigate to a seller's product listing (shareable/refreshable URL)
+  const handleViewSellerProducts = (seller) => {
+    navigate(`/super-admin/dashboard/sellers-products/${seller._id}`);
+  };
+
+  const handleBackToSellersProducts = () => {
+    goToSection("sellers-products");
+  };
+
   const toggleSubMenu = (menuId) => {
     setExpandedMenus((prev) => ({
       ...prev,
@@ -214,6 +231,13 @@ const SuperAdminDashboard = () => {
       id: "sellers",
       label: "Seller Requests",
       icon: FiUsers,
+      isSubMenu: false,
+    },
+    // ✅ NEW: Sellers & Products
+    {
+      id: "sellers-products",
+      label: "Sellers & Products",
+      icon: FiGrid,
       isSubMenu: false,
     },
     {
@@ -303,6 +327,22 @@ const SuperAdminDashboard = () => {
             seller={selectedSeller}
             sellerId={id}
             onClose={handleCloseDetails}
+          />
+        );
+      // ✅ NEW: Sellers & Products list
+      case "sellers-products":
+        return (
+          <SellersProducts
+            onViewSeller={handleViewSeller}
+            onViewSellerProducts={handleViewSellerProducts}
+          />
+        );
+      // ✅ NEW: A specific seller's product catalog
+      case "seller-products-detail":
+        return (
+          <SellerProductsPage
+            sellerId={sellerId}
+            onBack={handleBackToSellersProducts}
           />
         );
       case "orders":
@@ -465,7 +505,15 @@ const SuperAdminDashboard = () => {
                   </div>
                 ) : (
                   <button
-                    className={`${styles.navItem} ${activeMenu === item.id ? styles.active : ""}`}
+                    className={`${styles.navItem} ${
+                      activeMenu === item.id ||
+                      // ✅ Keep "Sellers & Products" highlighted while viewing
+                      // a specific seller's product catalog
+                      (item.id === "sellers-products" &&
+                        activeMenu === "seller-products-detail")
+                        ? styles.active
+                        : ""
+                    }`}
                     onClick={() => {
                       goToSection(item.id);
                       setMobileMenuOpen(false);
@@ -473,7 +521,9 @@ const SuperAdminDashboard = () => {
                   >
                     <item.icon className={styles.navIcon} />
                     <span className={styles.navLabel}>{item.label}</span>
-                    {activeMenu === item.id && (
+                    {(activeMenu === item.id ||
+                      (item.id === "sellers-products" &&
+                        activeMenu === "seller-products-detail")) && (
                       <div className={styles.activeIndicator} />
                     )}
                   </button>
