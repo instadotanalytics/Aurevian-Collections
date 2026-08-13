@@ -19,9 +19,6 @@ const orderItemSchema = new mongoose.Schema(
   { _id: false },
 );
 
-// ============================================
-// ✅ NEW: SHIPPING SUBDOCUMENT (Shiprocket)
-// ============================================
 const shippingSchema = new mongoose.Schema(
   {
     provider: { type: String, default: "shiprocket" },
@@ -33,27 +30,59 @@ const shippingSchema = new mongoose.Schema(
     trackingUrl: String,
     labelUrl: String,
     manifestUrl: String,
-    status: String, // raw Shiprocket status text, latest known
-    statusCode: String, // raw Shiprocket current_status_id, used for webhook idempotency
+    status: String,
+    statusCode: String,
     estimatedDeliveryDate: Date,
     pickupScheduledAt: Date,
     shippedAt: Date,
     deliveredAt: Date,
     cancelledAt: Date,
-    paymentMethod: String, // "Prepaid" | "COD" as sent to Shiprocket
-    weight: Number, // kg, as computed/sent at shipment creation
-    dimensions: {
-      length: Number,
-      breadth: Number,
-      height: Number,
-    },
+    paymentMethod: String,
+    weight: Number,
+    dimensions: { length: Number, breadth: Number, height: Number },
     returnShipmentId: String,
     returnStatus: String,
-    lastError: String, // ✅ NEW — real Shiprocket rejection reason, human-readable
+    lastError: String,
     lastSyncedAt: Date,
   },
   { _id: false },
 );
+
+const statusHistoryEntrySchema = new mongoose.Schema(
+  {
+    status: { type: String, required: true },
+    changedBy: { type: mongoose.Schema.Types.ObjectId },
+    role: {
+      type: String,
+      enum: ["customer", "seller", "super_admin", "system"],
+      required: true,
+    },
+    reason: String,
+    timestamp: { type: Date, default: Date.now },
+  },
+  { _id: false },
+);
+
+const FULFILLMENT_STATUSES = [
+  "PENDING_SELLER_CONFIRMATION",
+  "SELLER_CONFIRMED",
+  "SELLER_REJECTED",
+  "ADMIN_APPROVED",
+  "ADMIN_REJECTED",
+  "SHIPMENT_CREATED",
+  "AWB_PENDING",
+  "AWB_ASSIGNED",
+  "READY_TO_SHIP",
+  "PICKED_UP",
+  "IN_TRANSIT",
+  "OUT_FOR_DELIVERY",
+  "DELIVERED",
+  "RTO",
+  "RETURN_INITIATED",
+  "RETURNED",
+  "CANCELLED",
+  "SHIPROCKET_FAILED",
+];
 
 const orderSchema = new mongoose.Schema(
   {
@@ -63,6 +92,7 @@ const orderSchema = new mongoose.Schema(
     customerEmail: String,
     customerPhone: String,
     items: [orderItemSchema],
+    seller: { type: mongoose.Schema.Types.ObjectId, ref: "Seller" },
     shippingAddress: {
       fullName: String,
       phone: String,
@@ -76,36 +106,52 @@ const orderSchema = new mongoose.Schema(
     itemsTotal: { type: Number, required: true },
     shippingFee: { type: Number, default: 0 },
     totalAmount: { type: Number, required: true },
-    paymentMethod: { type: String, default: "razorpay" }, // "razorpay" | "cod"
+    paymentMethod: { type: String, default: "razorpay" },
     paymentStatus: {
       type: String,
       enum: ["pending", "paid", "failed"],
       default: "pending",
     },
-    razorpay: {
-      orderId: String,
-      paymentId: String,
-      signature: String,
-    },
+    razorpay: { orderId: String, paymentId: String, signature: String },
+
     orderStatus: {
       type: String,
       enum: [
         "placed",
         "processing",
-        "ready_to_ship", // ✅ NEW: pickup scheduled
-        "shipped", // picked up by courier
-        "in_transit", // ✅ NEW
-        "out_for_delivery", // ✅ NEW
+        "ready_to_ship",
+        "shipped",
+        "in_transit",
+        "out_for_delivery",
         "delivered",
-        "rto", // ✅ NEW: return to origin
-        "return_initiated", // ✅ NEW
-        "returned", // ✅ NEW
+        "rto",
+        "return_initiated",
+        "returned",
         "cancelled",
       ],
       default: "placed",
     },
+
+    fulfillmentStatus: {
+      type: String,
+      enum: FULFILLMENT_STATUSES,
+      default: "PENDING_SELLER_CONFIRMATION",
+    },
+    statusHistory: { type: [statusHistoryEntrySchema], default: [] },
+
+    sellerConfirmedAt: Date,
+    sellerConfirmedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Seller" },
+    sellerRejectedAt: Date,
+    sellerRejectedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Seller" },
+    sellerRejectionReason: String,
+
+    adminApprovedAt: Date,
+    adminApprovedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    adminRejectedAt: Date,
+    adminRejectedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    adminRejectionReason: String,
+
     placedAt: { type: Date },
-    // ✅ NEW
     shipping: { type: shippingSchema, default: () => ({}) },
   },
   { timestamps: true },
@@ -113,7 +159,13 @@ const orderSchema = new mongoose.Schema(
 
 orderSchema.index({ user: 1, createdAt: -1 });
 orderSchema.index({ "items.seller": 1, createdAt: -1 });
+orderSchema.index({ seller: 1, fulfillmentStatus: 1, createdAt: -1 });
+orderSchema.index({ fulfillmentStatus: 1, createdAt: -1 });
 orderSchema.index({ "shipping.awbCode": 1 });
 orderSchema.index({ "shipping.shiprocketOrderId": 1 });
+
+export const FULFILLMENT_STATUS = Object.fromEntries(
+  FULFILLMENT_STATUSES.map((s) => [s, s]),
+);
 
 export default mongoose.model("Order", orderSchema);

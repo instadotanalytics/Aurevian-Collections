@@ -1,6 +1,6 @@
 // src/Pages/Seller/SellerDashboard/ProductManagement.jsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -10,12 +10,12 @@ import {
   FiTrash2,
   FiEye,
   FiPackage,
-  FiDollarSign,
   FiGrid,
   FiChevronLeft,
   FiChevronRight,
-  FiFilter,
   FiX,
+  FiChevronDown,
+  FiChevronUp,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import styles from "./ProductManagement.module.css";
@@ -26,6 +26,56 @@ import {
   fetchProductLimitStatus,
   fetchPlacementCounts,
 } from "../../../../redux/slices/sellerProductSlice";
+
+// Debounce utility
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
+// Skeleton Loader Component
+const SkeletonLoader = ({ count = 5 }) => {
+  return (
+    <div className={styles.skeletonContainer}>
+      {Array.from({ length: count }).map((_, index) => (
+        <div key={index} className={styles.skeletonRow}>
+          <div className={styles.skeletonIndex}></div>
+          <div className={styles.skeletonCheckbox}></div>
+          <div className={styles.skeletonImage}></div>
+          <div className={styles.skeletonName}>
+            <div className={styles.skeletonLine}></div>
+            <div className={styles.skeletonLineShort}></div>
+          </div>
+          <div className={styles.skeletonCategory}></div>
+          <div className={styles.skeletonPrice}>
+            <div className={styles.skeletonLine}></div>
+            <div className={styles.skeletonLineShort}></div>
+          </div>
+          <div className={styles.skeletonStock}></div>
+          <div className={styles.skeletonStatus}></div>
+          <div className={styles.skeletonPlacements}></div>
+          <div className={styles.skeletonActions}>
+            <div className={styles.skeletonIcon}></div>
+            <div className={styles.skeletonIcon}></div>
+            <div className={styles.skeletonIcon}></div>
+            <div className={styles.skeletonIcon}></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const ProductManagement = () => {
   const dispatch = useDispatch();
@@ -41,22 +91,42 @@ const ProductManagement = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [expandedRows, setExpandedRows] = useState({});
+  const [selectedRows, setSelectedRows] = useState({});
+  const [isThrottled, setIsThrottled] = useState(false);
+  const [showSkeleton, setShowSkeleton] = useState(true);
+
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const debouncedStatusFilter = useDebounce(statusFilter, 300);
+  const debouncedCategoryFilter = useDebounce(categoryFilter, 300);
 
   useEffect(() => {
-    fetchProductData();
+    setShowSkeleton(true);
+    setIsThrottled(true);
+
+    const timer = setTimeout(() => {
+      setIsThrottled(false);
+      fetchProductData();
+      setShowSkeleton(false);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [currentPage, debouncedStatusFilter, debouncedCategoryFilter, debouncedSearchTerm]);
+
+  useEffect(() => {
     dispatch(fetchPlacementCounts());
-  }, [currentPage, statusFilter, categoryFilter, searchTerm]);
+    dispatch(fetchProductLimitStatus());
+  }, []);
 
   const fetchProductData = () => {
     const params = {
       page: currentPage,
       limit: 20,
-      status: statusFilter || undefined,
-      categoryId: categoryFilter || undefined,
-      search: searchTerm || undefined,
+      status: debouncedStatusFilter || undefined,
+      categoryId: debouncedCategoryFilter || undefined,
+      search: debouncedSearchTerm || undefined,
     };
     dispatch(fetchProducts(params));
-    dispatch(fetchProductLimitStatus());
   };
 
   const handleSearch = (e) => {
@@ -70,6 +140,10 @@ const ProductManagement = () => {
     setStatusFilter("");
     setCategoryFilter("");
     setCurrentPage(1);
+    // Fetch immediately after clearing
+    setTimeout(() => {
+      fetchProductData();
+    }, 100);
   };
 
   const handleEdit = (product) => {
@@ -108,6 +182,29 @@ const ProductManagement = () => {
     navigate(`/product/${product.productSlug}`);
   };
 
+  const toggleRowExpand = (productId) => {
+    setExpandedRows(prev => ({
+      ...prev,
+      [productId]: !prev[productId]
+    }));
+  };
+
+  const toggleRowSelect = (productId) => {
+    setSelectedRows(prev => ({
+      ...prev,
+      [productId]: !prev[productId]
+    }));
+  };
+
+  const toggleAllSelect = () => {
+    const allSelected = products.every(p => selectedRows[p._id]);
+    const newState = {};
+    products.forEach(p => {
+      newState[p._id] = !allSelected;
+    });
+    setSelectedRows(newState);
+  };
+
   const getStatusBadge = (status) => {
     const statusMap = {
       Draft: { className: styles.statusDraft, label: "Draft" },
@@ -125,112 +222,217 @@ const ProductManagement = () => {
     );
   };
 
-  const renderProductCard = (product) => {
-    const displayPrice =
-      product.pricing?.salePrice || product.pricing?.originalPrice;
-    const hasDiscount =
-      product.pricing?.salePrice &&
-      product.pricing?.salePrice < product.pricing?.originalPrice;
+  const getSerialNumber = (index) => {
+    return (currentPage - 1) * 20 + index + 1;
+  };
+
+  // Bulk action handlers
+  const handleBulkDelete = () => {
+    const selectedIds = Object.keys(selectedRows).filter(id => selectedRows[id]);
+    if (selectedIds.length === 0) {
+      toast.error("Please select products to delete");
+      return;
+    }
+    // Implement bulk delete logic here
+    toast.success(`${selectedIds.length} products selected for deletion`);
+  };
+
+  const renderTableRow = (product, index) => {
+    const isExpanded = expandedRows[product._id];
+    const isSelected = selectedRows[product._id];
+    const displayPrice = product.pricing?.salePrice || product.pricing?.originalPrice;
+    const hasDiscount = product.pricing?.salePrice && product.pricing?.salePrice < product.pricing?.originalPrice;
+    const serialNumber = getSerialNumber(index);
 
     return (
-      <div key={product._id} className={styles.productCard}>
-        <div className={styles.productImage}>
-          <img
-            src={product.thumbnail?.url || "/placeholder-image.jpg"}
-            alt={product.productName}
-            onError={(e) => {
-              e.target.src = "/placeholder-image.jpg";
-            }}
-          />
-          {product.labels?.featured && (
-            <span className={styles.featuredBadge}>⭐ Featured</span>
-          )}
-          {product.labels?.bestSeller && (
-            <span className={styles.bestSellerBadge}>🏆 Best Seller</span>
-          )}
-        </div>
-
-        <div className={styles.productInfo}>
-          <h3 className={styles.productName}>{product.productName}</h3>
-          <p className={styles.productBrand}>{product.brand}</p>
-          <div className={styles.productMeta}>
-            <span className={styles.productPrice}>
-              ₹{displayPrice?.toLocaleString() || "0"}
+      <React.Fragment key={product._id}>
+        <tr className={`${styles.tableRow} ${isExpanded ? styles.expanded : ""}`}>
+          <td className={styles.indexCell}>
+            <span className={styles.indexNumber}>{serialNumber}</span>
+          </td>
+          <td className={styles.checkboxCell}>
+            <input
+              type="checkbox"
+              checked={isSelected || false}
+              onChange={() => toggleRowSelect(product._id)}
+              className={styles.checkbox}
+            />
+          </td>
+          <td className={styles.imageCell}>
+            <img
+              src={product.thumbnail?.url || "/placeholder-image.jpg"}
+              alt={product.productName}
+              className={styles.thumbnail}
+              onError={(e) => {
+                e.target.src = "/placeholder-image.jpg";
+              }}
+            />
+          </td>
+          <td className={styles.nameCell}>
+            <div className={styles.productNameCompact} title={product.productName}>
+              {product.productName}
+            </div>
+            <div className={styles.productSku}>SKU: {product.sku || 'N/A'}</div>
+          </td>
+          <td className={styles.categoryCell}>
+            {product.category?.categoryData?.label || 'Uncategorized'}
+          </td>
+          <td className={styles.priceCell}>
+            <div className={styles.priceCompact}>
+              <div className={styles.priceRow}>
+                ₹{displayPrice?.toLocaleString() || "0"}
+                {hasDiscount && (
+                  <span className={styles.originalPriceCompact}>
+                    ₹{product.pricing.originalPrice?.toLocaleString()}
+                  </span>
+                )}
+              </div>
               {hasDiscount && (
-                <span className={styles.originalPrice}>
-                  ₹{product.pricing.originalPrice?.toLocaleString()}
+                <span className={styles.discountCompact}>
+                  {Math.round(
+                    ((product.pricing.originalPrice - product.pricing.salePrice) /
+                      product.pricing.originalPrice) * 100
+                  )}% OFF
                 </span>
               )}
-            </span>
-            {hasDiscount && (
-              <span className={styles.discountBadge}>
-                {Math.round(
-                  ((product.pricing.originalPrice - product.pricing.salePrice) /
-                    product.pricing.originalPrice) *
-                    100,
-                )}
-                % OFF
-              </span>
-            )}
-          </div>
-          <div className={styles.productStock}>
-            <span className={styles.stockLabel}>Stock:</span>
-            <span
-              className={
-                product.inventory?.stockQuantity > 0
-                  ? styles.inStock
-                  : styles.outOfStock
-              }
-            >
-              {product.inventory?.stockQuantity > 0
-                ? `${product.inventory.stockQuantity} units`
-                : "Out of Stock"}
-            </span>
-          </div>
-          <div className={styles.productStatus}>
-            {getStatusBadge(product.status)}
-          </div>
-          {product.placements && product.placements.length > 0 && (
-            <div className={styles.productStock}>
-              <span className={styles.stockLabel}>Visible on:</span>
-              <span className={styles.inStock}>
-                {product.placements.join(", ")}
-              </span>
             </div>
-          )}
-        </div>
-
-        <div className={styles.productActions}>
-          <button
-            className={styles.actionBtn}
-            onClick={() => handleViewProduct(product)}
-            title="View Product"
-          >
-            <FiEye size={16} />
-          </button>
-          <button
-            className={styles.actionBtn}
-            onClick={() => handleEdit(product)}
-            title="Edit Product"
-          >
-            <FiEdit2 size={16} />
-          </button>
-          <button
-            className={`${styles.actionBtn} ${styles.deleteBtn}`}
-            onClick={() => handleDeleteClick(product)}
-            title="Archive Product"
-          >
-            <FiTrash2 size={16} />
-          </button>
-        </div>
-      </div>
+          </td>
+          <td className={styles.stockCell}>
+            <span className={product.inventory?.stockQuantity > 0 ? styles.inStock : styles.outOfStock}>
+              {product.inventory?.stockQuantity > 0 ? product.inventory.stockQuantity : '0'}
+            </span>
+          </td>
+          <td className={styles.statusCell}>
+            {getStatusBadge(product.status)}
+          </td>
+          <td className={styles.placementsCell}>
+            {product.placements && product.placements.length > 0 ? (
+              <span className={styles.placementTags}>
+                {product.placements.slice(0, 2).join(', ')}
+                {product.placements.length > 2 && ` +${product.placements.length - 2}`}
+              </span>
+            ) : (
+              <span className={styles.noPlacements}>—</span>
+            )}
+          </td>
+          <td className={styles.actionsCell}>
+            <button
+              className={styles.actionIconBtn}
+              onClick={() => handleViewProduct(product)}
+              title="View Product"
+            >
+              <FiEye size={16} />
+            </button>
+            <button
+              className={styles.actionIconBtn}
+              onClick={() => handleEdit(product)}
+              title="Edit Product"
+            >
+              <FiEdit2 size={16} />
+            </button>
+            <button
+              className={`${styles.actionIconBtn} ${styles.deleteIconBtn}`}
+              onClick={() => handleDeleteClick(product)}
+              title="Archive Product"
+            >
+              <FiTrash2 size={16} />
+            </button>
+            <button
+              className={styles.actionIconBtn}
+              onClick={() => toggleRowExpand(product._id)}
+              title="Expand Details"
+            >
+              {isExpanded ? <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
+            </button>
+          </td>
+        </tr>
+        {isExpanded && (
+          <tr className={styles.expandedRow}>
+            <td colSpan="10">
+              <div className={styles.expandedContent}>
+                <div className={styles.expandedGrid}>
+                  <div className={styles.expandedSection}>
+                    <h4>Product Details</h4>
+                    <div className={styles.expandedItem}>
+                      <span className={styles.expandedLabel}>Description:</span>
+                      <span className={styles.expandedValue}>{product.description || 'No description'}</span>
+                    </div>
+                    <div className={styles.expandedItem}>
+                      <span className={styles.expandedLabel}>Brand:</span>
+                      <span className={styles.expandedValue}>{product.brand || 'N/A'}</span>
+                    </div>
+                    <div className={styles.expandedItem}>
+                      <span className={styles.expandedLabel}>Weight:</span>
+                      <span className={styles.expandedValue}>{product.weight || 'N/A'}</span>
+                    </div>
+                    <div className={styles.expandedItem}>
+                      <span className={styles.expandedLabel}>Material:</span>
+                      <span className={styles.expandedValue}>{product.material || 'N/A'}</span>
+                    </div>
+                  </div>
+                  <div className={styles.expandedSection}>
+                    <h4>Pricing & Inventory</h4>
+                    <div className={styles.expandedItem}>
+                      <span className={styles.expandedLabel}>Sale Price:</span>
+                      <span className={styles.expandedValue}>₹{product.pricing?.salePrice?.toLocaleString() || 'N/A'}</span>
+                    </div>
+                    <div className={styles.expandedItem}>
+                      <span className={styles.expandedLabel}>Original Price:</span>
+                      <span className={styles.expandedValue}>₹{product.pricing?.originalPrice?.toLocaleString() || 'N/A'}</span>
+                    </div>
+                    <div className={styles.expandedItem}>
+                      <span className={styles.expandedLabel}>Stock:</span>
+                      <span className={styles.expandedValue}>{product.inventory?.stockQuantity || 0} units</span>
+                    </div>
+                    <div className={styles.expandedItem}>
+                      <span className={styles.expandedLabel}>Low Stock Alert:</span>
+                      <span className={styles.expandedValue}>{product.inventory?.lowStockThreshold || 'Not set'}</span>
+                    </div>
+                  </div>
+                  <div className={styles.expandedSection}>
+                    <h4>Placements & Labels</h4>
+                    <div className={styles.expandedItem}>
+                      <span className={styles.expandedLabel}>Placements:</span>
+                      <span className={styles.expandedValue}>
+                        {product.placements && product.placements.length > 0 
+                          ? product.placements.join(', ') 
+                          : 'None'}
+                      </span>
+                    </div>
+                    <div className={styles.expandedItem}>
+                      <span className={styles.expandedLabel}>Labels:</span>
+                      <span className={styles.expandedValue}>
+                        {product.labels && Object.keys(product.labels).filter(k => product.labels[k]).length > 0
+                          ? Object.keys(product.labels).filter(k => product.labels[k]).join(', ')
+                          : 'None'}
+                      </span>
+                    </div>
+                    <div className={styles.expandedItem}>
+                      <span className={styles.expandedLabel}>Created:</span>
+                      <span className={styles.expandedValue}>
+                        {new Date(product.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className={styles.expandedItem}>
+                      <span className={styles.expandedLabel}>Last Updated:</span>
+                      <span className={styles.expandedValue}>
+                        {new Date(product.updatedAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        )}
+      </React.Fragment>
     );
   };
 
   const renderEmptyState = () => {
     return (
       <div className={styles.emptyState}>
-        <FiPackage size={60} />
+        <FiPackage size={60} className={styles.emptyIcon} />
         <h3>No products found</h3>
         <p>
           {searchTerm || statusFilter || categoryFilter
@@ -309,8 +511,14 @@ const ProductManagement = () => {
     );
   };
 
+  const showLoadingState = isLoading || isThrottled || showSkeleton;
+
+  // Get selected count
+  const selectedCount = Object.keys(selectedRows).filter(id => selectedRows[id]).length;
+
   return (
     <div className={styles.container}>
+      {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <h1 className={styles.title}>Products</h1>
@@ -360,21 +568,34 @@ const ProductManagement = () => {
         </div>
       </div>
 
+      {/* Filters */}
       <div className={styles.filters}>
         <form className={styles.searchForm} onSubmit={handleSearch}>
-          <input
-            type="text"
-            className={styles.searchInput}
-            placeholder="Search products..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <div className={styles.searchWrapper}>
+            <FiSearch className={styles.searchIcon} />
+            <input
+              type="text"
+              className={styles.searchInput}
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
           <button type="submit" className={styles.searchBtn}>
-            <FiSearch size={18} />
+            Search
           </button>
         </form>
 
         <div className={styles.filterGroup}>
+          {(searchTerm || statusFilter || categoryFilter) && (
+            <button
+              className={styles.clearFiltersBtn}
+              onClick={handleClearFilters}
+            >
+              <FiX size={16} />
+              Clear
+            </button>
+          )}
           <select
             className={styles.filterSelect}
             value={statusFilter}
@@ -396,32 +617,61 @@ const ProductManagement = () => {
             <option value="">All Categories</option>
           </select>
 
-          {(searchTerm || statusFilter || categoryFilter) && (
-            <button
-              className={styles.clearFiltersBtn}
-              onClick={handleClearFilters}
-            >
-              <FiX size={16} />
-              Clear
-            </button>
-          )}
+          
         </div>
       </div>
 
-      {isLoading ? (
-        <div className={styles.loadingContainer}>
-          <div className={styles.spinner}></div>
-          <p>Loading products...</p>
+      {/* Table */}
+      {showLoadingState ? (
+        <div className={styles.tableContainer}>
+          <SkeletonLoader count={5} />
         </div>
       ) : products.length === 0 ? (
         renderEmptyState()
       ) : (
-        <div className={styles.productsGrid}>
-          {products.map(renderProductCard)}
+        <div className={styles.tableContainer}>
+          <div className={styles.tableToolbar}>
+            <span className={styles.selectedInfo}>
+              {selectedCount > 0 ? `${selectedCount} product${selectedCount > 1 ? 's' : ''} selected` : ''}
+            </span>
+            {selectedCount > 0 && (
+              <button className={styles.bulkDeleteBtn} onClick={handleBulkDelete}>
+                <FiTrash2 size={14} />
+                Delete Selected
+              </button>
+            )}
+          </div>
+          <table className={styles.productTable}>
+            <thead>
+              <tr>
+                <th className={styles.indexCell}>#</th>
+                <th className={styles.checkboxCell}>
+                  <input
+                    type="checkbox"
+                    className={styles.checkbox}
+                    onChange={toggleAllSelect}
+                    checked={products.length > 0 && products.every(p => selectedRows[p._id])}
+                  />
+                </th>
+                <th className={styles.imageCell}>Image</th>
+                <th className={styles.nameCell}>Product</th>
+                <th className={styles.categoryCell}>Category</th>
+                <th className={styles.priceCell}>Price</th>
+                <th className={styles.stockCell}>Stock</th>
+                <th className={styles.statusCell}>Status</th>
+                <th className={styles.placementsCell}>Placements</th>
+                <th className={styles.actionsCell}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((product, index) => renderTableRow(product, index))}
+            </tbody>
+          </table>
         </div>
       )}
 
-      {pagination.totalPages > 1 && (
+      {/* Pagination */}
+      {!showLoadingState && pagination.totalPages > 1 && (
         <div className={styles.pagination}>
           <button
             className={styles.paginationBtn}

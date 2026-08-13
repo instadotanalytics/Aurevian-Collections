@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FiArrowRight, FiPackage } from 'react-icons/fi';
 import styles from './RecentOrders.module.css';
 
 const RecentOrders = ({ orders = [] }) => {
@@ -23,9 +24,13 @@ const RecentOrders = ({ orders = [] }) => {
   return (
     <div className={styles.recentOrders}>
       <div className={styles.header}>
-        <h3>Recent Orders</h3>
+        <div className={styles.headerLeft}>
+          <FiPackage className={styles.headerIcon} />
+          <h3>Recent Orders</h3>
+        </div>
         <Link to="/seller/dashboard/orders" className={styles.viewAll}>
-          View All →
+          View All
+          <FiArrowRight className={styles.arrowIcon} />
         </Link>
       </div>
       
@@ -39,25 +44,33 @@ const RecentOrders = ({ orders = [] }) => {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Total</th>
-                <th>Status</th>
-                <th>Date</th>
+                <th className={styles.colOrderId}>Order ID</th>
+                <th className={styles.colCustomer}>Customer</th>
+                <th className={styles.colTotal}>Total</th>
+                <th className={styles.colStatus}>Status</th>
+                <th className={styles.colDate}>Date</th>
               </tr>
             </thead>
             <tbody>
               {orders.map((order) => (
                 <tr key={order._id}>
-                  <td className={styles.orderId}>#{order.orderNumber}</td>
-                  <td>{order.customer}</td>
-                  <td>${order.total.toFixed(2)}</td>
-                  <td>
+                  <td className={styles.colOrderId}>
+                    <span className={styles.orderId}>#{order.orderNumber}</span>
+                  </td>
+                  <td className={styles.colCustomer}>
+                    <span className={styles.customerName}>{order.customer}</span>
+                  </td>
+                  <td className={styles.colTotal}>
+                    <span className={styles.totalAmount}>${order.total.toFixed(2)}</span>
+                  </td>
+                  <td className={styles.colStatus}>
                     <span className={`${styles.statusBadge} ${getStatusColor(order.status)}`}>
                       {getStatusLabel(order.status)}
                     </span>
                   </td>
-                  <td>{new Date(order.date).toLocaleDateString()}</td>
+                  <td className={styles.colDate}>
+                    <span className={styles.orderDate}>{new Date(order.date).toLocaleDateString()}</span>
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -1,5 +1,4 @@
-// backend/controllers/orderController.js
-import Order from "../models/Order.js";
+import Order, { FULFILLMENT_STATUS } from "../models/Order.js";
 import Cart from "../models/Cart.js";
 import JewelleryProduct from "../models/JewelleryProduct.js";
 import razorpayService from "../services/razorpayService.js";
@@ -71,6 +70,22 @@ const buildOrderItemsAndTotals = async (items) => {
   }
 
   return { orderItems, itemsTotal, totalWeightKg };
+};
+
+const assertSingleSeller = (orderItems) => {
+  const sellerIds = new Set(
+    orderItems.map((i) => i.seller && i.seller.toString()).filter(Boolean),
+  );
+  if (sellerIds.size > 1) {
+    const err = new Error(
+      "Your cart contains items from multiple sellers. Please check out " +
+        "items from one seller at a time — this helps us keep order " +
+        "tracking accurate.",
+    );
+    err.status = 400;
+    throw err;
+  }
+  return sellerIds.size === 1 ? [...sellerIds][0] : null;
 };
 
 const resolveShippingFee = async ({ pincode, weightKg, paymentMethod }) => {
@@ -170,6 +185,15 @@ export const createRazorpayOrder = async (req, res) => {
         .json({ success: false, message: e.message });
     }
 
+    let sellerId;
+    try {
+      sellerId = assertSingleSeller(orderItems);
+    } catch (e) {
+      return res
+        .status(e.status || 400)
+        .json({ success: false, message: e.message });
+    }
+
     let shippingFee;
     try {
       shippingFee = await resolveShippingFee({
@@ -188,6 +212,7 @@ export const createRazorpayOrder = async (req, res) => {
     const order = await Order.create({
       orderNumber: generateOrderNumber(),
       user: userId,
+      seller: sellerId,
       customerName:
         req.user.fullName ||
         `${req.user.firstName || ""} ${req.user.lastName || ""}`.trim() ||
@@ -284,6 +309,12 @@ export const verifyRazorpayPayment = async (req, res) => {
 
     order.paymentStatus = "paid";
     order.orderStatus = "processing";
+    order.fulfillmentStatus = FULFILLMENT_STATUS.PENDING_SELLER_CONFIRMATION;
+    order.statusHistory.push({
+      status: FULFILLMENT_STATUS.PENDING_SELLER_CONFIRMATION,
+      role: "system",
+      timestamp: new Date(),
+    });
     order.placedAt = new Date();
     order.razorpay = {
       orderId: razorpay_order_id || order.razorpay?.orderId,
@@ -293,15 +324,6 @@ export const verifyRazorpayPayment = async (req, res) => {
     await order.save();
 
     await finalizeInventoryAndCart(order, userId);
-
-    try {
-      await createShipmentForOrder(order._id);
-    } catch (shipErr) {
-      console.error(
-        `⚠️ Shiprocket shipment creation failed for order ${order.orderNumber}:`,
-        shipErr.message,
-      );
-    }
 
     return res.status(200).json({
       success: true,
@@ -346,6 +368,15 @@ export const createCODOrder = async (req, res) => {
         .json({ success: false, message: e.message });
     }
 
+    let sellerId;
+    try {
+      sellerId = assertSingleSeller(orderItems);
+    } catch (e) {
+      return res
+        .status(e.status || 400)
+        .json({ success: false, message: e.message });
+    }
+
     let shippingFee;
     try {
       shippingFee = await resolveShippingFee({
@@ -364,6 +395,7 @@ export const createCODOrder = async (req, res) => {
     const order = await Order.create({
       orderNumber: generateOrderNumber(),
       user: userId,
+      seller: sellerId,
       customerName:
         req.user.fullName ||
         `${req.user.firstName || ""} ${req.user.lastName || ""}`.trim() ||
@@ -378,19 +410,18 @@ export const createCODOrder = async (req, res) => {
       paymentMethod: "cod",
       paymentStatus: "pending",
       orderStatus: "processing",
+      fulfillmentStatus: FULFILLMENT_STATUS.PENDING_SELLER_CONFIRMATION,
+      statusHistory: [
+        {
+          status: FULFILLMENT_STATUS.PENDING_SELLER_CONFIRMATION,
+          role: "system",
+          timestamp: new Date(),
+        },
+      ],
       placedAt: new Date(),
     });
 
     await finalizeInventoryAndCart(order, userId);
-
-    try {
-      await createShipmentForOrder(order._id);
-    } catch (shipErr) {
-      console.error(
-        `⚠️ Shiprocket shipment creation failed for COD order ${order.orderNumber}:`,
-        shipErr.message,
-      );
-    }
 
     return res.status(201).json({
       success: true,
@@ -475,6 +506,10 @@ export const getSellerOrders = async (req, res) => {
         sellerSubtotal,
         paymentStatus: order.paymentStatus,
         orderStatus: order.orderStatus,
+        fulfillmentStatus: order.fulfillmentStatus,
+        sellerConfirmedAt: order.sellerConfirmedAt,
+        sellerRejectedAt: order.sellerRejectedAt,
+        sellerRejectionReason: order.sellerRejectionReason,
         shipping: order.shipping,
         createdAt: order.createdAt,
       };
@@ -491,17 +526,43 @@ export const getSellerOrders = async (req, res) => {
   }
 };
 
-// ✅ NEW: statuses that only make sense once Shiprocket has actually
-// created a shipment for this order. This is the fix for the reported bug:
-// a seller could previously set orderStatus to "ready_to_ship" (or
-// shipped/delivered/etc.) from the dashboard dropdown with zero validation,
-// even while shipping.status was "CREATE_FAILED" and no Shiprocket
-// shipment existed — producing exactly the inconsistent state reported
-// (paymentStatus: paid, orderStatus: ready_to_ship, shipping.status:
-// CREATE_FAILED). These statuses should only be reachable via the
-// Shiprocket webhook or the internal shipping pipeline (schedulePickup,
-// etc.), which already require shipping.awbCode/shipmentId to exist before
-// touching orderStatus.
+// ✅ NEW: SUPER ADMIN — GET /orders/admin/all?fulfillmentStatus=SELLER_CONFIRMED
+export const getAdminOrders = async (req, res) => {
+  try {
+    if (req.user.role !== "admin" && req.user.role !== "super_admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized" });
+    }
+
+    const { fulfillmentStatus } = req.query;
+    const filter = {};
+    if (fulfillmentStatus) {
+      filter.fulfillmentStatus = fulfillmentStatus;
+    } else {
+      // Default: everything relevant to admin action/monitoring, excludes
+      // orders still waiting on the seller (nothing for admin to do there yet).
+      filter.fulfillmentStatus = {
+        $ne: FULFILLMENT_STATUS.PENDING_SELLER_CONFIRMATION,
+      };
+    }
+
+    const orders = await Order.find(filter)
+      .populate("seller", "storeInfo.storeName fullName email")
+      .sort({ createdAt: -1 })
+      .limit(200);
+
+    return res.status(200).json({ success: true, data: orders });
+  } catch (error) {
+    console.error("❌ Get admin orders error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch orders",
+      error: error.message,
+    });
+  }
+};
+
 const SHIPMENT_DEPENDENT_STATUSES = [
   "ready_to_ship",
   "shipped",
@@ -540,8 +601,6 @@ export const updateOrderStatus = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Order not found" });
 
-    // ✅ NEW: reject manual writes into a shipment-dependent status when no
-    // Shiprocket shipment actually exists for this order yet.
     if (
       SHIPMENT_DEPENDENT_STATUSES.includes(status) &&
       !order.shipping?.shipmentId
@@ -565,6 +624,501 @@ export const updateOrderStatus = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to update order status",
+      error: error.message,
+    });
+  }
+};
+
+export const sellerConfirmOrder = async (req, res) => {
+  try {
+    const sellerId = req.seller?._id;
+    if (!sellerId) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Seller authentication required" });
+    }
+
+    const { orderId } = req.params;
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    const belongsToSeller = order.items.some(
+      (i) => i.seller && i.seller.toString() === sellerId.toString(),
+    );
+    if (!belongsToSeller) {
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized for this order" });
+    }
+
+    if (order.paymentStatus !== "paid") {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot confirm an order that has not been paid for",
+      });
+    }
+
+    if (
+      order.fulfillmentStatus !== FULFILLMENT_STATUS.PENDING_SELLER_CONFIRMATION
+    ) {
+      return res.status(409).json({
+        success: false,
+        message: `Cannot confirm order in state "${order.fulfillmentStatus}". Only orders pending seller confirmation can be confirmed.`,
+      });
+    }
+
+    order.fulfillmentStatus = FULFILLMENT_STATUS.SELLER_CONFIRMED;
+    order.sellerConfirmedAt = new Date();
+    order.sellerConfirmedBy = sellerId;
+    order.statusHistory.push({
+      status: FULFILLMENT_STATUS.SELLER_CONFIRMED,
+      changedBy: sellerId,
+      role: "seller",
+      timestamp: new Date(),
+    });
+    await order.save();
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Order confirmed", data: order });
+  } catch (error) {
+    console.error("❌ Seller confirm order error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to confirm order" });
+  }
+};
+
+export const sellerRejectOrder = async (req, res) => {
+  try {
+    const sellerId = req.seller?._id;
+    if (!sellerId) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Seller authentication required" });
+    }
+
+    const { orderId } = req.params;
+    const { reason } = req.body;
+    if (!reason || !reason.trim()) {
+      return res
+        .status(400)
+        .json({ success: false, message: "A rejection reason is required" });
+    }
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    const belongsToSeller = order.items.some(
+      (i) => i.seller && i.seller.toString() === sellerId.toString(),
+    );
+    if (!belongsToSeller) {
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized for this order" });
+    }
+
+    if (
+      order.fulfillmentStatus !== FULFILLMENT_STATUS.PENDING_SELLER_CONFIRMATION
+    ) {
+      return res.status(409).json({
+        success: false,
+        message: `Cannot reject order in state "${order.fulfillmentStatus}".`,
+      });
+    }
+
+    order.fulfillmentStatus = FULFILLMENT_STATUS.SELLER_REJECTED;
+    order.sellerRejectedAt = new Date();
+    order.sellerRejectedBy = sellerId;
+    order.sellerRejectionReason = reason.trim();
+    order.statusHistory.push({
+      status: FULFILLMENT_STATUS.SELLER_REJECTED,
+      changedBy: sellerId,
+      role: "seller",
+      reason: reason.trim(),
+      timestamp: new Date(),
+    });
+    await order.save();
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Order rejected", data: order });
+  } catch (error) {
+    console.error("❌ Seller reject order error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to reject order" });
+  }
+};
+
+export const adminApproveOrder = async (req, res) => {
+  try {
+    if (req.user.role !== "admin" && req.user.role !== "super_admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized" });
+    }
+
+    const { orderId } = req.params;
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    if (order.paymentStatus !== "paid") {
+      return res
+        .status(400)
+        .json({ success: false, message: "Order has not been paid for" });
+    }
+    if (order.fulfillmentStatus !== FULFILLMENT_STATUS.SELLER_CONFIRMED) {
+      return res.status(409).json({
+        success: false,
+        message: `Cannot approve order in state "${order.fulfillmentStatus}". Only seller-confirmed orders can be approved.`,
+      });
+    }
+
+    if (order.shipping?.shiprocketOrderId) {
+      return res.status(200).json({
+        success: true,
+        message: "Order was already approved and forwarded to Shiprocket",
+        data: order,
+      });
+    }
+
+    order.fulfillmentStatus = FULFILLMENT_STATUS.ADMIN_APPROVED;
+    order.adminApprovedAt = new Date();
+    order.adminApprovedBy = req.user._id || req.user.id;
+    order.statusHistory.push({
+      status: FULFILLMENT_STATUS.ADMIN_APPROVED,
+      changedBy: req.user._id || req.user.id,
+      role: "super_admin",
+      timestamp: new Date(),
+    });
+    await order.save();
+
+    try {
+      const { order: updatedOrder } = await createShipmentForOrder(order._id);
+
+      if (updatedOrder.shipping?.shipmentId) {
+        updatedOrder.fulfillmentStatus = updatedOrder.shipping.awbCode
+          ? FULFILLMENT_STATUS.AWB_ASSIGNED
+          : FULFILLMENT_STATUS.AWB_PENDING;
+      } else {
+        updatedOrder.fulfillmentStatus = FULFILLMENT_STATUS.SHIPROCKET_FAILED;
+      }
+      updatedOrder.statusHistory.push({
+        status: updatedOrder.fulfillmentStatus,
+        role: "system",
+        reason: updatedOrder.shipping?.lastError || null,
+        timestamp: new Date(),
+      });
+      await updatedOrder.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Order approved and forwarded to Shiprocket",
+        data: updatedOrder,
+      });
+    } catch (shipErr) {
+      order.fulfillmentStatus = FULFILLMENT_STATUS.SHIPROCKET_FAILED;
+      order.statusHistory.push({
+        status: FULFILLMENT_STATUS.SHIPROCKET_FAILED,
+        role: "system",
+        reason: shipErr.message,
+        timestamp: new Date(),
+      });
+      await order.save();
+
+      return res.status(502).json({
+        success: false,
+        message: "Order approved, but Shiprocket order creation failed",
+        error: shipErr.message,
+        data: order,
+      });
+    }
+  } catch (error) {
+    console.error("❌ Admin approve order error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to approve order" });
+  }
+};
+
+export const adminRejectOrder = async (req, res) => {
+  try {
+    if (req.user.role !== "admin" && req.user.role !== "super_admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized" });
+    }
+
+    const { orderId } = req.params;
+    const { reason } = req.body;
+    if (!reason || !reason.trim()) {
+      return res
+        .status(400)
+        .json({ success: false, message: "A rejection reason is required" });
+    }
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    if (order.fulfillmentStatus !== FULFILLMENT_STATUS.SELLER_CONFIRMED) {
+      return res.status(409).json({
+        success: false,
+        message: `Cannot reject order in state "${order.fulfillmentStatus}".`,
+      });
+    }
+
+    order.fulfillmentStatus = FULFILLMENT_STATUS.ADMIN_REJECTED;
+    order.adminRejectedAt = new Date();
+    order.adminRejectedBy = req.user._id || req.user.id;
+    order.adminRejectionReason = reason.trim();
+    order.statusHistory.push({
+      status: FULFILLMENT_STATUS.ADMIN_REJECTED,
+      changedBy: req.user._id || req.user.id,
+      role: "super_admin",
+      reason: reason.trim(),
+      timestamp: new Date(),
+    });
+    await order.save();
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Order rejected", data: order });
+  } catch (error) {
+    console.error("❌ Admin reject order error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to reject order" });
+  }
+};
+
+// ============================================
+// SUPER ADMIN: GET /orders/admin/history
+// Full paginated, filtered, searchable order history. Never deletes or
+// hides anything based on status — this is the permanent audit view.
+// ============================================
+const DATE_RANGE_TO_START = {
+  today: () => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  },
+  "7d": () => new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+  "30d": () => new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+};
+
+// Maps the frontend's requested status filter labels to actual queries.
+// Some labels map to `fulfillmentStatus` (seller/admin lifecycle stages,
+// which the app itself writes) and some map to the legacy `orderStatus`
+// field (shipment-progress stages, which only the Shiprocket webhook
+// writes — fulfillmentStatus is never updated for these today).
+// "SELLER_CONFIRMED" also covers what the UI calls "Pending Admin
+// Approval" — they are the same stored value, not two different ones.
+const buildStatusFilter = (statusKey) => {
+  switch (statusKey) {
+    case "PENDING_SELLER_CONFIRMATION":
+      return { fulfillmentStatus: "PENDING_SELLER_CONFIRMATION" };
+    case "SELLER_CONFIRMED":
+      return { fulfillmentStatus: "SELLER_CONFIRMED" };
+    case "ADMIN_APPROVED":
+      return { fulfillmentStatus: "ADMIN_APPROVED" };
+    case "PROCESSING":
+      return {
+        fulfillmentStatus: {
+          $in: ["SHIPMENT_CREATED", "AWB_PENDING", "AWB_ASSIGNED"],
+        },
+      };
+    case "READY_TO_SHIP":
+      return { orderStatus: "ready_to_ship" };
+    case "SHIPPED":
+      return { orderStatus: "shipped" };
+    case "IN_TRANSIT":
+      return { orderStatus: "in_transit" };
+    case "OUT_FOR_DELIVERY":
+      return { orderStatus: "out_for_delivery" };
+    case "DELIVERED":
+      return { orderStatus: "delivered" };
+    case "CANCELLED":
+      return { orderStatus: "cancelled" };
+    case "REJECTED":
+      return {
+        fulfillmentStatus: { $in: ["SELLER_REJECTED", "ADMIN_REJECTED"] },
+      };
+    case "FAILED":
+      return { fulfillmentStatus: "SHIPROCKET_FAILED" };
+    default:
+      return {};
+  }
+};
+
+// "refunded" has no corresponding value in the current paymentStatus enum
+// (pending/paid/failed) — passing it returns zero results rather than
+// silently matching everything or crashing.
+const buildShiprocketFilter = (key) => {
+  switch (key) {
+    case "NOT_CREATED":
+      return {
+        $or: [
+          { "shipping.shiprocketOrderId": { $exists: false } },
+          { "shipping.shiprocketOrderId": null },
+        ],
+      };
+    case "CREATED":
+      return {
+        "shipping.shiprocketOrderId": { $exists: true, $ne: null },
+        $or: [
+          { "shipping.awbCode": { $exists: false } },
+          { "shipping.awbCode": null },
+        ],
+      };
+    case "AWB_ASSIGNED":
+      return { "shipping.awbCode": { $exists: true, $ne: null } };
+    case "PICKED_UP":
+      return { "shipping.shippedAt": { $exists: true, $ne: null } };
+    case "IN_TRANSIT":
+      return { orderStatus: "in_transit" };
+    case "DELIVERED":
+      return { "shipping.deliveredAt": { $exists: true, $ne: null } };
+    case "FAILED":
+      return { fulfillmentStatus: "SHIPROCKET_FAILED" };
+    default:
+      return {};
+  }
+};
+
+export const getOrderHistory = async (req, res) => {
+  try {
+    if (req.user.role !== "admin" && req.user.role !== "super_admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized" });
+    }
+
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const {
+      search,
+      status,
+      payment,
+      dateRange,
+      startDate,
+      endDate,
+      shiprocket,
+    } = req.query;
+
+    const filter = {};
+
+    if (search && search.trim()) {
+      const re = new RegExp(
+        search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+        "i",
+      );
+      filter.$or = [
+        { orderNumber: re },
+        { customerName: re },
+        { customerEmail: re },
+        { customerPhone: re },
+      ];
+    }
+
+    if (status && status !== "ALL") {
+      Object.assign(filter, buildStatusFilter(status));
+    }
+
+    if (payment && payment !== "ALL") {
+      filter.paymentStatus = payment.toLowerCase();
+    }
+
+    if (shiprocket && shiprocket !== "ALL") {
+      Object.assign(filter, buildShiprocketFilter(shiprocket));
+    }
+
+    if (dateRange === "custom" && (startDate || endDate)) {
+      filter.createdAt = {};
+      if (startDate) filter.createdAt.$gte = new Date(startDate);
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        filter.createdAt.$lte = end;
+      }
+    } else if (dateRange && DATE_RANGE_TO_START[dateRange]) {
+      filter.createdAt = { $gte: DATE_RANGE_TO_START[dateRange]() };
+    }
+
+    const [orders, totalOrders] = await Promise.all([
+      Order.find(filter)
+        .populate("seller", "storeInfo.storeName fullName email")
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit),
+      Order.countDocuments(filter),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      orders,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.max(1, Math.ceil(totalOrders / limit)),
+        totalOrders,
+        limit,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Get order history error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch order history",
+      error: error.message,
+    });
+  }
+};
+
+// ============================================
+// SUPER ADMIN: GET /orders/admin/history/:id
+// Full single-order detail for the history modal — returns the complete
+// stored document, nothing synthesized.
+// ============================================
+export const getOrderHistoryDetail = async (req, res) => {
+  try {
+    if (req.user.role !== "admin" && req.user.role !== "super_admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized" });
+    }
+
+    const order = await Order.findById(req.params.id).populate(
+      "seller",
+      "storeInfo.storeName fullName email phone",
+    );
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    return res.status(200).json({ success: true, data: order });
+  } catch (error) {
+    console.error("❌ Get order history detail error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch order details",
       error: error.message,
     });
   }

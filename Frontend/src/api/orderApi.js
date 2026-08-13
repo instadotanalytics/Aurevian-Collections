@@ -1,4 +1,3 @@
-// src/api/orderApi.js
 import axiosInstance from "./axiosConfig.js";
 import axios from "axios";
 
@@ -8,6 +7,15 @@ const API_URL =
 
 const sellerAuthHeader = () => {
   const token = localStorage.getItem("sellerAccessToken");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+// Mirrors the fallback SuperAdminDashboard.jsx already uses when reading
+// the token out of localStorage.
+const adminAuthHeader = () => {
+  const token =
+    localStorage.getItem("superAdminToken") ||
+    localStorage.getItem("accessToken");
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
@@ -36,8 +44,6 @@ export const getOrderById = async (id) => {
 
 // ============================================
 // SELLER-AUTHENTICATED ENDPOINTS
-// Use plain axios + sellerAccessToken (NOT the customer axiosInstance,
-// which sends the customer token and triggers /api/auth/refresh).
 // ============================================
 export const getSellerOrders = async () => {
   const response = await axios.get(`${API_URL}/orders/seller/all`, {
@@ -51,6 +57,69 @@ export const updateSellerOrderStatus = async (id, status) => {
     `${API_URL}/orders/seller/${id}/status`,
     { status },
     { headers: sellerAuthHeader() },
+  );
+  return response.data;
+};
+
+export const sellerConfirmOrder = async (orderId) => {
+  const response = await axios.post(
+    `${API_URL}/orders/${orderId}/seller-confirm`,
+    {},
+    { headers: sellerAuthHeader() },
+  );
+  return response.data;
+};
+
+export const sellerRejectOrder = async (orderId, reason) => {
+  const response = await axios.post(
+    `${API_URL}/orders/${orderId}/seller-reject`,
+    { reason },
+    { headers: sellerAuthHeader() },
+  );
+  return response.data;
+};
+
+// ============================================
+// SUPER ADMIN-AUTHENTICATED ENDPOINTS
+// ============================================
+export const getAdminOrders = async (fulfillmentStatus) => {
+  const response = await axios.get(`${API_URL}/orders/admin/all`, {
+    params: fulfillmentStatus ? { fulfillmentStatus } : {},
+    headers: adminAuthHeader(),
+  });
+  return response.data;
+};
+
+export const adminApproveOrder = async (orderId) => {
+  const response = await axios.post(
+    `${API_URL}/orders/${orderId}/admin-approve`,
+    {},
+    { headers: adminAuthHeader() },
+  );
+  return response.data;
+};
+
+export const adminRejectOrder = async (orderId, reason) => {
+  const response = await axios.post(
+    `${API_URL}/orders/${orderId}/admin-reject`,
+    { reason },
+    { headers: adminAuthHeader() },
+  );
+  return response.data;
+};
+
+export const getOrderHistory = async (params = {}) => {
+  const response = await axios.get(`${API_URL}/orders/admin/history`, {
+    params,
+    headers: adminAuthHeader(),
+  });
+  return response.data;
+};
+
+export const getOrderHistoryDetail = async (orderId) => {
+  const response = await axios.get(
+    `${API_URL}/orders/admin/history/${orderId}`,
+    { headers: adminAuthHeader() },
   );
   return response.data;
 };

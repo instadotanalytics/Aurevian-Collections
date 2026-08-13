@@ -1,148 +1,524 @@
+/* src/Components/OrderDetailView/OrderDetailView.module.css */
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap");
+
+/* ─────────────────────────────────────────────
+   Aurevian order certificate — design tokens
+   Concept: a jewelry appraisal / authentication
+   card. Ink + parchment, a wax-seal moment for
+   confirmation, everything else quiet and precise.
+───────────────────────────────────────────── */
 .page {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 40px 24px 80px;
+  --ink: #171310;
+  --ink-soft: #372f26;
+  --parchment: #f6efe0;
+  --parchment-deep: #eee0bf;
+  --card: #fffcf6;
+  --card-elevated: #fffefb;
+  --hairline: #e3d5b4;
+  --hairline-strong: #d6c39a;
+
+  --gold: #b8863c;
+  --gold-bright: #d9ab5f;
+  --gold-deep: #8a6425;
+  --gold-wash: #f2e3bf;
+
+  --emerald: #29513f;
+  --emerald-soft: #e2ece3;
+  --amber: #97701f;
+  --amber-soft: #f6ecd3;
+  --rose: #963a2f;
+  --rose-soft: #f5e3df;
+
+  --muted: #857a68;
+  --muted-2: #a89c86;
+
+  --shadow-soft: 0 2px 10px -4px rgba(23, 19, 16, 0.14);
+  --shadow-medium: 0 10px 28px -10px rgba(23, 19, 16, 0.2);
+  --shadow-strong: 0 20px 50px -14px rgba(23, 19, 16, 0.28);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 4px;
+
+  max-width: 1200px;
+  margin: 130px auto;
+  padding: 0px 24px 100px;
+  font-family:
+    "Manrope",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  color: var(--ink);
+  background:transparent;
+  min-height: 100vh;
+  animation: pageIn 0.6s ease both;
 }
 
-.successHeader {
-  text-align: center;
-  margin-bottom: 36px;
-}
-
-.successIcon {
-  font-size: 48px;
-  color: #16a34a;
-  margin-bottom: 12px;
-}
-
-.successTitle {
-  font-size: 26px;
-  font-weight: 700;
-  color: #111;
-  margin: 0 0 8px;
-}
-
-.successSub {
-  font-size: 14px;
-  color: #666;
-  margin: 0;
-}
-
-.orderIdRow {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-
-.orderIdLabel {
-  font-size: 12px;
-  color: #999;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.orderId {
-  font-size: 18px;
-  font-weight: 700;
-  color: #111;
-}
-
-.orderDate {
-  font-size: 13px;
-  color: #999;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 24px;
-}
-
-@media (max-width: 860px) {
-  .grid {
-    grid-template-columns: 1fr;
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.mainCol,
-.sideCol {
+/* ─── Confirmation moment: the wax seal ─── */
+.successHeader {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 48px 24px 40px;
+  position: relative;
+}
+
+.sealWrap {
+  position: relative;
+  width: fit-content;
+  margin: 0 auto 22px;
+}
+
+.seal {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 28%,
+    var(--gold-bright),
+    var(--gold) 55%,
+    var(--gold-deep) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow:
+    0 0 0 3px var(--parchment),
+    0 0 0 4px var(--hairline-strong),
+    0 16px 30px -10px rgba(138, 100, 37, 0.55);
+  animation: sealStamp 0.6s cubic-bezier(0.2, 0.9, 0.25, 1.15) both;
+}
+
+.seal::before {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.45);
+}
+
+.sealMonogram {
+  position: absolute;
+  font-family: "Cormorant Garamond", serif;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.55);
+  top: 12px;
+}
+
+.sealCheck {
+  color: #fff;
+  font-size: 26px;
+  stroke-width: 3px;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.15));
+}
+
+@keyframes sealStamp {
+  0% {
+    opacity: 0;
+    transform: scale(1.6) rotate(-8deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.94) rotate(2deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.sealRibbonL,
+.sealRibbonR {
+  position: absolute;
+  top: 64px;
+  width: 10px;
+  height: 26px;
+  background: var(--gold-deep);
+  z-index: -1;
+}
+
+.sealRibbonL {
+  left: 22px;
+  transform: skewY(18deg);
+  clip-path: polygon(0 0, 100% 0, 100% 78%, 50% 100%, 0 78%);
+}
+
+.sealRibbonR {
+  right: 22px;
+  transform: skewY(-18deg);
+  clip-path: polygon(0 0, 100% 0, 100% 78%, 50% 100%, 0 78%);
+}
+
+.eyebrow {
+  display: inline-block;
+  font-family: "Manrope", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  margin-bottom: 10px;
+}
+
+.successTitle {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-style: italic;
+  font-size: 42px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 0 0 12px;
+}
+
+.successSub {
+  font-size: 14.5px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.7;
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ─── Order ID — hallmark tag ─── */
+.orderIdRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 30px;
+  padding: 16px 24px;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-medium);
+}
+
+.orderIdMain {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.orderIdLabel {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--gold-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.orderId {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 15px;
+  font-weight: 500;
+  color: black;
+  letter-spacing: 0.02em;
+}
+
+.orderIdDivider {
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.18);
+  display: none;
+}
+
+.orderDate {
+  font-size: 12.5px;
+  color:black;
+  margin-left: auto;
+  font-weight: 500;
+}
+
+@media (min-width: 480px) {
+  .orderIdDivider {
+    display: block;
+  }
+}
+
+/* ─── Stack — single full-width column ─── */
+.stack {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
+.splitRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 720px) {
+  .splitRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Card ─── */
 .card {
-  background: #fff;
-  border: 1px solid #eee;
-  border-radius: 14px;
-  padding: 22px;
+  border: 1px solid var(--hairline);
+  padding: 28px;
+  box-shadow: var(--shadow-soft);
+  animation: cardIn 0.5s ease both;
+}
+
+.stack > .card:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.stack > .splitRow {
+  animation-delay: 0.1s;
+}
+.stack > .splitRow .card {
+  animation-delay: 0.1s;
+}
+.stack > .card.summaryCard {
+  animation-delay: 0.15s;
+}
+.stack > .card.shippingCard {
+  animation-delay: 0.2s;
+}
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cardHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.cardHeaderRow .cardTitle {
+  margin-bottom: 0;
+}
+
+.itemCountPill {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--parchment);
+  border: 1px solid var(--hairline);
+  padding: 5px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
 }
 
 .cardTitle {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 700;
-  color: #111;
-  margin: 0 0 16px;
+  gap: 10px;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 21px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 20px;
+}
+
+.cardTitle svg {
+  color: var(--gold-deep);
+  flex-shrink: 0;
+  stroke-width: 2px;
+  width: 17px;
+  height: 17px;
+}
+
+/* ─── Products — catalog rows ─── */
+.productList {
+  display: flex;
+  flex-direction: column;
 }
 
 .productRow {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding-bottom: 14px;
-  margin-bottom: 14px;
-  border-bottom: 1px solid #f2f2f2;
+  gap: 16px;
+  padding: 16px 4px;
+  border-bottom: 1px solid var(--hairline);
+  transition: background 0.2s ease;
 }
 
 .productRow:last-child {
   border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
+  padding-bottom: 4px;
 }
 
-.productRow img {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
+.productRow:first-child {
+  padding-top: 4px;
+}
+
+.productRow:hover {
+  background: linear-gradient(90deg, var(--parchment) 0%, transparent 60%);
+}
+
+.productImgWrap {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--hairline-strong);
+  padding: 4px;
+  flex-shrink: 0;
+  background: var(--card-elevated);
+}
+
+.productImg {
+  width: 100%;
+  height: 100%;
+  border-radius: 3px;
   object-fit: cover;
-  background: #eee;
+  display: block;
 }
 
 .productInfo {
   flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 7px;
+  min-width: 0;
 }
 
 .productName {
-  font-size: 13.5px;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 18px;
   font-weight: 600;
-  color: #111;
+  color: var(--ink);
+  text-transform: capitalize;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.productQty {
+.productMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.qtyPill {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--gold-deep);
+  background: var(--gold-wash);
+  padding: 3px 9px;
+  border-radius: 3px;
+  letter-spacing: 0.03em;
+}
+
+.unitPrice {
+  display: flex;
+  align-items: center;
+  gap: 2px;
   font-size: 12px;
-  color: #888;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.productPriceCol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+  min-width: 80px;
+}
+
+.priceLabel {
+  font-size: 9.5px;
+  color: var(--muted-2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
 }
 
 .productPrice {
   display: flex;
   align-items: center;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #111;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ─── Address — gift tag ─── */
+.addressBox {
+  padding: 22px;
+  position: relative;
+}
+
+.addressBox::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 18px;
+  bottom: 18px;
+  width: 3px;
 }
 
 .addressText {
-  font-size: 13.5px;
-  line-height: 1.7;
-  color: #333;
-  margin: 0;
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--ink-soft);
+  margin: 0 0 14px;
+}
+
+.addressName {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 17px;
+}
+
+.addressPhoneRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--hairline-strong);
+}
+
+.addressPhoneLabel {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.addressPhone {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  font-family: "IBM Plex Mono", monospace;
+}
+
+/* ─── Key/value rows ─── */
+.kvGrid {
+  display: flex;
+  flex-direction: column;
 }
 
 .kvRow {
@@ -150,82 +526,473 @@
   justify-content: space-between;
   align-items: center;
   font-size: 13.5px;
-  color: #444;
-  padding: 6px 0;
+  padding: 12px 2px;
+  border-bottom: 1px solid var(--hairline);
+  gap: 12px;
 }
 
-.kvRow span:last-child {
+.kvRow:last-child {
+  border-bottom: none;
+}
+
+.kvLabel {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.kvValue {
   display: flex;
   align-items: center;
-  gap: 3px;
-  color: #111;
-  font-weight: 600;
+  gap: 4px;
+  color: var(--ink);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .mono {
-  font-family: "Courier New", monospace;
-  font-size: 12.5px;
+  font-family: "IBM Plex Mono", "Courier New", monospace;
+  font-size: 12px;
+  letter-spacing: -0.01em;
+}
+
+.freeTag {
+  color: var(--emerald);
+  font-weight: 700;
+  background: var(--emerald-soft);
+  padding: 3px 10px;
+  border-radius: 3px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Copy field */
+.copyField {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--parchment);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-sm);
+  padding: 7px 11px;
+  cursor: pointer;
+  font: inherit;
+  color: var(--ink);
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+  position: relative;
+}
+
+.copyField:hover {
+  border-color: var(--gold);
+  background: var(--gold-wash);
+}
+
+.copyIcon {
+  color: var(--muted);
+  width: 13px;
+  height: 13px;
+}
+
+.copyIconOk {
+  color: var(--emerald);
+  width: 13px;
+  height: 13px;
+}
+
+.copyFlag {
+  position: absolute;
+  right: 0;
+  top: -26px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--ink);
+  padding: 3px 8px;
+  border-radius: 4px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
+  pointer-events: none;
+}
+
+.copyFlag[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .paymentBadge {
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 11.5px;
+  padding: 4px 12px;
+  border-radius: 3px;
+  font-size: 10.5px;
   font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .paymentBadge.paid {
-  background: #dcfce7;
-  color: #16a34a;
+  background: var(--gold-bright);
+  color: var(--ink);
 }
 
 .paymentBadge.pending {
-  background: #fef3c7;
-  color: #b45309;
+  background: var(--amber-soft);
+  color: var(--amber);
 }
 
 .paymentBadge.failed {
-  background: #fee2e2;
-  color: #dc2626;
+  background: var(--rose-soft);
+  color: var(--rose);
+}
+
+/* ─── Order summary — the receipt ─── */
+.summaryCard {
+  background: transparent;
+  color: #fdfaf2;
+}
+
+.summaryCard .cardTitle {
+  color: black;
+}
+
+.summaryCard .cardTitle svg {
+  color: var(--gold-bright);
+}
+
+.summaryCard .kvRow {
+  border-bottom-color:black;
+}
+
+.summaryCard .kvLabel {
+  color: black;
+}
+
+.summaryCard .kvValue {
+  color: black;
+}
+
+.summaryCard .freeTag {
+  background: black;
+  color: var(--gold-bright);
 }
 
 .totalRow {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  font-size: 16px;
-  font-weight: 700;
-  color: #111;
-  margin-top: 8px;
-  padding-top: 12px;
-  border-top: 1.5px solid #eee;
+  align-items: baseline;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: black;
+  margin-top: 14px;
+  padding-top: 18px;
+  border-top: 1px dashed black;
 }
 
 .totalRow span:last-child {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
+  color: var(--gold-bright);
+  font-size: 26px;
+  font-weight: 700;
+}
+
+/* ─── Shipping card — horizontal band at the foot of the page ─── */
+.shippingCard {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  background: linear-gradient(
+    100deg,
+    var(--ink) 0%,
+    var(--ink) 34%,
+    var(--card) 34%,
+    var(--card) 100%
+  );
+  padding: 0;
+  overflow: hidden;
+}
+
+.shippingTop {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-shrink: 0;
+  padding: 28px;
+  width: 34%;
+  min-width: 300px;
+}
+
+.shippingHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.shippingIconWrap {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background: rgba(253, 250, 242, 0.1);
+  border: 1px solid rgba(253, 250, 242, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-bright);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.shippingTitle {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 19px;
+  font-weight: 600;
+  color: #fdfaf2;
+  margin: 0 0 3px;
+}
+
+.shippingSubtitle {
+  font-size: 11.5px;
+  color: rgba(253, 250, 242, 0.55);
+  font-weight: 500;
+}
+
+.shippingStats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-left: 1px solid rgba(253, 250, 242, 0.16);
+  padding-left: 20px;
+  min-width: 0;
+}
+
+.shippingStat {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.shippingStatLabel {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: rgba(253, 250, 242, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.shippingStatValue {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fdfaf2;
+  word-break: break-all;
+}
+
+.shippingStats .copyField {
+  background: rgba(253, 250, 242, 0.08);
+  border-color: rgba(253, 250, 242, 0.18);
+  color: #fdfaf2;
+}
+
+.shippingStats .copyField:hover {
+  border-color: var(--gold-bright);
+  background: rgba(217, 171, 95, 0.16);
+}
+
+.shippingStats .copyIcon {
+  color: rgba(253, 250, 242, 0.6);
 }
 
 .pendingNote {
-  font-size: 12.5px;
-  color: #999;
-  line-height: 1.5;
-  margin: 0 0 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  color: rgba(253, 250, 242, 0.6);
+  line-height: 1.55;
+  border-left: 1px solid rgba(253, 250, 242, 0.16);
+  padding-left: 20px;
+}
+
+.pendingIcon {
+  color: var(--gold-bright);
+  flex-shrink: 0;
+  margin-top: 2px;
+  width: 15px;
+  height: 15px;
 }
 
 .timelineWrap {
-  margin-top: 18px;
-  padding-top: 18px;
-  border-top: 1px solid #f2f2f2;
+  flex: 1;
+  padding: 28px 28px 28px 0;
+  min-width: 0;
+  overflow-x: auto;
 }
 
+@media (max-width: 860px) {
+  .shippingCard {
+    flex-direction: column;
+    align-items: stretch;
+    background: var(--ink);
+  }
+
+  .shippingTop {
+    width: auto;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(253, 250, 242, 0.14);
+  }
+
+  .shippingStats,
+  .pendingNote {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px dashed rgba(253, 250, 242, 0.16);
+    padding-top: 14px;
+    width: 100%;
+  }
+
+  .timelineWrap {
+    padding: 24px 28px 28px;
+    background: var(--card);
+  }
+}
+
+/* ─── Footer link ─── */
 .allOrdersLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   text-align: center;
   font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #fdfaf2;
+  text-decoration: none;
+  padding: 15px 0;
+  border-radius: var(--radius-sm);
+  background: var(--ink);
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.allOrdersLink svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.2s ease;
+}
+
+.allOrdersLink:hover {
+  background: var(--gold-deep);
+}
+
+.allOrdersLink:hover svg {
+  transform: translateX(3px);
+}
+
+/* ─── Focus states ─── */
+.allOrdersLink:focus-visible,
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* ─── Loading / error states ─── */
+.stateWrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 120px 24px;
+  text-align: center;
+  font-family: "Manrope", sans-serif;
+  background: var(--parchment);
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.stateTitle {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 22px;
   font-weight: 600;
-  color: #111;
-  text-decoration: underline;
-  padding: 8px 0;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+
+.stateSub {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0;
+}
+
+.stateSub.errorText {
+  color: var(--rose);
+  font-weight: 500;
+}
+
+.spinner {
+  width: 30px;
+  height: 30px;
+  margin: 0 auto 18px;
+  border: 3px solid var(--hairline);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 640px) {
+  .page {
+    padding: 24px 16px 72px;
+  }
+
+  .orderIdRow {
+    padding: 14px 18px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  .shippingStats {
+    grid-template-columns: 1fr;
+  }
+
+  .productPriceCol {
+    min-width: 68px;
+  }
+
+  .successTitle {
+    font-size: 32px;
+  }
+
+  .grid {
+    gap: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page,
+  .seal,
+  .card,
+  .spinner {
+    animation: none !important;
+  }
 }

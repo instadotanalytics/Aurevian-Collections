@@ -1,0 +1,371 @@
+/* src/Pages/SuperAdmin/components/OrdersManagement/OrdersManagement.module.css */
+
+.wrap {
+  padding: 24px;
+  font-family: "Inter", sans-serif;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+.pageTitle {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: #1c1917;
+  margin: 0 0 4px;
+}
+.pageSubtitle {
+  font-size: 13.5px;
+  color: #78716c;
+  margin: 0;
+}
+.refreshBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border: 1px solid #e7e5e4;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  color: #44403c;
+}
+.refreshBtn:hover {
+  background: #fafaf9;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e7e5e4;
+  padding-bottom: 12px;
+}
+.tab {
+  background: #f5f5f4;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #57534e;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.tab:hover {
+  background: #e7e5e4;
+}
+.tabActive {
+  background: #111111;
+  color: #fff;
+}
+
+.loadingText,
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: #78716c;
+  font-size: 14px;
+}
+
+.table {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.orderRow {
+  background: #fff;
+  border: 1px solid #e7e5e4;
+  border-radius: 10px;
+  padding: 18px;
+}
+
+.orderMain {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f5f5f4;
+}
+.orderNumber {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1c1917;
+  margin: 0;
+}
+.orderDate {
+  font-size: 12px;
+  color: #a8a29e;
+  margin: 2px 0 0;
+}
+
+.customerInfo {
+  flex: 1;
+  min-width: 200px;
+}
+.customerName {
+  font-size: 13.5px;
+  font-weight: 500;
+  margin: 0;
+}
+.customerAddress {
+  font-size: 12px;
+  color: #78716c;
+  margin: 2px 0 0;
+}
+
+.sellerInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.sellerLabel {
+  font-size: 11px;
+  color: #a8a29e;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.sellerName {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1c1917;
+}
+
+.items {
+  margin-bottom: 12px;
+}
+.itemRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 13px;
+}
+.itemRow img {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.itemName {
+  flex: 1;
+  color: #44403c;
+}
+.itemQty {
+  color: #a8a29e;
+}
+.itemPrice {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.metaRow {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  padding: 10px 0;
+  border-top: 1px solid #f5f5f4;
+}
+.metaBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.metaLabel {
+  font-size: 11px;
+  color: #a8a29e;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.metaBlock span:last-child {
+  font-size: 13px;
+  color: #1c1917;
+  display: flex;
+  align-items: center;
+}
+
+.payStatus {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  width: fit-content;
+}
+.payStatus.paid {
+  background: #dcfce7;
+  color: #166534;
+}
+.payStatus.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+.payStatus.failed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.shippingInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #57534e;
+  background: #fafaf9;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.shippingError {
+  color: #991b1b;
+  font-size: 12px;
+}
+
+.fulfillmentRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.fulfillmentBadge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f4f4f0;
+  color: #57534e;
+}
+.fulfillmentBadge.PENDING_SELLER_CONFIRMATION {
+  background: #fef3c7;
+  color: #92400e;
+}
+.fulfillmentBadge.SELLER_CONFIRMED {
+  background: #dbeafe;
+  color: #1e40af;
+}
+.fulfillmentBadge.SELLER_REJECTED,
+.fulfillmentBadge.ADMIN_REJECTED,
+.fulfillmentBadge.SHIPROCKET_FAILED {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.fulfillmentBadge.ADMIN_APPROVED,
+.fulfillmentBadge.AWB_ASSIGNED,
+.fulfillmentBadge.DELIVERED {
+  background: #dcfce7;
+  color: #166534;
+}
+.fulfillmentBadge.AWB_PENDING {
+  background: #ffedd5;
+  color: #9a3412;
+}
+.rejectionReasonText {
+  font-size: 12.5px;
+  color: #991b1b;
+}
+
+.actionRow {
+  display: flex;
+  gap: 10px;
+}
+.approveBtn,
+.rejectBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+.approveBtn {
+  background: #111111;
+  color: #fff;
+}
+.rejectBtn {
+  background: #fff;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+.approveBtn:disabled,
+.rejectBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal {
+  background: #fff;
+  border-radius: 10px;
+  padding: 24px;
+  width: 440px;
+  max-width: 90vw;
+}
+.modalTitle {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+.modalSub {
+  font-size: 13px;
+  color: #78716c;
+  margin: 0 0 14px;
+}
+.modalTextarea {
+  width: 100%;
+  border: 1px solid #e7e5e4;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+}
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+.modalCancelBtn {
+  background: none;
+  border: 1px solid #e7e5e4;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.modalConfirmRejectBtn {
+  background: #991b1b;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+.modalConfirmRejectBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
