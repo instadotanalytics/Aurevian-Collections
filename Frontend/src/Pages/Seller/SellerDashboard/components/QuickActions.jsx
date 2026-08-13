@@ -6,16 +6,18 @@ import {
   FiPlus, 
   FiList, 
   FiFileText, 
-  FiUser 
+  FiUser,
+  FiDollarSign,
+  FiUsers
 } from 'react-icons/fi';
 import styles from './QuickActions.module.css';
 
 const QuickActions = () => {
   const actions = [
-    { icon: FiPlus, label: 'Add Product', path: '/seller/products/new' },
-    { icon: FiList, label: 'View Orders', path: '/seller/orders' },
-    { icon: FiFileText, label: 'Documents', path: '/seller/documents' },
-    { icon: FiUser, label: 'Profile', path: '/seller/profile' },
+    { icon: FiPlus, label: 'Add Product', path: '/seller/dashboard/products/new' },
+    { icon: FiList, label: 'View Orders', path: '/seller/dashboard/orders' },
+    { icon: FiDollarSign, label: 'Earnings', path: '/seller/dashboard/earnings' },
+    { icon: FiUsers, label: 'Customers', path: '/seller/dashboard/customers' },
   ];
 
   return (
