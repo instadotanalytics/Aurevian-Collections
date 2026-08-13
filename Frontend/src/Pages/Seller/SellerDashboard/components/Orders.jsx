@@ -1,6 +1,6 @@
 // src/Pages/Seller/SellerDashboard/components/Orders.jsx
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FaRupeeSign } from "react-icons/fa";
 import {
@@ -9,8 +9,6 @@ import {
   FiX,
   FiPackage,
   FiUser,
-  FiCalendar,
-  FiClock,
   FiSearch,
   FiEye,
 } from "react-icons/fi";
@@ -34,14 +32,14 @@ const STATUS_OPTIONS = [
 ];
 
 const STATUS_COLORS = {
-  placed: { bg: "#fef3c7", text: "#92400e", dot: "#f59e0b" },
-  processing: { bg: "#dbeafe", text: "#1e40af", dot: "#3b82f6" },
-  ready_to_ship: { bg: "#ede9fe", text: "#5b21b6", dot: "#8b5cf6" },
-  shipped: { bg: "#cffafe", text: "#0e7490", dot: "#06b6d4" },
-  in_transit: { bg: "#e0e7ff", text: "#3730a3", dot: "#6366f1" },
-  out_for_delivery: { bg: "#fef3c7", text: "#92400e", dot: "#f97316" },
-  delivered: { bg: "#d1fae5", text: "#065f46", dot: "#10b981" },
-  cancelled: { bg: "#fee2e2", text: "#991b1b", dot: "#ef4444" },
+  placed: { bg: "#fef3c7", text: "#92400e" },
+  processing: { bg: "#dbeafe", text: "#1e40af" },
+  ready_to_ship: { bg: "#ede9fe", text: "#5b21b6" },
+  shipped: { bg: "#cffafe", text: "#0e7490" },
+  in_transit: { bg: "#e0e7ff", text: "#3730a3" },
+  out_for_delivery: { bg: "#fef3c7", text: "#92400e" },
+  delivered: { bg: "#d1fae5", text: "#065f46" },
+  cancelled: { bg: "#fee2e2", text: "#991b1b" },
 };
 
 const FULFILLMENT_LABEL = {
@@ -69,7 +67,7 @@ const FULFILLMENT_COLORS = {
   PENDING_SELLER_CONFIRMATION: { bg: "#fef3c7", text: "#92400e" },
   SELLER_CONFIRMED: { bg: "#dbeafe", text: "#1e40af" },
   SELLER_REJECTED: { bg: "#fee2e2", text: "#991b1b" },
-  ADMIN_APPROVED: { bg: "#d1fae5", text: "#065f46" },
+  ADMIN_APPROVED: { bg: "#dcfce7", text: "#16a34a" },
   ADMIN_REJECTED: { bg: "#fee2e2", text: "#991b1b" },
   SHIPMENT_CREATED: { bg: "#ede9fe", text: "#5b21b6" },
   AWB_PENDING: { bg: "#fef3c7", text: "#92400e" },
@@ -78,12 +76,26 @@ const FULFILLMENT_COLORS = {
   PICKED_UP: { bg: "#e0e7ff", text: "#3730a3" },
   IN_TRANSIT: { bg: "#e0e7ff", text: "#3730a3" },
   OUT_FOR_DELIVERY: { bg: "#fef3c7", text: "#92400e" },
-  DELIVERED: { bg: "#d1fae5", text: "#065f46" },
+  DELIVERED: { bg: "#dcfce7", text: "#16a34a" },
   RTO: { bg: "#fee2e2", text: "#991b1b" },
   RETURN_INITIATED: { bg: "#fef3c7", text: "#92400e" },
   RETURNED: { bg: "#fee2e2", text: "#991b1b" },
   CANCELLED: { bg: "#fee2e2", text: "#991b1b" },
   SHIPROCKET_FAILED: { bg: "#fee2e2", text: "#991b1b" },
+};
+
+// Debounce utility
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+
+  return debouncedValue;
 };
 
 const formatCurrency = (amount) => {
@@ -100,6 +112,37 @@ const formatDate = (date) => {
   });
 };
 
+// Skeleton Loader
+const SkeletonLoader = ({ count = 10 }) => {
+  return (
+    <div className={styles.skeletonContainer}>
+      {Array.from({ length: count }).map((_, index) => (
+        <div key={index} className={styles.skeletonCard}>
+          <div className={styles.skeletonRow}>
+            <div className={styles.skeletonOrderId}></div>
+            <div className={styles.skeletonBadge}></div>
+            <div className={styles.skeletonBadge}></div>
+          </div>
+          <div className={styles.skeletonRow}>
+            <div className={styles.skeletonField}>
+              <div className={styles.skeletonLabel}></div>
+              <div className={styles.skeletonValue}></div>
+            </div>
+            <div className={styles.skeletonField}>
+              <div className={styles.skeletonLabel}></div>
+              <div className={styles.skeletonValue}></div>
+            </div>
+            <div className={styles.skeletonField}>
+              <div className={styles.skeletonLabel}></div>
+              <div className={styles.skeletonValue}></div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const Orders = () => {
   const dispatch = useDispatch();
   const { sellerOrders, isLoading } = useSelector((state) => state.orders);
@@ -111,10 +154,22 @@ const Orders = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
+  const [visibleCount, setVisibleCount] = useState(10);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [allOrdersLoaded, setAllOrdersLoaded] = useState(false);
+
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const debouncedStatusFilter = useDebounce(statusFilter, 300);
+  const debouncedSortBy = useDebounce(sortBy, 300);
 
   useEffect(() => {
     dispatch(fetchSellerOrders());
   }, [dispatch]);
+
+  useEffect(() => {
+    setVisibleCount(10);
+    setAllOrdersLoaded(false);
+  }, [debouncedSearchTerm, debouncedStatusFilter, debouncedSortBy]);
 
   const handleStatusChange = async (id, status) => {
     try {
@@ -130,7 +185,7 @@ const Orders = () => {
     setActioningId(orderId);
     try {
       await orderApi.sellerConfirmOrder(orderId);
-      toast.success("Order confirmed — sent for admin approval");
+      toast.success("Order confirmed");
       dispatch(fetchSellerOrders());
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to confirm order");
@@ -173,7 +228,7 @@ const Orders = () => {
   };
 
   const getStatusStyle = (status) => {
-    return STATUS_COLORS[status] || { bg: "#f3f4f6", text: "#6b7280", dot: "#6b7280" };
+    return STATUS_COLORS[status] || { bg: "#f3f4f6", text: "#6b7280" };
   };
 
   const getFulfillmentStyle = (status) => {
@@ -183,8 +238,8 @@ const Orders = () => {
   const getFilteredOrders = () => {
     let filtered = [...sellerOrders];
 
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
+    if (debouncedSearchTerm) {
+      const term = debouncedSearchTerm.toLowerCase();
       filtered = filtered.filter(order => 
         order.orderNumber?.toLowerCase().includes(term) ||
         order.customer?.fullName?.toLowerCase().includes(term) ||
@@ -192,11 +247,11 @@ const Orders = () => {
       );
     }
 
-    if (statusFilter !== "all") {
-      filtered = filtered.filter(order => order.orderStatus === statusFilter);
+    if (debouncedStatusFilter !== "all") {
+      filtered = filtered.filter(order => order.orderStatus === debouncedStatusFilter);
     }
 
-    switch (sortBy) {
+    switch (debouncedSortBy) {
       case "newest":
         filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         break;
@@ -217,20 +272,79 @@ const Orders = () => {
   };
 
   const filteredOrders = getFilteredOrders();
+  const visibleOrders = filteredOrders.slice(0, visibleCount);
+
+  // Load more orders with throttling - 10 cards in first 1 second
+  const loadMoreOrders = useCallback(() => {
+    if (isLoadingMore || allOrdersLoaded || visibleCount >= filteredOrders.length) {
+      if (visibleCount >= filteredOrders.length) {
+        setAllOrdersLoaded(true);
+      }
+      return;
+    }
+
+    setIsLoadingMore(true);
+    let currentCount = visibleCount;
+    const maxCount = Math.min(visibleCount + 10, filteredOrders.length);
+    const batchSize = 10;
+    const delayPerBatch = 1000; // 1 second for 10 cards
+    
+    const loadNextBatch = () => {
+      const nextCount = Math.min(currentCount + batchSize, maxCount);
+      setVisibleCount(nextCount);
+      currentCount = nextCount;
+      
+      if (currentCount < maxCount) {
+        setTimeout(loadNextBatch, delayPerBatch);
+      } else {
+        setIsLoadingMore(false);
+        if (currentCount >= filteredOrders.length) {
+          setAllOrdersLoaded(true);
+        }
+      }
+    };
+    
+    setTimeout(loadNextBatch, 200);
+  }, [visibleCount, filteredOrders.length, isLoadingMore, allOrdersLoaded]);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    if (visibleOrders.length === 0 || allOrdersLoaded) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMoreOrders();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const sentinel = document.getElementById('orders-sentinel');
+    if (sentinel) {
+      observer.observe(sentinel);
+    }
+
+    return () => {
+      if (sentinel) {
+        observer.unobserve(sentinel);
+      }
+    };
+  }, [visibleOrders, allOrdersLoaded, loadMoreOrders]);
+
+  const showLoadingState = isLoading;
 
   return (
     <div className={styles.ordersWrap}>
-      {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <h2 className={styles.title}>Orders</h2>
           <span className={styles.orderCount}>
-            {sellerOrders?.length || 0} orders
+            {filteredOrders?.length || 0} orders
           </span>
         </div>
       </div>
 
-      {/* Filters */}
       <div className={styles.filters}>
         <div className={styles.searchWrapper}>
           <FiSearch className={styles.searchIcon} />
@@ -270,18 +384,11 @@ const Orders = () => {
         </div>
       </div>
 
-      {/* Loading */}
-      {isLoading && (
-        <div className={styles.loadingContainer}>
-          <div className={styles.spinner}></div>
-          <p>Loading orders...</p>
-        </div>
-      )}
-
-      {/* Empty State */}
-      {!isLoading && filteredOrders.length === 0 && (
+      {showLoadingState && filteredOrders.length === 0 ? (
+        <SkeletonLoader count={10} />
+      ) : filteredOrders.length === 0 ? (
         <div className={styles.emptyState}>
-          <FiPackage size={60} className={styles.emptyIcon} />
+          <FiPackage size={48} className={styles.emptyIcon} />
           <h3>No orders found</h3>
           <p>
             {searchTerm || statusFilter !== "all"
@@ -289,12 +396,9 @@ const Orders = () => {
               : "When you receive orders, they'll appear here"}
           </p>
         </div>
-      )}
-
-      {/* Orders Cards */}
-      {!isLoading && filteredOrders.length > 0 && (
+      ) : (
         <div className={styles.ordersList}>
-          {filteredOrders.map((order) => {
+          {visibleOrders.map((order) => {
             const statusStyle = getStatusStyle(order.orderStatus);
             const fulfillmentStyle = getFulfillmentStyle(order.fulfillmentStatus);
             const isActionRequired = order.fulfillmentStatus === "PENDING_SELLER_CONFIRMATION";
@@ -307,61 +411,67 @@ const Orders = () => {
                 className={styles.orderCard}
                 onClick={() => openOrderPopup(order)}
               >
-                <div className={styles.orderCardTop}>
-                  <div className={styles.orderId}>
-                    #{order.orderNumber || 'N/A'}
+                <div className={styles.orderCardContent}>
+                  <div className={styles.orderCardLeft}>
+                    <div className={styles.orderId}>
+                      #{order.orderNumber || 'N/A'}
+                    </div>
+                    <div className={styles.orderCardFields}>
+                      <div className={styles.orderCardField}>
+                        <span className={styles.fieldLabel}>Customer</span>
+                        <span className={styles.fieldValue}>{customer.fullName || 'N/A'}</span>
+                      </div>
+                      <div className={styles.orderCardField}>
+                        <span className={styles.fieldLabel}>Total</span>
+                        <span className={styles.fieldValue}>{formatCurrency(totalAmount)}</span>
+                      </div>
+                      <div className={styles.orderCardField}>
+                        <span className={styles.fieldLabel}>Date</span>
+                        <span className={styles.fieldValue}>{formatDate(order.createdAt)}</span>
+                      </div>
+                      <div className={styles.orderCardField}>
+                        <span className={styles.fieldLabel}>Items</span>
+                        <span className={styles.fieldValue}>{order.items?.length || 0}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className={styles.orderCardBadges}>
-                    <span
-                      className={styles.statusBadge}
-                      style={{ backgroundColor: statusStyle.bg, color: statusStyle.text }}
-                    >
-                      <span className={styles.statusDot} style={{ backgroundColor: statusStyle.dot }} />
-                      {order.orderStatus || 'N/A'}
-                    </span>
-                    {isActionRequired && (
-                      <span className={styles.actionRequiredBadge}>⚡</span>
-                    )}
-                  </div>
-                </div>
 
-                <div className={styles.orderCardBody}>
-                  <div className={styles.orderCardInfo}>
-                    <div className={styles.orderCardCustomer}>
-                      <span className={styles.orderCardLabel}>Customer</span>
-                      <span className={styles.orderCardValue}>{customer.fullName || 'N/A'}</span>
+                  <div className={styles.orderCardRight}>
+                    <div className={styles.orderCardBadges}>
+                      <span
+                        className={styles.statusBadge}
+                        style={{ backgroundColor: statusStyle.bg, color: statusStyle.text }}
+                      >
+                        {order.orderStatus || 'N/A'}
+                      </span>
+                      <span
+                        className={styles.fulfillmentBadge}
+                        style={{ backgroundColor: fulfillmentStyle.bg, color: fulfillmentStyle.text }}
+                      >
+                        {FULFILLMENT_LABEL[order.fulfillmentStatus] || order.fulfillmentStatus || 'N/A'}
+                      </span>
+                      {isActionRequired && (
+                        <span className={styles.actionRequiredBadge}>⚡</span>
+                      )}
                     </div>
-                    <div className={styles.orderCardTotal}>
-                      <span className={styles.orderCardLabel}>Total</span>
-                      <span className={styles.orderCardValue}>{formatCurrency(totalAmount)}</span>
-                    </div>
-                    <div className={styles.orderCardDate}>
-                      <span className={styles.orderCardLabel}>Date</span>
-                      <span className={styles.orderCardValue}>{formatDate(order.createdAt)}</span>
-                    </div>
-                  </div>
-                  <div className={styles.orderCardFulfillment}>
-                    <span
-                      className={styles.fulfillmentBadge}
-                      style={{ backgroundColor: fulfillmentStyle.bg, color: fulfillmentStyle.text }}
-                    >
-                      {FULFILLMENT_LABEL[order.fulfillmentStatus] || order.fulfillmentStatus || 'N/A'}
+                    <span className={styles.orderCardView}>
+                      <FiEye size={14} />
+                      View
                     </span>
                   </div>
-                </div>
-
-                <div className={styles.orderCardFooter}>
-                  <span className={styles.orderCardItems}>
-                    {order.items?.length || 0} items
-                  </span>
-                  <span className={styles.orderCardView}>
-                    <FiEye size={14} />
-                    View Details
-                  </span>
                 </div>
               </div>
             );
           })}
+          {!allOrdersLoaded && filteredOrders.length > visibleCount && (
+            <div id="orders-sentinel" className={styles.sentinel} />
+          )}
+          {isLoadingMore && (
+            <div className={styles.loadingMore}>
+              <div className={styles.spinnerSmall}></div>
+              <span>Loading more orders...</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -374,7 +484,6 @@ const Orders = () => {
             </button>
 
             <div className={styles.popupContent}>
-              {/* Header */}
               <div className={styles.popupHeader}>
                 <div className={styles.popupOrderId}>
                   #{selectedOrder.orderNumber}
@@ -402,7 +511,6 @@ const Orders = () => {
               </div>
 
               <div className={styles.popupBody}>
-                {/* Customer Info - Compact */}
                 <div className={styles.popupSection}>
                   <h4><FiUser className={styles.popupSectionIcon} /> Customer</h4>
                   <div className={styles.popupCompactGrid}>
@@ -429,26 +537,36 @@ const Orders = () => {
                   </div>
                 </div>
 
-                {/* Order Items - Compact */}
                 <div className={styles.popupSection}>
                   <h4><FiPackage className={styles.popupSectionIcon} /> Items</h4>
-                  <div className={styles.popupCompactItems}>
+                  <div className={styles.popupItems}>
                     {(selectedOrder.items || []).map((item, idx) => (
-                      <div key={idx} className={styles.popupCompactItemRow}>
-                        <div className={styles.popupCompactItemDetails}>
-                          <span className={styles.popupCompactItemName}>{item.name || 'Product'}</span>
-                          <span className={styles.popupCompactItemSku}>SKU: {item.sku || 'N/A'}</span>
+                      <div key={idx} className={styles.popupItemRow}>
+                        <div className={styles.popupItemLeft}>
+                          {item.image && (
+                            <img
+                              src={item.image}
+                              alt={item.name || 'Product'}
+                              className={styles.popupItemImage}
+                              onError={(e) => {
+                                e.target.src = "https://via.placeholder.com/40";
+                              }}
+                            />
+                          )}
+                          <div className={styles.popupItemDetails}>
+                            <span className={styles.popupItemName}>{item.name || 'Product'}</span>
+                            <span className={styles.popupItemSku}>SKU: {item.sku || 'N/A'}</span>
+                          </div>
                         </div>
-                        <div className={styles.popupCompactItemRight}>
-                          <span className={styles.popupCompactItemQty}>×{item.quantity || 0}</span>
-                          <span className={styles.popupCompactItemPrice}>{formatCurrency(item.subtotal)}</span>
+                        <div className={styles.popupItemRight}>
+                          <span className={styles.popupItemQty}>×{item.quantity || 0}</span>
+                          <span className={styles.popupItemPrice}>{formatCurrency(item.subtotal)}</span>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Shipping Info - Compact */}
                 {selectedOrder.shipping && (selectedOrder.shipping.courierName || selectedOrder.shipping.awbCode) && (
                   <div className={styles.popupSection}>
                     <h4><FiTruck className={styles.popupSectionIcon} /> Shipping</h4>
@@ -472,15 +590,13 @@ const Orders = () => {
                   </div>
                 )}
 
-                {/* Rejection Reason */}
                 {selectedOrder.fulfillmentStatus === "SELLER_REJECTED" && selectedOrder.sellerRejectionReason && (
                   <div className={styles.popupRejection}>
-                    <FiX size={16} />
+                    <FiX size={14} />
                     <span>{selectedOrder.sellerRejectionReason}</span>
                   </div>
                 )}
 
-                {/* Action Buttons */}
                 {selectedOrder.fulfillmentStatus === "PENDING_SELLER_CONFIRMATION" && (
                   <div className={styles.popupActions}>
                     <button
@@ -491,7 +607,7 @@ const Orders = () => {
                         closeOrderPopup();
                       }}
                     >
-                      <FiCheck size={16} />
+                      <FiCheck size={14} />
                       {actioningId === selectedOrder._id ? "Confirming..." : "Confirm"}
                     </button>
                     <button
@@ -502,13 +618,12 @@ const Orders = () => {
                         closeOrderPopup();
                       }}
                     >
-                      <FiX size={16} />
+                      <FiX size={14} />
                       Reject
                     </button>
                   </div>
                 )}
 
-                {/* Footer */}
                 <div className={styles.popupFooter}>
                   <span className={styles.popupEarnings}>
                     Earnings: <strong>{formatCurrency(selectedOrder.sellerSubtotal)}</strong>
@@ -540,7 +655,6 @@ const Orders = () => {
         </div>
       )}
 
-      {/* Reject Modal */}
       {rejectingId && (
         <div
           className={styles.modalOverlay}
@@ -561,10 +675,10 @@ const Orders = () => {
             </p>
             <textarea
               className={styles.modalTextarea}
-              placeholder="e.g. Product unavailable, Inventory issue, Unable to fulfill"
+              placeholder="e.g. Product unavailable, Inventory issue..."
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
-              rows={4}
+              rows={3}
             />
             <div className={styles.modalActions}>
               <button
