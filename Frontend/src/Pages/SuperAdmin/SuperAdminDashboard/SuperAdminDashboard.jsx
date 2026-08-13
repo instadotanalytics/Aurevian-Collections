@@ -1,5 +1,3 @@
-// src/Pages/SuperAdmin/SuperAdminDashboard/SuperAdminDashboard.jsx
-
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
@@ -67,6 +65,7 @@ import PaymentsManagement from "../components/PaymentsManagement/PaymentsManagem
 import SupportManagement from "../components/SupportManagement";
 import SubscriptionPlanManagement from "../components/SubscriptionPlanManagement/SubscriptionPlanManagement";
 import HeaderManagement from "../components/HeaderManagement/HeaderManagement";
+import OrdersManagement from "../components/OrdersManagement/OrdersManagement";
 
 const SuperAdminDashboard = () => {
   // ✅ Page title
@@ -300,11 +299,7 @@ const SuperAdminDashboard = () => {
           />
         );
       case "orders":
-        return (
-          <div className={styles.placeholderContent}>
-            Orders Management Coming Soon
-          </div>
-        );
+        return <OrdersManagement />;
       case "products":
         return (
           <div className={styles.placeholderContent}>
