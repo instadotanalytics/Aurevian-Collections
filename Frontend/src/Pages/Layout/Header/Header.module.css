@@ -1,4 +1,5 @@
- @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap");
+
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap");
 
 * {
   margin: 0%;
@@ -1320,13 +1321,17 @@
    MOBILE BOTTOM NAVIGATION (FROZEN)
    ========================================================== */
 .mobileBottomNav {
+  /* Hidden by default (desktop). Only switched to display:flex
+     inside the max-width:992px media query below, so it never
+     shows on desktop/tablet-landscape screens. */
+  display: none;
+
   position: fixed;
   bottom: 0;       /* ✅ FROZEN to the bottom edge */
   left: 50%;
   transform: translateX(-50%);
   z-index: 1500;
 
-  display: flex;
   align-items: center;
   justify-content: space-around;
   gap: 6px;
@@ -1608,7 +1613,9 @@
     right: -60px;
   }
   
-  /* Show bottom nav on tablet/mobile */
+  /* Show bottom nav only on tablet/mobile — this is the ONLY
+     place .mobileBottomNav gets display:flex. Desktop keeps the
+     display:none set in the base rule above. */
   .mobileBottomNav {
     display: flex;
   }

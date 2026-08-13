@@ -659,7 +659,7 @@
    ============================================ */
 .contentArea {
   flex: 1;
-  padding: 0 var(--content-pad-x) var(--content-pad-b);
+  /* padding: 0 var(--content-pad-x) var(--content-pad-b); */
   overflow-y: auto;
   height: calc(100vh - var(--header-height));
   background: var(--surface-sunk);
@@ -669,8 +669,8 @@
 /* Layered onto planStyles.welcomeBanner so it can go full-bleed and
    lose its radius without needing to touch PlanTheme.module.css */
 .welcomeBannerOverride {
-  width: calc(100% + var(--content-pad-x) * 2) !important;
-  margin: 0 calc(var(--content-pad-x) * -1) 24px !important;
+  /* width: calc(100% + var(--content-pad-x) * 2) !important;
+  margin: 0 calc(var(--content-pad-x) * -1) 24px !important; */
   border-radius: 0 !important;
 }
 
