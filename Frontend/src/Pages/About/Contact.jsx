@@ -154,10 +154,11 @@ const Contact = () => {
               Let's Create
             </motion.span>
             <motion.hr variants={fadeUp} className={styles.hairline} />
-            <motion.h1 variants={fadeUp} className={styles.heroTitle}>
+          <motion.h1 variants={fadeUp} className={styles.heroTitle}>
               Something{" "}
               <span className={styles.heroTitleAccent}>Beautiful</span>
             </motion.h1>
+
             <motion.p variants={fadeUp} className={styles.heroSub}>
               Whether you have a question about our collections, need assistance
               with an order, or want to book a private consultation, we're here

@@ -40,26 +40,28 @@ const OrderDetail = () => {
   }, [id]);
 
   return (
-    <div className={styles.page}>
+    <>
       <Header />
-      {loading && (
-        <div className={styles.stateWrap}>
-          <div className={styles.spinner} />
-          <p className={styles.stateTitle}>Loading order</p>
-          <p className={styles.stateSub}>
-            Just a moment while we pull up the details.
-          </p>
-        </div>
-      )}
-      {!loading && error && (
-        <div className={styles.stateWrap}>
-          <p className={styles.stateTitle}>Something went wrong</p>
-          <p className={`${styles.stateSub} ${styles.errorText}`}>{error}</p>
-        </div>
-      )}
-      {!loading && order && <OrderDetailView order={order} />}
+      <div className={styles.page}>
+        {loading && (
+          <div className={styles.stateWrap}>
+            <div className={styles.spinner} />
+            <p className={styles.stateTitle}>Loading order</p>
+            <p className={styles.stateSub}>
+              Just a moment while we pull up the details.
+            </p>
+          </div>
+        )}
+        {!loading && error && (
+          <div className={styles.stateWrap}>
+            <p className={styles.stateTitle}>Something went wrong</p>
+            <p className={`${styles.stateSub} ${styles.errorText}`}>{error}</p>
+          </div>
+        )}
+        {!loading && order && <OrderDetailView order={order} />}
+      </div>
       <Footer />
-    </div>
+    </>
   );
 };
 

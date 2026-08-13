@@ -1,17 +1,17 @@
-
 // src/Components/OrderDetailView/OrderDetailView.jsx
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaRupeeSign } from "react-icons/fa";
 import {
-  FiCheckCircle,
+  FiCheck,
   FiPackage,
   FiMapPin,
   FiCreditCard,
   FiTruck,
   FiCopy,
-  FiCheck,
   FiClock,
+  FiShoppingBag,
+  FiArrowRight,
 } from "react-icons/fi";
 import OrderStatusTimeline from "../OrderStatusTimeline/OrderStatusTimeline";
 import styles from "./OrderDetailView.module.css";
@@ -48,11 +48,10 @@ const CopyField = ({ value, label }) => {
       aria-label={`Copy ${label}`}
     >
       <span className={styles.mono}>{value}</span>
-      {copied ? (
-        <FiCheck className={styles.copyIconOk} />
-      ) : (
-        <FiCopy className={styles.copyIcon} />
-      )}
+      <FiCopy className={copied ? styles.copyIconOk : styles.copyIcon} />
+      <span className={styles.copyFlag} data-visible={copied}>
+        Copied
+      </span>
     </button>
   );
 };
@@ -81,22 +80,31 @@ const OrderDetailView = ({ order, justPlaced = false }) => {
     <div className={styles.page}>
       {justPlaced && (
         <div className={styles.successHeader}>
-          <div className={styles.seal}>
-            <FiCheckCircle />
+          <div className={styles.sealWrap}>
+            <div className={styles.seal}>
+              <span className={styles.sealMonogram}>A</span>
+              <FiCheck className={styles.sealCheck} />
+            </div>
+            <div className={styles.sealRibbonL} />
+            <div className={styles.sealRibbonR} />
           </div>
-          <span className={styles.eyebrow}>Confirmation</span>
-          <h1 className={styles.successTitle}>Order Placed!</h1>
+          <span className={styles.eyebrow}>Certificate of Purchase</span>
+          <h1 className={styles.successTitle}>Your Order is Sealed</h1>
           <p className={styles.successSub}>
-            Thank you for your purchase. A confirmation has been sent to your
-            email.
+            Thank you for choosing Aurevian. A confirmation has been sent to
+            your email, and every piece is now being prepared with care.
           </p>
         </div>
       )}
 
       <div className={styles.orderIdRow}>
-        <span className={styles.orderIdLabel}>Order ID</span>
-        <span className={styles.orderId}>#{orderNumber}</span>
+        <div className={styles.orderIdMain}>
+          <span className={styles.orderIdLabel}>Order No.</span>
+          <span className={styles.orderId}>{orderNumber}</span>
+        </div>
+        <span className={styles.orderIdDivider} />
         <span className={styles.orderDate}>
+          Placed{" "}
           {new Date(createdAt).toLocaleDateString("en-IN", {
             day: "numeric",
             month: "short",
@@ -105,58 +113,60 @@ const OrderDetailView = ({ order, justPlaced = false }) => {
         </span>
       </div>
 
-      <div className={styles.grid}>
-        <div className={styles.mainCol}>
-          {/* PRODUCTS */}
-          <section className={styles.card}>
-            <div className={styles.cardHeaderRow}>
-              <h3 className={styles.cardTitle}>
-                <FiPackage /> Products
-              </h3>
-              <span className={styles.itemCountPill}>
-                {items.length} {items.length === 1 ? "item" : "items"} ·{" "}
-                {totalUnits} {totalUnits === 1 ? "unit" : "units"}
-              </span>
-            </div>
-            <div className={styles.productList}>
-              {items.map((item, idx) => {
-                const unitPrice = item.quantity
-                  ? item.subtotal / item.quantity
-                  : item.subtotal;
-                return (
-                  <div className={styles.productRow} key={idx}>
+      <div className={styles.stack}>
+        {/* PRODUCTS — full width */}
+        <section className={styles.card}>
+          <div className={styles.cardHeaderRow}>
+            <h3 className={styles.cardTitle}>
+              <FiShoppingBag /> The Pieces
+            </h3>
+            <span className={styles.itemCountPill}>
+              {items.length} {items.length === 1 ? "item" : "items"} ·{" "}
+              {totalUnits} {totalUnits === 1 ? "unit" : "units"}
+            </span>
+          </div>
+          <div className={styles.productList}>
+            {items.map((item, idx) => {
+              const unitPrice = item.quantity
+                ? item.subtotal / item.quantity
+                : item.subtotal;
+              return (
+                <div className={styles.productRow} key={idx}>
+                  <div className={styles.productImgWrap}>
                     <img
                       src={item.image}
                       alt={item.name}
                       className={styles.productImg}
                       loading="lazy"
                     />
-                    <div className={styles.productInfo}>
-                      <span className={styles.productName}>{item.name}</span>
-                      <div className={styles.productMeta}>
-                        <span className={styles.qtyPill}>
-                          Qty {item.quantity}
-                        </span>
-                        <span className={styles.unitPrice}>
-                          <FaRupeeSign size={10} />
-                          {unitPrice.toLocaleString("en-IN")} each
-                        </span>
-                      </div>
-                    </div>
-                    <div className={styles.productPriceCol}>
-                      <span className={styles.priceLabel}>Subtotal</span>
-                      <span className={styles.productPrice}>
-                        <FaRupeeSign size={12} />
-                        {item.subtotal.toLocaleString("en-IN")}
+                  </div>
+                  <div className={styles.productInfo}>
+                    <span className={styles.productName}>{item.name}</span>
+                    <div className={styles.productMeta}>
+                      <span className={styles.qtyPill}>
+                        Qty {item.quantity}
+                      </span>
+                      <span className={styles.unitPrice}>
+                        <FaRupeeSign size={10} />
+                        {unitPrice.toLocaleString("en-IN")} each
                       </span>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </section>
+                  <div className={styles.productPriceCol}>
+                    <span className={styles.priceLabel}>Subtotal</span>
+                    <span className={styles.productPrice}>
+                      <FaRupeeSign size={12} />
+                      {item.subtotal.toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
 
-          {/* DELIVERY ADDRESS */}
+        {/* ADDRESS + PAYMENT — paired row */}
+        <div className={styles.splitRow}>
           <section className={styles.card}>
             <h3 className={styles.cardTitle}>
               <FiMapPin /> Delivery Address
@@ -186,7 +196,6 @@ const OrderDetailView = ({ order, justPlaced = false }) => {
             </div>
           </section>
 
-          {/* PAYMENT */}
           <section className={styles.card}>
             <h3 className={styles.cardTitle}>
               <FiCreditCard /> Payment
@@ -219,45 +228,47 @@ const OrderDetailView = ({ order, justPlaced = false }) => {
               )}
             </div>
           </section>
-
-          {/* ORDER SUMMARY */}
-          <section className={`${styles.card} ${styles.summaryCard}`}>
-            <h3 className={styles.cardTitle}>Order Summary</h3>
-            <div className={styles.kvGrid}>
-              <div className={styles.kvRow}>
-                <span className={styles.kvLabel}>Items ({totalUnits})</span>
-                <span className={styles.kvValue}>
-                  <FaRupeeSign size={11} />
-                  {itemsTotal.toLocaleString("en-IN")}
-                </span>
-              </div>
-              <div className={styles.kvRow}>
-                <span className={styles.kvLabel}>Shipping</span>
-                <span className={styles.kvValue}>
-                  {shippingFee === 0 ? (
-                    <span className={styles.freeTag}>Free</span>
-                  ) : (
-                    <>
-                      <FaRupeeSign size={11} />
-                      {shippingFee.toLocaleString("en-IN")}
-                    </>
-                  )}
-                </span>
-              </div>
-            </div>
-            <div className={styles.totalRow}>
-              <span>Total</span>
-              <span>
-                <FaRupeeSign size={14} />
-                {totalAmount.toLocaleString("en-IN")}
-              </span>
-            </div>
-          </section>
         </div>
 
-        <div className={styles.sideCol}>
-          {/* SHIPPING / TRACKING — fills full column height */}
-          <section className={`${styles.card} ${styles.shippingCard}`}>
+        {/* ORDER SUMMARY — full width */}
+        <section className={`${styles.card} ${styles.summaryCard}`}>
+          <h3 className={styles.cardTitle}>
+            <FiPackage /> Order Summary
+          </h3>
+          <div className={styles.kvGrid}>
+            <div className={styles.kvRow}>
+              <span className={styles.kvLabel}>Items ({totalUnits})</span>
+              <span className={styles.kvValue}>
+                <FaRupeeSign size={11} />
+                {itemsTotal.toLocaleString("en-IN")}
+              </span>
+            </div>
+            <div className={styles.kvRow}>
+              <span className={styles.kvLabel}>Shipping</span>
+              <span className={styles.kvValue}>
+                {shippingFee === 0 ? (
+                  <span className={styles.freeTag}>Complimentary</span>
+                ) : (
+                  <>
+                    <FaRupeeSign size={11} />
+                    {shippingFee.toLocaleString("en-IN")}
+                  </>
+                )}
+              </span>
+            </div>
+          </div>
+          <div className={styles.totalRow}>
+            <span>Total Paid</span>
+            <span>
+              <FaRupeeSign size={16} />
+              {totalAmount.toLocaleString("en-IN")}
+            </span>
+          </div>
+        </section>
+
+        {/* SHIPPING / TRACKING — full width, bottom of page */}
+        <section className={`${styles.card} ${styles.shippingCard}`}>
+          <div className={styles.shippingTop}>
             <div className={styles.shippingHeader}>
               <div className={styles.shippingIconWrap}>
                 <FiTruck />
@@ -265,9 +276,7 @@ const OrderDetailView = ({ order, justPlaced = false }) => {
               <div>
                 <h3 className={styles.shippingTitle}>Shipping</h3>
                 <span className={styles.shippingSubtitle}>
-                  {shipping?.awbCode
-                    ? "In progress"
-                    : "Preparing your order"}
+                  {shipping?.awbCode ? "In progress" : "Preparing your order"}
                 </span>
               </div>
             </div>
@@ -295,21 +304,21 @@ const OrderDetailView = ({ order, justPlaced = false }) => {
               <div className={styles.pendingNote}>
                 <FiClock className={styles.pendingIcon} />
                 <span>
-                  Courier assignment is in progress. This section updates
-                  automatically once your shipment is picked up.
+                  Courier assignment is in progress. This updates automatically
+                  once your shipment is picked up.
                 </span>
               </div>
             )}
+          </div>
 
-            <div className={styles.timelineWrap}>
-              <OrderStatusTimeline order={order} />
-            </div>
-          </section>
+          <div className={styles.timelineWrap}>
+            <OrderStatusTimeline order={order} />
+          </div>
+        </section>
 
-          <Link to="/orders" className={styles.allOrdersLink}>
-            View all my orders
-          </Link>
-        </div>
+        <Link to="/orders" className={styles.allOrdersLink}>
+          View all my orders <FiArrowRight />
+        </Link>
       </div>
     </div>
   );
