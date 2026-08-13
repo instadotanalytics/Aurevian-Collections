@@ -377,7 +377,7 @@ export default function Collections() {
                         scrollToFilter();
                       }}
                     >
-                      Shop Now <span>→</span>
+                      Shop Now <span></span>
                     </button>
                   </div>
                 </div>
@@ -417,24 +417,6 @@ export default function Collections() {
         </div>
 
         <div className={styles.container}>
-          {/* ---------------- New Collection (UNCHANGED) ---------------- */}
-          <Reveal
-            as="section"
-            className={styles.newCollectionSection}
-            delay={100}
-          >
-            <div className={styles.newCollectionContent}>
-              <span className={styles.newCollectionEyebrow}>
-                New ✦ Collection
-              </span>
-              <h2 className={styles.newCollectionTitle}>Timeless Elegance</h2>
-              <p className={styles.newCollectionDesc}>
-                Each piece is crafted with precision and passion to reflect your
-                unique style.
-              </p>
-            </div>
-          </Reveal>
-
           {/* ---------------- Mobile Filter Toggle Button ---------------- */}
           <button
             type="button"
@@ -709,7 +691,7 @@ export default function Collections() {
                 className={styles.ctaBtn}
                 onClick={scrollToFilter}
               >
-                Explore the Set <span>→</span>
+                Explore the Set <span></span>
               </button>
             </Reveal>
           </div>
@@ -758,7 +740,7 @@ export default function Collections() {
                 className={styles.ctaBtn}
                 onClick={scrollToFilter}
               >
-                Explore the Collection <span>→</span>
+                Explore the Collection <span></span>
               </button>
             </Reveal>
 

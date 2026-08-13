@@ -7,7 +7,7 @@
 
 .container {
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 100px auto;
   padding: 32px 24px 64px;
 }
 
@@ -63,7 +63,6 @@
   width: 100%;
   aspect-ratio: 1 / 1;
   background: #fff;
-  border-radius: 16px;
   overflow: hidden;
   border: 1px solid rgba(184, 147, 79, 0.15);
 }
@@ -71,7 +70,7 @@
 .mainImage {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: fill;
 }
 
 .discountBadge {
@@ -151,7 +150,7 @@
   flex-shrink: 0;
   width: 72px;
   height: 72px;
-  border-radius: 10px;
+
   overflow: hidden;
   border: 2px solid transparent;
   cursor: pointer;
@@ -186,7 +185,7 @@
 }
 
 .productName {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family:sans-serif;
   font-size: 30px;
   color: #201a10;
   margin: 0;
@@ -275,7 +274,6 @@
   display: flex;
   align-items: center;
   border: 1px solid rgba(184, 147, 79, 0.35);
-  border-radius: 10px;
   overflow: hidden;
 }
 
@@ -314,7 +312,6 @@
   background: linear-gradient(135deg, #d4af6a, #a97d34);
   color: #fff;
   border: none;
-  border-radius: 10px;
   font-weight: 600;
   font-size: 15px;
   cursor: pointer;
@@ -372,14 +369,14 @@
 }
 
 .detailsCard {
-  background: #fff;
+  background: transparent;
   border: 1px solid rgba(184, 147, 79, 0.15);
   border-radius: 16px;
   padding: 24px 28px;
 }
 
 .detailsCard h3 {
-  font-family: Georgia, serif;
+  font-family: sans-serif;
   font-size: 19px;
   color: #201a10;
   margin: 0 0 14px;
@@ -440,7 +437,7 @@
 }
 
 .notFoundWrap h2 {
-  font-family: Georgia, serif;
+  font-family:sans-serif;
   color: #201a10;
   margin: 0;
 }
@@ -469,7 +466,6 @@
   justify-content: center;
   gap: 8px;
   padding: 14px 24px;
-  border-radius: 10px;
   border: 1.5px solid #111;
   background: #fff;
   color: #111;
@@ -484,4 +480,41 @@
 .buyNowBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .purchaseRow {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .qtySelector {
+    flex: 0 0 auto;
+  }
+
+  .qtySelector button {
+    width: 30px;
+    height: 42px;
+  }
+
+  .qtySelector span {
+    width: 28px;
+  }
+
+  .addToCartBtn,
+  .buyNowBtn {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 8px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .addToCartBtn svg,
+  .buyNowBtn svg {
+    font-size: 15px;
+    flex-shrink: 0;
+  }
 }

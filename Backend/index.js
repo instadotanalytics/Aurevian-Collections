@@ -42,6 +42,7 @@ import headerConfigRoutes from "./routes/headerConfigRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import shippingRoutes from "./routes/shippingRoutes.js"; // ✅ NEW
 
 // ✅ IMPORT PRODUCT ROUTES
 console.log("🔧 Importing jewelleryProductRoutes...");
@@ -203,6 +204,7 @@ app.get("/api", (req, res) => {
       cart: "/api/cart",
       wishlist: "/api/wishlist",
       orders: "/api/orders",
+      shipping: "/api/shipping", // ✅ NEW
       health: "/health",
     },
     documentation: "Contact support for API documentation",
@@ -253,6 +255,8 @@ app.use("/api/wishlist", wishlistRoutes);
 console.log("  ✅ /api/wishlist");
 app.use("/api/orders", orderRoutes);
 console.log("  ✅ /api/orders");
+app.use("/api/shipping", shippingRoutes); // ✅ NEW
+console.log("  ✅ /api/shipping");
 
 console.log("\n" + "=".repeat(60));
 console.log("✅ ALL ROUTES REGISTERED");
@@ -385,6 +389,9 @@ const server = app.listen(PORT, () => {
   console.log(
     `💳 Razorpay: ${process.env.RAZORPAY_KEY_ID ? "✅ Configured" : "⚠️ Not configured (mock mode)"}`,
   );
+  console.log(
+    `📦 Shiprocket: ${process.env.SHIPROCKET_EMAIL ? "✅ Configured" : "⚠️ Not configured"}`,
+  );
   console.log("=".repeat(60));
   console.log("📌 Available Routes:");
   console.log("  🔹 /api/auth - Authentication");
@@ -402,6 +409,7 @@ const server = app.listen(PORT, () => {
   console.log("  🔹 /api/cart - Cart");
   console.log("  🔹 /api/wishlist - Wishlist");
   console.log("  🔹 /api/orders - Orders");
+  console.log("  🔹 /api/shipping - Shipping (Shiprocket)");
   console.log("  🔹 /health - Health Check");
   console.log("  🔹 /api - API Info");
   console.log("=".repeat(60));

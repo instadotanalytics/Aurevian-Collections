@@ -5,6 +5,7 @@ import { protectSeller } from "../middleware/sellerAuth.js";
 import {
   createRazorpayOrder,
   verifyRazorpayPayment,
+  createCODOrder,
   getMyOrders,
   getOrderById,
   getSellerOrders,
@@ -15,6 +16,7 @@ const router = express.Router();
 
 router.post("/razorpay/create", protect, createRazorpayOrder);
 router.post("/razorpay/verify", protect, verifyRazorpayPayment);
+router.post("/cod/create", protect, createCODOrder); // ✅ NEW
 router.get("/my", protect, getMyOrders);
 
 router.get("/seller/all", protectSeller, getSellerOrders);

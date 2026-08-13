@@ -1,8 +1,15 @@
 
-import React, { useState } from "react";
-import { Mail, Phone, MapPin, ArrowRight } from "lucide-react";
+import React from "react";
+import { Mail, Phone, MapPin } from "lucide-react";
 import styles from "./Footer.module.css";
-import logo from "../../../assets/Aurevianlogo.png";
+import logo from "../../../assets/newlogo1.png";
+import {
+  FaInstagram,
+  FaFacebookF,
+  FaYoutube,
+  FaPinterestP,
+  FaWhatsapp,
+} from "react-icons/fa";
 
 /* ------------------------------------------------------------------
  * Data (mirrors navData.js shape — swap for your real imports:
@@ -48,8 +55,8 @@ const aboutDropdown = [
 ];
 
 const policyLinks = [
-  { id: "shipping", label: "Shipping Policy", path: "/policies/shipping" },
-  { id: "returns", label: "Returns & Exchange", path: "/policies/returns" },
+  
+
   { id: "privacy", label: "Privacy Policy", path: "/policies/privacy" },
   { id: "terms", label: "Terms of Service", path: "/policies/terms" },
 ];
@@ -61,34 +68,29 @@ const policyLinks = [
  * "does not provide an export" crash regardless of the installed
  * lucide-react version.
  * ------------------------------------------------------------------ */
-const InstagramIcon = (props) => (
-  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" {...props}>
-    <rect x="3" y="3" width="18" height="18" rx="5" />
-    <circle cx="12" cy="12" r="4" />
-    <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
-  </svg>
-);
 
-const FacebookIcon = (props) => (
-  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" {...props}>
-    <path d="M14 9h2V6h-2c-1.66 0-3 1.34-3 3v2H9v3h2v6h3v-6h2.2l.8-3H14V9.5c0-.28.22-.5.5-.5H14z" />
-  </svg>
-);
-
-const YoutubeIcon = (props) => (
-  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" {...props}>
-    <rect x="2.5" y="6" width="19" height="12" rx="3" />
-    <path d="M10.5 9.5l5 2.5-5 2.5v-5z" fill="currentColor" stroke="none" />
-  </svg>
-);
 
 const socialIcons = [
   {
-    Icon: InstagramIcon,
-    href: "https://www.instagram.com/aureviancollections?igsh=bDc1NHBlcWJxeG5o&utm_source=qr",
+    Icon: FaInstagram,
+    href: "https://www.instagram.com/aureviancollections.in?igsh=MWs4a2diMjF0MTA2Yg==",
   },
-  { Icon: FacebookIcon, href: "#" },
-  { Icon: YoutubeIcon, href: "#" },
+  {
+    Icon: FaFacebookF,
+    href: "https://www.facebook.com/profile.php?id=61592830934451",
+  },
+  {
+    Icon: FaYoutube,
+    href: "https://www.youtube.com/@AurevianCollections",
+  },
+  {
+    Icon: FaPinterestP,
+    href: "https://pin.it/7a79gBqeR",
+  },
+  {
+    Icon: FaWhatsapp,
+    href: "https://wa.link/gui67i",
+  },
 ];
 
 function ChainDivider() {
@@ -118,20 +120,9 @@ function FooterLink({ href, children }) {
 }
 
 export default function Footer() {
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
-
-  const handleSubscribe = (e) => {
-    e.preventDefault();
-    if (!email.trim()) return;
-    setSubscribed(true);
-    setEmail("");
-    setTimeout(() => setSubscribed(false), 3500);
-  };
-
   return (
     <footer className={styles.footer}>
-      <div className={styles.topLine} />
+      
 
       <div className={styles.container}>
         <div className={styles.grid}>
@@ -176,7 +167,7 @@ export default function Footer() {
           </div>
 
           {/* Link columns */}
-          <div className={styles.linkCol}>
+          <div className={`${styles.linkCol} ${styles.shopCol}`}>
             <FooterHeading>Shop</FooterHeading>
             <ul className={styles.linkList}>
               {shopCategories.map((item) => (
@@ -187,7 +178,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div className={styles.linkCol}>
+          <div className={`${styles.linkCol} ${styles.collectionsCol}`}>
             <FooterHeading>Collections</FooterHeading>
             <ul className={styles.linkList}>
               {collectionsDropdown.map((item) => (
@@ -198,7 +189,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div className={styles.linkCol}>
+          <div className={`${styles.linkCol} ${styles.giftCol}`}>
             <FooterHeading>Gift Guide</FooterHeading>
             <ul className={styles.linkList}>
               {giftGuide.byOccasion.map((item) => (
@@ -212,25 +203,6 @@ export default function Footer() {
                 </FooterLink>
               ))}
             </ul>
-          </div>
-
-          {/* Newsletter */}
-          <div className={styles.linkCol}>
-            <FooterHeading>Stay In Touch</FooterHeading>
-            <p className={styles.newsletterText}>New arrivals, first look.</p>
-            <form onSubmit={handleSubscribe} className={styles.newsletterForm}>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Your email"
-                className={styles.emailInput}
-              />
-              <button type="submit" className={styles.subscribeBtn}>
-                {subscribed ? "Subscribed" : "Subscribe"}
-                {!subscribed && <ArrowRight size={13} />}
-              </button>
-            </form>
           </div>
         </div>
 
@@ -254,9 +226,7 @@ export default function Footer() {
       </div>
 
       {/* decorative chain link divider */}
-      <div className={styles.chainStrip}>
-        <ChainDivider />
-      </div>
+      
 
       {/* bottom bar */}
       <div className={styles.bottomBar}>
@@ -264,13 +234,7 @@ export default function Footer() {
           <p className={styles.copyright}>
             © {new Date().getFullYear()} Aurevian. All rights reserved.
           </p>
-          <div className={styles.paymentRow}>
-            {["Visa", "Mastercard", "UPI", "RuPay"].map((method) => (
-              <span key={method} className={styles.paymentTag}>
-                {method}
-              </span>
-            ))}
-          </div>
+          
         </div>
       </div>
     </footer>

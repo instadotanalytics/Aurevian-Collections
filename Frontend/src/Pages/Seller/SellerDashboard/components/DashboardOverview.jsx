@@ -3,11 +3,18 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { FiAlertTriangle, FiArrowRight, FiCheckCircle } from "react-icons/fi";
+import {
+  FiAlertTriangle,
+  FiArrowRight,
+  FiCheckCircle,
+  FiPackage,
+  FiShoppingBag,
+  FiDollarSign,
+  FiTrendingUp,
+} from "react-icons/fi";
 
 import StatsCard from "./StatsCard";
 import RecentOrders from "./RecentOrders";
-import RecentActivities from "./RecentActivities";
 import QuickActions from "./QuickActions";
 
 import {
@@ -22,8 +29,9 @@ import styles from "./DashboardOverview.module.css";
 const DashboardOverview = () => {
   const dispatch = useDispatch();
 
-  const { seller, dashboardStats, recentOrders, recentActivities } =
-    useSelector((state) => state.seller);
+  const { seller, dashboardStats, recentOrders } = useSelector(
+    (state) => state.seller,
+  );
 
   useEffect(() => {
     dispatch(fetchSellerDashboard());
@@ -71,15 +79,12 @@ const DashboardOverview = () => {
 
       <div className={styles.header}>
         <div>
-          
-
           <p className={styles.subtitle}>
             Track your store's performance and manage your business.
           </p>
         </div>
 
         <div className={styles.headerActions}>
-         
           <div className={styles.storeStatus}>
             <span
               className={`${styles.statusDot} ${
@@ -107,43 +112,29 @@ const DashboardOverview = () => {
         <StatsCard
           title="Total Products"
           value={dashboardStats?.totalProducts || 0}
-          icon="📦"
+          icon={<FiPackage />}
           color="#6366f1"
         />
 
         <StatsCard
           title="Total Orders"
           value={dashboardStats?.totalOrders || 0}
-          icon="🛍️"
+          icon={<FiShoppingBag />}
           color="#f59e0b"
         />
 
         <StatsCard
           title="Revenue"
           value={`₹${dashboardStats?.totalRevenue || 0}`}
-          icon="💰"
+          icon={<FiDollarSign />}
           color="#10b981"
         />
 
         <StatsCard
           title="Sales"
           value={dashboardStats?.totalSales || 0}
-          icon="📈"
+          icon={<FiTrendingUp />}
           color="#ec4899"
-        />
-
-        <StatsCard
-          title="Rating"
-          value={dashboardStats?.rating?.toFixed(1) || "0.0"}
-          icon="⭐"
-          color="#8b5cf6"
-        />
-
-        <StatsCard
-          title="Wallet"
-          value={`₹${dashboardStats?.walletBalance || 0}`}
-          icon="💳"
-          color="#06b6d4"
         />
       </div>
 
@@ -156,8 +147,6 @@ const DashboardOverview = () => {
 
         <div className={styles.rightColumn}>
           <QuickActions />
-
-          <RecentActivities activities={recentActivities} />
         </div>
       </div>
     </div>

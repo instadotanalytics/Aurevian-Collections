@@ -41,8 +41,14 @@ const Cart = () => {
     (total, item) => total + item.price * item.quantity,
     0,
   );
-  const shipping = subtotal > 5000 || subtotal === 0 ? 0 : 49;
-  const total = subtotal + shipping;
+
+  // ✅ FIXED: this used to be
+  //   const shipping = subtotal > 5000 || subtotal === 0 ? 0 : 49;
+  // — a fake fee shown before any address existed. The cart page has no
+  // delivery pincode to give Shiprocket, so it has no basis for a shipping
+  // number at all. Shipping is calculated for real at checkout, once a
+  // pincode exists. This page shows items-only total and says so.
+  const total = subtotal;
 
   const updateQuantity = (productId, newQuantity) => {
     if (newQuantity < 1) return;
@@ -307,9 +313,14 @@ const Cart = () => {
                 </span>
               </div>
 
+              {/* ✅ FIXED: no fee shown here — the cart has no delivery
+                  pincode, so there is nothing real to show. Shiprocket
+                  quotes shipping at checkout once an address exists. */}
               <div className={styles.summaryRow}>
                 <span>Shipping</span>
-                <span>{shipping === 0 ? "Free" : `₹${shipping}`}</span>
+                <span className={styles.shippingAtCheckout}>
+                  Calculated at checkout
+                </span>
               </div>
 
               <div className={styles.totalRow}>
@@ -319,6 +330,9 @@ const Cart = () => {
                   {total.toLocaleString("en-IN")}
                 </span>
               </div>
+              <p className={styles.totalCaveat}>
+                Shipping added at checkout based on your delivery location
+              </p>
 
               <button
                 className={styles.checkoutButton}
@@ -331,8 +345,12 @@ const Cart = () => {
                 <div className={styles.trustCard}>
                   <FiTruck className={styles.trustIcon} />
                   <div className={styles.trustInfo}>
-                    <h4>Free Shipping</h4>
-                    <p>Free shipping for order above ₹5000</p>
+                    {/* ✅ FIXED: the old copy ("Free shipping above ₹5000")
+                        promised a threshold the backend no longer honors —
+                        shipping now comes from live courier rates, not order
+                        value. Left this accurate instead of overpromising. */}
+                    <h4>Reliable Delivery</h4>
+                    <p>Shipping calculated for your exact location</p>
                   </div>
                 </div>
                 <div className={styles.trustCard}>

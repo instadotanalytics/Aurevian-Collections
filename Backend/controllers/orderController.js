@@ -3,6 +3,13 @@ import Order from "../models/Order.js";
 import Cart from "../models/Cart.js";
 import JewelleryProduct from "../models/JewelleryProduct.js";
 import razorpayService from "../services/razorpayService.js";
+import {
+  createShipmentForOrder,
+  calculateShippingRate,
+  getItemWeightKg,
+  isValidIndianPincode,
+  ShippingUnavailableError,
+} from "./shippingController.js";
 
 const getProductSnapshot = (product) => {
   const name = product.productName || "Product";
@@ -18,6 +25,123 @@ const getProductSnapshot = (product) => {
 const generateOrderNumber = () =>
   `AUR${Date.now()}${Math.floor(Math.random() * 900 + 100)}`;
 
+const buildOrderItemsAndTotals = async (items) => {
+  const orderItems = [];
+  let itemsTotal = 0;
+  let totalWeightKg = 0;
+
+  for (const it of items) {
+    const product = await JewelleryProduct.findOne({
+      _id: it.productId,
+      status: "Published",
+      isActive: true,
+    });
+
+    if (!product) {
+      const err = new Error(`Product not found: ${it.productId}`);
+      err.status = 404;
+      throw err;
+    }
+
+    const snap = getProductSnapshot(product);
+    const quantity = Math.max(1, Number(it.quantity) || 1);
+
+    if (snap.stock !== undefined && quantity > snap.stock) {
+      const err = new Error(
+        `Only ${snap.stock} unit(s) of "${snap.name}" available`,
+      );
+      err.status = 400;
+      throw err;
+    }
+
+    const subtotal = snap.price * quantity;
+    itemsTotal += subtotal;
+    totalWeightKg += getItemWeightKg(product) * quantity;
+
+    orderItems.push({
+      product: product._id,
+      seller: snap.seller,
+      name: snap.name,
+      image: snap.image,
+      slug: snap.slug,
+      price: snap.price,
+      quantity,
+      subtotal,
+    });
+  }
+
+  return { orderItems, itemsTotal, totalWeightKg };
+};
+
+const resolveShippingFee = async ({ pincode, weightKg, paymentMethod }) => {
+  try {
+    const rate = await calculateShippingRate({
+      deliveryPincode: pincode,
+      weightKg,
+      paymentMethod,
+    });
+    return rate.shippingFee;
+  } catch (err) {
+    if (err instanceof ShippingUnavailableError) {
+      const e = new Error(err.message);
+      e.status = 400;
+      throw e;
+    }
+    const e = new Error(
+      err.message ||
+        "Unable to calculate shipping right now. Please try again.",
+    );
+    e.status = err.status || err.statusCode || 502;
+    throw e;
+  }
+};
+
+const finalizeInventoryAndCart = async (order, userId) => {
+  for (const item of order.items) {
+    try {
+      const product = await JewelleryProduct.findById(item.product);
+      if (!product) continue;
+      product.inventory.stockQuantity = Math.max(
+        0,
+        product.inventory.stockQuantity - item.quantity,
+      );
+      if (product.inventory.stockQuantity <= 0) {
+        product.inventory.availability = "Out of Stock";
+      }
+      product.reviews.totalSold =
+        (product.reviews?.totalSold || 0) + item.quantity;
+      await product.save();
+    } catch (e) {
+      console.error("⚠️ Stock decrement failed:", e.message);
+    }
+  }
+
+  try {
+    const cart = await Cart.findOne({ user: userId });
+    if (cart) {
+      const orderedIds = order.items.map((i) => i.product.toString());
+      cart.items = cart.items.filter(
+        (i) => !orderedIds.includes(i.product.toString()),
+      );
+      await cart.save();
+    }
+  } catch (e) {
+    console.error("⚠️ Cart cleanup failed:", e.message);
+  }
+};
+
+const validateShippingAddress = (shippingAddress) => {
+  return !!(
+    shippingAddress &&
+    shippingAddress.fullName &&
+    shippingAddress.phone &&
+    shippingAddress.addressLine1 &&
+    shippingAddress.city &&
+    shippingAddress.state &&
+    isValidIndianPincode(shippingAddress.pincode)
+  );
+};
+
 export const createRazorpayOrder = async (req, res) => {
   try {
     const userId = req.user._id || req.user.id;
@@ -28,69 +152,37 @@ export const createRazorpayOrder = async (req, res) => {
         .status(400)
         .json({ success: false, message: "No items to order" });
     }
-    if (
-      !shippingAddress ||
-      !shippingAddress.fullName ||
-      !shippingAddress.phone ||
-      !shippingAddress.addressLine1 ||
-      !shippingAddress.city ||
-      !shippingAddress.state ||
-      !shippingAddress.pincode
-    ) {
+    if (!validateShippingAddress(shippingAddress)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Complete shipping address with a valid 6-digit pincode is required",
+      });
+    }
+
+    let orderItems, itemsTotal, totalWeightKg;
+    try {
+      ({ orderItems, itemsTotal, totalWeightKg } =
+        await buildOrderItemsAndTotals(items));
+    } catch (e) {
       return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Complete shipping address is required",
-        });
+        .status(e.status || 400)
+        .json({ success: false, message: e.message });
     }
 
-    const orderItems = [];
-    let itemsTotal = 0;
-
-    for (const it of items) {
-      const product = await JewelleryProduct.findOne({
-        _id: it.productId,
-        status: "Published",
-        isActive: true,
+    let shippingFee;
+    try {
+      shippingFee = await resolveShippingFee({
+        pincode: shippingAddress.pincode,
+        weightKg: totalWeightKg,
+        paymentMethod: "prepaid",
       });
-
-      if (!product) {
-        return res
-          .status(404)
-          .json({
-            success: false,
-            message: `Product not found: ${it.productId}`,
-          });
-      }
-      const snap = getProductSnapshot(product);
-      const quantity = Math.max(1, Number(it.quantity) || 1);
-
-      if (snap.stock !== undefined && quantity > snap.stock) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: `Only ${snap.stock} unit(s) of "${snap.name}" available`,
-          });
-      }
-
-      const subtotal = snap.price * quantity;
-      itemsTotal += subtotal;
-
-      orderItems.push({
-        product: product._id,
-        seller: snap.seller,
-        name: snap.name,
-        image: snap.image,
-        slug: snap.slug,
-        price: snap.price,
-        quantity,
-        subtotal,
-      });
+    } catch (e) {
+      return res
+        .status(e.status || 502)
+        .json({ success: false, message: e.message });
     }
 
-    const shippingFee = itemsTotal > 5000 ? 0 : 49;
     const totalAmount = itemsTotal + shippingFee;
 
     const order = await Order.create({
@@ -107,6 +199,7 @@ export const createRazorpayOrder = async (req, res) => {
       itemsTotal,
       shippingFee,
       totalAmount,
+      paymentMethod: "razorpay",
       paymentStatus: "pending",
       orderStatus: "placed",
     });
@@ -120,12 +213,10 @@ export const createRazorpayOrder = async (req, res) => {
 
     if (!rzpResult.success) {
       await Order.findByIdAndDelete(order._id);
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: rzpResult.error || "Payment order creation failed",
-        });
+      return res.status(500).json({
+        success: false,
+        message: rzpResult.error || "Payment order creation failed",
+      });
     }
 
     order.razorpay = { orderId: rzpResult.order.id };
@@ -141,18 +232,18 @@ export const createRazorpayOrder = async (req, res) => {
         amount: rzpResult.order.amount,
         currency: rzpResult.order.currency,
         mock: !!rzpResult.mock,
+        itemsTotal,
+        shippingFee,
         totalAmount,
       },
     });
   } catch (error) {
     console.error("❌ Create Razorpay order error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to create order",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to create order",
+      error: error.message,
+    });
   }
 };
 
@@ -201,54 +292,118 @@ export const verifyRazorpayPayment = async (req, res) => {
     };
     await order.save();
 
-    for (const item of order.items) {
-      try {
-        const product = await JewelleryProduct.findById(item.product);
-        if (!product) continue;
-        product.inventory.stockQuantity = Math.max(
-          0,
-          product.inventory.stockQuantity - item.quantity,
-        );
-        if (product.inventory.stockQuantity <= 0) {
-          product.inventory.availability = "Out of Stock";
-        }
-        product.reviews.totalSold =
-          (product.reviews?.totalSold || 0) + item.quantity;
-        await product.save();
-      } catch (e) {
-        console.error("⚠️ Stock decrement failed:", e.message);
-      }
-    }
+    await finalizeInventoryAndCart(order, userId);
 
     try {
-      const cart = await Cart.findOne({ user: userId });
-      if (cart) {
-        const orderedIds = order.items.map((i) => i.product.toString());
-        cart.items = cart.items.filter(
-          (i) => !orderedIds.includes(i.product.toString()),
-        );
-        await cart.save();
-      }
-    } catch (e) {
-      console.error("⚠️ Cart cleanup failed:", e.message);
+      await createShipmentForOrder(order._id);
+    } catch (shipErr) {
+      console.error(
+        `⚠️ Shiprocket shipment creation failed for order ${order.orderNumber}:`,
+        shipErr.message,
+      );
     }
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Payment verified successfully",
-        data: order,
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Payment verified successfully",
+      data: order,
+    });
   } catch (error) {
     console.error("❌ Verify payment error:", error);
-    return res
-      .status(500)
-      .json({
+    return res.status(500).json({
+      success: false,
+      message: "Payment verification failed",
+      error: error.message,
+    });
+  }
+};
+
+export const createCODOrder = async (req, res) => {
+  try {
+    const userId = req.user._id || req.user.id;
+    const { items, shippingAddress } = req.body;
+
+    if (!items || !items.length) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No items to order" });
+    }
+    if (!validateShippingAddress(shippingAddress)) {
+      return res.status(400).json({
         success: false,
-        message: "Payment verification failed",
-        error: error.message,
+        message:
+          "Complete shipping address with a valid 6-digit pincode is required",
       });
+    }
+
+    let orderItems, itemsTotal, totalWeightKg;
+    try {
+      ({ orderItems, itemsTotal, totalWeightKg } =
+        await buildOrderItemsAndTotals(items));
+    } catch (e) {
+      return res
+        .status(e.status || 400)
+        .json({ success: false, message: e.message });
+    }
+
+    let shippingFee;
+    try {
+      shippingFee = await resolveShippingFee({
+        pincode: shippingAddress.pincode,
+        weightKg: totalWeightKg,
+        paymentMethod: "cod",
+      });
+    } catch (e) {
+      return res
+        .status(e.status || 502)
+        .json({ success: false, message: e.message });
+    }
+
+    const totalAmount = itemsTotal + shippingFee;
+
+    const order = await Order.create({
+      orderNumber: generateOrderNumber(),
+      user: userId,
+      customerName:
+        req.user.fullName ||
+        `${req.user.firstName || ""} ${req.user.lastName || ""}`.trim() ||
+        shippingAddress.fullName,
+      customerEmail: req.user.email,
+      customerPhone: req.user.phone || shippingAddress.phone,
+      items: orderItems,
+      shippingAddress,
+      itemsTotal,
+      shippingFee,
+      totalAmount,
+      paymentMethod: "cod",
+      paymentStatus: "pending",
+      orderStatus: "processing",
+      placedAt: new Date(),
+    });
+
+    await finalizeInventoryAndCart(order, userId);
+
+    try {
+      await createShipmentForOrder(order._id);
+    } catch (shipErr) {
+      console.error(
+        `⚠️ Shiprocket shipment creation failed for COD order ${order.orderNumber}:`,
+        shipErr.message,
+      );
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: "Order placed (Cash on Delivery)",
+      data: order,
+    });
+  } catch (error) {
+    console.error("❌ Create COD order error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to place order",
+      error: error.message,
+    });
   }
 };
 
@@ -259,13 +414,11 @@ export const getMyOrders = async (req, res) => {
     return res.status(200).json({ success: true, data: orders });
   } catch (error) {
     console.error("❌ Get my orders error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to fetch orders",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch orders",
+      error: error.message,
+    });
   }
 };
 
@@ -280,13 +433,11 @@ export const getOrderById = async (req, res) => {
     return res.status(200).json({ success: true, data: order });
   } catch (error) {
     console.error("❌ Get order error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to fetch order",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch order",
+      error: error.message,
+    });
   }
 };
 
@@ -299,7 +450,6 @@ export const getSellerOrders = async (req, res) => {
         .json({ success: false, message: "Seller authentication required" });
     }
 
-    // Only show orders that have completed/attempted payment, newest first
     const orders = await Order.find({
       "items.seller": sellerId,
       paymentStatus: { $in: ["paid", "pending", "failed"] },
@@ -325,6 +475,7 @@ export const getSellerOrders = async (req, res) => {
         sellerSubtotal,
         paymentStatus: order.paymentStatus,
         orderStatus: order.orderStatus,
+        shipping: order.shipping,
         createdAt: order.createdAt,
       };
     });
@@ -332,15 +483,32 @@ export const getSellerOrders = async (req, res) => {
     return res.status(200).json({ success: true, data: shaped });
   } catch (error) {
     console.error("❌ Get seller orders error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to fetch orders",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch orders",
+      error: error.message,
+    });
   }
 };
+
+// ✅ NEW: statuses that only make sense once Shiprocket has actually
+// created a shipment for this order. This is the fix for the reported bug:
+// a seller could previously set orderStatus to "ready_to_ship" (or
+// shipped/delivered/etc.) from the dashboard dropdown with zero validation,
+// even while shipping.status was "CREATE_FAILED" and no Shiprocket
+// shipment existed — producing exactly the inconsistent state reported
+// (paymentStatus: paid, orderStatus: ready_to_ship, shipping.status:
+// CREATE_FAILED). These statuses should only be reachable via the
+// Shiprocket webhook or the internal shipping pipeline (schedulePickup,
+// etc.), which already require shipping.awbCode/shipmentId to exist before
+// touching orderStatus.
+const SHIPMENT_DEPENDENT_STATUSES = [
+  "ready_to_ship",
+  "shipped",
+  "in_transit",
+  "out_for_delivery",
+  "delivered",
+];
 
 export const updateOrderStatus = async (req, res) => {
   try {
@@ -350,8 +518,14 @@ export const updateOrderStatus = async (req, res) => {
     const validStatuses = [
       "placed",
       "processing",
+      "ready_to_ship",
       "shipped",
+      "in_transit",
+      "out_for_delivery",
       "delivered",
+      "rto",
+      "return_initiated",
+      "returned",
       "cancelled",
     ];
     if (!validStatuses.includes(status)) {
@@ -366,6 +540,20 @@ export const updateOrderStatus = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Order not found" });
 
+    // ✅ NEW: reject manual writes into a shipment-dependent status when no
+    // Shiprocket shipment actually exists for this order yet.
+    if (
+      SHIPMENT_DEPENDENT_STATUSES.includes(status) &&
+      !order.shipping?.shipmentId
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot set order status to "${status}" — no Shiprocket shipment exists yet for this order (shipping.status: ${
+          order.shipping?.status || "none"
+        }). Resolve the Shiprocket shipment creation issue first.`,
+      });
+    }
+
     order.orderStatus = status;
     await order.save();
 
@@ -374,12 +562,10 @@ export const updateOrderStatus = async (req, res) => {
       .json({ success: true, message: "Order status updated", data: order });
   } catch (error) {
     console.error("❌ Update order status error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to update order status",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update order status",
+      error: error.message,
+    });
   }
 };

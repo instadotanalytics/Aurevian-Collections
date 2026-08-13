@@ -1,22 +1,25 @@
 
 /* ------------------------------------------------------------------
  * Footer.module.css
- * Aurevian — black / white / gold luxury jewellery footer
+ * Aurevian — cream / dark-text / gold footer, matched to header
  * ------------------------------------------------------------------ */
 
 .footer {
-  --ink: #0b0b0c;
-  --ink-soft: #151516;
-  --paper: #f6f4ee;
-  --muted: #9c9a92;
-  --muted-2: #8f8d85;
-  --line: #3a3630;
-  --line-soft: #2a2723;
-  --gold: #c9a24b;
-  --gold-light: #e9d9a8;
-  --gold-deep: #8a6d2f;
+  /* Same palette as the header (warm cream bg, dark ink text) */
+  --header-bg: #f2e6d3;
+  --ink: #2a2620;
+  --ink-soft: #ece0cb;
+  --paper: #2a2620;
+  --muted: #6f6555;
+  --muted-2: #7c7264;
+  --line: rgba(42, 38, 32, 0.18);
+  --line-soft: rgba(42, 38, 32, 0.12);
+  --gold: #a9812f;
+  --gold-light: #8a6a26;
+  --gold-deep: #7a5e22;
 
-  background-color: var(--ink);
+   background: transparent;
+  color: var(--ink);
   color: var(--paper);
   position: relative;
   font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -35,36 +38,44 @@
 }
 
 .container {
-  max-width: 1280px;
-  margin: 0 auto;
+  max-width: 1200px;
+  margin: 0px auto;
   padding: 64px 24px 40px;
+}
+
+@media (max-width: 767px) {
+  .container {
+    /* extra room at the bottom so content doesn't sit under the
+       fixed pill bottom-nav on mobile */
+    padding: 48px 20px 24px;
+  }
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
   gap: 32px 32px;
 }
 
 @media (max-width: 767px) {
   .grid {
-    grid-template-columns: 1fr;
-    gap: 48px;
+    grid-template-columns: 1fr 1fr;
+    gap: 36px 24px;
   }
 }
 
 /* ---- Brand column ---- */
 .brandCol {
-  grid-column: span 4;
+  grid-column: span 1;
 }
 @media (max-width: 767px) {
   .brandCol {
-    grid-column: span 1;
+    grid-column: span 2;
   }
 }
 
 /* Logo — real brand mark, swapped in for the old Gem-icon + text
-   lockup. Sits on the dark footer background, so a soft brightness
+   lockup. Sits on the footer background, so a soft brightness
    lift on hover gives the same "alive" feel the old hover state had. */
 .logoRow {
   display: inline-flex;
@@ -73,24 +84,23 @@
 }
 
 .logoImage {
-  height: 40px;
+  height: 60px;
   width: auto;
   display: block;
   object-fit: contain;
-  filter: brightness(1.05);
-  transition: transform 0.35s ease, filter 0.35s ease;
+  transition: transform 0.35s ease, opacity 0.35s ease;
 }
 
 .logoRow:hover .logoImage {
   transform: scale(1.03);
-  filter: brightness(1.15);
+  opacity: 0.85;
 }
 
 .tagline {
   font-size: 14px;
   line-height: 1.6;
   color: var(--muted);
-  max-width: 280px;
+  max-width: 320px;
 }
 
 .contactList {
@@ -99,7 +109,7 @@
   flex-direction: column;
   gap: 10px;
   font-size: 14px;
-  color: #a9a79f;
+  color: var(--ink);
 }
 
 .contactItem {
@@ -135,20 +145,27 @@
 
 .socialBtn:hover {
   border-color: var(--gold);
-  background-color: rgba(201, 162, 75, 0.08);
+  background-color: rgba(169, 129, 47, 0.1);
 }
 
 .socialBtn svg {
-  color: var(--gold-light);
+  color: var(--gold-deep);
 }
 
 /* ---- Link columns ---- */
 .linkCol {
-  grid-column: span 2;
+  grid-column: span 1;
 }
+
+/* Mobile: Shop + Collections sit side by side (2-col row),
+   Gift Guide takes its own full-width row underneath. */
 @media (max-width: 767px) {
-  .linkCol {
+  .shopCol,
+  .collectionsCol {
     grid-column: span 1;
+  }
+  .giftCol {
+    grid-column: span 2;
   }
 }
 
@@ -157,7 +174,7 @@
   text-transform: uppercase;
   letter-spacing: 0.18em;
   font-weight: 600;
-  color: var(--gold-light);
+  color: var(--gold-deep);
   margin: 0 0 20px;
 }
 
@@ -172,71 +189,36 @@
 
 .linkItem a {
   font-size: 14px;
-  color: #c9c8c2;
+  color: var(--ink);
   text-decoration: none;
   transition: color 0.25s ease;
 }
 
 .linkItem a:hover {
-  color: var(--gold-light);
-}
-
-/* ---- Newsletter ---- */
-.newsletterText {
-  font-size: 14px;
-  color: #a9a79f;
-  margin: 0 0 16px;
-}
-
-.newsletterForm {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.emailInput {
-  font-size: 14px;
-  padding: 10px 12px;
-  background: transparent;
-  border: 1px solid var(--line);
-  color: var(--paper);
-  outline: none;
-  transition: border-color 0.25s ease;
-}
-
-.emailInput:focus {
-  border-color: var(--gold);
-}
-
-.subscribeBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  padding: 11px;
-  border: none;
-  cursor: pointer;
-  color: var(--ink);
-  background-image: linear-gradient(90deg, var(--gold-deep), var(--gold-light));
-  transition: opacity 0.3s ease;
-}
-
-.subscribeBtn:hover {
-  opacity: 0.9;
+  color: var(--gold-deep);
 }
 
 /* ---- About / policy row ---- */
 .metaRow {
-  margin-top: 56px;
-  padding-top: 32px;
+ margin-top: 13px;
+  padding-top: 15px;
   border-top: 1px solid var(--line-soft);
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 24px;
+  gap: 30px;
+}
+
+@media (max-width: 767px) {
+  .metaRow {
+    /* was crashing into the Gift Guide column above it — give it
+       real breathing room and stack the two link groups */
+    margin-top: 40px;
+    padding-top: 28px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
 }
 
 .metaLinks {
@@ -245,17 +227,23 @@
   gap: 8px 24px;
 }
 
+@media (max-width: 767px) {
+  .metaLinks {
+    gap: 10px 16px;
+  }
+}
+
 .metaLinks a {
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--muted-2);
+color: var(--paper);
   text-decoration: none;
   transition: color 0.25s ease;
 }
 
 .metaLinks a:hover {
-  color: var(--gold-light);
+  color: var(--gold-deep);
 }
 
 /* ---- Chain divider (signature element) ---- */
@@ -264,11 +252,37 @@
   background-color: var(--ink-soft);
 }
 
+@media (max-width: 767px) {
+  .chainStrip {
+    padding: 16px 0;
+    overflow: hidden;
+  }
+}
+
 .chainRow {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 767px) {
+  .chainRow {
+    /* 40 links wrapping into several rows looked messy on narrow
+       screens — keep it a single scrollable strip instead */
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    gap: 9px;
+    padding: 0 20px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .chainRow::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .chainLink {
@@ -276,10 +290,11 @@
   width: 5px;
   height: 5px;
   transform: rotate(45deg);
+  flex-shrink: 0;
 }
 
 .chainLink.bright {
-  background-color: var(--gold-light);
+  background-color: var(--gold-deep);
   opacity: 1;
 }
 
@@ -291,6 +306,14 @@
 /* ---- Bottom bar ---- */
 .bottomBar {
   background-color: var(--ink-soft);
+}
+
+@media (max-width: 767px) {
+  .bottomBar {
+    /* clears the fixed pill bottom-nav so copyright/payment tags
+       aren't hidden behind it */
+    padding-bottom: 84px;
+  }
 }
 
 .bottomInner {
@@ -310,16 +333,33 @@
   }
 }
 
+@media (max-width: 767px) {
+  .bottomInner {
+    padding: 20px 20px 0;
+    gap: 14px;
+    text-align: center;
+  }
+}
+
 .copyright {
   font-size: 12px;
-  color: #7d7b73;
+  color: var(--muted);
   margin: 0;
+  padding-left: 500px;
 }
 
 .paymentRow {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+@media (max-width: 767px) {
+  .paymentRow {
+    gap: 8px;
+  }
 }
 
 .paymentTag {
@@ -329,4 +369,11 @@
   border-radius: 2px;
   letter-spacing: 0.05em;
   color: var(--muted);
+}
+
+@media (max-width: 767px) {
+  .paymentTag {
+    font-size: 9px;
+    padding: 3px 8px;
+  }
 }

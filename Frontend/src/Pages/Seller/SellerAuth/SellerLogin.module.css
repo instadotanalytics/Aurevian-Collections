@@ -29,7 +29,7 @@
    MOBILE FIRST — BASE LAYOUT
    ============================================ */
 .page {
-  min-height: 100vh;
+  min-height: 90vh;
   background:
     radial-gradient(circle at 100% 0%, rgba(201, 162, 39, 0.08) 0%, transparent 55%),
     radial-gradient(circle at 0% 100%, rgba(201, 162, 39, 0.06) 0%, transparent 55%),
@@ -37,7 +37,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 20px 14px 40px;
+  padding: 108px 0 40px;
 }
 
 .container {
@@ -66,7 +66,7 @@
   width: 100%;
   height: 240px;
   flex-shrink: 0;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  /* border-radius: var(--radius-lg) var(--radius-lg) 0 0; */
   overflow: hidden;
 }
 
@@ -437,7 +437,7 @@
    ============================================ */
 @media (min-width: 600px) {
   .page {
-    padding: 32px 20px 48px;
+    padding: 100px 0 48px;
   }
 
   .imageSection {
@@ -455,7 +455,7 @@
 @media (min-width: 900px) {
   .page {
     align-items: center;
-    min-height: 100vh;
+    min-height: 90vh;
   }
 
   .card {

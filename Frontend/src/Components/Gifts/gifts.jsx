@@ -1,6 +1,6 @@
 // src/Pages/Gifts/Gifts.jsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -35,34 +35,28 @@ const jewelHighlights = [
 ];
 
 /* ---------- Filter data ---------- */
-const occasions = [
-  { name: "Anniversary", count: 14 },
-  { name: "Birthday", count: 22 },
-  { name: "Wedding", count: 12 },
-  { name: "Valentine's Day", count: 9 },
-  { name: "Mother's Day", count: 11 },
-  { name: "Just Because", count: 18 },
+const FILTER_CATEGORIES = [
+  "All",
+  "Anniversary",
+  "Birthday",
+  "Wedding",
+  "Valentine's Day",
+  "Mother's Day",
+  "Just Because",
 ];
 
-const recipients = [
-  { name: "For Her", count: 46 },
-  { name: "For Him", count: 15 },
-  { name: "For Couples", count: 10 },
-  { name: "For Kids", count: 7 },
-];
+const FILTER_RECIPIENTS = ["All", "For Her", "For Him", "For Couples", "For Kids"];
 
-const budgets = [
-  { name: "Under ₹1,000", count: 20 },
-  { name: "₹1,000 – ₹3,000", count: 34 },
-  { name: "₹3,000 – ₹6,000", count: 18 },
-  { name: "Above ₹6,000", count: 6 },
-];
+const FILTER_BUDGETS = ["All", "Under ₹1,000", "₹1,000 – ₹3,000", "₹3,000 – ₹6,000", "Above ₹6,000"];
 
-const promotions = ["Gift Wrapped", "Best Seller", "Trending", "Premium Gift"];
+const FILTER_PROMOTIONS = ["All", "Gift Wrapped", "Best Seller", "Trending", "Premium Gift"];
 
-const availability = [
-  { name: "In Stock", count: 72 },
-  { name: "Out of Stock", count: 4 },
+const FILTER_AVAILABILITY = ["All", "In Stock", "Out of Stock"];
+
+const SORT_OPTIONS = [
+  { value: "latest", label: "Sort by latest" },
+  { value: "price-low", label: "Price: Low to High" },
+  { value: "price-high", label: "Price: High to Low" },
 ];
 
 const testimonials = [
@@ -119,11 +113,25 @@ export default function Gifts() {
     pagination: { page: 1, totalPages: 1, total: 0 },
   };
 
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [selectedFilters, setSelectedFilters] = useState(new Set());
+  // Filter states
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedRecipient, setSelectedRecipient] = useState("All");
+  const [selectedBudget, setSelectedBudget] = useState("All");
+  const [selectedPromotion, setSelectedPromotion] = useState("All");
+  const [selectedAvailability, setSelectedAvailability] = useState("All");
+  const [priceRange, setPriceRange] = useState([0, 8000]);
+  const [sortBy, setSortBy] = useState("latest");
   const [currentPage, setCurrentPage] = useState(1);
-  const [cartLoadingId, setCartLoadingId] = useState(null);
   const itemsPerPage = 8;
+
+  const [cartLoadingId, setCartLoadingId] = useState(null);
+
+  // Mobile filter sheet state
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
+  // Custom dropdown state
+  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+  const sortDropdownRef = useRef(null);
 
   const products = giftsData.products || [];
   const { total, totalPages } = giftsData.pagination || {
@@ -131,22 +139,35 @@ export default function Gifts() {
     totalPages: 1,
   };
 
-  // Fetch products when page changes
+  // Fetch products when filters change
   useEffect(() => {
     dispatch(
       fetchProductsByPlacement({
         placement: "gifts",
         page: currentPage,
         limit: itemsPerPage,
+        categoryId: selectedCategory !== "All" ? selectedCategory : undefined,
+        sort: sortBy || undefined,
       }),
     );
-  }, [dispatch, currentPage]);
+  }, [dispatch, currentPage, selectedCategory, sortBy]);
 
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(fetchWishlist());
     }
   }, [dispatch, isAuthenticated]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target)) {
+        setIsSortDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const requireAuth = () => {
     if (!isAuthenticated) {
@@ -179,27 +200,52 @@ export default function Gifts() {
     }
   };
 
-  const toggleFilter = (type, value) => {
-    const key = `${type}:${value}`;
-    setSelectedFilters((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) {
-        next.delete(key);
-      } else {
-        next.add(key);
-      }
-      return next;
-    });
+  const clearAllFilters = () => {
+    setSelectedCategory("All");
+    setSelectedRecipient("All");
+    setSelectedBudget("All");
+    setSelectedPromotion("All");
+    setSelectedAvailability("All");
+    setPriceRange([0, 8000]);
+    setCurrentPage(1);
   };
 
-  const isSelected = (type, value) => selectedFilters.has(`${type}:${value}`);
+  const openMobileFilter = () => {
+    setIsMobileFilterOpen(true);
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.width = "100%";
+    document.body.style.top = `-${window.scrollY}px`;
+  };
+
+  const closeMobileFilter = () => {
+    const scrollY = document.body.style.top;
+    setIsMobileFilterOpen(false);
+    document.body.style.overflow = "";
+    document.body.style.position = "";
+    document.body.style.width = "";
+    document.body.style.top = "";
+    if (scrollY) {
+      window.scrollTo(0, parseInt(scrollY || "0", 10) * -1);
+    }
+  };
+
+  const handleSortSelect = (value) => {
+    setSortBy(value);
+    setIsSortDropdownOpen(false);
+  };
+
+  const getSortLabel = () => {
+    const option = SORT_OPTIONS.find(opt => opt.value === sortBy);
+    return option ? option.label : "Sort by latest";
+  };
 
   return (
     <>
       <Header />
       <div className={styles.page}>
         <div className={styles.mainContent}>
-          {/* ================= HERO (UNCHANGED) ================= */}
+          {/* ================= HERO ================= */}
           <section className={styles.hero}>
             <img
               src={giftHero}
@@ -208,14 +254,14 @@ export default function Gifts() {
             />
           </section>
 
-          {/* ================= GIFT SHOP BODY (FILTERS + GRID) ================= */}
+          {/* ================= GIFT SHOP BODY ================= */}
           <div className={styles.shopWrap} id="shopSection">
             {/* ---------- Mobile Filter Toggle Button ---------- */}
             <button
               type="button"
               className={styles.filterToggle}
-              onClick={() => setFiltersOpen((prev) => !prev)}
-              aria-expanded={filtersOpen}
+              onClick={openMobileFilter}
+              aria-expanded={isMobileFilterOpen}
             >
               <span className={styles.filterToggleText}>Filter Options</span>
               <span className={styles.filterToggleIcon}>
@@ -224,206 +270,151 @@ export default function Gifts() {
             </button>
 
             {/* ---------- Mobile backdrop ---------- */}
-            {filtersOpen && (
+            {isMobileFilterOpen && (
               <div
                 className={styles.filterOverlay}
-                onClick={() => setFiltersOpen(false)}
+                onClick={closeMobileFilter}
               />
             )}
 
-            {/* ---------- Sidebar / Bottom-sheet Filters ---------- */}
-            <aside
-              className={`${styles.filters} ${
-                filtersOpen ? styles.filtersOpen : ""
-              }`}
-            >
-              <div className={styles.filtersSheetHeader}>
-                <h3 className={styles.filtersHeading}>Filter Options</h3>
-                <button
-                  type="button"
-                  className={styles.filtersClose}
-                  onClick={() => setFiltersOpen(false)}
-                  aria-label="Close filters"
-                >
-                  ✕
-                </button>
+            {/* ---------- Desktop Filter Sidebar ---------- */}
+            <aside className={styles.filters}>
+              <h3 className={styles.filtersHeading}>Filter</h3>
+
+              <div className={styles.filterGroup}>
+                <span className={styles.filterGroupLabel}>Category</span>
+                {FILTER_CATEGORIES.map((cat) => (
+                  <label key={cat} className={styles.filterOption}>
+                    <input
+                      type="radio"
+                      name="category"
+                      checked={selectedCategory === cat}
+                      onChange={() => setSelectedCategory(cat)}
+                    />
+                    {cat}
+                  </label>
+                ))}
               </div>
 
-              <div className={styles.filtersInner}>
-                <div className={styles.filterGroup}>
-                  <h3 className={styles.groupHeading}>By Occasion</h3>
-                  <ul>
-                    {occasions.map((o) => (
-                      <li
-                        key={o.name}
-                        className={
-                          isSelected("occasion", o.name) ? styles.selected : ""
-                        }
-                      >
-                        <label className={styles.checkRow}>
-                          <input
-                            type="checkbox"
-                            checked={isSelected("occasion", o.name)}
-                            onChange={() => toggleFilter("occasion", o.name)}
-                          />
-                          <span className={styles.checkLabel}>{o.name}</span>
-                        </label>
-                        <span className={styles.count}>{o.count}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className={styles.filterGroup}>
-                  <h3 className={styles.groupHeading}>By Recipient</h3>
-                  <ul>
-                    {recipients.map((r) => (
-                      <li
-                        key={r.name}
-                        className={
-                          isSelected("recipient", r.name) ? styles.selected : ""
-                        }
-                      >
-                        <label className={styles.checkRow}>
-                          <input
-                            type="checkbox"
-                            checked={isSelected("recipient", r.name)}
-                            onChange={() => toggleFilter("recipient", r.name)}
-                          />
-                          <span className={styles.checkLabel}>{r.name}</span>
-                        </label>
-                        <span className={styles.count}>{r.count}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className={styles.filterGroup}>
-                  <h3 className={styles.groupHeading}>Price</h3>
-                  <div className={styles.priceSlider}>
-                    <div className={styles.fill}></div>
-                    <div
-                      className={`${styles.handle} ${styles.handleLeft}`}
-                    ></div>
-                    <div
-                      className={`${styles.handle} ${styles.handleRight}`}
-                    ></div>
-                  </div>
-                  <div className={styles.priceValues}>
-                    <span>₹500</span>
-                    <span>₹8,000</span>
-                  </div>
-                </div>
-
-                <div className={styles.filterGroup}>
-                  <h3 className={styles.groupHeading}>By Budget</h3>
-                  <ul>
-                    {budgets.map((b) => (
-                      <li
-                        key={b.name}
-                        className={
-                          isSelected("budget", b.name) ? styles.selected : ""
-                        }
-                      >
-                        <label className={styles.checkRow}>
-                          <input
-                            type="checkbox"
-                            checked={isSelected("budget", b.name)}
-                            onChange={() => toggleFilter("budget", b.name)}
-                          />
-                          <span className={styles.checkLabel}>{b.name}</span>
-                        </label>
-                        <span className={styles.count}>{b.count}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className={styles.filterGroup}>
-                  <h3 className={styles.groupHeading}>By Promotions</h3>
-                  <ul>
-                    {promotions.map((p) => (
-                      <li
-                        key={p}
-                        className={
-                          isSelected("promotion", p) ? styles.selected : ""
-                        }
-                      >
-                        <label className={styles.checkRow}>
-                          <input
-                            type="checkbox"
-                            checked={isSelected("promotion", p)}
-                            onChange={() => toggleFilter("promotion", p)}
-                          />
-                          <span className={styles.checkLabel}>{p}</span>
-                        </label>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className={styles.filterGroup}>
-                  <h3 className={styles.groupHeading}>Availability</h3>
-                  <ul>
-                    {availability.map((a) => (
-                      <li
-                        key={a.name}
-                        className={
-                          isSelected("availability", a.name)
-                            ? styles.selected
-                            : ""
-                        }
-                      >
-                        <label className={styles.checkRow}>
-                          <input
-                            type="checkbox"
-                            checked={isSelected("availability", a.name)}
-                            onChange={() =>
-                              toggleFilter("availability", a.name)
-                            }
-                          />
-                          <span className={styles.checkLabel}>{a.name}</span>
-                        </label>
-                        <span className={styles.count}>{a.count}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className={styles.promoTags}>
-                  <span>Price: ₹500–₹8,000 ✕</span>
-                  <span>Best Seller ✕</span>
-                  <span>In Stock ✕</span>
-                  <span className={styles.clear}>Clear all</span>
-                </div>
-
-                <button
-                  type="button"
-                  className={styles.applyFilters}
-                  onClick={() => setFiltersOpen(false)}
-                >
-                  Apply Filters
-                </button>
+              <div className={styles.filterGroup}>
+                <span className={styles.filterGroupLabel}>Recipient</span>
+                {FILTER_RECIPIENTS.map((r) => (
+                  <label key={r} className={styles.filterOption}>
+                    <input
+                      type="radio"
+                      name="recipient"
+                      checked={selectedRecipient === r}
+                      onChange={() => setSelectedRecipient(r)}
+                    />
+                    {r}
+                  </label>
+                ))}
               </div>
+
+              <div className={styles.filterGroup}>
+                <span className={styles.filterGroupLabel}>Budget</span>
+                {FILTER_BUDGETS.map((b) => (
+                  <label key={b} className={styles.filterOption}>
+                    <input
+                      type="radio"
+                      name="budget"
+                      checked={selectedBudget === b}
+                      onChange={() => setSelectedBudget(b)}
+                    />
+                    {b}
+                  </label>
+                ))}
+              </div>
+
+              <div className={styles.filterGroup}>
+                <span className={styles.filterGroupLabel}>Price Range</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="8000"
+                  step="100"
+                  value={priceRange[1]}
+                  onChange={(e) => setPriceRange([0, Number(e.target.value)])}
+                  className={styles.filterPriceInput}
+                  style={{ "--_progress": `${(priceRange[1] / 8000) * 100}%` }}
+                />
+                <div className={styles.filterPriceRange}>
+                  <span>₹0</span>
+                  <span>₹{priceRange[1]}</span>
+                </div>
+              </div>
+
+              <div className={styles.filterGroup}>
+                <span className={styles.filterGroupLabel}>Promotions</span>
+                {FILTER_PROMOTIONS.map((p) => (
+                  <label key={p} className={styles.filterOption}>
+                    <input
+                      type="radio"
+                      name="promotion"
+                      checked={selectedPromotion === p}
+                      onChange={() => setSelectedPromotion(p)}
+                    />
+                    {p}
+                  </label>
+                ))}
+              </div>
+
+              <div className={styles.filterGroup}>
+                <span className={styles.filterGroupLabel}>Availability</span>
+                {FILTER_AVAILABILITY.map((a) => (
+                  <label key={a} className={styles.filterOption}>
+                    <input
+                      type="radio"
+                      name="availability"
+                      checked={selectedAvailability === a}
+                      onChange={() => setSelectedAvailability(a)}
+                    />
+                    {a}
+                  </label>
+                ))}
+              </div>
+
+              <button
+                className={styles.filterClearBtn}
+                onClick={clearAllFilters}
+              >
+                Clear All Filters
+              </button>
             </aside>
 
             {/* ---------- Product Listing ---------- */}
-            <main>
+            <main className={styles.productsWrapper}>
               <div className={styles.toolbar}>
                 <span className={styles.resultsCount}>
                   {isLoading
                     ? "Loading..."
-                    : `Showing ${products.length} of ${total} results`}
+                    : `Showing ${products.length} of ${total} products`}
                 </span>
-                <div className={styles.sortWrapper}>
-                  <select className={styles.sortSelect}>
-                    <option>Default Sorting</option>
-                    <option>Price: Low to High</option>
-                    <option>Price: High to Low</option>
-                    <option>Newest</option>
-                    <option>Top Rated</option>
-                  </select>
-                  <FiChevronDown className={styles.sortChevron} />
+                
+                {/* Custom Sort Dropdown */}
+                <div className={styles.sortWrapper} ref={sortDropdownRef}>
+                  <button
+                    className={styles.sortButton}
+                    onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                    aria-expanded={isSortDropdownOpen}
+                  >
+                    <span>{getSortLabel()}</span>
+                    <FiChevronDown className={`${styles.sortChevron} ${isSortDropdownOpen ? styles.sortChevronOpen : ""}`} />
+                  </button>
+                  
+                  {isSortDropdownOpen && (
+                    <div className={styles.sortDropdown}>
+                      {SORT_OPTIONS.map((option) => (
+                        <button
+                          key={option.value}
+                          className={`${styles.sortOption} ${sortBy === option.value ? styles.sortOptionActive : ""}`}
+                          onClick={() => handleSortSelect(option.value)}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -442,7 +433,6 @@ export default function Gifts() {
                   const addingToCart = cartLoadingId === p._id;
                   return (
                     <div className={styles.productCard} key={p._id}>
-                      {/* navigate to product detail page */}
                       <Link
                         to={`/product/${p.productSlug}`}
                         className={styles.productMedia}
@@ -486,7 +476,6 @@ export default function Gifts() {
                         )}
                       </Link>
                       <div className={styles.productInfo}>
-                        {/* product name also links */}
                         <Link
                           to={`/product/${p.productSlug}`}
                           className={styles.productName}
@@ -534,46 +523,43 @@ export default function Gifts() {
               {/* ---------- Pagination ---------- */}
               {totalPages > 1 && (
                 <div className={styles.pagination}>
-                  <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (currentPage > 1) setCurrentPage(currentPage - 1);
-                    }}
+                  <button
+                    className={styles.paginationBtn}
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                    disabled={currentPage === 1}
                   >
                     ‹
-                  </a>
+                  </button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                     (n) => (
-                      <a
+                      <button
                         key={n}
-                        href="#"
-                        className={n === currentPage ? styles.active : ""}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setCurrentPage(n);
-                        }}
+                        className={`${styles.pageBtn} ${
+                          n === currentPage ? styles.activePage : ""
+                        }`}
+                        onClick={() => setCurrentPage(n)}
                       >
                         {n}
-                      </a>
+                      </button>
                     ),
                   )}
-                  <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (currentPage < totalPages)
-                        setCurrentPage(currentPage + 1);
-                    }}
+                  <button
+                    className={styles.paginationBtn}
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                    }
+                    disabled={currentPage === totalPages}
                   >
                     ›
-                  </a>
+                  </button>
                 </div>
               )}
             </main>
           </div>
 
-          {/* ================= TESTIMONIALS (UNCHANGED) ================= */}
+          {/* ================= TESTIMONIALS ================= */}
           <section className={styles.testimonials}>
             <div className={styles.testimonialsHeading}>
               <span className={styles.testimonialsKicker}>
@@ -604,7 +590,7 @@ export default function Gifts() {
             </div>
           </section>
 
-          {/* ================= COMMITMENT / BRAND STORY (UNCHANGED) ================= */}
+          {/* ================= COMMITMENT / BRAND STORY ================= */}
           <section className={styles.commitment}>
             <div className={styles.commitmentGrid}>
               <div className={styles.commitmentText}>
@@ -655,7 +641,7 @@ export default function Gifts() {
             </div>
           </section>
 
-          {/* ================= PERKS STRIP (UNCHANGED) ================= */}
+          {/* ================= PERKS STRIP ================= */}
           <section className={styles.perks}>
             {perks.map((perk) => (
               <div className={styles.perk} key={perk.title}>
@@ -667,6 +653,113 @@ export default function Gifts() {
               </div>
             ))}
           </section>
+        </div>
+
+        {/* ---------------- Mobile Bottom Sheet Filter ---------------- */}
+        {isMobileFilterOpen && (
+          <div className={styles.filterOverlay} onClick={closeMobileFilter} />
+        )}
+
+        <div
+          className={`${styles.mobileFilterSheet} ${
+            isMobileFilterOpen ? styles.mobileFilterSheetActive : ""
+          }`}
+        >
+          <div className={styles.mobileFilterHandle} />
+
+          <div className={styles.mobileFilterHeader}>
+            <h3 className={styles.mobileFilterTitle}>Filter</h3>
+            <button
+              className={styles.mobileFilterClose}
+              onClick={closeMobileFilter}
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className={styles.mobileFilterContent}>
+            <div className={styles.mobileFilterGroup}>
+              <span className={styles.mobileFilterGroupLabel}>Category</span>
+              {FILTER_CATEGORIES.map((cat) => (
+                <label key={cat} className={styles.mobileFilterOption}>
+                  <input
+                    type="radio"
+                    name="mobile_category"
+                    checked={selectedCategory === cat}
+                    onChange={() => setSelectedCategory(cat)}
+                  />
+                  {cat}
+                </label>
+              ))}
+            </div>
+
+            <div className={styles.mobileFilterGroup}>
+              <span className={styles.mobileFilterGroupLabel}>Recipient</span>
+              {FILTER_RECIPIENTS.map((r) => (
+                <label key={r} className={styles.mobileFilterOption}>
+                  <input
+                    type="radio"
+                    name="mobile_recipient"
+                    checked={selectedRecipient === r}
+                    onChange={() => setSelectedRecipient(r)}
+                  />
+                  {r}
+                </label>
+              ))}
+            </div>
+
+            <div className={styles.mobileFilterGroup}>
+              <span className={styles.mobileFilterGroupLabel}>Budget</span>
+              {FILTER_BUDGETS.map((b) => (
+                <label key={b} className={styles.mobileFilterOption}>
+                  <input
+                    type="radio"
+                    name="mobile_budget"
+                    checked={selectedBudget === b}
+                    onChange={() => setSelectedBudget(b)}
+                  />
+                  {b}
+                </label>
+              ))}
+            </div>
+
+            <div className={styles.mobileFilterGroup}>
+              <span className={styles.mobileFilterGroupLabel}>Promotions</span>
+              {FILTER_PROMOTIONS.map((p) => (
+                <label key={p} className={styles.mobileFilterOption}>
+                  <input
+                    type="radio"
+                    name="mobile_promotion"
+                    checked={selectedPromotion === p}
+                    onChange={() => setSelectedPromotion(p)}
+                  />
+                  {p}
+                </label>
+              ))}
+            </div>
+
+            <div className={styles.mobileFilterGroup}>
+              <span className={styles.mobileFilterGroupLabel}>Availability</span>
+              {FILTER_AVAILABILITY.map((a) => (
+                <label key={a} className={styles.mobileFilterOption}>
+                  <input
+                    type="radio"
+                    name="mobile_availability"
+                    checked={selectedAvailability === a}
+                    onChange={() => setSelectedAvailability(a)}
+                  />
+                  {a}
+                </label>
+              ))}
+            </div>
+
+            <button
+              className={styles.mobileFilterApply}
+              onClick={closeMobileFilter}
+            >
+              Apply Filters
+            </button>
+          </div>
         </div>
 
         <Footer />

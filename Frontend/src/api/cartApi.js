@@ -31,3 +31,12 @@ export const clearCart = async () => {
   const response = await axiosInstance.delete("/cart/clear");
   return response.data;
 };
+
+// ✅ ADDED: Missing calculateShippingRate function
+export const calculateShippingRate = async (pincode, paymentMethod) => {
+  const response = await axiosInstance.post("/shipping/calculate-rate", {
+    pincode,
+    paymentMethod,
+  });
+  return response.data;
+};

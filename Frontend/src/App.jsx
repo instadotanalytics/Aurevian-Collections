@@ -35,6 +35,8 @@ import Cart from "./Pages/Cart/Cart";
 import Wishlist from "./Pages/Wishlist/Wishlist.jsx";
 import Checkout from "./Pages/Checkout/Checkout.jsx";
 import OrdersPage from "./Pages/Orders/OrdersPage.jsx";
+import OrderSuccess from "./Pages/Orders/OrderSuccess.jsx";
+import OrderDetail from "./Pages/Orders/OrderDetail.jsx";
 import Story from "./Pages/About/Story";
 
 // ============================================
@@ -77,6 +79,7 @@ import Shop from "./Components/Shop/shop.jsx";
 import Gifts from "./Components/Gifts/gifts.jsx";
 import Collections from "./Components/Collections/Collections.jsx";
 import Offers from "./Components/Offers/Offers.jsx";
+// import GiftGuide from "./Components/ShopCard/GiftGuide.jsx";
 
 import ProductDetail from "./Pages/Layout/ProductDetail/ProductDetail";
 
@@ -97,6 +100,7 @@ const ROUTES = {
   GIFTS: "/gifts",
   COLLECTIONS: "/collections",
   OFFERS: "/offers",
+  GIFT_GUIDE: "/gifts",
   LOGIN: "/login",
   REGISTER: "/register",
   VERIFY_OTP: "/verify-otp",
@@ -109,6 +113,8 @@ const ROUTES = {
   STORY: "/stories",
   ORDERS: "/orders",
   CHECKOUT: "/checkout",
+  ORDER_SUCCESS: "/order-success/:orderId",
+  ORDER_DETAIL: "/orders/:id",
   SUPER_ADMIN_LOGIN: "/super-admin/login",
   SUPER_ADMIN_DASHBOARD: "/super-admin/dashboard",
   // Seller Routes
@@ -258,6 +264,11 @@ const App = () => {
           <Route path={ROUTES.SHOP} element={<Shop />} />
 
           <Route path={ROUTES.GIFTS} element={<Gifts />} />
+
+          <Route
+  path={ROUTES.GIFT_GUIDE}
+  element={<Gifts />}
+/>
 
           {/* ============================================
                 COLLECTIONS ROUTE - WITH HEADER
@@ -599,6 +610,26 @@ const App = () => {
             element={
               <PrivateRoute>
                 <Profile />
+              </PrivateRoute>
+            }
+          />
+
+          {/* ============================================
+                ORDER SUCCESS & ORDER DETAIL ROUTES - WITH HEADER
+                ============================================ */}
+          <Route
+            path={ROUTES.ORDER_SUCCESS}
+            element={
+              <PrivateRoute>
+                <OrderSuccess />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ORDER_DETAIL}
+            element={
+              <PrivateRoute>
+                <OrderDetail />
               </PrivateRoute>
             }
           />

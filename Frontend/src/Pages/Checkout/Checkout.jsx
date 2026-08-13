@@ -1,14 +1,15 @@
 // src/Pages/Checkout/Checkout.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
-import { FiLock, FiTruck } from "react-icons/fi";
+import { FiLock, FiTruck, FiLoader, FiAlertCircle } from "react-icons/fi";
 import { FaRupeeSign } from "react-icons/fa";
 import Header from "../Layout/Header/Header";
 import Footer from "../Layout/Footer/Footer";
 import styles from "./Checkout.module.css";
 import * as orderApi from "../../api/orderApi.js";
+import * as cartApi from "../../api/cartApi.js";
 
 const loadRazorpayScript = () =>
   new Promise((resolve) => {
@@ -22,6 +23,19 @@ const loadRazorpayScript = () =>
     script.onerror = () => resolve(false);
     document.body.appendChild(script);
   });
+
+const isValidPincode = (value) => /^\d{6}$/.test(String(value || "").trim());
+
+const PINCODE_DEBOUNCE_MS = 500;
+
+const initialShippingQuote = {
+  status: "idle",
+  fee: 0,
+  courierName: null,
+  estimatedDeliveryDays: null,
+  quotedPincode: null,
+  message: null,
+};
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -40,6 +54,10 @@ const Checkout = () => {
     pincode: "",
   });
   const [paying, setPaying] = useState(false);
+  const [shippingQuote, setShippingQuote] = useState(initialShippingQuote);
+
+  const requestIdRef = useRef(0);
+  const debounceTimerRef = useRef(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -53,14 +71,129 @@ const Checkout = () => {
     }
   }, [items, navigate]);
 
+  useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    requestIdRef.current += 1;
+    const thisRequestId = requestIdRef.current;
+
+    if (!isValidPincode(address.pincode)) {
+      setShippingQuote(initialShippingQuote);
+      return;
+    }
+
+    setShippingQuote((prev) => ({
+      ...initialShippingQuote,
+      status: "checking",
+    }));
+
+    debounceTimerRef.current = setTimeout(async () => {
+      try {
+        const res = await cartApi.calculateShippingRate(
+          address.pincode,
+          "prepaid",
+        );
+
+        if (requestIdRef.current !== thisRequestId) return;
+
+        if (res.success && res.serviceable) {
+          setShippingQuote({
+            status: "success",
+            fee: res.data.shippingFee,
+            courierName: res.data.courierName,
+            estimatedDeliveryDays: res.data.estimatedDeliveryDays,
+            quotedPincode: address.pincode,
+            message: null,
+          });
+        } else {
+          setShippingQuote({
+            ...initialShippingQuote,
+            status: "unavailable",
+            message:
+              res.message ||
+              "Sorry, delivery is currently unavailable for this pincode.",
+          });
+        }
+      } catch (error) {
+        if (requestIdRef.current !== thisRequestId) return;
+        setShippingQuote({
+          ...initialShippingQuote,
+          status: "error",
+          message:
+            error.response?.data?.message ||
+            "Unable to calculate shipping right now. Please try again.",
+        });
+      }
+    }, PINCODE_DEBOUNCE_MS);
+
+    return () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address.pincode]);
+
   if (items.length === 0) return null;
 
   const itemsTotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const shippingFee = itemsTotal > 5000 ? 0 : 49;
+
+  const quoteIsCurrent =
+    shippingQuote.status === "success" &&
+    shippingQuote.quotedPincode === address.pincode;
+  const shippingFee = quoteIsCurrent ? shippingQuote.fee : 0;
   const totalAmount = itemsTotal + shippingFee;
+
+  const canPay = quoteIsCurrent && !paying;
 
   const handleChange = (e) => {
     setAddress((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const renderShippingLine = () => {
+    switch (shippingQuote.status) {
+      case "idle":
+        return (
+          <span className={styles.shippingHint}>
+            Enter your delivery pincode to calculate shipping
+          </span>
+        );
+      case "checking":
+        return (
+          <span className={styles.shippingChecking}>
+            <FiLoader className={styles.spinIcon} /> Calculating shipping...
+          </span>
+        );
+      case "success":
+        if (!quoteIsCurrent) {
+          return (
+            <span className={styles.shippingChecking}>
+              <FiLoader className={styles.spinIcon} /> Calculating shipping...
+            </span>
+          );
+        }
+        return (
+          <span>
+            {shippingFee === 0
+              ? "Free"
+              : `₹${shippingFee.toLocaleString("en-IN")}`}
+          </span>
+        );
+      case "unavailable":
+        return (
+          <span className={styles.shippingError}>
+            <FiAlertCircle /> {shippingQuote.message}
+          </span>
+        );
+      case "error":
+        return (
+          <span className={styles.shippingError}>
+            <FiAlertCircle /> {shippingQuote.message}
+          </span>
+        );
+      default:
+        return null;
+    }
   };
 
   const handlePay = async (e) => {
@@ -69,6 +202,14 @@ const Checkout = () => {
     const { fullName, phone, addressLine1, city, state, pincode } = address;
     if (!fullName || !phone || !addressLine1 || !city || !state || !pincode) {
       toast.error("Please fill in all required address fields");
+      return;
+    }
+    if (!isValidPincode(pincode)) {
+      toast.error("Please enter a valid 6-digit pincode");
+      return;
+    }
+    if (!quoteIsCurrent) {
+      toast.error("Please wait for shipping to be calculated for this pincode");
       return;
     }
 
@@ -100,7 +241,9 @@ const Checkout = () => {
         setPaying(false);
         if (verifyRes.success) {
           toast.success("Order placed successfully (test mode)");
-          navigate("/orders");
+          // ✅ FIXED: used to be navigate("/orders") — dumped the customer
+          // on a generic list with no confirmation of what just happened.
+          navigate(`/order-success/${orderId}`);
         } else {
           toast.error(verifyRes.message || "Payment verification failed");
         }
@@ -137,7 +280,8 @@ const Checkout = () => {
             });
             if (verifyRes.success) {
               toast.success("Payment successful! Order placed.");
-              navigate("/orders");
+              // ✅ FIXED: same change as above
+              navigate(`/order-success/${orderId}`);
             } else {
               toast.error(verifyRes.message || "Payment verification failed");
             }
@@ -227,15 +371,30 @@ const Checkout = () => {
                 placeholder="Pincode *"
                 value={address.pincode}
                 onChange={handleChange}
+                inputMode="numeric"
+                maxLength={6}
                 required
               />
             </div>
 
-            <button type="submit" className={styles.payBtn} disabled={paying}>
+            {shippingQuote.status === "success" && quoteIsCurrent && (
+              <p className={styles.courierNote}>
+                Ships via {shippingQuote.courierName}
+                {shippingQuote.estimatedDeliveryDays
+                  ? ` · ${shippingQuote.estimatedDeliveryDays} delivery`
+                  : ""}
+              </p>
+            )}
+
+            <button type="submit" className={styles.payBtn} disabled={!canPay}>
               <FiLock />{" "}
               {paying
                 ? "Processing..."
-                : `Pay ₹${totalAmount.toLocaleString("en-IN")} with Razorpay`}
+                : !isValidPincode(address.pincode)
+                  ? "Enter pincode to continue"
+                  : !quoteIsCurrent
+                    ? "Calculating shipping..."
+                    : `Pay ₹${totalAmount.toLocaleString("en-IN")} with Razorpay`}
             </button>
           </form>
 
@@ -264,7 +423,7 @@ const Checkout = () => {
             </div>
             <div className={styles.summaryRow}>
               <span>Shipping</span>
-              <span>{shippingFee === 0 ? "Free" : `₹${shippingFee}`}</span>
+              {renderShippingLine()}
             </div>
             <div className={styles.summaryTotal}>
               <span>Total</span>
