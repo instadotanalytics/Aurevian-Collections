@@ -10,6 +10,8 @@ import {
   getOrderById,
   getSellerOrders,
   getAdminOrders,
+  getOrderHistory,
+  getOrderHistoryDetail,
   updateOrderStatus,
   sellerConfirmOrder,
   sellerRejectOrder,
@@ -29,6 +31,8 @@ router.patch("/seller/:id/status", protectSeller, updateOrderStatus);
 router.post("/:orderId/seller-confirm", protectSeller, sellerConfirmOrder);
 router.post("/:orderId/seller-reject", protectSeller, sellerRejectOrder);
 
+router.get("/admin/history", protect, admin, getOrderHistory);
+router.get("/admin/history/:id", protect, admin, getOrderHistoryDetail);
 router.get("/admin/all", protect, admin, getAdminOrders);
 router.post("/:orderId/admin-approve", protect, admin, adminApproveOrder);
 router.post("/:orderId/admin-reject", protect, admin, adminRejectOrder);

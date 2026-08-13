@@ -1,0 +1,370 @@
+/* src/Pages/SuperAdmin/components/OrderHistory/OrderHistory.module.css */
+
+.wrap {
+  padding: 24px;
+  font-family: "Inter", sans-serif;
+}
+
+.headerRow {
+  margin-bottom: 20px;
+}
+.pageTitle {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: #1c1917;
+  margin: 0 0 4px;
+}
+.pageSubtitle {
+  font-size: 13.5px;
+  color: #78716c;
+  margin: 0;
+}
+
+.filterBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+  align-items: center;
+}
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #e7e5e4;
+  border-radius: 6px;
+  padding: 8px 12px;
+  flex: 1;
+  min-width: 240px;
+  color: #a8a29e;
+}
+.searchBox input {
+  border: none;
+  outline: none;
+  flex: 1;
+  font-size: 13px;
+  color: #1c1917;
+}
+.filterSelect,
+.dateInput {
+  border: 1px solid #e7e5e4;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  background: #fff;
+  color: #44403c;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid #e7e5e4;
+  border-radius: 10px;
+  background: #fff;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.table th {
+  text-align: left;
+  padding: 12px 14px;
+  background: #fafaf9;
+  border-bottom: 1px solid #e7e5e4;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #78716c;
+  white-space: nowrap;
+}
+.table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f5f5f4;
+  vertical-align: top;
+  white-space: nowrap;
+}
+.subText {
+  font-size: 11.5px;
+  color: #a8a29e;
+}
+.mono {
+  font-family: monospace;
+  font-size: 12.5px;
+}
+.loadingCell {
+  text-align: center;
+  padding: 40px;
+  color: #78716c;
+}
+
+.badge {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+.badge.paid {
+  background: #dcfce7;
+  color: #166534;
+}
+.badge.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+.badge.failed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.badge.refunded {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.viewBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #111111;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.paginationBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+}
+.pageBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #fff;
+  border: 1px solid #e7e5e4;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.pageBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.pageInfo {
+  font-size: 13px;
+  color: #78716c;
+}
+
+/* ===== Detail modal ===== */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 20px;
+}
+.detailModal {
+  background: #fff;
+  border-radius: 12px;
+  width: 900px;
+  max-width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px;
+  position: relative;
+}
+.modalCloseBtn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #78716c;
+}
+.detailHeader {
+  margin-bottom: 20px;
+}
+.detailHeader h2 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 24px;
+  margin: 0 0 4px;
+}
+.detailDate {
+  font-size: 12.5px;
+  color: #a8a29e;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 20px;
+}
+.detailMain,
+.detailSide {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detailCard {
+  border: 1px solid #e7e5e4;
+  border-radius: 8px;
+  padding: 16px;
+}
+.detailCard h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  margin: 0 0 12px;
+  color: #1c1917;
+}
+
+.kvRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid #fafaf9;
+  font-size: 13px;
+}
+.kvRow span:first-child {
+  color: #78716c;
+}
+.kvRow span:last-child {
+  color: #1c1917;
+  text-align: right;
+}
+.kvRowTotal {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0 0;
+  font-weight: 600;
+  font-size: 14px;
+}
+.errorText {
+  color: #991b1b;
+}
+.emptyNote {
+  font-size: 12.5px;
+  color: #a8a29e;
+}
+
+.addressText {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #44403c;
+}
+
+.productRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #fafaf9;
+}
+.productRow img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.productInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.productName {
+  font-size: 13px;
+}
+.productQty {
+  font-size: 11.5px;
+  color: #a8a29e;
+}
+.productPrice {
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+}
+
+.loadingText {
+  text-align: center;
+  padding: 60px;
+  color: #78716c;
+}
+
+/* ===== Timeline ===== */
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.step {
+  display: flex;
+  gap: 10px;
+  padding: 8px 0;
+  opacity: 0.5;
+}
+.stepDone,
+.stepActive {
+  opacity: 1;
+}
+.stepDot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #d6d3d1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #fff;
+}
+.stepDone .stepDot {
+  background: #111111;
+  border-color: #111111;
+}
+.stepActive .stepDot {
+  border-color: #111111;
+}
+.stepBody {
+  display: flex;
+  flex-direction: column;
+}
+.stepLabel {
+  font-size: 12.5px;
+  color: #1c1917;
+}
+.stepDate {
+  font-size: 11px;
+  color: #a8a29e;
+}
+
+.exceptionBanner {
+  background: #fee2e2;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.exceptionLabel {
+  font-weight: 600;
+  color: #991b1b;
+  font-size: 13px;
+}
+.exceptionReason,
+.exceptionDate {
+  font-size: 12px;
+  color: #7f1d1d;
+}

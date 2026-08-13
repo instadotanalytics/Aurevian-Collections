@@ -1,4 +1,3 @@
-// src/api/orderApi.js
 import axiosInstance from "./axiosConfig.js";
 import axios from "axios";
 
@@ -104,6 +103,22 @@ export const adminRejectOrder = async (orderId, reason) => {
   const response = await axios.post(
     `${API_URL}/orders/${orderId}/admin-reject`,
     { reason },
+    { headers: adminAuthHeader() },
+  );
+  return response.data;
+};
+
+export const getOrderHistory = async (params = {}) => {
+  const response = await axios.get(`${API_URL}/orders/admin/history`, {
+    params,
+    headers: adminAuthHeader(),
+  });
+  return response.data;
+};
+
+export const getOrderHistoryDetail = async (orderId) => {
+  const response = await axios.get(
+    `${API_URL}/orders/admin/history/${orderId}`,
     { headers: adminAuthHeader() },
   );
   return response.data;

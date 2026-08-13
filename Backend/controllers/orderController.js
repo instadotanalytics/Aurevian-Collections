@@ -1,4 +1,3 @@
-// backend/controllers/orderController.js
 import Order, { FULFILLMENT_STATUS } from "../models/Order.js";
 import Cart from "../models/Cart.js";
 import JewelleryProduct from "../models/JewelleryProduct.js";
@@ -906,5 +905,221 @@ export const adminRejectOrder = async (req, res) => {
     return res
       .status(500)
       .json({ success: false, message: "Failed to reject order" });
+  }
+};
+
+// ============================================
+// SUPER ADMIN: GET /orders/admin/history
+// Full paginated, filtered, searchable order history. Never deletes or
+// hides anything based on status — this is the permanent audit view.
+// ============================================
+const DATE_RANGE_TO_START = {
+  today: () => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  },
+  "7d": () => new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+  "30d": () => new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+};
+
+// Maps the frontend's requested status filter labels to actual queries.
+// Some labels map to `fulfillmentStatus` (seller/admin lifecycle stages,
+// which the app itself writes) and some map to the legacy `orderStatus`
+// field (shipment-progress stages, which only the Shiprocket webhook
+// writes — fulfillmentStatus is never updated for these today).
+// "SELLER_CONFIRMED" also covers what the UI calls "Pending Admin
+// Approval" — they are the same stored value, not two different ones.
+const buildStatusFilter = (statusKey) => {
+  switch (statusKey) {
+    case "PENDING_SELLER_CONFIRMATION":
+      return { fulfillmentStatus: "PENDING_SELLER_CONFIRMATION" };
+    case "SELLER_CONFIRMED":
+      return { fulfillmentStatus: "SELLER_CONFIRMED" };
+    case "ADMIN_APPROVED":
+      return { fulfillmentStatus: "ADMIN_APPROVED" };
+    case "PROCESSING":
+      return {
+        fulfillmentStatus: {
+          $in: ["SHIPMENT_CREATED", "AWB_PENDING", "AWB_ASSIGNED"],
+        },
+      };
+    case "READY_TO_SHIP":
+      return { orderStatus: "ready_to_ship" };
+    case "SHIPPED":
+      return { orderStatus: "shipped" };
+    case "IN_TRANSIT":
+      return { orderStatus: "in_transit" };
+    case "OUT_FOR_DELIVERY":
+      return { orderStatus: "out_for_delivery" };
+    case "DELIVERED":
+      return { orderStatus: "delivered" };
+    case "CANCELLED":
+      return { orderStatus: "cancelled" };
+    case "REJECTED":
+      return {
+        fulfillmentStatus: { $in: ["SELLER_REJECTED", "ADMIN_REJECTED"] },
+      };
+    case "FAILED":
+      return { fulfillmentStatus: "SHIPROCKET_FAILED" };
+    default:
+      return {};
+  }
+};
+
+// "refunded" has no corresponding value in the current paymentStatus enum
+// (pending/paid/failed) — passing it returns zero results rather than
+// silently matching everything or crashing.
+const buildShiprocketFilter = (key) => {
+  switch (key) {
+    case "NOT_CREATED":
+      return {
+        $or: [
+          { "shipping.shiprocketOrderId": { $exists: false } },
+          { "shipping.shiprocketOrderId": null },
+        ],
+      };
+    case "CREATED":
+      return {
+        "shipping.shiprocketOrderId": { $exists: true, $ne: null },
+        $or: [
+          { "shipping.awbCode": { $exists: false } },
+          { "shipping.awbCode": null },
+        ],
+      };
+    case "AWB_ASSIGNED":
+      return { "shipping.awbCode": { $exists: true, $ne: null } };
+    case "PICKED_UP":
+      return { "shipping.shippedAt": { $exists: true, $ne: null } };
+    case "IN_TRANSIT":
+      return { orderStatus: "in_transit" };
+    case "DELIVERED":
+      return { "shipping.deliveredAt": { $exists: true, $ne: null } };
+    case "FAILED":
+      return { fulfillmentStatus: "SHIPROCKET_FAILED" };
+    default:
+      return {};
+  }
+};
+
+export const getOrderHistory = async (req, res) => {
+  try {
+    if (req.user.role !== "admin" && req.user.role !== "super_admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized" });
+    }
+
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const {
+      search,
+      status,
+      payment,
+      dateRange,
+      startDate,
+      endDate,
+      shiprocket,
+    } = req.query;
+
+    const filter = {};
+
+    if (search && search.trim()) {
+      const re = new RegExp(
+        search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+        "i",
+      );
+      filter.$or = [
+        { orderNumber: re },
+        { customerName: re },
+        { customerEmail: re },
+        { customerPhone: re },
+      ];
+    }
+
+    if (status && status !== "ALL") {
+      Object.assign(filter, buildStatusFilter(status));
+    }
+
+    if (payment && payment !== "ALL") {
+      filter.paymentStatus = payment.toLowerCase();
+    }
+
+    if (shiprocket && shiprocket !== "ALL") {
+      Object.assign(filter, buildShiprocketFilter(shiprocket));
+    }
+
+    if (dateRange === "custom" && (startDate || endDate)) {
+      filter.createdAt = {};
+      if (startDate) filter.createdAt.$gte = new Date(startDate);
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        filter.createdAt.$lte = end;
+      }
+    } else if (dateRange && DATE_RANGE_TO_START[dateRange]) {
+      filter.createdAt = { $gte: DATE_RANGE_TO_START[dateRange]() };
+    }
+
+    const [orders, totalOrders] = await Promise.all([
+      Order.find(filter)
+        .populate("seller", "storeInfo.storeName fullName email")
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit),
+      Order.countDocuments(filter),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      orders,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.max(1, Math.ceil(totalOrders / limit)),
+        totalOrders,
+        limit,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Get order history error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch order history",
+      error: error.message,
+    });
+  }
+};
+
+// ============================================
+// SUPER ADMIN: GET /orders/admin/history/:id
+// Full single-order detail for the history modal — returns the complete
+// stored document, nothing synthesized.
+// ============================================
+export const getOrderHistoryDetail = async (req, res) => {
+  try {
+    if (req.user.role !== "admin" && req.user.role !== "super_admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized" });
+    }
+
+    const order = await Order.findById(req.params.id).populate(
+      "seller",
+      "storeInfo.storeName fullName email phone",
+    );
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    return res.status(200).json({ success: true, data: order });
+  } catch (error) {
+    console.error("❌ Get order history detail error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch order details",
+      error: error.message,
+    });
   }
 };

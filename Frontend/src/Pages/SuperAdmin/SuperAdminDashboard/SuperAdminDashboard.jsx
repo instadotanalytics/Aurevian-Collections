@@ -66,6 +66,7 @@ import SupportManagement from "../components/SupportManagement";
 import SubscriptionPlanManagement from "../components/SubscriptionPlanManagement/SubscriptionPlanManagement";
 import HeaderManagement from "../components/HeaderManagement/HeaderManagement";
 import OrdersManagement from "../components/OrdersManagement/OrdersManagement";
+import OrderHistory from "../components/OrderHistory/OrderHistory.jsx";
 
 const SuperAdminDashboard = () => {
   // ✅ Page title
@@ -222,6 +223,12 @@ const SuperAdminDashboard = () => {
       isSubMenu: false,
     },
     {
+      id: "order-history",
+      label: "Order History",
+      icon: FiClock,
+      isSubMenu: false,
+    },
+    {
       id: "products",
       label: "Products",
       icon: FiPackage,
@@ -300,6 +307,8 @@ const SuperAdminDashboard = () => {
         );
       case "orders":
         return <OrdersManagement />;
+      case "order-history":
+        return <OrderHistory />;
       case "products":
         return (
           <div className={styles.placeholderContent}>
