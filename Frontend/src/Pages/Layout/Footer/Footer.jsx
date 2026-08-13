@@ -13,7 +13,7 @@ import {
 
 /* ------------------------------------------------------------------
  * Data (mirrors navData.js shape — swap for your real imports:
- *   import { shopCategories, collectionsDropdown, giftGuide, aboutDropdown } from "./navData";
+ *   import { shopCategories, collectionsDropdown, giftGuide, offersDropdown, aboutDropdown } from "./navData";
  * ------------------------------------------------------------------ */
 const shopCategories = [
   { id: "earrings", label: "Earrings", path: "/shop/earrings" },
@@ -45,6 +45,16 @@ const giftGuide = {
     { id: "under-1999", label: "Under ₹1,999", path: "/gift-guide/under-1999" },
   ],
 };
+
+/* New — Offers column, matching the offers dropdown shown on the site */
+const offersDropdown = [
+  { id: "flash-sale", label: "Flash Sale", path: "/offers/flash-sale" },
+  { id: "combo-edit", label: "Combo Edit", path: "/offers/combo-edit" },
+  { id: "refer-earn", label: "Refer & Earn", path: "/offers/refer-earn" },
+  { id: "loyalty-rewards", label: "Loyalty Rewards", path: "/offers/loyalty-rewards" },
+  { id: "first-order-privilege", label: "First Order Privilege", path: "/offers/first-order-privilege" },
+  { id: "seasonal-edit", label: "Seasonal Edit", path: "/offers/seasonal-edit" },
+];
 
 const aboutDropdown = [
   { id: "about-us", label: "About Us", path: "/about" },
@@ -128,13 +138,17 @@ export default function Footer() {
         <div className={styles.grid}>
           {/* Brand column */}
           <div className={styles.brandCol}>
-            <a href="/" className={styles.logoRow}>
-              <img src={logo} alt="Aurevian" className={styles.logoImage} />
-            </a>
-            <p className={styles.tagline}>
-              Fine jewellery crafted for every story worth telling — timeless
-              gold, modern lines, made to be handed down.
-            </p>
+            {/* Logo + tagline wrapper — stacked on desktop,
+                side-by-side row on mobile only (see .brandTop) */}
+            <div className={styles.brandTop}>
+              <a href="/" className={styles.logoRow}>
+                <img src={logo} alt="Aurevian" className={styles.logoImage} />
+              </a>
+              <p className={styles.tagline}>
+                Fine jewellery crafted for every story worth telling — timeless
+                gold, modern lines, made to be handed down.
+              </p>
+            </div>
 
             <div className={styles.contactList}>
               <div className={styles.contactItem}>
@@ -204,39 +218,60 @@ export default function Footer() {
               ))}
             </ul>
           </div>
+
+          {/* New — Offers column, sits beside Gift Guide (2x2 on mobile) */}
+          <div className={`${styles.linkCol} ${styles.offersCol}`}>
+            <FooterHeading>Offers</FooterHeading>
+            <ul className={styles.linkList}>
+              {offersDropdown.map((item) => (
+                <FooterLink key={item.id} href={item.path}>
+                  {item.label}
+                </FooterLink>
+              ))}
+            </ul>
+          </div>
         </div>
 
         {/* About / policy row */}
         <div className={styles.metaRow}>
-          <div className={styles.metaLinks}>
-            {aboutDropdown.map((item) => (
-              <a key={item.id} href={item.path}>
-                {item.label}
-              </a>
-            ))}
-          </div>
-          <div className={styles.metaLinks}>
-            {policyLinks.map((item) => (
-              <a key={item.id} href={item.path}>
-                {item.label}
-              </a>
-            ))}
-          </div>
-        </div>
-      </div>
+  <div className={styles.metaLinks}>
+    {aboutDropdown.map((item) => (
+      <a key={item.id} href={item.path}>
+        {item.label}
+      </a>
+    ))}
+  </div>
+
+  <div className={styles.metaLinks}>
+    {policyLinks.map((item) => (
+      <a key={item.id} href={item.path}>
+        {item.label}
+      </a>
+    ))}
+  </div>
+</div>
+
+<div className={styles.bottomBar}>
+  <div className={styles.bottomInner}>
+    <p className={styles.copyright}>
+      © {new Date().getFullYear()} Aurevian. All rights reserved.
+    </p>
+  </div>
+</div>
+</div>
 
       {/* decorative chain link divider */}
       
 
       {/* bottom bar */}
-      <div className={styles.bottomBar}>
+      {/*<div className={styles.bottomBar}>
         <div className={styles.bottomInner}>
           <p className={styles.copyright}>
             © {new Date().getFullYear()} Aurevian. All rights reserved.
           </p>
           
         </div>
-      </div>
+      </div>*/}
     </footer>
   );
 }
