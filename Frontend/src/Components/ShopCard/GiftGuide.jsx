@@ -186,7 +186,7 @@ export default function GiftGuide() {
         </div>
       </section>
 
-      <Footer />
+      
     </>
   );
 }

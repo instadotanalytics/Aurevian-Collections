@@ -1,6 +1,6 @@
 // src/Components/Offers/Offers.jsx
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -13,7 +13,6 @@ import {
   FiChevronRight,
   FiShoppingBag,
   FiCheck,
-  FiFilter,
 } from "react-icons/fi";
 import { LuSlidersHorizontal } from "react-icons/lu";
 import styles from "./Offers.module.css";
@@ -64,8 +63,31 @@ const FILTER_CATEGORIES = [
   "Anklets",
   "Bridal Sets",
 ];
-const FILTER_MATERIALS = ["All", "Gold", "Silver", "Rose Gold", "Platinum"];
-const FILTER_SIZES = ["All", "Small", "Medium", "Large"];
+
+const SORT_OPTIONS = [
+  { value: "newest", label: "Default Sorting" },
+  { value: "price-asc", label: "Price: Low to High" },
+  { value: "price-desc", label: "Price: High to Low" },
+  { value: "name-asc", label: "Name: A-Z" },
+  { value: "name-desc", label: "Name: Z-A" },
+  { value: "discount-desc", label: "Discount: High to Low" },
+];
+
+/* ----------------------------------------------------------------
+   Skeleton Card
+------------------------------------------------------------------- */
+function SkeletonCard() {
+  return (
+    <div className={styles.skeletonCard} aria-hidden="true">
+      <div className={styles.skeletonImage} />
+      <div className={styles.skeletonBody}>
+        <div className={styles.skeletonText} style={{ width: "80%" }} />
+        <div className={styles.skeletonText} style={{ width: "40%" }} />
+        <div className={styles.skeletonBtn} />
+      </div>
+    </div>
+  );
+}
 
 /* ----------------------------------------------------------------
    Persistent Reveal-on-scroll with Blur Effect
@@ -125,9 +147,7 @@ function Reveal({
 export default function Offers() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { byPlacement, isLoading } = useSelector(
-    (state) => state.storefrontProduct,
-  );
+  const { byPlacement } = useSelector((state) => state.storefrontProduct);
   const { isAuthenticated } = useSelector((state) => state.auth);
   const cartItems = useSelector((state) => state.cart.items);
   const wishlistItems = useSelector((state) => state.wishlist.items);
@@ -142,6 +162,8 @@ export default function Offers() {
   const [currentPage, setCurrentPage] = useState(0);
   const [cartLoadingId, setCartLoadingId] = useState(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [sortBy, setSortBy] = useState("newest");
+  const [localLoading, setLocalLoading] = useState(false);
   const itemsPerPage = 9;
 
   const products = offersData.products || [];
@@ -150,8 +172,12 @@ export default function Offers() {
     totalPages: 1,
   };
 
-  // Fetch products when filters change
+  // Throttled fetch — minimum 1000 ms skeleton display
   useEffect(() => {
+    setLocalLoading(true);
+    const start = Date.now();
+    let timeoutId;
+
     dispatch(
       fetchProductsByPlacement({
         placement: "offers",
@@ -159,7 +185,16 @@ export default function Offers() {
         limit: itemsPerPage,
         categoryId: selectedCategory !== "All" ? selectedCategory : undefined,
       }),
-    );
+    )
+      .unwrap()
+      .catch(() => {})
+      .finally(() => {
+        const elapsed = Date.now() - start;
+        const remaining = Math.max(0, 1000 - elapsed);
+        timeoutId = setTimeout(() => setLocalLoading(false), remaining);
+      });
+
+    return () => clearTimeout(timeoutId);
   }, [dispatch, currentPage, selectedCategory]);
 
   useEffect(() => {
@@ -167,6 +202,43 @@ export default function Offers() {
       dispatch(fetchWishlist());
     }
   }, [dispatch, isAuthenticated]);
+
+  // Client-side sort
+  const sortedProducts = useMemo(() => {
+    const list = [...products];
+    switch (sortBy) {
+      case "price-asc":
+        return list.sort(
+          (a, b) =>
+            (a.pricing?.salePrice || a.pricing?.originalPrice || 0) -
+            (b.pricing?.salePrice || b.pricing?.originalPrice || 0),
+        );
+      case "price-desc":
+        return list.sort(
+          (a, b) =>
+            (b.pricing?.salePrice || b.pricing?.originalPrice || 0) -
+            (a.pricing?.salePrice || a.pricing?.originalPrice || 0),
+        );
+      case "name-asc":
+        return list.sort((a, b) => a.productName.localeCompare(b.productName));
+      case "name-desc":
+        return list.sort((a, b) => b.productName.localeCompare(a.productName));
+      case "discount-desc":
+        return list.sort((a, b) => {
+          const discA =
+            a.pricing?.originalPrice && a.pricing?.salePrice
+              ? a.pricing.originalPrice - a.pricing.salePrice
+              : 0;
+          const discB =
+            b.pricing?.originalPrice && b.pricing?.salePrice
+              ? b.pricing.originalPrice - b.pricing.salePrice
+              : 0;
+          return discB - discA;
+        });
+      default:
+        return list;
+    }
+  }, [products, sortBy]);
 
   // Scroll to offers section function
   const scrollToOffers = () => {
@@ -226,6 +298,7 @@ export default function Offers() {
   const clearAllFilters = () => {
     setSelectedCategory("All");
     setPriceRange([0, 7000]);
+    setSortBy("newest");
     setCurrentPage(0);
   };
 
@@ -306,6 +379,21 @@ export default function Offers() {
                 </div>
 
                 <div className={styles.filterGroup}>
+                  <span className={styles.filterGroupLabel}>Sort By</span>
+                  {SORT_OPTIONS.map((opt) => (
+                    <label key={opt.value} className={styles.filterOption}>
+                      <input
+                        type="radio"
+                        name="sort"
+                        checked={sortBy === opt.value}
+                        onChange={() => setSortBy(opt.value)}
+                      />
+                      {opt.label}
+                    </label>
+                  ))}
+                </div>
+
+                <div className={styles.filterGroup}>
                   <span className={styles.filterGroupLabel}>Price Range</span>
                   <input
                     type="range"
@@ -344,144 +432,160 @@ export default function Offers() {
                     }}
                   >
                     <span className={styles.productsCount}>
-                      {isLoading
+                      {localLoading
                         ? "Loading..."
-                        : `Showing ${products.length} of ${total} products`}
+                        : `Showing ${sortedProducts.length} of ${total} products`}
                     </span>
                   </div>
                 </div>
 
-                <div className={styles.productsGrid}>
-                  {products.map((product, i) => {
-                    const inCart = isInCart(product._id);
-                    const inWishlist = isInWishlist(product._id);
-                    const addingToCart = cartLoadingId === product._id;
-                    const discount =
-                      product.pricing?.salePrice &&
-                      product.pricing?.originalPrice
-                        ? Math.round(
-                            ((product.pricing.originalPrice -
-                              product.pricing.salePrice) /
-                              product.pricing.originalPrice) *
-                              100,
-                          )
-                        : 0;
-                    return (
-                      <Reveal
-                        as="div"
-                        key={product._id}
-                        delay={i * 50}
-                        className={styles.productCard}
-                      >
-                        <Link
-                          to={`/product/${product.productSlug}`}
-                          className={styles.productImageWrap}
-                        >
-                          <img
-                            className={styles.productImage}
-                            src={product.thumbnail?.url}
-                            alt={product.productName}
-                            loading="lazy"
-                          />
-                          {discount > 0 && (
-                            <span className={styles.productDiscount}>
-                              {discount}% OFF
-                            </span>
-                          )}
-                          <span className={styles.productCategoryOverlay}>
-                            {product.category?.categoryData?.label ||
-                              "Uncategorized"}
-                          </span>
-                          <div className={styles.wishlistActions}>
-                            <button
-                              type="button"
-                              className={`${styles.wishlistBtn} ${inWishlist ? styles.wishlistBtnActive : ""}`}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                toggleWishlist(product._id);
-                              }}
-                              aria-label={
-                                inWishlist
-                                  ? "Remove from wishlist"
-                                  : "Add to wishlist"
-                              }
-                            >
-                              {inWishlist ? (
-                                <FiHeart fill="currentColor" />
-                              ) : (
-                                <FiHeart />
-                              )}
-                            </button>
-                          </div>
-                        </Link>
-                        <div className={styles.productBody}>
-                          <Link
-                            to={`/product/${product.productSlug}`}
-                            className={styles.productName}
+                {localLoading ? (
+                  <div
+                    className={styles.productsGrid}
+                    aria-busy="true"
+                    aria-label="Loading products"
+                  >
+                    {Array.from({ length: itemsPerPage }).map((_, i) => (
+                      <SkeletonCard key={i} />
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    <div className={styles.productsGrid}>
+                      {sortedProducts.map((product, i) => {
+                        const inCart = isInCart(product._id);
+                        const inWishlist = isInWishlist(product._id);
+                        const addingToCart = cartLoadingId === product._id;
+                        const discount =
+                          product.pricing?.salePrice &&
+                          product.pricing?.originalPrice
+                            ? Math.round(
+                                ((product.pricing.originalPrice -
+                                  product.pricing.salePrice) /
+                                  product.pricing.originalPrice) *
+                                  100,
+                              )
+                            : 0;
+                        return (
+                          <Reveal
+                            as="div"
+                            key={product._id}
+                            delay={i * 50}
+                            className={styles.productCard}
                           >
-                            {product.productName}
-                          </Link>
-                          <div className={styles.productPriceRow}>
-                            <span className={styles.productCurrentPrice}>
-                              ₹
-                              {(
-                                product.pricing?.salePrice ||
-                                product.pricing?.originalPrice
-                              )?.toLocaleString() || "0"}
-                            </span>
-                            {product.pricing?.salePrice &&
-                              product.pricing?.originalPrice && (
-                                <span className={styles.productOriginalPrice}>
-                                  ₹
-                                  {product.pricing.originalPrice.toLocaleString()}
+                            <Link
+                              to={`/product/${product.productSlug}`}
+                              className={styles.productImageWrap}
+                            >
+                              <img
+                                className={styles.productImage}
+                                src={product.thumbnail?.url}
+                                alt={product.productName}
+                                loading="lazy"
+                              />
+                              {discount > 0 && (
+                                <span className={styles.productDiscount}>
+                                  {discount}% OFF
                                 </span>
                               )}
-                          </div>
-                          <button
-                            type="button"
-                            className={`${styles.productAddBtn} ${inCart ? styles.productAddBtnActive : ""}`}
-                            onClick={() => handleAddToCart(product._id)}
-                            disabled={inCart || addingToCart}
-                          >
-                            {inCart ? (
-                              <>
-                                <FiCheck /> Added to Cart
-                              </>
-                            ) : (
-                              <>
-                                <FiShoppingBag />{" "}
-                                {addingToCart ? "Adding..." : "Add to Cart"}
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      </Reveal>
-                    );
-                  })}
-                </div>
+                              <span className={styles.productCategoryOverlay}>
+                                {product.category?.categoryData?.label ||
+                                  "Uncategorized"}
+                              </span>
+                              <div className={styles.wishlistActions}>
+                                <button
+                                  type="button"
+                                  className={`${styles.wishlistBtn} ${inWishlist ? styles.wishlistBtnActive : ""}`}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    toggleWishlist(product._id);
+                                  }}
+                                  aria-label={
+                                    inWishlist
+                                      ? "Remove from wishlist"
+                                      : "Add to wishlist"
+                                  }
+                                >
+                                  {inWishlist ? (
+                                    <FiHeart fill="currentColor" />
+                                  ) : (
+                                    <FiHeart />
+                                  )}
+                                </button>
+                              </div>
+                            </Link>
+                            <div className={styles.productBody}>
+                              <Link
+                                to={`/product/${product.productSlug}`}
+                                className={styles.productName}
+                              >
+                                {product.productName}
+                              </Link>
+                              <div className={styles.productPriceRow}>
+                                <span className={styles.productCurrentPrice}>
+                                  ₹
+                                  {(
+                                    product.pricing?.salePrice ||
+                                    product.pricing?.originalPrice
+                                  )?.toLocaleString() || "0"}
+                                </span>
+                                {product.pricing?.salePrice &&
+                                  product.pricing?.originalPrice && (
+                                    <span
+                                      className={styles.productOriginalPrice}
+                                    >
+                                      ₹
+                                      {product.pricing.originalPrice.toLocaleString()}
+                                    </span>
+                                  )}
+                              </div>
+                              <button
+                                type="button"
+                                className={`${styles.productAddBtn} ${inCart ? styles.productAddBtnActive : ""}`}
+                                onClick={() => handleAddToCart(product._id)}
+                                disabled={inCart || addingToCart}
+                              >
+                                {inCart ? (
+                                  <>
+                                    <FiCheck /> Added to Cart
+                                  </>
+                                ) : (
+                                  <>
+                                    <FiShoppingBag />{" "}
+                                    {addingToCart ? "Adding..." : "Add to Cart"}
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          </Reveal>
+                        );
+                      })}
+                    </div>
 
-                {/* Pagination - Next/Prev Buttons */}
-                {totalPages > 1 && (
-                  <div className={styles.pagination}>
-                    <button
-                      className={`${styles.paginationBtn} ${currentPage === 0 ? styles.paginationDisabled : ""}`}
-                      onClick={prevPage}
-                      disabled={currentPage === 0}
-                    >
-                      <FiChevronLeft /> Prev
-                    </button>
-                    <span className={styles.paginationInfo}>
-                      Page {currentPage + 1} of {totalPages}
-                    </span>
-                    <button
-                      className={`${styles.paginationBtn} ${currentPage === totalPages - 1 ? styles.paginationDisabled : ""}`}
-                      onClick={nextPage}
-                      disabled={currentPage === totalPages - 1}
-                    >
-                      Next <FiChevronRight />
-                    </button>
-                  </div>
+                    {/* Pagination - Next/Prev Buttons */}
+                    {totalPages > 1 && (
+                      <div className={styles.pagination}>
+                        <button
+                          className={`${styles.paginationBtn} ${currentPage === 0 ? styles.paginationDisabled : ""}`}
+                          onClick={prevPage}
+                          disabled={currentPage === 0}
+                        >
+                          <FiChevronLeft /> Prev
+                        </button>
+                        <span className={styles.paginationInfo}>
+                          Page {currentPage + 1} of {totalPages}
+                        </span>
+                        <button
+                          className={`${styles.paginationBtn} ${currentPage === totalPages - 1 ? styles.paginationDisabled : ""}`}
+                          onClick={nextPage}
+                          disabled={currentPage === totalPages - 1}
+                        >
+                          Next <FiChevronRight />
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -496,7 +600,7 @@ export default function Offers() {
               <h2>Get up to 30% OFF on selected premium products.</h2>
               <p>Limited time only. Don't miss out!</p>
               <button className={styles.premiumBtn} onClick={scrollToOffers}>
-                EXPLORE OFFERS →
+                EXPLORE OFFERS
               </button>
             </div>
             <div className={styles.premiumBadge}>
@@ -540,7 +644,7 @@ export default function Offers() {
           }`}
         >
           <div className={styles.mobileFilterSheetHeader}>
-            <h3 className={styles.mobileFilterTitle}>Filter Options</h3>
+            <h3 className={styles.mobileFilterTitle}>Filter</h3>
             <button
               type="button"
               className={styles.mobileFilterClose}
@@ -552,22 +656,44 @@ export default function Offers() {
           </div>
 
           <div className={styles.mobileFilterInner}>
+            {/* Mobile Sort By — Dropdown style */}
+            <div className={styles.filterGroup}>
+              <span className={styles.filterGroupLabel}>Sort By</span>
+              <div className={styles.mobileSortWrapper}>
+                <select
+                  className={styles.mobileSortSelect}
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                >
+                  {SORT_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                <span className={styles.mobileSortChevron}>⌄</span>
+              </div>
+            </div>
+
+            {/* Mobile Category — Two column grid */}
             <div className={styles.filterGroup}>
               <span className={styles.filterGroupLabel}>Category</span>
-              {FILTER_CATEGORIES.map((cat) => (
-                <label key={cat} className={styles.mobileFilterOption}>
-                  <input
-                    type="radio"
-                    name="mobile_category"
-                    checked={selectedCategory === cat}
-                    onChange={() => {
-                      setSelectedCategory(cat);
-                      setCurrentPage(0);
-                    }}
-                  />
-                  {cat}
-                </label>
-              ))}
+              <div className={styles.mobileFilterGrid}>
+                {FILTER_CATEGORIES.map((cat) => (
+                  <label key={cat} className={styles.mobileFilterOption}>
+                    <input
+                      type="radio"
+                      name="mobile_category"
+                      checked={selectedCategory === cat}
+                      onChange={() => {
+                        setSelectedCategory(cat);
+                        setCurrentPage(0);
+                      }}
+                    />
+                    {cat}
+                  </label>
+                ))}
+              </div>
             </div>
 
             <div className={styles.filterGroup}>

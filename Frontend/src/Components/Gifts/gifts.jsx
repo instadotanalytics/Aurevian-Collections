@@ -240,6 +240,9 @@ export default function Gifts() {
     return option ? option.label : "Sort by latest";
   };
 
+  // Duplicate testimonials for infinite scroll feel on mobile
+  const duplicatedTestimonials = [...testimonials, ...testimonials, ...testimonials];
+
   return (
     <>
       <Header />
@@ -384,13 +387,14 @@ export default function Gifts() {
 
             {/* ---------- Product Listing ---------- */}
             <main className={styles.productsWrapper}>
+              {/* Desktop-only toolbar */}
               <div className={styles.toolbar}>
                 <span className={styles.resultsCount}>
                   {isLoading
                     ? "Loading..."
                     : `Showing ${products.length} of ${total} products`}
                 </span>
-                
+
                 {/* Custom Sort Dropdown */}
                 <div className={styles.sortWrapper} ref={sortDropdownRef}>
                   <button
@@ -401,7 +405,7 @@ export default function Gifts() {
                     <span>{getSortLabel()}</span>
                     <FiChevronDown className={`${styles.sortChevron} ${isSortDropdownOpen ? styles.sortChevronOpen : ""}`} />
                   </button>
-                  
+
                   {isSortDropdownOpen && (
                     <div className={styles.sortDropdown}>
                       {SORT_OPTIONS.map((option) => (
@@ -567,6 +571,7 @@ export default function Gifts() {
               </span>
             </div>
 
+            {/* Desktop Grid */}
             <div className={styles.testimonialsGrid}>
               {testimonials.map((t) => (
                 <div className={styles.testimonialCard} key={t.name}>
@@ -587,6 +592,31 @@ export default function Gifts() {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Mobile Carousel */}
+            <div className={styles.testimonialsCarousel}>
+              <div className={styles.testimonialsTrack}>
+                {duplicatedTestimonials.map((t, idx) => (
+                  <div className={styles.testimonialCardMobile} key={`${t.name}-${idx}`}>
+                    <span className={styles.avatar}>{t.initials}</span>
+                    <div className={styles.testimonialBody}>
+                      <div className={styles.stars}>
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <FiStar
+                            key={i}
+                            className={
+                              i < t.rating ? styles.starFilled : styles.starEmpty
+                            }
+                          />
+                        ))}
+                      </div>
+                      <p className={styles.testimonialQuote}>"{t.quote}"</p>
+                      <div className={styles.authorName}>– {t.name}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
 
@@ -678,79 +708,146 @@ export default function Gifts() {
           </div>
 
           <div className={styles.mobileFilterContent}>
+
+            {/* ---- Sort By ---- */}
+            <div className={styles.mobileFilterGroup}>
+              <span className={styles.mobileFilterGroupLabel}>Sort By</span>
+              <div className={styles.mobileSortWrapper} ref={sortDropdownRef}>
+                <button
+                  className={styles.mobileSortButton}
+                  onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                  aria-expanded={isSortDropdownOpen}
+                >
+                  <span>{getSortLabel()}</span>
+                  <FiChevronDown className={`${styles.mobileSortChevron} ${isSortDropdownOpen ? styles.mobileSortChevronOpen : ""}`} />
+                </button>
+
+                {isSortDropdownOpen && (
+                  <div className={styles.mobileSortDropdown}>
+                    {SORT_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        className={`${styles.mobileSortOption} ${sortBy === option.value ? styles.mobileSortOptionActive : ""}`}
+                        onClick={() => {
+                          handleSortSelect(option.value);
+                          setIsSortDropdownOpen(false);
+                        }}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* ---- Category ---- */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Category</span>
-              {FILTER_CATEGORIES.map((cat) => (
-                <label key={cat} className={styles.mobileFilterOption}>
-                  <input
-                    type="radio"
-                    name="mobile_category"
-                    checked={selectedCategory === cat}
-                    onChange={() => setSelectedCategory(cat)}
-                  />
-                  {cat}
-                </label>
-              ))}
+              <div className={styles.mobileFilterGrid}>
+                {FILTER_CATEGORIES.map((cat) => (
+                  <label key={cat} className={styles.mobileFilterOption}>
+                    <input
+                      type="radio"
+                      name="mobile_category"
+                      checked={selectedCategory === cat}
+                      onChange={() => setSelectedCategory(cat)}
+                    />
+                    {cat}
+                  </label>
+                ))}
+              </div>
             </div>
 
+            {/* ---- Recipient ---- */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Recipient</span>
-              {FILTER_RECIPIENTS.map((r) => (
-                <label key={r} className={styles.mobileFilterOption}>
-                  <input
-                    type="radio"
-                    name="mobile_recipient"
-                    checked={selectedRecipient === r}
-                    onChange={() => setSelectedRecipient(r)}
-                  />
-                  {r}
-                </label>
-              ))}
+              <div className={styles.mobileFilterGrid}>
+                {FILTER_RECIPIENTS.map((r) => (
+                  <label key={r} className={styles.mobileFilterOption}>
+                    <input
+                      type="radio"
+                      name="mobile_recipient"
+                      checked={selectedRecipient === r}
+                      onChange={() => setSelectedRecipient(r)}
+                    />
+                    {r}
+                  </label>
+                ))}
+              </div>
             </div>
 
+            {/* ---- Budget ---- */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Budget</span>
-              {FILTER_BUDGETS.map((b) => (
-                <label key={b} className={styles.mobileFilterOption}>
-                  <input
-                    type="radio"
-                    name="mobile_budget"
-                    checked={selectedBudget === b}
-                    onChange={() => setSelectedBudget(b)}
-                  />
-                  {b}
-                </label>
-              ))}
+              <div className={styles.mobileFilterGrid}>
+                {FILTER_BUDGETS.map((b) => (
+                  <label key={b} className={styles.mobileFilterOption}>
+                    <input
+                      type="radio"
+                      name="mobile_budget"
+                      checked={selectedBudget === b}
+                      onChange={() => setSelectedBudget(b)}
+                    />
+                    {b}
+                  </label>
+                ))}
+              </div>
             </div>
 
+            {/* ---- Promotions ---- */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Promotions</span>
-              {FILTER_PROMOTIONS.map((p) => (
-                <label key={p} className={styles.mobileFilterOption}>
-                  <input
-                    type="radio"
-                    name="mobile_promotion"
-                    checked={selectedPromotion === p}
-                    onChange={() => setSelectedPromotion(p)}
-                  />
-                  {p}
-                </label>
-              ))}
+              <div className={styles.mobileFilterGrid}>
+                {FILTER_PROMOTIONS.map((p) => (
+                  <label key={p} className={styles.mobileFilterOption}>
+                    <input
+                      type="radio"
+                      name="mobile_promotion"
+                      checked={selectedPromotion === p}
+                      onChange={() => setSelectedPromotion(p)}
+                    />
+                    {p}
+                  </label>
+                ))}
+              </div>
             </div>
 
+            {/* ---- Availability ---- */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Availability</span>
-              {FILTER_AVAILABILITY.map((a) => (
-                <label key={a} className={styles.mobileFilterOption}>
-                  <input
-                    type="radio"
-                    name="mobile_availability"
-                    checked={selectedAvailability === a}
-                    onChange={() => setSelectedAvailability(a)}
-                  />
-                  {a}
-                </label>
-              ))}
+              <div className={styles.mobileFilterGrid}>
+                {FILTER_AVAILABILITY.map((a) => (
+                  <label key={a} className={styles.mobileFilterOption}>
+                    <input
+                      type="radio"
+                      name="mobile_availability"
+                      checked={selectedAvailability === a}
+                      onChange={() => setSelectedAvailability(a)}
+                    />
+                    {a}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* ---- Price Range (Last) ---- */}
+            <div className={styles.mobileFilterGroup}>
+              <span className={styles.mobileFilterGroupLabel}>Price Range</span>
+              <input
+                type="range"
+                min="0"
+                max="8000"
+                step="100"
+                value={priceRange[1]}
+                onChange={(e) => setPriceRange([0, Number(e.target.value)])}
+                className={styles.filterPriceInput}
+                style={{ "--_progress": `${(priceRange[1] / 8000) * 100}%` }}
+              />
+              <div className={styles.filterPriceRange}>
+                <span>₹0</span>
+                <span>₹{priceRange[1]}</span>
+              </div>
             </div>
 
             <button

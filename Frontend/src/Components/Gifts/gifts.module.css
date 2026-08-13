@@ -969,9 +969,7 @@
 }
 
 .testimonialCard {
-  background: #fff;
-  border: 1px solid var(--cream-line);
-  border-radius: 12px;
+  border: 1px solid grey;
   padding: 20px 22px;
   display: flex;
   align-items: center;
@@ -1024,6 +1022,19 @@
   font-size: 12.5px;
   font-weight: 600;
   color: var(--ink);
+}
+
+/* Mobile Testimonials Carousel - Hidden on Desktop */
+.testimonialsCarousel {
+  display: none;
+}
+
+.testimonialsTrack {
+  display: none;
+}
+
+.testimonialCardMobile {
+  display: none;
 }
 
 /* ---------- Perks strip ---------- */
@@ -1149,6 +1160,7 @@
 
 .mobileFilterGroup {
   margin-bottom: 20px;
+  padding-top: 16px;
 }
 
 .mobileFilterGroupLabel {
@@ -1156,27 +1168,123 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--muted);
+  color: var(--gold-deep);
   margin: 0 0 10px 0;
   display: block;
+}
+
+/* Mobile Filter Grid - 2 columns */
+.mobileFilterGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 12px;
 }
 
 .mobileFilterOption {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 0;
-  font-size: 15px;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 14px;
   color: var(--ink-soft);
   cursor: pointer;
 }
 
 .mobileFilterOption input[type="radio"] {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   accent-color: var(--gold-deep);
   cursor: pointer;
   flex-shrink: 0;
+}
+
+/* ============================================================
+   Mobile Custom Sort Dropdown (inside the filter sheet)
+   ============================================================ */
+.mobileSortWrapper {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.mobileSortButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--cream-line);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+  color: var(--ink);
+  cursor: pointer;
+  font-family: "Jost", sans-serif;
+  transition: border-color 0.2s ease;
+  position: relative;
+  z-index: 10;
+}
+
+.mobileSortButton:hover {
+  border-color: var(--gold-soft);
+}
+
+.mobileSortChevron {
+  font-size: 14px !important;
+  width: 14px !important;
+  height: 14px !important;
+  color: var(--gold-deep) !important;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.mobileSortChevronOpen {
+  transform: rotate(180deg);
+}
+
+.mobileSortDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid var(--cream-line);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(28, 25, 23, 0.12);
+  padding: 4px 0;
+  z-index: 20;
+  overflow: hidden;
+}
+
+.mobileSortOption {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-family: "Jost", sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.mobileSortOption:hover {
+  background: var(--cream);
+  color: var(--gold-deep);
+}
+
+.mobileSortOptionActive {
+  background: var(--gold-soft);
+  color: var(--gold-deep);
+  font-weight: 500;
+}
+
+.mobileSortOptionActive:hover {
+  background: var(--gold-soft);
+  color: var(--gold-deep);
 }
 
 .mobileFilterApply {
@@ -1303,25 +1411,9 @@
     padding: 30px 24px;
   }
 
-  .resultsCount {
-    display: inline-block;
-    font-size: 15px;
-  }
-
+  /* Hide the entire toolbar on mobile */
   .toolbar {
-    justify-content: space-between;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-  }
-
-  .sortButton {
-    width: 160px;
-    padding: 8px 16px;
-    font-size: 13px;
-  }
-
-  .sortDropdown {
-    width: 160px;
+    display: none;
   }
 }
 
@@ -1430,58 +1522,56 @@
     font-size: 12px;
   }
 
-  .toolbar {
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-  }
-
-  .resultsCount {
-    font-size: 13px;
-  }
-
-  .sortWrapper {
-    flex-shrink: 0;
-  }
-
-  .sortButton {
-    width: 150px;
-    padding: 8px 14px;
-    font-size: 12px;
-    min-width: unset;
-  }
-
-  .sortDropdown {
-    width: 150px;
-    top: calc(100% + 6px);
-    border-radius: 10px;
-  }
-
-  .sortOption {
-    padding: 10px 14px;
-    font-size: 12px;
-  }
-
-  .sortChevron {
-    font-size: 12px !important;
-    width: 12px !important;
-    height: 12px !important;
-  }
-
   .testimonials {
     padding: 0 20px 60px;
     margin-top: 40px;
   }
 
+  /* Hide desktop grid on mobile */
   .testimonialsGrid {
-    grid-template-columns: 1fr;
-    gap: 14px;
+    display: none;
   }
 
-  .testimonialCard {
-    padding: 18px;
+  /* Show mobile carousel */
+  .testimonialsCarousel {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .testimonialsTrack {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 4px 0 20px;
+    scroll-padding-left: 50%;
+    scroll-padding-right: 50%;
+    /* Center the first item */
+    padding-left: calc(50% - 140px);
+    padding-right: calc(50% - 140px);
+  }
+
+  .testimonialsTrack::-webkit-scrollbar {
+    display: none;
+  }
+
+  .testimonialCardMobile {
+    display: flex;
+    flex: 0 0 280px;
+    width: 280px;
+    min-width: 280px;
+    border: 1px solid var(--cream-line);
+    background: var(--cream-card);
+    padding: 20px 22px;
+    align-items: center;
+    gap: 14px;
+    scroll-snap-align: center;
+    border-radius: 4px;
   }
 
   .perks {
@@ -1509,11 +1599,20 @@
   }
 
   .mobileFilterContent {
-    padding: 16px;
+    padding: 0 16px 60px;
   }
 
   .mobileFilterGroup {
     margin-bottom: 16px;
+  }
+
+  .mobileFilterGrid {
+    gap: 2px 10px;
+  }
+
+  .mobileFilterOption {
+    font-size: 13px;
+    padding: 5px 0;
   }
 
   .mobileFilterApply {
@@ -1617,43 +1716,42 @@
     font-size: 11px;
   }
 
-  .sortButton {
-    width: 130px;
-    padding: 6px 12px;
-    font-size: 11px;
-  }
-
-  .sortDropdown {
-    width: 130px;
-  }
-
-  .sortOption {
-    padding: 8px 12px;
-    font-size: 11px;
-  }
-
-  .sortChevron {
-    font-size: 12px !important;
-    width: 12px !important;
-    height: 12px !important;
-  }
-
   .mobileFilterSheet {
     height: 65vh;
     max-height: 65vh;
   }
 
   .mobileFilterContent {
-    padding: 14px;
+    padding: 0 14px 14px;
   }
 
   .mobileFilterGroup {
     margin-bottom: 14px;
   }
 
+  .mobileFilterGrid {
+    gap: 2px 8px;
+  }
+
+  .mobileFilterOption {
+    font-size: 12px;
+  }
+
   .mobileFilterApply {
     padding: 10px;
     font-size: 14px;
+  }
+
+  .testimonialsTrack {
+    padding-left: calc(50% - 130px);
+    padding-right: calc(50% - 130px);
+  }
+
+  .testimonialCardMobile {
+    flex: 0 0 260px;
+    width: 260px;
+    min-width: 260px;
+    padding: 16px 18px;
   }
 }
 
@@ -1662,9 +1760,14 @@
   .filterOverlay {
     display: none !important;
   }
-  
+
   .mobileFilterSheet {
     display: none !important;
+  }
+
+  /* Restore toolbar on desktop */
+  .toolbar {
+    display: flex !important;
   }
 }
 
@@ -1679,7 +1782,7 @@
   .addToCartBtn,
   .wishlistBtn,
   .mobileFilterSheet {
-    transition: none !important;
+        transition: none !important;
   }
 
   .productCard:hover .productImage,
@@ -1687,5 +1790,9 @@
   .wishlistBtn:hover,
   .addToCartBtn:hover {
     transform: none !important;
+  }
+
+  .testimonialsTrack {
+    scroll-behavior: auto;
   }
 }
