@@ -265,10 +265,7 @@ const App = () => {
 
           <Route path={ROUTES.GIFTS} element={<Gifts />} />
 
-          <Route
-  path={ROUTES.GIFT_GUIDE}
-  element={<Gifts />}
-/>
+          <Route path={ROUTES.GIFT_GUIDE} element={<Gifts />} />
 
           {/* ============================================
                 COLLECTIONS ROUTE - WITH HEADER
@@ -279,8 +276,6 @@ const App = () => {
                 OFFERS ROUTE - WITH HEADER
                 ============================================ */}
           <Route path={ROUTES.OFFERS} element={<Offers />} />
-
-  
 
           {/* ============================================
                 PUBLIC PRODUCT DETAIL ROUTE - WITH HEADER ✅
@@ -406,6 +401,19 @@ const App = () => {
           />
           <Route
             path={`${ROUTES.SUPER_ADMIN_DASHBOARD}/seller-details/:id`}
+            element={
+              <SuperAdminRoute>
+                <LayoutWithoutHeader>
+                  <SuperAdminDashboard />
+                </LayoutWithoutHeader>
+              </SuperAdminRoute>
+            }
+          />
+          {/* ✅ NEW: Sellers & Products — a specific seller's product catalog.
+               Registered alongside seller-details/:id, before the generic
+               /:section route, following the same convention. */}
+          <Route
+            path={`${ROUTES.SUPER_ADMIN_DASHBOARD}/sellers-products/:sellerId`}
             element={
               <SuperAdminRoute>
                 <LayoutWithoutHeader>
