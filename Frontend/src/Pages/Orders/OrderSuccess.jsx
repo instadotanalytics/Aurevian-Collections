@@ -1,3 +1,4 @@
+
 // src/Pages/Orders/OrderSuccess.jsx
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -5,6 +6,7 @@ import Header from "../Layout/Header/Header";
 import Footer from "../Layout/Footer/Footer";
 import OrderDetailView from "../../Components/OrderDetailView/OrderDetailView";
 import * as orderApi from "../../api/orderApi.js";
+import styles from "../../Components/OrderDetailView/OrderDetailView.module.css";
 
 const OrderSuccess = () => {
   const { orderId } = useParams();
@@ -38,27 +40,26 @@ const OrderSuccess = () => {
   }, [orderId]);
 
   return (
-    <>
+    <div className={styles.page}>
       <Header />
       {loading && (
-        <div style={{ textAlign: "center", padding: "80px 24px" }}>
-          Loading your order...
+        <div className={styles.stateWrap}>
+          <div className={styles.spinner} />
+          <p className={styles.stateTitle}>Loading your order</p>
+          <p className={styles.stateSub}>
+            Just a moment while we confirm the details.
+          </p>
         </div>
       )}
       {!loading && error && (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "80px 24px",
-            color: "#dc2626",
-          }}
-        >
-          {error}
+        <div className={styles.stateWrap}>
+          <p className={styles.stateTitle}>Something went wrong</p>
+          <p className={`${styles.stateSub} ${styles.errorText}`}>{error}</p>
         </div>
       )}
       {!loading && order && <OrderDetailView order={order} justPlaced />}
       <Footer />
-    </>
+    </div>
   );
 };
 
