@@ -859,7 +859,7 @@
   }
 
   .contentArea {
-    padding: 0 13px 20px;
+    /* padding: 0 13px 20px; */
     height: calc(100vh - var(--header-height));
   }
 
