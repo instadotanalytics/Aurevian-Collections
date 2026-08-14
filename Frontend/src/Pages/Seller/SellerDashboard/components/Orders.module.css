@@ -127,59 +127,220 @@
   color: #14140f;
 }
 
-/* ===== Skeleton ===== */
-.skeletonContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.skeletonCard {
+/* ===== TABLE ===== */
+.tableWrap {
   background: #ffffff;
   border: 1px solid #e8e3dc;
-  padding: 16px 18px;
+  border-radius: 12px;
+  overflow: hidden;
+  overflow-x: auto;
 }
 
-.skeletonRow {
+.tableHeader,
+.orderRow {
+  display: grid;
+  grid-template-columns: 32px 52px 1.5fr 1.1fr 60px 100px 130px 150px 70px;
+  gap: 14px;
+  align-items: center;
+  padding: 13px 20px;
+  min-width: 900px;
+}
+
+.tableHeader {
+  background: #faf8f4;
+  border-bottom: 1px solid #e8e3dc;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #9a8f7d;
+}
+
+.orderRow {
+  border-bottom: 1px solid #f2efe9;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.orderRow:hover {
+  background: #faf8f4;
+}
+
+.orderRow:last-child {
+  border-bottom: none;
+}
+
+/* Column alignment */
+.colIndex {
+  color: #9a8f7d;
+  font-size: 13px;
+}
+
+.colImage {
   display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
   align-items: center;
 }
 
-.skeletonOrderId {
-  width: 100px;
-  height: 16px;
-  background: #f0edeb;
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
-.skeletonBadge {
-  width: 70px;
-  height: 22px;
-  background: #f0edeb;
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
-.skeletonField {
+.colOrder {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  min-width: 70px;
+  gap: 2px;
+  min-width: 0;
 }
 
-.skeletonLabel {
-  width: 50px;
-  height: 8px;
+.colCustomer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.colItems {
+  text-align: center;
+  font-size: 13px;
+  color: #55554d;
+}
+
+.colTotal {
+  text-align: right;
+  font-weight: 600;
+  font-size: 13.5px;
+  color: #14140f;
+}
+
+.colStatus,
+.colFulfillment {
+  display: flex;
+}
+
+.colActions {
+  display: flex;
+  justify-content: center;
+}
+
+.rowThumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
   background: #f0edeb;
-  animation: pulse 1.5s ease-in-out infinite;
 }
 
-.skeletonValue {
+.rowThumbPlaceholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  background: #f5f2ee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b5aa9a;
+}
+
+.rowOrderId {
+  font-size: 14px;
+  font-weight: 600;
+  color: #14140f;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: "Jost", "Helvetica Neue", Arial, sans-serif;
+}
+
+.rowOrderDate {
+  font-size: 11.5px;
+  color: #8a8072;
+}
+
+.actionDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f59e0b;
+  flex-shrink: 0;
+  animation: blink 1.5s infinite;
+}
+
+.rowCustomerName {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #1c1917;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowCustomerPhone {
+  font-size: 11.5px;
+  color: #8a8072;
+}
+
+.viewBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  border: 1px solid #e8e3dc;
+  background: #ffffff;
+  color: #55554d;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.viewBtn:hover {
+  border-color: #c8a86e;
+  color: #c8a86e;
+  background: rgba(200, 168, 110, 0.08);
+}
+
+/* Badges — sized for table cells */
+.statusBadge,
+.fulfillmentBadge {
+  display: inline-block;
+  padding: 4px 11px;
+  font-size: 10.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  border-radius: 12px;
+}
+
+/* ===== Skeleton (table version) ===== */
+.skelText {
   width: 60px;
-  height: 14px;
+  height: 12px;
+  background: #f0edeb;
+  border-radius: 3px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.skelThumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
   background: #f0edeb;
   animation: pulse 1.5s ease-in-out infinite;
+}
+
+.skelPill {
+  width: 70px;
+  height: 22px;
+  border-radius: 12px;
+  background: #f0edeb;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.skelIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: #f0edeb;
+  animation: pulse 1.5s ease-in-out infinite;
+  margin: 0 auto;
 }
 
 @keyframes pulse {
@@ -216,6 +377,11 @@
   height: 20px;
 }
 
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
 /* ===== Empty State ===== */
 .emptyState {
   display: flex;
@@ -243,131 +409,6 @@
   margin: 0 0 20px;
   max-width: 320px;
   font-size: 14px;
-}
-
-/* ===== Orders List ===== */
-.ordersList {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.orderCard {
-  background: #ffffff;
-  border: 1px solid #e8e3dc;
-  padding: 14px 18px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  border-radius: 6px;
-}
-
-.orderCard:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  border-color: #c8a86e;
-  transform: translateY(-2px);
-}
-
-.orderCard:active {
-  transform: scale(0.99);
-}
-
-/* Key fix: no more space-between stretching the row edge-to-edge.
-   Left block only takes the width it needs, right block sits right
-   after it with a fixed, reasonable gap — no more giant blank gap
-   between "Items" and the status badges. */
-.orderCardContent {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 28px;
-  flex-wrap: wrap;
-  height: 100%;
-}
-
-.orderCardLeft {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  flex: 0 1 auto;
-  flex-wrap: wrap;
-}
-
-.orderCardRight {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
-.orderId {
-  font-size: 14px;
-  font-weight: 700;
-  color: #14140f;
-  min-width: 90px;
-}
-
-.orderCardFields {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.orderCardField {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 50px;
-}
-
-.fieldLabel {
-  font-size: 9px;
-  font-weight: 600;
-  color: #8a8072;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-}
-
-.fieldValue {
-  font-size: 14px;
-  font-weight: 500;
-  color: #14140f;
-}
-
-.orderCardBadges {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.statusBadge,
-.fulfillmentBadge {
-  display: inline-block;
-  padding: 4px 10px;
-  font-size: 10px;
-  font-weight: 600;
-  white-space: nowrap;
-  border-radius: 20px;
-}
-
-.actionRequiredBadge {
-  font-size: 14px;
-  animation: blink 1.5s infinite;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
-
-.orderCardView {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  color: #c8a86e;
-  font-weight: 500;
 }
 
 /* ===== Popup ===== */
@@ -897,22 +938,6 @@
   .filterSelect {
     min-width: 100px;
   }
-
-  .orderCardFields {
-    gap: 14px;
-  }
-
-  .orderCardContent {
-    gap: 18px;
-  }
-
-  .orderCardLeft {
-    gap: 14px;
-  }
-
-  .orderId {
-    min-width: 80px;
-  }
 }
 
 @media (max-width: 768px) {
@@ -949,49 +974,221 @@
     padding: 6px 24px 6px 10px;
   }
 
-  .orderCard {
-    padding: 12px 14px;
+  /* Hide order count on mobile */
+  .orderCount {
+    display: none;
   }
 
-  .orderCardContent {
+  /* Mobile: Convert table to cards - NO horizontal scroll */
+  .tableWrap {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+    overflow-x: visible;
+  }
+
+  .tableHeader {
+    display: none;
+  }
+
+  .orderRow {
+    display: flex;
     flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
+    background: #ffffff;
+    border: 1px solid #e8e3dc;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    min-width: unset;
+    grid-template-columns: unset;
+    gap: 4px;
+    min-height: 20vh;
+    max-height: 25vh;
   }
 
-  .orderCardLeft {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 6px;
+  .orderRow:hover {
+    background: #ffffff;
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   }
 
-  .orderCardFields {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px 12px;
+  .orderRow:last-child {
+    margin-bottom: 0;
   }
 
-  .orderCardRight {
-    justify-content: space-between;
-    width: 100%;
-    margin-left: 0;
-    padding-top: 8px;
-    border-top: 1px solid #f0edeb;
+  /* First row: index + order id + date */
+  .orderRow .colIndex {
+    order: 1;
+    font-size: 11px;
+    color: #9a8f7d;
+    font-weight: 500;
+    min-width: 20px;
+    padding-right: 4px;
+  }
+
+  .orderRow .colImage {
+    display: none;
+  }
+
+  .orderRow .colOrder {
+    order: 2;
+    flex: 1;
+    display: flex;
     flex-direction: row;
     align-items: center;
-  }
-
-  .orderCardBadges {
+    gap: 6px;
     flex-wrap: wrap;
   }
 
-  .orderId {
-    min-width: unset;
-    font-size: 13px;
+  .rowOrderId {
+    font-size: 12px;
+    white-space: nowrap;
+    font-weight: 600;
   }
 
-  .fieldValue {
-    font-size: 13px;
+  .rowOrderDate {
+    font-size: 10px;
+    color: #8a8072;
+    font-weight: 400;
+  }
+
+  .actionDot {
+    width: 5px;
+    height: 5px;
+  }
+
+  /* Second row: customer name + phone (inline) */
+  .orderRow .colCustomer {
+    order: 3;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    width: 100%;
+    padding: 0;
+  }
+
+  .rowCustomerName {
+    font-size: 12px;
+    font-weight: 500;
+    color: #1c1917;
+  }
+
+  .rowCustomerPhone {
+    font-size: 10px;
+    color: #8a8072;
+  }
+
+  /* Hide customer label on mobile */
+  .orderRow .colCustomer::before {
+    display: none;
+  }
+
+  /* Third row: Items, Total, Status, Fulfillment, Actions inline */
+  .orderRow .colItems {
+    order: 4;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #55554d;
+    padding: 0;
+  }
+
+  .orderRow .colItems::before {
+    content: "Items:";
+    font-size: 9px;
+    font-weight: 600;
+    color: #8a8072;
+  }
+
+  .orderRow .colTotal {
+    order: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #14140f;
+    padding: 0;
+    text-align: left;
+  }
+
+  .orderRow .colTotal::before {
+    content: "Total:";
+    font-size: 9px;
+    font-weight: 600;
+    color: #8a8072;
+  }
+
+  .orderRow .colStatus {
+    order: 6;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+  }
+
+  .orderRow .colStatus::before {
+    content: "";
+    display: none;
+  }
+
+  .orderRow .colFulfillment {
+    order: 7;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+  }
+
+  .orderRow .colFulfillment::before {
+    content: "";
+    display: none;
+  }
+
+  .orderRow .colActions {
+    order: 8;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    margin-left: auto;
+  }
+
+  .orderRow .colActions::before {
+    content: "";
+    display: none;
+  }
+
+  .statusBadge,
+  .fulfillmentBadge {
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  /* Fourth row: Items, Total, Status, Fulfillment, Actions in a flex wrap */
+  .orderRow .colItems,
+  .orderRow .colTotal,
+  .orderRow .colStatus,
+  .orderRow .colFulfillment,
+  .orderRow .colActions {
+    flex-wrap: wrap;
+  }
+
+  .viewBtn {
+    width: 24px;
+    height: 24px;
+    border-radius: 5px;
+  }
+
+  .viewBtn svg {
+    width: 13px;
+    height: 13px;
   }
 
   .popup {
@@ -1044,29 +1241,49 @@
     font-size: 20px;
   }
 
-  .orderCard {
-    padding: 10px 12px;
+  .orderRow {
+    padding: 8px 12px;
+    min-height: 20vh;
+    max-height: 25vh;
+    gap: 3px;
+    margin-bottom: 8px;
   }
 
-  .orderCardFields {
-    grid-template-columns: 1fr 1fr;
-    gap: 4px 10px;
+  .rowOrderId {
+    font-size: 11px;
   }
 
-  .orderCardField {
-    min-width: unset;
+  .rowOrderDate {
+    font-size: 9px;
   }
 
-  .fieldLabel {
+  .rowCustomerName {
+    font-size: 11px;
+  }
+
+  .rowCustomerPhone {
+    font-size: 9px;
+  }
+
+  .orderRow .colIndex {
+    font-size: 10px;
+    min-width: 16px;
+  }
+
+  .orderRow .colItems,
+  .orderRow .colTotal {
+    font-size: 10px;
+  }
+
+  .orderRow .colItems::before,
+  .orderRow .colTotal::before {
     font-size: 8px;
   }
 
-  .fieldValue {
-    font-size: 12px;
-  }
-
-  .orderId {
-    font-size: 12px;
+  .statusBadge,
+  .fulfillmentBadge {
+    font-size: 8px;
+    padding: 2px 6px;
   }
 
   .filterSelect {
@@ -1094,16 +1311,6 @@
 
   .popupValue {
     font-size: 12px;
-  }
-
-  .orderCardView {
-    font-size: 11px;
-  }
-
-  .statusBadge,
-  .fulfillmentBadge {
-    font-size: 10px;
-    padding: 3px 8px;
   }
 }
 

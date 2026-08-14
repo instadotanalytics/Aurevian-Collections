@@ -115,30 +115,55 @@ const formatDate = (date) => {
   });
 };
 
+// Shared header row so columns always line up with the body rows
+const TableHeader = () => (
+  <div className={styles.tableHeader}>
+    <span className={styles.colIndex}>#</span>
+    <span className={styles.colImage}></span>
+    <span className={styles.colOrder}>Order</span>
+    <span className={styles.colCustomer}>Customer</span>
+    <span className={styles.colItems}>Items</span>
+    <span className={styles.colTotal}>Total</span>
+    <span className={styles.colStatus}>Status</span>
+    <span className={styles.colFulfillment}>Fulfillment</span>
+    <span className={styles.colActions}>Actions</span>
+  </div>
+);
+
 // Skeleton Loader
-const SkeletonLoader = ({ count = 10 }) => {
+const SkeletonLoader = ({ count = 8 }) => {
   return (
-    <div className={styles.skeletonContainer}>
+    <div className={styles.tableWrap}>
+      <TableHeader />
       {Array.from({ length: count }).map((_, index) => (
-        <div key={index} className={styles.skeletonCard}>
-          <div className={styles.skeletonRow}>
-            <div className={styles.skeletonOrderId}></div>
-            <div className={styles.skeletonBadge}></div>
-            <div className={styles.skeletonBadge}></div>
+        <div key={index} className={styles.orderRow}>
+          <div className={styles.colIndex}>
+            <div className={styles.skelText} style={{ width: 16 }} />
           </div>
-          <div className={styles.skeletonRow}>
-            <div className={styles.skeletonField}>
-              <div className={styles.skeletonLabel}></div>
-              <div className={styles.skeletonValue}></div>
-            </div>
-            <div className={styles.skeletonField}>
-              <div className={styles.skeletonLabel}></div>
-              <div className={styles.skeletonValue}></div>
-            </div>
-            <div className={styles.skeletonField}>
-              <div className={styles.skeletonLabel}></div>
-              <div className={styles.skeletonValue}></div>
-            </div>
+          <div className={styles.colImage}>
+            <div className={styles.skelThumb} />
+          </div>
+          <div className={styles.colOrder}>
+            <div className={styles.skelText} style={{ width: 110, height: 13 }} />
+            <div className={styles.skelText} style={{ width: 70, height: 10, marginTop: 4 }} />
+          </div>
+          <div className={styles.colCustomer}>
+            <div className={styles.skelText} style={{ width: 90 }} />
+          </div>
+          <div className={styles.colItems}>
+            <div className={styles.skelText} style={{ width: 20 }} />
+          </div>
+          <div className={styles.colTotal}>
+            <div className={styles.skelText} style={{ width: 60 }} />
+          </div>
+          <div className={styles.colStatus}>
+            <div className={styles.skelPill} />
+          </div>
+          <div className={styles.colFulfillment}>
+            <div className={styles.skelPill} />
+          </div>
+          <div className={styles.colActions}>
+            <div className={styles.skelIcon} />
           </div>
         </div>
       ))}
@@ -404,7 +429,7 @@ const Orders = () => {
       </div>
 
       {showLoadingState && filteredOrders.length === 0 ? (
-        <SkeletonLoader count={10} />
+        <SkeletonLoader count={8} />
       ) : filteredOrders.length === 0 ? (
         <div className={styles.emptyState}>
           <FiPackage size={48} className={styles.emptyIcon} />
@@ -416,8 +441,10 @@ const Orders = () => {
           </p>
         </div>
       ) : (
-        <div className={styles.ordersList}>
-          {visibleOrders.map((order) => {
+        <div className={styles.tableWrap}>
+          <TableHeader />
+
+          {visibleOrders.map((order, idx) => {
             const statusStyle = getStatusStyle(order.orderStatus);
             const fulfillmentStyle = getFulfillmentStyle(
               order.fulfillmentStatus,
@@ -425,82 +452,110 @@ const Orders = () => {
             const isActionRequired =
               order.fulfillmentStatus === "PENDING_SELLER_CONFIRMATION";
             const customer = order?.customer || {};
-            const totalAmount = order.totalAmount || 0;
+            const firstItem = order.items?.[0];
 
             return (
               <div
                 key={order._id}
-                className={styles.orderCard}
+                className={styles.orderRow}
                 onClick={() => openOrderPopup(order)}
               >
-                <div className={styles.orderCardContent}>
-                  <div className={styles.orderCardLeft}>
-                    <div className={styles.orderId}>
-                      #{order.orderNumber || "N/A"}
-                    </div>
-                    <div className={styles.orderCardFields}>
-                      <div className={styles.orderCardField}>
-                        <span className={styles.fieldLabel}>Customer</span>
-                        <span className={styles.fieldValue}>
-                          {customer.fullName || "N/A"}
-                        </span>
-                      </div>
-                      <div className={styles.orderCardField}>
-                        <span className={styles.fieldLabel}>Total</span>
-                        <span className={styles.fieldValue}>
-                          {formatCurrency(order.sellerSubtotal || 0)}
-                        </span>
-                      </div>
-                      <div className={styles.orderCardField}>
-                        <span className={styles.fieldLabel}>Date</span>
-                        <span className={styles.fieldValue}>
-                          {formatDate(order.createdAt)}
-                        </span>
-                      </div>
-                      <div className={styles.orderCardField}>
-                        <span className={styles.fieldLabel}>Items</span>
-                        <span className={styles.fieldValue}>
-                          {order.items?.length || 0}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                <div className={styles.colIndex}>{idx + 1}</div>
 
-                  <div className={styles.orderCardRight}>
-                    <div className={styles.orderCardBadges}>
-                      <span
-                        className={styles.statusBadge}
-                        style={{
-                          backgroundColor: statusStyle.bg,
-                          color: statusStyle.text,
-                        }}
-                      >
-                        {order.orderStatus || "N/A"}
-                      </span>
-                      <span
-                        className={styles.fulfillmentBadge}
-                        style={{
-                          backgroundColor: fulfillmentStyle.bg,
-                          color: fulfillmentStyle.text,
-                        }}
-                      >
-                        {FULFILLMENT_LABEL[order.fulfillmentStatus] ||
-                          order.fulfillmentStatus ||
-                          "N/A"}
-                      </span>
-                      {isActionRequired && (
-                        <span className={styles.actionRequiredBadge}>⚡</span>
-                      )}
+                <div className={styles.colImage}>
+                  {firstItem?.image ? (
+                    <img
+                      src={firstItem.image}
+                      alt={firstItem.name || "Product"}
+                      className={styles.rowThumb}
+                      onError={(e) => {
+                        e.target.src = "https://via.placeholder.com/40";
+                      }}
+                    />
+                  ) : (
+                    <div className={styles.rowThumbPlaceholder}>
+                      <FiPackage size={16} />
                     </div>
-                    <span className={styles.orderCardView}>
-                      <FiEye size={14} />
-                      View
+                  )}
+                </div>
+
+                <div className={styles.colOrder}>
+                  <span className={styles.rowOrderId}>
+                    #{order.orderNumber || "N/A"}
+                    {isActionRequired && (
+                      <span
+                        className={styles.actionDot}
+                        title="Action required"
+                      />
+                    )}
+                  </span>
+                  <span className={styles.rowOrderDate}>
+                    {formatDate(order.createdAt)}
+                  </span>
+                </div>
+
+                <div className={styles.colCustomer}>
+                  <span className={styles.rowCustomerName}>
+                    {customer.fullName || "N/A"}
+                  </span>
+                  {customer.phone && (
+                    <span className={styles.rowCustomerPhone}>
+                      {customer.phone}
                     </span>
-                  </div>
+                  )}
+                </div>
+
+                <div className={styles.colItems}>
+                  {order.items?.length || 0}
+                </div>
+
+                <div className={styles.colTotal}>
+                  {formatCurrency(order.sellerSubtotal || 0)}
+                </div>
+
+                <div className={styles.colStatus}>
+                  <span
+                    className={styles.statusBadge}
+                    style={{
+                      backgroundColor: statusStyle.bg,
+                      color: statusStyle.text,
+                    }}
+                  >
+                    {order.orderStatus || "N/A"}
+                  </span>
+                </div>
+
+                <div className={styles.colFulfillment}>
+                  <span
+                    className={styles.fulfillmentBadge}
+                    style={{
+                      backgroundColor: fulfillmentStyle.bg,
+                      color: fulfillmentStyle.text,
+                    }}
+                  >
+                    {FULFILLMENT_LABEL[order.fulfillmentStatus] ||
+                      order.fulfillmentStatus ||
+                      "N/A"}
+                  </span>
+                </div>
+
+                <div className={styles.colActions}>
+                  <button
+                    type="button"
+                    className={styles.viewBtn}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openOrderPopup(order);
+                    }}
+                    title="View order"
+                  >
+                    <FiEye size={15} />
+                  </button>
                 </div>
               </div>
             );
           })}
+
           {!allOrdersLoaded && filteredOrders.length > visibleCount && (
             <div id="orders-sentinel" className={styles.sentinel} />
           )}
