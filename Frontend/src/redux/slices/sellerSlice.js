@@ -294,6 +294,30 @@ export const fetchSellerDashboard = createAsyncThunk(
   },
 );
 
+// ✅ NEW — Get Sales Performance chart data
+export const fetchDashboardPerformance = createAsyncThunk(
+  "seller/fetchDashboardPerformance",
+  async (period = "this-month", { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("sellerAccessToken");
+      const response = await axios.get(
+        `${API_URL}/seller/dashboard/performance`,
+        {
+          params: { period },
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      if (response.data.success) {
+        return { period: response.data.period, data: response.data.data };
+      }
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch performance data",
+      );
+    }
+  },
+);
+
 // Get Recent Orders
 export const fetchRecentOrders = createAsyncThunk(
   "seller/fetchRecentOrders",
@@ -376,6 +400,13 @@ const initialState = {
   registrationData: null,
   verificationStatus: null,
   otpDeliveryStatus: null,
+  // ✅ NEW — Sales Performance chart state
+  performance: {
+    period: "this-month",
+    data: [],
+    loading: false,
+    error: null,
+  },
 };
 
 const sellerSlice = createSlice({
@@ -394,6 +425,12 @@ const sellerSlice = createSlice({
       state.recentActivities = [];
       state.status = "idle";
       state.otpDeliveryStatus = null;
+      state.performance = {
+        period: "this-month",
+        data: [],
+        loading: false,
+        error: null,
+      };
     },
     clearOtpDeliveryStatus: (state) => {
       state.otpDeliveryStatus = null;
@@ -605,8 +642,25 @@ const sellerSlice = createSlice({
         state.status = "succeeded";
       })
       .addCase(fetchSellerDashboard.rejected, (state) => {
-        state.isLoading = false;
+        state.dashboardLoading = false;
         state.status = "failed";
+      })
+
+      // ============================================
+      // ✅ NEW: DASHBOARD PERFORMANCE (SALES CHART)
+      // ============================================
+      .addCase(fetchDashboardPerformance.pending, (state) => {
+        state.performance.loading = true;
+        state.performance.error = null;
+      })
+      .addCase(fetchDashboardPerformance.fulfilled, (state, action) => {
+        state.performance.loading = false;
+        state.performance.period = action.payload.period;
+        state.performance.data = action.payload.data;
+      })
+      .addCase(fetchDashboardPerformance.rejected, (state, action) => {
+        state.performance.loading = false;
+        state.performance.error = action.payload;
       })
 
       // ============================================
@@ -634,6 +688,12 @@ const sellerSlice = createSlice({
         state.recentActivities = [];
         state.status = "idle";
         state.otpDeliveryStatus = null;
+        state.performance = {
+          period: "this-month",
+          data: [],
+          loading: false,
+          error: null,
+        };
       });
   },
 });

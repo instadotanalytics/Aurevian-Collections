@@ -187,7 +187,7 @@
   font-weight: 600;
   color: #14140f;
   font-size: 14px;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .customerName {
@@ -216,7 +216,7 @@
   white-space: nowrap;
 }
 
-/* Status Colors */
+/* Status Colors — every key is a real Order.orderStatus value */
 .pending {
   background: #fef3c7;
   color: #92400e;
@@ -227,14 +227,44 @@
   color: #1e40af;
 }
 
+.readyToShip {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
 .shipped {
   background: #e0e7ff;
   color: #3730a3;
 }
 
+.inTransit {
+  background: #cffafe;
+  color: #155e75;
+}
+
+.outForDelivery {
+  background: #fde68a;
+  color: #78350f;
+}
+
 .delivered {
   background: #d1fae5;
   color: #065f46;
+}
+
+.rto {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.returnInitiated {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.returned {
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 .cancelled {

@@ -27,7 +27,10 @@ const FINAL_ORDER_STATUS = "delivered";
 
 const toObjectId = (id) => new mongoose.Types.ObjectId(id);
 
-async function getSellerOrderRows(sellerId, { from, to } = {}) {
+// ✅ EXPORTED — reused by sellerController.js (dashboard summary) so
+// revenue is calculated identically everywhere in the app, never
+// re-derived with slightly different (and therefore incompatible) logic.
+export async function getSellerOrderRows(sellerId, { from, to } = {}) {
   const sellerOid = toObjectId(sellerId);
 
   const match = { "items.seller": sellerOid };
@@ -282,13 +285,11 @@ export const getEarningsSummary = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Get earnings summary error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to load earnings summary",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to load earnings summary",
+      error: error.message,
+    });
   }
 };
 
@@ -375,13 +376,109 @@ export const getEarningsChart = async (req, res) => {
     return res.status(200).json({ success: true, data: buckets, period });
   } catch (error) {
     console.error("❌ Get earnings chart error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to load earnings chart",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to load earnings chart",
+      error: error.message,
+    });
+  }
+};
+
+// ============================================
+// ✅ NEW: GET /api/seller/dashboard/performance?period=this-week|this-month|this-year
+// Same bucketing rules as getEarningsChart (kept intentionally identical
+// so "Sales Performance" on the dashboard and the Earnings tab chart never
+// disagree about what a week/month/year total means), but with the label
+// format the dashboard spec asked for ("1 Aug" instead of a bare "1"), and
+// "revenue" instead of "earnings" as the field name.
+// ============================================
+const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const MONTH_LABELS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+export const getDashboardPerformance = async (req, res) => {
+  try {
+    const sellerId = req.seller._id;
+    const period = ["this-week", "this-month", "this-year"].includes(
+      req.query.period,
+    )
+      ? req.query.period
+      : "this-month";
+
+    const { from, to } = periodToRange(period);
+    const rows = await getSellerOrderRows(sellerId, { from, to });
+    const paidRows = rows.filter((r) => r.paymentStatus === "paid");
+
+    let data = [];
+
+    if (period === "this-week") {
+      const totals = new Array(7).fill(0);
+      const orders = new Array(7).fill(0);
+      for (const r of paidRows) {
+        const idx = (new Date(r.effectiveDate).getDay() + 6) % 7;
+        totals[idx] += r.sellerSubtotal;
+        orders[idx] += 1;
+      }
+      data = WEEKDAY_LABELS.map((label, i) => ({
+        label,
+        revenue: totals[i],
+        orders: orders[i],
+      }));
+    } else if (period === "this-year") {
+      const totals = new Array(12).fill(0);
+      const orders = new Array(12).fill(0);
+      for (const r of paidRows) {
+        const m = new Date(r.effectiveDate).getMonth();
+        totals[m] += r.sellerSubtotal;
+        orders[m] += 1;
+      }
+      data = MONTH_LABELS.map((label, i) => ({
+        label,
+        revenue: totals[i],
+        orders: orders[i],
+      }));
+    } else {
+      const now = new Date();
+      const monthLabel = MONTH_LABELS[now.getMonth()];
+      const daysInMonth = new Date(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        0,
+      ).getDate();
+      const totals = new Array(daysInMonth).fill(0);
+      const orders = new Array(daysInMonth).fill(0);
+      for (const r of paidRows) {
+        const d = new Date(r.effectiveDate).getDate() - 1;
+        totals[d] += r.sellerSubtotal;
+        orders[d] += 1;
+      }
+      data = totals.map((revenue, i) => ({
+        label: `${i + 1} ${monthLabel}`,
+        revenue,
+        orders: orders[i],
+      }));
+    }
+
+    return res.status(200).json({ success: true, period, data });
+  } catch (error) {
+    console.error("❌ Get dashboard performance error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to load performance data",
+      error: error.message,
+    });
   }
 };
 
@@ -432,13 +529,11 @@ export const getEarningsTransactions = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Get earnings transactions error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to load transactions",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to load transactions",
+      error: error.message,
+    });
   }
 };
 
@@ -534,13 +629,11 @@ export const requestPayout = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Request payout error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to request payout",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to request payout",
+      error: error.message,
+    });
   }
 };
 
@@ -555,12 +648,10 @@ export const getPayoutHistory = async (req, res) => {
     return res.status(200).json({ success: true, data: payouts });
   } catch (error) {
     console.error("❌ Get payout history error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to load payout history",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to load payout history",
+      error: error.message,
+    });
   }
 };

@@ -32,6 +32,7 @@ import {
   getEarningsTransactions,
   requestPayout,
   getPayoutHistory,
+  getDashboardPerformance, // ✅ NEW
 } from "../controllers/sellerEarningsController.js";
 
 // ============================================
@@ -110,6 +111,7 @@ router.get("/me", getCurrentSeller);
 router.put("/profile", updateSellerProfile);
 
 router.get("/dashboard", getSellerDashboard);
+router.get("/dashboard/performance", getDashboardPerformance); // ✅ NEW
 router.get("/orders/recent", getRecentOrders);
 router.get("/activities/recent", getRecentActivities);
 router.get("/verification-status", getVerificationStatus);
@@ -163,6 +165,7 @@ console.log("  📌 POST   /api/seller/forgot-password");
 console.log("  📌 POST   /api/seller/reset-password/:token");
 console.log("  📌 GET    /api/seller/me");
 console.log("  📌 GET    /api/seller/dashboard");
+console.log("  📌 GET    /api/seller/dashboard/performance");
 console.log("  📌 POST   /api/seller/upload-documents");
 console.log("  📌 GET    /api/seller/verification-status");
 console.log("  📌 GET    /api/seller/earnings/summary");

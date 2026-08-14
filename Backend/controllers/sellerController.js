@@ -1,10 +1,31 @@
-import Seller from "../models/Seller.js";
+// Backend/controllers/sellerController.js
+
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import mongoose from "mongoose";
+
+import Seller from "../models/Seller.js";
+import Order, { FULFILLMENT_STATUS } from "../models/Order.js";
+import JewelleryProduct from "../models/JewelleryProduct.js";
+
 import otpService from "../services/otpService.js";
 import emailService from "../services/emailService.js";
 import cloudinaryService from "../services/cloudinaryService.js";
-import crypto from "crypto";
+
+// ✅ Reuse the SAME seller-revenue isolation logic used by the Earnings
+// tab, and the SAME customer-grouping logic used by /customers/summary.
+// This is what guarantees the dashboard numbers never disagree with the
+// dedicated Earnings/Customers pages.
+import { getSellerOrderRows } from "./sellerEarningsController.js";
+import {
+  getSellerOrderRowsForCustomers,
+  buildCustomerRecords,
+} from "./sellerCustomersController.js";
+
+const REFUNDED_ORDER_STATUSES = ["cancelled", "returned", "rto"];
+const LOW_STOCK_DEFAULT_THRESHOLD = 5;
+const toObjectId = (id) => new mongoose.Types.ObjectId(id);
 
 // ============================================
 // GENERATE TOKENS
@@ -788,33 +809,218 @@ export const refreshSellerToken = async (req, res) => {
 };
 
 // ============================================
-// 9. GET SELLER DASHBOARD
+// 9. GET SELLER DASHBOARD — ✅ FULLY REBUILT ON REAL DATA
+//
+// One call returns everything the dashboard's top cards, status grid,
+// low-stock list and top-products list need. Revenue/customer figures
+// reuse the exact same aggregation helpers as /earnings and /customers
+// so the numbers can never silently drift apart across pages.
 // ============================================
 export const getSellerDashboard = async (req, res) => {
   try {
-    const seller = await Seller.findById(req.seller._id);
-    if (!seller) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Seller not found" });
+    const sellerId = req.seller._id;
+    const now = new Date();
+    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+    // ---------------- PRODUCTS ----------------
+    const [totalProducts, activeProducts, newProductsThisMonth, lowStockDocs] =
+      await Promise.all([
+        JewelleryProduct.countDocuments({
+          "seller.sellerId": sellerId,
+          status: { $ne: "Archived" },
+        }),
+        JewelleryProduct.countDocuments({
+          "seller.sellerId": sellerId,
+          status: "Published",
+        }),
+        JewelleryProduct.countDocuments({
+          "seller.sellerId": sellerId,
+          status: { $ne: "Archived" },
+          createdAt: { $gte: thisMonthStart },
+        }),
+        JewelleryProduct.find({
+          "seller.sellerId": sellerId,
+          status: { $ne: "Archived" },
+          isActive: true,
+          $expr: {
+            $lte: [
+              "$inventory.stockQuantity",
+              {
+                $ifNull: [
+                  "$inventory.lowStockThreshold",
+                  LOW_STOCK_DEFAULT_THRESHOLD,
+                ],
+              },
+            ],
+          },
+        })
+          .select(
+            "productName thumbnail inventory.stockQuantity inventory.lowStockThreshold status",
+          )
+          .sort({ "inventory.stockQuantity": 1 })
+          .limit(6),
+      ]);
+
+    // ---------------- ORDERS / REVENUE ----------------
+    // Same seller-item isolation + refund treatment as the Earnings tab.
+    const rows = await getSellerOrderRows(sellerId);
+    const paidRows = rows.filter((r) => r.paymentStatus === "paid");
+    const refundedPaid = paidRows.filter((r) =>
+      REFUNDED_ORDER_STATUSES.includes(r.orderStatus),
+    );
+    const sum = (list) => list.reduce((s, r) => s + (r.sellerSubtotal || 0), 0);
+
+    const revenue = sum(paidRows) - sum(refundedPaid);
+
+    const thisMonthPaid = paidRows.filter(
+      (r) => new Date(r.effectiveDate) >= thisMonthStart,
+    );
+    const thisMonthRefunded = refundedPaid.filter(
+      (r) => new Date(r.effectiveDate) >= thisMonthStart,
+    );
+    const lastMonthPaid = paidRows.filter(
+      (r) =>
+        new Date(r.effectiveDate) >= lastMonthStart &&
+        new Date(r.effectiveDate) < thisMonthStart,
+    );
+    const lastMonthRefunded = refundedPaid.filter(
+      (r) =>
+        new Date(r.effectiveDate) >= lastMonthStart &&
+        new Date(r.effectiveDate) < thisMonthStart,
+    );
+    const thisMonthRevenue = sum(thisMonthPaid) - sum(thisMonthRefunded);
+    const lastMonthRevenue = sum(lastMonthPaid) - sum(lastMonthRefunded);
+    const revenueChangePercent =
+      lastMonthRevenue > 0
+        ? ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
+        : null;
+
+    // Last 7 calendar days — powers the Revenue card's mini sparkline.
+    const revenueTrend = [];
+    for (let i = 6; i >= 0; i--) {
+      const dayStart = new Date(now);
+      dayStart.setHours(0, 0, 0, 0);
+      dayStart.setDate(dayStart.getDate() - i);
+      const dayEnd = new Date(dayStart);
+      dayEnd.setDate(dayEnd.getDate() + 1);
+      const dayTotal = sum(
+        paidRows.filter(
+          (r) =>
+            new Date(r.effectiveDate) >= dayStart &&
+            new Date(r.effectiveDate) < dayEnd,
+        ),
+      );
+      revenueTrend.push(dayTotal);
     }
 
-    const stats = {
-      totalProducts: seller.stats?.totalProducts || 0,
-      totalOrders: seller.stats?.totalOrders || 0,
-      totalRevenue: seller.stats?.totalRevenue || 0,
-      totalSales: seller.stats?.totalSales || 0,
-      rating: seller.stats?.rating || 0,
-      reviewCount: seller.stats?.reviewCount || 0,
-      walletBalance: seller.stats?.walletBalance || 0,
-      status: seller.status,
-      isVerified: seller.isVerified,
-      kycStatus: seller.kyc?.status || "not_submitted",
-      emailVerified: seller.emailVerified,
-      phoneVerified: seller.phoneVerified,
-    };
+    const totalOrders = await Order.countDocuments({
+      "items.seller": sellerId,
+    });
 
-    return res.status(200).json({ success: true, data: stats });
+    // Real fulfillmentStatus counts — no invented status values.
+    const fulfillmentCountsAgg = await Order.aggregate([
+      { $match: { "items.seller": toObjectId(sellerId) } },
+      { $group: { _id: "$fulfillmentStatus", count: { $sum: 1 } } },
+    ]);
+    const fulfillmentCounts = {};
+    for (const s of Object.values(FULFILLMENT_STATUS)) fulfillmentCounts[s] = 0;
+    for (const row of fulfillmentCountsAgg) {
+      if (row._id in fulfillmentCounts) fulfillmentCounts[row._id] = row.count;
+    }
+    const pendingOrders = fulfillmentCounts.PENDING_SELLER_CONFIRMATION || 0;
+    const processingOrders =
+      (fulfillmentCounts.SELLER_CONFIRMED || 0) +
+      (fulfillmentCounts.ADMIN_APPROVED || 0) +
+      (fulfillmentCounts.SHIPMENT_CREATED || 0) +
+      (fulfillmentCounts.AWB_PENDING || 0) +
+      (fulfillmentCounts.AWB_ASSIGNED || 0);
+
+    // ---------------- CUSTOMERS ----------------
+    const customerRows = await getSellerOrderRowsForCustomers(sellerId);
+    const customers = buildCustomerRecords(customerRows);
+    const totalCustomers = customers.length;
+    const newCustomersThisMonth = customers.filter(
+      (c) => new Date(c.firstOrderAt) >= thisMonthStart,
+    ).length;
+
+    // ---------------- TOP PRODUCTS ----------------
+    const byProduct = {};
+    for (const r of paidRows) {
+      for (const it of r.sellerItems) {
+        const key = it.product?.toString();
+        if (!key) continue;
+        if (!byProduct[key]) {
+          byProduct[key] = {
+            productId: key,
+            name: it.name,
+            image: it.image,
+            unitsSold: 0,
+            revenue: 0,
+          };
+        }
+        byProduct[key].unitsSold += it.quantity;
+        byProduct[key].revenue += it.subtotal;
+      }
+    }
+    const topProductAgg = Object.values(byProduct)
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
+
+    const topProductDocs = topProductAgg.length
+      ? await JewelleryProduct.find({
+          _id: { $in: topProductAgg.map((p) => toObjectId(p.productId)) },
+        }).select("productName thumbnail inventory.stockQuantity status")
+      : [];
+    const productDocById = new Map(
+      topProductDocs.map((d) => [d._id.toString(), d]),
+    );
+
+    const topProducts = topProductAgg.map((p) => {
+      const doc = productDocById.get(p.productId);
+      return {
+        productId: p.productId,
+        name: doc?.productName || p.name,
+        image: doc?.thumbnail?.url || p.image || "",
+        unitsSold: p.unitsSold,
+        revenue: p.revenue,
+        stock: doc?.inventory?.stockQuantity ?? null,
+        status: doc?.status || null,
+      };
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        totalProducts,
+        activeProducts,
+        newProductsThisMonth,
+
+        totalOrders,
+        pendingOrders,
+        processingOrders,
+
+        revenue,
+        revenueChangePercent,
+        revenueTrend,
+
+        totalCustomers,
+        newCustomersThisMonth,
+
+        orderStatusBreakdown: fulfillmentCounts,
+
+        lowStockProducts: lowStockDocs.map((p) => ({
+          _id: p._id,
+          name: p.productName,
+          image: p.thumbnail?.url || "",
+          stock: p.inventory?.stockQuantity ?? 0,
+          threshold:
+            p.inventory?.lowStockThreshold ?? LOW_STOCK_DEFAULT_THRESHOLD,
+        })),
+
+        topProducts,
+      },
+    });
   } catch (error) {
     console.error("❌ Get dashboard error:", error);
     return res.status(500).json({
@@ -826,41 +1032,40 @@ export const getSellerDashboard = async (req, res) => {
 };
 
 // ============================================
-// 10. GET RECENT ORDERS
+// 10. GET RECENT ORDERS — ✅ REAL, seller-scoped, no dummy data
 // ============================================
 export const getRecentOrders = async (req, res) => {
   try {
-    const orders = [
-      {
-        _id: "1",
-        orderNumber: "ORD-001",
-        customer: "John Doe",
-        total: 299.99,
-        status: "processing",
-        date: new Date(),
-        items: 3,
-      },
-      {
-        _id: "2",
-        orderNumber: "ORD-002",
-        customer: "Jane Smith",
-        total: 149.5,
-        status: "shipped",
-        date: new Date(Date.now() - 86400000),
-        items: 2,
-      },
-      {
-        _id: "3",
-        orderNumber: "ORD-003",
-        customer: "Mike Johnson",
-        total: 89.99,
-        status: "delivered",
-        date: new Date(Date.now() - 172800000),
-        items: 1,
-      },
-    ];
+    const sellerId = req.seller._id;
 
-    return res.status(200).json({ success: true, data: orders });
+    const orders = await Order.find({ "items.seller": sellerId })
+      .sort({ createdAt: -1 })
+      .limit(8)
+      .select(
+        "orderNumber customerName items orderStatus fulfillmentStatus paymentStatus createdAt",
+      );
+
+    const shaped = orders.map((order) => {
+      const sellerItems = order.items.filter(
+        (i) => i.seller && i.seller.toString() === sellerId.toString(),
+      );
+      const sellerSubtotal = sellerItems.reduce((s, i) => s + i.subtotal, 0);
+      const itemCount = sellerItems.reduce((s, i) => s + i.quantity, 0);
+
+      return {
+        _id: order._id,
+        orderNumber: order.orderNumber,
+        customer: order.customerName || "Customer",
+        total: sellerSubtotal,
+        status: order.orderStatus,
+        fulfillmentStatus: order.fulfillmentStatus,
+        paymentStatus: order.paymentStatus,
+        items: itemCount,
+        date: order.createdAt,
+      };
+    });
+
+    return res.status(200).json({ success: true, data: shaped });
   } catch (error) {
     console.error("❌ Get orders error:", error);
     return res.status(500).json({
@@ -1139,35 +1344,109 @@ export const getVerificationStatus = async (req, res) => {
 };
 
 // ============================================
-// 14. GET RECENT ACTIVITIES
+// 14. GET RECENT ACTIVITIES — ✅ REAL, derived from Order.statusHistory
+//
+// There's no separate Activity model in this codebase, so activities are
+// derived from the same statusHistory entries the order lifecycle already
+// writes (system/seller/super_admin actions on this seller's orders).
+// Nothing here is fabricated — every entry maps to a real status change
+// that actually happened.
 // ============================================
+const ACTIVITY_LABELS = {
+  PENDING_SELLER_CONFIRMATION: {
+    icon: "📦",
+    message: (o) => `New order #${o.orderNumber} received`,
+  },
+  SELLER_CONFIRMED: {
+    icon: "✅",
+    message: (o) => `You confirmed order #${o.orderNumber}`,
+  },
+  SELLER_REJECTED: {
+    icon: "🚫",
+    message: (o) => `You rejected order #${o.orderNumber}`,
+  },
+  ADMIN_APPROVED: {
+    icon: "🛡️",
+    message: (o) => `Order #${o.orderNumber} approved by admin`,
+  },
+  ADMIN_REJECTED: {
+    icon: "⚠️",
+    message: (o) => `Order #${o.orderNumber} rejected by admin`,
+  },
+  SHIPMENT_CREATED: {
+    icon: "🚚",
+    message: (o) => `Shipment created for order #${o.orderNumber}`,
+  },
+  AWB_PENDING: {
+    icon: "🚚",
+    message: (o) => `Order #${o.orderNumber} is awaiting courier assignment`,
+  },
+  AWB_ASSIGNED: {
+    icon: "🏷️",
+    message: (o) => `Courier assigned for order #${o.orderNumber}`,
+  },
+  IN_TRANSIT: {
+    icon: "🛣️",
+    message: (o) => `Order #${o.orderNumber} is in transit`,
+  },
+  OUT_FOR_DELIVERY: {
+    icon: "📍",
+    message: (o) => `Order #${o.orderNumber} is out for delivery`,
+  },
+  DELIVERED: {
+    icon: "🎉",
+    message: (o) => `Order #${o.orderNumber} delivered`,
+  },
+  RTO: {
+    icon: "↩️",
+    message: (o) => `Order #${o.orderNumber} marked RTO`,
+  },
+  RETURN_INITIATED: {
+    icon: "↩️",
+    message: (o) => `Return initiated for order #${o.orderNumber}`,
+  },
+  RETURNED: {
+    icon: "↩️",
+    message: (o) => `Order #${o.orderNumber} was returned`,
+  },
+  CANCELLED: {
+    icon: "❌",
+    message: (o) => `Order #${o.orderNumber} was cancelled`,
+  },
+  SHIPROCKET_FAILED: {
+    icon: "⚠️",
+    message: (o) => `Shipment creation failed for order #${o.orderNumber}`,
+  },
+};
+
 export const getRecentActivities = async (req, res) => {
   try {
-    const activities = [
-      {
-        _id: "1",
-        type: "order",
-        message: "New order #ORD-004 received",
-        timestamp: new Date(),
-        icon: "📦",
-      },
-      {
-        _id: "2",
-        type: "product",
-        message: 'Product "Gold Necklace" added',
-        timestamp: new Date(Date.now() - 3600000),
-        icon: "✨",
-      },
-      {
-        _id: "3",
-        type: "review",
-        message: "New 5-star review received",
-        timestamp: new Date(Date.now() - 7200000),
-        icon: "⭐",
-      },
-    ];
+    const sellerId = req.seller._id;
 
-    return res.status(200).json({ success: true, data: activities });
+    const orders = await Order.find({ "items.seller": sellerId })
+      .sort({ updatedAt: -1 })
+      .limit(15)
+      .select("orderNumber statusHistory");
+
+    const events = [];
+    for (const order of orders) {
+      for (const entry of order.statusHistory || []) {
+        const meta = ACTIVITY_LABELS[entry.status];
+        events.push({
+          _id: `${order._id}-${entry.status}-${new Date(entry.timestamp).getTime()}`,
+          type: entry.status,
+          message: meta
+            ? meta.message(order)
+            : `Order #${order.orderNumber} status: ${entry.status}`,
+          icon: meta?.icon || "🔔",
+          timestamp: entry.timestamp,
+        });
+      }
+    }
+
+    events.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    return res.status(200).json({ success: true, data: events.slice(0, 10) });
   } catch (error) {
     console.error("❌ Get activities error:", error);
     return res.status(500).json({
