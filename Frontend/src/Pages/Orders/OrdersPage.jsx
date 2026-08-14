@@ -1,4 +1,3 @@
-
 // src/Pages/Orders/OrdersPage.jsx
 import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
@@ -17,6 +16,9 @@ import Header from "../Layout/Header/Header";
 import Footer from "../Layout/Footer/Footer";
 import styles from "./OrdersPage.module.css";
 import { fetchMyOrders } from "../../redux/slices/orderSlice";
+
+// ✅ SOCKET.IO — real-time order updates
+import useOrderSocketEvents from "../../hooks/useOrderSocketEvents.js";
 
 const STATUS_META = {
   placed: { label: "Placed", className: "badgePlaced", icon: <FaClock /> },
@@ -71,6 +73,17 @@ const OrdersPage = () => {
     if (isAuthenticated) dispatch(fetchMyOrders());
   }, [dispatch, isAuthenticated]);
 
+  // ✅ SOCKET.IO — any status/shipping change on any of this customer's
+  // orders re-pulls the authoritative list from REST. No full page reload,
+  // no invented client-side merge logic — MongoDB stays the source of truth.
+  useOrderSocketEvents({
+    onSellerConfirmed: () => dispatch(fetchMyOrders()),
+    onSellerRejected: () => dispatch(fetchMyOrders()),
+    onAdminConfirmed: () => dispatch(fetchMyOrders()),
+    onAdminRejected: () => dispatch(fetchMyOrders()),
+    onShippingUpdated: () => dispatch(fetchMyOrders()),
+  });
+
   const filteredOrders = useMemo(() => {
     if (activeFilter === "all") return myOrders;
     if (activeFilter === "return")
@@ -81,15 +94,12 @@ const OrdersPage = () => {
   const summary = useMemo(() => {
     const totalOrders = myOrders.length;
     const delivered = myOrders.filter(
-      (o) => o.orderStatus === "delivered"
+      (o) => o.orderStatus === "delivered",
     ).length;
     const inProgress = myOrders.filter((o) =>
-      ["placed", "processing", "shipped"].includes(o.orderStatus)
+      ["placed", "processing", "shipped"].includes(o.orderStatus),
     ).length;
-    const totalSpent = myOrders.reduce(
-      (sum, o) => sum + getOrderTotal(o),
-      0
-    );
+    const totalSpent = myOrders.reduce((sum, o) => sum + getOrderTotal(o), 0);
     return { totalOrders, delivered, inProgress, totalSpent };
   }, [myOrders]);
 
@@ -154,8 +164,7 @@ const OrdersPage = () => {
                   <div className={styles.ordersList}>
                     {filteredOrders.map((order) => {
                       const status =
-                        STATUS_META[order.orderStatus] ||
-                        STATUS_META.placed;
+                        STATUS_META[order.orderStatus] || STATUS_META.placed;
                       const mainItem = order.items[0];
                       const extraQty = order.items.length - 1;
 
@@ -209,7 +218,10 @@ const OrdersPage = () => {
                             </p>
                           </div>
 
-                          <div className={styles.colDate} data-label="Order Date">
+                          <div
+                            className={styles.colDate}
+                            data-label="Order Date"
+                          >
                             <p className={styles.orderDate}>
                               {new Date(order.createdAt).toLocaleDateString(
                                 "en-IN",
@@ -217,7 +229,7 @@ const OrdersPage = () => {
                                   day: "numeric",
                                   month: "short",
                                   year: "numeric",
-                                }
+                                },
                               )}
                             </p>
                           </div>

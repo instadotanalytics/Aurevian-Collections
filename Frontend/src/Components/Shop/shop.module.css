@@ -27,6 +27,7 @@
 
 .mainContent {
   padding-top: 120px;
+  /* Account for fixed header */
   flex: 1;
 }
 
@@ -65,6 +66,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -87,18 +89,19 @@
   padding: 46px 40px 80px;
   align-items: start;
 }
-
-/* Mobile Filter Toggle */
+/* ==========================================================
+   Mobile Filter Toggle Button - No Border Radius
+   ========================================================== */
 .filterToggle {
   display: none;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
   width: 100%;
-  padding: 12px 16px;
+  padding: 10px 16px;
   background: var(--cream-card);
   border: 1px solid var(--cream-line);
-  border-radius: 8px;
+  border-radius: 0;
   font-family: "Jost", sans-serif;
   font-size: 13px;
   letter-spacing: 1px;
@@ -285,13 +288,11 @@
   appearance: none;
   -webkit-appearance: none;
   cursor: pointer;
-  background: linear-gradient(
-    to right,
-    var(--gold) 0%,
-    var(--gold) var(--_progress, 50%),
-    var(--cream-line) var(--_progress, 50%),
-    var(--cream-line) 100%
-  );
+  background: linear-gradient(to right,
+      var(--gold) 0%,
+      var(--gold) var(--_progress, 50%),
+      var(--cream-line) var(--_progress, 50%),
+      var(--cream-line) 100%);
   height: 3px;
   border-radius: 2px;
   outline: none;
@@ -480,7 +481,7 @@
 }
 
 .skeletonCard {
-  background: #fff;
+  background: var(--cream-card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   overflow: hidden;
@@ -490,7 +491,7 @@
 
 .skeletonImage {
   aspect-ratio: 1 / 1;
-  background: linear-gradient(90deg, #efe9db 25%, #f5f0e6 50%, #efe9db 75%);
+  background: linear-gradient(90deg, #e8ddcc 25%, #f0e8da 50%, #e8ddcc 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -498,7 +499,7 @@
 .skeletonText {
   height: 16px;
   margin: 12px 18px 0;
-  background: linear-gradient(90deg, #efe9db 25%, #f5f0e6 50%, #efe9db 75%);
+  background: linear-gradient(90deg, #e8ddcc 25%, #f0e8da 50%, #e8ddcc 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;
@@ -512,7 +513,7 @@
 .skeletonBtn {
   height: 44px;
   margin: auto -18px -4px;
-  background: linear-gradient(90deg, #efe9db 25%, #f5f0e6 50%, #efe9db 75%);
+  background: linear-gradient(90deg, #e8ddcc 25%, #f0e8da 50%, #e8ddcc 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -521,6 +522,7 @@
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }
@@ -528,9 +530,9 @@
 
 /* Product Card */
 .productCard {
-  background: #fff;
+  background: var(--cream-card);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: 0;
   overflow: hidden;
   position: relative;
   transition: box-shadow 0.25s, transform 0.25s;
@@ -547,13 +549,11 @@
 .productMedia {
   position: relative;
   aspect-ratio: 1 / 1;
-  background: repeating-linear-gradient(
-    45deg,
-    #efe9db,
-    #efe9db 10px,
-    #e7ddc7 10px,
-    #e7ddc7 20px
-  );
+  background: repeating-linear-gradient(45deg,
+      #efe9db,
+      #efe9db 10px,
+      #e7ddc7 10px,
+      #e7ddc7 20px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -574,17 +574,19 @@
   transform: scale(1.05);
 }
 
+/* ---------- Discount Badge - Black background with white text ---------- */
 .badge {
   position: absolute;
   top: 12px;
   left: 12px;
-  background: var(--sale);
-  color: #f4e9cf;
+  background: #ffffff;
+  color: #000000;
   font-size: 11px;
   letter-spacing: 1px;
   padding: 5px 10px;
   border-radius: 20px;
   z-index: 2;
+  font-weight: 600;
 }
 
 .productCatOverlay {
@@ -650,8 +652,9 @@
   border-color: #d44444 !important;
 }
 
+/* ---------- Product Info - Reduced padding ---------- */
 .productInfo {
-  padding: 12px 18px 4px;
+  /* padding: 10px 14px 0; */
   position: relative;
   display: flex;
   flex-direction: column;
@@ -663,9 +666,10 @@
   font-size: 16px;
   font-weight: 500;
   font-family: "Jost", sans-serif;
-  margin-bottom: 6px;
+  /* margin-bottom: 4px; */
   color: var(--ink);
   word-break: break-word;
+  padding: 10px 15px 5px;
 }
 
 .productPrice {
@@ -674,6 +678,8 @@
   gap: 10px;
   font-size: 14px;
   margin-bottom: 8px;
+  margin-bottom: 6px;
+  padding: 0 15px 2px;
 }
 
 .priceNow {
@@ -686,8 +692,8 @@
   text-decoration: line-through;
   font-size: 13px;
 }
+/* ---------- Add to Cart Button - Full width, no padding ---------- */
 
-/* Add to Cart button */
 .addToCartBtn {
   display: flex;
   align-items: center;
@@ -696,10 +702,13 @@
   width: calc(100% + 36px);
   margin: 14px -18px -4px;
   padding: 12px 0;
+  width: 100%;
+  margin: 6px 0 0;
+  padding: 10px 0;
   font-family: "Jost", sans-serif;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 500;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
   color: var(--cream);
   background: var(--gold);
@@ -708,10 +717,11 @@
   transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease,
     box-shadow 0.2s ease;
   margin-top: auto;
+  border-radius: 0;
 }
 
 .addToCartBtn svg {
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .addToCartBtn:hover {
@@ -1123,7 +1133,7 @@
   }
 
   .productCard {
-    border-radius: 4px;
+    border-radius: 0;
   }
 
   .productCatOverlay {
@@ -1142,12 +1152,15 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    padding: 8px 10px 2px;
   }
 
   .productPrice {
     gap: 6px;
     font-size: 12px;
     flex-wrap: wrap;
+    padding: 0 10px;
+
   }
 
   .priceOld {
@@ -1189,10 +1202,38 @@
     font-size: 10.5px;
     gap: 6px;
     letter-spacing: 0.6px;
+    margin-top: 4px;
+    padding: 8px 0;
+    font-size: 10px;
+    gap: 4px;
+    letter-spacing: 0.5px;
   }
 
   .addToCartBtn svg {
+    font-size: 11px;
+  }
+
+  .productInfo {
+    /* padding: 8px 10px 0; */
+  }
+
+  .productName {
     font-size: 12px;
+    margin-bottom: 3px;
+  }
+
+  .productPrice {
+    font-size: 11px;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+
+  .priceNow {
+    font-size: 12px;
+  }
+
+  .priceOld {
+    font-size: 10px;
   }
 
   .toolbar {
@@ -1277,5 +1318,37 @@
   .mobileFilterApply {
     padding: 10px;
     font-size: 14px;
+  }
+
+  .productInfo {
+    /* padding: 6px 8px 0; */
+  }
+
+  .productName {
+    font-size: 11px;
+    padding: 6px 10px 2px;
+  }
+
+  .productPrice {
+    font-size: 10px;
+    gap: 4px;
+    padding: 0 10px;
+  }
+
+  .priceNow {
+    font-size: 11px;
+  }
+
+  .priceOld {
+    font-size: 9px;
+  }
+
+  .addToCartBtn {
+    font-size: 9px;
+    padding: 6px 0;
+  }
+
+  .addToCartBtn svg {
+    font-size: 10px;
   }
 }

@@ -1,0 +1,1051 @@
+/* src/Pages/Seller/SellerDashboard/Settings.module.css */
+
+/* ============================================
+   CONTAINER
+   ============================================ */
+.container {
+  padding: 24px 28px;
+  max-width: 1000px;
+  margin: 0 auto;
+  background: #f8f4ee00;
+  min-height: 100vh;
+  border-radius: 16px;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #3d3228;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #9a8a78;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.refreshBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #ffffff;
+  border: 1px solid #e0d6ca;
+  border-radius: 8px;
+  color: #6b5d4f;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.refreshBtn:hover:not(:disabled) {
+  background: #f5f0ea;
+  border-color: #c8b8a8;
+}
+
+.refreshBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================
+   TABS
+   ============================================ */
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: #ffffff;
+  border: 1px solid #ebe3d8;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  box-shadow: 0 1px 4px rgba(180, 160, 140, 0.06);
+}
+
+.tabBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #9a8a78;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tabBtn:hover {
+  color: #5a4d3e;
+  background: #f5f0ea;
+}
+
+.tabBtn.active {
+  background: #c8a86e;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(200, 168, 110, 0.25);
+}
+
+.tabBtn svg {
+  flex-shrink: 0;
+}
+
+/* ============================================
+   CONTENT
+   ============================================ */
+.content {
+  background: #ffffff;
+  border: 1px solid #ebe3d8;
+  border-radius: 12px;
+  padding: 28px 32px;
+  box-shadow: 0 1px 4px rgba(180, 160, 140, 0.06);
+}
+
+.tabContent {
+  animation: fadeSlide 0.3s ease;
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   SECTION
+   ============================================ */
+.section {
+  margin-bottom: 32px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid #f0e8e0;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.section h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: #3d3228;
+  margin: 0 0 4px 0;
+}
+
+.section p {
+  font-size: 13px;
+  color: #9a8a78;
+  margin: 0 0 20px 0;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.sectionHeader h3 {
+  margin-bottom: 4px;
+}
+
+.sectionHeader p {
+  margin-bottom: 0;
+}
+
+/* ============================================
+   FORM GRID
+   ============================================ */
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.formGroupFull {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  grid-column: 1 / -1;
+}
+
+.formGroup label,
+.formGroupFull label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #5a4d3e;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea,
+.formGroupFull input,
+.formGroupFull select,
+.formGroupFull textarea {
+  padding: 9px 13px;
+  background: #faf7f2;
+  border: 1px solid #e0d6ca;
+  border-radius: 8px;
+  color: #3d3228;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  outline: none;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus,
+.formGroupFull input:focus,
+.formGroupFull select:focus,
+.formGroupFull textarea:focus {
+  border-color: #c8a86e;
+  background: #fcf9f5;
+  box-shadow: 0 0 0 3px rgba(200, 168, 110, 0.08);
+}
+
+.formGroup input:hover,
+.formGroup select:hover,
+.formGroup textarea:hover,
+.formGroupFull input:hover,
+.formGroupFull select:hover,
+.formGroupFull textarea:hover {
+  border-color: #c8b8a8;
+}
+
+.formGroup input::placeholder,
+.formGroup textarea::placeholder,
+.formGroupFull input::placeholder,
+.formGroupFull textarea::placeholder {
+  color: #b8a898;
+  font-size: 13px;
+}
+
+.formGroup textarea,
+.formGroupFull textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.formGroup select,
+.formGroupFull select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%238a7a68' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+  cursor: pointer;
+}
+
+.formGroup select option,
+.formGroupFull select option {
+  background: #faf7f2;
+  color: #3d3228;
+}
+
+.hint {
+  font-size: 11px;
+  color: #b0a090;
+  margin-top: 2px;
+}
+
+/* ============================================
+   FORM ACTIONS
+   ============================================ */
+.formActions {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #f0e8e0;
+}
+
+.saveBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 28px;
+  background: linear-gradient(135deg, #c8a86e, #b89868);
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(200, 168, 110, 0.2);
+}
+
+.saveBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(200, 168, 110, 0.3);
+  background: linear-gradient(135deg, #d4b88a, #c8a86e);
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ============================================
+   PASSWORD INPUT
+   ============================================ */
+.passwordInput {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.passwordInput input {
+  padding-right: 44px;
+  width: 100%;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: #9a8a78;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.passwordToggle:hover {
+  color: #3d3228;
+}
+
+/* ============================================
+   TWO FACTOR AUTH
+   ============================================ */
+.toggleBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #f5f0ea;
+  border: 1px solid #e0d6ca;
+  border-radius: 8px;
+  color: #6b5d4f;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.toggleBtn:hover {
+  background: #ede6de;
+}
+
+.toggleBtn.active {
+  background: #e8f8ef;
+  border-color: #27ae60;
+  color: #27ae60;
+}
+
+.twoFactorInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fef9e7;
+  border: 1px solid #f9e79f;
+  border-radius: 8px;
+  color: #7d6608;
+  font-size: 13px;
+  margin-top: 12px;
+}
+
+.twoFactorInfo svg {
+  flex-shrink: 0;
+  color: #f39c12;
+}
+
+/* ============================================
+   DEVICE LIST
+   ============================================ */
+.deviceList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.deviceItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: #faf7f2;
+  border: 1px solid #e8dfd4;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.deviceItem:hover {
+  border-color: #d0c4b6;
+}
+
+.deviceIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #ede6de;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8a7a68;
+  flex-shrink: 0;
+}
+
+.deviceInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.deviceName {
+  font-weight: 600;
+  color: #3d3228;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.currentDevice {
+  font-size: 10px;
+  font-weight: 600;
+  color: #27ae60;
+  background: #e8f8ef;
+  padding: 1px 8px;
+  border-radius: 12px;
+}
+
+.deviceLocation {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #9a8a78;
+}
+
+.deviceTime {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #b0a090;
+}
+
+.deviceRemove {
+  padding: 4px 12px;
+  background: #fde8e8;
+  border: 1px solid #f5c6c6;
+  border-radius: 6px;
+  color: #e74c3c;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.deviceRemove:hover {
+  background: #f5d0d0;
+  border-color: #e74c3c;
+}
+
+/* ============================================
+   NOTIFICATIONS
+   ============================================ */
+.notificationList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.notificationItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  gap: 12px;
+}
+
+.notificationItem:hover {
+  background: #faf7f2;
+}
+
+.notificationInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.notificationLabel {
+  font-weight: 600;
+  color: #3d3228;
+  font-size: 14px;
+}
+
+.notificationDesc {
+  font-size: 12px;
+  color: #9a8a78;
+}
+
+.toggleSmall {
+  width: 36px;
+  height: 22px;
+  border-radius: 12px;
+  border: 2px solid #d0c4b6;
+  background: #f5f0ea;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  position: relative;
+}
+
+.toggleSmall.active {
+  background: #c8a86e;
+  border-color: #c8a86e;
+}
+
+.toggleSmall svg {
+  color: #ffffff;
+}
+
+/* ============================================
+   DANGER ZONE
+   ============================================ */
+.dangerZone {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.dangerItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  background: #fdf6f4;
+  border: 1px solid #f5d6ce;
+  border-radius: 8px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.dangerItem > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dangerLabel {
+  font-weight: 600;
+  color: #3d3228;
+  font-size: 14px;
+}
+
+.dangerDesc {
+  font-size: 12px;
+  color: #9a8a78;
+}
+
+.dangerBtn {
+  padding: 6px 16px;
+  background: #f5f0ea;
+  border: 1px solid #e0d6ca;
+  border-radius: 6px;
+  color: #6b5d4f;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.dangerBtn:hover {
+  background: #ede6de;
+}
+
+.dangerBtnDelete {
+  padding: 6px 16px;
+  background: #fde8e8;
+  border: 1px solid #f5c6c6;
+  border-radius: 6px;
+  color: #e74c3c;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.dangerBtnDelete:hover {
+  background: #f5d0d0;
+  border-color: #e74c3c;
+}
+
+/* ============================================
+   SKELETON LOADING
+   ============================================ */
+.skeletonContainer {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.skeletonHeader {
+  margin-bottom: 24px;
+}
+
+.skeletonTitle {
+  width: 200px;
+  height: 32px;
+  background: #e8dfd4;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.skeletonSubtitle {
+  width: 250px;
+  height: 18px;
+  background: #e8dfd4;
+  border-radius: 4px;
+}
+
+.skeletonTabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.skeletonTab {
+  width: 100px;
+  height: 40px;
+  background: #e8dfd4;
+  border-radius: 8px;
+}
+
+.skeletonContent {
+  background: #e8dfd4;
+  border-radius: 12px;
+  padding: 28px 32px;
+}
+
+.skeletonSection {
+  height: 120px;
+  background: #ddd2c4;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.skeletonSection:last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================
+   ERROR STATE
+   ============================================ */
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 12px;
+  text-align: center;
+}
+
+.errorContainer svg {
+  color: #e74c3c;
+}
+
+.errorContainer h2 {
+  color: #3d3228;
+  font-size: 20px;
+  margin: 0;
+}
+
+.errorContainer p {
+  color: #9a8a78;
+  margin: 0;
+}
+
+.retryBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 24px;
+  background: #c8a86e;
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all 0.25s ease;
+  margin-top: 8px;
+}
+
+.retryBtn:hover {
+  background: #d4b88a;
+  transform: translateY(-1px);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1024px) {
+  .container {
+    padding: 20px;
+  }
+
+  .content {
+    padding: 24px 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 14px 16px;
+    border-radius: 10px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .headerRight {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  .tabs {
+    gap: 2px;
+    padding: 3px;
+  }
+
+  .tabBtn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .tabBtn span {
+    display: none;
+  }
+
+  .content {
+    padding: 20px 18px;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .section {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+  }
+
+  .section h3 {
+    font-size: 16px;
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .toggleBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .deviceItem {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .deviceRemove {
+    margin-left: auto;
+  }
+
+  .notificationItem {
+    flex-wrap: wrap;
+    padding: 10px 12px;
+  }
+
+  .dangerItem {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .dangerBtn,
+  .dangerBtnDelete {
+    width: 100%;
+    text-align: center;
+  }
+
+  .saveBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Skeleton responsive */
+  .skeletonTabs {
+    gap: 4px;
+  }
+
+  .skeletonTab {
+    width: 70px;
+    height: 36px;
+  }
+
+  .skeletonContent {
+    padding: 20px 18px;
+  }
+
+  .skeletonSection {
+    height: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 10px 12px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .refreshBtn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .content {
+    padding: 16px 14px;
+    border-radius: 10px;
+  }
+
+  .tabBtn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .tabBtn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .formGroup input,
+  .formGroup select,
+  .formGroup textarea,
+  .formGroupFull input,
+  .formGroupFull select,
+  .formGroupFull textarea {
+    padding: 8px 11px;
+    font-size: 13px;
+  }
+
+  .formGroup label,
+  .formGroupFull label {
+    font-size: 11px;
+  }
+
+  .deviceItem {
+    padding: 10px 12px;
+  }
+
+  .deviceName {
+    font-size: 13px;
+  }
+
+  .deviceLocation,
+  .deviceTime {
+    font-size: 11px;
+  }
+
+  .notificationItem {
+    padding: 8px 10px;
+  }
+
+  .notificationLabel {
+    font-size: 13px;
+  }
+
+  .notificationDesc {
+    font-size: 11px;
+  }
+
+  .dangerItem {
+    padding: 12px 14px;
+  }
+
+  .dangerLabel {
+    font-size: 13px;
+  }
+
+  .dangerDesc {
+    font-size: 11px;
+  }
+
+  .twoFactorInfo {
+    font-size: 12px;
+    padding: 10px 14px;
+  }
+
+  .skeletonTitle {
+    width: 160px;
+    height: 28px;
+  }
+
+  .skeletonSubtitle {
+    width: 200px;
+    height: 16px;
+  }
+
+  .skeletonTab {
+    width: 60px;
+    height: 32px;
+  }
+
+  .skeletonContent {
+    padding: 16px 14px;
+  }
+
+  .skeletonSection {
+    height: 80px;
+  }
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+.tabs::-webkit-scrollbar {
+  height: 3px;
+}
+
+.tabs::-webkit-scrollbar-track {
+  background: #f5f0ea;
+  border-radius: 2px;
+}
+
+.tabs::-webkit-scrollbar-thumb {
+  background: #e0d6ca;
+  border-radius: 2px;
+}
+
+.tabs::-webkit-scrollbar-thumb:hover {
+  background: #c8b8a8;
+}
+
+/* Focus visible for accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #c8a86e;
+  outline-offset: 2px;
+}

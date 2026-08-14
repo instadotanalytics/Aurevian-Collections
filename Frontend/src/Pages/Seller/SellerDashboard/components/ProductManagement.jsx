@@ -7,10 +7,10 @@ import {
   FiPlus,
   FiSearch,
   FiEdit2,
-  FiTrash2,
   FiEye,
   FiPackage,
   FiGrid,
+  FiTrash2,
   FiChevronLeft,
   FiChevronRight,
   FiX,
@@ -45,31 +45,19 @@ const useDebounce = (value, delay) => {
 };
 
 // Skeleton Loader Component
-const SkeletonLoader = ({ count = 5 }) => {
+const SkeletonLoader = ({ count = 10 }) => {
   return (
     <div className={styles.skeletonContainer}>
       {Array.from({ length: count }).map((_, index) => (
-        <div key={index} className={styles.skeletonRow}>
-          <div className={styles.skeletonIndex}></div>
-          <div className={styles.skeletonCheckbox}></div>
-          <div className={styles.skeletonImage}></div>
-          <div className={styles.skeletonName}>
-            <div className={styles.skeletonLine}></div>
-            <div className={styles.skeletonLineShort}></div>
-          </div>
-          <div className={styles.skeletonCategory}></div>
-          <div className={styles.skeletonPrice}>
-            <div className={styles.skeletonLine}></div>
-            <div className={styles.skeletonLineShort}></div>
-          </div>
-          <div className={styles.skeletonStock}></div>
-          <div className={styles.skeletonStatus}></div>
-          <div className={styles.skeletonPlacements}></div>
-          <div className={styles.skeletonActions}>
-            <div className={styles.skeletonIcon}></div>
-            <div className={styles.skeletonIcon}></div>
-            <div className={styles.skeletonIcon}></div>
-            <div className={styles.skeletonIcon}></div>
+        <div key={index} className={styles.skeletonCard}>
+          <div className={styles.skeletonRow}>
+            <div className={styles.skeletonImage}></div>
+            <div className={styles.skeletonInfo}>
+              <div className={styles.skeletonLine}></div>
+              <div className={styles.skeletonLineShort}></div>
+              <div className={styles.skeletonLine}></div>
+              <div className={styles.skeletonLineShort}></div>
+            </div>
           </div>
         </div>
       ))}
@@ -93,6 +81,9 @@ const ProductManagement = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [expandedRows, setExpandedRows] = useState({});
   const [selectedRows, setSelectedRows] = useState({});
+  const [visibleCount, setVisibleCount] = useState(10);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [allProductsLoaded, setAllProductsLoaded] = useState(false);
   const [isThrottled, setIsThrottled] = useState(false);
   const [showSkeleton, setShowSkeleton] = useState(true);
 
@@ -100,7 +91,16 @@ const ProductManagement = () => {
   const debouncedStatusFilter = useDebounce(statusFilter, 300);
   const debouncedCategoryFilter = useDebounce(categoryFilter, 300);
 
+  const visibleProducts = products.slice(0, visibleCount);
+
   useEffect(() => {
+    dispatch(fetchPlacementCounts());
+    dispatch(fetchProductLimitStatus());
+  }, []);
+
+  useEffect(() => {
+    setVisibleCount(10);
+    setAllProductsLoaded(false);
     setShowSkeleton(true);
     setIsThrottled(true);
 
@@ -112,11 +112,6 @@ const ProductManagement = () => {
 
     return () => clearTimeout(timer);
   }, [currentPage, debouncedStatusFilter, debouncedCategoryFilter, debouncedSearchTerm]);
-
-  useEffect(() => {
-    dispatch(fetchPlacementCounts());
-    dispatch(fetchProductLimitStatus());
-  }, []);
 
   const fetchProductData = () => {
     const params = {
@@ -140,7 +135,6 @@ const ProductManagement = () => {
     setStatusFilter("");
     setCategoryFilter("");
     setCurrentPage(1);
-    // Fetch immediately after clearing
     setTimeout(() => {
       fetchProductData();
     }, 100);
@@ -175,6 +169,8 @@ const ProductManagement = () => {
   const handlePageChange = (page) => {
     if (page >= 1 && page <= pagination.totalPages) {
       setCurrentPage(page);
+      setVisibleCount(10);
+      setAllProductsLoaded(false);
     }
   };
 
@@ -205,6 +201,10 @@ const ProductManagement = () => {
     setSelectedRows(newState);
   };
 
+  const handleCardClick = (product) => {
+    toggleRowExpand(product._id);
+  };
+
   const getStatusBadge = (status) => {
     const statusMap = {
       Draft: { className: styles.statusDraft, label: "Draft" },
@@ -226,16 +226,69 @@ const ProductManagement = () => {
     return (currentPage - 1) * 20 + index + 1;
   };
 
-  // Bulk action handlers
   const handleBulkDelete = () => {
     const selectedIds = Object.keys(selectedRows).filter(id => selectedRows[id]);
     if (selectedIds.length === 0) {
       toast.error("Please select products to delete");
       return;
     }
-    // Implement bulk delete logic here
     toast.success(`${selectedIds.length} products selected for deletion`);
   };
+
+  const loadMoreProducts = useCallback(() => {
+    if (isLoadingMore || allProductsLoaded || visibleCount >= products.length) {
+      if (visibleCount >= products.length) {
+        setAllProductsLoaded(true);
+      }
+      return;
+    }
+
+    setIsLoadingMore(true);
+    let currentCount = visibleCount;
+    const maxCount = Math.min(visibleCount + 10, products.length);
+    
+    const loadNextBatch = () => {
+      if (currentCount < maxCount) {
+        currentCount++;
+        setVisibleCount(currentCount);
+        setTimeout(loadNextBatch, 200);
+      } else {
+        setIsLoadingMore(false);
+        if (currentCount >= products.length) {
+          setAllProductsLoaded(true);
+        }
+      }
+    };
+    
+    setTimeout(loadNextBatch, 200);
+  }, [visibleCount, products.length, isLoadingMore, allProductsLoaded]);
+
+  useEffect(() => {
+    if (visibleProducts.length === 0 || allProductsLoaded || isLoading) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMoreProducts();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const sentinel = document.getElementById('products-sentinel');
+    if (sentinel) {
+      observer.observe(sentinel);
+    }
+
+    return () => {
+      if (sentinel) {
+        observer.unobserve(sentinel);
+      }
+    };
+  }, [visibleProducts, allProductsLoaded, loadMoreProducts, isLoading]);
+
+  const selectedCount = Object.keys(selectedRows).filter(id => selectedRows[id]).length;
+  const showLoadingState = isLoading || isThrottled || showSkeleton;
 
   const renderTableRow = (product, index) => {
     const isExpanded = expandedRows[product._id];
@@ -246,11 +299,17 @@ const ProductManagement = () => {
 
     return (
       <React.Fragment key={product._id}>
-        <tr className={`${styles.tableRow} ${isExpanded ? styles.expanded : ""}`}>
-          <td className={styles.indexCell}>
+        <tr 
+          className={`${styles.tableRow} ${isExpanded ? styles.expanded : ""}`}
+          onClick={() => handleCardClick(product)}
+        >
+          {/* Index */}
+          <td className={styles.indexCell} onClick={(e) => e.stopPropagation()}>
             <span className={styles.indexNumber}>{serialNumber}</span>
           </td>
-          <td className={styles.checkboxCell}>
+          
+          {/* Checkbox */}
+          <td className={styles.checkboxCell} onClick={(e) => e.stopPropagation()}>
             <input
               type="checkbox"
               checked={isSelected || false}
@@ -258,7 +317,9 @@ const ProductManagement = () => {
               className={styles.checkbox}
             />
           </td>
-          <td className={styles.imageCell}>
+          
+          {/* Image */}
+          <td className={styles.imageCell} onClick={(e) => e.stopPropagation()}>
             <img
               src={product.thumbnail?.url || "/placeholder-image.jpg"}
               alt={product.productName}
@@ -268,15 +329,21 @@ const ProductManagement = () => {
               }}
             />
           </td>
+          
+          {/* Product Name & SKU */}
           <td className={styles.nameCell}>
             <div className={styles.productNameCompact} title={product.productName}>
               {product.productName}
             </div>
             <div className={styles.productSku}>SKU: {product.sku || 'N/A'}</div>
           </td>
+          
+          {/* Category */}
           <td className={styles.categoryCell}>
             {product.category?.categoryData?.label || 'Uncategorized'}
           </td>
+          
+          {/* Price */}
           <td className={styles.priceCell}>
             <div className={styles.priceCompact}>
               <div className={styles.priceRow}>
@@ -297,14 +364,20 @@ const ProductManagement = () => {
               )}
             </div>
           </td>
+          
+          {/* Stock */}
           <td className={styles.stockCell}>
             <span className={product.inventory?.stockQuantity > 0 ? styles.inStock : styles.outOfStock}>
               {product.inventory?.stockQuantity > 0 ? product.inventory.stockQuantity : '0'}
             </span>
           </td>
+          
+          {/* Status */}
           <td className={styles.statusCell}>
             {getStatusBadge(product.status)}
           </td>
+          
+          {/* Placements */}
           <td className={styles.placementsCell}>
             {product.placements && product.placements.length > 0 ? (
               <span className={styles.placementTags}>
@@ -315,7 +388,9 @@ const ProductManagement = () => {
               <span className={styles.noPlacements}>—</span>
             )}
           </td>
-          <td className={styles.actionsCell}>
+          
+          {/* Actions */}
+          <td className={styles.actionsCell} onClick={(e) => e.stopPropagation()}>
             <button
               className={styles.actionIconBtn}
               onClick={() => handleViewProduct(product)}
@@ -331,13 +406,6 @@ const ProductManagement = () => {
               <FiEdit2 size={16} />
             </button>
             <button
-              className={`${styles.actionIconBtn} ${styles.deleteIconBtn}`}
-              onClick={() => handleDeleteClick(product)}
-              title="Archive Product"
-            >
-              <FiTrash2 size={16} />
-            </button>
-            <button
               className={styles.actionIconBtn}
               onClick={() => toggleRowExpand(product._id)}
               title="Expand Details"
@@ -346,6 +414,8 @@ const ProductManagement = () => {
             </button>
           </td>
         </tr>
+        
+        {/* Expanded Row */}
         {isExpanded && (
           <tr className={styles.expandedRow}>
             <td colSpan="10">
@@ -511,11 +581,6 @@ const ProductManagement = () => {
     );
   };
 
-  const showLoadingState = isLoading || isThrottled || showSkeleton;
-
-  // Get selected count
-  const selectedCount = Object.keys(selectedRows).filter(id => selectedRows[id]).length;
-
   return (
     <div className={styles.container}>
       {/* Header */}
@@ -587,15 +652,6 @@ const ProductManagement = () => {
         </form>
 
         <div className={styles.filterGroup}>
-          {(searchTerm || statusFilter || categoryFilter) && (
-            <button
-              className={styles.clearFiltersBtn}
-              onClick={handleClearFilters}
-            >
-              <FiX size={16} />
-              Clear
-            </button>
-          )}
           <select
             className={styles.filterSelect}
             value={statusFilter}
@@ -617,14 +673,22 @@ const ProductManagement = () => {
             <option value="">All Categories</option>
           </select>
 
-          
+          {(searchTerm || statusFilter || categoryFilter) && (
+            <button
+              className={styles.clearFiltersBtn}
+              onClick={handleClearFilters}
+            >
+              <FiX size={16} />
+              Clear
+            </button>
+          )}
         </div>
       </div>
 
       {/* Table */}
-      {showLoadingState ? (
+      {showLoadingState && products.length === 0 ? (
         <div className={styles.tableContainer}>
-          <SkeletonLoader count={5} />
+          <SkeletonLoader count={10} />
         </div>
       ) : products.length === 0 ? (
         renderEmptyState()
@@ -664,9 +728,18 @@ const ProductManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {products.map((product, index) => renderTableRow(product, index))}
+              {visibleProducts.map((product, index) => renderTableRow(product, index))}
             </tbody>
           </table>
+          {!allProductsLoaded && products.length > visibleCount && (
+            <div id="products-sentinel" className={styles.sentinel} />
+          )}
+          {isLoadingMore && (
+            <div className={styles.loadingMore}>
+              <div className={styles.spinnerSmall}></div>
+              <span>Loading more products...</span>
+            </div>
+          )}
         </div>
       )}
 

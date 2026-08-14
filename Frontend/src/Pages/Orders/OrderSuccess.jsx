@@ -1,4 +1,3 @@
-
 // src/Pages/Orders/OrderSuccess.jsx
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -7,6 +6,30 @@ import Footer from "../Layout/Footer/Footer";
 import OrderDetailView from "../../Components/OrderDetailView/OrderDetailView";
 import * as orderApi from "../../api/orderApi.js";
 import styles from "../../Components/OrderDetailView/OrderDetailView.module.css";
+import useOrderRoom from "../../hooks/useOrderRoom.js";
+import useOrderSocketEvents from "../../hooks/useOrderSocketEvents.js";
+import {
+  notifySellerConfirmed,
+  notifySellerRejected,
+  notifyAdminApproved,
+  notifyAdminRejected,
+  notifyShippingUpdated,
+} from "../../utils/orderNotifications.js";
+
+const patchOrder = (prev, payload) => {
+  if (!prev) return prev;
+  return {
+    ...prev,
+    orderStatus: payload.orderStatus ?? prev.orderStatus,
+    fulfillmentStatus: payload.fulfillmentStatus ?? prev.fulfillmentStatus,
+    paymentStatus: payload.paymentStatus ?? prev.paymentStatus,
+    sellerRejectionReason: payload.reason ?? prev.sellerRejectionReason,
+    adminRejectionReason: payload.reason ?? prev.adminRejectionReason,
+    shipping: payload.shipping
+      ? { ...prev.shipping, ...payload.shipping }
+      : prev.shipping,
+  };
+};
 
 const OrderSuccess = () => {
   const { orderId } = useParams();
@@ -38,6 +61,40 @@ const OrderSuccess = () => {
       cancelled = true;
     };
   }, [orderId]);
+
+  useOrderRoom(orderId);
+
+  useOrderSocketEvents({
+    onSellerConfirmed: (payload) => {
+      if (payload.orderId !== orderId) return;
+      notifySellerConfirmed(payload);
+      setOrder((prev) => patchOrder(prev, payload));
+    },
+    onSellerRejected: (payload) => {
+      if (payload.orderId !== orderId) return;
+      notifySellerRejected(payload);
+      setOrder((prev) => patchOrder(prev, payload));
+    },
+    onAdminConfirmed: (payload) => {
+      if (payload.orderId !== orderId) return;
+      notifyAdminApproved(payload);
+      setOrder((prev) => patchOrder(prev, payload));
+    },
+    onAdminRejected: (payload) => {
+      if (payload.orderId !== orderId) return;
+      notifyAdminRejected(payload);
+      setOrder((prev) => patchOrder(prev, payload));
+    },
+    onShippingUpdated: (payload) => {
+      if (payload.orderId !== orderId) return;
+      notifyShippingUpdated(payload);
+      setOrder((prev) => patchOrder(prev, payload));
+    },
+    onStatusUpdated: (payload) => {
+      if (payload.orderId !== orderId) return;
+      setOrder((prev) => patchOrder(prev, payload));
+    },
+  });
 
   return (
     <>

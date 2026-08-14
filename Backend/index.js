@@ -57,6 +57,12 @@ import { initializeDefaultPlans } from "./services/subscriptionPlanService.js";
 import { initializeHeaderConfig } from "./services/headerConfigService.js";
 
 // ============================================
+// SOCKET.IO IMPORTS (NEW)
+// ============================================
+import { createServer } from "http";
+import { initSocket } from "./socket/socketService.js";
+
+// ============================================
 // INITIALIZE SERVICES ON STARTUP
 // ============================================
 (async () => {
@@ -356,15 +362,22 @@ app.use((err, req, res, next) => {
 });
 
 // ============================================
-// START SERVER
+// START SERVER (UPDATED WITH SOCKET.IO)
 // ============================================
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
+
+// ✅ SOCKET.IO — wrap Express in a raw HTTP server so Socket.IO can attach
+// to the SAME port, then hand that server to initSocket() before listening.
+const httpServer = createServer(app);
+initSocket(httpServer);
+
+const server = httpServer.listen(PORT, () => {
   console.log("\n" + "=".repeat(60));
   console.log("🚀 Server Started Successfully");
   console.log("=".repeat(60));
   console.log(`📍 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(`🔗 Port: ${PORT}`);
+  console.log(`🔌 Socket.IO: ✅ Attached`);
   console.log(
     `🔗 Client URL: ${process.env.CLIENT_URL || "https://aureviancollections.in"}`,
   );

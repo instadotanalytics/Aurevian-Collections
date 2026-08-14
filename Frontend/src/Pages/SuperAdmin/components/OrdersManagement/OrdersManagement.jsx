@@ -6,6 +6,9 @@ import toast from "react-hot-toast";
 import styles from "./OrdersManagement.module.css";
 import * as orderApi from "../../../../api/orderApi.js";
 
+// ✅ SOCKET.IO — real-time order updates for super admin
+import useOrderSocketEvents from "../../../../hooks/useOrderSocketEvents.js";
+
 const TABS = [
   { key: "SELLER_CONFIRMED", label: "Awaiting Approval" },
   { key: "ADMIN_APPROVED", label: "Approved" },
@@ -64,6 +67,16 @@ const OrdersManagement = () => {
   useEffect(() => {
     loadOrders(activeTab);
   }, [activeTab, loadOrders]);
+
+  // ✅ SOCKET.IO — "Super Admin should see this without refreshing" per
+  // spec item 2. A seller confirming an order is the one event admin
+  // actively needs a toast for; shipping updates just quietly refresh
+  // whatever tab is open (relevant for AWB Pending / Shipped tabs).
+  useOrderSocketEvents({
+    onOrderCreated: () => loadOrders(activeTab),
+    onSellerConfirmed: () => loadOrders(activeTab),
+    onShippingUpdated: () => loadOrders(activeTab),
+  });
 
   const handleApprove = async (orderId) => {
     setActioningId(orderId);

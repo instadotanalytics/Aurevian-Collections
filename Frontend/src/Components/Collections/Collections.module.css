@@ -112,6 +112,14 @@
       rgba(20, 15, 10, 0.08) 100%
     ),
     linear-gradient(to top, rgba(20, 15, 10, 0.35) 0%, rgba(20, 15, 10, 0) 35%);
+  background:
+    linear-gradient(
+      to right,
+      rgba(20, 15, 10, 0.55) 0%,
+      rgba(20, 15, 10, 0.22) 45%,
+      rgba(20, 15, 10, 0.08) 100%
+    ),
+    linear-gradient(to top, rgba(20, 15, 10, 0.35) 0%, rgba(20, 15, 10, 0) 35%);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -332,6 +340,29 @@
 .revealVisible.revealStagger > *:nth-child(6) {
   transition-delay: 0.3s;
 }
+.revealVisible.revealStagger > *:nth-child(1) {
+  transition-delay: 0.05s;
+}
+
+.revealVisible.revealStagger > *:nth-child(2) {
+  transition-delay: 0.1s;
+}
+
+.revealVisible.revealStagger > *:nth-child(3) {
+  transition-delay: 0.15s;
+}
+
+.revealVisible.revealStagger > *:nth-child(4) {
+  transition-delay: 0.2s;
+}
+
+.revealVisible.revealStagger > *:nth-child(5) {
+  transition-delay: 0.25s;
+}
+
+.revealVisible.revealStagger > *:nth-child(6) {
+  transition-delay: 0.3s;
+}
 
 .revealVisible.revealStagger > * {
   opacity: 1;
@@ -407,7 +438,7 @@
   padding: 12px 16px;
   background: var(--cream-card);
   border: 1px solid var(--cream-line);
-  border-radius: 8px;
+  /* border-radius: 8px; */
   font-family: "Jost", sans-serif;
   font-size: 13px;
   letter-spacing: 1px;
@@ -818,6 +849,7 @@
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }
@@ -972,12 +1004,12 @@
 
 /* Product Body - Flex column to ensure button stays at bottom */
 .productBody {
-  padding: 12px 16px 4px;
+  /* padding: 12px 16px 0; */
   display: flex;
   flex-direction: column;
   flex: 1;
   justify-content: space-between;
-  gap: 4px;
+  /* gap: 4px; */
 }
 
 .productName {
@@ -985,7 +1017,7 @@
   font-size: 15px;
   font-weight: 500;
   color: var(--ink);
-  margin: 0 0 6px 0;
+  /* margin-bottom: 3px; */
   line-height: 1.3;
   font-style: normal;
   display: -webkit-box;
@@ -993,6 +1025,7 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-decoration: none;
+  padding: 10px 12px 5px;
 }
 
 .productName:hover {
@@ -1003,9 +1036,10 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 14px;
-  margin-bottom: 2px;
+  font-size: 13px;
+  /* margin-bottom: 6px; */
   flex-wrap: wrap;
+  padding: 0 15px 6px;
 }
 
 .productCurrentPrice {
@@ -1791,6 +1825,9 @@
     width: calc(100% + 32px);
     margin: 10px -16px -4px;
   }
+  .productPriceRow {
+    padding: 0 15px;
+  }
 }
 
 @media (max-width: 860px) {
@@ -2023,17 +2060,17 @@
   }
 
   .productBody {
-    padding: 10px 12px 10px;
-    gap: 3px;
+    /* padding: 8px 12px 0; */
+    /* gap: 3px; */
   }
 
   .productName {
     font-size: 13px;
-    text-decoration: none;
+    /* margin-bottom: 3px; */
   }
 
   .productPriceRow {
-    font-size: 13px;
+    font-size: 11px;
     gap: 8px;
   }
 
@@ -2112,8 +2149,8 @@
   }
 
   .filterToggle {
-    font-size: 12px;
-    padding: 6px 12px;
+    font-size: 13px;
+    padding: 10px 12px;
   }
 
   .featureImageWrap {
@@ -2225,12 +2262,12 @@
   }
 
   .productBody {
-    padding: 8px 10px 8px;
+    /* padding: 6px 10px 0; */
   }
 
   .productName {
     font-size: 12px;
-    text-decoration: none;
+    padding: 6px 12px 2px;
   }
 
   .productCurrentPrice {
@@ -2365,7 +2402,7 @@
   }
 
   .productBody {
-    padding: 6px 8px 0;
+    /* padding: 6px 8px 0; */
   }
 
   .productName {
