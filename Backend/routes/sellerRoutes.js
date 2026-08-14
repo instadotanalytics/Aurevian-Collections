@@ -23,6 +23,26 @@ import {
 } from "../controllers/sellerController.js";
 import { protectSeller } from "../middleware/sellerAuth.js";
 
+// ============================================
+// EARNINGS CONTROLLER IMPORTS
+// ============================================
+import {
+  getEarningsSummary,
+  getEarningsChart,
+  getEarningsTransactions,
+  requestPayout,
+  getPayoutHistory,
+} from "../controllers/sellerEarningsController.js";
+
+// ============================================
+// CUSTOMERS CONTROLLER IMPORTS (ADDED)
+// ============================================
+import {
+  getCustomersSummary,
+  getCustomers,
+  getCustomerDetail,
+} from "../controllers/sellerCustomersController.js";
+
 const router = express.Router();
 
 // ============================================
@@ -95,6 +115,25 @@ router.get("/activities/recent", getRecentActivities);
 router.get("/verification-status", getVerificationStatus);
 
 // ============================================
+// EARNINGS ROUTES
+// ============================================
+router.get("/earnings/summary", getEarningsSummary);
+router.get("/earnings/chart", getEarningsChart);
+router.get("/earnings/transactions", getEarningsTransactions);
+router.post("/earnings/payout/request", requestPayout);
+router.get("/earnings/payout/history", getPayoutHistory);
+
+// ============================================
+// CUSTOMERS ROUTES (ADDED)
+// NOTE: order matters — /customers/summary must be registered before
+// /customers/:userId, otherwise Express would match "summary" as a
+// :userId param and getCustomerDetail's ObjectId validation would 400 it.
+// ============================================
+router.get("/customers/summary", getCustomersSummary);
+router.get("/customers", getCustomers);
+router.get("/customers/:userId", getCustomerDetail);
+
+// ============================================
 // DOCUMENT UPLOAD ROUTES
 // ============================================
 router.post(
@@ -126,5 +165,13 @@ console.log("  📌 GET    /api/seller/me");
 console.log("  📌 GET    /api/seller/dashboard");
 console.log("  📌 POST   /api/seller/upload-documents");
 console.log("  📌 GET    /api/seller/verification-status");
+console.log("  📌 GET    /api/seller/earnings/summary");
+console.log("  📌 GET    /api/seller/earnings/chart");
+console.log("  📌 GET    /api/seller/earnings/transactions");
+console.log("  📌 POST   /api/seller/earnings/payout/request");
+console.log("  📌 GET    /api/seller/earnings/payout/history");
+console.log("  📌 GET    /api/seller/customers/summary");
+console.log("  📌 GET    /api/seller/customers");
+console.log("  📌 GET    /api/seller/customers/:userId");
 
 export default router;

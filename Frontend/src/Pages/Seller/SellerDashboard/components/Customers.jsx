@@ -1,17 +1,15 @@
 // src/Pages/Seller/SellerDashboard/Customers.jsx
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FiSearch,
   FiDownload,
   FiUsers,
-  FiUserPlus,
   FiStar,
   FiMail,
   FiPhone,
   FiCalendar,
   FiChevronDown,
-  FiChevronRight,
-  FiArrowRight,
   FiRefreshCw,
   FiFilter,
   FiEye,
@@ -24,10 +22,27 @@ import {
   FiMoreHorizontal,
 } from "react-icons/fi";
 import styles from "./Customers.module.css";
+import { API_URL } from "../../../../utils/constants";
 
 // ============================================
-// THROTTLE & DEBOUNCE UTILITIES
+// API HELPER (same pattern as Earnings.jsx)
 // ============================================
+async function apiFetch(path, options = {}) {
+  const token = localStorage.getItem("sellerAccessToken");
+  const res = await fetch(`${API_URL}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    credentials: "include",
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success)
+    throw new Error(data.message || "Request failed");
+  return data;
+}
+
 const throttle = (func, limit) => {
   let inThrottle;
   return function (...args) {
@@ -39,301 +54,156 @@ const throttle = (func, limit) => {
   };
 };
 
-const debounce = (func, delay) => {
-  let timeoutId;
-  return function (...args) {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func.apply(this, args), delay);
-  };
-};
+// ============================================
+// SKELETON LOADER (unchanged)
+// ============================================
+const SkeletonLoader = () => (
+  <div className={styles.skeletonContainer}>
+    <div className={styles.skeletonHeader}>
+      <div className={styles.skeletonTitle} />
+      <div className={styles.skeletonButtons} />
+    </div>
+    <div className={styles.skeletonStats}>
+      {[1, 2, 3, 4].map((i) => (
+        <div key={i} className={styles.skeletonStatCard}>
+          <div className={styles.skeletonStatIcon} />
+          <div className={styles.skeletonStatContent}>
+            <div className={styles.skeletonStatLabel} />
+            <div className={styles.skeletonStatValue} />
+            <div className={styles.skeletonStatChange} />
+          </div>
+        </div>
+      ))}
+    </div>
+    <div className={styles.skeletonToolbar} />
+    <div className={styles.skeletonTable}>
+      <div className={styles.skeletonTableHeader} />
+      {[1, 2, 3, 4, 5].map((i) => (
+        <div key={i} className={styles.skeletonTableRow} />
+      ))}
+    </div>
+  </div>
+);
 
 // ============================================
-// SKELETON LOADER COMPONENT
+// CSV EXPORT — real client-side export of the data already on screen.
+// No backend needed; nothing fabricated.
 // ============================================
-const SkeletonLoader = () => {
-  return (
-    <div className={styles.skeletonContainer}>
-      <div className={styles.skeletonHeader}>
-        <div className={styles.skeletonTitle} />
-        <div className={styles.skeletonButtons} />
-      </div>
-      <div className={styles.skeletonStats}>
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className={styles.skeletonStatCard}>
-            <div className={styles.skeletonStatIcon} />
-            <div className={styles.skeletonStatContent}>
-              <div className={styles.skeletonStatLabel} />
-              <div className={styles.skeletonStatValue} />
-              <div className={styles.skeletonStatChange} />
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className={styles.skeletonToolbar} />
-      <div className={styles.skeletonTable}>
-        <div className={styles.skeletonTableHeader} />
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className={styles.skeletonTableRow} />
-        ))}
-      </div>
-    </div>
-  );
-};
+function exportCustomersCSV(customers) {
+  const headers = [
+    "Name",
+    "Email",
+    "Phone",
+    "Segment",
+    "Orders",
+    "Total Spent (INR)",
+    "Last Order",
+    "Status",
+  ];
+  const rows = customers.map((c) => [
+    c.name || "",
+    c.email || "",
+    c.phone || "",
+    c.segment,
+    c.totalOrders,
+    c.totalSpent,
+    new Date(c.lastOrderAt).toISOString().slice(0, 10),
+    c.status,
+  ]);
+  const csv = [headers, ...rows]
+    .map((row) =>
+      row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
+    )
+    .join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `customers-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 // ============================================
 // MAIN COMPONENT
 // ============================================
 const Customers = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterSegment, setFilterSegment] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [customers, setCustomers] = useState([]);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    total: 0,
+  });
   const [stats, setStats] = useState(null);
   const [error, setError] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
 
-  // Refs
   const refreshThrottleRef = useRef(null);
   const searchDebounceRef = useRef(null);
 
-  // ============================================
-  // SAMPLE DATA
-  // ============================================
-  const sampleCustomers = [
-    {
-      id: 1,
-      name: "Priya Sharma",
-      email: "priya.sharma@email.com",
-      phone: "+91 98765 43210",
-      segment: "premium",
-      totalOrders: 24,
-      totalSpent: 45230,
-      lastOrder: "2024-12-18",
-      joined: "2023-06-15",
-      status: "active",
-      avatar: "PS",
-      reviews: 12,
-      avgRating: 4.8,
-    },
-    {
-      id: 2,
-      name: "Amit Kumar",
-      email: "amit.kumar@email.com",
-      phone: "+91 87654 32109",
-      segment: "regular",
-      totalOrders: 12,
-      totalSpent: 18990,
-      lastOrder: "2024-12-17",
-      joined: "2023-09-22",
-      status: "active",
-      avatar: "AK",
-      reviews: 5,
-      avgRating: 4.2,
-    },
-    {
-      id: 3,
-      name: "Neha Patel",
-      email: "neha.patel@email.com",
-      phone: "+91 76543 21098",
-      segment: "vip",
-      totalOrders: 38,
-      totalSpent: 89450,
-      lastOrder: "2024-12-16",
-      joined: "2022-11-03",
-      status: "active",
-      avatar: "NP",
-      reviews: 18,
-      avgRating: 4.9,
-    },
-    {
-      id: 4,
-      name: "Raj Singh",
-      email: "raj.singh@email.com",
-      phone: "+91 65432 10987",
-      segment: "regular",
-      totalOrders: 8,
-      totalSpent: 12450,
-      lastOrder: "2024-12-15",
-      joined: "2024-02-10",
-      status: "inactive",
-      avatar: "RS",
-      reviews: 3,
-      avgRating: 3.5,
-    },
-    {
-      id: 5,
-      name: "Sneha Reddy",
-      email: "sneha.reddy@email.com",
-      phone: "+91 54321 09876",
-      segment: "premium",
-      totalOrders: 19,
-      totalSpent: 36780,
-      lastOrder: "2024-12-14",
-      joined: "2023-04-28",
-      status: "active",
-      avatar: "SR",
-      reviews: 9,
-      avgRating: 4.6,
-    },
-    {
-      id: 6,
-      name: "Vikram Mehta",
-      email: "vikram.mehta@email.com",
-      phone: "+91 43210 98765",
-      segment: "new",
-      totalOrders: 3,
-      totalSpent: 4590,
-      lastOrder: "2024-12-13",
-      joined: "2024-11-05",
-      status: "active",
-      avatar: "VM",
-      reviews: 1,
-      avgRating: 5.0,
-    },
-    {
-      id: 7,
-      name: "Ananya Iyer",
-      email: "ananya.iyer@email.com",
-      phone: "+91 32109 87654",
-      segment: "vip",
-      totalOrders: 42,
-      totalSpent: 112340,
-      lastOrder: "2024-12-12",
-      joined: "2022-08-19",
-      status: "active",
-      avatar: "AI",
-      reviews: 22,
-      avgRating: 4.9,
-    },
-    {
-      id: 8,
-      name: "Deepak Gupta",
-      email: "deepak.gupta@email.com",
-      phone: "+91 21098 76543",
-      segment: "inactive",
-      totalOrders: 2,
-      totalSpent: 1890,
-      lastOrder: "2024-10-28",
-      joined: "2024-07-14",
-      status: "inactive",
-      avatar: "DG",
-      reviews: 0,
-      avgRating: 0,
-    },
-  ];
+  const fetchCustomers = useCallback(async () => {
+    const params = new URLSearchParams({
+      search: searchTerm,
+      segment: filterSegment,
+      sort: sortBy,
+      page: "1",
+      limit: "50",
+    });
+    const [summaryRes, listRes] = await Promise.all([
+      apiFetch("/seller/customers/summary"),
+      apiFetch(`/seller/customers?${params.toString()}`),
+    ]);
+    setStats(summaryRes.data);
+    setCustomers(listRes.data);
+    setPagination(listRes.pagination);
+  }, [searchTerm, filterSegment, sortBy]);
 
-  // ============================================
-  // FETCH DATA
-  // ============================================
-  const fetchCustomersData = useCallback(async () => {
+  const loadAll = useCallback(async () => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      const data = {
-        customers: sampleCustomers,
-        stats: {
-          total: 342,
-          active: 289,
-          premium: 78,
-          vip: 34,
-          newThisMonth: 45,
-          returningRate: 68,
-          avgOrderValue: 364,
-          lifetimeValue: 45600,
-        },
-      };
-
-      setCustomers(data.customers);
-      setStats(data.stats);
+      await fetchCustomers();
       setError(null);
     } catch (err) {
-      setError("Failed to load customers data");
+      setError(err.message || "Failed to load customers data");
       console.error("Error fetching customers:", err);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [fetchCustomers]);
 
-  // ============================================
-  // THROTTLED REFRESH
-  // ============================================
   const handleRefresh = useCallback(() => {
     if (refreshThrottleRef.current) return;
-
     refreshThrottleRef.current = throttle(() => {
       setRefreshing(true);
-      fetchCustomersData();
+      loadAll();
       refreshThrottleRef.current = null;
     }, 2000)();
-
     setTimeout(() => {
       refreshThrottleRef.current = null;
     }, 2000);
-  }, [fetchCustomersData]);
+  }, [loadAll]);
 
-  // ============================================
-  // DEBOUNCED SEARCH
-  // ============================================
   const handleSearch = useCallback((value) => {
-    if (searchDebounceRef.current) {
-      clearTimeout(searchDebounceRef.current);
-    }
-
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
     searchDebounceRef.current = setTimeout(() => {
       setSearchTerm(value);
       searchDebounceRef.current = null;
     }, 300);
   }, []);
 
-  // ============================================
-  // EFFECTS
-  // ============================================
   useEffect(() => {
-    fetchCustomersData();
+    setLoading(true);
+    loadAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm, filterSegment, sortBy]);
 
-    return () => {
-      if (searchDebounceRef.current) {
-        clearTimeout(searchDebounceRef.current);
-      }
-    };
-  }, [fetchCustomersData]);
-
-  // ============================================
-  // FILTER & SEARCH LOGIC
-  // ============================================
-  const filteredCustomers = customers.filter((customer) => {
-    const matchesSearch = customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          customer.phone.includes(searchTerm);
-
-    const matchesSegment = filterSegment === "all" || customer.segment === filterSegment;
-
-    return matchesSearch && matchesSegment;
-  });
-
-  // Sort customers
-  const sortedCustomers = [...filteredCustomers].sort((a, b) => {
-    switch (sortBy) {
-      case "recent":
-        return new Date(b.lastOrder) - new Date(a.lastOrder);
-      case "spent":
-        return b.totalSpent - a.totalSpent;
-      case "orders":
-        return b.totalOrders - a.totalOrders;
-      case "name":
-        return a.name.localeCompare(b.name);
-      default:
-        return 0;
-    }
-  });
-
-  // ============================================
-  // GET SEGMENT LABEL
-  // ============================================
   const getSegmentLabel = (segment) => {
     switch (segment) {
       case "vip":
@@ -368,16 +238,14 @@ const Customers = () => {
     }
   };
 
-  // ============================================
-  // GET STATUS LABEL
-  // ============================================
-  const getStatusLabel = (status) => {
-    return status === "active" ? "Active" : "Inactive";
-  };
+  const getInitials = (name = "") =>
+    name
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((p) => p[0]?.toUpperCase())
+      .join("") || "?";
 
-  // ============================================
-  // LOADING STATE
-  // ============================================
   if (loading) {
     return (
       <div className={styles.container}>
@@ -386,9 +254,6 @@ const Customers = () => {
     );
   }
 
-  // ============================================
-  // ERROR STATE
-  // ============================================
   if (error) {
     return (
       <div className={styles.container}>
@@ -405,16 +270,15 @@ const Customers = () => {
     );
   }
 
-  // ============================================
-  // MAIN RENDER
-  // ============================================
   return (
     <div className={styles.container}>
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <h1 className={styles.title}>Customers</h1>
-          <span className={styles.subtitle}>Manage your customer relationships</span>
+          <span className={styles.subtitle}>
+            Customers who've purchased from your store
+          </span>
         </div>
         <div className={styles.headerRight}>
           <button
@@ -422,16 +286,19 @@ const Customers = () => {
             onClick={handleRefresh}
             disabled={refreshing}
           >
-            <FiRefreshCw className={refreshing ? styles.spinning : ""} size={16} />
+            <FiRefreshCw
+              className={refreshing ? styles.spinning : ""}
+              size={16}
+            />
             {refreshing ? "Refreshing..." : "Refresh"}
           </button>
-          <button className={styles.exportBtn}>
+          <button
+            className={styles.exportBtn}
+            onClick={() => exportCustomersCSV(customers)}
+            disabled={customers.length === 0}
+          >
             <FiDownload size={16} />
             Export
-          </button>
-          <button className={styles.addBtn}>
-            <FiUserPlus size={16} />
-            Add Customer
           </button>
         </div>
       </div>
@@ -445,9 +312,8 @@ const Customers = () => {
           <div className={styles.statContent}>
             <span className={styles.statLabel}>Total Customers</span>
             <span className={styles.statValue}>{stats.total}</span>
-            <span className={`${styles.statChange} ${styles.positive}`}>
-              <FiTrendingUp size={14} />
-              +12% this month
+            <span className={styles.statChange}>
+              {stats.returningRate}% return for a 2nd order
             </span>
           </div>
         </div>
@@ -460,7 +326,10 @@ const Customers = () => {
             <span className={styles.statLabel}>Active</span>
             <span className={styles.statValue}>{stats.active}</span>
             <span className={styles.statChange}>
-              {Math.round((stats.active / stats.total) * 100)}% of total
+              {stats.total > 0
+                ? Math.round((stats.active / stats.total) * 100)
+                : 0}
+              % of total
             </span>
           </div>
         </div>
@@ -471,7 +340,9 @@ const Customers = () => {
           </div>
           <div className={styles.statContent}>
             <span className={styles.statLabel}>VIP & Premium</span>
-            <span className={styles.statValue}>{stats.vip + stats.premium}</span>
+            <span className={styles.statValue}>
+              {stats.vip + stats.premium}
+            </span>
             <span className={styles.statChange}>
               {stats.vip} VIP · {stats.premium} Premium
             </span>
@@ -485,9 +356,9 @@ const Customers = () => {
           <div className={styles.statContent}>
             <span className={styles.statLabel}>New This Month</span>
             <span className={styles.statValue}>{stats.newThisMonth}</span>
-            <span className={`${styles.statChange} ${styles.positive}`}>
-              <FiTrendingUp size={14} />
-              +8% from last month
+            <span className={styles.statChange}>
+              Avg. order ₹
+              {Math.round(stats.avgOrderValue).toLocaleString("en-IN")}
             </span>
           </div>
         </div>
@@ -540,7 +411,7 @@ const Customers = () => {
 
         <div className={styles.toolbarRight}>
           <span className={styles.resultCount}>
-            {sortedCustomers.length} customers
+            {pagination.total} customers
           </span>
         </div>
       </div>
@@ -560,51 +431,68 @@ const Customers = () => {
             </tr>
           </thead>
           <tbody>
-            {sortedCustomers.map((customer) => (
-              <tr key={customer.id}>
+            {customers.length === 0 && (
+              <tr>
+                <td
+                  colSpan={7}
+                  style={{ textAlign: "center", padding: "32px" }}
+                >
+                  No customers yet — orders from your store will show up here.
+                </td>
+              </tr>
+            )}
+            {customers.map((customer) => (
+              <tr key={customer.userId}>
                 <td>
                   <div className={styles.customerInfo}>
                     <div className={styles.avatar}>
-                      {customer.avatar}
+                      {getInitials(customer.name)}
                     </div>
                     <div className={styles.customerDetails}>
-                      <span className={styles.customerName}>{customer.name}</span>
+                      <span className={styles.customerName}>
+                        {customer.name || "Unknown"}
+                      </span>
                       <span className={styles.customerEmail}>
                         <FiMail size={12} />
-                        {customer.email}
+                        {customer.email || "—"}
                       </span>
                       <span className={styles.customerPhone}>
                         <FiPhone size={12} />
-                        {customer.phone}
+                        {customer.phone || "—"}
                       </span>
                     </div>
                   </div>
                 </td>
                 <td>
-                  <span className={`${styles.segmentBadge} ${getSegmentColor(customer.segment)}`}>
+                  <span
+                    className={`${styles.segmentBadge} ${getSegmentColor(customer.segment)}`}
+                  >
                     {getSegmentLabel(customer.segment)}
                   </span>
                 </td>
                 <td>{customer.totalOrders}</td>
-                <td className={styles.amount}>₹{customer.totalSpent.toLocaleString()}</td>
+                <td className={styles.amount}>
+                  ₹{customer.totalSpent.toLocaleString("en-IN")}
+                </td>
                 <td>
                   <div className={styles.dateInfo}>
                     <FiCalendar size={12} />
-                    {new Date(customer.lastOrder).toLocaleDateString("en-IN", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
+                    {new Date(customer.lastOrderAt).toLocaleDateString(
+                      "en-IN",
+                      { day: "2-digit", month: "short", year: "numeric" },
+                    )}
                   </div>
                 </td>
                 <td>
-                  <span className={`${styles.statusBadge} ${customer.status === "active" ? styles.active : styles.inactive}`}>
+                  <span
+                    className={`${styles.statusBadge} ${customer.status === "active" ? styles.active : styles.inactive}`}
+                  >
                     {customer.status === "active" ? (
                       <FiCheckCircle size={12} />
                     ) : (
                       <FiClock size={12} />
                     )}
-                    {getStatusLabel(customer.status)}
+                    {customer.status === "active" ? "Active" : "Inactive"}
                   </span>
                 </td>
                 <td>
@@ -619,7 +507,11 @@ const Customers = () => {
                     >
                       <FiEye size={16} />
                     </button>
-                    <button className={styles.actionBtn} title="Message">
+                    <button
+                      className={styles.actionBtn}
+                      title="Messaging coming soon"
+                      disabled
+                    >
                       <FiMessageSquare size={16} />
                     </button>
                     <button className={styles.actionBtn} title="More">
@@ -635,16 +527,21 @@ const Customers = () => {
 
       {/* Customer Details Modal */}
       {showDetails && selectedCustomer && (
-        <div className={styles.modalOverlay} onClick={() => setShowDetails(false)}>
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setShowDetails(false)}
+        >
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <div className={styles.modalCustomerInfo}>
                 <div className={styles.modalAvatar}>
-                  {selectedCustomer.avatar}
+                  {getInitials(selectedCustomer.name)}
                 </div>
                 <div>
-                  <h3>{selectedCustomer.name}</h3>
-                  <span className={`${styles.segmentBadge} ${getSegmentColor(selectedCustomer.segment)}`}>
+                  <h3>{selectedCustomer.name || "Unknown"}</h3>
+                  <span
+                    className={`${styles.segmentBadge} ${getSegmentColor(selectedCustomer.segment)}`}
+                  >
                     {getSegmentLabel(selectedCustomer.segment)}
                   </span>
                 </div>
@@ -661,11 +558,11 @@ const Customers = () => {
               <div className={styles.modalInfoGrid}>
                 <div className={styles.modalInfoItem}>
                   <label>Email</label>
-                  <p>{selectedCustomer.email}</p>
+                  <p>{selectedCustomer.email || "—"}</p>
                 </div>
                 <div className={styles.modalInfoItem}>
                   <label>Phone</label>
-                  <p>{selectedCustomer.phone}</p>
+                  <p>{selectedCustomer.phone || "—"}</p>
                 </div>
                 <div className={styles.modalInfoItem}>
                   <label>Total Orders</label>
@@ -673,47 +570,59 @@ const Customers = () => {
                 </div>
                 <div className={styles.modalInfoItem}>
                   <label>Total Spent</label>
-                  <p>₹{selectedCustomer.totalSpent.toLocaleString()}</p>
+                  <p>₹{selectedCustomer.totalSpent.toLocaleString("en-IN")}</p>
                 </div>
                 <div className={styles.modalInfoItem}>
-                  <label>Joined</label>
-                  <p>{new Date(selectedCustomer.joined).toLocaleDateString("en-IN", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric",
-                  })}</p>
+                  <label>Customer Since</label>
+                  <p>
+                    {new Date(selectedCustomer.firstOrderAt).toLocaleDateString(
+                      "en-IN",
+                      { day: "2-digit", month: "long", year: "numeric" },
+                    )}
+                  </p>
                 </div>
                 <div className={styles.modalInfoItem}>
                   <label>Last Order</label>
-                  <p>{new Date(selectedCustomer.lastOrder).toLocaleDateString("en-IN", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric",
-                  })}</p>
+                  <p>
+                    {new Date(selectedCustomer.lastOrderAt).toLocaleDateString(
+                      "en-IN",
+                      { day: "2-digit", month: "long", year: "numeric" },
+                    )}
+                  </p>
                 </div>
                 <div className={styles.modalInfoItem}>
                   <label>Reviews</label>
-                  <p>{selectedCustomer.reviews}</p>
+                  <p>Not available</p>
                 </div>
                 <div className={styles.modalInfoItem}>
                   <label>Rating</label>
                   <p className={styles.ratingValue}>
-                    <FiStar size={14} />
-                    {selectedCustomer.avgRating || "N/A"}
+                    <FiStar size={14} /> No review data
                   </p>
                 </div>
               </div>
 
               <div className={styles.modalActions}>
-                <button className={styles.modalActionBtn}>
+                <button
+                  className={styles.modalActionBtn}
+                  disabled
+                  title="Messaging coming soon"
+                >
                   <FiMessageSquare size={16} />
                   Send Message
                 </button>
-                <button className={styles.modalActionBtn}>
+                <button
+                  className={styles.modalActionBtn}
+                  onClick={() => navigate("/seller/dashboard/orders")}
+                >
                   <FiEye size={16} />
                   View Orders
                 </button>
-                <button className={styles.modalActionBtn}>
+                <button
+                  className={styles.modalActionBtn}
+                  disabled
+                  title="Email sending not wired up yet"
+                >
                   <FiMail size={16} />
                   Send Email
                 </button>

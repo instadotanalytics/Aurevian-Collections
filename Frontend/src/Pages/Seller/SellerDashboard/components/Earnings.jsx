@@ -20,9 +20,10 @@ import {
   FiRefreshCw,
 } from "react-icons/fi";
 import styles from "./Earnings.module.css";
+import { API_URL } from "../../../../utils/constants";
 
 // ============================================
-// THROTTLE & DEBOUNCE UTILITIES
+// THROTTLE & DEBOUNCE UTILITIES (unchanged)
 // ============================================
 const throttle = (func, limit) => {
   let inThrottle;
@@ -35,16 +36,31 @@ const throttle = (func, limit) => {
   };
 };
 
-const debounce = (func, delay) => {
-  let timeoutId;
-  return function (...args) {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func.apply(this, args), delay);
-  };
-};
+// ============================================
+// API HELPER
+// Reads whichever seller token is stored — swap for your shared axios
+// instance if one exists; nothing else in this file needs to change.
+// ============================================
+async function apiFetch(path, options = {}) {
+  const token = localStorage.getItem("sellerAccessToken");
+  const res = await fetch(`${API_URL}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {}),
+    },
+    credentials: "include",
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Request failed");
+  }
+  return data;
+}
 
 // ============================================
-// SKELETON LOADER COMPONENT
+// SKELETON LOADER COMPONENT (unchanged)
 // ============================================
 const SkeletonLoader = () => {
   return (
@@ -88,150 +104,103 @@ const SkeletonLoader = () => {
 // ============================================
 const Earnings = () => {
   const [period, setPeriod] = useState("this-month");
-  const [view, setView] = useState("overview");
   const [loading, setLoading] = useState(true);
+  const [chartLoading, setChartLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState(null);
-  const [monthlyData, setMonthlyData] = useState([]);
+  const [chartData, setChartData] = useState([]);
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [error, setError] = useState(null);
+  const [payoutState, setPayoutState] = useState({
+    loading: false,
+    message: null,
+    isError: false,
+  });
 
-  // Refs for throttling/debouncing
   const refreshThrottleRef = useRef(null);
-  const filterDebounceRef = useRef(null);
 
   // ============================================
-  // SIMULATED API CALL
+  // FETCH: SUMMARY + TRANSACTIONS (lifetime — not period-scoped)
   // ============================================
-  const fetchEarningsData = useCallback(async () => {
+  const fetchSummaryAndTransactions = useCallback(async () => {
+    const [summaryRes, txRes] = await Promise.all([
+      apiFetch("/seller/earnings/summary"),
+      apiFetch("/seller/earnings/transactions?page=1&limit=10"),
+    ]);
+    setStats(summaryRes.data);
+    setRecentTransactions(txRes.data);
+  }, []);
+
+  // ============================================
+  // FETCH: CHART (period-scoped — this is what This Week/Month/Year drives)
+  // ============================================
+  const fetchChart = useCallback(async (selectedPeriod) => {
+    setChartLoading(true);
     try {
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const res = await apiFetch(
+        `/seller/earnings/chart?period=${selectedPeriod}`,
+      );
+      setChartData(res.data);
+    } catch (err) {
+      console.error("Error fetching earnings chart:", err);
+    } finally {
+      setChartLoading(false);
+    }
+  }, []);
 
-      // Sample data
-      const data = {
-        stats: {
-          totalEarnings: 124567,
-          pendingPayout: 23450,
-          availableBalance: 101117,
-          totalOrders: 342,
-          averageOrderValue: 364,
-          commission: 18685,
-          refunds: 2340,
-        },
-        monthlyData: [
-          { month: "Jan", earnings: 18500, orders: 52 },
-          { month: "Feb", earnings: 21200, orders: 58 },
-          { month: "Mar", earnings: 19400, orders: 47 },
-          { month: "Apr", earnings: 23200, orders: 63 },
-          { month: "May", earnings: 27800, orders: 72 },
-          { month: "Jun", earnings: 14267, orders: 50 },
-        ],
-        transactions: [
-          {
-            id: "#ORD-2024-001",
-            date: "2024-12-18",
-            customer: "Priya Sharma",
-            amount: 3499,
-            status: "completed",
-            type: "sale",
-          },
-          {
-            id: "#ORD-2024-002",
-            date: "2024-12-17",
-            customer: "Amit Kumar",
-            amount: 1299,
-            status: "pending",
-            type: "sale",
-          },
-          {
-            id: "#ORD-2024-003",
-            date: "2024-12-16",
-            customer: "Neha Patel",
-            amount: 2499,
-            status: "completed",
-            type: "sale",
-          },
-          {
-            id: "#ORD-2024-004",
-            date: "2024-12-15",
-            customer: "Raj Singh",
-            amount: 499,
-            status: "refunded",
-            type: "refund",
-          },
-          {
-            id: "#ORD-2024-005",
-            date: "2024-12-14",
-            customer: "Sneha Reddy",
-            amount: 1899,
-            status: "completed",
-            type: "sale",
-          },
-        ],
-      };
-
-      setStats(data.stats);
-      setMonthlyData(data.monthlyData);
-      setRecentTransactions(data.transactions);
+  const loadAll = useCallback(async () => {
+    try {
+      await Promise.all([fetchSummaryAndTransactions(), fetchChart(period)]);
       setError(null);
     } catch (err) {
-      setError("Failed to load earnings data");
+      setError(err.message || "Failed to load earnings data");
       console.error("Error fetching earnings:", err);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchSummaryAndTransactions, fetchChart]);
 
-  // ============================================
-  // THROTTLED REFRESH
-  // ============================================
   const handleRefresh = useCallback(() => {
     if (refreshThrottleRef.current) return;
-
     refreshThrottleRef.current = throttle(() => {
       setRefreshing(true);
-      fetchEarningsData();
+      loadAll();
       refreshThrottleRef.current = null;
     }, 2000)();
-
-    // Reset throttle after 2 seconds
     setTimeout(() => {
       refreshThrottleRef.current = null;
     }, 2000);
-  }, [fetchEarningsData]);
+  }, [loadAll]);
 
-  // ============================================
-  // DEBOUNCED PERIOD CHANGE
-  // ============================================
-  const handlePeriodChange = useCallback((newPeriod) => {
-    // Debounce the period change
-    if (filterDebounceRef.current) {
-      clearTimeout(filterDebounceRef.current);
-    }
-
-    filterDebounceRef.current = setTimeout(() => {
+  const handlePeriodChange = useCallback(
+    (newPeriod) => {
       setPeriod(newPeriod);
-      // In real app, fetch data for new period here
-      // For demo, just update the period
-      filterDebounceRef.current = null;
-    }, 300);
+      fetchChart(newPeriod);
+    },
+    [fetchChart],
+  );
+
+  useEffect(() => {
+    loadAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ============================================
-  // EFFECTS
-  // ============================================
-  useEffect(() => {
-    fetchEarningsData();
-
-    // Cleanup
-    return () => {
-      if (filterDebounceRef.current) {
-        clearTimeout(filterDebounceRef.current);
-      }
-    };
-  }, [fetchEarningsData]);
+  const handleRequestPayout = useCallback(async () => {
+    setPayoutState({ loading: true, message: null, isError: false });
+    try {
+      const res = await apiFetch("/seller/earnings/payout/request", {
+        method: "POST",
+      });
+      setPayoutState({ loading: false, message: res.message, isError: false });
+      // Refresh balances — the just-requested amount now counts as
+      // "awaiting processing," not "available."
+      fetchSummaryAndTransactions();
+    } catch (err) {
+      setPayoutState({ loading: false, message: err.message, isError: true });
+    }
+  }, [fetchSummaryAndTransactions]);
 
   // ============================================
   // RENDER HELPERS
@@ -262,9 +231,6 @@ const Earnings = () => {
     }
   };
 
-  // ============================================
-  // LOADING STATE
-  // ============================================
   if (loading) {
     return (
       <div className={styles.container}>
@@ -273,9 +239,6 @@ const Earnings = () => {
     );
   }
 
-  // ============================================
-  // ERROR STATE
-  // ============================================
   if (error) {
     return (
       <div className={styles.container}>
@@ -292,9 +255,8 @@ const Earnings = () => {
     );
   }
 
-  // ============================================
-  // MAIN RENDER
-  // ============================================
+  const maxChartValue = Math.max(1, ...chartData.map((d) => d.earnings));
+
   return (
     <div className={styles.container}>
       {/* Header */}
@@ -309,17 +271,16 @@ const Earnings = () => {
             onClick={handleRefresh}
             disabled={refreshing}
           >
-            <FiRefreshCw className={refreshing ? styles.spinning : ""} size={16} />
+            <FiRefreshCw
+              className={refreshing ? styles.spinning : ""}
+              size={16}
+            />
             {refreshing ? "Refreshing..." : "Refresh"}
-          </button>
-          <button className={styles.exportBtn}>
-            <FiDownload size={16} />
-            Export
           </button>
         </div>
       </div>
 
-      {/* Period Selector */}
+      {/* Period Selector — drives the chart only; everything else below is lifetime */}
       <div className={styles.periodSelector}>
         <button
           className={`${styles.periodBtn} ${period === "this-week" ? styles.active : ""}`}
@@ -349,11 +310,28 @@ const Earnings = () => {
           </div>
           <div className={styles.statContent}>
             <span className={styles.statLabel}>Total Earnings</span>
-            <span className={styles.statValue}>₹{stats.totalEarnings.toLocaleString()}</span>
-            <span className={`${styles.statChange} ${styles.positive}`}>
-              <FiTrendingUp size={14} />
-              +12.5% from last month
+            <span className={styles.statValue}>
+              ₹{stats.totalEarnings.toLocaleString("en-IN")}
             </span>
+            {stats.monthOverMonthChangePercent != null ? (
+              <span
+                className={`${styles.statChange} ${
+                  stats.monthOverMonthChangePercent >= 0
+                    ? styles.positive
+                    : styles.negative
+                }`}
+              >
+                {stats.monthOverMonthChangePercent >= 0 ? (
+                  <FiTrendingUp size={14} />
+                ) : (
+                  <FiTrendingDown size={14} />
+                )}
+                {stats.monthOverMonthChangePercent >= 0 ? "+" : ""}
+                {stats.monthOverMonthChangePercent.toFixed(1)}% from last month
+              </span>
+            ) : (
+              <span className={styles.statChange}>Not enough history yet</span>
+            )}
           </div>
         </div>
 
@@ -363,10 +341,12 @@ const Earnings = () => {
           </div>
           <div className={styles.statContent}>
             <span className={styles.statLabel}>Available Balance</span>
-            <span className={styles.statValue}>₹{stats.availableBalance.toLocaleString()}</span>
+            <span className={styles.statValue}>
+              ₹{stats.availableBalance.toLocaleString("en-IN")}
+            </span>
             <span className={styles.statChange}>
-              <FiClock size={14} />
-              ₹{stats.pendingPayout.toLocaleString()} pending
+              <FiClock size={14} />₹
+              {stats.pendingBalance.toLocaleString("en-IN")} pending
             </span>
           </div>
         </div>
@@ -379,7 +359,9 @@ const Earnings = () => {
             <span className={styles.statLabel}>Total Orders</span>
             <span className={styles.statValue}>{stats.totalOrders}</span>
             <span className={styles.statChange}>
-              Avg. ₹{stats.averageOrderValue.toLocaleString()} per order
+              Avg. ₹
+              {Math.round(stats.averageOrderValue).toLocaleString("en-IN")} per
+              order
             </span>
           </div>
         </div>
@@ -390,10 +372,14 @@ const Earnings = () => {
           </div>
           <div className={styles.statContent}>
             <span className={styles.statLabel}>Commission</span>
-            <span className={styles.statValue}>₹{stats.commission.toLocaleString()}</span>
+            <span className={styles.statValue}>
+              {stats.commission.configured
+                ? `₹${stats.commission.amount.toLocaleString("en-IN")}`
+                : "Not configured"}
+            </span>
             <span className={`${styles.statChange} ${styles.negative}`}>
               <FiTrendingDown size={14} />
-              Refunds: ₹{stats.refunds.toLocaleString()}
+              Refunds: ₹{stats.refunds.toLocaleString("en-IN")}
             </span>
           </div>
         </div>
@@ -402,38 +388,45 @@ const Earnings = () => {
       {/* Chart Section */}
       <div className={styles.chartSection}>
         <div className={styles.chartHeader}>
-          <h3>Monthly Earnings</h3>
-          <div className={styles.chartTabs}>
-            <button
-              className={`${styles.chartTab} ${view === "overview" ? styles.active : ""}`}
-              onClick={() => setView("overview")}
-            >
-              Overview
-            </button>
-            <button
-              className={`${styles.chartTab} ${view === "details" ? styles.active : ""}`}
-              onClick={() => setView("details")}
-            >
-              Details
-            </button>
-          </div>
+          <h3>
+            {period === "this-week"
+              ? "This Week"
+              : period === "this-year"
+                ? "This Year"
+                : "This Month"}
+            's Earnings
+          </h3>
         </div>
         <div className={styles.chartContainer}>
-          <div className={styles.chartBars}>
-            {monthlyData.map((item, index) => (
-              <div key={index} className={styles.chartBarGroup}>
-                <div className={styles.chartBarWrapper}>
-                  <div
-                    className={styles.chartBar}
-                    style={{ height: `${(item.earnings / 28000) * 100}%` }}
-                  >
-                    <span className={styles.chartBarValue}>₹{item.earnings.toLocaleString()}</span>
+          {chartLoading ? (
+            <div className={styles.skeletonChartBars}>
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className={styles.skeletonChartBar} />
+              ))}
+            </div>
+          ) : (
+            <div className={styles.chartBars}>
+              {chartData.map((item, index) => (
+                <div key={index} className={styles.chartBarGroup}>
+                  <div className={styles.chartBarWrapper}>
+                    <div
+                      className={styles.chartBar}
+                      style={{
+                        height: `${(item.earnings / maxChartValue) * 100}%`,
+                      }}
+                    >
+                      {item.earnings > 0 && (
+                        <span className={styles.chartBarValue}>
+                          ₹{item.earnings.toLocaleString("en-IN")}
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  <span className={styles.chartLabel}>{item.label}</span>
                 </div>
-                <span className={styles.chartLabel}>{item.month}</span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -441,9 +434,6 @@ const Earnings = () => {
       <div className={styles.transactionsSection}>
         <div className={styles.sectionHeader}>
           <h3>Recent Transactions</h3>
-          <button className={styles.viewAllBtn}>
-            View All <FiArrowRight size={14} />
-          </button>
         </div>
 
         <div className={styles.tableWrapper}>
@@ -459,20 +449,39 @@ const Earnings = () => {
               </tr>
             </thead>
             <tbody>
+              {recentTransactions.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={6}
+                    style={{ textAlign: "center", padding: "24px" }}
+                  >
+                    No transactions yet
+                  </td>
+                </tr>
+              )}
               {recentTransactions.map((tx) => (
                 <tr key={tx.id}>
                   <td className={styles.orderId}>{tx.id}</td>
-                  <td>{new Date(tx.date).toLocaleDateString("en-IN", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })}</td>
+                  <td>
+                    {new Date(tx.date).toLocaleDateString("en-IN", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </td>
                   <td>{tx.customer}</td>
-                  <td className={tx.type === "refund" ? styles.refundAmount : styles.amount}>
-                    {tx.type === "refund" ? "-" : ""}₹{tx.amount.toLocaleString()}
+                  <td
+                    className={
+                      tx.type === "refund" ? styles.refundAmount : styles.amount
+                    }
+                  >
+                    {tx.type === "refund" ? "-" : ""}₹
+                    {tx.amount.toLocaleString("en-IN")}
                   </td>
                   <td>
-                    <span className={`${styles.statusBadge} ${styles[tx.status]}`}>
+                    <span
+                      className={`${styles.statusBadge} ${styles[tx.status]}`}
+                    >
                       {getStatusIcon(tx.status)}
                       {getStatusLabel(tx.status)}
                     </span>
@@ -498,50 +507,121 @@ const Earnings = () => {
           </div>
           <div className={styles.payoutDetails}>
             <div className={styles.payoutItem}>
-              <span>Next Payout</span>
-              <strong>₹{stats.pendingPayout.toLocaleString()}</strong>
-              <small>Estimated: Dec 25, 2024</small>
+              <span>Available for Payout</span>
+              <strong>₹{stats.availableBalance.toLocaleString("en-IN")}</strong>
+              {stats.payout.totalAwaitingProcessing > 0 && (
+                <small>
+                  ₹
+                  {stats.payout.totalAwaitingProcessing.toLocaleString("en-IN")}{" "}
+                  already requested
+                </small>
+              )}
             </div>
             <div className={styles.payoutDivider} />
             <div className={styles.payoutItem}>
               <span>Payout Method</span>
-              <strong>Bank Transfer</strong>
-              <small>•••• 6789 • HDFC Bank</small>
+              <strong>
+                {stats.payout.method ? stats.payout.method.label : "Not set up"}
+              </strong>
+              {!stats.payout.method && (
+                <small>Add bank/UPI details in your profile</small>
+              )}
             </div>
             <div className={styles.payoutDivider} />
             <div className={styles.payoutItem}>
               <span>Minimum Payout</span>
-              <strong>₹1,000</strong>
-              <small>Reached ✓</small>
+              <strong>
+                {stats.payout.minimumPayoutAmount != null
+                  ? `₹${stats.payout.minimumPayoutAmount.toLocaleString("en-IN")}`
+                  : "Not configured yet"}
+              </strong>
+              {stats.payout.minimumPayoutAmount != null && (
+                <small>
+                  {stats.payout.eligible ? "Reached ✓" : "Not reached yet"}
+                </small>
+              )}
             </div>
           </div>
-          <button className={styles.payoutBtn}>
-            Request Payout <FiChevronRight size={16} />
+          <button
+            className={styles.payoutBtn}
+            onClick={handleRequestPayout}
+            disabled={!stats.payout.eligible || payoutState.loading}
+            title={
+              stats.payout.minimumPayoutAmount == null
+                ? "Payouts are not configured yet"
+                : !stats.payout.method
+                  ? "Add bank/UPI details first"
+                  : !stats.payout.eligible
+                    ? "Below minimum payout amount"
+                    : undefined
+            }
+          >
+            {payoutState.loading ? "Requesting..." : "Request Payout"}{" "}
+            <FiChevronRight size={16} />
           </button>
+          {payoutState.message && (
+            <p
+              style={{
+                color: payoutState.isError ? "#EF4444" : "#10B981",
+                marginTop: 8,
+                fontSize: 13,
+              }}
+            >
+              {payoutState.message}
+            </p>
+          )}
         </div>
 
         <div className={styles.quickStats}>
           <div className={styles.quickStatItem}>
             <span className={styles.quickStatLabel}>Best Day</span>
-            <strong className={styles.quickStatValue}>₹8,450</strong>
-            <small>Dec 15, 2024</small>
+            {stats.bestDay ? (
+              <>
+                <strong className={styles.quickStatValue}>
+                  ₹{stats.bestDay.amount.toLocaleString("en-IN")}
+                </strong>
+                <small>
+                  {new Date(stats.bestDay.date).toLocaleDateString("en-IN", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </small>
+              </>
+            ) : (
+              <strong className={styles.quickStatValue}>No sales yet</strong>
+            )}
           </div>
           <div className={styles.quickStatItem}>
             <span className={styles.quickStatLabel}>Best Product</span>
-            <strong className={styles.quickStatValue}>Diamond Ring</strong>
-            <small>43 units sold</small>
+            {stats.bestProduct ? (
+              <>
+                <strong className={styles.quickStatValue}>
+                  {stats.bestProduct.name}
+                </strong>
+                <small>{stats.bestProduct.unitsSold} units sold</small>
+              </>
+            ) : (
+              <strong className={styles.quickStatValue}>No sales yet</strong>
+            )}
           </div>
           <div className={styles.quickStatItem}>
             <span className={styles.quickStatLabel}>Conversion Rate</span>
-            <strong className={styles.quickStatValue}>3.8%</strong>
-            <small>+0.6% from last month</small>
+            <strong className={styles.quickStatValue}>Not enough data</strong>
+            <small>Needs visitor/session tracking</small>
           </div>
           <div className={styles.quickStatItem}>
             <span className={styles.quickStatLabel}>Rating</span>
-            <strong className={styles.quickStatValue}>
-              <FiStar size={16} /> 4.8
-            </strong>
-            <small>128 reviews</small>
+            {stats.rating != null ? (
+              <>
+                <strong className={styles.quickStatValue}>
+                  <FiStar size={16} /> {stats.rating.toFixed(1)}
+                </strong>
+                <small>{stats.reviewCount} reviews</small>
+              </>
+            ) : (
+              <strong className={styles.quickStatValue}>No reviews yet</strong>
+            )}
           </div>
         </div>
       </div>
