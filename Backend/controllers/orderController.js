@@ -10,6 +10,19 @@ import {
   ShippingUnavailableError,
 } from "./shippingController.js";
 
+// ============================================
+// SOCKET.IO IMPORTS (ADDED)
+// ============================================
+import {
+  emitOrderCreated,
+  emitSellerConfirmed,
+  emitSellerRejected,
+  emitAdminApproved,
+  emitAdminRejected,
+  emitOrderStatusUpdated,
+  emitShippingUpdated,
+} from "../socket/orderEvents.js";
+
 const getProductSnapshot = (product) => {
   const name = product.productName || "Product";
   const image = product.thumbnail?.url || product.images?.[0]?.url || "";
@@ -325,6 +338,9 @@ export const verifyRazorpayPayment = async (req, res) => {
 
     await finalizeInventoryAndCart(order, userId);
 
+    // ✅ SOCKET.IO — notify the seller in real time
+    emitOrderCreated(order);
+
     return res.status(200).json({
       success: true,
       message: "Payment verified successfully",
@@ -422,6 +438,9 @@ export const createCODOrder = async (req, res) => {
     });
 
     await finalizeInventoryAndCart(order, userId);
+
+    // ✅ SOCKET.IO — notify the seller in real time
+    emitOrderCreated(order);
 
     return res.status(201).json({
       success: true,
@@ -616,6 +635,9 @@ export const updateOrderStatus = async (req, res) => {
     order.orderStatus = status;
     await order.save();
 
+    // ✅ SOCKET.IO
+    emitOrderStatusUpdated(order);
+
     return res
       .status(200)
       .json({ success: true, message: "Order status updated", data: order });
@@ -682,6 +704,9 @@ export const sellerConfirmOrder = async (req, res) => {
     });
     await order.save();
 
+    // ✅ SOCKET.IO — customer + super admin
+    emitSellerConfirmed(order);
+
     return res
       .status(200)
       .json({ success: true, message: "Order confirmed", data: order });
@@ -747,6 +772,9 @@ export const sellerRejectOrder = async (req, res) => {
       timestamp: new Date(),
     });
     await order.save();
+
+    // ✅ SOCKET.IO — customer + super admin
+    emitSellerRejected(order);
 
     return res
       .status(200)
@@ -824,6 +852,9 @@ export const adminApproveOrder = async (req, res) => {
       });
       await updatedOrder.save();
 
+      // ✅ SOCKET.IO — customer + seller + order room
+      emitAdminApproved(updatedOrder);
+
       return res.status(200).json({
         success: true,
         message: "Order approved and forwarded to Shiprocket",
@@ -838,6 +869,9 @@ export const adminApproveOrder = async (req, res) => {
         timestamp: new Date(),
       });
       await order.save();
+
+      // ✅ SOCKET.IO — surface the failure live too, not just on refresh
+      emitAdminApproved(order);
 
       return res.status(502).json({
         success: false,
@@ -896,6 +930,9 @@ export const adminRejectOrder = async (req, res) => {
       timestamp: new Date(),
     });
     await order.save();
+
+    // ✅ SOCKET.IO — customer + seller + order room
+    emitAdminRejected(order);
 
     return res
       .status(200)

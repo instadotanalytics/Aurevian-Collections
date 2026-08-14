@@ -20,6 +20,9 @@ import {
 } from "../../../../redux/slices/orderSlice";
 import * as orderApi from "../../../../api/orderApi.js";
 
+// ✅ SOCKET.IO — real-time order updates for sellers
+import useOrderSocketEvents from "../../../../hooks/useOrderSocketEvents.js";
+
 const STATUS_OPTIONS = [
   "placed",
   "processing",
@@ -99,12 +102,12 @@ const useDebounce = (value, delay) => {
 };
 
 const formatCurrency = (amount) => {
-  if (!amount && amount !== 0) return '₹0';
+  if (!amount && amount !== 0) return "₹0";
   return `₹${Number(amount).toLocaleString("en-IN")}`;
 };
 
 const formatDate = (date) => {
-  if (!date) return 'N/A';
+  if (!date) return "N/A";
   return new Date(date).toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
@@ -170,6 +173,17 @@ const Orders = () => {
     setVisibleCount(10);
     setAllOrdersLoaded(false);
   }, [debouncedSearchTerm, debouncedStatusFilter, debouncedSortBy]);
+
+  // ✅ SOCKET.IO — a brand-new order shows up here the instant it's paid
+  // for, and any admin action on an already-visible order refreshes the
+  // list too. Every branch just re-pulls from REST — no client-side order
+  // synthesis, so there's no risk of shape drift or duplicate rows.
+  useOrderSocketEvents({
+    onOrderCreated: () => dispatch(fetchSellerOrders()),
+    onAdminConfirmed: () => dispatch(fetchSellerOrders()),
+    onAdminRejected: () => dispatch(fetchSellerOrders()),
+    onShippingUpdated: () => dispatch(fetchSellerOrders()),
+  });
 
   const handleStatusChange = async (id, status) => {
     try {
@@ -240,15 +254,18 @@ const Orders = () => {
 
     if (debouncedSearchTerm) {
       const term = debouncedSearchTerm.toLowerCase();
-      filtered = filtered.filter(order =>
-        order.orderNumber?.toLowerCase().includes(term) ||
-        order.customer?.fullName?.toLowerCase().includes(term) ||
-        order.customer?.phone?.includes(term)
+      filtered = filtered.filter(
+        (order) =>
+          order.orderNumber?.toLowerCase().includes(term) ||
+          order.customer?.fullName?.toLowerCase().includes(term) ||
+          order.customer?.phone?.includes(term),
       );
     }
 
     if (debouncedStatusFilter !== "all") {
-      filtered = filtered.filter(order => order.orderStatus === debouncedStatusFilter);
+      filtered = filtered.filter(
+        (order) => order.orderStatus === debouncedStatusFilter,
+      );
     }
 
     switch (debouncedSortBy) {
@@ -276,7 +293,11 @@ const Orders = () => {
 
   // Load more orders with throttling - 10 cards in first 1 second
   const loadMoreOrders = useCallback(() => {
-    if (isLoadingMore || allOrdersLoaded || visibleCount >= filteredOrders.length) {
+    if (
+      isLoadingMore ||
+      allOrdersLoaded ||
+      visibleCount >= filteredOrders.length
+    ) {
       if (visibleCount >= filteredOrders.length) {
         setAllOrdersLoaded(true);
       }
@@ -317,10 +338,10 @@ const Orders = () => {
           loadMoreOrders();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
-    const sentinel = document.getElementById('orders-sentinel');
+    const sentinel = document.getElementById("orders-sentinel");
     if (sentinel) {
       observer.observe(sentinel);
     }
@@ -398,8 +419,11 @@ const Orders = () => {
         <div className={styles.ordersList}>
           {visibleOrders.map((order) => {
             const statusStyle = getStatusStyle(order.orderStatus);
-            const fulfillmentStyle = getFulfillmentStyle(order.fulfillmentStatus);
-            const isActionRequired = order.fulfillmentStatus === "PENDING_SELLER_CONFIRMATION";
+            const fulfillmentStyle = getFulfillmentStyle(
+              order.fulfillmentStatus,
+            );
+            const isActionRequired =
+              order.fulfillmentStatus === "PENDING_SELLER_CONFIRMATION";
             const customer = order?.customer || {};
             const totalAmount = order.totalAmount || 0;
 
@@ -412,24 +436,32 @@ const Orders = () => {
                 <div className={styles.orderCardContent}>
                   <div className={styles.orderCardLeft}>
                     <div className={styles.orderId}>
-                      #{order.orderNumber || 'N/A'}
+                      #{order.orderNumber || "N/A"}
                     </div>
                     <div className={styles.orderCardFields}>
                       <div className={styles.orderCardField}>
                         <span className={styles.fieldLabel}>Customer</span>
-                        <span className={styles.fieldValue}>{customer.fullName || 'N/A'}</span>
+                        <span className={styles.fieldValue}>
+                          {customer.fullName || "N/A"}
+                        </span>
                       </div>
                       <div className={styles.orderCardField}>
                         <span className={styles.fieldLabel}>Total</span>
-                        <span className={styles.fieldValue}>{formatCurrency(order.sellerSubtotal || 0)}</span>
+                        <span className={styles.fieldValue}>
+                          {formatCurrency(order.sellerSubtotal || 0)}
+                        </span>
                       </div>
                       <div className={styles.orderCardField}>
                         <span className={styles.fieldLabel}>Date</span>
-                        <span className={styles.fieldValue}>{formatDate(order.createdAt)}</span>
+                        <span className={styles.fieldValue}>
+                          {formatDate(order.createdAt)}
+                        </span>
                       </div>
                       <div className={styles.orderCardField}>
                         <span className={styles.fieldLabel}>Items</span>
-                        <span className={styles.fieldValue}>{order.items?.length || 0}</span>
+                        <span className={styles.fieldValue}>
+                          {order.items?.length || 0}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -438,15 +470,23 @@ const Orders = () => {
                     <div className={styles.orderCardBadges}>
                       <span
                         className={styles.statusBadge}
-                        style={{ backgroundColor: statusStyle.bg, color: statusStyle.text }}
+                        style={{
+                          backgroundColor: statusStyle.bg,
+                          color: statusStyle.text,
+                        }}
                       >
-                        {order.orderStatus || 'N/A'}
+                        {order.orderStatus || "N/A"}
                       </span>
                       <span
                         className={styles.fulfillmentBadge}
-                        style={{ backgroundColor: fulfillmentStyle.bg, color: fulfillmentStyle.text }}
+                        style={{
+                          backgroundColor: fulfillmentStyle.bg,
+                          color: fulfillmentStyle.text,
+                        }}
                       >
-                        {FULFILLMENT_LABEL[order.fulfillmentStatus] || order.fulfillmentStatus || 'N/A'}
+                        {FULFILLMENT_LABEL[order.fulfillmentStatus] ||
+                          order.fulfillmentStatus ||
+                          "N/A"}
                       </span>
                       {isActionRequired && (
                         <span className={styles.actionRequiredBadge}>⚡</span>
@@ -490,53 +530,70 @@ const Orders = () => {
                   <span
                     className={styles.popupStatusBadge}
                     style={{
-                      backgroundColor: getStatusStyle(selectedOrder.orderStatus).bg,
-                      color: getStatusStyle(selectedOrder.orderStatus).text
+                      backgroundColor: getStatusStyle(selectedOrder.orderStatus)
+                        .bg,
+                      color: getStatusStyle(selectedOrder.orderStatus).text,
                     }}
                   >
-                    {selectedOrder.orderStatus || 'N/A'}
+                    {selectedOrder.orderStatus || "N/A"}
                   </span>
                   <span
                     className={styles.popupFulfillmentBadge}
                     style={{
-                      backgroundColor: getFulfillmentStyle(selectedOrder.fulfillmentStatus).bg,
-                      color: getFulfillmentStyle(selectedOrder.fulfillmentStatus).text
+                      backgroundColor: getFulfillmentStyle(
+                        selectedOrder.fulfillmentStatus,
+                      ).bg,
+                      color: getFulfillmentStyle(
+                        selectedOrder.fulfillmentStatus,
+                      ).text,
                     }}
                   >
-                    {FULFILLMENT_LABEL[selectedOrder.fulfillmentStatus] || selectedOrder.fulfillmentStatus || 'N/A'}
+                    {FULFILLMENT_LABEL[selectedOrder.fulfillmentStatus] ||
+                      selectedOrder.fulfillmentStatus ||
+                      "N/A"}
                   </span>
                 </div>
               </div>
 
               <div className={styles.popupBody}>
                 <div className={styles.popupSection}>
-                  <h4><FiUser className={styles.popupSectionIcon} /> Customer</h4>
+                  <h4>
+                    <FiUser className={styles.popupSectionIcon} /> Customer
+                  </h4>
                   <div className={styles.popupCompactGrid}>
                     <div className={styles.popupCompactItem}>
                       <span className={styles.popupLabel}>Name</span>
-                      <span className={styles.popupValue}>{selectedOrder.customer?.fullName || 'N/A'}</span>
+                      <span className={styles.popupValue}>
+                        {selectedOrder.customer?.fullName || "N/A"}
+                      </span>
                     </div>
                     <div className={styles.popupCompactItem}>
                       <span className={styles.popupLabel}>Phone</span>
-                      <span className={styles.popupValue}>{selectedOrder.customer?.phone || 'N/A'}</span>
+                      <span className={styles.popupValue}>
+                        {selectedOrder.customer?.phone || "N/A"}
+                      </span>
                     </div>
                     <div className={styles.popupCompactItem}>
                       <span className={styles.popupLabel}>Email</span>
-                      <span className={styles.popupValue}>{selectedOrder.customer?.email || 'N/A'}</span>
+                      <span className={styles.popupValue}>
+                        {selectedOrder.customer?.email || "N/A"}
+                      </span>
                     </div>
                     <div className={styles.popupCompactItem}>
                       <span className={styles.popupLabel}>Address</span>
                       <span className={styles.popupValue}>
-                        {selectedOrder.customer?.addressLine1 ?
-                          `${selectedOrder.customer.addressLine1}, ${selectedOrder.customer.city || ''}, ${selectedOrder.customer.state || ''} - ${selectedOrder.customer.pincode || ''}`
-                          : 'N/A'}
+                        {selectedOrder.customer?.addressLine1
+                          ? `${selectedOrder.customer.addressLine1}, ${selectedOrder.customer.city || ""}, ${selectedOrder.customer.state || ""} - ${selectedOrder.customer.pincode || ""}`
+                          : "N/A"}
                       </span>
                     </div>
                   </div>
                 </div>
 
                 <div className={styles.popupSection}>
-                  <h4><FiPackage className={styles.popupSectionIcon} /> Items</h4>
+                  <h4>
+                    <FiPackage className={styles.popupSectionIcon} /> Items
+                  </h4>
                   <div className={styles.popupItems}>
                     {(selectedOrder.items || []).map((item, idx) => (
                       <div key={idx} className={styles.popupItemRow}>
@@ -544,7 +601,7 @@ const Orders = () => {
                           {item.image && (
                             <img
                               src={item.image}
-                              alt={item.name || 'Product'}
+                              alt={item.name || "Product"}
                               className={styles.popupItemImage}
                               onError={(e) => {
                                 e.target.src = "https://via.placeholder.com/40";
@@ -552,50 +609,67 @@ const Orders = () => {
                             />
                           )}
                           <div className={styles.popupItemDetails}>
-                            <span className={styles.popupItemName}>{item.name || 'Product'}</span>
-                            <span className={styles.popupItemSku}>SKU: {item.sku || 'N/A'}</span>
+                            <span className={styles.popupItemName}>
+                              {item.name || "Product"}
+                            </span>
+                            <span className={styles.popupItemSku}>
+                              SKU: {item.sku || "N/A"}
+                            </span>
                           </div>
                         </div>
                         <div className={styles.popupItemRight}>
-                          <span className={styles.popupItemQty}>×{item.quantity || 0}</span>
-                          <span className={styles.popupItemPrice}>{formatCurrency(item.subtotal)}</span>
+                          <span className={styles.popupItemQty}>
+                            ×{item.quantity || 0}
+                          </span>
+                          <span className={styles.popupItemPrice}>
+                            {formatCurrency(item.subtotal)}
+                          </span>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {selectedOrder.shipping && (selectedOrder.shipping.courierName || selectedOrder.shipping.awbCode) && (
-                  <div className={styles.popupSection}>
-                    <h4><FiTruck className={styles.popupSectionIcon} /> Shipping</h4>
-                    <div className={styles.popupCompactShipping}>
-                      {selectedOrder.shipping.courierName && (
-                        <span className={styles.popupCompactShippingItem}>
-                          <strong>Courier:</strong> {selectedOrder.shipping.courierName}
-                        </span>
-                      )}
-                      {selectedOrder.shipping.awbCode && (
-                        <span className={styles.popupCompactShippingItem}>
-                          <strong>AWB:</strong> {selectedOrder.shipping.awbCode}
-                        </span>
-                      )}
-                      {selectedOrder.shipping.status && (
-                        <span className={styles.popupCompactShippingItem}>
-                          <strong>Status:</strong> {selectedOrder.shipping.status}
-                        </span>
-                      )}
+                {selectedOrder.shipping &&
+                  (selectedOrder.shipping.courierName ||
+                    selectedOrder.shipping.awbCode) && (
+                    <div className={styles.popupSection}>
+                      <h4>
+                        <FiTruck className={styles.popupSectionIcon} /> Shipping
+                      </h4>
+                      <div className={styles.popupCompactShipping}>
+                        {selectedOrder.shipping.courierName && (
+                          <span className={styles.popupCompactShippingItem}>
+                            <strong>Courier:</strong>{" "}
+                            {selectedOrder.shipping.courierName}
+                          </span>
+                        )}
+                        {selectedOrder.shipping.awbCode && (
+                          <span className={styles.popupCompactShippingItem}>
+                            <strong>AWB:</strong>{" "}
+                            {selectedOrder.shipping.awbCode}
+                          </span>
+                        )}
+                        {selectedOrder.shipping.status && (
+                          <span className={styles.popupCompactShippingItem}>
+                            <strong>Status:</strong>{" "}
+                            {selectedOrder.shipping.status}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {selectedOrder.fulfillmentStatus === "SELLER_REJECTED" && selectedOrder.sellerRejectionReason && (
-                  <div className={styles.popupRejection}>
-                    <FiX size={14} />
-                    <span>{selectedOrder.sellerRejectionReason}</span>
-                  </div>
-                )}
+                {selectedOrder.fulfillmentStatus === "SELLER_REJECTED" &&
+                  selectedOrder.sellerRejectionReason && (
+                    <div className={styles.popupRejection}>
+                      <FiX size={14} />
+                      <span>{selectedOrder.sellerRejectionReason}</span>
+                    </div>
+                  )}
 
-                {selectedOrder.fulfillmentStatus === "PENDING_SELLER_CONFIRMATION" && (
+                {selectedOrder.fulfillmentStatus ===
+                  "PENDING_SELLER_CONFIRMATION" && (
                   <div className={styles.popupActions}>
                     <button
                       className={styles.confirmBtn}
@@ -606,7 +680,9 @@ const Orders = () => {
                       }}
                     >
                       <FiCheck size={14} />
-                      {actioningId === selectedOrder._id ? "Confirming..." : "Confirm"}
+                      {actioningId === selectedOrder._id
+                        ? "Confirming..."
+                        : "Confirm"}
                     </button>
                     <button
                       className={styles.rejectBtn}
@@ -624,19 +700,25 @@ const Orders = () => {
 
                 <div className={styles.popupFooter}>
                   <span className={styles.popupEarnings}>
-                    Earnings: <strong>{formatCurrency(selectedOrder.sellerSubtotal)}</strong>
+                    Earnings:{" "}
+                    <strong>
+                      {formatCurrency(selectedOrder.sellerSubtotal)}
+                    </strong>
                   </span>
                   <span
-                    className={`${styles.popupPaymentStatus} ${styles[selectedOrder.paymentStatus || '']}`}
+                    className={`${styles.popupPaymentStatus} ${styles[selectedOrder.paymentStatus || ""]}`}
                   >
-                    {selectedOrder.paymentStatus || 'N/A'}
+                    {selectedOrder.paymentStatus || "N/A"}
                   </span>
                   <select
                     className={styles.popupStatusSelect}
-                    value={selectedOrder.orderStatus || 'placed'}
+                    value={selectedOrder.orderStatus || "placed"}
                     onChange={(e) => {
                       handleStatusChange(selectedOrder._id, e.target.value);
-                      const updatedOrder = { ...selectedOrder, orderStatus: e.target.value };
+                      const updatedOrder = {
+                        ...selectedOrder,
+                        orderStatus: e.target.value,
+                      };
                       setSelectedOrder(updatedOrder);
                     }}
                   >

@@ -71,6 +71,10 @@ import OrderHistory from "../components/OrderHistory/OrderHistory.jsx";
 import SellersProducts from "../components/SellersProducts/SellersProducts.jsx";
 import SellerProductsPage from "../components/SellersProducts/SellerProductsPage.jsx";
 
+// ✅ SOCKET.IO — admin notifications
+import useAdminNotifications from "../../../hooks/useAdminNotifications.js";
+import NotificationCenter from "../../../Components/common/NotificationCenter/NotificationCenter.jsx";
+
 const SuperAdminDashboard = () => {
   // ✅ Page title
   useEffect(() => {
@@ -100,6 +104,10 @@ const SuperAdminDashboard = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState({});
   const [isVerifying, setIsVerifying] = useState(true);
+
+  // ✅ SOCKET.IO — mounted at the persistent dashboard shell level
+  const { notifications, unreadCount, handleItemClick } =
+    useAdminNotifications();
 
   const goToSection = (sectionId) => {
     navigate(`/super-admin/dashboard/${sectionId}`);
@@ -431,10 +439,11 @@ const SuperAdminDashboard = () => {
           </div>
         </div>
         <div className={styles.headerRight}>
-          <button className={styles.notificationBtn}>
-            <FiBell size={20} />
-            <span className={styles.notificationBadge}>3</span>
-          </button>
+          <NotificationCenter
+            notifications={notifications}
+            unreadCount={unreadCount}
+            onItemClick={handleItemClick}
+          />
           <div className={styles.adminProfile}>
             <div className={styles.avatar}>
               {user?.profileImage ? (

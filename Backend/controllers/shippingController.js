@@ -5,6 +5,11 @@ import shiprocketService, {
   ShiprocketError,
 } from "../services/shiprocketService.js";
 
+// ============================================
+// SOCKET.IO IMPORTS (ADDED)
+// ============================================
+import { emitShippingUpdated } from "../socket/orderEvents.js";
+
 const UNIT_TO_KG = { g: 0.001, kg: 1, oz: 0.0283495, lb: 0.453592 };
 
 // ============================================
@@ -250,6 +255,9 @@ async function assignAWBForOrder(order, courierId) {
   order.shipping.lastSyncedAt = new Date();
   await order.save();
 
+  // ✅ SOCKET.IO
+  emitShippingUpdated(order);
+
   return { alreadyAssigned: false, awbCode: awbData.awb_code };
 }
 
@@ -396,6 +404,9 @@ export async function createShipmentForOrder(orderId) {
     order.shipping.lastSyncedAt = new Date();
     await order.save();
 
+    // ✅ SOCKET.IO — surface shipment-creation failure live
+    emitShippingUpdated(order);
+
     throw err;
   }
 
@@ -442,6 +453,9 @@ export async function createShipmentForOrder(orderId) {
     order.shipping.lastSyncedAt = new Date();
     await order.save();
 
+    // ✅ SOCKET.IO — surface shipment-creation failure live
+    emitShippingUpdated(order);
+
     throw new ShiprocketError(
       `Shiprocket order creation failed: ${reason}`,
       502,
@@ -481,6 +495,9 @@ export async function createShipmentForOrder(orderId) {
     // Store the AWB error in lastError so admins can see what went wrong
     order.shipping.lastError = awbErr.message;
     await order.save();
+
+    // ✅ SOCKET.IO
+    emitShippingUpdated(order);
   }
 
   return { alreadyExists: false, order };
@@ -779,6 +796,9 @@ export const schedulePickup = async (req, res) => {
     }
     await order.save();
 
+    // ✅ SOCKET.IO
+    emitShippingUpdated(order);
+
     return res.status(200).json({
       success: true,
       message: "Pickup scheduled",
@@ -826,6 +846,9 @@ export const generateLabel = async (req, res) => {
     order.shipping.lastSyncedAt = new Date();
     await order.save();
 
+    // ✅ SOCKET.IO
+    emitShippingUpdated(order);
+
     return res
       .status(200)
       .json({ success: true, message: "Label generated", data: { labelUrl } });
@@ -866,6 +889,9 @@ export const generateManifest = async (req, res) => {
       order.shipping.manifestUrl = manifestUrl;
       order.shipping.lastSyncedAt = new Date();
       await order.save();
+
+      // ✅ SOCKET.IO
+      emitShippingUpdated(order);
     }
 
     return res.status(200).json({
@@ -987,6 +1013,9 @@ export const cancelShipment = async (req, res) => {
       order.shipping.cancelledAt = new Date();
     }
     await order.save();
+
+    // ✅ SOCKET.IO
+    emitShippingUpdated(order);
 
     return res
       .status(200)
@@ -1163,6 +1192,11 @@ export const shiprocketWebhook = async (req, res) => {
     order.shipping.lastSyncedAt = new Date();
 
     await order.save();
+
+    // ✅ SOCKET.IO — this is the one that makes AWB/courier/tracking
+    // changes show up live on the customer's Order Detail page
+    emitShippingUpdated(order);
+
     return res
       .status(200)
       .json({ success: true, message: "Webhook processed" });

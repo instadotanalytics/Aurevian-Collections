@@ -44,6 +44,10 @@ import Earnings from "./components/Earnings";
 import Customers from "./components/Customers";
 import Settings from "./components/Settings";
 
+// ✅ SOCKET.IO — seller notifications
+import useSellerNotifications from "../../../hooks/useSellerNotifications.js";
+import NotificationCenter from "../../../Components/common/NotificationCenter/NotificationCenter.jsx";
+
 const PLAN_THEME = {
   free: {
     dashboardName: "Seller Dashboard",
@@ -150,6 +154,11 @@ const SellerDashboard = () => {
     "free";
   const planTheme = getPlanTheme(planId);
 
+  // ✅ SOCKET.IO — mounted at the persistent dashboard shell level (not a
+  // sub-route), so it's active no matter which tab the seller is on.
+  const { notifications, unreadCount, handleItemClick } =
+    useSellerNotifications();
+
   useEffect(() => {
     dispatch(fetchCurrentSubscription());
   }, [dispatch]);
@@ -192,11 +201,12 @@ const SellerDashboard = () => {
             {mobileMenuOpen ? <FiX size={22} /> : <FiMenu size={22} />}
           </button>
 
-          <div
-            className={styles.headerLogo}
-            onClick={() => navigate(basePath)}
-          >
-            <img src={logo} alt="Aurevian Collections" className={styles.logoImage} />
+          <div className={styles.headerLogo} onClick={() => navigate(basePath)}>
+            <img
+              src={logo}
+              alt="Aurevian Collections"
+              className={styles.logoImage}
+            />
           </div>
 
           <div className={styles.headerTitleBlock}>
@@ -230,10 +240,11 @@ const SellerDashboard = () => {
             <FiSearch size={19} />
           </button>
 
-          <button className={styles.notificationBtn}>
-            <FiBell size={19} />
-            <span className={styles.notificationBadge}>0</span>
-          </button>
+          <NotificationCenter
+            notifications={notifications}
+            unreadCount={unreadCount}
+            onItemClick={handleItemClick}
+          />
 
           <div className={styles.profileWrap} ref={profileRef}>
             <button
