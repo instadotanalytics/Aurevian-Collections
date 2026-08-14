@@ -40,6 +40,9 @@ import Orders from "./components/Orders";
 import { sellerLogout } from "../../../redux/slices/sellerSlice";
 import { fetchCurrentSubscription } from "../../../redux/slices/sellerSubscriptionSlice";
 import logo from "../../../assets/newlogo.png";
+import Earnings from "./components/Earnings";
+import Customers from "./components/Customers";
+import Settings from "./components/Settings";
 
 const PLAN_THEME = {
   free: {
@@ -87,7 +90,7 @@ const menuItems = [
   { id: "orders", label: "Orders", icon: FiShoppingBag },
   { id: "earnings", label: "Earnings", icon: FiDollarSign },
   { id: "customers", label: "Customers", icon: FiUsers },
-  { id: "reviews", label: "Reviews", icon: FiMessageSquare },
+ 
   { id: "settings", label: "Settings", icon: FiSettings },
   { id: "upgrade", label: "Upgrade", icon: FiTrendingUp },
 ];
@@ -413,16 +416,16 @@ const SellerDashboard = () => {
               <Route path="orders" element={<Orders />} />
               <Route
                 path="earnings"
-                element={<ComingSoon label="Earnings" />}
+                element={<Earnings/>}
               />
               <Route
                 path="customers"
-                element={<ComingSoon label="Customers" />}
+                element={<Customers/>}
               />
-              <Route path="reviews" element={<ComingSoon label="Reviews" />} />
+             
               <Route
                 path="settings"
-                element={<ComingSoon label="Settings" />}
+                element={<Settings/>}
               />
               <Route path="upgrade" element={<Upgrade />} />
               <Route path="*" element={<Navigate to={basePath} replace />} />

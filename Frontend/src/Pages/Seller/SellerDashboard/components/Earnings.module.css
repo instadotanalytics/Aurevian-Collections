@@ -1,0 +1,1159 @@
+/* src/Pages/Seller/SellerDashboard/Earnings.module.css */
+
+/* ============================================
+   CONTAINER
+   ============================================ */
+.container {
+  padding: 24px 28px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #f8f4ee00;
+  min-height: 100vh;
+  border-radius: 16px;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #3d3228;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #9a8a78;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.refreshBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #ffffff;
+  border: 1px solid #e0d6ca;
+  border-radius: 8px;
+  color: #6b5d4f;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.refreshBtn:hover:not(:disabled) {
+  background: #f5f0ea;
+  border-color: #c8b8a8;
+}
+
+.refreshBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.exportBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: #c8a86e;
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(200, 168, 110, 0.2);
+}
+
+.exportBtn:hover {
+  background: #d4b88a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(200, 168, 110, 0.3);
+}
+
+/* ============================================
+   PERIOD SELECTOR
+   ============================================ */
+.periodSelector {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: #ffffff;
+  border: 1px solid #ebe3d8;
+  border-radius: 10px;
+  margin-bottom: 24px;
+  width: fit-content;
+  box-shadow: 0 1px 4px rgba(180, 160, 140, 0.06);
+}
+
+.periodBtn {
+  padding: 6px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  color: #8a7a68;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.periodBtn:hover {
+  color: #5a4d3e;
+  background: #f5f0ea;
+}
+
+.periodBtn.active {
+  background: #c8a86e;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(200, 168, 110, 0.2);
+}
+
+/* ============================================
+   STATS GRID
+   ============================================ */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.statCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  background: #ffffff;
+  border: 1px solid #ebe3d8;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 4px rgba(180, 160, 140, 0.06);
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(180, 160, 140, 0.1);
+  border-color: #dccfc0;
+}
+
+.statIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #f5f0ea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c8a86e;
+  flex-shrink: 0;
+}
+
+.statContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.statLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9a8a78;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.statValue {
+  font-size: 22px;
+  font-weight: 700;
+  color: #3d3228;
+}
+
+.statChange {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #9a8a78;
+}
+
+.statChange.positive {
+  color: #27ae60;
+}
+
+.statChange.negative {
+  color: #e74c3c;
+}
+
+/* ============================================
+   CHART SECTION
+   ============================================ */
+.chartSection {
+  background: #ffffff;
+  border: 1px solid #ebe3d8;
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 4px rgba(180, 160, 140, 0.06);
+}
+
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.chartHeader h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #3d3228;
+  margin: 0;
+}
+
+.chartTabs {
+  display: flex;
+  gap: 4px;
+  background: #f5f0ea;
+  padding: 3px;
+  border-radius: 8px;
+}
+
+.chartTab {
+  padding: 4px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #8a7a68;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.chartTab:hover {
+  color: #5a4d3e;
+}
+
+.chartTab.active {
+  background: #ffffff;
+  color: #3d3228;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.chartContainer {
+  padding: 8px 0;
+}
+
+.chartBars {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 160px;
+  gap: 12px;
+}
+
+.chartBarGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  height: 100%;
+}
+
+.chartBarWrapper {
+  display: flex;
+  align-items: flex-end;
+  height: 130px;
+  width: 100%;
+}
+
+.chartBar {
+  width: 100%;
+  max-width: 40px;
+  min-height: 8px;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(180deg, #c8a86e, #dbbd94);
+  position: relative;
+  transition: height 0.5s ease;
+  margin: 0 auto;
+}
+
+.chartBarValue {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: #6b5d4f;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.chartBar:hover .chartBarValue {
+  opacity: 1;
+}
+
+.chartLabel {
+  font-size: 11px;
+  color: #9a8a78;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+/* ============================================
+   TRANSACTIONS SECTION
+   ============================================ */
+.transactionsSection {
+  background: #ffffff;
+  border: 1px solid #ebe3d8;
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 4px rgba(180, 160, 140, 0.06);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.sectionHeader h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #3d3228;
+  margin: 0;
+}
+
+.viewAllBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  color: #c8a86e;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.viewAllBtn:hover {
+  color: #d4b88a;
+  gap: 8px;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table thead th {
+  text-align: left;
+  padding: 10px 12px;
+  color: #9a8a78;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #f0e8e0;
+}
+
+.table tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0e8e0;
+  color: #4a3d32;
+}
+
+.table tbody tr:hover {
+  background: #faf7f2;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.orderId {
+  font-weight: 600;
+  color: #3d3228;
+  font-size: 12px;
+}
+
+.amount {
+  font-weight: 600;
+  color: #27ae60;
+}
+
+.refundAmount {
+  font-weight: 600;
+  color: #e74c3c;
+}
+
+/* ============================================
+   STATUS BADGES
+   ============================================ */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.statusBadge.completed {
+  background: #e8f8ef;
+  color: #27ae60;
+}
+
+.statusBadge.pending {
+  background: #fef9e7;
+  color: #f39c12;
+}
+
+.statusBadge.refunded {
+  background: #fde8e8;
+  color: #e74c3c;
+}
+
+.statusCompleted {
+  color: #27ae60;
+  font-size: 14px;
+}
+
+.statusPending {
+  color: #f39c12;
+  font-size: 14px;
+}
+
+.statusRefunded {
+  color: #e74c3c;
+  font-size: 14px;
+}
+
+.typeBadge {
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.typeBadge.sale {
+  background: #e8f0fe;
+  color: #2980b9;
+}
+
+.typeBadge.refund {
+  background: #fde8e8;
+  color: #e74c3c;
+}
+
+/* ============================================
+   PAYOUT SECTION
+   ============================================ */
+.payoutSection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.payoutCard {
+  background: #ffffff;
+  border: 1px solid #ebe3d8;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 1px 4px rgba(180, 160, 140, 0.06);
+}
+
+.payoutHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.payoutHeader svg {
+  color: #c8a86e;
+}
+
+.payoutHeader h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #3d3228;
+  margin: 0;
+}
+
+.payoutDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.payoutItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.payoutItem span {
+  font-size: 12px;
+  color: #9a8a78;
+}
+
+.payoutItem strong {
+  font-size: 16px;
+  color: #3d3228;
+}
+
+.payoutItem small {
+  font-size: 11px;
+  color: #b0a090;
+}
+
+.payoutDivider {
+  border-top: 1px solid #f0e8e0;
+}
+
+.payoutBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, #c8a86e, #b89868);
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all 0.25s ease;
+}
+
+.payoutBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(200, 168, 110, 0.3);
+}
+
+/* ============================================
+   QUICK STATS
+   ============================================ */
+.quickStats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.quickStatItem {
+  background: #ffffff;
+  border: 1px solid #ebe3d8;
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 1px 4px rgba(180, 160, 140, 0.06);
+  transition: all 0.2s ease;
+}
+
+.quickStatItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(180, 160, 140, 0.1);
+}
+
+.quickStatLabel {
+  font-size: 11px;
+  color: #9a8a78;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-weight: 600;
+}
+
+.quickStatValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: #3d3228;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.quickStatItem small {
+  font-size: 11px;
+  color: #b0a090;
+}
+
+/* ============================================
+   SKELETON LOADING
+   ============================================ */
+.skeletonContainer {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.skeletonHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.skeletonTitle {
+  width: 180px;
+  height: 32px;
+  background: #e8dfd4;
+  border-radius: 6px;
+}
+
+.skeletonButtons {
+  display: flex;
+  gap: 10px;
+}
+
+.skeletonButtons div {
+  width: 100px;
+  height: 36px;
+  background: #e8dfd4;
+  border-radius: 8px;
+}
+
+.skeletonStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.skeletonStatCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  background: #e8dfd4;
+  border-radius: 12px;
+}
+
+.skeletonStatIcon {
+  width: 44px;
+  height: 44px;
+  background: #ddd2c4;
+  border-radius: 10px;
+}
+
+.skeletonStatContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeletonStatLabel {
+  width: 80px;
+  height: 12px;
+  background: #ddd2c4;
+  border-radius: 4px;
+}
+
+.skeletonStatValue {
+  width: 120px;
+  height: 22px;
+  background: #ddd2c4;
+  border-radius: 4px;
+}
+
+.skeletonStatChange {
+  width: 100px;
+  height: 12px;
+  background: #ddd2c4;
+  border-radius: 4px;
+}
+
+.skeletonChart {
+  background: #e8dfd4;
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.skeletonChartHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.skeletonChartHeader div {
+  height: 20px;
+  background: #ddd2c4;
+  border-radius: 4px;
+}
+
+.skeletonChartHeader div:first-child {
+  width: 150px;
+}
+.skeletonChartHeader div:last-child {
+  width: 120px;
+}
+
+.skeletonChartBars {
+  display: flex;
+  justify-content: space-between;
+  height: 130px;
+  gap: 12px;
+}
+
+.skeletonChartBar {
+  flex: 1;
+  background: #ddd2c4;
+  border-radius: 4px;
+  height: 100%;
+  min-height: 30px;
+}
+
+.skeletonChartBar:nth-child(1) {
+  height: 60%;
+}
+.skeletonChartBar:nth-child(2) {
+  height: 75%;
+}
+.skeletonChartBar:nth-child(3) {
+  height: 65%;
+}
+.skeletonChartBar:nth-child(4) {
+  height: 80%;
+}
+.skeletonChartBar:nth-child(5) {
+  height: 95%;
+}
+.skeletonChartBar:nth-child(6) {
+  height: 50%;
+}
+
+.skeletonTable {
+  background: #e8dfd4;
+  border-radius: 12px;
+  padding: 20px 24px;
+}
+
+.skeletonTableHeader {
+  height: 16px;
+  width: 100%;
+  background: #ddd2c4;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.skeletonTableRow {
+  height: 40px;
+  width: 100%;
+  background: #ddd2c4;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.skeletonTableRow:last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================
+   ERROR STATE
+   ============================================ */
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 12px;
+  text-align: center;
+}
+
+.errorContainer svg {
+  color: #e74c3c;
+}
+
+.errorContainer h2 {
+  color: #3d3228;
+  font-size: 20px;
+  margin: 0;
+}
+
+.errorContainer p {
+  color: #9a8a78;
+  margin: 0;
+}
+
+.retryBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 24px;
+  background: #c8a86e;
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all 0.25s ease;
+  margin-top: 8px;
+}
+
+.retryBtn:hover {
+  background: #d4b88a;
+  transform: translateY(-1px);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1024px) {
+  .container {
+    padding: 20px;
+  }
+  .payoutSection {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 14px 16px;
+    border-radius: 10px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .headerRight {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  .periodSelector {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 4px;
+    gap: 2px;
+  }
+
+  .periodBtn {
+    padding: 6px 14px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .statCard {
+    padding: 14px 16px;
+  }
+
+  .statValue {
+    font-size: 18px;
+  }
+
+  .chartSection {
+    padding: 16px 18px;
+  }
+
+  .chartHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .chartTabs {
+    width: fit-content;
+  }
+
+  .chartBars {
+    height: 120px;
+    gap: 8px;
+  }
+
+  .chartBarWrapper {
+    height: 100px;
+  }
+
+  .chartBarValue {
+    font-size: 8px;
+    top: -18px;
+  }
+
+  .chartLabel {
+    font-size: 10px;
+  }
+
+  .transactionsSection {
+    padding: 16px 18px;
+  }
+
+  .table thead th,
+  .table tbody td {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .table tbody td:first-child,
+  .table thead th:first-child {
+    padding-left: 4px;
+  }
+
+  .table tbody td:last-child,
+  .table thead th:last-child {
+    padding-right: 4px;
+  }
+
+  /* Hide less important columns on mobile */
+  .table thead th:nth-child(3),
+  .table tbody td:nth-child(3) {
+    display: none;
+  }
+
+  .statusBadge {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+
+  .typeBadge {
+    font-size: 10px;
+    padding: 1px 8px;
+  }
+
+  .payoutSection {
+    gap: 14px;
+  }
+
+  .payoutCard {
+    padding: 16px 18px;
+  }
+
+  .payoutItem strong {
+    font-size: 14px;
+  }
+
+  .quickStats {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .quickStatItem {
+    padding: 14px 16px;
+  }
+
+  .quickStatValue {
+    font-size: 16px;
+  }
+
+  /* Skeleton responsive */
+  .skeletonStats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .skeletonChartBars {
+    height: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 10px 12px;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .refreshBtn,
+  .exportBtn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .statCard {
+    padding: 12px 14px;
+  }
+
+  .statIcon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .statValue {
+    font-size: 16px;
+  }
+
+  .chartSection {
+    padding: 12px 14px;
+  }
+
+  .chartBars {
+    height: 100px;
+    gap: 4px;
+  }
+
+  .chartBarWrapper {
+    height: 80px;
+  }
+
+  .chartBar {
+    max-width: 28px;
+  }
+
+  .transactionsSection {
+    padding: 12px 14px;
+  }
+
+  .table thead th,
+  .table tbody td {
+    padding: 6px 6px;
+    font-size: 11px;
+  }
+
+  .table tbody td:nth-child(2) {
+    font-size: 10px;
+  }
+
+  .quickStats {
+    grid-template-columns: 1fr;
+  }
+
+  .payoutCard {
+    padding: 14px 16px;
+  }
+
+  .payoutBtn {
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  /* Skeleton responsive */
+  .skeletonStats {
+    grid-template-columns: 1fr;
+  }
+
+  .skeletonTitle {
+    width: 140px;
+    height: 28px;
+  }
+
+  .skeletonButtons div {
+    width: 80px;
+    height: 32px;
+  }
+}
+
+/* ============================================
+   SCROLLBAR STYLING
+   ============================================ */
+.tableWrapper::-webkit-scrollbar {
+  height: 4px;
+}
+
+.tableWrapper::-webkit-scrollbar-track {
+  background: #f5f0ea;
+  border-radius: 2px;
+}
+
+.tableWrapper::-webkit-scrollbar-thumb {
+  background: #e0d6ca;
+  border-radius: 2px;
+}
+
+.tableWrapper::-webkit-scrollbar-thumb:hover {
+  background: #c8b8a8;
+}
+
+/* Focus visible for accessibility */
+button:focus-visible {
+  outline: 2px solid #c8a86e;
+  outline-offset: 2px;
+}
