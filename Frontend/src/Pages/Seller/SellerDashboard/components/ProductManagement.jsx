@@ -10,6 +10,7 @@ import {
   FiEye,
   FiPackage,
   FiGrid,
+  FiTrash2,
   FiChevronLeft,
   FiChevronRight,
   FiX,
