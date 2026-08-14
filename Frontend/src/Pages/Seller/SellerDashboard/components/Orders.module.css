@@ -9,19 +9,21 @@
   font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+/* ===== Header (title + count on left, search + filters on right) ===== */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 14px;
 }
 
 .headerLeft {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .title {
@@ -39,23 +41,26 @@
   color: #55554d;
   font-size: 12px;
   font-weight: 500;
+  white-space: nowrap;
 }
 
-.filters {
+.headerRight {
   display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
   align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-left: auto;
 }
 
 .searchWrapper {
-  flex: 1;
-  min-width: 160px;
+  flex: 0 0 auto;
+  width: 300px;
   display: flex;
   align-items: center;
   background: #ffffff;
   border: 1px solid #e8e3dc;
+  border-radius: 8px;
   padding: 0 12px;
   transition: all 0.3s ease;
 }
@@ -91,12 +96,14 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .filterSelect {
-  padding: 8px 28px 8px 12px;
+  padding: 8px 30px 8px 12px;
   background: #ffffff;
   border: 1px solid #e8e3dc;
+  border-radius: 8px;
   color: #14140f;
   font-size: 13px;
   cursor: pointer;
@@ -107,7 +114,7 @@
   background-position: right 10px center;
   font-family: inherit;
   transition: all 0.3s ease;
-  min-width: 110px;
+  min-width: 130px;
 }
 
 .filterSelect:focus {
@@ -141,14 +148,14 @@
 }
 
 .skeletonOrderId {
-  width: 140px;
+  width: 100px;
   height: 16px;
   background: #f0edeb;
   animation: pulse 1.5s ease-in-out infinite;
 }
 
 .skeletonBadge {
-  width: 80px;
+  width: 70px;
   height: 22px;
   background: #f0edeb;
   animation: pulse 1.5s ease-in-out infinite;
@@ -158,7 +165,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-width: 80px;
+  min-width: 70px;
 }
 
 .skeletonLabel {
@@ -169,7 +176,7 @@
 }
 
 .skeletonValue {
-  width: 70px;
+  width: 60px;
   height: 14px;
   background: #f0edeb;
   animation: pulse 1.5s ease-in-out infinite;
@@ -199,6 +206,10 @@
   border-top-color: #c8a86e;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .sentinel {
@@ -248,7 +259,7 @@
   cursor: pointer;
   transition: all 0.25s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  min-height: 10vh;
+  border-radius: 6px;
 }
 
 .orderCard:hover {
@@ -261,60 +272,65 @@
   transform: scale(0.99);
 }
 
+/* Key fix: no more space-between stretching the row edge-to-edge.
+   Left block only takes the width it needs, right block sits right
+   after it with a fixed, reasonable gap — no more giant blank gap
+   between "Items" and the status badges. */
 .orderCardContent {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  gap: 16px;
+  gap: 28px;
+  flex-wrap: wrap;
   height: 100%;
 }
 
 .orderCardLeft {
   display: flex;
   align-items: center;
-  gap: 24px;
-  flex: 1;
+  gap: 20px;
+  flex: 0 1 auto;
   flex-wrap: wrap;
 }
 
 .orderCardRight {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .orderId {
   font-size: 14px;
   font-weight: 700;
   color: #14140f;
-  min-width: 140px;
+  min-width: 90px;
 }
 
 .orderCardFields {
   display: flex;
-  gap: 24px;
+  gap: 20px;
   flex-wrap: wrap;
-  flex: 1;
 }
 
 .orderCardField {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  min-width: 60px;
+  gap: 2px;
+  min-width: 50px;
 }
 
 .fieldLabel {
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 600;
   color: #8a8072;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.4px;
 }
 
 .fieldValue {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   color: #14140f;
 }
@@ -322,25 +338,25 @@
 .orderCardBadges {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .statusBadge,
 .fulfillmentBadge {
   display: inline-block;
-  padding: 5px 15px;
+  padding: 4px 10px;
   font-size: 10px;
   font-weight: 600;
   white-space: nowrap;
-  border-radius: 10px;
+  border-radius: 20px;
 }
 
 .actionRequiredBadge {
   font-size: 14px;
-  animation: pulse 1.5s infinite;
+  animation: blink 1.5s infinite;
 }
 
-@keyframes pulse {
+@keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.3; }
 }
@@ -443,7 +459,7 @@
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   padding-bottom: 12px;
   border-bottom: 1px solid #f0edeb;
   margin-bottom: 16px;
@@ -459,16 +475,16 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin-right: 50px;
+  margin-right: 40px;
 }
 
 .popupStatusBadge,
 .popupFulfillmentBadge {
-  padding: 3px 10px;
-  font-size: 10px;
+  padding: 4px 12px;
+  font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
-  border-radius: 4px;
+  border-radius: 20px;
 }
 
 .popupBody {
@@ -481,7 +497,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #14140f;
   margin: 0 0 8px;
@@ -495,25 +511,25 @@
 .popupCompactGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px 16px;
+  gap: 8px 20px;
 }
 
 .popupCompactItem {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
 }
 
 .popupLabel {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
   color: #8a8072;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.4px;
 }
 
 .popupValue {
-  font-size: 13px;
+  font-size: 14px;
   color: #14140f;
   word-break: break-word;
 }
@@ -532,6 +548,7 @@
   padding: 6px 10px;
   background: #faf9f5;
   gap: 10px;
+  border-radius: 6px;
 }
 
 .popupItemLeft {
@@ -548,6 +565,7 @@
   object-fit: cover;
   background: #f0edeb;
   flex-shrink: 0;
+  border-radius: 4px;
 }
 
 .popupItemDetails {
@@ -559,12 +577,12 @@
 .popupItemName {
   font-weight: 500;
   color: #14140f;
-  font-size: 12px;
+  font-size: 13px;
   word-break: break-word;
 }
 
 .popupItemSku {
-  font-size: 10px;
+  font-size: 11px;
   color: #8a8072;
 }
 
@@ -577,13 +595,13 @@
 
 .popupItemQty {
   color: #55554d;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .popupItemPrice {
   font-weight: 600;
   color: #14140f;
-  font-size: 12px;
+  font-size: 13px;
   min-width: 50px;
   text-align: right;
 }
@@ -592,7 +610,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px 14px;
-  font-size: 12px;
+  font-size: 13px;
   color: #14140f;
 }
 
@@ -609,7 +627,8 @@
   background: rgba(239, 68, 68, 0.08);
   border: 1px solid rgba(239, 68, 68, 0.15);
   color: #ef4444;
-  font-size: 12px;
+  font-size: 13px;
+  border-radius: 6px;
 }
 
 .popupActions {
@@ -623,7 +642,7 @@
   align-items: center;
   gap: 6px;
   padding: 8px 18px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   border: none;
@@ -631,6 +650,7 @@
   font-family: inherit;
   flex: 1;
   justify-content: center;
+  border-radius: 8px;
 }
 
 .confirmBtn {
@@ -670,7 +690,7 @@
 }
 
 .popupEarnings {
-  font-size: 13px;
+  font-size: 14px;
   color: #55554d;
 }
 
@@ -679,12 +699,13 @@
 }
 
 .popupPaymentStatus {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: capitalize;
-  padding: 3px 10px;
+  padding: 4px 12px;
   background: #f5f2ee;
   color: #55554d;
+  border-radius: 20px;
 }
 
 .popupPaymentStatus.paid {
@@ -703,21 +724,22 @@
 }
 
 .popupStatusSelect {
-  padding: 6px 26px 6px 10px;
+  padding: 6px 30px 6px 12px;
   border: 1px solid #e8e3dc;
   background: #ffffff;
-  font-size: 12px;
+  border-radius: 8px;
+  font-size: 13px;
   color: #14140f;
   cursor: pointer;
   outline: none;
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%238a8072' d='M5 7L1 3h8z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 8px center;
+  background-position: right 10px center;
   font-family: inherit;
   transition: all 0.2s ease;
   text-transform: capitalize;
-  min-width: 100px;
+  min-width: 120px;
 }
 
 .popupStatusSelect:focus {
@@ -748,6 +770,7 @@
   max-width: 380px;
   padding: 20px 24px;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
 }
 
 .modalHeader {
@@ -772,7 +795,7 @@
   height: 28px;
   background: #f5f2ee;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   color: #8a8072;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -792,6 +815,7 @@
 .modalTextarea {
   width: 100%;
   border: 1px solid #e8e3dc;
+  border-radius: 8px;
   padding: 10px 12px;
   font-size: 13px;
   font-family: inherit;
@@ -822,6 +846,7 @@
   padding: 6px 16px;
   background: #f5f2ee;
   border: 1px solid #e8e3dc;
+  border-radius: 8px;
   color: #55554d;
   font-size: 13px;
   font-weight: 500;
@@ -843,6 +868,7 @@
   padding: 6px 16px;
   background: #ef4444;
   border: none;
+  border-radius: 8px;
   color: #fff;
   font-size: 13px;
   font-weight: 600;
@@ -864,8 +890,28 @@
    RESPONSIVE
    ============================================ */
 @media (max-width: 1024px) {
+  .searchWrapper {
+    width: 220px;
+  }
+
   .filterSelect {
-    min-width: 90px;
+    min-width: 100px;
+  }
+
+  .orderCardFields {
+    gap: 14px;
+  }
+
+  .orderCardContent {
+    gap: 18px;
+  }
+
+  .orderCardLeft {
+    gap: 14px;
+  }
+
+  .orderId {
+    min-width: 80px;
   }
 }
 
@@ -876,17 +922,19 @@
 
   .header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
   }
 
-  .filters {
-    flex-direction: column;
-    gap: 8px;
+  .headerRight {
+    width: 100%;
+    margin-left: 0;
+    justify-content: stretch;
   }
 
   .searchWrapper {
     width: 100%;
-    min-width: unset;
+    flex: 1 1 100%;
+    order: -1;
   }
 
   .filterGroup {
@@ -898,36 +946,36 @@
     flex: 1;
     min-width: 60px;
     font-size: 12px;
-    padding: 6px 22px 6px 10px;
+    padding: 6px 24px 6px 10px;
   }
 
   .orderCard {
-    min-height: unset;
-    padding: 14px 16px;
+    padding: 12px 14px;
   }
 
   .orderCardContent {
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
+    gap: 8px;
   }
 
   .orderCardLeft {
     flex-direction: column;
     align-items: stretch;
-    gap: 8px;
+    gap: 6px;
   }
 
   .orderCardFields {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 6px 16px;
+    gap: 6px 12px;
   }
 
   .orderCardRight {
     justify-content: space-between;
     width: 100%;
-    padding-top: 10px;
+    margin-left: 0;
+    padding-top: 8px;
     border-top: 1px solid #f0edeb;
     flex-direction: row;
     align-items: center;
@@ -943,13 +991,14 @@
   }
 
   .fieldValue {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .popup {
     max-width: 100%;
     max-height: 100vh;
     margin: 0;
+    border-radius: 0;
   }
 
   .popupContent {
@@ -996,12 +1045,12 @@
   }
 
   .orderCard {
-    padding: 12px 14px;
+    padding: 10px 12px;
   }
 
   .orderCardFields {
     grid-template-columns: 1fr 1fr;
-    gap: 4px 12px;
+    gap: 4px 10px;
   }
 
   .orderCardField {
@@ -1049,6 +1098,12 @@
 
   .orderCardView {
     font-size: 11px;
+  }
+
+  .statusBadge,
+  .fulfillmentBadge {
+    font-size: 10px;
+    padding: 3px 8px;
   }
 }
 

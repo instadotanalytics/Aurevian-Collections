@@ -240,7 +240,7 @@ const Orders = () => {
 
     if (debouncedSearchTerm) {
       const term = debouncedSearchTerm.toLowerCase();
-      filtered = filtered.filter(order => 
+      filtered = filtered.filter(order =>
         order.orderNumber?.toLowerCase().includes(term) ||
         order.customer?.fullName?.toLowerCase().includes(term) ||
         order.customer?.phone?.includes(term)
@@ -288,12 +288,12 @@ const Orders = () => {
     const maxCount = Math.min(visibleCount + 10, filteredOrders.length);
     const batchSize = 10;
     const delayPerBatch = 1000; // 1 second for 10 cards
-    
+
     const loadNextBatch = () => {
       const nextCount = Math.min(currentCount + batchSize, maxCount);
       setVisibleCount(nextCount);
       currentCount = nextCount;
-      
+
       if (currentCount < maxCount) {
         setTimeout(loadNextBatch, delayPerBatch);
       } else {
@@ -303,7 +303,7 @@ const Orders = () => {
         }
       }
     };
-    
+
     setTimeout(loadNextBatch, 200);
   }, [visibleCount, filteredOrders.length, isLoadingMore, allOrdersLoaded]);
 
@@ -343,21 +343,19 @@ const Orders = () => {
             {filteredOrders?.length || 0} orders
           </span>
         </div>
-      </div>
 
-      <div className={styles.filters}>
-        <div className={styles.searchWrapper}>
-          <FiSearch className={styles.searchIcon} />
-          <input
-            type="text"
-            className={styles.searchInput}
-            placeholder="Search orders..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+        <div className={styles.headerRight}>
+          <div className={styles.searchWrapper}>
+            <FiSearch className={styles.searchIcon} />
+            <input
+              type="text"
+              className={styles.searchInput}
+              placeholder="Search orders..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
 
-        <div className={styles.filterGroup}>
           <select
             className={styles.filterSelect}
             value={statusFilter}
@@ -406,8 +404,8 @@ const Orders = () => {
             const totalAmount = order.totalAmount || 0;
 
             return (
-              <div 
-                key={order._id} 
+              <div
+                key={order._id}
                 className={styles.orderCard}
                 onClick={() => openOrderPopup(order)}
               >
@@ -423,7 +421,7 @@ const Orders = () => {
                       </div>
                       <div className={styles.orderCardField}>
                         <span className={styles.fieldLabel}>Total</span>
-                        <span className={styles.fieldValue}>{formatCurrency(totalAmount)}</span>
+                        <span className={styles.fieldValue}>{formatCurrency(order.sellerSubtotal || 0)}</span>
                       </div>
                       <div className={styles.orderCardField}>
                         <span className={styles.fieldLabel}>Date</span>
@@ -491,7 +489,7 @@ const Orders = () => {
                 <div className={styles.popupBadges}>
                   <span
                     className={styles.popupStatusBadge}
-                    style={{ 
+                    style={{
                       backgroundColor: getStatusStyle(selectedOrder.orderStatus).bg,
                       color: getStatusStyle(selectedOrder.orderStatus).text
                     }}
@@ -500,7 +498,7 @@ const Orders = () => {
                   </span>
                   <span
                     className={styles.popupFulfillmentBadge}
-                    style={{ 
+                    style={{
                       backgroundColor: getFulfillmentStyle(selectedOrder.fulfillmentStatus).bg,
                       color: getFulfillmentStyle(selectedOrder.fulfillmentStatus).text
                     }}
@@ -529,8 +527,8 @@ const Orders = () => {
                     <div className={styles.popupCompactItem}>
                       <span className={styles.popupLabel}>Address</span>
                       <span className={styles.popupValue}>
-                        {selectedOrder.customer?.addressLine1 ? 
-                          `${selectedOrder.customer.addressLine1}, ${selectedOrder.customer.city || ''}, ${selectedOrder.customer.state || ''} - ${selectedOrder.customer.pincode || ''}` 
+                        {selectedOrder.customer?.addressLine1 ?
+                          `${selectedOrder.customer.addressLine1}, ${selectedOrder.customer.city || ''}, ${selectedOrder.customer.state || ''} - ${selectedOrder.customer.pincode || ''}`
                           : 'N/A'}
                       </span>
                     </div>
