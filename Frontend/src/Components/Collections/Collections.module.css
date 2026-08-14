@@ -104,17 +104,14 @@
 .heroOverlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to right,
-    rgba(20, 15, 10, 0.55) 0%,
-    rgba(20, 15, 10, 0.22) 45%,
-    rgba(20, 15, 10, 0.08) 100%
-  ),
-  linear-gradient(
-    to top,
-    rgba(20, 15, 10, 0.35) 0%,
-    rgba(20, 15, 10, 0) 35%
-  );
+  background:
+    linear-gradient(
+      to right,
+      rgba(20, 15, 10, 0.55) 0%,
+      rgba(20, 15, 10, 0.22) 45%,
+      rgba(20, 15, 10, 0.08) 100%
+    ),
+    linear-gradient(to top, rgba(20, 15, 10, 0.35) 0%, rgba(20, 15, 10, 0) 35%);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -197,7 +194,12 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.45) 48%, transparent 65%);
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.45) 48%,
+    transparent 65%
+  );
   transform: translateX(-120%);
   transition: transform 0.7s ease;
 }
@@ -288,7 +290,8 @@
   opacity: 0;
   transform: translateY(60px);
   filter: blur(12px);
-  transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1),
+  transition:
+    opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1),
     transform 1.4s cubic-bezier(0.16, 1, 0.3, 1),
     filter 1.4s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform, filter;
@@ -305,17 +308,30 @@
   opacity: 0;
   transform: translateY(40px);
   filter: blur(8px);
-  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+  transition:
+    opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
     transform 1.2s cubic-bezier(0.16, 1, 0.3, 1),
     filter 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.revealVisible.revealStagger > *:nth-child(1) { transition-delay: 0.05s; }
-.revealVisible.revealStagger > *:nth-child(2) { transition-delay: 0.10s; }
-.revealVisible.revealStagger > *:nth-child(3) { transition-delay: 0.15s; }
-.revealVisible.revealStagger > *:nth-child(4) { transition-delay: 0.20s; }
-.revealVisible.revealStagger > *:nth-child(5) { transition-delay: 0.25s; }
-.revealVisible.revealStagger > *:nth-child(6) { transition-delay: 0.30s; }
+.revealVisible.revealStagger > *:nth-child(1) {
+  transition-delay: 0.05s;
+}
+.revealVisible.revealStagger > *:nth-child(2) {
+  transition-delay: 0.1s;
+}
+.revealVisible.revealStagger > *:nth-child(3) {
+  transition-delay: 0.15s;
+}
+.revealVisible.revealStagger > *:nth-child(4) {
+  transition-delay: 0.2s;
+}
+.revealVisible.revealStagger > *:nth-child(5) {
+  transition-delay: 0.25s;
+}
+.revealVisible.revealStagger > *:nth-child(6) {
+  transition-delay: 0.3s;
+}
 
 .revealVisible.revealStagger > * {
   opacity: 1;
@@ -501,7 +517,12 @@
   width: 100%;
   height: 1px;
   margin: 12px 0 18px;
-  background: linear-gradient(to right, var(--gold-light), var(--cream-line) 60%, transparent);
+  background: linear-gradient(
+    to right,
+    var(--gold-light),
+    var(--cream-line) 60%,
+    transparent
+  );
   flex-shrink: 0;
 }
 
@@ -526,7 +547,9 @@
   gap: 10px;
   padding: 6px 0;
   cursor: pointer;
-  transition: color 0.25s ease, transform 0.25s ease;
+  transition:
+    color 0.25s ease,
+    transform 0.25s ease;
   font-size: 14px;
   color: var(--ink-soft);
   font-weight: 400;
@@ -549,7 +572,9 @@
   cursor: pointer;
   flex-shrink: 0;
   position: relative;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .filterOption input[type="radio"]::after {
@@ -591,7 +616,13 @@
   appearance: none;
   -webkit-appearance: none;
   cursor: pointer;
-  background: linear-gradient(to right, var(--gold) 0%, var(--gold) var(--_progress, 50%), var(--cream-line) var(--_progress, 50%), var(--cream-line) 100%);
+  background: linear-gradient(
+    to right,
+    var(--gold) 0%,
+    var(--gold) var(--_progress, 50%),
+    var(--cream-line) var(--_progress, 50%),
+    var(--cream-line) 100%
+  );
   height: 3px;
   border-radius: 2px;
   outline: none;
@@ -644,7 +675,9 @@
   cursor: pointer;
   padding: 10px 0 2px;
   font-family: "Jost", sans-serif;
-  transition: color 0.2s ease, letter-spacing 0.2s ease;
+  transition:
+    color 0.2s ease,
+    letter-spacing 0.2s ease;
   letter-spacing: 0.04em;
   margin-top: 6px;
   text-transform: uppercase;
@@ -807,7 +840,9 @@
   border: 1px solid var(--cream-line);
   border-radius: 0;
   overflow: hidden;
-  transition: box-shadow 0.25s, transform 0.25s;
+  transition:
+    box-shadow 0.25s,
+    transform 0.25s;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -903,7 +938,12 @@
   line-height: 1;
   cursor: pointer;
   color: var(--ink);
-  transition: transform 0.2s ease, font-size 0.2s ease, color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    font-size 0.2s ease,
+    color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .wishlistBtn:hover {
@@ -997,7 +1037,11 @@
   background: var(--gold);
   border: 1px solid var(--gold);
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
   min-height: 40px;
   flex-shrink: 0;
   margin-top: auto;
@@ -1406,7 +1450,9 @@
   font-size: 14px;
   color: var(--ink);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .mobileSortOption:hover {
@@ -1416,7 +1462,7 @@
 
 .mobileSortOptionActive {
   background: var(--gold-light);
-  color: var(  --gold-deep);
+  color: var(--gold-deep);
   font-weight: 500;
 }
 
@@ -2208,6 +2254,8 @@
     padding: 3px 7px;
     top: 8px;
     left: 8px;
+    background-color: red;
+    color: white;
   }
 
   .productCategoryOverlay {
@@ -2379,7 +2427,7 @@
   .filterOverlay {
     display: none !important;
   }
-  
+
   .mobileFilterSheet {
     display: none !important;
   }

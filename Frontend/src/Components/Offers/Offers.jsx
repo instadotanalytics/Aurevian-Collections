@@ -27,7 +27,7 @@ import {
 } from "../../redux/slices/wishlistSlice";
 
 /* ----------------------------------------------------------------
-   Data — All offers, deals, and promotional content
+   Data
 ------------------------------------------------------------------- */
 
 const BOTTOM_FEATURES = [
@@ -53,7 +53,6 @@ const BOTTOM_FEATURES = [
   },
 ];
 
-// Filter categories matching Collections page
 const FILTER_CATEGORIES = [
   "All",
   "Rings",
@@ -90,7 +89,7 @@ function SkeletonCard() {
 }
 
 /* ----------------------------------------------------------------
-   Persistent Reveal-on-scroll with Blur Effect
+   Reveal-on-scroll
 ------------------------------------------------------------------- */
 function useReveal(options = {}) {
   const ref = useRef(null);
@@ -99,21 +98,16 @@ function useReveal(options = {}) {
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
-
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setVisible(true);
       return;
     }
-
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-        }
+        if (entry.isIntersecting) setVisible(true);
       },
       { threshold: 0.1, rootMargin: "0px 0px -100px 0px", ...options },
     );
-
     observer.observe(node);
     return () => observer.disconnect();
   }, [options]);
@@ -131,7 +125,6 @@ function Reveal({
 }) {
   const [ref, visible] = useReveal();
   const staggerClass = stagger ? styles.revealStagger : "";
-
   return (
     <Tag
       ref={ref}
@@ -144,6 +137,65 @@ function Reveal({
   );
 }
 
+/* ----------------------------------------------------------------
+   Mobile Sort Dropdown
+------------------------------------------------------------------- */
+function MobileSortDropdown({ value, options, onChange }) {
+  const [open, setOpen] = useState(false);
+  const wrapperRef = useRef(null);
+  const currentLabel = options.find((o) => o.value === value)?.label || "";
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  return (
+    <div className={styles.mobileSortWrapper} ref={wrapperRef}>
+      <button
+        type="button"
+        className={styles.mobileSortTrigger}
+        onClick={() => setOpen(!open)}
+      >
+        <span>{currentLabel}</span>
+        <span
+          className={`${styles.mobileSortChevron} ${
+            open ? styles.mobileSortChevronOpen : ""
+          }`}
+        />
+      </button>
+
+      {open && (
+        <div className={styles.mobileSortList}>
+          {options.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              className={`${styles.mobileSortItem} ${
+                value === opt.value ? styles.mobileSortItemActive : ""
+              }`}
+              onClick={() => {
+                onChange(opt.value);
+                setOpen(false);
+              }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ----------------------------------------------------------------
+   Main Component
+------------------------------------------------------------------- */
 export default function Offers() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -172,7 +224,7 @@ export default function Offers() {
     totalPages: 1,
   };
 
-  // Throttled fetch — minimum 1000 ms skeleton display
+  // Throttled fetch — minimum 1000 ms skeleton
   useEffect(() => {
     setLocalLoading(true);
     const start = Date.now();
@@ -198,12 +250,9 @@ export default function Offers() {
   }, [dispatch, currentPage, selectedCategory]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      dispatch(fetchWishlist());
-    }
+    if (isAuthenticated) dispatch(fetchWishlist());
   }, [dispatch, isAuthenticated]);
 
-  // Client-side sort
   const sortedProducts = useMemo(() => {
     const list = [...products];
     switch (sortBy) {
@@ -240,26 +289,23 @@ export default function Offers() {
     }
   }, [products, sortBy]);
 
-  // Scroll to offers section function
   const scrollToOffers = () => {
-    const offersSection = document.getElementById("offers-section");
-    if (offersSection) {
-      const rect = offersSection.getBoundingClientRect();
-      const top = rect.top + window.pageYOffset;
-      window.scrollTo({ top: top - 120, behavior: "smooth" });
+    const el = document.getElementById("offers-section");
+    if (el) {
+      const top = el.getBoundingClientRect().top + window.pageYOffset - 120;
+      window.scrollTo({ top, behavior: "smooth" });
     }
   };
 
   const nextPage = () => {
     if (currentPage < totalPages - 1) {
-      setCurrentPage((prev) => prev + 1);
+      setCurrentPage((p) => p + 1);
       setTimeout(scrollToOffers, 100);
     }
   };
-
   const prevPage = () => {
     if (currentPage > 0) {
-      setCurrentPage((prev) => prev - 1);
+      setCurrentPage((p) => p - 1);
       setTimeout(scrollToOffers, 100);
     }
   };
@@ -317,30 +363,25 @@ export default function Offers() {
     document.body.style.position = "";
     document.body.style.width = "";
     document.body.style.top = "";
-    if (scrollY) {
-      window.scrollTo(0, parseInt(scrollY || "0", 10) * -1);
-    }
+    if (scrollY) window.scrollTo(0, parseInt(scrollY || "0", 10) * -1);
   };
 
   return (
     <>
       <Header />
       <section className={styles.offers} aria-label="Aurevian Exclusive Offers">
-        {/* ---------------- Hero Banner with Background Image ---------------- */}
         <div
           className={styles.heroBanner}
           style={{ backgroundImage: `url(${craftImage1})` }}
-        ></div>
+        />
 
         <div className={styles.container}>
-          {/* ---------------- Limited Time Offers ---------------- */}
           <Reveal as="div" className={styles.offersSection} delay={100}>
             <div id="offers-section" className={styles.sectionHeader}>
               <span className={styles.sectionTag}>LIMITED TIME OFFERS</span>
               <h2 className={styles.sectionTitle}>Our Premium Picks</h2>
             </div>
 
-            {/* ---------------- Mobile Filter Toggle Button ---------------- */}
             <button
               type="button"
               className={styles.filterToggle}
@@ -353,9 +394,8 @@ export default function Offers() {
               </span>
             </button>
 
-            {/* ---------------- Shop Layout - Filter Sidebar + Products ---------------- */}
             <div className={styles.shopLayout}>
-              {/* Desktop Filter Sidebar */}
+              {/* Desktop Sidebar */}
               <aside className={styles.filterSidebar}>
                 <h3 className={styles.filterTitle}>Filter</h3>
 
@@ -401,7 +441,9 @@ export default function Offers() {
                     max="7000"
                     step="100"
                     value={priceRange[1]}
-                    onChange={(e) => setPriceRange([0, Number(e.target.value)])}
+                    onChange={(e) =>
+                      setPriceRange([0, Number(e.target.value)])
+                    }
                     className={styles.filterPriceInput}
                     style={{
                       "--_progress": `${(priceRange[1] / 7000) * 100}%`,
@@ -495,7 +537,11 @@ export default function Offers() {
                               <div className={styles.wishlistActions}>
                                 <button
                                   type="button"
-                                  className={`${styles.wishlistBtn} ${inWishlist ? styles.wishlistBtnActive : ""}`}
+                                  className={`${styles.wishlistBtn} ${
+                                    inWishlist
+                                      ? styles.wishlistBtnActive
+                                      : ""
+                                  }`}
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
@@ -523,7 +569,9 @@ export default function Offers() {
                                 {product.productName}
                               </Link>
                               <div className={styles.productPriceRow}>
-                                <span className={styles.productCurrentPrice}>
+                                <span
+                                  className={styles.productCurrentPrice}
+                                >
                                   ₹
                                   {(
                                     product.pricing?.salePrice ||
@@ -533,7 +581,9 @@ export default function Offers() {
                                 {product.pricing?.salePrice &&
                                   product.pricing?.originalPrice && (
                                     <span
-                                      className={styles.productOriginalPrice}
+                                      className={
+                                        styles.productOriginalPrice
+                                      }
                                     >
                                       ₹
                                       {product.pricing.originalPrice.toLocaleString()}
@@ -542,8 +592,14 @@ export default function Offers() {
                               </div>
                               <button
                                 type="button"
-                                className={`${styles.productAddBtn} ${inCart ? styles.productAddBtnActive : ""}`}
-                                onClick={() => handleAddToCart(product._id)}
+                                className={`${styles.productAddBtn} ${
+                                  inCart
+                                    ? styles.productAddBtnActive
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleAddToCart(product._id)
+                                }
                                 disabled={inCart || addingToCart}
                               >
                                 {inCart ? (
@@ -553,7 +609,9 @@ export default function Offers() {
                                 ) : (
                                   <>
                                     <FiShoppingBag />{" "}
-                                    {addingToCart ? "Adding..." : "Add to Cart"}
+                                    {addingToCart
+                                      ? "Adding..."
+                                      : "Add to Cart"}
                                   </>
                                 )}
                               </button>
@@ -563,11 +621,14 @@ export default function Offers() {
                       })}
                     </div>
 
-                    {/* Pagination - Next/Prev Buttons */}
                     {totalPages > 1 && (
                       <div className={styles.pagination}>
                         <button
-                          className={`${styles.paginationBtn} ${currentPage === 0 ? styles.paginationDisabled : ""}`}
+                          className={`${styles.paginationBtn} ${
+                            currentPage === 0
+                              ? styles.paginationDisabled
+                              : ""
+                          }`}
                           onClick={prevPage}
                           disabled={currentPage === 0}
                         >
@@ -577,7 +638,11 @@ export default function Offers() {
                           Page {currentPage + 1} of {totalPages}
                         </span>
                         <button
-                          className={`${styles.paginationBtn} ${currentPage === totalPages - 1 ? styles.paginationDisabled : ""}`}
+                          className={`${styles.paginationBtn} ${
+                            currentPage === totalPages - 1
+                              ? styles.paginationDisabled
+                              : ""
+                          }`}
                           onClick={nextPage}
                           disabled={currentPage === totalPages - 1}
                         >
@@ -591,7 +656,7 @@ export default function Offers() {
             </div>
           </Reveal>
 
-          {/* ---------------- Exclusive Premium Offer Banner ---------------- */}
+          {/* Premium Banner */}
           <Reveal as="div" className={styles.premiumBanner} delay={100}>
             <div className={styles.premiumBannerContent}>
               <span className={styles.premiumTag}>
@@ -599,7 +664,10 @@ export default function Offers() {
               </span>
               <h2>Get up to 30% OFF on selected premium products.</h2>
               <p>Limited time only. Don't miss out!</p>
-              <button className={styles.premiumBtn} onClick={scrollToOffers}>
+              <button
+                className={styles.premiumBtn}
+                onClick={scrollToOffers}
+              >
                 EXPLORE OFFERS
               </button>
             </div>
@@ -616,7 +684,7 @@ export default function Offers() {
             </div>
           </Reveal>
 
-          {/* ---------------- Bottom Features ---------------- */}
+          {/* Bottom Features */}
           <Reveal
             as="div"
             className={styles.bottomFeatures}
@@ -625,7 +693,9 @@ export default function Offers() {
           >
             {BOTTOM_FEATURES.map((feature, i) => (
               <div key={i} className={styles.bottomFeature}>
-                <span className={styles.bottomFeatureIcon}>{feature.icon}</span>
+                <span className={styles.bottomFeatureIcon}>
+                  {feature.icon}
+                </span>
                 <h4>{feature.title}</h4>
                 <p>{feature.description}</p>
               </div>
@@ -633,7 +703,7 @@ export default function Offers() {
           </Reveal>
         </div>
 
-        {/* ---------------- Mobile Bottom Sheet Filter ---------------- */}
+        {/* Mobile Filter Sheet */}
         {filtersOpen && (
           <div className={styles.filterOverlay} onClick={closeFilters} />
         )}
@@ -656,23 +726,14 @@ export default function Offers() {
           </div>
 
           <div className={styles.mobileFilterInner}>
-            {/* Mobile Sort By — Dropdown style */}
+            {/* Mobile Sort By — Custom Dropdown */}
             <div className={styles.filterGroup}>
               <span className={styles.filterGroupLabel}>Sort By</span>
-              <div className={styles.mobileSortWrapper}>
-                <select
-                  className={styles.mobileSortSelect}
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                >
-                  {SORT_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-                <span className={styles.mobileSortChevron}>⌄</span>
-              </div>
+              <MobileSortDropdown
+                value={sortBy}
+                options={SORT_OPTIONS}
+                onChange={(val) => setSortBy(val)}
+              />
             </div>
 
             {/* Mobile Category — Two column grid */}
@@ -704,9 +765,13 @@ export default function Offers() {
                 max="7000"
                 step="100"
                 value={priceRange[1]}
-                onChange={(e) => setPriceRange([0, Number(e.target.value)])}
+                onChange={(e) =>
+                  setPriceRange([0, Number(e.target.value)])
+                }
                 className={styles.filterPriceInput}
-                style={{ "--_progress": `${(priceRange[1] / 7000) * 100}%` }}
+                style={{
+                  "--_progress": `${(priceRange[1] / 7000) * 100}%`,
+                }}
               />
               <div className={styles.filterPriceRange}>
                 <span>₹0</span>

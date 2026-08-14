@@ -1,10 +1,5 @@
 /* src/Components/Offers/Offers.module.css - Complete updated file */
 
-/* ==========================================================
-   Aurevian — Exclusive Offers
-   Premium style matching Collections page
-   ========================================================== */
-
 .offers {
   --cream: #f7f2e9;
   --cream-deep: #f3ead9;
@@ -39,9 +34,7 @@
   box-sizing: border-box;
 }
 
-/* ==========================================================
-   Scroll Reveal
-   ========================================================== */
+/* Scroll Reveal */
 .reveal {
   opacity: 0;
   transform: translateY(60px);
@@ -80,9 +73,7 @@
   filter: blur(0);
 }
 
-/* ==========================================================
-   Hero Banner - Only image, no content
-   ========================================================== */
+/* Hero Banner */
 .heroBanner {
   height: 85vh;
   margin-top: 115px;
@@ -100,9 +91,7 @@
   overflow: hidden;
 }
 
-/* ==========================================================
-   Section Header
-   ========================================================== */
+/* Section Header */
 .sectionHeader {
   text-align: center;
   margin: 60px 0;
@@ -127,9 +116,7 @@
   margin: 0;
 }
 
-/* ==========================================================
-   Mobile Filter Toggle Button
-   ========================================================== */
+/* Mobile Filter Toggle */
 .filterToggle {
   display: none;
   align-items: center;
@@ -168,9 +155,7 @@
   align-items: center;
 }
 
-/* ==========================================================
-   Shop Layout - 90vh Container with Sticky Filter + Scrollable Products
-   ========================================================== */
+/* Shop Layout */
 .shopLayout {
   display: grid;
   grid-template-columns: 260px 1fr;
@@ -181,7 +166,7 @@
   overflow: hidden;
 }
 
-/* Filter Sidebar - Desktop - No scroll, fits content only */
+/* Desktop Filter Sidebar — No scroll, fits content */
 .filterSidebar {
   position: sticky;
   top: 0;
@@ -432,7 +417,7 @@
   transform: translateX(3px);
 }
 
-/* Products Wrapper - Scrollable */
+/* Products Wrapper */
 .productsWrapper {
   display: flex;
   flex-direction: column;
@@ -443,7 +428,6 @@
   flex: 1;
 }
 
-/* Custom scrollbar for products wrapper */
 .productsWrapper::-webkit-scrollbar {
   width: 4px;
 }
@@ -463,7 +447,6 @@
   scrollbar-color: var(--gold) var(--cream-line);
 }
 
-/* Products Header - Sticky inside scrollable wrapper */
 .productsHeader {
   display: flex;
   justify-content: space-between;
@@ -486,9 +469,7 @@
   font-weight: 400;
 }
 
-/* ==========================================================
-   Skeleton Loading
-   ========================================================== */
+/* Skeleton Loading */
 .skeletonCard {
   background: var(--cream-card);
   border: 1px solid var(--cream-line);
@@ -559,9 +540,7 @@
   }
 }
 
-/* ==========================================================
-   Products Grid - Fixed Card Heights
-   ========================================================== */
+/* Products Grid */
 .productsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -738,9 +717,7 @@
   font-size: 13px;
 }
 
-/* ==========================================================
-   Add to Cart Button - No radius
-   ========================================================== */
+/* Add to Cart Button */
 .productAddBtn {
   display: flex;
   align-items: center;
@@ -794,9 +771,7 @@
   transform: none;
 }
 
-/* ==========================================================
-   Pagination - Sticky at bottom of products wrapper
-   ========================================================== */
+/* Pagination */
 .pagination {
   display: flex;
   justify-content: center;
@@ -831,7 +806,7 @@
 .paginationBtn:hover:not(:disabled) {
   background: var(--ink);
   color: var(--gold-light);
-  border-color:   var(--ink);
+  border-color: var(--ink);
 }
 
 .paginationBtn:active:not(:disabled) {
@@ -853,9 +828,7 @@
   font-weight: 400;
 }
 
-/* ==========================================================
-   Premium Banner
-   ========================================================== */
+/* Premium Banner */
 .premiumBanner {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -971,9 +944,7 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
-/* ==========================================================
-   Bottom Features
-   ========================================================== */
+/* Bottom Features */
 .bottomFeatures {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1016,9 +987,7 @@
   font-weight: 300;
 }
 
-/* ==========================================================
-   Mobile Filter Overlay
-   ========================================================== */
+/* Mobile Filter Overlay */
 .filterOverlay {
   display: none;
   position: fixed;
@@ -1031,9 +1000,7 @@
   display: block;
 }
 
-/* ==========================================================
-   Mobile Filter Sheet
-   ========================================================== */
+/* Mobile Filter Sheet */
 .mobileFilterSheet {
   position: fixed;
   left: 0;
@@ -1106,44 +1073,94 @@
   overscroll-behavior: contain;
 }
 
-/* Mobile Sort By — Dropdown style (1st reference image) */
+/* ==========================================================
+   Mobile Sort By — Custom Dropdown (matches 2nd reference)
+   ========================================================== */
 .mobileSortWrapper {
   position: relative;
   width: 100%;
 }
 
-.mobileSortSelect {
+.mobileSortTrigger {
   width: 100%;
-  appearance: none;
-  -webkit-appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   background: #fff;
   border: 1px solid var(--cream-line);
-  border-radius: 8px;
-  padding: 12px 40px 12px 14px;
+  border-radius: 10px;
+  padding: 14px 16px;
   font-family: "Jost", sans-serif;
   font-size: 14px;
+  font-weight: 400;
   color: var(--ink-soft);
   cursor: pointer;
   outline: none;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.mobileSortSelect:focus {
+.mobileSortTrigger:focus-visible {
   border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(169, 129, 47, 0.08);
 }
 
+/* Thin chevron arrow */
 .mobileSortChevron {
-  position: absolute;
-  right: 14px;
-  top: 35%;
-  transform: translateY(-50%);
-  font-size: 18px;
-  color: var(--gold-deep);
-  pointer-events: none;
-  line-height: 1;
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid var(--gold-deep);
+  border-bottom: 1.5px solid var(--gold-deep);
+  transform: rotate(45deg);
+  transition: transform 0.25s ease;
+  display: inline-block;
+  flex-shrink: 0;
 }
 
-/* Mobile Category — Two column grid (2nd reference image) */
+.mobileSortChevronOpen {
+  transform: rotate(-135deg) translateY(2px);
+}
+
+/* Dropdown list */
+.mobileSortList {
+  margin-top: 6px;
+  background: #fff;
+  border: 1px solid var(--cream-line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.mobileSortItem {
+  width: 100%;
+  text-align: left;
+  padding: 13px 16px;
+  font-family: "Jost", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ink-soft);
+  background: #fff;
+  border: none;
+  border-bottom: 1px solid var(--cream-line);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.mobileSortItem:last-child {
+  border-bottom: none;
+}
+
+.mobileSortItem:hover {
+  background: var(--cream-card);
+}
+
+/* Golden highlight for selected item — matches 2nd reference image */
+.mobileSortItemActive {
+  background: var(--gold-light) !important;
+  color: var(--gold-deep) !important;
+}
+
+/* ==========================================================
+   Mobile Category — Two column grid
+   ========================================================== */
 .mobileFilterGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1235,7 +1252,6 @@
     margin-bottom: 16px;
   }
 
-  /* Hide product count on mobile */
   .productsCount {
     display: none;
   }
@@ -1280,7 +1296,6 @@
     margin: 12px -16px -4px;
   }
 
-  /* Skeleton responsive */
   .skeletonCard {
     min-height: 320px;
   }
@@ -1450,7 +1465,7 @@
   .paginationInfo {
     font-size: 12px;
     order: -1;
-    width: 100%;
+    width:     100%;
     text-align: center;
   }
 

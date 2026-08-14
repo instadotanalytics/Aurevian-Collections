@@ -712,6 +712,7 @@
   width: auto;
   display: block;
   object-fit: contain;
+  margin-left: -20px;
 }
 
 .drawerClose {
@@ -1603,6 +1604,7 @@
     height: 150px;
     max-width: 34vw;
     object-fit: contain;
+    margin-left: -80px;
   }
 
   .searchPanel {
@@ -1636,6 +1638,7 @@
     width: 36px;
     height: 36px;
     font-size: 20px;
+    margin-left: -10px;
   }
 
   .drawerSubHeading {

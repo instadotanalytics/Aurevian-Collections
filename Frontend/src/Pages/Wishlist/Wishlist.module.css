@@ -440,7 +440,7 @@
   text-align: center;
   padding: 4rem 2rem;
   background: white;
-  margin-top: 100px;
+  /* margin-top: 100px; */
 }
 
 .emptyHeart {
@@ -452,7 +452,7 @@
 .emptyWishlist h2 {
   font-size: 1.5rem;
   color: var(--dark);
-  margin-bottom: 0.5rem;
+  margin-bottom: 2rem;
 }
 
 .emptyWishlist p {
@@ -465,7 +465,7 @@
   background: var(--gold-gradient);
   color: white;
   border: none;
-  border-radius: 6px;
+  /* border-radius: 6px; */
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;

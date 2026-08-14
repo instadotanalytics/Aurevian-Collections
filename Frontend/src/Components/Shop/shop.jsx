@@ -1,6 +1,4 @@
-// src/Pages/Shop/Shop.jsx
-
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -32,6 +30,22 @@ const SORT_OPTIONS = [
   { value: "price-high", label: "Price: High to Low" },
 ];
 
+const BUDGET_OPTIONS = [
+  { value: "all", label: "All" },
+  { value: "under-1000", label: "Under ₹1,000" },
+  { value: "1000-3000", label: "₹1,000 – ₹3,000" },
+  { value: "3000-6000", label: "₹3,000 – ₹6,000" },
+  { value: "above-6000", label: "Above ₹6,000" },
+];
+
+const PROMOTION_OPTIONS = [
+  { value: "all", label: "All" },
+  { value: "gift-wrapped", label: "Gift Wrapped" },
+  { value: "best-seller", label: "Best Seller" },
+  { value: "trending", label: "Trending" },
+  { value: "premium-gift", label: "Premium Gift" },
+];
+
 const perks = [
   {
     icon: "📦",
@@ -46,7 +60,6 @@ const perks = [
   { icon: "☎", title: "24×7 Support", text: "We support online all day" },
 ];
 
-/* Truncate names > 3 words. Full name still passed to cart & shown on hover. */
 const truncateName = (name) => {
   if (!name) return "";
   const words = name.trim().split(/\s+/);
@@ -59,35 +72,42 @@ const truncateName = (name) => {
 export default function Shop() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { byPlacement, isLoading } = useSelector(
-    (state) => state.storefrontProduct,
-  );
   const { isAuthenticated } = useSelector((state) => state.auth);
   const cartItems = useSelector((state) => state.cart.items);
   const wishlistItems = useSelector((state) => state.wishlist.items);
-
-  const shopData = byPlacement.shop || {
-    products: [],
-    pagination: { page: 1, totalPages: 1, total: 0 },
-  };
 
   const [categories, setCategories] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [priceRange, setPriceRange] = useState([0, 7000]);
   const [sort, setSort] = useState("");
-  const [page, setPage] = useState(1);
   const [cartLoadingId, setCartLoadingId] = useState(null);
 
-  // Mobile filter sheet state
+  // Filters
+  const [budgetFilter, setBudgetFilter] = useState("all");
+  const [promotionFilter, setPromotionFilter] = useState("all");
+
+  // Infinite scroll
+  const [page, setPage] = useState(1);
+  const [allProducts, setAllProducts] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const loaderRef = useRef(null);
+
+  // Mobile filter sheet
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const sheetRef = useRef(null);
+  const dragState = useRef({ startY: 0, currentY: 0 });
+  const [isDraggingSheet, setIsDraggingSheet] = useState(false);
 
   // Mobile sort dropdown state
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const sortDropdownRef = useRef(null);
 
-  // Skeleton / throttling state
-  const [displaySkeleton, setDisplaySkeleton] = useState(false);
-  const loadStartRef = useRef(0);
+  // Desktop sidebar sort dropdown state
+  const [isSidebarSortOpen, setIsSidebarSortOpen] = useState(false);
+  const sidebarSortRef = useRef(null);
 
   useEffect(() => {
     axios
@@ -102,38 +122,80 @@ export default function Shop() {
       });
   }, []);
 
+  // Fetch products (infinite scroll)
   useEffect(() => {
-    dispatch(
-      fetchProductsByPlacement({
-        placement: "shop",
-        page,
-        limit: 12,
-        categoryId: selectedCategoryId || undefined,
-        sort: sort || undefined,
-      }),
+    const load = async () => {
+      const isFirst = page === 1;
+      if (isFirst) setIsInitialLoading(true);
+      else setIsLoadingMore(true);
+
+      const start = Date.now();
+
+      try {
+        const result = await dispatch(
+          fetchProductsByPlacement({
+            placement: "shop",
+            page,
+            limit: 10,
+            categoryId: selectedCategoryId || undefined,
+            sort: sort || undefined,
+          })
+        ).unwrap();
+
+        const fetched = result.products || [];
+        setAllProducts((prev) => (isFirst ? fetched : [...prev, ...fetched]));
+        setHasMore(page < (result.pagination?.totalPages || 1));
+      } catch (err) {
+        console.error(err);
+      } finally {
+        const elapsed = Date.now() - start;
+        const remaining = Math.max(0, 1000 - elapsed);
+        setTimeout(() => {
+          if (isFirst) setIsInitialLoading(false);
+          else setIsLoadingMore(false);
+        }, remaining);
+      }
+    };
+
+    load();
+  }, [page, refreshKey, dispatch, selectedCategoryId, sort]);
+
+  // Reset on filter change
+  useEffect(() => {
+    setPage(1);
+    setAllProducts([]);
+    setHasMore(true);
+    setRefreshKey((k) => k + 1);
+  }, [selectedCategoryId, sort, budgetFilter, promotionFilter]);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    if (!loaderRef.current || !hasMore || isLoadingMore || isInitialLoading)
+      return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          hasMore &&
+          !isLoadingMore &&
+          !isInitialLoading
+        ) {
+          setPage((p) => p + 1);
+        }
+      },
+      { rootMargin: "200px" }
     );
-  }, [dispatch, page, selectedCategoryId, sort]);
+
+    observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, isLoadingMore, isInitialLoading]);
 
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(fetchWishlist());
     }
   }, [dispatch, isAuthenticated]);
-
-  /* Throttle skeleton so it shows for at least 1000 ms (prevents flicker) */
-  useEffect(() => {
-    if (isLoading) {
-      setDisplaySkeleton(true);
-      loadStartRef.current = Date.now();
-    } else {
-      const elapsed = Date.now() - loadStartRef.current;
-      const remaining = Math.max(0, 1000 - elapsed);
-      const timer = setTimeout(() => {
-        setDisplaySkeleton(false);
-      }, remaining);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading]);
 
   /* Close mobile sort dropdown on outside click */
   useEffect(() => {
@@ -148,6 +210,73 @@ export default function Shop() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  /* Close desktop sidebar sort dropdown on outside click */
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        sidebarSortRef.current &&
+        !sidebarSortRef.current.contains(event.target)
+      ) {
+        setIsSidebarSortOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Drag to close sheet
+  useEffect(() => {
+    if (!isDraggingSheet) return;
+
+    const onMove = (e) => {
+      const clientY = e.clientY ?? e.touches?.[0]?.clientY;
+      const delta = clientY - dragState.current.startY;
+      if (delta < 0) return;
+      dragState.current.currentY = delta;
+      if (sheetRef.current) {
+        sheetRef.current.style.transform = `translateY(${delta}px)`;
+      }
+    };
+
+    const onUp = () => {
+      setIsDraggingSheet(false);
+      const delta = dragState.current.currentY;
+      if (sheetRef.current) {
+        sheetRef.current.style.transition = "transform 0.35s ease";
+        if (delta > 100) {
+          sheetRef.current.style.transform = "translateY(100%)";
+          setTimeout(() => {
+            closeMobileFilter();
+            if (sheetRef.current) {
+              sheetRef.current.style.transform = "";
+              sheetRef.current.style.transition = "";
+            }
+          }, 350);
+        } else {
+          sheetRef.current.style.transform = "translateY(0)";
+          setTimeout(() => {
+            if (sheetRef.current) {
+              sheetRef.current.style.transform = "";
+              sheetRef.current.style.transition = "";
+            }
+          }, 350);
+        }
+      }
+    };
+
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+    document.addEventListener("touchmove", onMove, { passive: false });
+    document.addEventListener("touchend", onUp);
+
+    return () => {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      document.removeEventListener("touchmove", onMove);
+      document.removeEventListener("touchend", onUp);
+    };
+  }, [isDraggingSheet]);
 
   const requireAuth = () => {
     if (!isAuthenticated) {
@@ -184,7 +313,8 @@ export default function Shop() {
     setSelectedCategoryId("");
     setPriceRange([0, 7000]);
     setSort("");
-    setPage(1);
+    setBudgetFilter("all");
+    setPromotionFilter("all");
   };
 
   const openMobileFilter = () => {
@@ -210,7 +340,6 @@ export default function Shop() {
   const handleSortSelect = (value) => {
     setSort(value);
     setIsSortDropdownOpen(false);
-    setPage(1);
   };
 
   const getSortLabel = () => {
@@ -218,13 +347,42 @@ export default function Shop() {
     return option ? option.label : "Default Sorting";
   };
 
-  const products = shopData.products || [];
-  const { total, totalPages } = shopData.pagination || {
-    total: 0,
-    totalPages: 1,
-  };
+  const filteredProducts = useMemo(() => {
+    return allProducts.filter((p) => {
+      const price = p.pricing?.salePrice || p.pricing?.originalPrice || 0;
 
-  const skeletonItems = Array.from({ length: 12 }, (_, i) => i);
+      if (budgetFilter === "under-1000" && price >= 1000) return false;
+      if (budgetFilter === "1000-3000" && (price < 1000 || price > 3000))
+        return false;
+      if (budgetFilter === "3000-6000" && (price < 3000 || price > 6000))
+        return false;
+      if (budgetFilter === "above-6000" && price <= 6000) return false;
+
+      if (promotionFilter !== "all") {
+        const discount =
+          p.pricing?.originalPrice && p.pricing?.salePrice
+            ? Math.round(
+                ((p.pricing.originalPrice - p.pricing.salePrice) /
+                  p.pricing.originalPrice) *
+                  100
+              )
+            : 0;
+
+        if (promotionFilter === "best-seller" && discount < 20) return false;
+        if (promotionFilter === "trending" && price < 500) return false;
+        if (
+          promotionFilter === "gift-wrapped" &&
+          !p.productName?.toLowerCase().includes("gift")
+        )
+          return false;
+        if (promotionFilter === "premium-gift" && price < 2000) return false;
+      }
+
+      return true;
+    });
+  }, [allProducts, budgetFilter, promotionFilter]);
+
+  const skeletonItems = Array.from({ length: 10 }, (_, i) => i);
 
   return (
     <div className={styles.page}>
@@ -258,6 +416,46 @@ export default function Shop() {
           <aside className={styles.filterSidebar}>
             <h3 className={styles.filterTitle}>Filter</h3>
 
+            {/* Sort By — Desktop Sidebar */}
+            <div className={styles.filterGroup}>
+              <span className={styles.filterGroupLabel}>Sort By</span>
+              <div className={styles.sidebarSortWrapper} ref={sidebarSortRef}>
+                <button
+                  className={styles.sidebarSortButton}
+                  onClick={() => setIsSidebarSortOpen(!isSidebarSortOpen)}
+                  aria-expanded={isSidebarSortOpen}
+                >
+                  <span>{getSortLabel()}</span>
+                  <FiChevronDown
+                    className={`${styles.sidebarSortChevron} ${
+                      isSidebarSortOpen ? styles.sidebarSortChevronOpen : ""
+                    }`}
+                  />
+                </button>
+
+                {isSidebarSortOpen && (
+                  <div className={styles.sidebarSortDropdown}>
+                    {SORT_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        className={`${styles.sidebarSortOption} ${
+                          sort === option.value
+                            ? styles.sidebarSortOptionActive
+                            : ""
+                        }`}
+                        onClick={() => {
+                          setSort(option.value);
+                          setIsSidebarSortOpen(false);
+                        }}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className={styles.filterGroup}>
               <span className={styles.filterGroupLabel}>Category</span>
               <label className={styles.filterOption}>
@@ -267,7 +465,6 @@ export default function Shop() {
                   checked={selectedCategoryId === ""}
                   onChange={() => {
                     setSelectedCategoryId("");
-                    setPage(1);
                   }}
                 />
                 All
@@ -280,10 +477,39 @@ export default function Shop() {
                     checked={selectedCategoryId === c.id}
                     onChange={() => {
                       setSelectedCategoryId(c.id);
-                      setPage(1);
                     }}
                   />
                   {c.label}
+                </label>
+              ))}
+            </div>
+
+            <div className={styles.filterGroup}>
+              <span className={styles.filterGroupLabel}>Budget</span>
+              {BUDGET_OPTIONS.map((opt) => (
+                <label key={opt.value} className={styles.filterOption}>
+                  <input
+                    type="radio"
+                    name="budget"
+                    checked={budgetFilter === opt.value}
+                    onChange={() => setBudgetFilter(opt.value)}
+                  />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
+
+            <div className={styles.filterGroup}>
+              <span className={styles.filterGroupLabel}>Promotions</span>
+              {PROMOTION_OPTIONS.map((opt) => (
+                <label key={opt.value} className={styles.filterOption}>
+                  <input
+                    type="radio"
+                    name="promotion"
+                    checked={promotionFilter === opt.value}
+                    onChange={() => setPromotionFilter(opt.value)}
+                  />
+                  {opt.label}
                 </label>
               ))}
             </div>
@@ -316,31 +542,14 @@ export default function Shop() {
             {/* Toolbar */}
             <div className={styles.toolbar}>
               <span className={styles.resultsCount}>
-                {isLoading
+                {isInitialLoading
                   ? "Loading..."
-                  : `Showing ${products.length} of ${total} results`}
+                  : `Showing ${filteredProducts.length} results`}
               </span>
-              {/* <div className={styles.sortWrapper}>
-                <select
-                  className={styles.sortSelect}
-                  value={sort}
-                  onChange={(e) => {
-                    setSort(e.target.value);
-                    setPage(1);
-                  }}
-                >
-                  {SORT_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-                <FiChevronDown className={styles.sortChevron} />
-              </div> */}
             </div>
 
             {/* Skeleton Loading */}
-            {displaySkeleton && (
+            {isInitialLoading && (
               <div className={styles.skeletonGrid}>
                 {skeletonItems.map((i) => (
                   <div className={styles.skeletonCard} key={i}>
@@ -356,9 +565,9 @@ export default function Shop() {
             )}
 
             {/* Products */}
-            {!displaySkeleton && (
+            {!isInitialLoading && (
               <div className={styles.productGrid}>
-                {products.map((p) => {
+                {filteredProducts.map((p) => {
                   const inCart = isInCart(p._id);
                   const inWishlist = isInWishlist(p._id);
                   const addingToCart = cartLoadingId === p._id;
@@ -375,7 +584,7 @@ export default function Shop() {
                               ((p.pricing.originalPrice -
                                 p.pricing.salePrice) /
                                 p.pricing.originalPrice) *
-                                100,
+                                100
                             )}
                             % off
                           </span>
@@ -386,7 +595,9 @@ export default function Shop() {
                         <div className={styles.wishlistActions}>
                           <button
                             type="button"
-                            className={`${styles.wishlistBtn} ${inWishlist ? styles.wishlistBtnActive : ""}`}
+                            className={`${styles.wishlistBtn} ${
+                              inWishlist ? styles.wishlistBtnActive : ""
+                            }`}
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -434,7 +645,9 @@ export default function Shop() {
                         </div>
                         <button
                           type="button"
-                          className={`${styles.addToCartBtn} ${inCart ? styles.addToCartBtnActive : ""}`}
+                          className={`${styles.addToCartBtn} ${
+                            inCart ? styles.addToCartBtnActive : ""
+                          }`}
                           onClick={() => handleAddToCart(p._id)}
                           disabled={inCart || addingToCart}
                         >
@@ -456,43 +669,28 @@ export default function Shop() {
               </div>
             )}
 
-            {/* Pagination */}
-            {!displaySkeleton && totalPages > 1 && (
-              <div className={styles.pagination}>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (page > 1) setPage(page - 1);
-                  }}
-                >
-                  ‹
-                </a>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (n) => (
-                    <a
-                      key={n}
-                      href="#"
-                      className={n === page ? styles.active : ""}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setPage(n);
-                      }}
-                    >
-                      {n}
-                    </a>
-                  ),
+            {/* Infinite scroll loader */}
+            {!isInitialLoading && hasMore && (
+              <div ref={loaderRef} className={styles.infiniteLoader}>
+                {isLoadingMore && (
+                  <div className={styles.skeletonGrid}>
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div className={styles.skeletonCard} key={`more-${i}`}>
+                        <div className={styles.skeletonImage} />
+                        <div className={styles.skeletonText} />
+                        <div
+                          className={`${styles.skeletonText} ${styles.skeletonTextShort}`}
+                        />
+                        <div className={styles.skeletonBtn} />
+                      </div>
+                    ))}
+                  </div>
                 )}
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (page < totalPages) setPage(page + 1);
-                  }}
-                >
-                  ›
-                </a>
               </div>
+            )}
+
+            {!isInitialLoading && !hasMore && filteredProducts.length > 0 && (
+              <div className={styles.endMessage}>No more products</div>
             )}
           </main>
         </div>
@@ -516,9 +714,24 @@ export default function Shop() {
         )}
 
         <div
-          className={`${styles.mobileFilterSheet} ${isMobileFilterOpen ? styles.mobileFilterSheetActive : ""}`}
+          ref={sheetRef}
+          className={`${styles.mobileFilterSheet} ${
+            isMobileFilterOpen ? styles.mobileFilterSheetActive : ""
+          }`}
         >
-          <div className={styles.mobileFilterHandle} />
+          <div
+            className={styles.mobileFilterHandle}
+            onMouseDown={(e) => {
+              dragState.current.startY = e.clientY;
+              dragState.current.currentY = 0;
+              setIsDraggingSheet(true);
+            }}
+            onTouchStart={(e) => {
+              dragState.current.startY = e.touches[0].clientY;
+              dragState.current.currentY = 0;
+              setIsDraggingSheet(true);
+            }}
+          />
 
           <div className={styles.mobileFilterHeader}>
             <h3 className={styles.mobileFilterTitle}>Filter</h3>
@@ -542,7 +755,9 @@ export default function Shop() {
                 >
                   <span>{getSortLabel()}</span>
                   <FiChevronDown
-                    className={`${styles.mobileSortChevron} ${isSortDropdownOpen ? styles.mobileSortChevronOpen : ""}`}
+                    className={`${styles.mobileSortChevron} ${
+                      isSortDropdownOpen ? styles.mobileSortChevronOpen : ""
+                    }`}
                   />
                 </button>
 
@@ -551,7 +766,11 @@ export default function Shop() {
                     {SORT_OPTIONS.map((option) => (
                       <button
                         key={option.value}
-                        className={`${styles.mobileSortOption} ${sort === option.value ? styles.mobileSortOptionActive : ""}`}
+                        className={`${styles.mobileSortOption} ${
+                          sort === option.value
+                            ? styles.mobileSortOptionActive
+                            : ""
+                        }`}
                         onClick={() => handleSortSelect(option.value)}
                       >
                         {option.label}
@@ -573,7 +792,6 @@ export default function Shop() {
                     checked={selectedCategoryId === ""}
                     onChange={() => {
                       setSelectedCategoryId("");
-                      setPage(1);
                     }}
                   />
                   All
@@ -586,7 +804,6 @@ export default function Shop() {
                       checked={selectedCategoryId === c.id}
                       onChange={() => {
                         setSelectedCategoryId(c.id);
-                        setPage(1);
                       }}
                     />
                     {c.label}
@@ -595,7 +812,43 @@ export default function Shop() {
               </div>
             </div>
 
-            {/* Price Range (Bottom) */}
+            {/* Budget */}
+            <div className={styles.mobileFilterGroup}>
+              <span className={styles.mobileFilterGroupLabel}>Budget</span>
+              <div className={styles.mobileFilterGrid}>
+                {BUDGET_OPTIONS.map((opt) => (
+                  <label key={opt.value} className={styles.mobileFilterOption}>
+                    <input
+                      type="radio"
+                      name="mobile_budget"
+                      checked={budgetFilter === opt.value}
+                      onChange={() => setBudgetFilter(opt.value)}
+                    />
+                    {opt.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Promotions */}
+            <div className={styles.mobileFilterGroup}>
+              <span className={styles.mobileFilterGroupLabel}>Promotions</span>
+              <div className={styles.mobileFilterGrid}>
+                {PROMOTION_OPTIONS.map((opt) => (
+                  <label key={opt.value} className={styles.mobileFilterOption}>
+                    <input
+                      type="radio"
+                      name="mobile_promotion"
+                      checked={promotionFilter === opt.value}
+                      onChange={() => setPromotionFilter(opt.value)}
+                    />
+                    {opt.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Price Range */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>
                 Price Range
