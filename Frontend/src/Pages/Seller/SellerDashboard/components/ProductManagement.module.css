@@ -161,8 +161,8 @@
 }
 
 .searchWrapper:focus-within {
-  /* border-color: #c8a86e;
-  box-shadow: 0 0 0 3px rgba(200, 168, 110, 0.12); */
+  border-color: #c8a86e;
+  box-shadow: 0 0 0 3px rgba(200, 168, 110, 0.12);
 }
 
 .searchIcon {
@@ -264,7 +264,7 @@
 }
 
 /* ============================================
-   PRODUCT TABLE
+   PRODUCT TABLE - Desktop
    ============================================ */
 .tableContainer {
   background: #ffffff;
@@ -272,6 +272,8 @@
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  overflow-x: auto;
 }
 
 .tableToolbar {
@@ -339,7 +341,6 @@
   border-bottom: 1px solid #f0edeb;
   vertical-align: middle;
   color: #14140f;
-  align-items: center;
 }
 
 .productTable tr:last-child td {
@@ -351,6 +352,22 @@
 }
 
 .productTable tbody tr:hover {
+  background: #faf9f5;
+}
+
+.tableRow {
+  cursor: pointer;
+}
+
+.tableRow:hover {
+  background: #faf9f5;
+}
+
+.expandedRow {
+  cursor: default;
+}
+
+.expandedRow:hover {
   background: #faf9f5;
 }
 
@@ -423,7 +440,6 @@
   padding: 12px 10px !important;
 }
 
-/* ===== Index Column ===== */
 .indexNumber {
   display: inline-block;
   color: #8a8072;
@@ -433,7 +449,6 @@
   width: 100%;
 }
 
-/* ===== Checkbox ===== */
 .checkbox {
   width: 16px;
   height: 16px;
@@ -441,7 +456,6 @@
   cursor: pointer;
 }
 
-/* ===== Image - No Border Radius ===== */
 .thumbnail {
   width: 52px;
   height: 52px;
@@ -452,7 +466,6 @@
   display: block;
 }
 
-/* ===== Product Name - With Ellipsis ===== */
 .productNameCompact {
   font-weight: 600;
   color: #14140f;
@@ -473,7 +486,6 @@
   margin-top: 4px;
 }
 
-/* ===== Category ===== */
 .categoryCell {
   color: #55554d;
   font-size: 13px;
@@ -482,7 +494,6 @@
   text-overflow: ellipsis;
 }
 
-/* ===== Price - Centered ===== */
 .priceCompact {
   display: flex;
   flex-direction: column;
@@ -515,7 +526,6 @@
   display: inline-block;
 }
 
-/* ===== Stock ===== */
 .stockCell .inStock {
   color: #10b981;
   font-weight: 500;
@@ -526,7 +536,6 @@
   font-weight: 500;
 }
 
-/* ===== Status ===== */
 .statusBadge {
   display: inline-block;
   padding: 4px 12px;
@@ -573,7 +582,6 @@
   color: #ef4444;
 }
 
-/* ===== Placements ===== */
 .placementTags {
   background: #f5f2ee;
   padding: 2px 8px;
@@ -587,7 +595,6 @@
   color: #b5aa9a;
 }
 
-/* ===== Actions ===== */
 .actionIconBtn {
   display: inline-flex;
   align-items: center;
@@ -608,13 +615,8 @@
   color: #14140f;
 }
 
-.deleteIconBtn:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-}
-
 /* ============================================
-   EXPANDED ROW
+   EXPANDED ROW - Desktop
    ============================================ */
 .tableRow.expanded {
   background: #faf9f5;
@@ -673,6 +675,9 @@
    SKELETON LOADER
    ============================================ */
 .skeletonContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   padding: 0;
   background: #ffffff;
 }
@@ -798,20 +803,38 @@
 }
 
 @keyframes pulse {
-  0% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-  100% {
-    opacity: 1;
-  }
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
 }
 
-/* ============================================
-   EMPTY STATE
-   ============================================ */
+.loadingMore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  color: #8a8072;
+  font-size: 13px;
+}
+
+.spinnerSmall {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(200, 168, 110, 0.15);
+  border-top-color: #c8a86e;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.sentinel {
+  height: 20px;
+}
+
 .emptyState {
   display: flex;
   flex-direction: column;
@@ -982,9 +1005,6 @@
   cursor: not-allowed;
 }
 
-/* ============================================
-   PAGINATION
-   ============================================ */
 .pagination {
   display: flex;
   justify-content: center;
@@ -1056,7 +1076,7 @@
 }
 
 /* ============================================
-   RESPONSIVE
+   RESPONSIVE - MOBILE ONLY FIXES
    ============================================ */
 @media (max-width: 1024px) {
   .container {
@@ -1106,28 +1126,331 @@
   }
 
   .filterGroup {
-    flex-direction: column;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    width: 100%;
   }
 
-  .productTable {
+  .filterSelect {
+    flex: 1;
+    min-width: 80px;
+    padding: 8px 24px 8px 10px;
     font-size: 13px;
-    min-width: 880px;
   }
 
   .tableContainer {
-    overflow-x: auto;
+    overflow: visible;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
   }
 
-  .expandedGrid {
-    grid-template-columns: 1fr;
+  .tableToolbar {
+    display: none;
   }
 
-  .expandedContent {
-    padding: 16px;
+  .productTable {
+    display: block;
+    min-width: unset;
+    table-layout: auto;
   }
 
+  .productTable thead {
+    display: none;
+  }
+
+  .productTable tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .productTable tbody tr {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border: 1px solid #e8e3dc;
+    border-radius: 8px;
+    padding: 12px 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .productTable tbody tr:hover {
+    background: #ffffff;
+    transform: none;
+  }
+
+  .productTable td {
+    display: flex;
+    align-items: center;
+    padding: 4px 0;
+    border: none;
+    width: 100%;
+    gap: 8px;
+  }
+
+  /* Hide empty cells */
+  .productTable td:empty {
+    display: none;
+  }
+
+  /* First row: index, checkbox, image, name */
+  .productTable td:nth-child(1),
+  .productTable td:nth-child(2),
+  .productTable td:nth-child(3),
+  .productTable td:nth-child(4) {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Second row: category, price, stock, status, placements, actions */
+  .productTable td:nth-child(5),
+  .productTable td:nth-child(6),
+  .productTable td:nth-child(7),
+  .productTable td:nth-child(8),
+  .productTable td:nth-child(9),
+  .productTable td:nth-child(10) {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: auto;
+    padding: 2px 0;
+  }
+
+  /* Make name cell take full width */
+  .productTable td:nth-child(4) {
+    flex: 1;
+  }
+
+  /* Hide category label on mobile */
+  .productTable td:nth-child(5)::before {
+    content: "";
+    display: none;
+  }
+
+  .productTable .indexCell {
+    width: auto;
+    min-width: unset;
+    max-width: unset;
+    padding: 0 !important;
+  }
+
+  .productTable .checkboxCell {
+    width: auto;
+    min-width: unset;
+    max-width: unset;
+    padding: 0 !important;
+  }
+
+  .productTable .imageCell {
+    width: auto;
+    min-width: unset;
+    max-width: unset;
+    padding: 0 !important;
+  }
+
+  .productTable .nameCell {
+    width: auto;
+    min-width: unset;
+    max-width: unset;
+    padding: 0 !important;
+    flex: 1;
+  }
+
+  .productTable .categoryCell {
+    width: auto;
+    min-width: unset;
+    max-width: unset;
+    padding: 0 !important;
+  }
+
+  .productTable .priceCell {
+    width: auto;
+    min-width: unset;
+    max-width: unset;
+    padding: 0 !important;
+    text-align: left !important;
+  }
+
+  .productTable .stockCell {
+    width: auto;
+    min-width: unset;
+    max-width: unset;
+    padding: 0 !important;
+    text-align: left !important;
+  }
+
+  .productTable .statusCell {
+    width: auto;
+    min-width: unset;
+    max-width: unset;
+    padding: 0 !important;
+  }
+
+  .productTable .placementsCell {
+    width: auto;
+    min-width: unset;
+    max-width: unset;
+    padding: 0 !important;
+  }
+
+  .productTable .actionsCell {
+    width: auto;
+    min-width: unset;
+    max-width: unset;
+    padding: 0 !important;
+    text-align: right !important;
+    justify-content: flex-end;
+    margin-left: auto;
+  }
+
+  .productTable td .indexNumber {
+    font-size: 12px;
+    min-width: 20px;
+  }
+
+  .productTable td .thumbnail {
+    width: 40px;
+    height: 40px;
+  }
+
+  .productTable td .productNameCompact {
+    font-size: 13px;
+    max-height: 32px;
+    -webkit-line-clamp: 1;
+  }
+
+  .productTable td .productSku {
+    font-size: 10px;
+  }
+
+  .productTable td .categoryCell {
+    font-size: 12px;
+    padding: 2px 6px;
+    background: #f5f2ee;
+    border-radius: 4px;
+  }
+
+  .productTable td .priceCompact {
+    flex-direction: row;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .productTable td .priceRow {
+    gap: 4px;
+  }
+
+  .productTable td .originalPriceCompact {
+    font-size: 10px;
+  }
+
+  .productTable td .discountCompact {
+    font-size: 9px;
+    padding: 1px 6px;
+  }
+
+  .productTable td .stockCell {
+    font-size: 12px;
+  }
+
+  .productTable td .statusBadge {
+    font-size: 9px;
+    padding: 2px 8px;
+  }
+
+  .productTable td .placementTags {
+    font-size: 9px;
+    padding: 1px 6px;
+  }
+
+  .productTable td .actionIconBtn {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* Expanded row mobile */
+  .productTable tbody tr .expandedRow {
+    display: block;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .productTable tbody tr .expandedRow td {
+    display: block;
+    padding: 8px 0 0 !important;
+  }
+
+  .productTable tbody tr .expandedContent {
+    padding: 10px 12px;
+    background: #faf9f5;
+    border-radius: 6px;
+  }
+
+  .productTable tbody tr .expandedGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .productTable tbody tr .expandedSection h4 {
+    font-size: 11px;
+    margin: 0 0 4px;
+    padding-bottom: 4px;
+  }
+
+  .productTable tbody tr .expandedItem {
+    margin-bottom: 4px;
+  }
+
+  .productTable tbody tr .expandedLabel {
+    font-size: 9px;
+  }
+
+  .productTable tbody tr .expandedValue {
+    font-size: 12px;
+  }
+
+  /* Skeleton mobile */
   .skeletonRow {
-    min-width: 880px;
+    min-width: unset;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 12px 14px;
+  }
+
+  .skeletonImage {
+    width: 40px;
+    height: 40px;
+  }
+
+  .skeletonName {
+    min-width: 100px;
+  }
+
+  .skeletonLine {
+    height: 12px;
+  }
+
+  .skeletonLineShort {
+    height: 10px;
+  }
+
+  .skeletonActions {
+    gap: 2px;
+  }
+
+  .skeletonIcon {
+    width: 24px;
+    height: 24px;
   }
 }
 
@@ -1146,55 +1469,68 @@
     gap: 6px;
   }
 
-  .productTable {
+  .filterSelect {
     font-size: 12px;
-    min-width: 780px;
+    padding: 6px 20px 6px 8px;
+    min-width: 60px;
   }
 
-  .thumbnail {
-    width: 40px;
-    height: 40px;
+  .productTable tbody tr {
+    padding: 10px 12px;
   }
 
-  .actionIconBtn {
-    width: 28px;
-    height: 28px;
-  }
-
-  .skeletonRow {
-    min-width: 780px;
-  }
-
-  .productTable .indexCell {
+  .productTable td .thumbnail {
     width: 36px;
-    min-width: 36px;
-    max-width: 36px;
-    padding: 12px 2px !important;
+    height: 36px;
   }
 
-  .productTable .checkboxCell {
-    width: 30px;
-    min-width: 30px;
-    max-width: 30px;
+  .productTable td .productNameCompact {
+    font-size: 12px;
+    max-height: 28px;
   }
 
-  .productTable .imageCell {
-    width: 56px;
-    min-width: 56px;
-    max-width: 56px;
+  .productTable td .productSku {
+    font-size: 9px;
   }
 
-  .productTable .actionsCell {
-    min-width: 120px;
+  .productTable td .priceCompact {
+    font-size: 12px;
   }
 
-  .indexNumber {
+  .productTable td .originalPriceCompact {
+    font-size: 9px;
+  }
+
+  .productTable td .statusBadge {
+    font-size: 8px;
+    padding: 2px 6px;
+  }
+
+  .productTable td .actionIconBtn {
+    width: 22px;
+    height: 22px;
+  }
+
+  .productTable tbody tr .expandedGrid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .productTable tbody tr .expandedContent {
+    padding: 8px 10px;
+  }
+
+  .productTable tbody tr .expandedSection h4 {
+    font-size: 10px;
+  }
+
+  .productTable tbody tr .expandedValue {
     font-size: 11px;
   }
 }
 
 /* ============================================
-   FOCUS VISIBLE FOR ACCESSIBILITY
+   FOCUS VISIBLE
    ============================================ */
 button:focus-visible,
 .searchInput:focus-visible,
