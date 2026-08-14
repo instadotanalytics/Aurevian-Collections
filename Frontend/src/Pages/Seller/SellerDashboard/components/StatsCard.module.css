@@ -8,7 +8,9 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .statsCard:hover {
@@ -20,6 +22,31 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+}
+
+.titleWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.iconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: currentColor;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.iconWrap svg {
+  color: #fff;
+  filter: brightness(0) invert(1);
 }
 
 .title {
@@ -27,6 +54,9 @@
   font-weight: 500;
   color: #999;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .badge {
@@ -37,6 +67,7 @@
   display: flex;
   align-items: center;
   gap: 3px;
+  flex-shrink: 0;
 }
 
 .badgeUp {
@@ -74,4 +105,18 @@
   font-size: 11px;
   color: #aaa;
   margin: 0;
+}
+
+@media (max-width: 480px) {
+  .statsCard {
+    padding: 14px 16px;
+  }
+
+  .value {
+    font-size: 20px;
+  }
+
+  .sparkline {
+    width: 60px;
+  }
 }

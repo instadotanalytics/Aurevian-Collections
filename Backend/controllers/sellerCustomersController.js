@@ -26,8 +26,10 @@ const daysBetween = (a, b) => (a - b) / (1000 * 60 * 60 * 24);
 // Core aggregation: one row per PAID order-item-group belonging to this
 // seller, with the seller-specific subtotal isolated (same pattern as
 // sellerEarningsController.js's getSellerOrderRows).
+// ✅ EXPORTED — reused by sellerController.js dashboard summary so the
+// customer count on the dashboard is always identical to /customers/summary.
 // ============================================
-async function getSellerOrderRowsForCustomers(sellerId) {
+export async function getSellerOrderRowsForCustomers(sellerId) {
   const sellerOid = toObjectId(sellerId);
 
   return Order.aggregate([
@@ -61,8 +63,9 @@ async function getSellerOrderRowsForCustomers(sellerId) {
 // ============================================
 // Groups order rows into one record per customer (per Order.user), then
 // classifies segment/status per the heuristic documented above.
+// ✅ EXPORTED — see note above.
 // ============================================
-function buildCustomerRecords(rows) {
+export function buildCustomerRecords(rows) {
   const byUser = new Map();
 
   for (const r of rows) {
@@ -172,13 +175,11 @@ export const getCustomersSummary = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Get customers summary error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to load customer summary",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to load customer summary",
+      error: error.message,
+    });
   }
 };
 
@@ -239,13 +240,11 @@ export const getCustomers = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Get customers error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to load customers",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to load customers",
+      error: error.message,
+    });
   }
 };
 
@@ -289,12 +288,10 @@ export const getCustomerDetail = async (req, res) => {
       .json({ success: true, data: { ...customer, orderHistory } });
   } catch (error) {
     console.error("❌ Get customer detail error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to load customer detail",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to load customer detail",
+      error: error.message,
+    });
   }
 };
