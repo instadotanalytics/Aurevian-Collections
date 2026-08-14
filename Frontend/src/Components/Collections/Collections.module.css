@@ -391,7 +391,7 @@
   padding: 12px 16px;
   background: var(--cream-card);
   border: 1px solid var(--cream-line);
-  border-radius: 8px;
+  /* border-radius: 8px; */
   font-family: "Jost", sans-serif;
   font-size: 13px;
   letter-spacing: 1px;
@@ -2066,8 +2066,8 @@
   }
 
   .filterToggle {
-    font-size: 12px;
-    padding: 6px 12px;
+    font-size: 13px;
+    padding: 10px 12px;
   }
 
   .featureImageWrap {
