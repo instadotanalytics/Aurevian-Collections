@@ -80,7 +80,7 @@
   }
 }
 
-/* ---------- Commitment / brand story section ---------- */
+/* ---------- Commitment / brand story ---------- */
 .commitment {
   max-width: 1280px;
   margin: 0 auto;
@@ -188,7 +188,7 @@
 }
 
 /* ============================================================
-   GIFT SHOP BODY — filters + product grid
+   GIFT SHOP BODY
    ============================================================ */
 
 .shopWrap {
@@ -202,7 +202,7 @@
   scroll-margin-top: 110px;
 }
 
-/* ---------- Mobile filter toggle button ---------- */
+/* ---------- Mobile filter toggle ---------- */
 .filterToggle {
   display: none;
   align-items: center;
@@ -212,7 +212,6 @@
   padding: 12px 16px;
   background: var(--cream-card);
   border: 1px solid var(--cream-line);
-  /* border-radius: 8px; */
   font-family: "Jost", sans-serif;
   font-size: 13px;
   letter-spacing: 1px;
@@ -226,15 +225,12 @@
 .filterToggle:hover {
   border-color: var(--gold);
 }
-
 .filterToggle:active {
   transform: scale(0.98);
 }
-
 .filterToggleText {
   font-weight: 500;
 }
-
 .filterToggleIcon {
   font-size: 18px;
   display: flex;
@@ -243,15 +239,10 @@
 
 /* ---------- Mobile backdrop ---------- */
 .filterOverlay {
-  display: none;
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.3);
   z-index: 998;
-}
-
-.filterOverlay {
-  display: block;
 }
 
 /* ---------- Desktop Filters Sidebar ---------- */
@@ -274,21 +265,17 @@
   flex-shrink: 0;
 }
 
-/* Custom scrollbar for filter sidebar */
 .filters::-webkit-scrollbar {
   width: 3px;
 }
-
 .filters::-webkit-scrollbar-track {
   background: var(--cream-line);
   border-radius: 4px;
 }
-
 .filters::-webkit-scrollbar-thumb {
   background: var(--gold);
   border-radius: 4px;
 }
-
 .filters {
   scrollbar-width: thin;
   scrollbar-color: var(--gold) var(--cream-line);
@@ -365,7 +352,6 @@
   transform: translateX(2px);
 }
 
-/* Custom elegant radio controls */
 .filterOption input[type="radio"] {
   appearance: none;
   -webkit-appearance: none;
@@ -396,7 +382,6 @@
   border-color: var(--gold);
   box-shadow: 0 0 0 3px rgba(179, 135, 63, 0.12);
 }
-
 .filterOption input[type="radio"]:checked::after {
   transform: scale(1);
 }
@@ -415,7 +400,6 @@
   font-weight: 600;
 }
 
-/* Custom elegant range slider */
 .filterPriceInput {
   width: 100%;
   appearance: none;
@@ -465,7 +449,6 @@
   height: 3px;
   border-radius: 2px;
 }
-
 .filterPriceInput::-moz-range-progress {
   background: var(--gold);
   height: 3px;
@@ -497,8 +480,6 @@
   content: "→";
   display: inline-block;
   font-size: 13px;
-  width: auto;
-  min-width: 0;
   transition: transform 0.25s ease;
 }
 
@@ -506,7 +487,6 @@
   color: var(--ink);
   letter-spacing: 0.07em;
 }
-
 .filterClearBtn:hover::after {
   transform: translateX(3px);
 }
@@ -536,7 +516,7 @@
   font-weight: 400;
 }
 
-/* ---------- Custom Sort Dropdown ---------- */
+/* ---------- Sort Dropdown ---------- */
 .sortWrapper {
   position: relative;
   display: inline-flex;
@@ -558,21 +538,17 @@
   font-family: "Jost", sans-serif;
   transition: border-color 0.2s ease;
   width: 170px;
-  position: relative;
-  z-index: 1;
   white-space: nowrap;
 }
 
 .sortButton:hover {
   border-color: var(--gold-soft);
 }
-
 .sortButton:focus {
   border-color: var(--gold);
   box-shadow: 0 0 0 3px rgba(179, 135, 63, 0.1);
   outline: none;
 }
-
 .sortButton span {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -591,7 +567,6 @@
   transform: rotate(180deg);
 }
 
-/* ---------- Sort Dropdown Menu ---------- */
 .sortDropdown {
   position: absolute;
   top: calc(100% + 8px);
@@ -627,19 +602,17 @@
   background: var(--cream);
   color: var(--gold-deep);
 }
-
 .sortOptionActive {
   background: var(--gold-soft);
   color: var(--gold-deep);
   font-weight: 500;
 }
-
 .sortOptionActive:hover {
   background: var(--gold-soft);
   color: var(--gold-deep);
 }
 
-/* ---------- Product grid ---------- */
+/* ---------- Product Grid ---------- */
 .productGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -650,7 +623,6 @@
 .productCard {
   background: var(--cream-card);
   border: 1px solid var(--cream-line);
-  border-radius: 0;
   overflow: hidden;
   transition:
     box-shadow 0.25s,
@@ -664,7 +636,6 @@
 .productCard:hover {
   box-shadow: 0 14px 30px rgba(28, 25, 23, 0.09);
   transform: translateY(-3px);
-  background: var(--cream-card-hover);
 }
 
 .productMedia {
@@ -705,7 +676,6 @@
   transform: scale(1.05);
 }
 
-/* ---------- Discount Badge ---------- */
 .badge {
   position: absolute;
   top: 12px;
@@ -722,7 +692,6 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-/* ---------- Category overlay ---------- */
 .productCatOverlay {
   position: absolute;
   bottom: 12px;
@@ -739,7 +708,6 @@
   font-weight: 600;
 }
 
-/* ---------- Wishlist button ---------- */
 .wishlistActions {
   position: absolute;
   top: 14px;
@@ -757,7 +725,6 @@
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  line-height: 1;
   cursor: pointer;
   color: var(--ink);
   transition:
@@ -779,20 +746,16 @@
   transform: scale(0.85);
   background: var(--gold-soft);
   color: var(--sale);
-  box-shadow: 0 2px 6px rgba(28, 25, 23, 0.2);
 }
-
 .wishlistBtnActive {
   color: #d9534f;
   background: #fff;
   border-color: #d9534f;
 }
-
 .wishlistBtnActive:hover {
   color: #d9534f;
 }
 
-/* ---------- Product Info ---------- */
 .productInfo {
   padding: 12px 16px 0;
   display: flex;
@@ -800,24 +763,19 @@
   flex: 1;
   justify-content: space-between;
   gap: 4px;
-  background: transparent;
 }
 
 .productName {
-  font-family: "Jost", "Helvetica Neue", Arial, sans-serif;
   font-size: 15px;
   font-weight: 500;
-  color: var(--ink);
-  /* margin: 0 0 6px 0; */
+  color: black;
   line-height: 1.3;
-  font-style: normal;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-transform: capitalize;
   font-family: "Jost", sans-serif;
-  color: black;
 }
 
 .productPrice {
@@ -828,19 +786,16 @@
   margin-bottom: 2px;
   flex-wrap: wrap;
 }
-
 .priceNow {
   color: var(--sale);
   font-weight: 600;
 }
-
 .priceOld {
   color: var(--muted);
   text-decoration: line-through;
   font-size: 13px;
 }
 
-/* ---------- Add to Cart button ---------- */
 .addToCartBtn {
   display: flex;
   align-items: center;
@@ -872,35 +827,100 @@
 .addToCartBtn svg {
   font-size: 13px;
 }
-
 .addToCartBtn:hover:not(:disabled) {
   background: var(--gold-deep);
   border-color: var(--gold-deep);
   box-shadow: 0 8px 18px rgba(124, 94, 34, 0.25);
 }
-
 .addToCartBtn:active:not(:disabled) {
   transform: scale(0.97);
 }
-
 .addToCartBtnActive {
   background: var(--gold-soft);
   color: var(--sale);
   border-color: var(--gold-soft);
   cursor: default;
 }
-
 .addToCartBtnActive:hover {
   background: var(--gold-soft);
   color: var(--sale);
-  border-color: var(--gold-soft);
   box-shadow: none;
   transform: none;
 }
-
 .addToCartBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* ============================================================
+   SKELETON LOADING
+   ============================================================ */
+
+@keyframes shimmer {
+  0% {
+    background-position: -600px 0;
+  }
+  100% {
+    background-position: 600px 0;
+  }
+}
+
+.skeletonCard {
+  background: var(--cream-card);
+  border: 1px solid var(--cream-line);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 330px;
+}
+
+.skeletonMedia {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(90deg, #ede5d3 25%, #f5ece0 50%, #ede5d3 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s infinite linear;
+  flex-shrink: 0;
+}
+
+.skeletonInfo {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.skeletonLine {
+  height: 13px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #ede5d3 25%, #f5ece0 50%, #ede5d3 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+.skeletonBtn {
+  height: 36px;
+  border-radius: 0;
+  background: linear-gradient(90deg, #ddd0b8 25%, #e8d9be 50%, #ddd0b8 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s infinite linear;
+  margin-top: auto;
+}
+
+/* Skeleton grid for load-more */
+.skeletonLoadMoreGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* ---------- Infinite Scroll Sentinel ---------- */
+.sentinel {
+  width: 100%;
+  min-height: 20px;
+  margin-top: 8px;
 }
 
 /* ---------- Pagination ---------- */
@@ -924,14 +944,12 @@
   cursor: pointer;
   font-size: 16px;
   transition: all 0.2s ease;
-  font-family: "Jost", sans-serif;
 }
 
 .paginationBtn:hover:not(:disabled) {
   border-color: var(--gold);
   color: var(--gold-deep);
 }
-
 .paginationBtn:disabled {
   opacity: 0.3;
   cursor: not-allowed;
@@ -957,17 +975,14 @@
   border-color: var(--gold);
   color: var(--gold-deep);
 }
-
 .activePage {
   background: var(--ink);
   color: var(--gold-soft);
   border-color: var(--ink);
 }
-
 .activePage:hover {
   background: var(--ink);
   color: var(--gold-soft);
-  border-color: var(--ink);
 }
 
 /* ---------- Testimonials ---------- */
@@ -1024,50 +1039,43 @@
 .testimonialBody {
   min-width: 0;
 }
-
 .stars {
   display: flex;
   gap: 2px;
   font-size: 13px;
   margin-bottom: 8px;
 }
-
 .starFilled {
   color: var(--gold);
   fill: var(--gold);
 }
-
 .starEmpty {
   color: var(--cream-line);
 }
-
 .testimonialQuote {
   font-size: 13px;
   line-height: 1.6;
   color: var(--sale);
   margin: 0 0 8px;
 }
-
 .authorName {
   font-size: 12.5px;
   font-weight: 600;
   color: var(--ink);
 }
 
-/* Mobile Testimonials Carousel - Hidden on Desktop */
+/* Mobile Carousel - hidden on desktop */
 .testimonialsCarousel {
   display: none;
 }
-
 .testimonialsTrack {
   display: none;
 }
-
 .testimonialCardMobile {
   display: none;
 }
 
-/* ---------- Perks strip ---------- */
+/* ---------- Perks ---------- */
 .perks {
   display: flex;
   justify-content: center;
@@ -1106,7 +1114,6 @@
   font-family: "Jost", sans-serif;
   color: #fff;
 }
-
 .perk p {
   margin: 0;
   font-size: 12.5px;
@@ -1114,8 +1121,9 @@
 }
 
 /* ============================================================
-   Mobile Bottom Sheet Filter
+   MOBILE BOTTOM SHEET
    ============================================================ */
+
 .mobileFilterSheet {
   position: fixed;
   left: 0;
@@ -1129,10 +1137,13 @@
   border-radius: 16px 16px 0 0;
   box-shadow: 0 -10px 30px rgba(28, 25, 23, 0.3);
   transform: translateY(100%);
-  transition: transform 0.35s ease;
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
   z-index: 999;
   overflow: hidden;
   pointer-events: none;
+  /* Will-change for smooth GPU compositing */
+  will-change: transform;
+  touch-action: none;
 }
 
 .mobileFilterSheetActive {
@@ -1140,6 +1151,7 @@
   pointer-events: all;
 }
 
+/* ─── Drag handle — grab cursor on both mouse & touch ─── */
 .mobileFilterHandle {
   width: 40px;
   height: 4px;
@@ -1147,8 +1159,16 @@
   border-radius: 2px;
   margin: 12px auto 8px;
   flex-shrink: 0;
+  cursor: grab;
+  touch-action: none;
 }
 
+.mobileFilterHandle:active {
+  cursor: grabbing;
+  background: var(--gold-soft);
+}
+
+/* ─── Header also draggable ─── */
 .mobileFilterHeader {
   display: flex;
   justify-content: space-between;
@@ -1157,6 +1177,14 @@
   border-bottom: 1px solid var(--cream-line);
   flex-shrink: 0;
   background: var(--cream);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.mobileFilterHeader:active {
+  cursor: grabbing;
 }
 
 .mobileFilterTitle {
@@ -1165,6 +1193,7 @@
   font-weight: 600;
   color: var(--ink);
   margin: 0;
+  pointer-events: none;
 }
 
 .mobileFilterClose {
@@ -1174,6 +1203,7 @@
   color: var(--muted);
   cursor: pointer;
   padding: 4px;
+  pointer-events: all;
 }
 
 .mobileFilterClose:hover {
@@ -1186,6 +1216,7 @@
   -webkit-overflow-scrolling: touch;
   padding: 0 20px 20px;
   overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 .mobileFilterGroup {
@@ -1203,7 +1234,6 @@
   display: block;
 }
 
-/* Mobile Filter Grid - 2 columns */
 .mobileFilterGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1228,9 +1258,7 @@
   flex-shrink: 0;
 }
 
-/* ============================================================
-   Mobile Custom Sort Dropdown (inside the filter sheet)
-   ============================================================ */
+/* ---------- Mobile Sort Dropdown ---------- */
 .mobileSortWrapper {
   position: relative;
   display: block;
@@ -1307,13 +1335,11 @@
   background: var(--cream);
   color: var(--gold-deep);
 }
-
 .mobileSortOptionActive {
   background: var(--gold-soft);
   color: var(--gold-deep);
   font-weight: 500;
 }
-
 .mobileSortOptionActive:hover {
   background: var(--gold-soft);
   color: var(--gold-deep);
@@ -1338,7 +1364,6 @@
 .mobileFilterApply:hover {
   background: var(--gold-deep);
 }
-
 .mobileFilterApply:active {
   transform: scale(0.96);
 }
@@ -1347,12 +1372,10 @@
    RESPONSIVE
    ============================================================ */
 
-/* ---------- Large tablets / small desktops ---------- */
 @media (max-width: 1100px) {
   .commitment {
     padding: 70px 32px;
   }
-
   .testimonials {
     padding: 0 32px 80px;
   }
@@ -1362,9 +1385,11 @@
   .productGrid {
     grid-template-columns: repeat(3, 1fr);
   }
+  .skeletonLoadMoreGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
-/* ---------- Tablet ---------- */
 @media (max-width: 900px) {
   .mainContent {
     padding-top: 100px;
@@ -1387,29 +1412,23 @@
     grid-template-columns: 1fr;
     gap: 40px;
   }
-
   .commitmentText {
     order: 2;
     padding: 0;
   }
-
   .commitmentMedia {
     order: 1;
   }
-
   .commitmentTitle {
     font-size: 28px;
     max-width: none;
   }
-
   .commitmentDesc {
     max-width: none;
   }
-
   .commitmentImage {
     max-width: 360px;
   }
-
   .testimonialsGrid {
     grid-template-columns: 1fr;
     gap: 16px;
@@ -1424,11 +1443,6 @@
   .filterToggle {
     display: flex;
   }
-
-  .filterOverlay {
-    display: block;
-  }
-
   .filters {
     display: none;
   }
@@ -1437,29 +1451,28 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
   }
+  .skeletonLoadMoreGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
 
   .perks {
     gap: 30px;
     padding: 30px 24px;
   }
-
-  /* Hide the entire toolbar on mobile */
   .toolbar {
     display: none;
   }
 }
 
-/* ---------- Mobile ---------- */
 @media (max-width: 560px) {
   .commitmentTitle {
     font-size: 24px;
   }
-
   .featureList {
     grid-template-columns: 1fr;
     row-gap: 12px;
   }
-
   .mainContent {
     padding-top: 80px;
   }
@@ -1468,20 +1481,16 @@
     aspect-ratio: auto;
     height: auto;
     object-fit: unset;
-    object-position: center;
-    background: none;
     padding-top: 28px;
   }
 
   .shopWrap {
     padding: 20px 14px 48px;
   }
-
   .filterToggle {
     padding: 10px 16px;
     font-size: 13px;
   }
-
   .filterToggleText {
     font-size: 12px;
   }
@@ -1490,8 +1499,15 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
   }
+  .skeletonLoadMoreGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
 
   .productCard {
+    min-height: 260px;
+  }
+  .skeletonCard {
     min-height: 260px;
   }
 
@@ -1499,20 +1515,16 @@
     padding: 10px 12px 0;
     gap: 3px;
   }
-
   .productName {
     font-size: 13px;
   }
-
   .productPrice {
     font-size: 13px;
     gap: 8px;
   }
-
   .priceNow {
     font-size: 13px;
   }
-
   .priceOld {
     font-size: 11px;
   }
@@ -1523,19 +1535,16 @@
     top: 10px;
     left: 10px;
   }
-
   .productCatOverlay {
     font-size: 9px;
     padding: 3px 8px;
     bottom: 10px;
     left: 10px;
   }
-
   .wishlistActions {
     top: 10px;
     right: 10px;
   }
-
   .wishlistBtn {
     width: 30px;
     height: 30px;
@@ -1554,17 +1563,21 @@
     font-size: 12px;
   }
 
+  .skeletonInfo {
+    padding: 10px 12px;
+  }
+  .skeletonBtn {
+    height: 30px;
+  }
+
   .testimonials {
     padding: 0 20px 60px;
     margin-top: 40px;
   }
-
-  /* Hide desktop grid on mobile */
   .testimonialsGrid {
     display: none;
   }
 
-  /* Show mobile carousel */
   .testimonialsCarousel {
     display: block;
     width: 100%;
@@ -1581,9 +1594,6 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
     padding: 4px 0 20px;
-    scroll-padding-left: 50%;
-    scroll-padding-right: 50%;
-    /* Center the first item */
     padding-left: calc(50% - 140px);
     padding-right: calc(50% - 140px);
   }
@@ -1617,64 +1627,50 @@
     height: 60vh;
     max-height: 60vh;
   }
-
   .mobileFilterHandle {
     margin: 10px auto 6px;
   }
-
   .mobileFilterHeader {
     padding: 6px 16px 10px;
   }
-
   .mobileFilterTitle {
     font-size: 18px;
   }
-
   .mobileFilterContent {
     padding: 0 16px 60px;
   }
-
   .mobileFilterGroup {
     margin-bottom: 16px;
   }
-
   .mobileFilterGrid {
     gap: 2px 10px;
   }
-
   .mobileFilterOption {
     font-size: 13px;
     padding: 5px 0;
   }
-
   .mobileFilterApply {
     padding: 12px;
     font-size: 15px;
   }
 }
 
-/* ---------- Small phones ---------- */
 @media (max-width: 400px) {
   .mainContent {
     padding-top: 70px;
   }
-
   .heroImage {
     aspect-ratio: auto;
     height: auto;
     object-fit: unset;
-    background: none;
     padding-top: 38px;
   }
-
   .commitment {
     padding: 44px 16px;
   }
-
   .commitmentTitle {
     font-size: 21px;
   }
-
   .commitmentDesc {
     font-size: 13px;
   }
@@ -1682,23 +1678,26 @@
   .productGrid {
     gap: 10px;
   }
+  .skeletonLoadMoreGrid {
+    gap: 10px;
+  }
 
   .productCard {
+    min-height: 240px;
+  }
+  .skeletonCard {
     min-height: 240px;
   }
 
   .productInfo {
     padding: 8px 10px 0;
   }
-
   .productName {
     font-size: 12px;
   }
-
   .priceNow {
     font-size: 12px;
   }
-
   .priceOld {
     font-size: 10px;
   }
@@ -1716,25 +1715,20 @@
     padding: 3px 7px;
     top: 8px;
     left: 8px;
-    background-color: red;
+    background-color: var(--sale);
     color: white;
   }
-
   .productCatOverlay {
     font-size: 8px;
     padding: 2px 7px;
     bottom: 8px;
     left: 8px;
   }
-
   .wishlistBtn {
     width: 28px;
     height: 28px;
     font-size: 11px;
-    top: 8px;
-    right: 8px;
   }
-
   .avatar {
     width: 44px;
     height: 44px;
@@ -1745,7 +1739,6 @@
     padding: 10px 16px;
     font-size: 13px;
   }
-
   .filterToggleText {
     font-size: 13px;
   }
@@ -1754,27 +1747,23 @@
     height: 65vh;
     max-height: 65vh;
   }
-
   .mobileFilterContent {
     padding: 0 14px 14px;
+    margin-bottom: 60px;
   }
-
   .mobileFilterGroup {
     margin-bottom: 14px;
   }
-
   .mobileFilterGrid {
     gap: 2px 8px;
   }
-
   .mobileFilterOption {
     font-size: 12px;
   }
-
   .mobileFilterApply {
     padding: 10px;
     font-size: 14px;
-    margin-bottom: 50px;
+    /* margin-bottom: 50px; */
   }
 
   .testimonialsTrack {
@@ -1790,17 +1779,14 @@
   }
 }
 
-/* ---------- Hide mobile filter on desktop ---------- */
+/* ---------- Desktop overrides ---------- */
 @media (min-width: 901px) {
   .filterOverlay {
     display: none !important;
   }
-
   .mobileFilterSheet {
     display: none !important;
   }
-
-  /* Restore toolbar on desktop */
   .toolbar {
     display: flex !important;
   }
@@ -1810,6 +1796,12 @@
 @media (prefers-reduced-motion: reduce) {
   .hero {
     animation: none !important;
+  }
+  .skeletonMedia,
+  .skeletonLine,
+  .skeletonBtn {
+    animation: none !important;
+    background: #ede5d3 !important;
   }
 
   .productCard,

@@ -1,6 +1,6 @@
 // src/Components/Offers/Offers.jsx
 
-import React, { useRef, useEffect, useState, useMemo } from "react";
+import React, { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -13,6 +13,7 @@ import {
   FiChevronRight,
   FiShoppingBag,
   FiCheck,
+  FiChevronDown,
 } from "react-icons/fi";
 import { LuSlidersHorizontal } from "react-icons/lu";
 import styles from "./Offers.module.css";
@@ -71,6 +72,8 @@ const SORT_OPTIONS = [
   { value: "name-desc", label: "Name: Z-A" },
   { value: "discount-desc", label: "Discount: High to Low" },
 ];
+
+const ITEMS_PER_BATCH = 10;
 
 /* ----------------------------------------------------------------
    Skeleton Card
@@ -138,62 +141,6 @@ function Reveal({
 }
 
 /* ----------------------------------------------------------------
-   Mobile Sort Dropdown
-------------------------------------------------------------------- */
-function MobileSortDropdown({ value, options, onChange }) {
-  const [open, setOpen] = useState(false);
-  const wrapperRef = useRef(null);
-  const currentLabel = options.find((o) => o.value === value)?.label || "";
-
-  useEffect(() => {
-    function handleClick(e) {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
-
-  return (
-    <div className={styles.mobileSortWrapper} ref={wrapperRef}>
-      <button
-        type="button"
-        className={styles.mobileSortTrigger}
-        onClick={() => setOpen(!open)}
-      >
-        <span>{currentLabel}</span>
-        <span
-          className={`${styles.mobileSortChevron} ${
-            open ? styles.mobileSortChevronOpen : ""
-          }`}
-        />
-      </button>
-
-      {open && (
-        <div className={styles.mobileSortList}>
-          {options.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              className={`${styles.mobileSortItem} ${
-                value === opt.value ? styles.mobileSortItemActive : ""
-              }`}
-              onClick={() => {
-                onChange(opt.value);
-                setOpen(false);
-              }}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ----------------------------------------------------------------
    Main Component
 ------------------------------------------------------------------- */
 export default function Offers() {
@@ -216,12 +163,34 @@ export default function Offers() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [sortBy, setSortBy] = useState("newest");
   const [localLoading, setLocalLoading] = useState(false);
+  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const itemsPerPage = 9;
+
+  // ── Infinite scroll state ──
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_BATCH);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const sentinelRef = useRef(null);
+
+  // ── Drag-to-close state ──
+  const sheetRef = useRef(null);
+  const dragState = useRef({
+    active: false,
+    startY: 0,
+    currentY: 0,
+    isDragging: false,
+  });
 
   const products = offersData.products || [];
   const { total, totalPages } = offersData.pagination || {
     total: 0,
     totalPages: 1,
+  };
+
+  const visibleProducts = products.slice(0, visibleCount);
+
+  const getSortLabel = () => {
+    const option = SORT_OPTIONS.find((opt) => opt.value === sortBy);
+    return option ? option.label : "Default Sorting";
   };
 
   // Throttled fetch — minimum 1000 ms skeleton
@@ -249,12 +218,17 @@ export default function Offers() {
     return () => clearTimeout(timeoutId);
   }, [dispatch, currentPage, selectedCategory]);
 
+  // Reset visible count when products change
+  useEffect(() => {
+    setVisibleCount(ITEMS_PER_BATCH);
+  }, [selectedCategory, sortBy, currentPage]);
+
   useEffect(() => {
     if (isAuthenticated) dispatch(fetchWishlist());
   }, [dispatch, isAuthenticated]);
 
   const sortedProducts = useMemo(() => {
-    const list = [...products];
+    const list = [...visibleProducts];
     switch (sortBy) {
       case "price-asc":
         return list.sort(
@@ -287,26 +261,35 @@ export default function Offers() {
       default:
         return list;
     }
-  }, [products, sortBy]);
+  }, [visibleProducts, sortBy]);
+
+  // ── Infinite Scroll via IntersectionObserver ──
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isLoadingMore && visibleCount < products.length) {
+          setIsLoadingMore(true);
+          setTimeout(() => {
+            setVisibleCount((prev) => Math.min(prev + ITEMS_PER_BATCH, products.length));
+            setIsLoadingMore(false);
+          }, 300);
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [visibleCount, products.length, isLoadingMore]);
 
   const scrollToOffers = () => {
     const el = document.getElementById("offers-section");
     if (el) {
       const top = el.getBoundingClientRect().top + window.pageYOffset - 120;
       window.scrollTo({ top, behavior: "smooth" });
-    }
-  };
-
-  const nextPage = () => {
-    if (currentPage < totalPages - 1) {
-      setCurrentPage((p) => p + 1);
-      setTimeout(scrollToOffers, 100);
-    }
-  };
-  const prevPage = () => {
-    if (currentPage > 0) {
-      setCurrentPage((p) => p - 1);
-      setTimeout(scrollToOffers, 100);
     }
   };
 
@@ -363,8 +346,116 @@ export default function Offers() {
     document.body.style.position = "";
     document.body.style.width = "";
     document.body.style.top = "";
+
+    // Reset sheet position
+    const sheet = sheetRef.current;
+    if (sheet) {
+      sheet.style.transform = "";
+      sheet.style.transition = "";
+    }
+
     if (scrollY) window.scrollTo(0, parseInt(scrollY || "0", 10) * -1);
   };
+
+  // ── Drag-to-close sheet handlers ──
+  const getDragY = (e) => {
+    if (e.touches) return e.touches[0].clientY;
+    return e.clientY;
+  };
+
+  const onDragStart = useCallback((e) => {
+    // Only drag from the handle or header area
+    const target = e.target;
+    const isHandle =
+      target.classList.contains(styles.mobileFilterHandle) ||
+      target.closest(`.${styles.mobileFilterSheetHeader}`);
+
+    if (!isHandle) return;
+
+    dragState.current = {
+      active: true,
+      startY: getDragY(e),
+      currentY: getDragY(e),
+      isDragging: false,
+    };
+
+    const sheet = sheetRef.current;
+    if (sheet) {
+      sheet.style.transition = "none";
+    }
+  }, []);
+
+  const onDragMove = useCallback((e) => {
+    if (!dragState.current.active) return;
+
+    const y = getDragY(e);
+    const deltaY = y - dragState.current.startY;
+
+    if (Math.abs(deltaY) > 5) {
+      dragState.current.isDragging = true;
+    }
+
+    if (!dragState.current.isDragging) return;
+
+    dragState.current.currentY = y;
+
+    // Only allow dragging downward
+    const translateY = Math.max(0, deltaY);
+    const sheet = sheetRef.current;
+    if (sheet) {
+      sheet.style.transform = `translateY(${translateY}px)`;
+    }
+
+    if (e.cancelable) e.preventDefault();
+  }, []);
+
+  const onDragEnd = useCallback(() => {
+    if (!dragState.current.active) return;
+
+    const deltaY = dragState.current.currentY - dragState.current.startY;
+    const sheet = sheetRef.current;
+
+    if (sheet) {
+      sheet.style.transition = "";
+    }
+
+    // Close if dragged down more than 80px
+    if (dragState.current.isDragging && deltaY > 80) {
+      closeFilters();
+    } else {
+      // Snap back
+      if (sheet) {
+        sheet.style.transform = "";
+      }
+    }
+
+    dragState.current = { active: false, startY: 0, currentY: 0, isDragging: false };
+  }, []);
+
+  // Attach drag listeners to the sheet
+  useEffect(() => {
+    const sheet = sheetRef.current;
+    if (!sheet) return;
+
+    // Touch events
+    sheet.addEventListener("touchstart", onDragStart, { passive: true });
+    sheet.addEventListener("touchmove", onDragMove, { passive: false });
+    sheet.addEventListener("touchend", onDragEnd, { passive: true });
+
+    // Mouse events
+    sheet.addEventListener("mousedown", onDragStart);
+    window.addEventListener("mousemove", onDragMove);
+    window.addEventListener("mouseup", onDragEnd);
+
+    return () => {
+      sheet.removeEventListener("touchstart", onDragStart);
+      sheet.removeEventListener("touchmove", onDragMove);
+      sheet.removeEventListener("touchend", onDragEnd);
+      sheet.removeEventListener("mousedown", onDragStart);
+      window.removeEventListener("mousemove", onDragMove);
+      window.removeEventListener("mouseup", onDragEnd);
+    };
+  }, [onDragStart, onDragMove, onDragEnd]);
 
   return (
     <>
@@ -476,7 +567,7 @@ export default function Offers() {
                     <span className={styles.productsCount}>
                       {localLoading
                         ? "Loading..."
-                        : `Showing ${sortedProducts.length} of ${total} products`}
+                        : `Showing ${Math.min(visibleCount, products.length)} of ${total} products`}
                     </span>
                   </div>
                 </div>
@@ -621,7 +712,21 @@ export default function Offers() {
                       })}
                     </div>
 
-                    {totalPages > 1 && (
+                    {/* ── Infinite Scroll Sentinel ── */}
+                    {!localLoading && (
+                      <div ref={sentinelRef} className={styles.sentinel}>
+                        {isLoadingMore && (
+                          <div className={styles.skeletonLoadMoreGrid}>
+                            {Array.from({ length: 4 }).map((_, i) => (
+                              <SkeletonCard key={i} />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Pagination (fallback) */}
+                    {!localLoading && totalPages > 1 && visibleCount >= products.length && (
                       <div className={styles.pagination}>
                         <button
                           className={`${styles.paginationBtn} ${
@@ -629,7 +734,12 @@ export default function Offers() {
                               ? styles.paginationDisabled
                               : ""
                           }`}
-                          onClick={prevPage}
+                          onClick={() => {
+                            if (currentPage > 0) {
+                              setCurrentPage((p) => p - 1);
+                              setTimeout(scrollToOffers, 100);
+                            }
+                          }}
                           disabled={currentPage === 0}
                         >
                           <FiChevronLeft /> Prev
@@ -643,7 +753,12 @@ export default function Offers() {
                               ? styles.paginationDisabled
                               : ""
                           }`}
-                          onClick={nextPage}
+                          onClick={() => {
+                            if (currentPage < totalPages - 1) {
+                              setCurrentPage((p) => p + 1);
+                              setTimeout(scrollToOffers, 100);
+                            }
+                          }}
                           disabled={currentPage === totalPages - 1}
                         >
                           Next <FiChevronRight />
@@ -703,16 +818,21 @@ export default function Offers() {
           </Reveal>
         </div>
 
-        {/* Mobile Filter Sheet */}
+        {/* Mobile Filter Overlay */}
         {filtersOpen && (
           <div className={styles.filterOverlay} onClick={closeFilters} />
         )}
 
+        {/* Mobile Filter Sheet */}
         <div
+          ref={sheetRef}
           className={`${styles.mobileFilterSheet} ${
             filtersOpen ? styles.mobileFilterSheetOpen : ""
           }`}
         >
+          {/* Drag handle */}
+          <div className={styles.mobileFilterHandle} />
+
           <div className={styles.mobileFilterSheetHeader}>
             <h3 className={styles.mobileFilterTitle}>Filter</h3>
             <button
@@ -729,11 +849,33 @@ export default function Offers() {
             {/* Mobile Sort By — Custom Dropdown */}
             <div className={styles.filterGroup}>
               <span className={styles.filterGroupLabel}>Sort By</span>
-              <MobileSortDropdown
-                value={sortBy}
-                options={SORT_OPTIONS}
-                onChange={(val) => setSortBy(val)}
-              />
+              <div className={styles.mobileSortWrapper}>
+                <button
+                  className={styles.mobileSortButton}
+                  onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                  aria-expanded={isSortDropdownOpen}
+                >
+                  <span>{getSortLabel()}</span>
+                  <FiChevronDown className={`${styles.mobileSortChevron} ${isSortDropdownOpen ? styles.mobileSortChevronOpen : ""}`} />
+                </button>
+
+                {isSortDropdownOpen && (
+                  <div className={styles.mobileSortDropdown}>
+                    {SORT_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        className={`${styles.mobileSortOption} ${sortBy === option.value ? styles.mobileSortOptionActive : ""}`}
+                        onClick={() => {
+                          setSortBy(option.value);
+                          setIsSortDropdownOpen(false);
+                        }}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Mobile Category — Two column grid */}

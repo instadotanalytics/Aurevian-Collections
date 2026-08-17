@@ -1,11 +1,16 @@
 // src/Components/Collections/Collections.jsx
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { FiFilter, FiHeart, FiShoppingBag, FiCheck, FiChevronDown } from "react-icons/fi";
+import {
+  FiHeart,
+  FiShoppingBag,
+  FiCheck,
+  FiChevronDown,
+} from "react-icons/fi";
 import { LuSlidersHorizontal } from "react-icons/lu";
 import styles from "./Collections.module.css";
 import Footer from "../../Pages/Layout/Footer/Footer.jsx";
@@ -130,6 +135,22 @@ const SORT_OPTIONS = [
   { value: "price-high", label: "Price: High to Low" },
 ];
 
+const BUDGET_OPTIONS = [
+  { value: "all", label: "All" },
+  { value: "under-1000", label: "Under ₹1,000" },
+  { value: "1000-3000", label: "₹1,000 – ₹3,000" },
+  { value: "3000-6000", label: "₹3,000 – ₹6,000" },
+  { value: "above-6000", label: "Above ₹6,000" },
+];
+
+const PROMOTION_OPTIONS = [
+  { value: "all", label: "All" },
+  { value: "gift-wrapped", label: "Gift Wrapped" },
+  { value: "best-seller", label: "Best Seller" },
+  { value: "trending", label: "Trending" },
+  { value: "premium-gift", label: "Premium Gift" },
+];
+
 /* ----------------------------------------------------------------
    Persistent Reveal-on-scroll with Blur Effect
 ------------------------------------------------------------------- */
@@ -188,17 +209,10 @@ function Reveal({
 export default function Collections() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { byPlacement, isLoading } = useSelector(
-    (state) => state.storefrontProduct,
-  );
+  const { byPlacement } = useSelector((state) => state.storefrontProduct);
   const { isAuthenticated } = useSelector((state) => state.auth);
   const cartItems = useSelector((state) => state.cart.items);
   const wishlistItems = useSelector((state) => state.wishlist.items);
-
-  const collectionsData = byPlacement.collections || {
-    products: [],
-    pagination: { page: 1, totalPages: 1, total: 0 },
-  };
 
   const heroRef = useRef(null);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -207,60 +221,108 @@ export default function Collections() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [priceRange, setPriceRange] = useState([0, 7000]);
   const [sortBy, setSortBy] = useState("latest");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12;
+  const [budgetFilter, setBudgetFilter] = useState("all");
+  const [promotionFilter, setPromotionFilter] = useState("all");
 
   const [cartLoadingId, setCartLoadingId] = useState(null);
 
   // Mobile filter sheet state
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const sheetRef = useRef(null);
+  const dragState = useRef({ startY: 0, currentY: 0 });
+  const [isDraggingSheet, setIsDraggingSheet] = useState(false);
 
   // Mobile sort dropdown state
   const [isMobileSortOpen, setIsMobileSortOpen] = useState(false);
   const mobileSortRef = useRef(null);
 
-  // Skeleton / throttling state (1000 ms minimum)
-  const [displaySkeleton, setDisplaySkeleton] = useState(false);
-  const loadStartRef = useRef(0);
+  // Desktop sidebar sort dropdown state
+  const [isSidebarSortOpen, setIsSidebarSortOpen] = useState(false);
+  const sidebarSortRef = useRef(null);
 
-  // Products from Redux
-  const products = collectionsData.products || [];
-  const { total, totalPages: totalPagesFromAPI } =
-    collectionsData.pagination || { total: 0, totalPages: 1 };
+  // Infinite scroll
+  const [page, setPage] = useState(1);
+  const [allProducts, setAllProducts] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const loaderRef = useRef(null);
 
-  // Fetch products when filters change
+  // Fetch products (infinite scroll)
   useEffect(() => {
-    dispatch(
-      fetchProductsByPlacement({
-        placement: "collections",
-        page: currentPage,
-        limit: itemsPerPage,
-        categoryId: selectedCategory !== "All" ? selectedCategory : undefined,
-        sort: sortBy || undefined,
-      }),
+    const load = async () => {
+      const isFirst = page === 1;
+      if (isFirst) setIsInitialLoading(true);
+      else setIsLoadingMore(true);
+
+      const start = Date.now();
+
+      try {
+        const result = await dispatch(
+          fetchProductsByPlacement({
+            placement: "collections",
+            page,
+            limit: 10,
+            categoryId: selectedCategory !== "All" ? selectedCategory : undefined,
+            sort: sortBy || undefined,
+          }),
+        ).unwrap();
+
+        const fetched = result.products || [];
+        setAllProducts((prev) => (isFirst ? fetched : [...prev, ...fetched]));
+        setHasMore(page < (result.pagination?.totalPages || 1));
+      } catch (err) {
+        console.error(err);
+      } finally {
+        const elapsed = Date.now() - start;
+        const remaining = Math.max(0, 1000 - elapsed);
+        setTimeout(() => {
+          if (isFirst) setIsInitialLoading(false);
+          else setIsLoadingMore(false);
+        }, remaining);
+      }
+    };
+
+    load();
+  }, [page, refreshKey, dispatch, selectedCategory, sortBy]);
+
+  // Reset on filter change
+  useEffect(() => {
+    setPage(1);
+    setAllProducts([]);
+    setHasMore(true);
+    setRefreshKey((k) => k + 1);
+  }, [selectedCategory, sortBy, budgetFilter, promotionFilter]);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    if (!loaderRef.current || !hasMore || isLoadingMore || isInitialLoading)
+      return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          hasMore &&
+          !isLoadingMore &&
+          !isInitialLoading
+        ) {
+          setPage((p) => p + 1);
+        }
+      },
+      { rootMargin: "200px" },
     );
-  }, [dispatch, currentPage, selectedCategory, sortBy]);
+
+    observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, isLoadingMore, isInitialLoading]);
 
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(fetchWishlist());
     }
   }, [dispatch, isAuthenticated]);
-
-  /* Throttle skeleton so it shows for at least 1000 ms */
-  useEffect(() => {
-    if (isLoading) {
-      setDisplaySkeleton(true);
-      loadStartRef.current = Date.now();
-    } else {
-      const elapsed = Date.now() - loadStartRef.current;
-      const remaining = Math.max(0, 1000 - elapsed);
-      const timer = setTimeout(() => {
-        setDisplaySkeleton(false);
-      }, remaining);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading]);
 
   /* Close mobile sort dropdown on outside click */
   useEffect(() => {
@@ -275,6 +337,73 @@ export default function Collections() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  /* Close desktop sidebar sort dropdown on outside click */
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        sidebarSortRef.current &&
+        !sidebarSortRef.current.contains(event.target)
+      ) {
+        setIsSidebarSortOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Drag to close sheet
+  useEffect(() => {
+    if (!isDraggingSheet) return;
+
+    const onMove = (e) => {
+      const clientY = e.clientY ?? e.touches?.[0]?.clientY;
+      const delta = clientY - dragState.current.startY;
+      if (delta < 0) return;
+      dragState.current.currentY = delta;
+      if (sheetRef.current) {
+        sheetRef.current.style.transform = `translateY(${delta}px)`;
+      }
+    };
+
+    const onUp = () => {
+      setIsDraggingSheet(false);
+      const delta = dragState.current.currentY;
+      if (sheetRef.current) {
+        sheetRef.current.style.transition = "transform 0.35s ease";
+        if (delta > 100) {
+          sheetRef.current.style.transform = "translateY(100%)";
+          setTimeout(() => {
+            closeMobileFilter();
+            if (sheetRef.current) {
+              sheetRef.current.style.transform = "";
+              sheetRef.current.style.transition = "";
+            }
+          }, 350);
+        } else {
+          sheetRef.current.style.transform = "translateY(0)";
+          setTimeout(() => {
+            if (sheetRef.current) {
+              sheetRef.current.style.transform = "";
+              sheetRef.current.style.transition = "";
+            }
+          }, 350);
+        }
+      }
+    };
+
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+    document.addEventListener("touchmove", onMove, { passive: false });
+    document.addEventListener("touchend", onUp);
+
+    return () => {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      document.removeEventListener("touchmove", onMove);
+      document.removeEventListener("touchend", onUp);
+    };
+  }, [isDraggingSheet]);
 
   // Auto-scroll for hero gallery
   useEffect(() => {
@@ -308,7 +437,12 @@ export default function Collections() {
     setSelectedCategory("All");
     setPriceRange([0, 7000]);
     setSortBy("latest");
-    setCurrentPage(1);
+    setBudgetFilter("all");
+        setPromotionFilter("all");
+    setPage(1);
+    setAllProducts([]);
+    setHasMore(true);
+    setRefreshKey((k) => k + 1);
   };
 
   const openMobileFilter = () => {
@@ -334,7 +468,6 @@ export default function Collections() {
   const handleSortSelect = (value) => {
     setSortBy(value);
     setIsMobileSortOpen(false);
-    setCurrentPage(1);
   };
 
   const getSortLabel = () => {
@@ -373,34 +506,54 @@ export default function Collections() {
     }
   };
 
-  // Scroll to filter section
   const scrollToFilter = () => {
-    const newCollection = document.querySelector(
-      `.${styles.newCollectionSection}`,
-    );
-
-    if (newCollection) {
-      const newCollectionRect = newCollection.getBoundingClientRect();
-      const newCollectionBottom = newCollectionRect.bottom + window.pageYOffset;
-
+    const filterSection = document.getElementById("filter-section");
+    if (filterSection) {
+      const rect = filterSection.getBoundingClientRect();
+      const absoluteTop = rect.top + window.pageYOffset;
       window.scrollTo({
-        top: newCollectionBottom - 300,
+        top: absoluteTop - 40,
         behavior: "smooth",
       });
-    } else {
-      const filterSection = document.getElementById("filter-section");
-      if (filterSection) {
-        const rect = filterSection.getBoundingClientRect();
-        const absoluteTop = rect.top + window.pageYOffset;
-        window.scrollTo({
-          top: absoluteTop - 40,
-          behavior: "smooth",
-        });
-      }
     }
   };
 
-  const skeletonItems = Array.from({ length: 12 }, (_, i) => i);
+  const filteredProducts = useMemo(() => {
+    return allProducts.filter((p) => {
+      const price = p.pricing?.salePrice || p.pricing?.originalPrice || 0;
+
+      if (budgetFilter === "under-1000" && price >= 1000) return false;
+      if (budgetFilter === "1000-3000" && (price < 1000 || price > 3000))
+        return false;
+      if (budgetFilter === "3000-6000" && (price < 3000 || price > 6000))
+        return false;
+      if (budgetFilter === "above-6000" && price <= 6000) return false;
+
+      if (promotionFilter !== "all") {
+        const discount =
+          p.pricing?.originalPrice && p.pricing?.salePrice
+            ? Math.round(
+                ((p.pricing.originalPrice - p.pricing.salePrice) /
+                  p.pricing.originalPrice) *
+                  100
+              )
+            : 0;
+
+        if (promotionFilter === "best-seller" && discount < 20) return false;
+        if (promotionFilter === "trending" && price < 500) return false;
+        if (
+          promotionFilter === "gift-wrapped" &&
+          !p.productName?.toLowerCase().includes("gift")
+        )
+          return false;
+        if (promotionFilter === "premium-gift" && price < 2000) return false;
+      }
+
+      return true;
+    });
+  }, [allProducts, budgetFilter, promotionFilter]);
+
+  const skeletonItems = Array.from({ length: 10 }, (_, i) => i);
 
   return (
     <>
@@ -453,7 +606,9 @@ export default function Collections() {
                 {HERO_SLIDES.map((_, index) => (
                   <button
                     key={index}
-                    className={`${styles.heroDot} ${index === currentSlide ? styles.heroDotActive : ""}`}
+                    className={`${styles.heroDot} ${
+                      index === currentSlide ? styles.heroDotActive : ""
+                    }`}
                     onClick={() => goToSlide(index)}
                     aria-label={`Go to slide ${index + 1}`}
                   />
@@ -490,6 +645,54 @@ export default function Collections() {
             <Reveal as="aside" className={styles.filterSidebar} delay={100}>
               <h3 className={styles.filterTitle}>Filter</h3>
 
+              {/* Sort By — Desktop Sidebar */}
+              <div className={styles.filterGroup}>
+                <span className={styles.filterGroupLabel}>Sort By</span>
+                <div
+                  className={styles.sidebarSortWrapper}
+                  ref={sidebarSortRef}
+                >
+                  <button
+                    className={styles.sidebarSortButton}
+                    onClick={() =>
+                      setIsSidebarSortOpen(!isSidebarSortOpen)
+                    }
+                    aria-expanded={isSidebarSortOpen}
+                  >
+                    <span>{getSortLabel()}</span>
+                    <FiChevronDown
+                      className={`${styles.sidebarSortChevron} ${
+                        isSidebarSortOpen
+                          ? styles.sidebarSortChevronOpen
+                          : ""
+                      }`}
+                    />
+                  </button>
+
+                  {isSidebarSortOpen && (
+                    <div className={styles.sidebarSortDropdown}>
+                      {SORT_OPTIONS.map((option) => (
+                        <button
+                          key={option.value}
+                          className={`${styles.sidebarSortOption} ${
+                            sortBy === option.value
+                              ? styles.sidebarSortOptionActive
+                              : ""
+                          }`}
+                          onClick={() => {
+                            setSortBy(option.value);
+                            setIsSidebarSortOpen(false);
+                          }}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Category */}
               <div className={styles.filterGroup}>
                 <span className={styles.filterGroupLabel}>Category</span>
                 {FILTER_CATEGORIES.map((cat) => (
@@ -505,6 +708,39 @@ export default function Collections() {
                 ))}
               </div>
 
+              {/* Budget */}
+              <div className={styles.filterGroup}>
+                <span className={styles.filterGroupLabel}>Budget</span>
+                {BUDGET_OPTIONS.map((opt) => (
+                  <label key={opt.value} className={styles.filterOption}>
+                    <input
+                      type="radio"
+                      name="budget"
+                      checked={budgetFilter === opt.value}
+                      onChange={() => setBudgetFilter(opt.value)}
+                    />
+                    {opt.label}
+                  </label>
+                ))}
+              </div>
+
+              {/* Promotions */}
+              <div className={styles.filterGroup}>
+                <span className={styles.filterGroupLabel}>Promotions</span>
+                {PROMOTION_OPTIONS.map((opt) => (
+                  <label key={opt.value} className={styles.filterOption}>
+                    <input
+                      type="radio"
+                      name="promotion"
+                      checked={promotionFilter === opt.value}
+                      onChange={() => setPromotionFilter(opt.value)}
+                    />
+                    {opt.label}
+                  </label>
+                ))}
+              </div>
+
+              {/* Price Range */}
               <div className={styles.filterGroup}>
                 <span className={styles.filterGroupLabel}>Price Range</span>
                 <input
@@ -513,9 +749,13 @@ export default function Collections() {
                   max="7000"
                   step="100"
                   value={priceRange[1]}
-                  onChange={(e) => setPriceRange([0, Number(e.target.value)])}
+                  onChange={(e) =>
+                    setPriceRange([0, Number(e.target.value)])
+                  }
                   className={styles.filterPriceInput}
-                  style={{ "--_progress": `${(priceRange[1] / 7000) * 100}%` }}
+                  style={{
+                    "--_progress": `${(priceRange[1] / 7000) * 100}%`,
+                  }}
                 />
                 <div className={styles.filterPriceRange}>
                   <span>₹0</span>
@@ -533,28 +773,17 @@ export default function Collections() {
 
             {/* Products */}
             <div className={styles.productsWrapper}>
-              {/* Desktop-only header: count + sort */}
+              {/* Desktop header: count only */}
               <div className={styles.productsHeader}>
                 <span className={styles.productsCount}>
-                  {isLoading
+                  {isInitialLoading
                     ? "Loading..."
-                    : `Showing ${products.length} of ${total} products`}
+                    : `Showing ${filteredProducts.length} results`}
                 </span>
-                <select
-                  className={styles.sortSelect}
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                >
-                  {SORT_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               {/* Skeleton Loading */}
-              {displaySkeleton && (
+              {isInitialLoading && (
                 <div className={styles.skeletonGrid}>
                   {skeletonItems.map((i) => (
                     <div className={styles.skeletonCard} key={i}>
@@ -570,9 +799,9 @@ export default function Collections() {
               )}
 
               {/* Products */}
-              {!displaySkeleton && (
+              {!isInitialLoading && (
                 <div className={styles.productsGrid}>
-                  {products.map((product) => {
+                  {filteredProducts.map((product) => {
                     const inCart = isInCart(product._id);
                     const inWishlist = isInWishlist(product._id);
                     const addingToCart = cartLoadingId === product._id;
@@ -583,7 +812,7 @@ export default function Collections() {
                             ((product.pricing.originalPrice -
                               product.pricing.salePrice) /
                               product.pricing.originalPrice) *
-                              100,
+                              100
                           )
                         : 0;
                     return (
@@ -615,7 +844,11 @@ export default function Collections() {
                           <div className={styles.wishlistActions}>
                             <button
                               type="button"
-                              className={`${styles.wishlistBtn} ${inWishlist ? styles.wishlistBtnActive : ""}`}
+                              className={`${styles.wishlistBtn} ${
+                                inWishlist
+                                  ? styles.wishlistBtnActive
+                                  : ""
+                              }`}
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -644,7 +877,9 @@ export default function Collections() {
                             {product.productName}
                           </Link>
                           <div className={styles.productPriceRow}>
-                            <span className={styles.productCurrentPrice}>
+                            <span
+                              className={styles.productCurrentPrice}
+                            >
                               ₹
                               {(
                                 product.pricing?.salePrice ||
@@ -653,7 +888,11 @@ export default function Collections() {
                             </span>
                             {product.pricing?.salePrice &&
                               product.pricing?.originalPrice && (
-                                <span className={styles.productOriginalPrice}>
+                                <span
+                                  className={
+                                    styles.productOriginalPrice
+                                  }
+                                >
                                   ₹
                                   {product.pricing.originalPrice.toLocaleString()}
                                 </span>
@@ -661,8 +900,14 @@ export default function Collections() {
                           </div>
                           <button
                             type="button"
-                            className={`${styles.productAddBtn} ${inCart ? styles.productAddBtnActive : ""}`}
-                            onClick={() => handleAddToCart(product._id)}
+                            className={`${styles.productAddBtn} ${
+                              inCart
+                                ? styles.productAddBtnActive
+                                : ""
+                            }`}
+                            onClick={() =>
+                              handleAddToCart(product._id)
+                            }
                             disabled={inCart || addingToCart}
                           >
                             {inCart ? (
@@ -672,7 +917,9 @@ export default function Collections() {
                             ) : (
                               <>
                                 <FiShoppingBag />{" "}
-                                {addingToCart ? "Adding..." : "Add to Cart"}
+                                {addingToCart
+                                  ? "Adding..."
+                                  : "Add to Cart"}
                               </>
                             )}
                           </button>
@@ -683,49 +930,49 @@ export default function Collections() {
                 </div>
               )}
 
-              {/* Pagination */}
-              {!displaySkeleton && totalPagesFromAPI > 1 && (
-                <div className={styles.pagination}>
-                  <button
-                    className={styles.paginationBtn}
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.max(prev - 1, 1))
-                    }
-                    disabled={currentPage === 1}
-                  >
-                    ‹
-                  </button>
-                  {Array.from(
-                    { length: totalPagesFromAPI },
-                    (_, i) => i + 1,
-                  ).map((n) => (
-                    <button
-                      key={n}
-                      className={`${styles.pageBtn} ${n === currentPage ? styles.activePage : ""}`}
-                      onClick={() => setCurrentPage(n)}
-                    >
-                      {n}
-                    </button>
-                  ))}
-                  <button
-                    className={styles.paginationBtn}
-                    onClick={() =>
-                      setCurrentPage((prev) =>
-                        Math.min(prev + 1, totalPagesFromAPI),
-                      )
-                    }
-                    disabled={currentPage === totalPagesFromAPI}
-                  >
-                    ›
-                  </button>
+              {/* Infinite scroll loader */}
+              {!isInitialLoading && hasMore && (
+                <div
+                  ref={loaderRef}
+                  className={styles.infiniteLoader}
+                >
+                  {isLoadingMore && (
+                    <div className={styles.skeletonGrid}>
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <div
+                          className={styles.skeletonCard}
+                          key={`more-${i}`}
+                        >
+                          <div className={styles.skeletonImage} />
+                          <div className={styles.skeletonText} />
+                          <div
+                            className={`${styles.skeletonText} ${styles.skeletonTextShort}`}
+                          />
+                          <div className={styles.skeletonBtn} />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
+
+              {!isInitialLoading &&
+                !hasMore &&
+                filteredProducts.length > 0 && (
+                  <div className={styles.endMessage}>
+                    No more products
+                  </div>
+                )}
             </div>
           </div>
 
           {/* ---------------- From: Blush Set ---------------- */}
           <div className={styles.featureSection}>
-            <Reveal as="div" className={styles.featureImageWrap} delay={0}>
+            <Reveal
+              as="div"
+              className={styles.featureImageWrap}
+              delay={0}
+            >
               <img
                 className={styles.featureImage}
                 src="https://i.pinimg.com/736x/07/ac/c1/07acc1c388356058bb35ea2b1bb7e8c9.jpg"
@@ -734,25 +981,40 @@ export default function Collections() {
               />
             </Reveal>
 
-            <Reveal as="div" className={styles.featureContent} delay={150}>
+            <Reveal
+              as="div"
+              className={styles.featureContent}
+              delay={150}
+            >
               <span className={styles.pill}>From: Blush Set</span>
               <h3 className={styles.featureTitle}>
                 Introducing The Blossom Set
               </h3>
               <p className={styles.featureBody}>
-                Inspired by nature's delicate beauty, the Blossom Set brings a
-                touch of freshness and femininity to your everyday look.
+                Inspired by nature's delicate beauty, the Blossom Set
+                brings a touch of freshness and femininity to your
+                everyday look.
               </p>
 
               <ul className={styles.featureList}>
-                {FEATURES.map((f, i) => (
-                  <li className={styles.featureItem} key={f.title}>
-                    <span className={styles.featureDot} aria-hidden="true">
+                {FEATURES.map((f) => (
+                  <li
+                    className={styles.featureItem}
+                    key={f.title}
+                  >
+                    <span
+                      className={styles.featureDot}
+                      aria-hidden="true"
+                    >
                       ✦
                     </span>
                     <div>
-                      <p className={styles.featureItemTitle}>{f.title}</p>
-                      <p className={styles.featureItemBody}>{f.body}</p>
+                      <p className={styles.featureItemTitle}>
+                        {f.title}
+                      </p>
+                      <p className={styles.featureItemBody}>
+                        {f.body}
+                      </p>
                     </div>
                   </li>
                 ))}
@@ -770,7 +1032,11 @@ export default function Collections() {
         </div>
 
         {/* ---------------- Explore More ---------------- */}
-        <Reveal as="div" className={styles.exploreSection} delay={100}>
+        <Reveal
+          as="div"
+          className={styles.exploreSection}
+          delay={100}
+        >
           <div className={styles.container}>
             <div className={styles.exploreInner}>
               <div className={styles.exploreHeading}>
@@ -787,7 +1053,9 @@ export default function Collections() {
                     <span className={styles.exploreThumb}>
                       <img src={cat.img} alt="" loading="lazy" />
                     </span>
-                    <span className={styles.exploreLabel}>{cat.name}</span>
+                    <span className={styles.exploreLabel}>
+                      {cat.name}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -798,7 +1066,11 @@ export default function Collections() {
         {/* ---------------- Shine in your own way ---------------- */}
         <div className={styles.container}>
           <div className={styles.closingSection}>
-            <Reveal as="div" className={styles.closingContent} delay={100}>
+            <Reveal
+              as="div"
+              className={styles.closingContent}
+              delay={100}
+            >
               <h3 className={styles.closingTitle}>
                 Shine in <em>your</em>
                 <br />
@@ -834,13 +1106,33 @@ export default function Collections() {
 
         {/* ---------------- Mobile Bottom Sheet Filter ---------------- */}
         {isMobileFilterOpen && (
-          <div className={styles.filterOverlay} onClick={closeMobileFilter} />
+          <div
+            className={styles.filterOverlay}
+            onClick={closeMobileFilter}
+          />
         )}
 
         <div
-          className={`${styles.mobileFilterSheet} ${isMobileFilterOpen ? styles.mobileFilterSheetActive : ""}`}
+          ref={sheetRef}
+          className={`${styles.mobileFilterSheet} ${
+            isMobileFilterOpen
+              ? styles.mobileFilterSheetActive
+              : ""
+          }`}
         >
-          <div className={styles.mobileFilterHandle} />
+          <div
+            className={styles.mobileFilterHandle}
+            onMouseDown={(e) => {
+              dragState.current.startY = e.clientY;
+              dragState.current.currentY = 0;
+              setIsDraggingSheet(true);
+            }}
+            onTouchStart={(e) => {
+              dragState.current.startY = e.touches[0].clientY;
+              dragState.current.currentY = 0;
+              setIsDraggingSheet(true);
+            }}
+          />
 
           <div className={styles.mobileFilterHeader}>
             <h3 className={styles.mobileFilterTitle}>Filter</h3>
@@ -853,18 +1145,29 @@ export default function Collections() {
           </div>
 
           <div className={styles.mobileFilterContent}>
-            {/* ---- Custom Sort By Dropdown ---- */}
+            {/* Sort By */}
             <div className={styles.mobileFilterGroup}>
-              <span className={styles.mobileFilterGroupLabel}>Sort By</span>
-              <div className={styles.mobileSortWrapper} ref={mobileSortRef}>
+              <span className={styles.mobileFilterGroupLabel}>
+                Sort By
+              </span>
+              <div
+                className={styles.mobileSortWrapper}
+                ref={mobileSortRef}
+              >
                 <button
                   className={styles.mobileSortButton}
-                  onClick={() => setIsMobileSortOpen(!isMobileSortOpen)}
+                  onClick={() =>
+                    setIsMobileSortOpen(!isMobileSortOpen)
+                  }
                   aria-expanded={isMobileSortOpen}
                 >
                   <span>{getSortLabel()}</span>
                   <FiChevronDown
-                    className={`${styles.mobileSortChevron} ${isMobileSortOpen ? styles.mobileSortChevronOpen : ""}`}
+                    className={`${styles.mobileSortChevron} ${
+                      isMobileSortOpen
+                        ? styles.mobileSortChevronOpen
+                        : ""
+                    }`}
                   />
                 </button>
 
@@ -873,8 +1176,14 @@ export default function Collections() {
                     {SORT_OPTIONS.map((option) => (
                       <button
                         key={option.value}
-                        className={`${styles.mobileSortOption} ${sortBy === option.value ? styles.mobileSortOptionActive : ""}`}
-                        onClick={() => handleSortSelect(option.value)}
+                        className={`${styles.mobileSortOption} ${
+                          sortBy === option.value
+                            ? styles.mobileSortOptionActive
+                            : ""
+                        }`}
+                        onClick={() =>
+                          handleSortSelect(option.value)
+                        }
                       >
                         {option.label}
                       </button>
@@ -884,12 +1193,17 @@ export default function Collections() {
               </div>
             </div>
 
-            {/* ---- Category ---- */}
+            {/* Category */}
             <div className={styles.mobileFilterGroup}>
-              <span className={styles.mobileFilterGroupLabel}>Category</span>
+              <span className={styles.mobileFilterGroupLabel}>
+                Category
+              </span>
               <div className={styles.mobileFilterGrid}>
                 {FILTER_CATEGORIES.map((cat) => (
-                  <label key={cat} className={styles.mobileFilterOption}>
+                  <label
+                    key={cat}
+                    className={styles.mobileFilterOption}
+                  >
                     <input
                       type="radio"
                       name="mobile_category"
@@ -902,7 +1216,55 @@ export default function Collections() {
               </div>
             </div>
 
-            {/* ---- Price Range (Bottom) ---- */}
+            {/* Budget */}
+            <div className={styles.mobileFilterGroup}>
+              <span className={styles.mobileFilterGroupLabel}>
+                Budget
+              </span>
+              <div className={styles.mobileFilterGrid}>
+                {BUDGET_OPTIONS.map((opt) => (
+                  <label
+                    key={opt.value}
+                    className={styles.mobileFilterOption}
+                  >
+                    <input
+                      type="radio"
+                      name="mobile_budget"
+                      checked={budgetFilter === opt.value}
+                      onChange={() => setBudgetFilter(opt.value)}
+                    />
+                    {opt.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Promotions */}
+            <div className={styles.mobileFilterGroup}>
+              <span className={styles.mobileFilterGroupLabel}>
+                Promotions
+              </span>
+              <div className={styles.mobileFilterGrid}>
+                {PROMOTION_OPTIONS.map((opt) => (
+                  <label
+                    key={opt.value}
+                    className={styles.mobileFilterOption}
+                  >
+                    <input
+                      type="radio"
+                      name="mobile_promotion"
+                      checked={promotionFilter === opt.value}
+                      onChange={() =>
+                        setPromotionFilter(opt.value)
+                      }
+                    />
+                    {opt.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Price Range */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>
                 Price Range
@@ -913,15 +1275,26 @@ export default function Collections() {
                 max="7000"
                 step="100"
                 value={priceRange[1]}
-                onChange={(e) => setPriceRange([0, Number(e.target.value)])}
+                onChange={(e) =>
+                  setPriceRange([0, Number(e.target.value)])
+                }
                 className={styles.filterPriceInput}
-                style={{ "--_progress": `${(priceRange[1] / 7000) * 100}%` }}
+                style={{
+                  "--_progress": `${(priceRange[1] / 7000) * 100}%`,
+                }}
               />
               <div className={styles.filterPriceRange}>
                 <span>₹0</span>
                 <span>₹{priceRange[1]}</span>
               </div>
             </div>
+
+            <button
+              className={styles.filterClearBtn}
+              onClick={clearAllFilters}
+            >
+              Clear All Filters
+            </button>
 
             <button
               className={styles.mobileFilterApply}
