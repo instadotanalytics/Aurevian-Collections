@@ -16,6 +16,7 @@ import {
   FiX,
   FiChevronDown,
   FiChevronUp,
+  FiTag,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import styles from "./ProductManagement.module.css";
@@ -49,15 +50,26 @@ const SkeletonLoader = ({ count = 10 }) => {
   return (
     <div className={styles.skeletonContainer}>
       {Array.from({ length: count }).map((_, index) => (
-        <div key={index} className={styles.skeletonCard}>
-          <div className={styles.skeletonRow}>
-            <div className={styles.skeletonImage}></div>
-            <div className={styles.skeletonInfo}>
-              <div className={styles.skeletonLine}></div>
-              <div className={styles.skeletonLineShort}></div>
-              <div className={styles.skeletonLine}></div>
-              <div className={styles.skeletonLineShort}></div>
-            </div>
+        <div key={index} className={styles.skeletonRow}>
+          <div className={styles.skeletonIndex}></div>
+          <div className={styles.skeletonCheckbox}></div>
+          <div className={styles.skeletonImage}></div>
+          <div className={styles.skeletonName}>
+            <div className={styles.skeletonLine}></div>
+            <div className={styles.skeletonLineShort}></div>
+          </div>
+          <div className={styles.skeletonCategory}></div>
+          <div className={styles.skeletonPrice}>
+            <div className={styles.skeletonLine}></div>
+            <div className={styles.skeletonLineShort}></div>
+          </div>
+          <div className={styles.skeletonStock}></div>
+          <div className={styles.skeletonStatus}></div>
+          <div className={styles.skeletonPlacements}></div>
+          <div className={styles.skeletonActions}>
+            <div className={styles.skeletonIcon}></div>
+            <div className={styles.skeletonIcon}></div>
+            <div className={styles.skeletonIcon}></div>
           </div>
         </div>
       ))}
@@ -86,6 +98,10 @@ const ProductManagement = () => {
   const [allProductsLoaded, setAllProductsLoaded] = useState(false);
   const [isThrottled, setIsThrottled] = useState(false);
   const [showSkeleton, setShowSkeleton] = useState(true);
+  
+  // Product Popup States
+  const [selectedProductPopup, setSelectedProductPopup] = useState(null);
+  const [showProductPopup, setShowProductPopup] = useState(false);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const debouncedStatusFilter = useDebounce(statusFilter, 300);
@@ -201,8 +217,21 @@ const ProductManagement = () => {
     setSelectedRows(newState);
   };
 
+  // Product Popup Functions
+  const openProductPopup = (product) => {
+    setSelectedProductPopup(product);
+    setShowProductPopup(true);
+    document.body.style.overflow = "hidden";
+  };
+
+  const closeProductPopup = () => {
+    setSelectedProductPopup(null);
+    setShowProductPopup(false);
+    document.body.style.overflow = "auto";
+  };
+
   const handleCardClick = (product) => {
-    toggleRowExpand(product._id);
+    openProductPopup(product);
   };
 
   const getStatusBadge = (status) => {
@@ -220,6 +249,18 @@ const ProductManagement = () => {
         {statusInfo.label}
       </span>
     );
+  };
+
+  const getStatusStyle = (status) => {
+    const statusMap = {
+      Draft: { bg: "#f5f2ee", text: "#8a8072" },
+      Pending: { bg: "#fef3c7", text: "#d97706" },
+      Published: { bg: "#dcfce7", text: "#16a34a" },
+      Scheduled: { bg: "#dbeafe", text: "#1e40af" },
+      Archived: { bg: "#f5f2ee", text: "#8a8072" },
+      Rejected: { bg: "#fee2e2", text: "#ef4444" },
+    };
+    return statusMap[status] || statusMap.Draft;
   };
 
   const getSerialNumber = (index) => {
@@ -340,6 +381,7 @@ const ProductManagement = () => {
           
           {/* Category */}
           <td className={styles.categoryCell}>
+            <span className={styles.categoryIconMobile}><FiTag size={11} /></span>
             {product.category?.categoryData?.label || 'Uncategorized'}
           </td>
           
@@ -381,6 +423,7 @@ const ProductManagement = () => {
           <td className={styles.placementsCell}>
             {product.placements && product.placements.length > 0 ? (
               <span className={styles.placementTags}>
+                <FiGrid size={11} className={styles.placementIconMobile} />
                 {product.placements.slice(0, 2).join(', ')}
                 {product.placements.length > 2 && ` +${product.placements.length - 2}`}
               </span>
@@ -397,6 +440,7 @@ const ProductManagement = () => {
               title="View Product"
             >
               <FiEye size={16} />
+              <span className={styles.actionBtnLabel}>View</span>
             </button>
             <button
               className={styles.actionIconBtn}
@@ -404,6 +448,7 @@ const ProductManagement = () => {
               title="Edit Product"
             >
               <FiEdit2 size={16} />
+              <span className={styles.actionBtnLabel}>Edit</span>
             </button>
             <button
               className={styles.actionIconBtn}
@@ -411,6 +456,7 @@ const ProductManagement = () => {
               title="Expand Details"
             >
               {isExpanded ? <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
+              <span className={styles.actionBtnLabel}>{isExpanded ? "Less" : "More"}</span>
             </button>
           </td>
         </tr>
@@ -575,6 +621,202 @@ const ProductManagement = () => {
             >
               {isDeleting ? "Archiving..." : "Archive Product"}
             </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Product Popup Component
+  const renderProductPopup = () => {
+    if (!showProductPopup || !selectedProductPopup) return null;
+    
+    const product = selectedProductPopup;
+    const statusStyle = getStatusStyle(product.status);
+    const displayPrice = product.pricing?.salePrice || product.pricing?.originalPrice;
+    const hasDiscount = product.pricing?.salePrice && product.pricing?.salePrice < product.pricing?.originalPrice;
+    
+    return (
+      <div className={styles.productPopupOverlay} onClick={closeProductPopup}>
+        <div className={styles.productPopup} onClick={(e) => e.stopPropagation()}>
+          <button className={styles.productPopupClose} onClick={closeProductPopup}>
+            <FiX size={20} />
+          </button>
+
+          <div className={styles.productPopupContent}>
+            <div className={styles.productPopupHeader}>
+              <div className={styles.productPopupHeaderLeft}>
+                <div className={styles.productPopupName}>
+                  {product.productName}
+                </div>
+                <div className={styles.productPopupSku}>
+                  SKU: {product.sku || 'N/A'}
+                </div>
+              </div>
+              <div className={styles.productPopupBadges}>
+                <span 
+                  className={styles.productPopupStatusBadge}
+                  style={{
+                    backgroundColor: statusStyle.bg,
+                    color: statusStyle.text,
+                  }}
+                >
+                  {product.status || 'Draft'}
+                </span>
+              </div>
+            </div>
+
+            <div className={styles.productPopupBody}>
+              {product.thumbnail?.url && (
+                <img 
+                  src={product.thumbnail.url} 
+                  alt={product.productName}
+                  className={styles.productPopupImage}
+                  onError={(e) => {
+                    e.target.src = '/placeholder-image.jpg';
+                  }}
+                />
+              )}
+
+              <div className={styles.productPopupSection}>
+                <h4>
+                  <FiPackage className={styles.productPopupSectionIcon} /> Product Details
+                </h4>
+                <div className={styles.productPopupCompactGrid}>
+                  <div className={styles.productPopupCompactItem}>
+                    <span className={styles.productPopupLabel}>Category</span>
+                    <span className={styles.productPopupValue}>
+                      {product.category?.categoryData?.label || 'Uncategorized'}
+                    </span>
+                  </div>
+                  <div className={styles.productPopupCompactItem}>
+                    <span className={styles.productPopupLabel}>Brand</span>
+                    <span className={styles.productPopupValue}>
+                      {product.brand || 'N/A'}
+                    </span>
+                  </div>
+                  <div className={styles.productPopupCompactItem}>
+                    <span className={styles.productPopupLabel}>Price</span>
+                    <span className={styles.productPopupValue}>
+                      ₹{displayPrice?.toLocaleString() || '0'}
+                      {hasDiscount && (
+                        <span style={{ 
+                          textDecoration: 'line-through', 
+                          color: '#8a8072', 
+                          marginLeft: '6px',
+                          fontSize: '12px'
+                        }}>
+                          ₹{product.pricing.originalPrice.toLocaleString()}
+                        </span>
+                      )}
+                      {hasDiscount && (
+                        <span style={{
+                          marginLeft: '6px',
+                          fontSize: '11px',
+                          color: '#10b981',
+                          fontWeight: 600,
+                          background: 'rgba(16, 185, 129, 0.1)',
+                          padding: '1px 8px',
+                          borderRadius: '12px'
+                        }}>
+                          {Math.round(
+                            ((product.pricing.originalPrice - product.pricing.salePrice) /
+                              product.pricing.originalPrice) * 100
+                          )}% OFF
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                  <div className={styles.productPopupCompactItem}>
+                    <span className={styles.productPopupLabel}>Stock</span>
+                    <span className={styles.productPopupValue}>
+                      {product.inventory?.stockQuantity || 0} units
+                      {product.inventory?.stockQuantity <= 0 && (
+                        <span style={{ color: '#ef4444', marginLeft: '6px', fontSize: '12px' }}>
+                          (Out of Stock)
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                  <div className={styles.productPopupCompactItem}>
+                    <span className={styles.productPopupLabel}>Placements</span>
+                    <span className={styles.productPopupValue}>
+                      {product.placements?.length > 0 
+                        ? product.placements.join(', ') 
+                        : 'None'}
+                    </span>
+                  </div>
+                  <div className={styles.productPopupCompactItem}>
+                    <span className={styles.productPopupLabel}>Created</span>
+                    <span className={styles.productPopupValue}>
+                      {new Date(product.createdAt).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </span>
+                  </div>
+                  <div className={styles.productPopupCompactItem}>
+                    <span className={styles.productPopupLabel}>Status</span>
+                    <span className={styles.productPopupValue}>
+                      <span 
+                        className={styles.statusBadge}
+                        style={{
+                          backgroundColor: statusStyle.bg,
+                          color: statusStyle.text,
+                        }}
+                      >
+                        {product.status || 'Draft'}
+                      </span>
+                    </span>
+                  </div>
+                  <div className={styles.productPopupCompactItem}>
+                    <span className={styles.productPopupLabel}>Last Updated</span>
+                    <span className={styles.productPopupValue}>
+                      {new Date(product.updatedAt).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {product.description && (
+                <div className={styles.productPopupSection}>
+                  <h4>Description</h4>
+                  <p style={{ fontSize: '13px', color: '#55554d', margin: 0, lineHeight: 1.5 }}>
+                    {product.description}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className={styles.productPopupFooter}>
+              <div className={styles.productPopupActions}>
+                <button 
+                  className={styles.productPopupViewBtn}
+                  onClick={() => {
+                    closeProductPopup();
+                    handleViewProduct(product);
+                  }}
+                >
+                  <FiEye size={14} />
+                  View Product
+                </button>
+                <button 
+                  className={styles.productPopupEditBtn}
+                  onClick={() => {
+                    closeProductPopup();
+                    handleEdit(product);
+                  }}
+                >
+                  <FiEdit2 size={14} />
+                  Edit Product
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -801,6 +1043,7 @@ const ProductManagement = () => {
       )}
 
       {renderDeleteModal()}
+      {renderProductPopup()}
     </div>
   );
 };
