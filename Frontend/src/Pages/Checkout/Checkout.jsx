@@ -3,7 +3,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
-import { FiLock, FiTruck, FiLoader, FiAlertCircle } from "react-icons/fi";
+import {
+  FiLock,
+  FiTruck,
+  FiLoader,
+  FiAlertCircle,
+} from "react-icons/fi";
 import { FaRupeeSign } from "react-icons/fa";
 import Header from "../Layout/Header/Header";
 import Footer from "../Layout/Footer/Footer";
