@@ -1,3 +1,4 @@
+
 // src/Pages/Checkout/Checkout.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -180,7 +181,7 @@ const Checkout = () => {
         return (
           <span>
             {shippingFee === 0
-              ? "Free"
+              ? "Complimentary"
               : `₹${shippingFee.toLocaleString("en-IN")}`}
           </span>
         );
@@ -246,8 +247,6 @@ const Checkout = () => {
         setPaying(false);
         if (verifyRes.success) {
           toast.success("Order placed successfully (test mode)");
-          // ✅ FIXED: used to be navigate("/orders") — dumped the customer
-          // on a generic list with no confirmation of what just happened.
           navigate(`/order-success/${orderId}`);
         } else {
           toast.error(verifyRes.message || "Payment verification failed");
@@ -274,7 +273,7 @@ const Checkout = () => {
           contact: address.phone,
           email: user?.email || "",
         },
-        theme: { color: "#111111" },
+        theme: { color: "#1c1815" },
         handler: async (response) => {
           try {
             const verifyRes = await orderApi.verifyRazorpayPayment({
@@ -285,7 +284,6 @@ const Checkout = () => {
             });
             if (verifyRes.success) {
               toast.success("Payment successful! Order placed.");
-              // ✅ FIXED: same change as above
               navigate(`/order-success/${orderId}`);
             } else {
               toast.error(verifyRes.message || "Payment verification failed");
@@ -317,7 +315,11 @@ const Checkout = () => {
     <>
       <Header />
       <div className={styles.checkoutPage}>
-        <h1 className={styles.pageTitle}>Checkout</h1>
+        <div className={styles.eyebrow}>Secure Checkout</div>
+        <h1 className={styles.pageTitle}>Complete Your Order</h1>
+        <p className={styles.pageSubtitle}>
+          Every piece is inspected, packaged, and insured before it leaves our atelier.
+        </p>
 
         <div className={styles.checkoutGrid}>
           <form className={styles.addressForm} onSubmit={handlePay}>
@@ -396,11 +398,15 @@ const Checkout = () => {
               {paying
                 ? "Processing..."
                 : !isValidPincode(address.pincode)
-                  ? "Enter pincode to continue"
+                  ? "Enter Pincode to Continue"
                   : !quoteIsCurrent
-                    ? "Calculating shipping..."
+                    ? "Calculating Shipping..."
                     : `Pay ₹${totalAmount.toLocaleString("en-IN")} with Razorpay`}
             </button>
+
+            <div className={styles.secureNote}>
+              <FiLock size={11} /> 256-bit encrypted payment
+            </div>
           </form>
 
           <div className={styles.orderSummary}>

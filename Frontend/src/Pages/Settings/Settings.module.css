@@ -1,0 +1,745 @@
+
+/* src/Pages/Settings/Settings.module.css */
+
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap");
+
+/* ---------------------------------------------------
+   Aurevian Collections — Settings
+   Same token system as Checkout.module.css, extended
+   with a "hallmark seal" motif — the faceted diamond
+   mark and layered ring echo a jeweller's authenticity
+   stamp, used here to mark a verified account.
+--------------------------------------------------- */
+
+.settingsPage {
+  --ink: #1c1815;
+  --ink-soft: #55493f;
+  --ivory: #faf8f3;
+  --panel: #fffdf9;
+  --gold: #c6a15b;
+  --gold-deep: #9c7c3f;
+  --champagne: #efe4c8;
+  --line: #e7ddc9;
+  --wine: #7a2e2e;
+  --shadow-gold: rgba(198, 161, 91, 0.22);
+
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 136px 24px 100px;
+  background: transparent;
+  font-family: "Jost", sans-serif;
+  color: var(--ink);
+}
+
+/* Defensive reset — guarantees padding/border are included in
+   each element's width instead of adding to it. Without this,
+   a project with no global box-sizing reset can silently make
+   the sidebar/tab column wider than the viewport on small
+   screens, which squashes or misaligns the stacked tab list. */
+.settingsPage,
+.settingsPage *,
+.settingsPage *::before,
+.settingsPage *::after {
+  box-sizing: border-box;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes shake {
+  10%,
+  90% { transform: translateX(-1px); }
+  20%,
+  80% { transform: translateX(2px); }
+  30%,
+  50%,
+  70% { transform: translateX(-4px); }
+  40%,
+  60% { transform: translateX(4px); }
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  margin-bottom: 14px;
+}
+
+.eyebrow::before {
+  width: 26px;
+  height: 1px;
+  background: var(--gold);
+}
+
+.eyebrowFacet {
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+.pageTitle {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 600;
+  font-size: 44px;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.pageSubtitle {
+  font-size: 13.5px;
+  color: #8a8177;
+  margin-bottom: 44px;
+  letter-spacing: 0.01em;
+}
+
+/* ---------------- Layout ---------------- */
+
+.settingsGrid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+/* ---------------- Sidebar ---------------- */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 110px;
+}
+
+.profileCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 20px 18px;
+}
+
+/* Hallmark seal — a rotated ring behind the avatar disc,
+   like the border of a jeweller's authenticity stamp. */
+.sealWrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sealRing {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px dashed var(--gold);
+  opacity: 0.55;
+}
+
+.avatarCircle {
+  position: relative;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(155deg, var(--gold) 0%, var(--gold-deep) 100%);
+  color: #fff;
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 8px var(--shadow-gold);
+}
+
+.profileMeta {
+  min-width: 0;
+}
+
+.profileName {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+}
+
+.profileEmail {
+  font-size: 11.5px;
+  color: #a79c8a;
+  margin: 2px 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+}
+
+.memberBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 7px 0 0;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+}
+
+.tabList {
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.tabButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 18px;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: #6b6255;
+  font-family: "Jost", sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.tabButton::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--gold);
+  transform: scaleY(0);
+  transition: transform 0.25s ease;
+}
+
+.tabList .tabButton:last-child {
+  border-bottom: none;
+}
+
+.tabIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tabButton:hover {
+  background: #f5efe1;
+  color: var(--ink);
+}
+
+.tabButtonActive {
+  background: var(--gold);
+  color: white;
+}
+
+.tabButtonActive::before {
+  transform: scaleY(1);
+  background: var(--gold);
+}
+
+
+/* ---------------- Content panel ---------------- */
+
+.contentPanel {
+  min-width: 0;
+}
+
+.section {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 40px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeSlideIn 0.4s ease both;
+}
+
+.section::before,
+.section::after {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+}
+
+.section::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid var(--gold);
+  border-left: 2px solid var(--gold);
+}
+
+.section::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid var(--gold);
+  border-right: 2px solid var(--gold);
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.section h3 {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  margin: 0;
+}
+
+.headingFacet {
+  color: var(--gold);
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+
+.sectionHint {
+  font-size: 12.5px;
+  color: #a79c8a;
+  margin: -10px 0 4px;
+  line-height: 1.5;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px 24px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formGroup label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #a79c8a;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 11px 2px;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  font-family: "Jost", sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  outline: none;
+  box-shadow: none;
+  -webkit-appearance: none;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.formGroup input::placeholder {
+  color: #c9bfae;
+}
+
+.formGroup input:focus,
+.formGroup input:focus-visible {
+  border-bottom: 1.5px solid var(--gold);
+  outline: none;
+  box-shadow: 0 1px 0 0 var(--shadow-gold);
+}
+
+/* ---------------- Password strength ---------------- */
+
+.strengthMeter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: -8px;
+}
+
+.strengthTrack {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  max-width: 200px;
+}
+
+.strengthBar {
+  flex: 1;
+  height: 3px;
+  background: var(--line);
+  border-radius: 2px;
+  transition: background 0.25s ease;
+}
+
+.strengthBarFilled {
+  background: var(--gold);
+}
+
+.strengthLabel {
+  font-size: 11px;
+  color: #a79c8a;
+  letter-spacing: 0.04em;
+}
+
+/* ---------------- Buttons ---------------- */
+
+.saveBtn {
+  align-self: flex-start;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 14px 28px;
+  border-radius: 2px;
+  border: 1px solid var(--gold);
+  background: var(--gold);
+  color: #fff;
+  font-family: "Jost", sans-serif;
+  font-weight: 500;
+  font-size: 12.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.25s ease, border-color 0.25s ease,
+    box-shadow 0.25s ease, transform 0.2s ease, opacity 0.25s ease;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: var(--gold-deep);
+  border-color: var(--gold-deep);
+  box-shadow: 0 6px 16px var(--shadow-gold);
+  transform: translateY(-1px);
+}
+
+.saveBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.saveBtn:focus-visible {
+  outline: 2px solid var(--gold-deep);
+  outline-offset: 2px;
+}
+
+/* ---------------- Preference toggles ---------------- */
+
+.toggleList {
+  display: flex;
+  flex-direction: column;
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.toggleRow:last-child {
+  border-bottom: none;
+}
+
+.toggleLabel {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+  margin: 0;
+}
+
+.toggleDesc {
+  font-size: 12px;
+  color: #a79c8a;
+  margin: 3px 0 0;
+  max-width: 360px;
+}
+
+.toggleSwitch {
+  flex-shrink: 0;
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #efe9dc;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.toggleKnob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(28, 24, 21, 0.3);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.toggleOn {
+  background: linear-gradient(155deg, var(--gold) 0%, var(--gold-deep) 100%);
+  border-color: var(--gold-deep);
+}
+
+.toggleOn .toggleKnob {
+  transform: translateX(20px);
+  box-shadow: 0 1px 4px rgba(156, 124, 63, 0.5);
+}
+
+.toggleSwitch:focus-visible {
+  outline: 2px solid var(--gold-deep);
+  outline-offset: 2px;
+}
+
+/* ---------------- Danger zone ---------------- */
+
+.dangerSection {
+  border-color: #ecd4d4;
+}
+
+.dangerSection::before,
+.dangerSection::after {
+
+}
+
+.dangerHeading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--gold-deep) !important;
+}
+
+.dangerIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f7ecec;
+  color: var(--gold-deep);
+  flex-shrink: 0;
+}
+
+.dangerInput {
+  border-bottom-color: #ecd4d4 !important;
+}
+
+.shake {
+  animation: shake 0.45s ease;
+}
+
+.dangerBtn {
+  align-self: flex-start;
+  margin-top: 6px;
+  padding: 14px 28px;
+  border-radius: 2px;
+  border: 1px solid var(--gold);
+  background: transparent;
+  color: var(--gold);
+  font-family: "Jost", sans-serif;
+  font-weight: 500;
+  font-size: 12.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+.dangerBtn:hover:not(:disabled) {
+  background: var(--gold);
+  color: #fff;
+}
+
+.dangerBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dangerBtn:focus-visible {
+  outline: 2px solid var(--wine);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------
+   Reduced motion
+--------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .section,
+  .saveBtn,
+  .toggleKnob,
+  .shake {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ---------------------------------------------------
+   Responsive
+--------------------------------------------------- */
+
+/* Tablet: sidebar moves above content; tab list stays a
+   vertical, full-width stack (same look as desktop). */
+@media (max-width: 900px) {
+  .settingsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    flex-direction: column;
+  }
+
+  .profileCard {
+    order: 1;
+  }
+
+  .tabList {
+    order: 2;
+  }
+
+  .settingsPage {
+    padding-top: 110px;
+  }
+}
+
+/* Large phone / small tablet */
+@media (max-width: 600px) {
+  .settingsPage {
+    padding: 130px 16px 64px;
+  }
+
+  .pageTitle {
+    font-size: 32px;
+  }
+
+  .pageSubtitle {
+    margin-bottom: 32px;
+    font-size: 13px;
+  }
+
+  .section {
+    padding: 26px 20px;
+  }
+
+  .section::before,
+  .section::after {
+    width: 16px;
+    height: 16px;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .saveBtn,
+  .dangerBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .toggleRow {
+    align-items: flex-start;
+  }
+
+  .strengthTrack {
+    max-width: none;
+  }
+
+  .tabButton {
+    font-size: 12.5px;
+    padding: 12px 14px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 380px) {
+  .settingsPage {
+    padding: 88px 12px 56px;
+  }
+
+  .pageTitle {
+    font-size: 27px;
+  }
+
+  .section {
+    padding: 22px 16px;
+  }
+
+  .profileCard {
+    padding: 14px;
+  }
+
+  .profileName,
+  .profileEmail {
+    max-width: 140px;
+  }
+
+  .tabButton {
+    padding: 11px 12px;
+    gap: 7px;
+  }
+}
+
+/* Large desktop */
+@media (min-width: 1400px) {
+  .settingsPage {
+    max-width: 1320px;
+  }
+
+  .pageTitle {
+    font-size: 48px;
+  }
+}
