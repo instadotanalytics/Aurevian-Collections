@@ -161,8 +161,8 @@ const SellerLogin = () => {
             <div className={styles.formSection}>
               <div className={styles.formContainer}>
                 <div className={styles.header}>
-                  <span className={styles.eyebrow}>Seller Portal</span>
-                  <h1 className={styles.title}>Welcome Back</h1>
+
+                  <h1 className={styles.title}>Seller Login </h1>
                   <p className={styles.subtitle}>Sign in to your Aurevian account</p>
                 </div>
 

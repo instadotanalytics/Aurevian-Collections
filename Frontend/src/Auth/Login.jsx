@@ -175,10 +175,11 @@ const Login = () => {
                 
 
                 {/* Header */}
-                <div className={styles.header}>
-                
-                  <p className={styles.subtitle}>Sign in to continue shopping</p>
-                </div>
+            
+<div className={styles.header}>
+  <h1 className={styles.loginTitle}>Login here</h1>
+  <p className={styles.subtitle}>Sign in to continue shopping</p>
+</div>
 
                 {/* Login Form */}
                 <form onSubmit={handleSubmit} className={styles.form}>
