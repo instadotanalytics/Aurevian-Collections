@@ -25,6 +25,7 @@ import Footer from "../Pages/Layout/Footer/Footer";
 import craftImage from "../assets/jewellery-craft.png";
 import styles from "./Login.module.css";
 import logo from "../assets/newlogo1.png";
+import SEO from "../Components/SEO/SEO";
 
 
 /* ------------------------------------------------------------------
@@ -114,7 +115,15 @@ const Login = () => {
     }
   };
 
+  
   return (
+  <>
+    <SEO
+      title="Login"
+      description="Login to your Aurevian Collections account and discover luxury jewellery designed for everyday elegance."
+      keywords="Aurevian login, jewellery login, Aurevian Collections, luxury jewellery"
+    />
+
     <div className={styles.pageWrapper}>
       <Header />
 
@@ -360,8 +369,9 @@ const Login = () => {
       </main>
 
       <Footer />
-    </div>
-  );
+      </div>
+  </>
+);
 };
 
 export default Login;
