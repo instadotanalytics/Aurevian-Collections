@@ -651,7 +651,7 @@
 
 .expandedGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px 24px;
   align-items: start;
 }
@@ -1343,7 +1343,7 @@
 }
 
 /* ============================================
-   RESPONSIVE - MOBILE (25vh, No Image, Compact)
+   RESPONSIVE - MOBILE (20vh, Full Product Name, SKU visible, Readable Text)
    ============================================ */
 @media (max-width: 768px) {
   .container {
@@ -1421,23 +1421,27 @@
     gap: 8px;
   }
 
-  /* ===== MOBILE CARD - 25vh, No Image, Compact ===== */
+  .productTable td {
+    text-align: left;
+  }
+
+  /* ===== MOBILE CARD - 20vh ===== */
   .productTable tbody tr {
     display: grid;
     grid-template-columns: 1fr auto;
-    gap: 0px 8px;
+    gap: 0px 10px;
     background: #ffffff;
     border: 1px solid #e8e3dc;
     border-radius: 8px;
-    padding: 10px 14px;
+    padding: 6px 12px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
     margin: 0;
     cursor: pointer;
     transition: box-shadow 0.2s ease;
     position: relative;
-    height: 25vh;
-    max-height: 25vh;
-    min-height: 25vh;
+    height: 20vh;
+    max-height: 20vh;
+    min-height: 20vh;
     overflow: hidden;
     align-items: center;
   }
@@ -1476,27 +1480,29 @@
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    gap: 1px;
+    gap: 0px;
     padding: 0;
     border: none;
     width: 100%;
+    overflow: visible;
   }
 
   .productTable td .productNameCompact {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: #14140f;
     max-height: unset;
-    -webkit-line-clamp: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.3;
+    -webkit-line-clamp: 2;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    word-break: break-word;
+    line-height: 1.2;
     width: 100%;
   }
 
   .productTable td .productSku {
-    font-size: 10px;
+    font-size: 9px;
     color: #8a8072;
     margin-top: 0;
     font-weight: 400;
@@ -1504,6 +1510,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
+    display: block !important;
   }
 
   /* Row 2: Category */
@@ -1521,49 +1528,16 @@
     font-size: 11px;
     color: #55554d;
     background: #f5f2ee;
-    padding: 2px 12px;
+    padding: 1px 10px;
     border-radius: 4px;
     white-space: nowrap;
     font-weight: 500;
   }
 
-  /* Row 3: Stock with Label */
-  .productTable td:nth-child(7) {
-    grid-column: 1 / 2;
-    grid-row: 3 / 4;
-    display: flex;
-    align-items: center;
-    padding: 1px 0;
-    border: none;
-    width: 100%;
-  }
-
-  .productTable td .stockCell {
-    font-size: 12px;
-    color: #55554d;
-    font-weight: 600;
-  }
-
-  .productTable td .stockCell::before {
-    content: "Stock: ";
-    font-weight: 400;
-    color: #8a8072;
-  }
-
-  .productTable td .stockCell .inStock {
-    color: #10b981;
-    font-weight: 600;
-  }
-
-  .productTable td .stockCell .outOfStock {
-    color: #ef4444;
-    font-weight: 600;
-  }
-
-  /* Row 4: Price */
+  /* Row 3: Price */
   .productTable td:nth-child(6) {
     grid-column: 1 / 2;
-    grid-row: 4 / 5;
+    grid-row: 3 / 4;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -1578,7 +1552,7 @@
     flex-direction: row;
     align-items: center;
     gap: 4px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     color: #14140f;
     flex-wrap: wrap;
@@ -1588,35 +1562,40 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
   }
 
   .productTable td .originalPriceCompact {
-    font-size: 11px;
+    font-size: 10px;
     color: #8a8072;
     text-decoration: line-through;
     font-weight: 400;
   }
 
   .productTable td .discountCompact {
-    font-size: 9px;
+    font-size: 8px;
     color: #10b981;
     background: rgba(16, 185, 129, 0.1);
-    padding: 2px 8px;
-    border-radius: 10px;
+    padding: 1px 6px;
+    border-radius: 8px;
     font-weight: 600;
     display: inline-block;
   }
 
-  /* ===== RIGHT COLUMN - Status + Placements (Close together) ===== */
+  /* Hide Stock on mobile */
+  .productTable td:nth-child(7) {
+    display: none;
+  }
+
+  /* ===== RIGHT COLUMN - Status + Placements + Actions ===== */
 
   /* Status - Top Right */
   .productTable td:nth-child(8) {
     grid-column: 2 / 3;
     grid-row: 1 / 2;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: flex-end;
     padding: 0;
     border: none;
@@ -1624,30 +1603,30 @@
   }
 
   .productTable td .statusBadge {
-    font-size: 10px;
-    padding: 2px 12px;
-    border-radius: 10px;
+    font-size: 9px;
+    padding: 1px 10px;
+    border-radius: 8px;
     font-weight: 500;
     white-space: nowrap;
   }
 
-  /* Placements - Below Status (Close) */
+  /* Placements - Middle Right */
   .productTable td:nth-child(9) {
     grid-column: 2 / 3;
-    grid-row: 2 / 4;
+    grid-row: 2 / 3;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: flex-end;
-    padding: 2px 0 0 0;
+    padding: 0;
     border: none;
     width: 100%;
   }
 
   .productTable td .placementTags {
-    font-size: 10px;
+    font-size: 9px;
     color: #55554d;
     background: #f5f2ee;
-    padding: 2px 12px;
+    padding: 1px 10px;
     border-radius: 4px;
     white-space: nowrap;
     display: inline-block;
@@ -1656,27 +1635,25 @@
 
   .productTable td .noPlacements {
     color: #b5aa9a;
-    font-size: 10px;
+    font-size: 9px;
   }
 
-  /* ===== Action Buttons - Full Width Bottom ===== */
+  /* ===== Action Buttons - Bottom Right ===== */
   .productTable td:nth-child(10) {
-    grid-column: 1 / 3;
-    grid-row: 5 / 6;
+    grid-column: 2 / 3;
+    grid-row: 3 / 4;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 6px 0 0 0;
+    justify-content: flex-end;
+    gap: 3px;
+    padding: 0;
     border: none;
     width: 100%;
-    border-top: 1px solid #f0edeb;
-    margin-top: 2px;
   }
 
   .productTable td .actionIconBtn {
-    flex: 1;
-    height: 32px;
+    width: 26px;
+    height: 26px;
     border-radius: 6px;
     background: transparent;
     border: 1px solid #e8e3dc;
@@ -1684,12 +1661,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 8px;
+    padding: 0;
     transition: all 0.2s ease;
-    gap: 4px;
-    font-size: 12px;
-    font-weight: 500;
-    max-width: 100px;
+    cursor: pointer;
   }
 
   .productTable td .actionIconBtn:hover {
@@ -1699,215 +1673,24 @@
   }
 
   .productTable td .actionIconBtn svg {
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
+    width: 13px;
+    height: 13px;
   }
 
   .productTable td .actionBtnLabel {
-    display: inline;
-    font-size: 11px;
-    font-weight: 500;
+    display: none;
   }
 
   /* ============================================
-     EXPANDED ROW - Mobile (Compact, No Image)
+     REMOVE EXPANDED ROW - Mobile (Arrow removed)
      ============================================ */
   .productTable tbody tr .expandedRow {
-    display: block;
-    padding: 0;
-    border: none;
-    background: transparent;
-    box-shadow: none;
-    grid-column: 1 / 3;
-    grid-row: 6 / 7;
-    max-height: none;
-    overflow: visible;
+    display: none !important;
   }
 
-  .productTable tbody tr .expandedRow td {
-    display: block;
-    padding: 4px 0 0 !important;
-    border: none;
-    width: 100%;
-  }
-
-  .productTable tbody tr .expandedContent {
-    padding: 10px 12px;
-    background: #faf9f5;
-    border: 1px solid #e8e3dc;
-    border-radius: 6px;
-    margin-top: 2px;
-    max-height: 60vh;
-    overflow-y: auto;
-  }
-
-  .productTable tbody tr .expandedGrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px 10px;
-  }
-
-  .productTable tbody tr .expandedProductName {
-    grid-column: 1 / 3;
-    font-size: 14px;
-    font-weight: 600;
-    color: #14140f;
-    margin-bottom: 2px;
-  }
-
-  .productTable tbody tr .expandedProductSku {
-    grid-column: 1 / 3;
-    font-size: 11px;
-    color: #8a8072;
-    margin-bottom: 3px;
-  }
-
-  .productTable tbody tr .expandedStatusWrapper {
-    grid-column: 1 / 3;
-    margin-bottom: 4px;
-  }
-
-  .productTable tbody tr .expandedStatusBadge {
-    font-size: 10px;
-    padding: 2px 12px;
-    border-radius: 10px;
-    font-weight: 600;
-    display: inline-block;
-  }
-
-  .productTable tbody tr .expandedDivider {
-    grid-column: 1 / 3;
-    border: none;
-    border-top: 1px solid #e8e3dc;
-    margin: 3px 0 4px 0;
-  }
-
-  .productTable tbody tr .expandedSectionTitle {
-    grid-column: 1 / 3;
-    font-size: 12px;
-    font-weight: 600;
-    color: #14140f;
-    margin: 2px 0 3px 0;
-  }
-
-  .productTable tbody tr .expandedDetailLeft {
-    grid-column: 1 / 2;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-
-  .productTable tbody tr .expandedDetailRight {
-    grid-column: 2 / 3;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-
-  .productTable tbody tr .expandedDetailItem {
-    display: flex;
-    flex-direction: column;
-    gap: 0px;
-  }
-
-  .productTable tbody tr .expandedDetailLabel {
-    font-size: 9px;
-    font-weight: 600;
-    color: #8a8072;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-  }
-
-  .productTable tbody tr .expandedDetailValue {
-    font-size: 12px;
-    color: #14140f;
-    font-weight: 500;
-  }
-
-  .productTable tbody tr .expandedDetailValuePrice {
-    font-size: 14px;
-    font-weight: 700;
-    color: #14140f;
-  }
-
-  .productTable tbody tr .expandedDetailValueOriginal {
-    font-size: 11px;
-    color: #8a8072;
-    text-decoration: line-through;
-    font-weight: 400;
-    margin-left: 4px;
-  }
-
-  .productTable tbody tr .expandedDetailValueDiscount {
-    font-size: 10px;
-    color: #10b981;
-    font-weight: 600;
-    background: rgba(16, 185, 129, 0.1);
-    padding: 1px 6px;
-    border-radius: 8px;
-    display: inline-block;
-    margin-left: 4px;
-  }
-
-  .productTable tbody tr .expandedDetailValueStock {
-    font-size: 14px;
-    font-weight: 700;
-    color: #14140f;
-  }
-
-  .productTable tbody tr .expandedDetailValueStockLabel {
-    font-size: 10px;
-    color: #8a8072;
-    font-weight: 400;
-  }
-
-  .productTable tbody tr .expandedPlacementsWrapper {
-    grid-column: 1 / 3;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 3px;
-    margin-top: 3px;
-    padding-top: 3px;
-    border-top: 1px solid #e8e3dc;
-  }
-
-  .productTable tbody tr .expandedPlacementTag {
-    font-size: 10px;
-    padding: 2px 10px;
-    background: #ffffff;
-    border: 1px solid #e8e3dc;
-    border-radius: 8px;
-    color: #55554d;
-  }
-
-  .productTable tbody tr .expandedViewBtnWrapper {
-    grid-column: 1 / 3;
-    margin-top: 4px;
-    padding-top: 4px;
-    border-top: 1px solid #e8e3dc;
-  }
-
-  .productTable tbody tr .expandedViewBtn {
-    width: 100%;
-    padding: 6px 14px;
-    background: #14140f;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: inherit;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-  }
-
-  .productTable tbody tr .expandedViewBtn:hover {
-    background: #2d2d2d;
+  /* Hide the More/Less button on mobile */
+  .productTable td .actionIconBtn:last-child {
+    display: none !important;
   }
 
   /* ============================================
@@ -1956,17 +1739,17 @@
   .skeletonRow {
     display: grid;
     grid-template-columns: 1fr auto;
-    gap: 0px 8px;
+    gap: 0px 10px;
     background: #ffffff;
     border: 1px solid #e8e3dc;
     border-radius: 8px;
-    padding: 10px 14px;
+    padding: 6px 12px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
     min-width: unset;
     flex-wrap: unset;
-    height: 25vh;
-    max-height: 25vh;
-    min-height: 25vh;
+    height: 20vh;
+    max-height: 20vh;
+    min-height: 20vh;
     align-items: center;
   }
 
@@ -1985,73 +1768,61 @@
     grid-column: 1 / 2;
     grid-row: 1 / 2;
     min-width: unset;
-    gap: 2px;
+    gap: 1px;
   }
 
   .skeletonCategory {
     grid-column: 1 / 2;
     grid-row: 2 / 3;
-    width: 60px;
-    height: 18px;
-  }
-
-  .skeletonStock {
-    grid-column: 1 / 2;
-    grid-row: 3 / 4;
     width: 50px;
-    height: 14px;
+    height: 16px;
   }
 
   .skeletonPrice {
     grid-column: 1 / 2;
-    grid-row: 4 / 5;
-    width: 80px;
-    height: 16px;
+    grid-row: 3 / 4;
+    width: 70px;
+    height: 14px;
   }
 
   .skeletonStatus {
     grid-column: 2 / 3;
     grid-row: 1 / 2;
-    width: 60px;
-    height: 20px;
+    width: 50px;
+    height: 18px;
     justify-self: end;
   }
 
   .skeletonPlacements {
     grid-column: 2 / 3;
-    grid-row: 2 / 4;
-    width: 70px;
-    height: 16px;
+    grid-row: 2 / 3;
+    width: 60px;
+    height: 14px;
     justify-self: end;
-    align-self: start;
-    margin-top: 2px;
   }
 
   .skeletonActions {
-    grid-column: 1 / 3;
-    grid-row: 5 / 6;
+    grid-column: 2 / 3;
+    grid-row: 3 / 4;
     display: flex;
-    gap: 6px;
-    justify-content: center;
-    padding-top: 4px;
-    border-top: 1px solid #f0edeb;
-    margin-top: 2px;
+    gap: 3px;
+    justify-content: flex-end;
+    padding: 0;
   }
 
   .skeletonIcon {
-    flex: 1;
-    max-width: 100px;
-    height: 32px;
+    width: 26px;
+    height: 26px;
     border: 1px solid #e8e3dc;
     border-radius: 6px;
     background: #f0edeb;
     animation: pulse 1.5s ease-in-out infinite;
   }
   .skeletonLine {
-    height: 12px;
+    height: 11px;
   }
   .skeletonLineShort {
-    height: 10px;
+    height: 9px;
   }
 }
 
@@ -2059,6 +1830,9 @@
    RESPONSIVE - EXTRA SMALL SCREENS
    ============================================ */
 @media (max-width: 480px) {
+  .productTable td {
+    text-align: left;
+  }
   .container {
     padding: 8px;
   }
@@ -2080,159 +1854,98 @@
   }
 
   .productTable tbody tr {
-    padding: 8px 10px;
-    gap: 0px 6px;
-    height: 25vh;
-    max-height: 25vh;
-    min-height: 25vh;
+    padding: 4px 8px;
+    gap: 0px 8px;
+    height: 20vh;
+    max-height: 20vh;
+    min-height: 20vh;
   }
 
   .productTable td .productNameCompact {
-    font-size: 13px;
+    font-size: 12px;
+    -webkit-line-clamp: 2;
   }
 
   .productTable td .productSku {
-    font-size: 9px;
+    font-size: 8px;
   }
 
   .productTable td .categoryCell {
     font-size: 10px;
-    padding: 1px 10px;
-  }
-
-  .productTable td .stockCell {
-    font-size: 11px;
-  }
-
-  .productTable td .priceCompact {
-    font-size: 13px;
-  }
-
-  .productTable td .priceRow {
-    font-size: 13px;
-  }
-
-  .productTable td .originalPriceCompact {
-    font-size: 10px;
-  }
-
-  .productTable td .discountCompact {
-    font-size: 8px;
-    padding: 1px 6px;
-  }
-
-  .productTable td .statusBadge {
-    font-size: 9px;
-    padding: 1px 10px;
-  }
-
-  .productTable td .placementTags {
-    font-size: 9px;
-    padding: 1px 10px;
-  }
-
-  .productTable td .actionIconBtn {
-    height: 28px;
-    padding: 0 6px;
-    font-size: 11px;
-    max-width: 80px;
-  }
-
-  .productTable td .actionIconBtn svg {
-    width: 12px;
-    height: 12px;
-  }
-
-  .productTable td .actionBtnLabel {
-    font-size: 10px;
-  }
-
-  /* ===== EXPANDED ROW - Extra Small ===== */
-  .productTable tbody tr .expandedContent {
-    padding: 8px 10px;
-    max-height: 60vh;
-  }
-
-  .productTable tbody tr .expandedGrid {
-    gap: 3px 6px;
-  }
-
-  .productTable tbody tr .expandedProductName {
-    font-size: 13px;
-  }
-
-  .productTable tbody tr .expandedProductSku {
-    font-size: 10px;
-  }
-
-  .productTable tbody tr .expandedDetailValue {
-    font-size: 11px;
-  }
-
-  .productTable tbody tr .expandedDetailValuePrice {
-    font-size: 13px;
-  }
-
-  .productTable tbody tr .expandedDetailValueOriginal {
-    font-size: 10px;
-  }
-
-  .productTable tbody tr .expandedDetailValueDiscount {
-    font-size: 9px;
-  }
-
-  .productTable tbody tr .expandedDetailValueStock {
-    font-size: 13px;
-  }
-
-  .productTable tbody tr .expandedPlacementTag {
-    font-size: 9px;
     padding: 1px 8px;
   }
 
-  .productTable tbody tr .expandedViewBtn {
-    font-size: 11px;
-    padding: 5px 12px;
+  .productTable td .priceCompact {
+    font-size: 12px;
+  }
+
+  .productTable td .priceRow {
+    font-size: 12px;
+  }
+
+  .productTable td .originalPriceCompact {
+    font-size: 9px;
+  }
+
+  .productTable td .discountCompact {
+    font-size: 7px;
+    padding: 1px 5px;
+  }
+
+  .productTable td .statusBadge {
+    font-size: 8px;
+    padding: 1px 8px;
+  }
+
+  .productTable td .placementTags {
+    font-size: 8px;
+    padding: 1px 8px;
+  }
+
+  .productTable td .actionIconBtn {
+    width: 24px;
+    height: 24px;
+  }
+
+  .productTable td .actionIconBtn svg {
+    width: 11px;
+    height: 11px;
   }
 
   /* SKELETON - Extra Small */
   .skeletonRow {
-    padding: 8px 10px;
-    gap: 0px 6px;
-    height: 25vh;
-    max-height: 25vh;
-    min-height: 25vh;
+    padding: 4px 8px;
+    gap: 0px 8px;
+    height: 20vh;
+    max-height: 20vh;
+    min-height: 20vh;
   }
 
   .skeletonCategory {
-    width: 50px;
-    height: 16px;
-  }
-  .skeletonStock {
     width: 40px;
-    height: 12px;
+    height: 14px;
   }
   .skeletonPrice {
-    width: 60px;
-    height: 14px;
+    width: 50px;
+    height: 12px;
   }
   .skeletonStatus {
-    width: 50px;
-    height: 18px;
+    width: 40px;
+    height: 16px;
   }
   .skeletonPlacements {
-    width: 60px;
-    height: 14px;
+    width: 50px;
+    height: 12px;
   }
   .skeletonIcon {
-    height: 28px;
-    max-width: 80px;
+    width: 24px;
+    height: 24px;
   }
   .skeletonLine {
-    height: 11px;
+    height: 10px;
   }
   .skeletonLineShort {
-    height: 9px;
+    height: 8px;
   }
 }
 

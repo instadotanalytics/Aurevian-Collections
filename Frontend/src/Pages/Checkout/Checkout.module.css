@@ -1,180 +1,355 @@
+
 /* src/Pages/Checkout/Checkout.module.css */
+
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap");
+
+/* ---------------------------------------------------
+   Aurevian Collections — Checkout
+   Tokens
+   Ink        #1c1815   (near-black, warm)
+   Ivory      #faf8f3   (page background)
+   Panel      #fffdf9   (card surface)
+   Gold       #c6a15b   (primary accent)
+   Gold Deep  #9c7c3f   (hover / pressed)
+   Line       #e7ddc9   (hairline borders)
+   Wine       #7a2e2e   (errors, used sparingly)
+--------------------------------------------------- */
+
 .checkoutPage {
-  max-width: 1100px;
-  margin: 70px auto;
-  padding: 52px 9px 80px;
+  --ink: #1c1815;
+  --ivory: #faf8f3;
+  --panel: #fffdf9;
+  --gold: #c6a15b;
+  --gold-deep: #9c7c3f;
+  --line: #e7ddc9;
+  --wine: #7a2e2e;
+
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 136px 24px 100px;
+  background: transparent;
+  font-family: "Jost", sans-serif;
+  color: var(--ink);
 }
-.pageTitle {
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 10px;
-  color: #111;
-}
-.checkoutGrid {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 32px;
-}
-@media (max-width: 860px) {
-  .checkoutGrid {
-    grid-template-columns: 1fr;
-  }
-}
-.addressForm {
-  background: #fff;
-  border: 1px solid #eee;
-  border-radius: 16px;
-  padding: 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.addressForm h3 {
+
+.eyebrow {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 18px;
-  margin-bottom: 6px;
-  color: #111;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  margin-bottom: 14px;
 }
+
+.eyebrow::before {
+  width: 26px;
+  height: 1px;
+  background: var(--gold);
+}
+
+.pageTitle {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 600;
+  font-size: 44px;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.pageSubtitle {
+  font-size: 13.5px;
+  color: #8a8177;
+  margin-bottom: 44px;
+  letter-spacing: 0.01em;
+}
+
+.checkoutGrid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 36px;
+  align-items: start;
+}
+
+/* ---------------- Address form: jewelry-box card ---------------- */
+
+.addressForm {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 40px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* gold corner brackets — the signature motif */
+.addressForm::before,
+.addressForm::after,
+.orderSummary::before,
+.orderSummary::after {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+}
+
+.addressForm::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid var(--gold);
+  border-left: 2px solid var(--gold);
+}
+
+.addressForm::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid var(--gold);
+  border-right: 2px solid var(--gold);
+}
+
+.addressForm h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.addressForm h3 svg {
+  color: var(--gold);
+}
+
+/* underline-style inputs — no boxes, no focus ring, just the gold underline */
 .addressForm input {
   width: 100%;
-  padding: 13px 16px;
-  border: 1.5px solid #e5e5e5;
-  border-radius: 10px;
+  padding: 11px 2px;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  font-family: "Jost", sans-serif;
   font-size: 14px;
+  color: var(--ink);
   outline: none;
-  transition: border-color 0.2s;
+  box-shadow: none;
+  -webkit-appearance: none;
+  transition: border-color 0.25s ease;
 }
-.addressForm input:focus {
-  border-color: #111;
+
+.addressForm input::placeholder {
+  color: #a79c8a;
+  letter-spacing: 0.01em;
 }
+
+.addressForm input:focus,
+.addressForm input:focus-visible {
+  border-bottom: 1.5px solid var(--gold);
+  outline: none;
+  box-shadow: none;
+}
+
 .formRow {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 14px;
+  gap: 20px 24px;
 }
+
 .payBtn {
-  margin-top: 10px;
+  margin-top: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 16px;
-  border-radius: 12px;
-  border: none;
-  background: #111;
+  padding: 17px;
+  border-radius: 2px;
+  border: 1px solid var(--gold-deep);
+   background: var(--gold-deep);
   color: #fff;
-  font-weight: 600;
-  font-size: 15px;
+  font-family: "Jost", sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: background 0.25s ease, border-color 0.25s ease, opacity 0.25s ease;
 }
+
 .payBtn:hover:not(:disabled) {
-  opacity: 0.85;
+  background: var(--gold-deep);
+  border-color: var(--gold-deep);
 }
+
 .payBtn:disabled {
-  opacity: 0.6;
   cursor: not-allowed;
 }
 
+/* keyboard focus ring stays on the button only — useful there, not on text inputs */
+.payBtn:focus-visible {
+  outline: 2px solid var(--gold-deep);
+  outline-offset: 2px;
+}
+
+/* ---------------- Order summary ---------------- */
+
 .orderSummary {
-  background: #fafafa;
-  border: 1px solid #eee;
-  border-radius: 16px;
-  padding: 24px;
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 36px 32px;
   height: fit-content;
 }
-.orderSummary h3 {
-  font-size: 17px;
-  margin-bottom: 18px;
-  color: #111;
+
+.orderSummary::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid var(--gold);
+  border-left: 2px solid var(--gold);
 }
+
+.orderSummary::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid var(--gold);
+  border-right: 2px solid var(--gold);
+}
+
+.orderSummary h3 {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 600;
+  font-size: 21px;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  margin-bottom: 22px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
 .summaryItem {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding-bottom: 14px;
-  margin-bottom: 14px;
-  border-bottom: 1px solid #eee;
+  gap: 14px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--line);
 }
+
 .summaryItem img {
-  width: 52px;
-  height: 52px;
-  border-radius: 8px;
+  width: 54px;
+  height: 54px;
   object-fit: cover;
-  background: #eee;
+  background: #f1ece1;
+  border: 1px solid var(--line);
+  padding: 2px;
+  flex-shrink: 0;
 }
+
 .summaryItem div {
   flex: 1;
+  min-width: 0;
 }
+
 .itemName {
   font-size: 13.5px;
-  font-weight: 600;
-  color: #111;
+  font-weight: 500;
+  color: var(--ink);
   margin: 0;
+  letter-spacing: 0.01em;
 }
+
 .itemQty {
-  font-size: 12px;
-  color: #888;
-  margin: 2px 0 0;
+  font-size: 11.5px;
+  color: #a79c8a;
+  margin: 3px 0 0;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
+
 .summaryItem span {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   font-size: 13.5px;
-  font-weight: 600;
-  color: #111;
+  font-weight: 500;
+  color: var(--ink);
 }
+
 .summaryRow {
   display: flex;
   justify-content: space-between;
-  font-size: 14px;
-  color: #555;
-  margin-bottom: 10px;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #8a8177;
+  margin-bottom: 12px;
 }
+
 .summaryTotal {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 17px;
-  font-weight: 700;
-  color: #111;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1.5px solid #ddd;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--gold);
 }
+
+.summaryTotal span:first-child {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
 .summaryTotal span:last-child {
   display: flex;
   align-items: center;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--gold-deep);
 }
 
+/* ---------------- Shipping status states ---------------- */
+
 .shippingHint {
-  font-size: 13px;
-  color: #999;
+  font-size: 12px;
+  color: #a79c8a;
   font-style: italic;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .shippingChecking {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13.5px;
-  color: #555;
+  gap: 7px;
+  font-size: 12.5px;
+  color: var(--gold-deep);
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .shippingError {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
-  color: #b3261e;
+  font-size: 12px;
+  color: var(--wine);
   text-align: right;
   max-width: 220px;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .spinIcon {
-  animation: checkoutSpin 0.8s linear infinite;
+  animation: checkoutSpin 0.9s linear infinite;
 }
 
 @keyframes checkoutSpin {
@@ -187,7 +362,117 @@
 }
 
 .courierNote {
-  font-size: 12.5px;
-  color: #777;
-  margin: -4px 0 4px;
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  margin: -6px 0 4px;
+}
+
+.secureNote {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #a79c8a;
+  margin-top: 4px;
+}
+
+.secureNote svg {
+  color: var(--gold);
+}
+
+/* ---------------------------------------------------
+   Responsive
+--------------------------------------------------- */
+
+/* Tablet: stack the two columns */
+@media (max-width: 860px) {
+  .checkoutGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .checkoutPage {
+    padding-top: 110px;
+  }
+}
+
+/* Small tablet / large phone */
+@media (max-width: 600px) {
+  .checkoutPage {
+    padding: 96px 16px 64px;
+  }
+
+  .pageTitle {
+    font-size: 32px;
+  }
+
+  .pageSubtitle {
+    margin-bottom: 32px;
+    font-size: 13px;
+  }
+
+  .addressForm,
+  .orderSummary {
+    padding: 26px 20px;
+  }
+
+  .addressForm::before,
+  .addressForm::after,
+  .orderSummary::before,
+  .orderSummary::after {
+    width: 16px;
+    height: 16px;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .payBtn {
+    padding: 15px;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-align: center;
+  }
+
+  .summaryTotal span:last-child {
+    font-size: 20px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 380px) {
+  .checkoutPage {
+    padding: 88px 12px 56px;
+  }
+
+  .pageTitle {
+    font-size: 27px;
+  }
+
+  .addressForm,
+  .orderSummary {
+    padding: 22px 16px;
+  }
+
+  .summaryItem img {
+    width: 46px;
+    height: 46px;
+  }
+}
+
+/* Large desktop: a bit more breathing room */
+@media (min-width: 1400px) {
+  .checkoutPage {
+    max-width: 1320px;
+  }
+
+  .pageTitle {
+    font-size: 48px;
+  }
 }

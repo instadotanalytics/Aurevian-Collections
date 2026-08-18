@@ -75,6 +75,7 @@ import SellerPayment from "./Pages/Seller/SellerPayment/SellerPayment.jsx";
 import BlogList from "./Pages/UserBlog/BlogList.jsx";
 import BlogDetail from "./Pages/UserBlog/BlogDetail.jsx";
 import Profile from "./Pages/Profile/Profile.jsx";
+import Settings from "./Pages/Settings/Settings.jsx";
 
 import SellerKYC from "./Pages/Seller/SellerKYC/SellerKYC";
 import ScrollToTop from "./Pages/Seller/ScrollToTop.jsx";
@@ -635,6 +636,16 @@ const App = () => {
                 </PrivateRoute>
               }
             />
+
+
+            <Route
+  path="/settings"
+  element={
+    <PrivateRoute>
+      <Settings />
+    </PrivateRoute>
+  }
+/>
 
             {/* ============================================
                   ORDER SUCCESS & ORDER DETAIL ROUTES - WITH HEADER
