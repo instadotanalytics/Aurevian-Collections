@@ -81,6 +81,7 @@ import SellerKYC from "./Pages/Seller/SellerKYC/SellerKYC";
 import ScrollToTop from "./Pages/Seller/ScrollToTop.jsx";
 
 import Shop from "./Components/Shop/shop.jsx";
+import Earrings from "./Components/Shop/Earrings.jsx";
 
 import Gifts from "./Components/Gifts/gifts.jsx";
 import Collections from "./Components/Collections/Collections.jsx";
@@ -102,7 +103,7 @@ const ROUTES = {
   HOME: "/",
   ABOUT: "/about",
   SHOP: "/shop",
-
+  EARRINGS: "/shop/earrings",
   GIFTS: "/gifts",
   COLLECTIONS: "/collections",
   OFFERS: "/offers",
@@ -271,6 +272,7 @@ const App = () => {
                   SHOP ROUTE - WITH HEADER
                   ============================================ */}
             <Route path={ROUTES.SHOP} element={<Shop />} />
+            <Route path={ROUTES.EARRINGS} element={<Earrings />} />
 
             <Route path={ROUTES.GIFTS} element={<Gifts />} />
 

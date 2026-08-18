@@ -42,8 +42,8 @@
   --radius-xl: 4px;
 
   max-width: 1200px;
-  margin: 130px auto;
-  padding: 0px 24px 100px;
+  margin: 90px auto 0px;
+  padding: 0px 24px 0px;
   font-family:
     "Manrope",
     -apple-system,
@@ -170,12 +170,11 @@
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--gold-deep);
-  margin-bottom: 10px;
+  margin-bottom: 0px;
 }
 
 .successTitle {
   font-family: "Cormorant Garamond", Georgia, serif;
-  font-style: italic;
   font-size: 42px;
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -191,6 +190,7 @@
   max-width: 440px;
   margin-left: auto;
   margin-right: auto;
+  margin-bottom: -70px;
 }
 
 /* ─── Order ID — hallmark tag ─── */
@@ -198,7 +198,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 30px;
+  margin-bottom: 15px;
   padding: 16px 24px;
   flex-wrap: wrap;
   box-shadow: var(--shadow-medium);
@@ -683,7 +683,6 @@
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  font-family: "Cormorant Garamond", Georgia, serif;
   font-size: 17px;
   font-weight: 600;
   color: black;
@@ -697,7 +696,7 @@
   align-items: center;
   gap: 3px;
   color: var(--gold-bright);
-  font-size: 26px;
+  font-size: 20px;
   font-weight: 700;
 }
 
@@ -960,7 +959,7 @@ button:focus-visible {
 /* ─── Responsive ─── */
 @media (max-width: 640px) {
   .page {
-    padding: 24px 16px 72px;
+    padding: 0px 16px 0px;
   }
 
   .orderIdRow {
