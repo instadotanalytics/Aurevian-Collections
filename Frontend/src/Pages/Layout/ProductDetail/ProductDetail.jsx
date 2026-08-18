@@ -16,8 +16,6 @@ import {
   FiMinus,
   FiPlus,
   FiArrowLeft,
-  FiChevronDown,
-  FiChevronUp,
   FiZoomIn,
 } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
@@ -36,116 +34,57 @@ import {
   fetchWishlist,
 } from "../../../redux/slices/wishlistSlice";
 
-// ─── Helper: Price Breakdown Accordion ───
-const PriceBreakdown = ({ product }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const originalPrice = product.pricing?.originalPrice || 0;
-  const salePrice = product.pricing?.salePrice;
-  const hasDiscount = salePrice && salePrice < originalPrice;
-  const displayPrice = salePrice || originalPrice;
-  const discountPct = hasDiscount
-    ? Math.round(((originalPrice - salePrice) / originalPrice) * 100)
-    : 0;
-
-  // Static breakdown data (replace with real data from API if available)
-  const breakdownItems = [
-    { label: "18KT Yellow Gold", rate: "₹11712.27/g", weight: "1.652g", discount: "-", value: "₹19346.33" },
-    { label: "Stone", rate: "-", weight: "0.096 ct / 0.019 g", discount: "-", value: "₹13728.00" },
-    { label: "Making Charges", rate: "-", weight: "-", discount: "-", value: "₹8776.00" },
-    { label: "Sub Total", rate: "-", weight: "1.671g Gross Wt.", discount: "-", value: `₹${originalPrice.toLocaleString()}` },
-  ];
-
-  const discountAmount = hasDiscount ? originalPrice - salePrice : 0;
-  const subtotalAfterDiscount = hasDiscount ? salePrice : originalPrice;
-  const gstAmount = Math.round(subtotalAfterDiscount * 0.03); // Assumed 3% GST
-
-  return (
-    <div className={styles.priceBreakdown}>
-      <button
-        className={styles.breakdownToggle}
-        onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-      >
-        <span>Product Details & Price Breakup</span>
-        {isOpen ? <FiChevronUp /> : <FiChevronDown />}
-      </button>
-
-      {isOpen && (
-        <div className={styles.breakdownContent}>
-          <div className={styles.breakdownTableWrap}>
-            <table className={styles.breakdownTable}>
-              <thead>
-                <tr>
-                  <th>Product Name</th>
-                  <th>Rate</th>
-                  <th>Weight (g)</th>
-                  <th>Discount (%)</th>
-                  <th>Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                {breakdownItems.map((item, idx) => (
-                  <tr key={idx}>
-                    <td>{item.label}</td>
-                    <td>{item.rate}</td>
-                    <td>{item.weight}</td>
-                    <td>{item.discount}</td>
-                    <td>{item.value}</td>
-                  </tr>
-                ))}
-                {hasDiscount && (
-                  <tr className={styles.discountRow}>
-                    <td colSpan="3">Discount</td>
-                    <td>{discountPct}%</td>
-                    <td>-₹{discountAmount.toLocaleString()}</td>
-                  </tr>
-                )}
-                <tr className={styles.subtotalRow}>
-                  <td colSpan="3">Subtotal after Discount</td>
-                  <td>-</td>
-                  <td>₹{subtotalAfterDiscount.toLocaleString()}</td>
-                </tr>
-                <tr>
-                  <td colSpan="3">GST</td>
-                  <td>-</td>
-                  <td>₹{gstAmount.toLocaleString()}</td>
-                </tr>
-                <tr className={styles.grandTotalRow}>
-                  <td colSpan="3">Grand Total</td>
-                  <td>-</td>
-                  <td>₹{(subtotalAfterDiscount + gstAmount).toLocaleString()}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div className={styles.skuId}>
-            <span>SKU ID:</span> {product._id || "501145FAARAC023IA001506"}
-          </div>
-
-          <div className={styles.cleaningNote}>
-            Enjoy sparkling jewellery! We provide free jewellery cleaning services!
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ─── Helper: Image Gallery with Zoom ───
-const ImageGallery = ({ images, productName }) => {
+// ─── Image Gallery with Zoom ───
+const ImageGallery = ({ images, productName, isWishlisted, onToggleWishlist }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isZooming, setIsZooming] = useState(false);
   const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [offsetX, setOffsetX] = useState(0);
   const imageRef = useRef(null);
-  const containerRef = useRef(null);
 
   const allImages = images.length > 0 ? images : [{ url: "/placeholder-image.png", altText: productName }];
-  const activeImage = allImages[activeIndex];
 
-  // ── Zoom on hover/drag ──
+  const prevImage = () => {
+    setActiveIndex((i) => (i === 0 ? allImages.length - 1 : i - 1));
+    setOffsetX(0);
+  };
+  const nextImage = () => {
+    setActiveIndex((i) => (i === allImages.length - 1 ? 0 : i + 1));
+    setOffsetX(0);
+  };
+
+  // ── Touch Drag for Slider ──
+  const handleTouchStart = (e) => {
+    setIsDragging(true);
+    setStartX(e.touches[0].clientX);
+    setIsZooming(false);
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isDragging) return;
+    const currentX = e.touches[0].clientX;
+    const diff = startX - currentX;
+    setOffsetX(diff);
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    if (Math.abs(offsetX) > 50) {
+      if (offsetX > 0) nextImage();
+      else prevImage();
+    }
+    setOffsetX(0);
+    setIsZooming(false);
+  };
+
+  // ── Mouse Zoom ──
   const handleMouseEnter = () => setIsZooming(true);
-  const handleMouseLeave = () => setIsZooming(false);
+  const handleMouseLeave = () => {
+    setIsZooming(false);
+    setIsDragging(false);
+  };
 
   const handleMouseMove = (e) => {
     if (!isZooming || !imageRef.current) return;
@@ -158,27 +97,8 @@ const ImageGallery = ({ images, productName }) => {
     });
   };
 
-  // ── Touch drag for zoom on mobile ──
-  const handleTouchMove = (e) => {
-    if (!isZooming || !imageRef.current || !e.touches.length) return;
-    const rect = imageRef.current.getBoundingClientRect();
-    const touch = e.touches[0];
-    const x = ((touch.clientX - rect.left) / rect.width) * 100;
-    const y = ((touch.clientY - rect.top) / rect.height) * 100;
-    setZoomPosition({
-      x: Math.min(Math.max(x, 0), 100),
-      y: Math.min(Math.max(y, 0), 100),
-    });
-  };
-
-  const handleTouchStart = () => setIsZooming(true);
-  const handleTouchEnd = () => setIsZooming(false);
-
-  const prevImage = () => setActiveIndex((i) => (i === 0 ? allImages.length - 1 : i - 1));
-  const nextImage = () => setActiveIndex((i) => (i === allImages.length - 1 ? 0 : i + 1));
-
   return (
-    <div className={styles.gallery} ref={containerRef}>
+    <div className={styles.gallery}>
       <div
         className={`${styles.mainImageWrap} ${isZooming ? styles.zooming : ""}`}
         onMouseEnter={handleMouseEnter}
@@ -188,22 +108,43 @@ const ImageGallery = ({ images, productName }) => {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <img
-          ref={imageRef}
-          src={activeImage.url}
-          alt={activeImage.altText || productName}
-          className={styles.mainImage}
-          style={
-            isZooming
-              ? {
-                  transform: "scale(2)",
-                  transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
+        <div
+          className={styles.imageSlider}
+          style={{
+            transform: `translateX(${-activeIndex * 100}%)`,
+            transition: isDragging ? 'none' : 'transform 0.4s ease',
+          }}
+        >
+          {allImages.map((img, idx) => (
+            <div key={idx} className={styles.slideImage}>
+              <img
+                ref={idx === activeIndex ? imageRef : null}
+                src={img.url}
+                alt={img.altText || productName}
+                className={styles.mainImage}
+                style={
+                  isZooming && idx === activeIndex
+                    ? {
+                        transform: "scale(2)",
+                        transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                      }
+                    : {}
                 }
-              : {}
-          }
-        />
+              />
+            </div>
+          ))}
+        </div>
 
-        {/* Zoom Lens Effect */}
+        {/* Wishlist Button - Top Right Corner */}
+        <button
+          type="button"
+          className={`${styles.wishlistIconBtn} ${isWishlisted ? styles.wishlistIconBtnActive : ""}`}
+          onClick={onToggleWishlist}
+          aria-label="Toggle wishlist"
+        >
+          {isWishlisted ? <FaHeart /> : <FiHeart />}
+        </button>
+
         {isZooming && (
           <div
             className={styles.zoomLens}
@@ -214,7 +155,6 @@ const ImageGallery = ({ images, productName }) => {
           />
         )}
 
-        {/* Navigation Buttons */}
         {allImages.length > 1 && (
           <>
             <button
@@ -233,6 +173,9 @@ const ImageGallery = ({ images, productName }) => {
             >
               <FiChevronRight />
             </button>
+            <div className={styles.imageCounter}>
+              {activeIndex + 1} / {allImages.length}
+            </div>
           </>
         )}
 
@@ -240,12 +183,12 @@ const ImageGallery = ({ images, productName }) => {
           type="button"
           className={styles.zoomIndicator}
           aria-label="Zoom in"
+          onClick={() => setIsZooming(!isZooming)}
         >
           <FiZoomIn />
         </button>
       </div>
 
-      {/* Thumbnails */}
       {allImages.length > 1 && (
         <div className={styles.thumbRow}>
           {allImages.map((img, idx) => (
@@ -253,7 +196,10 @@ const ImageGallery = ({ images, productName }) => {
               type="button"
               key={idx}
               className={`${styles.thumbBtn} ${idx === activeIndex ? styles.thumbBtnActive : ""}`}
-              onClick={() => setActiveIndex(idx)}
+              onClick={() => {
+                setActiveIndex(idx);
+                setOffsetX(0);
+              }}
             >
               <img src={img.url} alt={`Thumbnail ${idx + 1}`} />
             </button>
@@ -366,20 +312,21 @@ export default function ProductDetail() {
     (i) => (i.product?._id || i.product) === product._id
   );
 
-  // ── Specs for Metal & Diamond Details ──
-  const metalSpecs = [
-    { label: "Karatage", value: product.specifications?.karatage || "18K" },
-    { label: "Metal", value: product.specifications?.material || "Gold" },
-    { label: "Material Colour", value: product.specifications?.materialColor || "Yellow" },
-    { label: "Gross Weight", value: product.specifications?.weight?.value ? `${product.specifications.weight.value}g` : "1.671g" },
-  ].filter(s => s.value && s.value !== "None");
-
-  const diamondSpecs = [
-    { label: "Clarity", value: product.specifications?.stoneClarity || "VS" },
-    { label: "Color", value: product.specifications?.stoneColor || "G-H" },
-    { label: "Carat Weight", value: product.specifications?.stoneCarat || "0.096 ct" },
-    { label: "Cut", value: product.specifications?.stoneCut || "Brilliant" },
-  ].filter(s => s.value && s.value !== "None");
+  // ── All Specs from Backend ──
+  const allSpecs = [
+    { label: "Karatage", value: product.specifications?.karatage },
+    { label: "Metal", value: product.specifications?.material },
+    { label: "Material Colour", value: product.specifications?.materialColor },
+    { label: "Gross Weight", value: product.specifications?.weight?.value ? `${product.specifications.weight.value}g` : null },
+    { label: "Stone Clarity", value: product.specifications?.stoneClarity },
+    { label: "Stone Color", value: product.specifications?.stoneColor },
+    { label: "Carat Weight", value: product.specifications?.stoneCarat },
+    { label: "Stone Cut", value: product.specifications?.stoneCut },
+    { label: "Size", value: product.specifications?.size },
+    { label: "Occasion", value: product.specifications?.occasion },
+    { label: "Style", value: product.specifications?.style },
+    { label: "Gender", value: product.specifications?.gender },
+  ].filter((s) => s.value && s.value !== "None" && s.value !== "");
 
   // ── Handlers ──
   const decreaseQty = () => setQuantity((q) => Math.max(minQty, q - 1));
@@ -457,12 +404,22 @@ export default function ProductDetail() {
           <span className={styles.breadcrumbCurrent}>{product.productName}</span>
         </div>
 
-        {/* Main Grid */}
+        {/* Main Grid - Transparent Background */}
         <div className={styles.mainGrid}>
-          <ImageGallery images={allImages} productName={product.productName} />
+          <ImageGallery 
+            images={allImages} 
+            productName={product.productName}
+            isWishlisted={isWishlisted}
+            onToggleWishlist={handleToggleWishlist}
+          />
 
           <div className={styles.info}>
             <h1 className={styles.productName}>{product.productName}</h1>
+
+            {/* Description - Now above price */}
+            {product.shortDescription && (
+              <p className={styles.shortDescription}>{product.shortDescription}</p>
+            )}
 
             <div className={styles.priceRow}>
               <span className={styles.currentPrice}>₹{displayPrice.toLocaleString()}</span>
@@ -521,42 +478,30 @@ export default function ProductDetail() {
                 <FiShield /> <span>1-year warranty</span>
               </div>
             </div>
+
+            {/* Specifications - Now directly below perks to fill the space */}
+            {allSpecs.length > 0 && (
+              <div className={styles.specsCompact}>
+                <h3 className={styles.specsCompactTitle}>Specifications</h3>
+                <div className={styles.specsCompactGrid}>
+                  {allSpecs.map((spec) => (
+                    <div key={spec.label} className={styles.specCompactItem}>
+                      <span className={styles.specCompactLabel}>{spec.label}</span>
+                      <span className={styles.specCompactValue}>{spec.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Details Grid (Metal & Diamond Details) */}
-        <div className={styles.detailsGrid}>
-          {metalSpecs.length > 0 && (
-            <div className={styles.detailsCard}>
-              <h3>Metal Details</h3>
-              <dl className={styles.specsList}>
-                {metalSpecs.map((spec) => (
-                  <div key={spec.label} className={styles.specItem}>
-                    <dt>{spec.label}</dt>
-                    <dd>{spec.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          )}
-
-          {diamondSpecs.length > 0 && (
-            <div className={styles.detailsCard}>
-              <h3>Diamond Details</h3>
-              <dl className={styles.specsList}>
-                {diamondSpecs.map((spec) => (
-                  <div key={spec.label} className={styles.specItem}>
-                    <dt>{spec.label}</dt>
-                    <dd>{spec.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          )}
-        </div>
-
-        {/* Price Breakdown Accordion */}
-        <PriceBreakdown product={product} />
+        {/* Full Description if available */}
+        {product.fullDescription && (
+          <div className={styles.descriptionSection}>
+            <p className={styles.fullDescription}>{product.fullDescription}</p>
+          </div>
+        )}
       </div>
 
       <Footer />
