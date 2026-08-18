@@ -1,32 +1,32 @@
 // src/Pages/Seller/SellerAuth/SellerRegister.jsx
 
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { registerSeller, resendOTP } from '../../../redux/slices/sellerSlice';
-import { 
-  FiArrowLeft, 
-  FiArrowRight, 
-  FiCheck, 
-  FiUser, 
-  FiMail, 
-  FiPhone, 
-  FiLock, 
-  FiShoppingBag, 
-  FiMapPin, 
-  FiCreditCard, 
-  FiShield, 
-  FiAward, 
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { registerSeller, resendOTP } from "../../../redux/slices/sellerSlice";
+import {
+  FiArrowLeft,
+  FiArrowRight,
+  FiCheck,
+  FiUser,
+  FiMail,
+  FiPhone,
+  FiLock,
+  FiShoppingBag,
+  FiMapPin,
+  FiCreditCard,
+  FiShield,
+  FiAward,
   FiUpload,
   FiTrendingUp,
   FiUsers,
-  FiStar
-} from 'react-icons/fi';
-import { FaGem } from 'react-icons/fa';
-import toast from 'react-hot-toast';
-import styles from './SellerRegister.module.css';
-import Header from "../../Layout/Header/Header"
-import Footer from "../../Layout/Footer/Footer"
+  FiStar,
+} from "react-icons/fi";
+import { FaGem } from "react-icons/fa";
+import toast from "react-hot-toast";
+import styles from "./SellerRegister.module.css";
+import Header from "../../Layout/Header/Header";
+import Footer from "../../Layout/Footer/Footer";
 
 // Import step images
 import Step1Image from "../../../assets/registerstep1.png";
@@ -39,7 +39,7 @@ const SellerRegister = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isLoading } = useSelector((state) => state.seller);
-  
+
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
@@ -58,24 +58,24 @@ const SellerRegister = () => {
   // Step information
   const stepInfo = {
     1: {
-      title: 'Personal Information',
-      description: 'Enter your personal details',
+      title: "Personal Information",
+      description: "Enter your personal details",
     },
     2: {
-      title: 'PAN Card Details',
-      description: 'Enter your PAN card details',
+      title: "PAN Card Details",
+      description: "Enter your PAN card details",
     },
     3: {
-      title: 'Aadhaar Card Details',
-      description: 'Enter your Aadhaar card details',
+      title: "Aadhaar Card Details",
+      description: "Enter your Aadhaar card details",
     },
     4: {
-      title: 'Store & GST Details',
-      description: 'Tell us about your store',
+      title: "Store & GST Details",
+      description: "Tell us about your store",
     },
     5: {
-      title: 'Review & Submit',
-      description: 'Review your information',
+      title: "Review & Submit",
+      description: "Review your information",
     },
   };
 
@@ -83,49 +83,49 @@ const SellerRegister = () => {
   // FORM DATA
   // ============================================
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-    emailOTP: '',
-    phoneOTP: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    emailOTP: "",
+    phoneOTP: "",
     emailVerified: false,
     phoneVerified: false,
-    panNumber: '',
+    panNumber: "",
     panCard: null,
     panVerified: false,
-    aadhaarNumber: '',
+    aadhaarNumber: "",
     aadhaarCard: null,
     aadhaarVerified: false,
-    gstNumber: '',
+    gstNumber: "",
     gstCertificate: null,
-    storeName: '',
-    brandName: '',
-    businessDescription: '',
+    storeName: "",
+    brandName: "",
+    businessDescription: "",
     productCategories: [],
-    website: '',
+    website: "",
     socialLinks: {
-      facebook: '',
-      instagram: '',
-      twitter: '',
-      youtube: '',
-      linkedin: ''
+      facebook: "",
+      instagram: "",
+      twitter: "",
+      youtube: "",
+      linkedin: "",
     },
     businessAddress: {
-      street: '',
-      city: '',
-      state: '',
-      pincode: '',
-      country: 'Switzerland'
+      street: "",
+      city: "",
+      state: "",
+      pincode: "",
+      country: "Switzerland",
     },
     bankDetails: {
-      accountHolderName: '',
-      bankName: '',
-      accountNumber: '',
-      ifscCode: '',
-      upiId: ''
+      accountHolderName: "",
+      bankName: "",
+      accountNumber: "",
+      ifscCode: "",
+      upiId: "",
     },
     termsAccepted: false,
   });
@@ -136,16 +136,16 @@ const SellerRegister = () => {
   const [gstPreview, setGstPreview] = useState(null);
 
   const categoryOptions = [
-    { value: 'jewelry', label: '💎 Jewelry' },
-    { value: 'rings', label: '💍 Rings' },
-    { value: 'necklaces', label: '📿 Necklaces' },
-    { value: 'earrings', label: '✨ Earrings' },
-    { value: 'bracelets', label: '📿 Bracelets' },
-    { value: 'watches', label: '⌚ Watches' },
-    { value: 'perfume', label: '🌸 Perfume' },
-    { value: 'sunglasses', label: '🕶️ Sunglasses' },
-    { value: 'bags', label: '👜 Bags' },
-    { value: 'other', label: '📦 Other' },
+    { value: "jewelry", label: "💎 Jewelry" },
+    { value: "rings", label: "💍 Rings" },
+    { value: "necklaces", label: "📿 Necklaces" },
+    { value: "earrings", label: "✨ Earrings" },
+    { value: "bracelets", label: "📿 Bracelets" },
+    { value: "watches", label: "⌚ Watches" },
+    { value: "perfume", label: "🌸 Perfume" },
+    { value: "sunglasses", label: "🕶️ Sunglasses" },
+    { value: "bags", label: "👜 Bags" },
+    { value: "other", label: "📦 Other" },
   ];
 
   // OTP Timer
@@ -158,73 +158,73 @@ const SellerRegister = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
-    
-    if (type === 'file') {
+
+    if (type === "file") {
       const file = files[0];
-      if (name === 'panCard') {
-        setFormData(prev => ({ ...prev, panCard: file }));
+      if (name === "panCard") {
+        setFormData((prev) => ({ ...prev, panCard: file }));
         setPanPreview(URL.createObjectURL(file));
-      } else if (name === 'aadhaarCard') {
-        setFormData(prev => ({ ...prev, aadhaarCard: file }));
+      } else if (name === "aadhaarCard") {
+        setFormData((prev) => ({ ...prev, aadhaarCard: file }));
         setAadhaarPreview(URL.createObjectURL(file));
-      } else if (name === 'gstCertificate') {
-        setFormData(prev => ({ ...prev, gstCertificate: file }));
+      } else if (name === "gstCertificate") {
+        setFormData((prev) => ({ ...prev, gstCertificate: file }));
         setGstPreview(URL.createObjectURL(file));
       }
       return;
     }
-    
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setFormData(prev => ({
+
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".");
+      setFormData((prev) => ({
         ...prev,
         [parent]: {
           ...prev[parent],
-          [child]: type === 'checkbox' ? checked : value
-        }
+          [child]: type === "checkbox" ? checked : value,
+        },
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: type === 'checkbox' ? checked : value
+        [name]: type === "checkbox" ? checked : value,
       }));
     }
-    
+
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
   const handleFocus = (field) => {
-    setIsFocused(prev => ({ ...prev, [field]: true }));
+    setIsFocused((prev) => ({ ...prev, [field]: true }));
   };
 
   const handleBlur = (field) => {
-    setIsFocused(prev => ({ ...prev, [field]: false }));
+    setIsFocused((prev) => ({ ...prev, [field]: false }));
   };
 
   const handleSocialLink = (platform, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       socialLinks: {
         ...prev.socialLinks,
-        [platform]: value
-      }
+        [platform]: value,
+      },
     }));
   };
 
   const handleCategoryToggle = (category) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const currentCategories = prev.productCategories;
       if (currentCategories.includes(category)) {
         return {
           ...prev,
-          productCategories: currentCategories.filter(c => c !== category)
+          productCategories: currentCategories.filter((c) => c !== category),
         };
       } else {
         return {
           ...prev,
-          productCategories: [...currentCategories, category]
+          productCategories: [...currentCategories, category],
         };
       }
     });
@@ -235,68 +235,75 @@ const SellerRegister = () => {
   // ============================================
   const validateStep = (step) => {
     const newErrors = {};
-    
+
     if (step === 1) {
-      if (!formData.firstName) newErrors.firstName = 'First name is required';
-      if (!formData.lastName) newErrors.lastName = 'Last name is required';
-      if (!formData.email) newErrors.email = 'Email is required';
+      if (!formData.firstName) newErrors.firstName = "First name is required";
+      if (!formData.lastName) newErrors.lastName = "Last name is required";
+      if (!formData.email) newErrors.email = "Email is required";
       else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-        newErrors.email = 'Please enter a valid email';
+        newErrors.email = "Please enter a valid email";
       }
-      if (!formData.phone) newErrors.phone = 'Phone number is required';
-      if (!formData.password) newErrors.password = 'Password is required';
+      if (!formData.phone) newErrors.phone = "Phone number is required";
+      if (!formData.password) newErrors.password = "Password is required";
       else if (formData.password.length < 6) {
-        newErrors.password = 'Password must be at least 6 characters';
+        newErrors.password = "Password must be at least 6 characters";
       }
       if (formData.password !== formData.confirmPassword) {
-        newErrors.confirmPassword = 'Passwords do not match';
+        newErrors.confirmPassword = "Passwords do not match";
       }
     }
-    
+
     if (step === 2) {
       if (!formData.panNumber) {
-        newErrors.panNumber = 'PAN number is required';
+        newErrors.panNumber = "PAN number is required";
       } else {
-        const cleanPan = formData.panNumber.trim().toUpperCase().replace(/\s/g, '');
+        const cleanPan = formData.panNumber
+          .trim()
+          .toUpperCase()
+          .replace(/\s/g, "");
         if (cleanPan.length !== 10) {
-          newErrors.panNumber = 'PAN number must be exactly 10 characters';
+          newErrors.panNumber = "PAN number must be exactly 10 characters";
         } else if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(cleanPan)) {
-          newErrors.panNumber = 'Enter valid PAN (e.g., ABCDE1234F)';
+          newErrors.panNumber = "Enter valid PAN (e.g., ABCDE1234F)";
         }
       }
       if (!formData.panCard) {
-        newErrors.panCard = 'PAN card image is required';
+        newErrors.panCard = "PAN card image is required";
       }
     }
-    
+
     if (step === 3) {
       if (!formData.aadhaarNumber) {
-        newErrors.aadhaarNumber = 'Aadhaar number is required';
+        newErrors.aadhaarNumber = "Aadhaar number is required";
       } else {
-        const cleanAadhaar = formData.aadhaarNumber.trim().replace(/\s/g, '');
+        const cleanAadhaar = formData.aadhaarNumber.trim().replace(/\s/g, "");
         if (cleanAadhaar.length !== 12) {
-          newErrors.aadhaarNumber = 'Aadhaar number must be 12 digits';
+          newErrors.aadhaarNumber = "Aadhaar number must be 12 digits";
         } else if (!/^[0-9]{12}$/.test(cleanAadhaar)) {
-          newErrors.aadhaarNumber = 'Enter valid 12-digit Aadhaar number';
+          newErrors.aadhaarNumber = "Enter valid 12-digit Aadhaar number";
         }
       }
       if (!formData.aadhaarCard) {
-        newErrors.aadhaarCard = 'Aadhaar card image is required';
+        newErrors.aadhaarCard = "Aadhaar card image is required";
       }
     }
-    
+
     if (step === 4) {
-      if (!formData.storeName) newErrors.storeName = 'Store name is required';
+      if (!formData.storeName) newErrors.storeName = "Store name is required";
       if (formData.productCategories.length === 0) {
-        newErrors.productCategories = 'Select at least one category';
+        newErrors.productCategories = "Select at least one category";
       }
     }
-    
+
     if (step === 5) {
-      if (!formData.businessAddress.street) newErrors['businessAddress.street'] = 'Street address is required';
-      if (!formData.businessAddress.city) newErrors['businessAddress.city'] = 'City is required';
-      if (!formData.businessAddress.state) newErrors['businessAddress.state'] = 'State is required';
-      if (!formData.businessAddress.pincode) newErrors['businessAddress.pincode'] = 'Pincode is required';
+      if (!formData.businessAddress.street)
+        newErrors["businessAddress.street"] = "Street address is required";
+      if (!formData.businessAddress.city)
+        newErrors["businessAddress.city"] = "City is required";
+      if (!formData.businessAddress.state)
+        newErrors["businessAddress.state"] = "State is required";
+      if (!formData.businessAddress.pincode)
+        newErrors["businessAddress.pincode"] = "Pincode is required";
     }
 
     setErrors(newErrors);
@@ -305,18 +312,18 @@ const SellerRegister = () => {
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep((prev) => prev + 1);
       const formElement = document.querySelector(`.${styles.form}`);
       if (formElement) {
         formElement.scrollTop = 0;
       }
     } else {
-      toast.error('Please fill all required fields');
+      toast.error("Please fill all required fields");
     }
   };
 
   const handlePrevious = () => {
-    setCurrentStep(prev => prev - 1);
+    setCurrentStep((prev) => prev - 1);
     const formElement = document.querySelector(`.${styles.form}`);
     if (formElement) {
       formElement.scrollTop = 0;
@@ -325,13 +332,13 @@ const SellerRegister = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (currentStep === 5) {
       if (!formData.termsAccepted) {
-        toast.error('Please accept the terms and conditions');
+        toast.error("Please accept the terms and conditions");
         return;
       }
-      
+
       setLoading(true);
       try {
         const submitData = {
@@ -341,48 +348,60 @@ const SellerRegister = () => {
           phone: formData.phone.trim(),
           password: formData.password,
           storeName: formData.storeName.trim(),
-          brandName: formData.brandName?.trim() || '',
-          businessDescription: formData.businessDescription?.trim() || '',
+          brandName: formData.brandName?.trim() || "",
+          businessDescription: formData.businessDescription?.trim() || "",
           productCategories: formData.productCategories || [],
-          website: formData.website?.trim() || '',
+          website: formData.website?.trim() || "",
           socialLinks: formData.socialLinks || {},
           panNumber: formData.panNumber.trim().toUpperCase(),
           aadhaarNumber: formData.aadhaarNumber.trim(),
           gstNumber: formData.gstNumber?.trim().toUpperCase() || null,
           businessAddress: {
-            street: formData.businessAddress?.street?.trim() || '',
-            city: formData.businessAddress?.city?.trim() || '',
-            state: formData.businessAddress?.state?.trim() || '',
-            pincode: formData.businessAddress?.pincode?.trim() || '',
-            country: formData.businessAddress?.country || 'Switzerland'
+            street: formData.businessAddress?.street?.trim() || "",
+            city: formData.businessAddress?.city?.trim() || "",
+            state: formData.businessAddress?.state?.trim() || "",
+            pincode: formData.businessAddress?.pincode?.trim() || "",
+            country: formData.businessAddress?.country || "Switzerland",
           },
           bankDetails: {
-            accountHolderName: formData.bankDetails?.accountHolderName?.trim() || '',
-            bankName: formData.bankDetails?.bankName?.trim() || '',
-            accountNumber: formData.bankDetails?.accountNumber?.trim() || '',
-            ifscCode: formData.bankDetails?.ifscCode?.trim() || '',
-            upiId: formData.bankDetails?.upiId?.trim() || ''
+            accountHolderName:
+              formData.bankDetails?.accountHolderName?.trim() || "",
+            bankName: formData.bankDetails?.bankName?.trim() || "",
+            accountNumber: formData.bankDetails?.accountNumber?.trim() || "",
+            ifscCode: formData.bankDetails?.ifscCode?.trim() || "",
+            upiId: formData.bankDetails?.upiId?.trim() || "",
           },
-          termsAccepted: formData.termsAccepted
+          termsAccepted: formData.termsAccepted,
         };
 
         const result = await dispatch(registerSeller(submitData)).unwrap();
-        
+
         if (result) {
-          localStorage.setItem('sellerEmail', submitData.email);
-          localStorage.setItem('sellerPhone', submitData.phone);
-          
-          toast.success('Registration successful! Please verify your email and phone.');
-          navigate('/seller/verify-otp', { 
-            state: { 
-              email: submitData.email, 
-              phone: submitData.phone 
-            } 
+          localStorage.setItem("sellerEmail", submitData.email);
+          localStorage.setItem("sellerPhone", submitData.phone);
+
+          // ✅ sellerSlice's registerSeller.fulfilled already fires an
+          // accurate email/phone toast based on the real delivery status —
+          // don't duplicate it with a blanket "success" toast here, that's
+          // exactly the "false success" pattern we're avoiding.
+          const otpDeliveryStatus = result.otpDeliveryStatus || {
+            email: true,
+            phone: true,
+          };
+          const otpDeliveryDetail = result.otpDeliveryDetail || {};
+
+          navigate("/seller/verify-otp", {
+            state: {
+              email: submitData.email,
+              phone: submitData.phone,
+              otpDeliveryStatus, // ✅ NEW — so the verify screen doesn't
+              otpDeliveryDetail, // fake a "sent" countdown for a channel that failed
+            },
           });
         }
       } catch (error) {
-        console.error('❌ Registration error:', error);
-        toast.error(error?.message || 'Registration failed. Please try again.');
+        console.error("❌ Registration error:", error);
+        toast.error(error?.message || "Registration failed. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -395,28 +414,28 @@ const SellerRegister = () => {
   // STEP INDICATOR
   // ============================================
   const renderStepIndicator = () => {
-    const steps = ['Personal', 'PAN', 'Aadhaar', 'Store', 'Review'];
-    
+    const steps = ["Personal", "PAN", "Aadhaar", "Store", "Review"];
+
     return (
       <div className={styles.stepIndicator}>
         {steps.map((label, index) => {
           const stepNumber = index + 1;
           const isCompleted = currentStep > stepNumber;
           const isActive = currentStep === stepNumber;
-          
+
           return (
             <div key={index} className={styles.stepItem}>
-              <div 
+              <div
                 className={`${styles.stepNumber} 
-                  ${isActive ? styles.active : ''} 
-                  ${isCompleted ? styles.completed : ''}`}
+                  ${isActive ? styles.active : ""} 
+                  ${isCompleted ? styles.completed : ""}`}
               >
                 {isCompleted ? <FiCheck /> : stepNumber}
               </div>
-              <span 
+              <span
                 className={`${styles.stepLabel} 
-                  ${isActive ? styles.active : ''} 
-                  ${isCompleted ? styles.completed : ''}`}
+                  ${isActive ? styles.active : ""} 
+                  ${isCompleted ? styles.completed : ""}`}
               >
                 {label}
               </span>
@@ -429,13 +448,19 @@ const SellerRegister = () => {
   };
 
   const renderStepContent = () => {
-    switch(currentStep) {
-      case 1: return renderPersonalInfo();
-      case 2: return renderPanCard();
-      case 3: return renderAadhaarCard();
-      case 4: return renderStoreInfo();
-      case 5: return renderReview();
-      default: return null;
+    switch (currentStep) {
+      case 1:
+        return renderPersonalInfo();
+      case 2:
+        return renderPanCard();
+      case 3:
+        return renderAadhaarCard();
+      case 4:
+        return renderStoreInfo();
+      case 5:
+        return renderReview();
+      default:
+        return null;
     }
   };
 
@@ -452,91 +477,115 @@ const SellerRegister = () => {
       <div className={styles.formFieldsWrapper}>
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
-            <label>First Name <span className={styles.required}>*</span></label>
-            <input 
-              name="firstName" 
-              placeholder="Enter your first name" 
-              value={formData.firstName} 
+            <label>
+              First Name <span className={styles.required}>*</span>
+            </label>
+            <input
+              name="firstName"
+              placeholder="Enter your first name"
+              value={formData.firstName}
               onChange={handleChange}
-              onFocus={() => handleFocus('firstName')}
-              onBlur={() => handleBlur('firstName')}
-              className={`${errors.firstName ? styles.error : ''} ${isFocused.firstName ? styles.focused : ''}`}
+              onFocus={() => handleFocus("firstName")}
+              onBlur={() => handleBlur("firstName")}
+              className={`${errors.firstName ? styles.error : ""} ${isFocused.firstName ? styles.focused : ""}`}
             />
-            {errors.firstName && <span className={styles.errorText}>{errors.firstName}</span>}
+            {errors.firstName && (
+              <span className={styles.errorText}>{errors.firstName}</span>
+            )}
           </div>
           <div className={styles.formGroup}>
-            <label>Last Name <span className={styles.required}>*</span></label>
-            <input 
-              name="lastName" 
-              placeholder="Enter your last name" 
-              value={formData.lastName} 
+            <label>
+              Last Name <span className={styles.required}>*</span>
+            </label>
+            <input
+              name="lastName"
+              placeholder="Enter your last name"
+              value={formData.lastName}
               onChange={handleChange}
-              onFocus={() => handleFocus('lastName')}
-              onBlur={() => handleBlur('lastName')}
-              className={`${errors.lastName ? styles.error : ''} ${isFocused.lastName ? styles.focused : ''}`}
+              onFocus={() => handleFocus("lastName")}
+              onBlur={() => handleBlur("lastName")}
+              className={`${errors.lastName ? styles.error : ""} ${isFocused.lastName ? styles.focused : ""}`}
             />
-            {errors.lastName && <span className={styles.errorText}>{errors.lastName}</span>}
+            {errors.lastName && (
+              <span className={styles.errorText}>{errors.lastName}</span>
+            )}
           </div>
         </div>
 
         <div className={styles.formGroup}>
-          <label>Email Address <span className={styles.required}>*</span></label>
-          <input 
-            type="email" 
-            name="email" 
-            placeholder="Enter your email" 
-            value={formData.email} 
+          <label>
+            Email Address <span className={styles.required}>*</span>
+          </label>
+          <input
+            type="email"
+            name="email"
+            placeholder="Enter your email"
+            value={formData.email}
             onChange={handleChange}
-            onFocus={() => handleFocus('email')}
-            onBlur={() => handleBlur('email')}
-            className={`${errors.email ? styles.error : ''} ${isFocused.email ? styles.focused : ''}`}
+            onFocus={() => handleFocus("email")}
+            onBlur={() => handleBlur("email")}
+            className={`${errors.email ? styles.error : ""} ${isFocused.email ? styles.focused : ""}`}
           />
-          {errors.email && <span className={styles.errorText}>{errors.email}</span>}
+          {errors.email && (
+            <span className={styles.errorText}>{errors.email}</span>
+          )}
         </div>
 
         <div className={styles.formGroup}>
-          <label>Phone Number <span className={styles.required}>*</span></label>
-          <input 
-            type="tel" 
-            name="phone" 
-            placeholder="+91 9876543210" 
-            value={formData.phone} 
+          <label>
+            Phone Number <span className={styles.required}>*</span>
+          </label>
+          <input
+            type="tel"
+            name="phone"
+            placeholder="+91 9876543210"
+            value={formData.phone}
             onChange={handleChange}
-            onFocus={() => handleFocus('phone')}
-            onBlur={() => handleBlur('phone')}
-            className={`${errors.phone ? styles.error : ''} ${isFocused.phone ? styles.focused : ''}`}
+            onFocus={() => handleFocus("phone")}
+            onBlur={() => handleBlur("phone")}
+            className={`${errors.phone ? styles.error : ""} ${isFocused.phone ? styles.focused : ""}`}
           />
-          {errors.phone && <span className={styles.errorText}>{errors.phone}</span>}
+          {errors.phone && (
+            <span className={styles.errorText}>{errors.phone}</span>
+          )}
         </div>
 
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
-            <label>Password <span className={styles.required}>*</span></label>
-            <input 
-              type="password" 
-              name="password" 
-              placeholder="Min 6 characters" 
-              value={formData.password} 
+            <label>
+              Password <span className={styles.required}>*</span>
+            </label>
+            <input
+              type="password"
+              name="password"
+              placeholder="Min 6 characters"
+              value={formData.password}
               onChange={handleChange}
-              onFocus={() => handleFocus('password')}
-              onBlur={() => handleBlur('password')}
-              className={`${errors.password ? styles.error : ''} ${isFocused.password ? styles.focused : ''}`}
+              onFocus={() => handleFocus("password")}
+              onBlur={() => handleBlur("password")}
+              className={`${errors.password ? styles.error : ""} ${isFocused.password ? styles.focused : ""}`}
             />
-            {errors.password && <span className={styles.errorText}>{errors.password}</span>}
+            {errors.password && (
+              <span className={styles.errorText}>{errors.password}</span>
+            )}
           </div>
           <div className={styles.formGroup}>
-            <label>Confirm Password <span className={styles.required}>*</span></label>
-            <input 
-              type="password" 
-              name="confirmPassword" 
-              placeholder="Confirm your password" 
-              value={formData.confirmPassword} 
+            <label>
+              Confirm Password <span className={styles.required}>*</span>
+            </label>
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirm your password"
+              value={formData.confirmPassword}
               onChange={handleChange}
-              onFocus={() => handleFocus('confirmPassword')}
-              onBlur={() => handleBlur('confirmPassword')}
-              className={`${errors.confirmPassword ? styles.error : ''} ${isFocused.confirmPassword ? styles.focused : ''}`}
+              onFocus={() => handleFocus("confirmPassword")}
+              onBlur={() => handleBlur("confirmPassword")}
+              className={`${errors.confirmPassword ? styles.error : ""} ${isFocused.confirmPassword ? styles.focused : ""}`}
             />
-            {errors.confirmPassword && <span className={styles.errorText}>{errors.confirmPassword}</span>}
+            {errors.confirmPassword && (
+              <span className={styles.errorText}>{errors.confirmPassword}</span>
+            )}
           </div>
         </div>
       </div>
@@ -555,38 +604,59 @@ const SellerRegister = () => {
 
       <div className={styles.formFieldsWrapper}>
         <div className={styles.formGroup}>
-          <label>PAN Number <span className={styles.required}>*</span></label>
+          <label>
+            PAN Number <span className={styles.required}>*</span>
+          </label>
           <input
             name="panNumber"
             placeholder="ABCDE1234F"
             value={formData.panNumber}
             onChange={(e) => {
-              const value = e.target.value.toUpperCase().replace(/\s/g, '');
-              setFormData(prev => ({ ...prev, panNumber: value }));
+              const value = e.target.value.toUpperCase().replace(/\s/g, "");
+              setFormData((prev) => ({ ...prev, panNumber: value }));
               if (errors.panNumber) {
-                setErrors(prev => ({ ...prev, panNumber: '' }));
+                setErrors((prev) => ({ ...prev, panNumber: "" }));
               }
             }}
-            onFocus={() => handleFocus('panNumber')}
-            onBlur={() => handleBlur('panNumber')}
-            className={`${errors.panNumber ? styles.error : ''} ${isFocused.panNumber ? styles.focused : ''}`}
+            onFocus={() => handleFocus("panNumber")}
+            onBlur={() => handleBlur("panNumber")}
+            className={`${errors.panNumber ? styles.error : ""} ${isFocused.panNumber ? styles.focused : ""}`}
             maxLength={10}
           />
-          {errors.panNumber && <span className={styles.errorText}>{errors.panNumber}</span>}
-          <small className={styles.hint}>Format: 5 letters + 4 digits + 1 letter (e.g., ABCDE1234F)</small>
-          {formData.panNumber && formData.panNumber.length === 10 && /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.panNumber) && (
-            <span className={styles.validText}>✅ Valid PAN format</span>
+          {errors.panNumber && (
+            <span className={styles.errorText}>{errors.panNumber}</span>
           )}
+          <small className={styles.hint}>
+            Format: 5 letters + 4 digits + 1 letter (e.g., ABCDE1234F)
+          </small>
+          {formData.panNumber &&
+            formData.panNumber.length === 10 &&
+            /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.panNumber) && (
+              <span className={styles.validText}>✅ Valid PAN format</span>
+            )}
         </div>
 
         <div className={styles.formGroup}>
-          <label>Upload PAN Card <span className={styles.required}>*</span></label>
+          <label>
+            Upload PAN Card <span className={styles.required}>*</span>
+          </label>
           <div className={styles.fileUploadWrapper}>
-            <div className={`${styles.fileUploadArea} ${panPreview ? styles.hasFile : ''}`}>
+            <div
+              className={`${styles.fileUploadArea} ${panPreview ? styles.hasFile : ""}`}
+            >
               {panPreview ? (
                 <div className={styles.filePreview}>
                   <img src={panPreview} alt="PAN Card" />
-                  <button type="button" className={styles.removeFile} onClick={() => { setFormData(prev => ({ ...prev, panCard: null })); setPanPreview(null); }}>×</button>
+                  <button
+                    type="button"
+                    className={styles.removeFile}
+                    onClick={() => {
+                      setFormData((prev) => ({ ...prev, panCard: null }));
+                      setPanPreview(null);
+                    }}
+                  >
+                    ×
+                  </button>
                 </div>
               ) : (
                 <>
@@ -595,10 +665,18 @@ const SellerRegister = () => {
                   <span>JPG, PNG, PDF (Max 5MB)</span>
                 </>
               )}
-              <input type="file" name="panCard" accept="image/*,.pdf" onChange={handleChange} className={styles.fileInput} />
+              <input
+                type="file"
+                name="panCard"
+                accept="image/*,.pdf"
+                onChange={handleChange}
+                className={styles.fileInput}
+              />
             </div>
           </div>
-          {errors.panCard && <span className={styles.errorText}>{errors.panCard}</span>}
+          {errors.panCard && (
+            <span className={styles.errorText}>{errors.panCard}</span>
+          )}
         </div>
       </div>
     </div>
@@ -611,43 +689,64 @@ const SellerRegister = () => {
     <div className={styles.stepContent}>
       <div className={styles.stepHeader}>
         <h2 className={styles.stepTitle}>Aadhaar Card Details</h2>
-        <p className={styles.stepDesc}>Enter your Aadhaar card details for KYC</p>
+        <p className={styles.stepDesc}>
+          Enter your Aadhaar card details for KYC
+        </p>
       </div>
 
       <div className={styles.formFieldsWrapper}>
         <div className={styles.formGroup}>
-          <label>Aadhaar Number <span className={styles.required}>*</span></label>
+          <label>
+            Aadhaar Number <span className={styles.required}>*</span>
+          </label>
           <input
             name="aadhaarNumber"
             placeholder="123456789012"
             value={formData.aadhaarNumber}
             onChange={(e) => {
-              const value = e.target.value.replace(/\s/g, '');
-              setFormData(prev => ({ ...prev, aadhaarNumber: value }));
+              const value = e.target.value.replace(/\s/g, "");
+              setFormData((prev) => ({ ...prev, aadhaarNumber: value }));
               if (errors.aadhaarNumber) {
-                setErrors(prev => ({ ...prev, aadhaarNumber: '' }));
+                setErrors((prev) => ({ ...prev, aadhaarNumber: "" }));
               }
             }}
-            onFocus={() => handleFocus('aadhaarNumber')}
-            onBlur={() => handleBlur('aadhaarNumber')}
-            className={`${errors.aadhaarNumber ? styles.error : ''} ${isFocused.aadhaarNumber ? styles.focused : ''}`}
+            onFocus={() => handleFocus("aadhaarNumber")}
+            onBlur={() => handleBlur("aadhaarNumber")}
+            className={`${errors.aadhaarNumber ? styles.error : ""} ${isFocused.aadhaarNumber ? styles.focused : ""}`}
             maxLength={12}
           />
-          {errors.aadhaarNumber && <span className={styles.errorText}>{errors.aadhaarNumber}</span>}
-          <small className={styles.hint}>12-digit Aadhaar number</small>
-          {formData.aadhaarNumber && formData.aadhaarNumber.length === 12 && /^[0-9]{12}$/.test(formData.aadhaarNumber) && (
-            <span className={styles.validText}>✅ Valid Aadhaar format</span>
+          {errors.aadhaarNumber && (
+            <span className={styles.errorText}>{errors.aadhaarNumber}</span>
           )}
+          <small className={styles.hint}>12-digit Aadhaar number</small>
+          {formData.aadhaarNumber &&
+            formData.aadhaarNumber.length === 12 &&
+            /^[0-9]{12}$/.test(formData.aadhaarNumber) && (
+              <span className={styles.validText}>✅ Valid Aadhaar format</span>
+            )}
         </div>
 
         <div className={styles.formGroup}>
-          <label>Upload Aadhaar Card <span className={styles.required}>*</span></label>
+          <label>
+            Upload Aadhaar Card <span className={styles.required}>*</span>
+          </label>
           <div className={styles.fileUploadWrapper}>
-            <div className={`${styles.fileUploadArea} ${aadhaarPreview ? styles.hasFile : ''}`}>
+            <div
+              className={`${styles.fileUploadArea} ${aadhaarPreview ? styles.hasFile : ""}`}
+            >
               {aadhaarPreview ? (
                 <div className={styles.filePreview}>
                   <img src={aadhaarPreview} alt="Aadhaar Card" />
-                  <button type="button" className={styles.removeFile} onClick={() => { setFormData(prev => ({ ...prev, aadhaarCard: null })); setAadhaarPreview(null); }}>×</button>
+                  <button
+                    type="button"
+                    className={styles.removeFile}
+                    onClick={() => {
+                      setFormData((prev) => ({ ...prev, aadhaarCard: null }));
+                      setAadhaarPreview(null);
+                    }}
+                  >
+                    ×
+                  </button>
                 </div>
               ) : (
                 <>
@@ -656,10 +755,18 @@ const SellerRegister = () => {
                   <span>JPG, PNG, PDF (Max 5MB)</span>
                 </>
               )}
-              <input type="file" name="aadhaarCard" accept="image/*,.pdf" onChange={handleChange} className={styles.fileInput} />
+              <input
+                type="file"
+                name="aadhaarCard"
+                accept="image/*,.pdf"
+                onChange={handleChange}
+                className={styles.fileInput}
+              />
             </div>
           </div>
-          {errors.aadhaarCard && <span className={styles.errorText}>{errors.aadhaarCard}</span>}
+          {errors.aadhaarCard && (
+            <span className={styles.errorText}>{errors.aadhaarCard}</span>
+          )}
         </div>
       </div>
     </div>
@@ -678,90 +785,105 @@ const SellerRegister = () => {
       <div className={styles.formFieldsWrapper}>
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
-            <label>Store Name <span className={styles.required}>*</span></label>
-            <input 
-              name="storeName" 
-              placeholder="Your Store Name" 
-              value={formData.storeName} 
+            <label>
+              Store Name <span className={styles.required}>*</span>
+            </label>
+            <input
+              name="storeName"
+              placeholder="Your Store Name"
+              value={formData.storeName}
               onChange={handleChange}
-              onFocus={() => handleFocus('storeName')}
-              onBlur={() => handleBlur('storeName')}
-              className={`${errors.storeName ? styles.error : ''} ${isFocused.storeName ? styles.focused : ''}`}
+              onFocus={() => handleFocus("storeName")}
+              onBlur={() => handleBlur("storeName")}
+              className={`${errors.storeName ? styles.error : ""} ${isFocused.storeName ? styles.focused : ""}`}
             />
-            {errors.storeName && <span className={styles.errorText}>{errors.storeName}</span>}
+            {errors.storeName && (
+              <span className={styles.errorText}>{errors.storeName}</span>
+            )}
           </div>
           <div className={styles.formGroup}>
             <label>Brand Name</label>
-            <input 
-              name="brandName" 
-              placeholder="Your Brand Name (optional)" 
-              value={formData.brandName} 
+            <input
+              name="brandName"
+              placeholder="Your Brand Name (optional)"
+              value={formData.brandName}
               onChange={handleChange}
-              onFocus={() => handleFocus('brandName')}
-              onBlur={() => handleBlur('brandName')}
-              className={`${isFocused.brandName ? styles.focused : ''}`}
+              onFocus={() => handleFocus("brandName")}
+              onBlur={() => handleBlur("brandName")}
+              className={`${isFocused.brandName ? styles.focused : ""}`}
             />
           </div>
         </div>
 
         <div className={styles.formGroup}>
           <label>Business Description</label>
-          <textarea 
-            name="businessDescription" 
-            placeholder="Tell us about your jewellery business..." 
-            value={formData.businessDescription} 
+          <textarea
+            name="businessDescription"
+            placeholder="Tell us about your jewellery business..."
+            value={formData.businessDescription}
             onChange={handleChange}
-            onFocus={() => handleFocus('businessDescription')}
-            onBlur={() => handleBlur('businessDescription')}
-            className={`${isFocused.businessDescription ? styles.focused : ''}`}
-            rows={2} 
+            onFocus={() => handleFocus("businessDescription")}
+            onBlur={() => handleBlur("businessDescription")}
+            className={`${isFocused.businessDescription ? styles.focused : ""}`}
+            rows={2}
           />
         </div>
 
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
-            <label>GST Number <span className={styles.optional}>(Optional)</span></label>
+            <label>
+              GST Number <span className={styles.optional}>(Optional)</span>
+            </label>
             <input
               name="gstNumber"
               placeholder="22AAAAA0000A1Z5"
               value={formData.gstNumber}
               onChange={(e) => {
-                const value = e.target.value.toUpperCase().replace(/\s/g, '');
-                setFormData(prev => ({ ...prev, gstNumber: value }));
+                const value = e.target.value.toUpperCase().replace(/\s/g, "");
+                setFormData((prev) => ({ ...prev, gstNumber: value }));
               }}
-              onFocus={() => handleFocus('gstNumber')}
-              onBlur={() => handleBlur('gstNumber')}
-              className={`${isFocused.gstNumber ? styles.focused : ''}`}
+              onFocus={() => handleFocus("gstNumber")}
+              onBlur={() => handleBlur("gstNumber")}
+              className={`${isFocused.gstNumber ? styles.focused : ""}`}
             />
-            <small className={styles.hint}>Enter GST number if you have one (optional)</small>
+            <small className={styles.hint}>
+              Enter GST number if you have one (optional)
+            </small>
           </div>
           <div className={styles.formGroup}>
             <label>Website</label>
-            <input 
-              name="website" 
-              placeholder="https://yourstore.com" 
-              value={formData.website} 
+            <input
+              name="website"
+              placeholder="https://yourstore.com"
+              value={formData.website}
               onChange={handleChange}
-              onFocus={() => handleFocus('website')}
-              onBlur={() => handleBlur('website')}
-              className={`${isFocused.website ? styles.focused : ''}`}
+              onFocus={() => handleFocus("website")}
+              onBlur={() => handleBlur("website")}
+              className={`${isFocused.website ? styles.focused : ""}`}
             />
           </div>
         </div>
 
         <div className={styles.formGroup}>
-          <label>GST Certificate <span className={styles.optional}>(Optional)</span></label>
+          <label>
+            GST Certificate <span className={styles.optional}>(Optional)</span>
+          </label>
           <div className={styles.fileUploadWrapper}>
-            <div className={`${styles.fileUploadArea} ${gstPreview ? styles.hasFile : ''}`}>
+            <div
+              className={`${styles.fileUploadArea} ${gstPreview ? styles.hasFile : ""}`}
+            >
               {gstPreview ? (
                 <div className={styles.filePreview}>
                   <img src={gstPreview} alt="GST Certificate" />
-                  <button 
-                    type="button" 
-                    className={styles.removeFile} 
-                    onClick={() => { 
-                      setFormData(prev => ({ ...prev, gstCertificate: null })); 
-                      setGstPreview(null); 
+                  <button
+                    type="button"
+                    className={styles.removeFile}
+                    onClick={() => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        gstCertificate: null,
+                      }));
+                      setGstPreview(null);
                     }}
                   >
                     ×
@@ -774,52 +896,56 @@ const SellerRegister = () => {
                   <span>JPG, PNG, PDF (Max 5MB)</span>
                 </>
               )}
-              <input 
-                type="file" 
-                name="gstCertificate" 
-                accept="image/*,.pdf" 
-                onChange={handleChange} 
-                className={styles.fileInput} 
+              <input
+                type="file"
+                name="gstCertificate"
+                accept="image/*,.pdf"
+                onChange={handleChange}
+                className={styles.fileInput}
               />
             </div>
           </div>
         </div>
 
         <div className={styles.formGroup}>
-          <label>Categories <span className={styles.required}>*</span></label>
+          <label>
+            Categories <span className={styles.required}>*</span>
+          </label>
           <div className={styles.categoryGrid}>
             {categoryOptions.map((cat) => (
               <button
                 key={cat.value}
                 type="button"
-                className={`${styles.categoryBtn} ${formData.productCategories.includes(cat.value) ? styles.selected : ''}`}
+                className={`${styles.categoryBtn} ${formData.productCategories.includes(cat.value) ? styles.selected : ""}`}
                 onClick={() => handleCategoryToggle(cat.value)}
               >
                 {cat.label}
               </button>
             ))}
           </div>
-          {errors.productCategories && <span className={styles.errorText}>{errors.productCategories}</span>}
+          {errors.productCategories && (
+            <span className={styles.errorText}>{errors.productCategories}</span>
+          )}
         </div>
 
         <div className={styles.formGroup}>
           <label>Social Links</label>
           <div className={styles.socialLinks}>
-            <input 
-              placeholder="Facebook URL" 
-              value={formData.socialLinks.facebook} 
-              onChange={(e) => handleSocialLink('facebook', e.target.value)}
-              onFocus={() => handleFocus('facebook')}
-              onBlur={() => handleBlur('facebook')}
-              className={`${isFocused.facebook ? styles.focused : ''}`}
+            <input
+              placeholder="Facebook URL"
+              value={formData.socialLinks.facebook}
+              onChange={(e) => handleSocialLink("facebook", e.target.value)}
+              onFocus={() => handleFocus("facebook")}
+              onBlur={() => handleBlur("facebook")}
+              className={`${isFocused.facebook ? styles.focused : ""}`}
             />
-            <input 
-              placeholder="Instagram URL" 
-              value={formData.socialLinks.instagram} 
-              onChange={(e) => handleSocialLink('instagram', e.target.value)}
-              onFocus={() => handleFocus('instagram')}
-              onBlur={() => handleBlur('instagram')}
-              className={`${isFocused.instagram ? styles.focused : ''}`}
+            <input
+              placeholder="Instagram URL"
+              value={formData.socialLinks.instagram}
+              onChange={(e) => handleSocialLink("instagram", e.target.value)}
+              onFocus={() => handleFocus("instagram")}
+              onBlur={() => handleBlur("instagram")}
+              className={`${isFocused.instagram ? styles.focused : ""}`}
             />
           </div>
         </div>
@@ -834,40 +960,73 @@ const SellerRegister = () => {
     <div className={styles.stepContent}>
       <div className={styles.stepHeader}>
         <h2 className={styles.stepTitle}>Review & Submit</h2>
-        <p className={styles.stepDesc}>Please review your information before submitting</p>
+        <p className={styles.stepDesc}>
+          Please review your information before submitting
+        </p>
       </div>
 
       <div className={styles.formFieldsWrapper}>
         <div className={styles.reviewSection}>
           <h4>Personal Information</h4>
           <div className={styles.reviewGrid}>
-            <div><strong>Name:</strong> {formData.firstName} {formData.lastName}</div>
-            <div><strong>Email:</strong> {formData.email}</div>
-            <div><strong>Phone:</strong> {formData.phone}</div>
+            <div>
+              <strong>Name:</strong> {formData.firstName} {formData.lastName}
+            </div>
+            <div>
+              <strong>Email:</strong> {formData.email}
+            </div>
+            <div>
+              <strong>Phone:</strong> {formData.phone}
+            </div>
           </div>
         </div>
 
         <div className={styles.reviewSection}>
           <h4>KYC Documents</h4>
           <div className={styles.reviewGrid}>
-            <div><strong>PAN:</strong> {formData.panNumber}</div>
-            <div><strong>Aadhaar:</strong> {formData.aadhaarNumber}</div>
-            <div><strong>GST:</strong> {formData.gstNumber || 'Not provided'}</div>
+            <div>
+              <strong>PAN:</strong> {formData.panNumber}
+            </div>
+            <div>
+              <strong>Aadhaar:</strong> {formData.aadhaarNumber}
+            </div>
+            <div>
+              <strong>GST:</strong> {formData.gstNumber || "Not provided"}
+            </div>
           </div>
         </div>
 
         <div className={styles.reviewSection}>
           <h4>Store Information</h4>
           <div className={styles.reviewGrid}>
-            <div><strong>Store:</strong> {formData.storeName}</div>
-            <div><strong>Categories:</strong> {formData.productCategories.join(', ')}</div>
+            <div>
+              <strong>Store:</strong> {formData.storeName}
+            </div>
+            <div>
+              <strong>Categories:</strong>{" "}
+              {formData.productCategories.join(", ")}
+            </div>
           </div>
         </div>
 
         <div className={styles.termsGroup}>
           <label className={styles.checkboxLabel}>
-            <input type="checkbox" name="termsAccepted" checked={formData.termsAccepted} onChange={handleChange} />
-            <span>I agree to the <Link to="/terms" target="_blank">Terms of Service</Link> and <Link to="/privacy" target="_blank">Privacy Policy</Link></span>
+            <input
+              type="checkbox"
+              name="termsAccepted"
+              checked={formData.termsAccepted}
+              onChange={handleChange}
+            />
+            <span>
+              I agree to the{" "}
+              <Link to="/terms" target="_blank">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link to="/privacy" target="_blank">
+                Privacy Policy
+              </Link>
+            </span>
           </label>
         </div>
       </div>
@@ -879,20 +1038,19 @@ const SellerRegister = () => {
   // ============================================
   return (
     <>
-      <Header/>
+      <Header />
       <div className={styles.page}>
         <div className={styles.container}>
           <div className={styles.card}>
             {/* Left Side - Image with overlay effects */}
             <div className={styles.leftPanel}>
               <div className={styles.imageWrapper}>
-                <img 
-                  src={stepImages[currentStep]} 
-                  alt={`Step ${currentStep} - ${stepInfo[currentStep].title}`} 
-                  className={styles.sideImage} 
+                <img
+                  src={stepImages[currentStep]}
+                  alt={`Step ${currentStep} - ${stepInfo[currentStep].title}`}
+                  className={styles.sideImage}
                 />
                 <div className={styles.imageOverlay} />
-               
               </div>
             </div>
 
@@ -903,7 +1061,9 @@ const SellerRegister = () => {
                   <FiAward className={styles.headerIconSvg} />
                 </div> */}
                 <h1 className={styles.title}>Become a Seller</h1>
-                <p className={styles.subtitle}>Complete your registration to start selling on Aurevian</p>
+                <p className={styles.subtitle}>
+                  Complete your registration to start selling on Aurevian
+                </p>
               </div>
 
               {renderStepIndicator()}
@@ -913,18 +1073,27 @@ const SellerRegister = () => {
 
                 <div className={styles.navigation}>
                   {currentStep > 1 && (
-                    <button type="button" onClick={handlePrevious} className={styles.prevBtn} disabled={loading}>
+                    <button
+                      type="button"
+                      onClick={handlePrevious}
+                      className={styles.prevBtn}
+                      disabled={loading}
+                    >
                       <FiArrowLeft /> Back
                     </button>
                   )}
 
-                  <button type="submit" className={styles.nextBtn} disabled={loading}>
+                  <button
+                    type="submit"
+                    className={styles.nextBtn}
+                    disabled={loading}
+                  >
                     {loading ? (
                       <span className={styles.loader}></span>
                     ) : currentStep === 5 ? (
-                      'Submit Application'
+                      "Submit Application"
                     ) : (
-                      'Next Step'
+                      "Next Step"
                     )}
                     {currentStep < 5 && !loading && <FiArrowRight />}
                   </button>
@@ -932,13 +1101,16 @@ const SellerRegister = () => {
               </form>
 
               <div className={styles.footer}>
-                <p>Already have an account? <Link to="/seller/login">Sign in here</Link></p>
+                <p>
+                  Already have an account?{" "}
+                  <Link to="/seller/login">Sign in here</Link>
+                </p>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </>
   );
 };

@@ -1,3 +1,5 @@
+// src/redux/slices/sellerSlice.js
+
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -99,7 +101,7 @@ export const verifyPhoneOTP = createAsyncThunk(
   },
 );
 
-// Resend OTP
+// Resend OTP — ✅ PATCHED: uses real per-channel error text
 export const resendOTP = createAsyncThunk(
   "seller/resendOTP",
   async ({ contact, type }, { rejectWithValue }) => {
@@ -109,34 +111,21 @@ export const resendOTP = createAsyncThunk(
         type,
       });
       if (response.data.success) {
-        if (response.data.otpDeliveryStatus) {
-          const { email, phone } = response.data.otpDeliveryStatus;
-          console.log(
-            "📊 Resend OTP Delivery Status:",
-            response.data.otpDeliveryStatus,
-          );
+        const delivered = response.data.otpDeliveryStatus?.[type];
+        const errorDetail = response.data.otpDeliveryDetail?.[`${type}Error`];
 
-          if (email && phone) {
-            toast.success("✅ OTPs resent successfully!");
-          } else if (email && !phone) {
-            toast.error(
-              "⚠️ Email OTP resent, but phone OTP failed. Please check your phone number.",
-            );
-          } else if (!email && phone) {
-            toast.error(
-              "⚠️ Phone OTP resent, but email OTP failed. Please check your email.",
-            );
-          } else {
-            toast.error("❌ Failed to resend OTPs. Please try again.");
-          }
+        if (delivered) {
+          toast.success(`OTP resent to your ${type}!`);
         } else {
-          toast.success(
-            `OTP sent to your ${type === "email" ? "email" : "phone"}!`,
+          // ✅ Don't say "sent" when it wasn't — surface the real reason.
+          toast.error(
+            errorDetail || `Could not resend ${type} OTP. Please try again.`,
           );
         }
         return response.data;
       }
     } catch (error) {
+      // ✅ Covers the new 429 cooldown response from the backend too
       const message = error.response?.data?.message || "Failed to resend OTP";
       toast.error(message);
       return rejectWithValue(message);
@@ -400,6 +389,7 @@ const initialState = {
   registrationData: null,
   verificationStatus: null,
   otpDeliveryStatus: null,
+  otpDeliveryDetail: null, // ✅ NEW — { emailError, phoneError, phoneErrorCode }
   // ✅ NEW — Sales Performance chart state
   performance: {
     period: "this-month",
@@ -425,6 +415,7 @@ const sellerSlice = createSlice({
       state.recentActivities = [];
       state.status = "idle";
       state.otpDeliveryStatus = null;
+      state.otpDeliveryDetail = null; // ✅ NEW
       state.performance = {
         period: "this-month",
         data: [],
@@ -434,6 +425,7 @@ const sellerSlice = createSlice({
     },
     clearOtpDeliveryStatus: (state) => {
       state.otpDeliveryStatus = null;
+      state.otpDeliveryDetail = null; // ✅ NEW
     },
   },
   extraReducers: (builder) => {
@@ -446,6 +438,7 @@ const sellerSlice = createSlice({
         state.error = null;
         state.status = "loading";
         state.otpDeliveryStatus = null;
+        state.otpDeliveryDetail = null; // ✅ NEW
       })
       .addCase(registerSeller.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -455,6 +448,7 @@ const sellerSlice = createSlice({
         state.isAuthenticated = false;
         state.status = "succeeded";
         state.otpDeliveryStatus = action.payload.otpDeliveryStatus || null;
+        state.otpDeliveryDetail = action.payload.otpDeliveryDetail || null; // ✅ NEW
 
         if (state.otpDeliveryStatus) {
           const { email, phone } = state.otpDeliveryStatus;
@@ -479,6 +473,7 @@ const sellerSlice = createSlice({
         state.error = action.payload;
         state.status = "failed";
         state.otpDeliveryStatus = null;
+        state.otpDeliveryDetail = null; // ✅ NEW
       })
 
       // ============================================
@@ -605,22 +600,26 @@ const sellerSlice = createSlice({
       })
 
       // ============================================
-      // RESEND OTP
+      // RESEND OTP — ✅ UPDATED: store detail
       // ============================================
       .addCase(resendOTP.pending, (state) => {
         state.isLoading = true;
         state.error = null;
         state.otpDeliveryStatus = null;
+        state.otpDeliveryDetail = null; // ✅ NEW
       })
       .addCase(resendOTP.fulfilled, (state, action) => {
         state.isLoading = false;
         state.otpDeliveryStatus = action.payload.otpDeliveryStatus || null;
+        state.otpDeliveryDetail = action.payload.otpDeliveryDetail || null; // ✅ NEW
         state.status = "succeeded";
       })
       .addCase(resendOTP.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
         state.status = "failed";
+        state.otpDeliveryStatus = null;
+        state.otpDeliveryDetail = null; // ✅ NEW
       })
 
       // ============================================
@@ -678,7 +677,7 @@ const sellerSlice = createSlice({
       })
 
       // ============================================
-      // LOGOUT
+      // LOGOUT — ✅ UPDATED: clear otpDeliveryDetail
       // ============================================
       .addCase(sellerLogout.fulfilled, (state) => {
         state.seller = null;
@@ -688,6 +687,7 @@ const sellerSlice = createSlice({
         state.recentActivities = [];
         state.status = "idle";
         state.otpDeliveryStatus = null;
+        state.otpDeliveryDetail = null; // ✅ NEW
         state.performance = {
           period: "this-month",
           data: [],

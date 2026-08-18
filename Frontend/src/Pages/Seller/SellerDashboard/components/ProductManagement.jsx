@@ -26,6 +26,7 @@ import {
   deleteProduct,
   fetchProductLimitStatus,
   fetchPlacementCounts,
+  setSelectedProduct, // ✅ NEW — import setSelectedProduct action
 } from "../../../../redux/slices/sellerProductSlice";
 
 // Debounce utility
@@ -89,7 +90,7 @@ const ProductManagement = () => {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedProduct, setSelectedProductLocal] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [expandedRows, setExpandedRows] = useState({});
   const [selectedRows, setSelectedRows] = useState({});
@@ -127,7 +128,12 @@ const ProductManagement = () => {
     }, 800);
 
     return () => clearTimeout(timer);
-  }, [currentPage, debouncedStatusFilter, debouncedCategoryFilter, debouncedSearchTerm]);
+  }, [
+    currentPage,
+    debouncedStatusFilter,
+    debouncedCategoryFilter,
+    debouncedSearchTerm,
+  ]);
 
   const fetchProductData = () => {
     const params = {
@@ -157,22 +163,23 @@ const ProductManagement = () => {
   };
 
   const handleEdit = (product) => {
+    dispatch(setSelectedProduct(product)); // ✅ NEW — hand the already-loaded product to the form
     navigate(`/seller/dashboard/products/edit/${product._id}`);
   };
 
   const handleDeleteClick = (product) => {
-    setSelectedProduct(product);
+    setSelectedProductLocal(product);
     setShowDeleteModal(true);
   };
 
   const handleConfirmDelete = async () => {
-    if (!selectedProduct) return;
+    if (!selectedProductLocal) return;
     setIsDeleting(true);
     try {
-      await dispatch(deleteProduct(selectedProduct._id)).unwrap();
+      await dispatch(deleteProduct(selectedProductLocal._id)).unwrap();
       toast.success("Product archived successfully");
       setShowDeleteModal(false);
-      setSelectedProduct(null);
+      setSelectedProductLocal(null);
       fetchProductData();
       dispatch(fetchPlacementCounts());
     } catch (error) {
@@ -195,23 +202,23 @@ const ProductManagement = () => {
   };
 
   const toggleRowExpand = (productId) => {
-    setExpandedRows(prev => ({
+    setExpandedRows((prev) => ({
       ...prev,
-      [productId]: !prev[productId]
+      [productId]: !prev[productId],
     }));
   };
 
   const toggleRowSelect = (productId) => {
-    setSelectedRows(prev => ({
+    setSelectedRows((prev) => ({
       ...prev,
-      [productId]: !prev[productId]
+      [productId]: !prev[productId],
     }));
   };
 
   const toggleAllSelect = () => {
-    const allSelected = products.every(p => selectedRows[p._id]);
+    const allSelected = products.every((p) => selectedRows[p._id]);
     const newState = {};
-    products.forEach(p => {
+    products.forEach((p) => {
       newState[p._id] = !allSelected;
     });
     setSelectedRows(newState);
@@ -268,7 +275,9 @@ const ProductManagement = () => {
   };
 
   const handleBulkDelete = () => {
-    const selectedIds = Object.keys(selectedRows).filter(id => selectedRows[id]);
+    const selectedIds = Object.keys(selectedRows).filter(
+      (id) => selectedRows[id],
+    );
     if (selectedIds.length === 0) {
       toast.error("Please select products to delete");
       return;
@@ -287,7 +296,7 @@ const ProductManagement = () => {
     setIsLoadingMore(true);
     let currentCount = visibleCount;
     const maxCount = Math.min(visibleCount + 10, products.length);
-    
+
     const loadNextBatch = () => {
       if (currentCount < maxCount) {
         currentCount++;
@@ -300,7 +309,7 @@ const ProductManagement = () => {
         }
       }
     };
-    
+
     setTimeout(loadNextBatch, 200);
   }, [visibleCount, products.length, isLoadingMore, allProductsLoaded]);
 
@@ -313,10 +322,10 @@ const ProductManagement = () => {
           loadMoreProducts();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
-    const sentinel = document.getElementById('products-sentinel');
+    const sentinel = document.getElementById("products-sentinel");
     if (sentinel) {
       observer.observe(sentinel);
     }
@@ -328,19 +337,24 @@ const ProductManagement = () => {
     };
   }, [visibleProducts, allProductsLoaded, loadMoreProducts, isLoading]);
 
-  const selectedCount = Object.keys(selectedRows).filter(id => selectedRows[id]).length;
+  const selectedCount = Object.keys(selectedRows).filter(
+    (id) => selectedRows[id],
+  ).length;
   const showLoadingState = isLoading || isThrottled || showSkeleton;
 
   const renderTableRow = (product, index) => {
     const isExpanded = expandedRows[product._id];
     const isSelected = selectedRows[product._id];
-    const displayPrice = product.pricing?.salePrice || product.pricing?.originalPrice;
-    const hasDiscount = product.pricing?.salePrice && product.pricing?.salePrice < product.pricing?.originalPrice;
+    const displayPrice =
+      product.pricing?.salePrice || product.pricing?.originalPrice;
+    const hasDiscount =
+      product.pricing?.salePrice &&
+      product.pricing?.salePrice < product.pricing?.originalPrice;
     const serialNumber = getSerialNumber(index);
 
     return (
       <React.Fragment key={product._id}>
-        <tr 
+        <tr
           className={`${styles.tableRow} ${isExpanded ? styles.expanded : ""}`}
           onClick={() => handleCardClick(product)}
         >
@@ -348,9 +362,12 @@ const ProductManagement = () => {
           <td className={styles.indexCell} onClick={(e) => e.stopPropagation()}>
             <span className={styles.indexNumber}>{serialNumber}</span>
           </td>
-          
+
           {/* Checkbox */}
-          <td className={styles.checkboxCell} onClick={(e) => e.stopPropagation()}>
+          <td
+            className={styles.checkboxCell}
+            onClick={(e) => e.stopPropagation()}
+          >
             <input
               type="checkbox"
               checked={isSelected || false}
@@ -358,7 +375,7 @@ const ProductManagement = () => {
               className={styles.checkbox}
             />
           </td>
-          
+
           {/* Image */}
           <td className={styles.imageCell} onClick={(e) => e.stopPropagation()}>
             <img
@@ -370,21 +387,28 @@ const ProductManagement = () => {
               }}
             />
           </td>
-          
+
           {/* Product Name & SKU */}
           <td className={styles.nameCell}>
-            <div className={styles.productNameCompact} title={product.productName}>
+            <div
+              className={styles.productNameCompact}
+              title={product.productName}
+            >
               {product.productName}
             </div>
-            <div className={styles.productSku}>SKU: {product.sku || 'N/A'}</div>
+            <div className={styles.productSku}>SKU: {product.sku || "N/A"}</div>
           </td>
-          
+
           {/* Category */}
           <td className={styles.categoryCell}>
+<<<<<<< Updated upstream
             <span className={styles.categoryIconMobile}><FiTag size={11} /></span>
             {product.category?.categoryData?.label || 'Uncategorized'}
+=======
+            {product.category?.categoryData?.label || "Uncategorized"}
+>>>>>>> Stashed changes
           </td>
-          
+
           {/* Price */}
           <td className={styles.priceCell}>
             <div className={styles.priceCompact}>
@@ -399,41 +423,61 @@ const ProductManagement = () => {
               {hasDiscount && (
                 <span className={styles.discountCompact}>
                   {Math.round(
-                    ((product.pricing.originalPrice - product.pricing.salePrice) /
-                      product.pricing.originalPrice) * 100
-                  )}% OFF
+                    ((product.pricing.originalPrice -
+                      product.pricing.salePrice) /
+                      product.pricing.originalPrice) *
+                      100,
+                  )}
+                  % OFF
                 </span>
               )}
             </div>
           </td>
-          
+
           {/* Stock */}
           <td className={styles.stockCell}>
-            <span className={product.inventory?.stockQuantity > 0 ? styles.inStock : styles.outOfStock}>
-              {product.inventory?.stockQuantity > 0 ? product.inventory.stockQuantity : '0'}
+            <span
+              className={
+                product.inventory?.stockQuantity > 0
+                  ? styles.inStock
+                  : styles.outOfStock
+              }
+            >
+              {product.inventory?.stockQuantity > 0
+                ? product.inventory.stockQuantity
+                : "0"}
             </span>
           </td>
-          
+
           {/* Status */}
           <td className={styles.statusCell}>
             {getStatusBadge(product.status)}
           </td>
-          
+
           {/* Placements */}
           <td className={styles.placementsCell}>
             {product.placements && product.placements.length > 0 ? (
               <span className={styles.placementTags}>
+<<<<<<< Updated upstream
                 <FiGrid size={11} className={styles.placementIconMobile} />
                 {product.placements.slice(0, 2).join(', ')}
                 {product.placements.length > 2 && ` +${product.placements.length - 2}`}
+=======
+                {product.placements.slice(0, 2).join(", ")}
+                {product.placements.length > 2 &&
+                  ` +${product.placements.length - 2}`}
+>>>>>>> Stashed changes
               </span>
             ) : (
               <span className={styles.noPlacements}>—</span>
             )}
           </td>
-          
+
           {/* Actions */}
-          <td className={styles.actionsCell} onClick={(e) => e.stopPropagation()}>
+          <td
+            className={styles.actionsCell}
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               className={styles.actionIconBtn}
               onClick={() => handleViewProduct(product)}
@@ -455,12 +499,20 @@ const ProductManagement = () => {
               onClick={() => toggleRowExpand(product._id)}
               title="Expand Details"
             >
+<<<<<<< Updated upstream
               {isExpanded ? <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
               <span className={styles.actionBtnLabel}>{isExpanded ? "Less" : "More"}</span>
+=======
+              {isExpanded ? (
+                <FiChevronUp size={16} />
+              ) : (
+                <FiChevronDown size={16} />
+              )}
+>>>>>>> Stashed changes
             </button>
           </td>
         </tr>
-        
+
         {/* Expanded Row */}
         {isExpanded && (
           <tr className={styles.expandedRow}>
@@ -471,38 +523,60 @@ const ProductManagement = () => {
                     <h4>Product Details</h4>
                     <div className={styles.expandedItem}>
                       <span className={styles.expandedLabel}>Description:</span>
-                      <span className={styles.expandedValue}>{product.description || 'No description'}</span>
+                      <span className={styles.expandedValue}>
+                        {product.description || "No description"}
+                      </span>
                     </div>
                     <div className={styles.expandedItem}>
                       <span className={styles.expandedLabel}>Brand:</span>
-                      <span className={styles.expandedValue}>{product.brand || 'N/A'}</span>
+                      <span className={styles.expandedValue}>
+                        {product.brand || "N/A"}
+                      </span>
                     </div>
                     <div className={styles.expandedItem}>
                       <span className={styles.expandedLabel}>Weight:</span>
-                      <span className={styles.expandedValue}>{product.weight || 'N/A'}</span>
+                      <span className={styles.expandedValue}>
+                        {product.weight || "N/A"}
+                      </span>
                     </div>
                     <div className={styles.expandedItem}>
                       <span className={styles.expandedLabel}>Material:</span>
-                      <span className={styles.expandedValue}>{product.material || 'N/A'}</span>
+                      <span className={styles.expandedValue}>
+                        {product.material || "N/A"}
+                      </span>
                     </div>
                   </div>
                   <div className={styles.expandedSection}>
                     <h4>Pricing & Inventory</h4>
                     <div className={styles.expandedItem}>
                       <span className={styles.expandedLabel}>Sale Price:</span>
-                      <span className={styles.expandedValue}>₹{product.pricing?.salePrice?.toLocaleString() || 'N/A'}</span>
+                      <span className={styles.expandedValue}>
+                        ₹{product.pricing?.salePrice?.toLocaleString() || "N/A"}
+                      </span>
                     </div>
                     <div className={styles.expandedItem}>
-                      <span className={styles.expandedLabel}>Original Price:</span>
-                      <span className={styles.expandedValue}>₹{product.pricing?.originalPrice?.toLocaleString() || 'N/A'}</span>
+                      <span className={styles.expandedLabel}>
+                        Original Price:
+                      </span>
+                      <span className={styles.expandedValue}>
+                        ₹
+                        {product.pricing?.originalPrice?.toLocaleString() ||
+                          "N/A"}
+                      </span>
                     </div>
                     <div className={styles.expandedItem}>
                       <span className={styles.expandedLabel}>Stock:</span>
-                      <span className={styles.expandedValue}>{product.inventory?.stockQuantity || 0} units</span>
+                      <span className={styles.expandedValue}>
+                        {product.inventory?.stockQuantity || 0} units
+                      </span>
                     </div>
                     <div className={styles.expandedItem}>
-                      <span className={styles.expandedLabel}>Low Stock Alert:</span>
-                      <span className={styles.expandedValue}>{product.inventory?.lowStockThreshold || 'Not set'}</span>
+                      <span className={styles.expandedLabel}>
+                        Low Stock Alert:
+                      </span>
+                      <span className={styles.expandedValue}>
+                        {product.inventory?.lowStockThreshold || "Not set"}
+                      </span>
                     </div>
                   </div>
                   <div className={styles.expandedSection}>
@@ -510,17 +584,22 @@ const ProductManagement = () => {
                     <div className={styles.expandedItem}>
                       <span className={styles.expandedLabel}>Placements:</span>
                       <span className={styles.expandedValue}>
-                        {product.placements && product.placements.length > 0 
-                          ? product.placements.join(', ') 
-                          : 'None'}
+                        {product.placements && product.placements.length > 0
+                          ? product.placements.join(", ")
+                          : "None"}
                       </span>
                     </div>
                     <div className={styles.expandedItem}>
                       <span className={styles.expandedLabel}>Labels:</span>
                       <span className={styles.expandedValue}>
-                        {product.labels && Object.keys(product.labels).filter(k => product.labels[k]).length > 0
-                          ? Object.keys(product.labels).filter(k => product.labels[k]).join(', ')
-                          : 'None'}
+                        {product.labels &&
+                        Object.keys(product.labels).filter(
+                          (k) => product.labels[k],
+                        ).length > 0
+                          ? Object.keys(product.labels)
+                              .filter((k) => product.labels[k])
+                              .join(", ")
+                          : "None"}
                       </span>
                     </div>
                     <div className={styles.expandedItem}>
@@ -530,7 +609,9 @@ const ProductManagement = () => {
                       </span>
                     </div>
                     <div className={styles.expandedItem}>
-                      <span className={styles.expandedLabel}>Last Updated:</span>
+                      <span className={styles.expandedLabel}>
+                        Last Updated:
+                      </span>
                       <span className={styles.expandedValue}>
                         {new Date(product.updatedAt).toLocaleDateString()}
                       </span>
@@ -599,7 +680,8 @@ const ProductManagement = () => {
           </div>
           <div className={styles.modalBody}>
             <p>
-              Are you sure you want to archive "{selectedProduct?.productName}"?
+              Are you sure you want to archive "
+              {selectedProductLocal?.productName}"?
             </p>
             <p className={styles.modalWarning}>
               This product will be hidden from your store but you can restore it
@@ -938,10 +1020,15 @@ const ProductManagement = () => {
         <div className={styles.tableContainer}>
           <div className={styles.tableToolbar}>
             <span className={styles.selectedInfo}>
-              {selectedCount > 0 ? `${selectedCount} product${selectedCount > 1 ? 's' : ''} selected` : ''}
+              {selectedCount > 0
+                ? `${selectedCount} product${selectedCount > 1 ? "s" : ""} selected`
+                : ""}
             </span>
             {selectedCount > 0 && (
-              <button className={styles.bulkDeleteBtn} onClick={handleBulkDelete}>
+              <button
+                className={styles.bulkDeleteBtn}
+                onClick={handleBulkDelete}
+              >
                 <FiTrash2 size={14} />
                 Delete Selected
               </button>
@@ -956,7 +1043,10 @@ const ProductManagement = () => {
                     type="checkbox"
                     className={styles.checkbox}
                     onChange={toggleAllSelect}
-                    checked={products.length > 0 && products.every(p => selectedRows[p._id])}
+                    checked={
+                      products.length > 0 &&
+                      products.every((p) => selectedRows[p._id])
+                    }
                   />
                 </th>
                 <th className={styles.imageCell}>Image</th>
@@ -970,7 +1060,9 @@ const ProductManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {visibleProducts.map((product, index) => renderTableRow(product, index))}
+              {visibleProducts.map((product, index) =>
+                renderTableRow(product, index),
+              )}
             </tbody>
           </table>
           {!allProductsLoaded && products.length > visibleCount && (

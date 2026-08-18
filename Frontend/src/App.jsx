@@ -77,7 +77,9 @@ import BlogDetail from "./Pages/UserBlog/BlogDetail.jsx";
 import Profile from "./Pages/Profile/Profile.jsx";
 import Settings from "./Pages/Settings/Settings.jsx";
 
-import SellerKYC from "./Pages/Seller/SellerKYC/SellerKYC";
+// ✅ REMOVED: import SellerKYC from "./Pages/Seller/SellerKYC/SellerKYC";
+// KYC now lives inside the dashboard shell at /seller/dashboard/kyc
+
 import ScrollToTop from "./Pages/Seller/ScrollToTop.jsx";
 
 import Shop from "./Components/Shop/shop.jsx";
@@ -131,7 +133,7 @@ const ROUTES = {
   SELLER_DASHBOARD: "/seller/dashboard",
   SELLER_PROFILE: "/seller/profile",
   SELLER_DOCUMENTS: "/seller/documents",
-  SELLER_KYC: "/seller/kyc",
+  // SELLER_KYC: "/seller/kyc", // ✅ REMOVED — now redirected to /seller/dashboard/kyc
   SELLER_ORDERS: "/seller/orders",
   SELLER_PRODUCTS: "/seller/dashboard/products", // Updated: Products inside dashboard
   SELLER_FORGOT_PASSWORD: "/seller/forgot-password",
@@ -507,6 +509,7 @@ const App = () => {
                   - /seller/dashboard/orders
                   - /seller/dashboard/earnings
                   - /seller/dashboard/upgrade
+                  - /seller/dashboard/kyc ← KYC now lives here!
                   etc.
                   ============================================ */}
             <Route
@@ -521,15 +524,12 @@ const App = () => {
             />
 
             {/* ============================================
-                  SELLER KYC ROUTE
+                  SELLER KYC ROUTE — now lives inside the dashboard
+                  shell (SellerDashboard.jsx). Redirect old URL.
                   ============================================ */}
             <Route
               path="/seller/kyc"
-              element={
-                <SellerRoute>
-                  <SellerKYC />
-                </SellerRoute>
-              }
+              element={<Navigate to="/seller/dashboard/kyc" replace />}
             />
 
             {/* ============================================
