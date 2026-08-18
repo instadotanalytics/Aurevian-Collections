@@ -56,7 +56,7 @@ const CopyField = ({ value, label }) => {
   );
 };
 
-const OrderDetailView = ({ order, justPlaced = false }) => {
+const OrderDetailView = ({ order, justPlaced = true }) => {
   if (!order) return null;
 
   const {
