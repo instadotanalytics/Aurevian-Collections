@@ -310,8 +310,7 @@
 .summaryTotal span:last-child {
   display: flex;
   align-items: center;
-  font-family: "Cormorant Garamond", serif;
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--gold-deep);
 }

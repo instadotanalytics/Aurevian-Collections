@@ -110,11 +110,14 @@ const OrdersPage = () => {
       <div className={styles.ordersPage}>
         <div className={styles.container}>
           <div className={styles.pageTop}>
-            <h1 className={styles.pageTitle}>My Orders</h1>
-            <p className={styles.pageSubtitle}>
-              Track, view and manage all your orders in one place.
-            </p>
-          </div>
+  <div className={styles.eyebrow}>MY ORDERS</div>
+
+  <h1 className={styles.pageTitle}>Your Orders</h1>
+
+  <p className={styles.pageSubtitle}>
+    Track, view and manage all your orders in one place.
+  </p>
+</div>
 
           <div className={styles.layoutGrid}>
             <main className={styles.mainPanel}>
