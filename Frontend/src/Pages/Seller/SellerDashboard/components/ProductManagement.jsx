@@ -401,12 +401,12 @@ const ProductManagement = () => {
 
           {/* Category */}
           <td className={styles.categoryCell}>
-<<<<<<< Updated upstream
+
             <span className={styles.categoryIconMobile}><FiTag size={11} /></span>
             {product.category?.categoryData?.label || 'Uncategorized'}
-=======
+
             {product.category?.categoryData?.label || "Uncategorized"}
->>>>>>> Stashed changes
+
           </td>
 
           {/* Price */}
@@ -458,15 +458,12 @@ const ProductManagement = () => {
           <td className={styles.placementsCell}>
             {product.placements && product.placements.length > 0 ? (
               <span className={styles.placementTags}>
-<<<<<<< Updated upstream
                 <FiGrid size={11} className={styles.placementIconMobile} />
                 {product.placements.slice(0, 2).join(', ')}
                 {product.placements.length > 2 && ` +${product.placements.length - 2}`}
-=======
                 {product.placements.slice(0, 2).join(", ")}
                 {product.placements.length > 2 &&
                   ` +${product.placements.length - 2}`}
->>>>>>> Stashed changes
               </span>
             ) : (
               <span className={styles.noPlacements}>—</span>
@@ -499,16 +496,15 @@ const ProductManagement = () => {
               onClick={() => toggleRowExpand(product._id)}
               title="Expand Details"
             >
-<<<<<<< Updated upstream
+
               {isExpanded ? <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
               <span className={styles.actionBtnLabel}>{isExpanded ? "Less" : "More"}</span>
-=======
               {isExpanded ? (
                 <FiChevronUp size={16} />
               ) : (
                 <FiChevronDown size={16} />
               )}
->>>>>>> Stashed changes
+
             </button>
           </td>
         </tr>
