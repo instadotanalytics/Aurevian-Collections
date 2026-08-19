@@ -15,7 +15,7 @@ import {
 } from "react-icons/fi";
 import Header from "../Pages/Layout/Header/Header";
 import Footer from "../Pages/Layout/Footer/Footer";
-import logo from "../assets/Aurevianlogo.png";
+import logo from "../assets/newlogo1.png";
 import styles from "./ResetPassword.module.css";
 
 /* ------------------------------------------------------------------

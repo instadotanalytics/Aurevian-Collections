@@ -17,6 +17,7 @@
   --gold: #b3873f;
   --gold-light: #d9b872;
   --gold-dark: #8a6626;
+   --gold-deep: #9c7a2e;
   --ink: #1a1714;
   --ink-soft: #4a4438;
   --text-muted: #7c7364;
@@ -145,7 +146,7 @@
   font-weight: 400;
   letter-spacing: 0.35em;
   text-transform: uppercase;
-  color: var(--gold-dark);
+  color: var(--gold-deep);
   margin-bottom: 16px;
   font-family: "Playfair Display", serif;
   font-style: italic;
@@ -162,7 +163,7 @@
 }
 
 .heroTitle span {
-  color: var(--gold-dark);
+  color: var(--gold-deep);
   font-style: italic;
 }
 
@@ -362,7 +363,7 @@
 
 .valueIcon {
   font-size: 30px;
-  color: var(--gold);
+  color: var(--gold-deep);
   opacity: 0.5;
   margin-bottom: 12px;
 }

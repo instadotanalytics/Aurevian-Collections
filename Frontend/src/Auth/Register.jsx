@@ -19,6 +19,7 @@ import {
   FiTruck,
   FiGift,
 } from "react-icons/fi";
+import { MdBadge } from "react-icons/md";
 import Header from "../Pages/Layout/Header/Header";
 import Footer from "../Pages/Layout/Footer/Footer";
 import logo from "../assets/newlogo1.png";
@@ -178,12 +179,13 @@ const Register = () => {
                     <div className={styles.formGroup}>
                       <label className={styles.label}>Last Name</label>
                       <div className={styles.inputWrapper}>
+                        <MdBadge className={styles.inputIcon} />
                         <input
                           type="text"
                           name="lastName"
                           value={formData.lastName}
                           onChange={handleChange}
-                          className={`${styles.input} ${styles.inputNoIcon}`}
+                          className={`${styles.input} ${styles.input}`}
                           placeholder="Last Name"
                           required
                           disabled={isLoading}

@@ -151,9 +151,8 @@
 }
 
 .heroHeadingAccent {
-  font-style: italic;
-  font-weight: 700;
-  background: var(--gold-gradient);
+  font-weight: 600;
+  background: var(--gold-deep);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -246,12 +245,9 @@
 .card {
   width: 100%;
   max-width: 1000px;
-  background: rgba(255, 255, 255, 0.85);
+  background: transparent;
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(201, 162, 75, 0.25);
-  border-radius: 20px;
   padding: 22px 24px;
-  box-shadow: 0 24px 60px rgba(43, 38, 32, 0.14);
   animation: fadeUp 0.7s ease 0.15s both;
 }
 
@@ -347,7 +343,7 @@
   left: 0.78rem;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--gold-1);
+  color: var(--gold-deep);
   pointer-events: none;
   font-size: 17px;
   z-index: 2;
@@ -419,17 +415,16 @@
 
 .submitButton {
   width: 100%;
-  background: var(--gold-gradient);
-  color: #2b2005;
-  padding: 0.62rem;
+  background: var(--gold-deep);
+  color: #fff;
+  padding: 0.72rem;
   border: none;
-  border-radius: 9px;
-  font-size: 0.9rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 0.15rem;
 }
 
 .submitButton:hover:not(:disabled) {
@@ -688,7 +683,7 @@
   height: 64px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.6);
-  border: 1.5px solid var(--gold-1);
+  border: 1.5px solid var(--gold-deep);
   margin-bottom: 20px;
   flex: none;
 }
@@ -700,7 +695,7 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: var(--gold-gradient);
+  background: var(--gold-deep);
   color: #fff;
   font-size: 18px;
 }
