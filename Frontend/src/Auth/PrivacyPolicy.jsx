@@ -385,7 +385,7 @@ const PrivacyPolicy = () => {
               </p>
               <div className={styles.bottomBannerDivider} />
               <span className={styles.bottomBannerFooter}>
-                Aurevian Collections — Since 2020
+                Aurevian Collections 
               </span>
             </div>
           </motion.section>
