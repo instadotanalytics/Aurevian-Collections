@@ -26,7 +26,7 @@ import craftImage from "../assets/jewellery-craft.png";
 import styles from "./Login.module.css";
 import logo from "../assets/newlogo1.png";
 import SEO from "../Components/SEO/SEO";
-
+import { LuArrowRight } from "react-icons/lu";
 
 /* ------------------------------------------------------------------
    Static content — hero features, "why choose us" rows, craft points
@@ -154,12 +154,10 @@ const Login = () => {
               </p>
 
               <div className={styles.heroCtas}>
-                <Link to="/collections" className={styles.ctaPrimary}>
-                  Explore Collection
+                <Link to="/Why-aurevian" className={styles.ctaSecondary}>
+                  Why Aurevian
+                  <LuArrowRight />
                 </Link>
-                <a href="#why-aurevian" className={styles.ctaSecondary}>
-                  Learn More
-                </a>
               </div>
 
               <ul className={styles.heroFeatures} role="list">
@@ -362,6 +360,7 @@ const Login = () => {
 
               <Link to="/collections" className={styles.craftCta}>
                 Explore The Collection
+                 <LuArrowRight />
               </Link>
             </div>
           </div>
