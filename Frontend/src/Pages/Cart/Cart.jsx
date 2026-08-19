@@ -17,7 +17,7 @@ import {
   FiRefreshCw,
 } from "react-icons/fi";
 import { FaRupeeSign, FaGem } from "react-icons/fa";
-import logo from "../../assets/Aurevianlogo.png";
+import logo from "../../assets/newlogo1.png";
 
 import {
   fetchCart,

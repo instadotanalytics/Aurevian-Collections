@@ -81,11 +81,11 @@
 .eyebrow::before {
   width: 26px;
   height: 1px;
-  background: var(--gold);
+  background: var(--gold-deep);
 }
 
 .eyebrowFacet {
-  color: var(--gold);
+  color: var(--gold-deep);
   flex-shrink: 0;
 }
 
@@ -148,7 +148,7 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 1px dashed var(--gold);
+  border: 1px dashed var(--gold-deep);
   opacity: 0.55;
 }
 
@@ -242,7 +242,7 @@
   top: 0;
   bottom: 0;
   width: 2px;
-  background: var(--gold);
+  background: var(--gold-deep);
   transform: scaleY(0);
   transition: transform 0.25s ease;
 }
@@ -264,13 +264,13 @@
 }
 
 .tabButtonActive {
-  background: var(--gold);
+  background: var(--gold-deep);
   color: white;
 }
 
 .tabButtonActive::before {
   transform: scaleY(1);
-  background: var(--gold);
+  background: var(--gold-deep);
 }
 
 
@@ -303,15 +303,15 @@
 .section::before {
   top: -1px;
   left: -1px;
-  border-top: 2px solid var(--gold);
-  border-left: 2px solid var(--gold);
+  border-top: 2px solid var(--gold-deep);
+  border-left: 2px solid var(--gold-deep);
 }
 
 .section::after {
   bottom: -1px;
   right: -1px;
-  border-bottom: 2px solid var(--gold);
-  border-right: 2px solid var(--gold);
+  border-bottom: 2px solid var(--gold-deep);
+  border-right: 2px solid var(--gold-deep);
 }
 
 .sectionHeading {
@@ -330,7 +330,7 @@
 }
 
 .headingFacet {
-  color: var(--gold);
+  color: var(--gold-deep);
   opacity: 0.85;
   flex-shrink: 0;
 }
@@ -384,7 +384,7 @@
 
 .formGroup input:focus,
 .formGroup input:focus-visible {
-  border-bottom: 1.5px solid var(--gold);
+  border-bottom: 1.5px solid var(--gold-deep);
   outline: none;
   box-shadow: 0 1px 0 0 var(--shadow-gold);
 }
@@ -414,7 +414,7 @@
 }
 
 .strengthBarFilled {
-  background: var(--gold);
+  background: var(--gold-deep);
 }
 
 .strengthLabel {
@@ -433,8 +433,8 @@
   gap: 9px;
   padding: 14px 28px;
   border-radius: 2px;
-  border: 1px solid var(--gold);
-  background: var(--gold);
+  border: 1px solid var(--gold-deep);
+  background: var(--gold-deep);
   color: #fff;
   font-family: "Jost", sans-serif;
   font-weight: 500;
@@ -584,9 +584,9 @@
   margin-top: 6px;
   padding: 14px 28px;
   border-radius: 2px;
-  border: 1px solid var(--gold);
+  border: 1px solid var(--gold-deep);
   background: transparent;
-  color: var(--gold);
+  color: var(--gold-deep);
   font-family: "Jost", sans-serif;
   font-weight: 500;
   font-size: 12.5px;
@@ -597,7 +597,7 @@
 }
 
 .dangerBtn:hover:not(:disabled) {
-  background: var(--gold);
+  background: var(--gold-deep);
   color: #fff;
 }
 

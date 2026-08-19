@@ -213,7 +213,7 @@
 .orderIdLabel {
   font-size: 10.5px;
   font-weight: 700;
-  color: var(--gold-bright);
+  color: var(--gold-deep);
   text-transform: uppercase;
   letter-spacing: 0.14em;
 }
@@ -639,8 +639,8 @@
 }
 
 .paymentBadge.pending {
-  background: var(--amber-soft);
-  color: var(--amber);
+  background: var(--gold-deep);
+  color: #fff;
 }
 
 .paymentBadge.failed {
@@ -659,7 +659,7 @@
 }
 
 .summaryCard .cardTitle svg {
-  color: var(--gold-bright);
+  color: var(--gold-deep);
 }
 
 .summaryCard .kvRow {
@@ -695,7 +695,7 @@
   display: flex;
   align-items: center;
   gap: 3px;
-  color: var(--gold-bright);
+  color: var(--gold-deep);
   font-size: 20px;
   font-weight: 700;
 }
@@ -736,13 +736,13 @@
 .shippingIconWrap {
   width: 44px;
   height: 44px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--gold-wash);
   background: rgba(253, 250, 242, 0.1);
   border: 1px solid rgba(253, 250, 242, 0.16);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--gold-bright);
+  color: var(--gold-deep);
   font-size: 18px;
   flex-shrink: 0;
 }
