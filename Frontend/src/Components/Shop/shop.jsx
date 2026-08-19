@@ -541,13 +541,13 @@ export default function Shop() {
           {/* Product Grid */}
           <main>
             {/* Toolbar */}
-            <div className={styles.toolbar}>
+            {/* <div className={styles.toolbar}>
               <span className={styles.resultsCount}>
                 {isInitialLoading
                   ? "Loading..."
                   : `Showing ${filteredProducts.length} results`}
               </span>
-            </div>
+            </div> */}
 
             {/* Skeleton Loading */}
             {isInitialLoading && (

@@ -482,11 +482,11 @@ export default function Gifts() {
             {/* Product Listing */}
             <main className={styles.productsWrapper}>
               <div className={styles.toolbar}>
-                <span className={styles.resultsCount}>
+                {/* <span className={styles.resultsCount}>
                   {isLoading
                     ? "Loading..."
                     : `Showing ${Math.min(visibleCount, allProducts.length)} of ${total} products`}
-                </span>
+                </span> */}
 
                 <div className={styles.sortWrapper} ref={sortDropdownRef}>
                   <button
