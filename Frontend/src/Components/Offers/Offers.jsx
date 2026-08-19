@@ -564,11 +564,11 @@ export default function Offers() {
                       gap: "12px",
                     }}
                   >
-                    {/* <span className={styles.productsCount}>
+                    <span className={styles.productsCount}>
                       {localLoading
                         ? "Loading..."
                         : `Showing ${Math.min(visibleCount, products.length)} of ${total} products`}
-                    </span> */}
+                    </span>
                   </div>
                 </div>
 
