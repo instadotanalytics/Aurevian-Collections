@@ -1,9 +1,9 @@
 /* ---------------------------------------------------------------
    ShopByCategory.module.css
-   Aurevian Jewellery — premium "Shop by Category" section — v11
-   - Fully Responsive: 8 → 7 → 6 → 5 → 4 → 3 → 2 cards
-   - Rotating dashed ring overlaid directly on top of each image
-   - Minimal padding for clean appearance
+   Aurevian Jewellery — premium "Shop by Category" section — v12
+   - Compact, refined, responsive: 8 → 7 → 6 → 5 → 4 → 3 → 2 cards
+   - Slow, continuous left-drifting marquee (auto-scroll)
+   - Soft rotating gold-gradient ring on each medallion
 ------------------------------------------------------------------ */
 
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Great+Vibes&family=Jost:wght@300;400;500;600&display=swap");
@@ -18,13 +18,13 @@
   --gold-soft: #d9b877;
   --ink: #2b2118;
   --muted: #8a7a68;
-  --shadow-soft: 0 14px 30px -16px rgba(120, 90, 40, 0.25);
-  --shadow-lift: 0 18px 34px -14px rgba(120, 90, 40, 0.38);
+  --shadow-soft: 0 12px 26px -16px rgba(120, 90, 40, 0.28);
+  --shadow-lift: 0 18px 34px -14px rgba(120, 90, 40, 0.4);
 
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  padding: 10px 0 10px 0;
+  padding: 36px 0 28px;
   background: var(--ivory);
 }
 
@@ -32,24 +32,25 @@
 .glowTopLeft,
 .glowBottomRight {
   position: absolute;
-  width: clamp(260px, 34vw, 480px);
-  height: clamp(260px, 34vw, 480px);
+  width: clamp(240px, 30vw, 440px);
+  height: clamp(240px, 30vw, 440px);
   border-radius: 50%;
   filter: blur(80px);
-  opacity: 0.4;
+  opacity: 0.35;
   z-index: -1;
   pointer-events: none;
+  background: radial-gradient(circle, var(--gold-soft), transparent 70%);
 }
 
 .glowTopLeft {
-  top: -16%;
+  top: -18%;
   left: -12%;
 }
 
 .glowBottomRight {
-  bottom: -20%;
+  bottom: -22%;
   right: -10%;
-  background: transparent;
+  background: radial-gradient(circle, var(--gold), transparent 70%);
 }
 
 .container {
@@ -65,16 +66,14 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding-top: 10px;
-  padding-bottom: 0;
-  margin-bottom: 5px;
+  margin-bottom: 20px;
 }
 
 .topText {
   font-family: "Jost", sans-serif;
   text-transform: uppercase;
-  letter-spacing: 6px;
-  font-size: 12px;
+  letter-spacing: 5px;
+  font-size: 11.5px;
   color: var(--gold-deep);
   font-weight: 600;
   margin: 0 0 10px;
@@ -85,7 +84,7 @@
   font-weight: 500;
   color: #1f1f1f;
   line-height: 1.1;
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   letter-spacing: 0.02em;
   display: flex;
   justify-content: center;
@@ -97,7 +96,7 @@
 .shop,
 .category {
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(28px, 3.6vw, 46px);
+  font-size: clamp(28px, 3.6vw, 44px);
   font-weight: 700;
   line-height: 1.3;
   background: linear-gradient(180deg, #4d3620 0%, #1f1b17 40%, #000000 100%);
@@ -108,11 +107,10 @@
 
 .by {
   font-family: "Great Vibes";
-  font-size: clamp(28px, 3.6vw, 44px);
+  font-size: clamp(28px, 3.6vw, 42px);
   font-weight: 400;
   line-height: 1.3;
   display: inline-block;
-
   background: linear-gradient(
     180deg,
     #f8e9b8 0%,
@@ -120,21 +118,19 @@
     #c9962f 70%,
     #a66b16 100%
   );
-
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
-
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 .headerDivider {
-  width: 130px;
+  width: 120px;
   height: 1px;
-  margin: 2px 0 12px;
+  margin: 2px 0 0;
   background: linear-gradient(to right, transparent, #d4af37, transparent);
   position: relative;
 }
@@ -148,17 +144,7 @@
   background: var(--ivory);
   color: #c89b3c;
   padding: 0 12px;
-  font-size: 13px;
-}
-
-.subtitle {
-  font-family: "Cormorant Garamond", serif;
-  font-size: clamp(16px, 2vw, 22px);
-  line-height: 1.55;
-  color: #433c35;
-  font-weight: 500;
-  max-width: 520px;
-  margin: 0;
+  font-size: 12px;
 }
 
 /* ----------------------------- slider ---------------------------- */
@@ -166,39 +152,67 @@
   position: relative;
   display: flex;
   align-items: center;
-  margin-top: 5px;
+  margin-top: 6px;
 }
 
-.track {
-  display: flex;
+/* Viewport clips the marquee and fades its edges for a premium,
+   continuous "flowing jewel case" feel. */
+.marqueeViewport {
+  position: relative;
   flex: 1 1 auto;
   min-width: 0;
-  gap: 16px;
-  overflow-x: auto;
-  scroll-snap-type: x proximity;
-  scroll-behavior: smooth;
-  padding: 10px 4px 5px 4px;
-  margin: 0;
-  justify-content: flex-start;
-
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 6%,
+    #000 94%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 6%,
+    #000 94%,
+    transparent 100%
+  );
 }
 
-.track::-webkit-scrollbar {
-  display: none;
-}
-
-.track:focus-visible {
+.marqueeViewport:focus-visible {
   outline: 2px solid var(--gold);
-  outline-offset: 6px;
-  border-radius: 12px;
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+.marqueeTrack {
+  display: flex;
+  width: max-content;
+  gap: 18px;
+  padding: 10px 4px 6px;
+  will-change: transform;
+}
+
+.loadingTrack {
+  opacity: 0.65;
+}
+
+.loadedTrack {
+  animation: fadeInContent 0.6s ease forwards;
+}
+
+@keyframes fadeInContent {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 /* -------------------------- nav buttons -------------------------- */
 .navButton {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   border: 1px solid rgba(214, 175, 90, 0.35);
   background: linear-gradient(160deg, #1a1a1a 0%, #000000 100%);
@@ -206,7 +220,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 17px;
+  font-size: 16px;
   cursor: pointer;
   flex-shrink: 0;
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
@@ -218,7 +232,7 @@
     border-color 0.3s ease;
 }
 
-.navButton:hover:not(:disabled) {
+.navButton:hover {
   background: linear-gradient(
     160deg,
     #e8c877 0%,
@@ -238,20 +252,21 @@
 
 .desktopNav {
   position: absolute;
+  top: 50%;
   transform: translateY(-50%);
   z-index: 2;
 }
 
-.desktopNav:hover:not(:disabled) {
+.desktopNav:hover {
   transform: translateY(calc(-50% - 2px));
 }
 
 .navButtonLeft.desktopNav {
-  left: -48px;
+  left: -10px;
 }
 
 .navButtonRight.desktopNav {
-  right: -48px;
+  right: -10px;
 }
 
 .mobileNav {
@@ -259,15 +274,13 @@
   justify-content: center;
   align-items: center;
   gap: 16px;
-  margin-top: 8px;
-  margin-bottom: 0;
+  margin-top: 10px;
 }
 
 /* ------------------------------ card ------------------------------ */
 .card {
   flex: 0 0 auto;
-  width: calc((100% - 7 * 16px) / 8);
-  min-width: 108px;
+  width: 128px;
   scroll-snap-align: start;
 }
 
@@ -286,21 +299,42 @@
   width: 100%;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
-  overflow: hidden;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+.imageWrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
   background: linear-gradient(160deg, var(--champagne) 0%, var(--cream) 100%);
   box-shadow: var(--shadow-soft);
-  flex-shrink: 0;
   transition:
     transform 0.35s ease,
     box-shadow 0.35s ease;
+  z-index: 0;
+}
+
+.card:hover .imageWrap::before,
+.card:focus-within .imageWrap::before {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lift);
+}
+
+.image,
+.imagePlaceholder {
+  position: absolute;
+  inset: 4px;
+  width: calc(100% - 8px);
+  height: calc(100% - 8px);
+  border-radius: 50%;
+  z-index: 1;
 }
 
 .image {
   display: block;
-  width: 100%;
-  height: 100%;
   object-fit: cover;
-  border-radius: 50%;
   transition: transform 0.5s ease;
 }
 
@@ -314,40 +348,45 @@
 .imagePlaceholderText {
   font-family: "Cormorant Garamond", serif;
   font-weight: 700;
-  font-size: 34px;
+  font-size: 30px;
   color: var(--gold-deep);
   letter-spacing: 0.02em;
-}
-
-.card:hover .imageWrap,
-.card:focus-within .imageWrap {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lift);
 }
 
 .card:hover .image {
   transform: scale(1.06);
 }
 
-/* Continuously rotating dashed ring */
+/* Slowly rotating gold-gradient ring — the section's signature detail */
 .ring {
   position: absolute;
-  inset: -1px;
+  inset: -4px;
   border-radius: 50%;
-  border: 3px dotted #3a2c1e;
-  opacity: 0.85;
+  padding: 2px;
+  z-index: 2;
   pointer-events: none;
-  animation: ringSpin 22s linear infinite;
-  transition:
-    opacity 0.3s ease,
-    border-color 0.3s ease;
+  background: conic-gradient(
+    from 0deg,
+    var(--gold-soft),
+    var(--gold) 25%,
+    var(--gold-deep) 50%,
+    var(--gold) 75%,
+    var(--gold-soft) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.55;
+  animation: ringSpin 26s linear infinite;
+  transition: opacity 0.3s ease;
 }
 
 .card:hover .ring,
 .card:focus-within .ring {
   opacity: 1;
-  border-color: var(--gold-deep);
-  animation-duration: 14s;
+  animation-duration: 15s;
 }
 
 @keyframes ringSpin {
@@ -360,19 +399,37 @@
 }
 
 .categoryName {
+  position: relative;
   font-family: "Jost", sans-serif;
   font-weight: 500;
   font-size: 13px;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   text-transform: capitalize;
   color: var(--ink);
   margin: 0;
   white-space: nowrap;
+  padding-bottom: 4px;
   transition: color 0.3s ease;
+}
+
+.categoryName::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 0;
+  height: 1px;
+  background: var(--gold);
+  transform: translateX(-50%);
+  transition: width 0.3s ease;
 }
 
 .card:hover .categoryName {
   color: var(--gold-deep);
+}
+
+.card:hover .categoryName::after {
+  width: 60%;
 }
 
 /* ------------------------------ CTA ------------------------------- */
@@ -381,47 +438,17 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
-  margin-top: 2px;
-  padding-bottom: 0;
+  margin-top: 18px;
+}
+
+.ctaLine {
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-soft));
 }
 
 .ctaLine:last-child {
   background: linear-gradient(90deg, var(--gold-soft), transparent);
-}
-
-.ctaButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 28px;
-  border: 1px solid var(--gold);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--gold-deep);
-  font-family: "Jost", sans-serif;
-  font-weight: 500;
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  text-decoration: none;
-  white-space: nowrap;
-  transition:
-    background 0.35s ease,
-    color 0.35s ease,
-    box-shadow 0.35s ease,
-    transform 0.35s ease;
-}
-
-.ctaButton:hover,
-.ctaButton:focus-visible {
-  background: var(--gold);
-  color: var(--white);
-  box-shadow: var(--shadow-soft);
-  transform: translateY(-2px);
-}
-
-.ctaIcon {
-  font-size: 15px;
 }
 
 /* ============================================
@@ -429,8 +456,10 @@
    ============================================ */
 
 .skeletonImage {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 4px;
+  width: calc(100% - 8px);
+  height: calc(100% - 8px);
   border-radius: 50%;
   background: linear-gradient(135deg, #e8e0d6 25%, #f2ece2 50%, #e8e0d6 75%);
   background-size: 200% 200%;
@@ -456,309 +485,18 @@
   }
 }
 
-.loadingTrack {
-  opacity: 0.6;
-  animation: fadeInContent 0.6s ease forwards;
-}
-
-.loadedTrack {
-  opacity: 0;
-  animation: fadeInContent 0.8s ease forwards;
-}
-
-@keyframes fadeInContent {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-.card .skeletonImage {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-}
-
-.card {
-  transition:
-    opacity 0.4s ease,
-    transform 0.4s ease;
-}
-
-/* ============================================
-   RESPONSIVE BREAKPOINTS
-   ============================================ */
-
-/* ===== LAPTOP: 7 CARDS ===== */
-@media (max-width: 1179px) {
-  .track {
-    gap: 14px;
-  }
-  .card {
-    width: calc((100% - 6 * 14px) / 7);
-    min-width: 100px;
-  }
-  .navButtonLeft.desktopNav {
-    left: -10px;
-  }
-  .navButtonRight.desktopNav {
-    right: -10px;
-  }
-}
-
-/* ===== TABLET LANDSCAPE: 6 CARDS ===== */
-@media (max-width: 992px) {
-  .section {
-    padding: 10px 0 8px 0;
-  }
-
-  .track {
-    gap: 14px;
-  }
-  .card {
-    width: calc((100% - 5 * 14px) / 6);
-    min-width: 96px;
-  }
-  .desktopNav {
-    width: 38px;
-    height: 38px;
-    font-size: 16px;
-  }
-  .navButtonLeft.desktopNav {
-    display: none;
-  }
-  .navButtonRight.desktopNav {
-    display: none;
-  }
-}
-
-/* ===== TABLET PORTRAIT: 5 CARDS ===== */
-@media (max-width: 768px) {
-  .section {
-    padding: 10px 0 6px 0;
-  }
-
-  .track {
-    gap: 12px;
-  }
-  .card {
-    width: calc((100% - 4 * 12px) / 5);
-    min-width: 92px;
-  }
-  .navButtonLeft.desktopNav {
-    display: none;
-  }
-  .navButtonRight.desktopNav {
-    display: none;
-  }
-
-  .heading {
-    gap: 8px;
-  }
-  .subtitle {
-    font-size: 16px;
-  }
-  .topText {
-    letter-spacing: 3.5px;
-    font-size: 10.5px;
-  }
-}
-
-/* ===== MOBILE LARGE: 4 CARDS ===== */
-@media (max-width: 640px) {
-  .section {
-    padding: 10px 0 4px 0;
-  }
-
-  .container {
-    padding-inline: 14px;
-  }
-
-  .header {
-    margin-bottom: 15px;
-    padding-top: 10px;
-    padding-bottom: 0;
-  }
-
-  .sliderWrap {
-    margin-top: 0;
-  }
-
-  .desktopNav {
-    display: none;
-  }
-
-  .track {
-    flex: 1 1 100%;
-    width: 100%;
-    gap: 10px;
-    padding: 6px 1px 4px 1px;
-    justify-content: flex-start;
-  }
-
-  .card {
-    width: calc((100% - 3 * 10px) / 4);
-    min-width: 68px;
-  }
-
-  .cardLink {
-    gap: 6px;
-  }
-
-  .categoryName {
-    font-size: 10.5px;
-    letter-spacing: 0.05em;
-  }
-
-  .mobileNav {
-    display: flex;
-    margin-top: 4px;
-    margin-bottom: 0;
-  }
-
-  .mobileNav .navButton {
-    display: flex;
-  }
-
-  .ctaLine {
-    display: none;
-  }
-
-  .ctaWrap {
-    margin-top: 2px;
-    padding-bottom: 0;
-  }
-
-  .ctaButton {
-    padding: 10px 22px;
-    font-size: 10.5px;
-  }
-}
-
-/* ===== MOBILE MEDIUM: 3 CARDS ===== */
-@media (max-width: 480px) {
-  .section {
-    padding: 10px 0 4px 0;
-  }
-
-  .track {
-    gap: 10px;
-    padding: 6px 2px 4px 2px;
-  }
-
-  .card {
-    width: calc((100% - 2 * 10px) / 3);
-    min-width: 80px;
-  }
-
-  .categoryName {
-    font-size: 10px;
-  }
-
-  .shop,
-  .category {
-    font-size: clamp(24px, 5vw, 32px);
-  }
-
-  .by {
-    font-size: clamp(24px, 5vw, 32px);
-  }
-
-  .topText {
-    font-size: 9px;
-    letter-spacing: 3px;
-  }
-
-  .headerDivider {
-    width: 80px;
-  }
-
-  .mobileNav .navButton {
-    width: 34px;
-    height: 34px;
-    font-size: 14px;
-  }
-}
-
-/* ===== MOBILE SMALL: 2 CARDS ===== */
-@media (max-width: 360px) {
-  .section {
-    padding: 10px 0 4px 0;
-  }
-
-  .container {
-    padding-inline: 10px;
-  }
-
-  .track {
-    gap: 8px;
-    padding: 4px 1px 3px 1px;
-  }
-
-  .card {
-    width: calc((100% - 1 * 8px) / 2);
-    min-width: 60px;
-  }
-
-  .cardLink {
-    gap: 4px;
-  }
-
-  .categoryName {
-    font-size: 9px;
-  }
-
-  .imagePlaceholderText {
-    font-size: 20px;
-  }
-
-  .ring {
-    border-width: 2px;
-  }
-
-  .shop,
-  .category {
-    font-size: 20px;
-  }
-
-  .by {
-    font-size: 20px;
-  }
-
-  .topText {
-    font-size: 8px;
-    letter-spacing: 2px;
-  }
-
-  .headerDivider {
-    width: 60px;
-  }
-
-  .headerDivider::after {
-    font-size: 10px;
-    padding: 0 8px;
-  }
-
-  .mobileNav .navButton {
-    width: 30px;
-    height: 30px;
-    font-size: 12px;
-  }
-}
-
 /* ============================================
    REDUCED MOTION
    ============================================ */
 @media (prefers-reduced-motion: reduce) {
-  .imageWrap,
+  .imageWrap::before,
   .image,
   .imagePlaceholder,
   .ring,
   .categoryName,
+  .categoryName::after,
   .navButton,
-  .ctaButton {
+  .marqueeTrack {
     transition: none !important;
   }
   .ring {
@@ -769,9 +507,157 @@
     animation: none !important;
     background: #e8e0d6;
   }
-  .loadingTrack,
   .loadedTrack {
     animation: none !important;
     opacity: 1;
+  }
+}
+
+/* ============================================
+   RESPONSIVE BREAKPOINTS
+   ============================================ */
+
+@media (max-width: 1179px) {
+  .card {
+    width: 112px;
+  }
+}
+
+@media (max-width: 992px) {
+  .section {
+    padding: 30px 0 22px;
+  }
+  .card {
+    width: 104px;
+  }
+  .navButtonLeft.desktopNav,
+  .navButtonRight.desktopNav {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 26px 0 20px;
+  }
+  .marqueeTrack {
+    gap: 14px;
+  }
+  .card {
+    width: 98px;
+  }
+  .heading {
+    gap: 8px;
+  }
+  .topText {
+    letter-spacing: 3.5px;
+    font-size: 10.5px;
+  }
+}
+
+@media (max-width: 640px) {
+  .section {
+    padding: 22px 0 16px;
+  }
+  .container {
+    padding-inline: 14px;
+  }
+  .header {
+    margin-bottom: 16px;
+  }
+  .desktopNav {
+    display: none;
+  }
+  .marqueeTrack {
+    gap: 12px;
+    padding: 6px 1px 4px;
+  }
+  .card {
+    width: 84px;
+  }
+  .cardLink {
+    gap: 6px;
+  }
+  .categoryName {
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+  }
+  .mobileNav {
+    display: flex;
+    margin-top: 12px;
+  }
+  .ctaWrap {
+    margin-top: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .marqueeTrack {
+    gap: 10px;
+  }
+  .card {
+    width: 76px;
+  }
+  .categoryName {
+    font-size: 10px;
+  }
+  .shop,
+  .category,
+  .by {
+    font-size: clamp(24px, 5vw, 32px);
+  }
+  .topText {
+    font-size: 9px;
+    letter-spacing: 3px;
+  }
+  .headerDivider {
+    width: 80px;
+  }
+  .mobileNav .navButton {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 360px) {
+  .container {
+    padding-inline: 10px;
+  }
+  .marqueeTrack {
+    gap: 8px;
+  }
+  .card {
+    width: 66px;
+  }
+  .cardLink {
+    gap: 4px;
+  }
+  .categoryName {
+    font-size: 9px;
+  }
+  .imagePlaceholderText {
+    font-size: 20px;
+  }
+  .shop,
+  .category,
+  .by {
+    font-size: 20px;
+  }
+  .topText {
+    font-size: 8px;
+    letter-spacing: 2px;
+  }
+  .headerDivider {
+    width: 60px;
+  }
+  .headerDivider::after {
+    font-size: 10px;
+    padding: 0 8px;
+  }
+  .mobileNav .navButton {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
   }
 }

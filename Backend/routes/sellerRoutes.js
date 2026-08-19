@@ -3,6 +3,7 @@
 import express from "express";
 import multer from "multer";
 import fs from "fs";
+import rateLimit from "express-rate-limit"; // ✅ NEW — route-level throttle for OTP endpoints
 import {
   registerSeller,
   verifyEmailOTP,
@@ -85,15 +86,29 @@ const upload = multer({
   fileFilter,
 });
 
+// ============================================
+// OTP RATE LIMITER — ✅ NEW: specific anti-spam for OTP endpoints
+// ============================================
+const otpLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 5, // 5 requests per 10 minutes
+  message: {
+    success: false,
+    message: "Too many OTP requests. Please try again later.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 console.log("🔧 Setting up seller routes...");
 
 // ============================================
 // PUBLIC ROUTES - No authentication required
 // ============================================
-router.post("/register", registerSeller);
+router.post("/register", otpLimiter, registerSeller); // ✅ NEW — rate limited
 router.post("/verify-email", verifyEmailOTP);
 router.post("/verify-phone", verifyPhoneOTP);
-router.post("/resend-otp", resendOTP);
+router.post("/resend-otp", otpLimiter, resendOTP); // ✅ NEW — rate limited
 router.post("/login", sellerLogin);
 router.post("/refresh", refreshSellerToken);
 router.post("/logout", sellerLogout);
@@ -156,10 +171,10 @@ router.post(
 );
 
 console.log("✅ Seller routes configured successfully");
-console.log("  📌 POST   /api/seller/register");
+console.log("  📌 POST   /api/seller/register (rate limited: 5/10min)");
 console.log("  📌 POST   /api/seller/verify-email");
 console.log("  📌 POST   /api/seller/verify-phone");
-console.log("  📌 POST   /api/seller/resend-otp");
+console.log("  📌 POST   /api/seller/resend-otp (rate limited: 5/10min)");
 console.log("  📌 POST   /api/seller/login");
 console.log("  📌 POST   /api/seller/forgot-password");
 console.log("  📌 POST   /api/seller/reset-password/:token");

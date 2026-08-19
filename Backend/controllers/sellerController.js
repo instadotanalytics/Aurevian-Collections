@@ -13,6 +13,12 @@ import otpService from "../services/otpService.js";
 import emailService from "../services/emailService.js";
 import cloudinaryService from "../services/cloudinaryService.js";
 
+// ✅ NEW — Add this import for phone normalization
+import { normalizePhoneNumber } from "../utils/phoneUtils.js";
+
+// ✅ NEW — Resend cooldown — prevents SMS/email spam via the resend endpoint.
+const RESEND_COOLDOWN_MS = 60 * 1000; // 60s
+
 // ✅ Reuse the SAME seller-revenue isolation logic used by the Earnings
 // tab, and the SAME customer-grouping logic used by /customers/summary.
 // This is what guarantees the dashboard numbers never disagree with the
@@ -47,7 +53,7 @@ const generateTokens = (sellerId) => {
 };
 
 // ============================================
-// 1. SELLER REGISTRATION
+// 1. SELLER REGISTRATION — ✅ PATCHED: phone validation + classified errors
 // ============================================
 export const registerSeller = async (req, res) => {
   try {
@@ -99,15 +105,26 @@ export const registerSeller = async (req, res) => {
       });
     }
 
-    // ✅ Check if seller exists
+    // ✅ NEW — validate phone BEFORE anything touches the DB or Twilio.
+    // No silent +91 guessing, no invalid numbers reaching Twilio.
+    const phoneCheck = normalizePhoneNumber(phone);
+    if (!phoneCheck.valid) {
+      return res.status(400).json({
+        success: false,
+        message: phoneCheck.reason || "Please enter a valid phone number",
+      });
+    }
+    const normalizedPhone = phoneCheck.e164;
+
     let existingSeller = await Seller.findOne({
       email: { $regex: new RegExp(`^${email}$`, "i") },
     });
 
-    // Initialize delivery status
-    let otpDeliveryStatus = {
-      email: false,
-      phone: false,
+    let otpDeliveryStatus = { email: false, phone: false };
+    let otpDeliveryDetail = {
+      emailError: null,
+      phoneError: null,
+      phoneErrorCode: null,
     };
 
     if (existingSeller) {
@@ -118,13 +135,11 @@ export const registerSeller = async (req, res) => {
         });
       }
 
-      // ✅ If not verified, update existing unverified seller
       existingSeller.firstName = firstName.trim();
       existingSeller.lastName = lastName.trim();
       existingSeller.fullName = `${firstName} ${lastName}`.trim();
-      existingSeller.phone = phone.trim();
+      existingSeller.phone = normalizedPhone;
 
-      // ✅ Hash password before saving
       const salt = await bcrypt.genSalt(12);
       existingSeller.password = await bcrypt.hash(password, salt);
 
@@ -137,7 +152,6 @@ export const registerSeller = async (req, res) => {
       await existingSeller.save();
       console.log("✅ Existing seller updated:", existingSeller._id);
 
-      // ✅ Send Email OTP with tracking
       const emailOTP = Math.floor(100000 + Math.random() * 900000).toString();
       await existingSeller.setEmailOTP(emailOTP);
       const emailResult = await emailService.sendOTPEmail(
@@ -145,22 +159,23 @@ export const registerSeller = async (req, res) => {
         emailOTP,
         "verification",
       );
+      otpDeliveryStatus.email = emailResult.success;
       if (!emailResult.success) {
         console.error("❌ Email OTP failed to send:", emailResult.error);
-        otpDeliveryStatus.email = false;
+        otpDeliveryDetail.emailError =
+          "Could not send email OTP. Please try resending.";
       } else {
         console.log("✅ Email OTP sent to:", email);
-        otpDeliveryStatus.email = true;
       }
 
-      // ✅ Send Phone OTP with tracking (Twilio Verify — generates & tracks its own code)
-      const phoneOtpResult = await otpService.sendPhoneOTP(phone);
+      const phoneOtpResult = await otpService.sendPhoneOTP(normalizedPhone);
+      otpDeliveryStatus.phone = phoneOtpResult.success;
       if (!phoneOtpResult.success) {
         console.error("❌ Failed to send phone OTP:", phoneOtpResult.error);
-        otpDeliveryStatus.phone = false;
+        otpDeliveryDetail.phoneError = phoneOtpResult.error;
+        otpDeliveryDetail.phoneErrorCode = phoneOtpResult.code;
       } else {
-        console.log("✅ Phone OTP sent to:", phone);
-        otpDeliveryStatus.phone = true;
+        console.log("✅ Phone OTP sent to:", normalizedPhone);
       }
 
       return res.status(200).json({
@@ -178,12 +193,12 @@ export const registerSeller = async (req, res) => {
           email: !existingSeller.emailVerified,
           phone: !existingSeller.phoneVerified,
         },
-        otpDeliveryStatus, // ✅ NEW: per-channel delivery status
+        otpDeliveryStatus,
+        otpDeliveryDetail, // ✅ NEW — safe, user-facing reason (no raw Twilio internals)
       });
     }
 
-    // ✅ Check phone
-    existingSeller = await Seller.findOne({ phone });
+    existingSeller = await Seller.findOne({ phone: normalizedPhone });
     if (existingSeller) {
       return res.status(400).json({
         success: false,
@@ -191,17 +206,15 @@ export const registerSeller = async (req, res) => {
       });
     }
 
-    // ✅ Hash password
     const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // ✅ Create new seller
     const sellerData = {
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       fullName: `${firstName} ${lastName}`.trim(),
       email: email.toLowerCase().trim(),
-      phone: phone.trim(),
+      phone: normalizedPhone,
       password: hashedPassword,
       storeInfo: {
         storeName: storeName.trim(),
@@ -252,7 +265,6 @@ export const registerSeller = async (req, res) => {
     await seller.save();
     console.log("✅ New seller created:", seller._id);
 
-    // ✅ Send Email OTP with tracking
     const emailOTP = Math.floor(100000 + Math.random() * 900000).toString();
     await seller.setEmailOTP(emailOTP);
     const emailResult = await emailService.sendOTPEmail(
@@ -260,27 +272,34 @@ export const registerSeller = async (req, res) => {
       emailOTP,
       "verification",
     );
+    otpDeliveryStatus.email = emailResult.success;
     if (!emailResult.success) {
       console.error("❌ Email OTP failed to send:", emailResult.error);
-      otpDeliveryStatus.email = false;
+      otpDeliveryDetail.emailError =
+        "Could not send email OTP. Please try resending.";
     } else {
       console.log("✅ Email OTP sent to:", email);
-      otpDeliveryStatus.email = true;
     }
 
-    // ✅ Send Phone OTP with tracking (Twilio Verify — generates & tracks its own code)
-    const phoneOtpResult = await otpService.sendPhoneOTP(phone);
+    const phoneOtpResult = await otpService.sendPhoneOTP(normalizedPhone);
+    otpDeliveryStatus.phone = phoneOtpResult.success;
+    seller.otp.phone.lastSentAt = new Date();
     if (!phoneOtpResult.success) {
       console.error("❌ Failed to send phone OTP:", phoneOtpResult.error);
-      otpDeliveryStatus.phone = false;
+      otpDeliveryDetail.phoneError = phoneOtpResult.error;
+      otpDeliveryDetail.phoneErrorCode = phoneOtpResult.code;
     } else {
-      console.log("✅ Phone OTP sent to:", phone);
-      otpDeliveryStatus.phone = true;
+      console.log("✅ Phone OTP sent to:", normalizedPhone);
     }
+    await seller.save();
 
+    // ✅ Registration record is intentionally kept even on partial OTP
+    // failure — this is the existing convention (see the "existingSeller"
+    // update-branch above), which lets the seller resend without
+    // re-registering. Not adding a rollback.
     return res.status(201).json({
       success: true,
-      message: "OTP sent! Please verify your email and phone.",
+      message: "Seller registration initiated. Verify the OTPs.",
       data: {
         _id: seller._id,
         email: seller.email,
@@ -293,7 +312,8 @@ export const registerSeller = async (req, res) => {
         email: !seller.emailVerified,
         phone: !seller.phoneVerified,
       },
-      otpDeliveryStatus, // ✅ NEW: per-channel delivery status
+      otpDeliveryStatus,
+      otpDeliveryDetail,
     });
   } catch (error) {
     console.error("❌ Registration error:", error);
@@ -373,7 +393,7 @@ export const verifyEmailOTP = async (req, res) => {
 };
 
 // ============================================
-// 3. VERIFY PHONE OTP
+// 3. VERIFY PHONE OTP — ✅ PATCHED: normalize phone before lookup
 // ============================================
 export const verifyPhoneOTP = async (req, res) => {
   try {
@@ -385,7 +405,22 @@ export const verifyPhoneOTP = async (req, res) => {
         .json({ success: false, message: "Phone and OTP are required" });
     }
 
-    const seller = await Seller.findOne({ phone });
+    // ✅ NEW — normalize before lookup, same as registerSeller/resendOTP.
+    // Seller.phone is always stored in E.164; comparing against a raw,
+    // unnormalized value here is what was causing "Seller not found"
+    // even with a correct OTP.
+    const phoneCheck = normalizePhoneNumber(phone);
+    if (!phoneCheck.valid) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: phoneCheck.reason || "Invalid phone number",
+        });
+    }
+    const normalizedPhone = phoneCheck.e164;
+
+    const seller = await Seller.findOne({ phone: normalizedPhone });
 
     if (!seller) {
       return res
@@ -399,7 +434,7 @@ export const verifyPhoneOTP = async (req, res) => {
         .json({ success: false, message: "Phone already verified" });
     }
 
-    const isValid = await otpService.verifyPhoneOTP(phone, otp);
+    const isValid = await otpService.verifyPhoneOTP(normalizedPhone, otp);
     if (!isValid) {
       return res
         .status(400)
@@ -439,7 +474,7 @@ export const verifyPhoneOTP = async (req, res) => {
 };
 
 // ============================================
-// 4. RESEND OTP
+// 4. RESEND OTP — ✅ PATCHED: cooldown + normalization + classified errors
 // ============================================
 export const resendOTP = async (req, res) => {
   try {
@@ -450,23 +485,28 @@ export const resendOTP = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Contact and type are required" });
     }
+    if (!["email", "phone"].includes(type)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid type. Use email or phone" });
+    }
 
     let seller;
-    let otpDeliveryStatus = {
-      email: false,
-      phone: false,
-    };
+    let normalizedContact = contact;
 
     if (type === "email") {
       seller = await Seller.findOne({
         email: { $regex: new RegExp(`^${contact}$`, "i") },
       });
-    } else if (type === "phone") {
-      seller = await Seller.findOne({ phone: contact });
     } else {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid type. Use email or phone" });
+      const phoneCheck = normalizePhoneNumber(contact);
+      if (!phoneCheck.valid) {
+        return res
+          .status(400)
+          .json({ success: false, message: phoneCheck.reason });
+      }
+      normalizedContact = phoneCheck.e164;
+      seller = await Seller.findOne({ phone: normalizedContact });
     }
 
     if (!seller) {
@@ -474,77 +514,93 @@ export const resendOTP = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Seller not found" });
     }
-
     if (type === "email" && seller.emailVerified) {
       return res
         .status(400)
         .json({ success: false, message: "Email already verified" });
     }
-
     if (type === "phone" && seller.phoneVerified) {
       return res
         .status(400)
         .json({ success: false, message: "Phone already verified" });
     }
 
+    // ✅ NEW — cooldown so resend can't be spammed into Twilio/Gmail.
+    const lastSentAt = seller.otp?.[type]?.lastSentAt;
+    if (
+      lastSentAt &&
+      Date.now() - new Date(lastSentAt).getTime() < RESEND_COOLDOWN_MS
+    ) {
+      const waitSeconds = Math.ceil(
+        (RESEND_COOLDOWN_MS - (Date.now() - new Date(lastSentAt).getTime())) /
+          1000,
+      );
+      return res.status(429).json({
+        success: false,
+        message: `Please wait ${waitSeconds}s before requesting another OTP.`,
+      });
+    }
+
+    let otpDeliveryStatus = { email: false, phone: false };
+    let otpDeliveryDetail = {
+      emailError: null,
+      phoneError: null,
+      phoneErrorCode: null,
+    };
+
     if (type === "email") {
       const newOTP = Math.floor(100000 + Math.random() * 900000).toString();
       await seller.setEmailOTP(newOTP);
+      seller.otp.email.lastSentAt = new Date();
       const emailResult = await emailService.sendOTPEmail(
         contact,
         newOTP,
         "verification",
       );
-      if (!emailResult.success) {
-        console.error("❌ Email OTP failed to resend:", emailResult.error);
-        otpDeliveryStatus.email = false;
-      } else {
-        console.log("✅ Email OTP resent to:", contact);
-        otpDeliveryStatus.email = true;
-      }
-      // ✅ Also send phone OTP if not verified yet
+      otpDeliveryStatus.email = emailResult.success;
+      if (!emailResult.success)
+        otpDeliveryDetail.emailError = "Could not resend email OTP.";
+
       if (!seller.phoneVerified) {
         const phoneResult = await otpService.sendPhoneOTP(seller.phone);
+        seller.otp.phone.lastSentAt = new Date();
+        otpDeliveryStatus.phone = phoneResult.success;
         if (!phoneResult.success) {
-          console.error("❌ Phone OTP failed to resend:", phoneResult.error);
-          otpDeliveryStatus.phone = false;
-        } else {
-          console.log("✅ Phone OTP resent to:", seller.phone);
-          otpDeliveryStatus.phone = true;
+          otpDeliveryDetail.phoneError = phoneResult.error;
+          otpDeliveryDetail.phoneErrorCode = phoneResult.code;
         }
       }
-    } else if (type === "phone") {
-      const phoneResult = await otpService.sendPhoneOTP(contact);
+      await seller.save();
+    } else {
+      const phoneResult = await otpService.sendPhoneOTP(normalizedContact);
+      seller.otp.phone.lastSentAt = new Date();
+      otpDeliveryStatus.phone = phoneResult.success;
       if (!phoneResult.success) {
-        console.error("❌ Phone OTP failed to resend:", phoneResult.error);
-        otpDeliveryStatus.phone = false;
-      } else {
-        console.log("✅ Phone OTP resent to:", contact);
-        otpDeliveryStatus.phone = true;
+        otpDeliveryDetail.phoneError = phoneResult.error;
+        otpDeliveryDetail.phoneErrorCode = phoneResult.code;
       }
-      // ✅ Also send email OTP if not verified yet
+
       if (!seller.emailVerified) {
         const newOTP = Math.floor(100000 + Math.random() * 900000).toString();
         await seller.setEmailOTP(newOTP);
+        seller.otp.email.lastSentAt = new Date();
         const emailResult = await emailService.sendOTPEmail(
           seller.email,
           newOTP,
           "verification",
         );
-        if (!emailResult.success) {
-          console.error("❌ Email OTP failed to resend:", emailResult.error);
-          otpDeliveryStatus.email = false;
-        } else {
-          console.log("✅ Email OTP resent to:", seller.email);
-          otpDeliveryStatus.email = true;
-        }
+        otpDeliveryStatus.email = emailResult.success;
+        if (!emailResult.success)
+          otpDeliveryDetail.emailError = "Could not resend email OTP.";
       }
+      await seller.save();
     }
 
     return res.status(200).json({
       success: true,
-      message: `OTP resent to ${type} successfully`,
-      otpDeliveryStatus, // ✅ NEW: per-channel delivery status
+      message: `OTP resend attempted for ${type}`,
+      otpDeliveryStatus,
+      otpDeliveryDetail,
     });
   } catch (error) {
     console.error("❌ Resend OTP error:", error);

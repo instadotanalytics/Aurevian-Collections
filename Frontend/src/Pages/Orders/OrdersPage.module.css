@@ -6,6 +6,7 @@
   --gold: #b98a4c;
   --gold-dark: #7c5c33;
   --gold-pale: #f3e7d0;
+   --gold-deep: #9c7a2e;
   --ivory: #faf6f0;
   --surface: #ffffff;
   --surface-alt: #f7f2ea;
@@ -64,19 +65,20 @@
   align-items: center;
   gap: 8px;
 
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.28em;
   text-transform: uppercase;
 
-  color: var(--gold-dark);
+  color: var(--gold-deep);
   margin-bottom: 5px;
+  padding-left: 8px;
 }
 
 .eyebrow::before {
   width: 26px;
   height: 1px;
-  background: var(--gold);
+  background: var(--gold-deep);
 }
 
 .pageTitle {
@@ -277,7 +279,7 @@
 .moreItemsTag {
   font-size: 0.74rem;
   font-weight: 500;
-  color: var(--gold-dark);
+  color: var(--gold-deep);
 }
 
 .viewDetailsMobile {
@@ -286,7 +288,7 @@
   gap: 4px;
   font-size: 0.76rem;
   font-weight: 600;
-  color: var(--gold-dark);
+  color: var(--gold-deep);
   text-decoration: none;
   white-space: nowrap;
   flex-shrink: 0;
@@ -365,8 +367,8 @@
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  border: 1px solid var(--gold);
-  color: var(--gold-dark);
+  border: 1px solid var(--gold-deep);
+  color: var(--gold-deep);
   background: var(--surface);
   font-size: 0.78rem;
   font-weight: 600;
@@ -376,7 +378,7 @@
 }
 
 .viewDetailsBtn:hover {
-  background: var(--gold);
+  background: var(--gold-deep);
   color: #fff;
 }
 
@@ -387,7 +389,7 @@
   justify-content: center;
   gap: 8px;
   padding: 20px 0;
-  color: var(--gold-dark);
+  color: var(--gold-deep);
   font-size: 0.84rem;
   border-top: 1px solid var(--border);
 }
@@ -412,7 +414,7 @@
 }
 
 .summaryIcon {
-  color: var(--gold);
+  color: var(--gold-deep);
   font-size: 1rem;
 }
 
@@ -472,7 +474,7 @@
   display: block;
   text-align: center;
   padding: 13px 18px;
-  background: var(--gold);
+  background: var(--gold-deep);
   color: #fff;
   font-size: 0.82rem;
   font-weight: 600;

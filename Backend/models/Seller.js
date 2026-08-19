@@ -78,18 +78,20 @@ const sellerSchema = new mongoose.Schema(
     },
 
     // ============================================
-    // OTP VERIFICATION
+    // OTP VERIFICATION — ✅ UPDATED with lastSentAt
     // ============================================
     otp: {
       email: {
         code: { type: String, select: false },
         expiresAt: { type: Date, select: false },
         verified: { type: Boolean, default: false },
+        lastSentAt: { type: Date, default: null }, // ✅ NEW — resend cooldown
       },
       phone: {
         code: { type: String, select: false },
         expiresAt: { type: Date, select: false },
         verified: { type: Boolean, default: false },
+        lastSentAt: { type: Date, default: null }, // ✅ NEW — resend cooldown
       },
     },
 
@@ -477,6 +479,7 @@ sellerSchema.methods.setEmailOTP = function (otpCode, expiryMinutes = 10) {
   this.otp.email.code = otpCode;
   this.otp.email.expiresAt = new Date(Date.now() + expiryMinutes * 60 * 1000);
   this.otp.email.verified = false;
+  this.otp.email.lastSentAt = new Date(); // ✅ NEW — track when OTP was sent
   return this.save();
 };
 
@@ -484,6 +487,7 @@ sellerSchema.methods.setPhoneOTP = function (otpCode, expiryMinutes = 10) {
   this.otp.phone.code = otpCode;
   this.otp.phone.expiresAt = new Date(Date.now() + expiryMinutes * 60 * 1000);
   this.otp.phone.verified = false;
+  this.otp.phone.lastSentAt = new Date(); // ✅ NEW — track when OTP was sent
   return this.save();
 };
 
@@ -495,6 +499,7 @@ sellerSchema.methods.verifyEmailOTP = function (otpCode) {
   this.emailVerified = true;
   this.otp.email.code = undefined;
   this.otp.email.expiresAt = undefined;
+  this.otp.email.lastSentAt = undefined; // ✅ NEW — clear tracking on verification
   return true;
 };
 
@@ -506,6 +511,7 @@ sellerSchema.methods.verifyPhoneOTP = function (otpCode) {
   this.phoneVerified = true;
   this.otp.phone.code = undefined;
   this.otp.phone.expiresAt = undefined;
+  this.otp.phone.lastSentAt = undefined; // ✅ NEW — clear tracking on verification
   return true;
 };
 

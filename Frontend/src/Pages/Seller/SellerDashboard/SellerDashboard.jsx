@@ -34,7 +34,7 @@ import planStyles from "./components/PlanTheme.module.css";
 import DashboardOverview from "./components/DashboardOverview";
 import Upgrade from "./components/Upgrade";
 import ProductManagement from "./components/ProductManagement";
-import ProductForm from "./components/ProductForm";
+import ProductFormWizard from "./components/ProductFormWizard"; // ✅ CHANGED: import wizard instead of form
 import Orders from "./components/Orders";
 
 import { sellerLogout } from "../../../redux/slices/sellerSlice";
@@ -43,6 +43,7 @@ import logo from "../../../assets/newlogo.png";
 import Earnings from "./components/Earnings";
 import Customers from "./components/Customers";
 import Settings from "./components/Settings";
+import SellerKYC from "../SellerKYC/SellerKYC.jsx"; // ✅ NEW — KYC page route
 
 // ✅ SOCKET.IO — seller notifications
 import useSellerNotifications from "../../../hooks/useSellerNotifications.js";
@@ -94,7 +95,7 @@ const menuItems = [
   { id: "orders", label: "Orders", icon: FiShoppingBag },
   { id: "earnings", label: "Earnings", icon: FiDollarSign },
   { id: "customers", label: "Customers", icon: FiUsers },
- 
+
   { id: "settings", label: "Settings", icon: FiSettings },
   { id: "upgrade", label: "Upgrade", icon: FiTrendingUp },
 ];
@@ -422,23 +423,20 @@ const SellerDashboard = () => {
             <Routes>
               <Route index element={<DashboardHome planTheme={planTheme} />} />
               <Route path="products" element={<ProductManagement />} />
-              <Route path="products/new" element={<ProductForm />} />
-              <Route path="products/edit/:id" element={<ProductForm />} />
+              <Route path="products/new" element={<ProductFormWizard />} />{" "}
+              {/* ✅ CHANGED: use wizard */}
+              <Route
+                path="products/edit/:id"
+                element={<ProductFormWizard />}
+              />{" "}
+              {/* ✅ CHANGED: use wizard */}
               <Route path="orders" element={<Orders />} />
-              <Route
-                path="earnings"
-                element={<Earnings/>}
-              />
-              <Route
-                path="customers"
-                element={<Customers/>}
-              />
-             
-              <Route
-                path="settings"
-                element={<Settings/>}
-              />
+              <Route path="earnings" element={<Earnings />} />
+              <Route path="customers" element={<Customers />} />
+              <Route path="settings" element={<Settings />} />
               <Route path="upgrade" element={<Upgrade />} />
+              <Route path="kyc" element={<SellerKYC />} />{" "}
+              {/* ✅ NEW — KYC page route */}
               <Route path="*" element={<Navigate to={basePath} replace />} />
             </Routes>
           </div>

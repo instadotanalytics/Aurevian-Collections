@@ -7,6 +7,7 @@
   --gold: #d4af37;
   --gold-light: #f5f0e8;
   --gold-dark: #b8962e;
+   --gold-deep: #9c7a2e;
   --gold-gradient: linear-gradient(
     135deg,
     #d4af37 0%,
@@ -417,7 +418,7 @@
 
 .summaryIcon {
   font-size: 20px;
-  color: var(--gold);
+  color: var(--gold-deep);
 }
 
 .summaryTitle {
@@ -459,7 +460,7 @@
 .totalAmount {
   font-size: 20px;
   font-weight: 600;
-  color: var(--gold-dark);
+  color: var(--gold-deep);
 }
 
 .rupeeIconLarge {
@@ -470,7 +471,7 @@
 .checkoutButton {
   width: 100%;
   padding: 14px;
-  background: var(--gold-gradient);
+  background: var(--gold-deep);
   color: white;
   border: none;
   font-family: "Jost", sans-serif;
@@ -514,7 +515,7 @@
 
 .trustIcon {
   font-size: 20px;
-  color: var(--gold);
+  color: var(--gold-deep);
   flex-shrink: 0;
   opacity: 0.6;
 }
@@ -539,7 +540,7 @@
 .whyAurevian {
   margin-top: 60px;
   padding: 60px 40px;
-  background: #ffffff;
+  background:transparent;
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
   position: relative;
@@ -563,7 +564,7 @@
   font-weight: 400;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: var(--gold-dark);
+  color: var(--gold-deep);
   margin-bottom: 12px;
   font-family: "Playfair Display", serif;
   font-style: italic;
@@ -573,7 +574,7 @@
   font-family: "Playfair Display", serif;
   font-size: clamp(28px, 3.5vw, 40px);
   font-weight: 500;
-  color: var(--dark);
+  color: var(--deep);
   margin: 0 0 16px 0;
   line-height: 1.15;
 }
@@ -629,7 +630,6 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: black;
   border: 1px solid var(--border);
 }
 

@@ -1,4 +1,7 @@
-// Shopbycategory.jsx - Update the categories state and add a useEffect to handle updates
+// ShopByCategory.jsx
+// Premium, compact "Shop by Category" section with a slow, continuous
+// left-moving marquee. Autoplay pauses on hover/focus, respects
+// prefers-reduced-motion, and the arrow buttons still work for manual paging.
 
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -20,7 +23,7 @@ const FALLBACK_CATEGORIES = [
   { id: "chains", label: "Chains", path: "/shop/chains", image: "" },
 ];
 
-// Create skeleton data (8 placeholders)
+// Skeleton placeholders
 const SKELETON_CATEGORIES = Array(8)
   .fill(null)
   .map((_, index) => ({
@@ -30,16 +33,6 @@ const SKELETON_CATEGORIES = Array(8)
     image: "",
     isSkeleton: true,
   }));
-
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.07,
-      delayChildren: 0.1,
-    },
-  },
-};
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -59,14 +52,13 @@ const getInitials = (label = "") =>
     .join("")
     .toUpperCase();
 
-// Skeleton Card Component
+// Skeleton Card
 const SkeletonCard = React.memo(function SkeletonCard() {
   return (
     <div className={styles.card}>
       <div className={styles.cardLink}>
         <div className={styles.imageWrap}>
           <div className={styles.skeletonImage} />
-          <span className={styles.ring} aria-hidden="true" />
         </div>
         <div className={styles.skeletonText} />
       </div>
@@ -84,8 +76,10 @@ const CategoryCard = React.memo(function CategoryCard({ category }) {
         to={category.path || "/shop"}
         className={styles.cardLink}
         aria-label={`Explore ${category.label}`}
+        tabIndex={-1}
       >
         <div className={styles.imageWrap}>
+          <span className={styles.ring} aria-hidden="true" />
           {hasImage ? (
             <img
               src={category.image}
@@ -101,7 +95,6 @@ const CategoryCard = React.memo(function CategoryCard({ category }) {
               </span>
             </div>
           )}
-          <span className={styles.ring} aria-hidden="true" />
         </div>
         <h3 className={styles.categoryName}>{category.label}</h3>
       </Link>
@@ -116,7 +109,6 @@ export default function ShopByCategory() {
   );
   const [categories, setCategories] = useState(SKELETON_CATEGORIES);
   const [isLoading, setIsLoading] = useState(true);
-  const [showContent, setShowContent] = useState(false);
 
   // Fetch config on mount
   useEffect(() => {
@@ -131,85 +123,131 @@ export default function ShopByCategory() {
       const timer = setTimeout(() => {
         setCategories(config.shopMegaMenu.categories);
         setIsLoading(false);
-        setTimeout(() => setShowContent(true), 100);
       }, 300);
       return () => clearTimeout(timer);
     } else if (config && !configLoading) {
       const timer = setTimeout(() => {
         setCategories(FALLBACK_CATEGORIES);
         setIsLoading(false);
-        setTimeout(() => setShowContent(true), 100);
       }, 300);
       return () => clearTimeout(timer);
     }
   }, [config, configLoading]);
 
-  // If loading takes too long, show fallback after 2 seconds
+  // Fallback if loading takes too long
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (isLoading) {
         setCategories(FALLBACK_CATEGORIES);
         setIsLoading(false);
-        setTimeout(() => setShowContent(true), 100);
       }
     }, 2000);
     return () => clearTimeout(timeoutId);
   }, [isLoading]);
 
-  const trackRef = useRef(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
+  const showSkeletons = isLoading || categories.some((c) => c.isSkeleton);
 
-  const updateScrollState = useCallback(() => {
-    const el = trackRef.current;
-    if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 8);
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 8);
+  /* ------------------------- continuous marquee ------------------------- */
+
+  const trackRef = useRef(null);
+  const posRef = useRef(0);
+  const isPausedRef = useRef(false);
+  const isNudgingRef = useRef(false);
+  const resumeTimeoutRef = useRef(null);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  // Respect prefers-reduced-motion
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(mq.matches);
+    const handler = (e) => setReducedMotion(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
   }, []);
 
-  // Update scroll state when categories change
+  // Reset position whenever the underlying category set changes
   useEffect(() => {
-    const el = trackRef.current;
-    if (!el) return;
+    posRef.current = 0;
+    if (trackRef.current) {
+      trackRef.current.style.transform = "translateX(0px)";
+    }
+  }, [categories, showSkeletons]);
 
-    // Use requestAnimationFrame to ensure DOM is updated
-    requestAnimationFrame(() => {
-      updateScrollState();
-    });
+  // Autoplay loop — slow, constant-speed, seamless leftward drift
+  useEffect(() => {
+    if (showSkeletons) return undefined;
 
-    el.addEventListener("scroll", updateScrollState, { passive: true });
-    window.addEventListener("resize", updateScrollState);
+    const track = trackRef.current;
+    if (!track) return undefined;
 
-    // Also update on category changes
-    return () => {
-      el.removeEventListener("scroll", updateScrollState);
-      window.removeEventListener("resize", updateScrollState);
+    let rafId;
+    let last = performance.now();
+    const SPEED_PX_PER_SEC = 26; // slow & premium, not jarring
+
+    const step = (now) => {
+      const dt = now - last;
+      last = now;
+
+      if (!reducedMotion && !isPausedRef.current && !isNudgingRef.current) {
+        const setWidth = track.scrollWidth / 2; // list is duplicated x2
+        if (setWidth > 0) {
+          posRef.current -= (SPEED_PX_PER_SEC * dt) / 1000;
+          if (posRef.current <= -setWidth) posRef.current += setWidth;
+          track.style.transform = `translateX(${posRef.current}px)`;
+        }
+      }
+      rafId = requestAnimationFrame(step);
     };
-  }, [updateScrollState, categories]);
 
-  // Force update scroll state when categories change
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      updateScrollState();
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [categories, updateScrollState]);
+    rafId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafId);
+  }, [showSkeletons, reducedMotion, categories]);
 
-  const scrollByAmount = (direction) => {
-    const el = trackRef.current;
-    if (!el) return;
-    const card = el.querySelector(`.${styles.card}`);
-    const cardWidth = card ? card.getBoundingClientRect().width : 140;
+  const pause = useCallback(() => {
+    isPausedRef.current = true;
+  }, []);
+
+  const resume = useCallback(() => {
+    if (!isNudgingRef.current) isPausedRef.current = false;
+  }, []);
+
+  const nudge = useCallback((direction) => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    const firstCard = track.querySelector(`.${styles.card}`);
+    const cardWidth = firstCard ? firstCard.getBoundingClientRect().width : 140;
     const gap = 16;
-    const distance = (cardWidth + gap) * 2 * direction;
-    el.scrollBy({ left: distance, behavior: "smooth" });
+    const distance = (cardWidth + gap) * 2;
 
-    // Update scroll state after scroll
-    setTimeout(() => updateScrollState(), 100);
-  };
+    isPausedRef.current = true;
+    isNudgingRef.current = true;
 
-  // Determine if we should show skeletons
-  const showSkeletons = isLoading || categories.some((c) => c.isSkeleton);
+    posRef.current -= direction * distance;
+
+    const setWidth = track.scrollWidth / 2;
+    if (setWidth > 0) {
+      if (posRef.current <= -setWidth) posRef.current += setWidth;
+      if (posRef.current > 0) posRef.current -= setWidth;
+    }
+
+    track.style.transition = "transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)";
+    track.style.transform = `translateX(${posRef.current}px)`;
+
+    clearTimeout(resumeTimeoutRef.current);
+    resumeTimeoutRef.current = setTimeout(() => {
+      track.style.transition = "";
+      isNudgingRef.current = false;
+      isPausedRef.current = false;
+    }, 550);
+  }, []);
+
+  useEffect(() => () => clearTimeout(resumeTimeoutRef.current), []);
+
+  // Duplicate the list for a seamless infinite loop
+  const displayItems = showSkeletons
+    ? SKELETON_CATEGORIES
+    : [...categories, ...categories];
 
   return (
     <section
@@ -227,7 +265,7 @@ export default function ShopByCategory() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <p className={styles.topText}>✦ DISCOVER OUR COLLECTIONS ✦</p>
+          <p className={styles.topText}>✦ Discover Our Collections ✦</p>
 
           <h2 id="shop-by-category-heading" className={styles.heading}>
             <span className={styles.shop}>Shop</span>
@@ -242,40 +280,44 @@ export default function ShopByCategory() {
           <button
             type="button"
             className={`${styles.navButton} ${styles.navButtonLeft} ${styles.desktopNav}`}
-            onClick={() => scrollByAmount(-1)}
-            disabled={!canScrollLeft}
-            aria-label="Scroll to previous categories"
+            onClick={() => nudge(-1)}
+            aria-label="Show previous categories"
           >
             <FiChevronLeft />
           </button>
 
-          <motion.div
-            className={`${styles.track} ${showSkeletons ? styles.loadingTrack : styles.loadedTrack}`}
-            ref={trackRef}
+          <div
+            className={styles.marqueeViewport}
             role="region"
             aria-label="Jewellery categories"
             tabIndex={0}
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            key={categories.length}
+            onMouseEnter={pause}
+            onMouseLeave={resume}
+            onFocus={pause}
+            onBlur={resume}
           >
-            {showSkeletons
-              ? SKELETON_CATEGORIES.map((_, index) => (
-                  <SkeletonCard key={`skeleton-${index}`} />
-                ))
-              : categories.map((category) => (
-                  <CategoryCard key={category.id} category={category} />
-                ))}
-          </motion.div>
+            <div
+              className={`${styles.marqueeTrack} ${showSkeletons ? styles.loadingTrack : styles.loadedTrack}`}
+              ref={trackRef}
+            >
+              {showSkeletons
+                ? displayItems.map((_, index) => (
+                    <SkeletonCard key={`skeleton-${index}`} />
+                  ))
+                : displayItems.map((category, index) => (
+                    <CategoryCard
+                      key={`${category.id}-${index}`}
+                      category={category}
+                    />
+                  ))}
+            </div>
+          </div>
 
           <button
             type="button"
             className={`${styles.navButton} ${styles.navButtonRight} ${styles.desktopNav}`}
-            onClick={() => scrollByAmount(1)}
-            disabled={!canScrollRight}
-            aria-label="Scroll to next categories"
+            onClick={() => nudge(1)}
+            aria-label="Show next categories"
           >
             <FiChevronRight />
           </button>
@@ -285,9 +327,8 @@ export default function ShopByCategory() {
           <button
             type="button"
             className={styles.navButton}
-            onClick={() => scrollByAmount(-1)}
-            disabled={!canScrollLeft}
-            aria-label="Scroll to previous categories"
+            onClick={() => nudge(-1)}
+            aria-label="Show previous categories"
           >
             <FiChevronLeft />
           </button>
@@ -295,9 +336,8 @@ export default function ShopByCategory() {
           <button
             type="button"
             className={styles.navButton}
-            onClick={() => scrollByAmount(1)}
-            disabled={!canScrollRight}
-            aria-label="Scroll to next categories"
+            onClick={() => nudge(1)}
+            aria-label="Show next categories"
           >
             <FiChevronRight />
           </button>
