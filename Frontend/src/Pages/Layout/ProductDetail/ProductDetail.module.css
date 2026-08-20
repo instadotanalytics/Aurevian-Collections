@@ -47,6 +47,13 @@
   }
 }
 
+/* ─── Left Column ─── */
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 /* ─── Gallery ─── */
 .gallery {
   display: flex;
@@ -64,6 +71,7 @@
   cursor: zoom-in;
   user-select: none;
   -webkit-user-select: none;
+  touch-action: none;
 }
 .mainImageWrap.zooming {
   cursor: grab;
@@ -132,11 +140,7 @@
   height: 16%;
   border: 2px solid rgba(184, 147, 79, 0.6);
   border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.3) 0%,
-    rgba(255, 255, 255, 0.05) 100%
-  );
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 100%);
   pointer-events: none;
   transform: translate(-50%, -50%);
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
@@ -335,6 +339,7 @@
   border-radius: 8px;
   overflow: hidden;
   background: #fff;
+  flex-shrink: 0;
 }
 .qtySelector button {
   width: 40px;
@@ -347,13 +352,19 @@
   justify-content: center;
   color: #201a10;
   transition: background 0.2s ease;
+  font-size: 16px;
 }
 .qtySelector button:hover:not(:disabled) {
   background: #f8f4ec;
 }
-.qtySelector button:disabled {
+.qtySelector button:disabled,
+.qtySelector button.qtyDisabled {
   opacity: 0.3;
   cursor: not-allowed;
+}
+.qtySelector button:disabled:hover,
+.qtySelector button.qtyDisabled:hover {
+  background: transparent;
 }
 .qtySelector span {
   width: 44px;
@@ -436,9 +447,8 @@
   font-size: 16px;
 }
 
-/* ─── Compact Specifications (Fills empty space) ─── */
+/* ─── Compact Specifications ─── */
 .specsCompact {
-  margin-top: 4px;
   padding: 12px 0 4px;
 }
 
@@ -474,10 +484,10 @@
   font-weight: 500;
 }
 
-/* ─── Description Section ─── */
-.descriptionSection {
-  margin-top: 40px;
-  padding-top: 32px;
+/* ─── Description in Info Column ─── */
+.descriptionSectionInInfo {
+  margin-top: 8px;
+  padding-top: 16px;
   border-top: 1px solid rgba(184, 147, 79, 0.15);
 }
 
@@ -536,18 +546,114 @@
   cursor: pointer;
 }
 
+/* ─── Skeleton Loader ─── */
+.shimmer {
+  background: linear-gradient(90deg, #f0ebe0 25%, #f8f4ec 50%, #f0ebe0 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s infinite;
+  border-radius: 6px;
+}
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeletonBreadcrumb {
+  margin-bottom: 28px;
+}
+
+.skeletonMainImage {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+}
+
+.skeletonThumbRow {
+  display: flex;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.skeletonThumb {
+  width: 76px;
+  height: 76px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.skeletonSpecsBlock {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeletonSpecsTitle {
+  border-radius: 4px;
+}
+
+.skeletonSpecsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 20px;
+}
+
+.skeletonSpecRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.skeletonTitle {
+  border-radius: 4px;
+}
+
+.skeletonPrice {
+  border-radius: 6px;
+}
+
+.skeletonPurchaseRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.skeletonQty {
+  border-radius: 8px;
+}
+
+.skeletonBtn {
+  border-radius: 8px;
+  min-width: 160px;
+}
+
+.skeletonPerks {
+  border-radius: 8px;
+}
+
+.skeletonDescBlock {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 /* ─── Mobile Responsiveness ─── */
 @media (max-width: 900px) {
   .specsCompactGrid {
+    grid-template-columns: 1fr;
+  }
+  .skeletonSpecsGrid {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 600px) {
   .container {
-    padding: 16px 12px 40px;
-    margin-top: 100px;
-    margin-bottom: 0px;
+    padding: 40px 12px 40px;
+    margin-top: 80px;
   }
 
   .productName {
@@ -569,6 +675,7 @@
   .qtySelector button {
     width: 34px;
     height: 38px;
+    font-size: 14px;
   }
   .qtySelector span {
     width: 32px;
@@ -601,6 +708,11 @@
     height: 56px;
   }
 
+  .skeletonThumb {
+    width: 56px;
+    height: 56px;
+  }
+
   .wishlistIconBtn {
     width: 38px;
     height: 38px;
@@ -616,6 +728,26 @@
     font-size: 12px;
     padding: 3px 0;
   }
+
+  .imageNavBtn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+  .imageNavPrev {
+    left: 8px;
+  }
+  .imageNavNext {
+    right: 8px;
+  }
+
+  .skeletonPurchaseRow {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+  .skeletonBtn {
+    min-width: 0;
+  }
 }
 
 /* ─── Reduced Motion ─── */
@@ -625,8 +757,10 @@
   .addToCartBtn,
   .buyNowBtn,
   .thumbBtn,
-  .wishlistIconBtn {
+  .wishlistIconBtn,
+  .shimmer {
     transition: none !important;
+    animation: none !important;
   }
   .imageSlider {
     transition: none !important;

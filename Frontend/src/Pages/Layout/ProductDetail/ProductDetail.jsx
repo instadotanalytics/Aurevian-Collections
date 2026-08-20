@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import {
   FiHeart,
   FiShoppingBag,
+  FiShoppingCart,
   FiCheck,
   FiChevronLeft,
   FiChevronRight,
@@ -34,6 +35,57 @@ import {
   fetchWishlist,
 } from "../../../redux/slices/wishlistSlice";
 
+// ─── Skeleton Loader ───
+const ProductDetailSkeleton = () => (
+  <div className={styles.page}>
+    <Header />
+    <div className={styles.container}>
+      <div className={styles.skeletonBreadcrumb}>
+        <div className={`${styles.skeletonText} ${styles.shimmer}`} style={{ width: "30%", height: 14 }} />
+      </div>
+      <div className={styles.mainGrid}>
+        <div className={styles.leftColumn}>
+          <div className={`${styles.skeletonMainImage} ${styles.shimmer}`} />
+          <div className={styles.skeletonThumbRow}>
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className={`${styles.skeletonThumb} ${styles.shimmer}`} />
+            ))}
+          </div>
+          <div className={styles.skeletonSpecsBlock}>
+            <div className={`${styles.skeletonSpecsTitle} ${styles.shimmer}`} style={{ width: "40%", height: 20 }} />
+            <div className={styles.skeletonSpecsGrid}>
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className={styles.skeletonSpecRow}>
+                  <div className={`${styles.shimmer}`} style={{ width: "40%", height: 14 }} />
+                  <div className={`${styles.shimmer}`} style={{ width: "40%", height: 14 }} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className={styles.info}>
+          <div className={`${styles.skeletonTitle} ${styles.shimmer}`} style={{ width: "80%", height: 32 }} />
+          <div className={`${styles.skeletonText} ${styles.shimmer}`} style={{ width: "100%", height: 16 }} />
+          <div className={`${styles.skeletonText} ${styles.shimmer}`} style={{ width: "90%", height: 16 }} />
+          <div className={`${styles.skeletonPrice} ${styles.shimmer}`} style={{ width: "40%", height: 36, marginTop: 8 }} />
+          <div className={styles.skeletonPurchaseRow}>
+            <div className={`${styles.skeletonQty} ${styles.shimmer}`} style={{ width: 120, height: 44 }} />
+            <div className={`${styles.skeletonBtn} ${styles.shimmer}`} style={{ flex: 1, height: 44 }} />
+            <div className={`${styles.skeletonBtn} ${styles.shimmer}`} style={{ flex: 1, height: 44 }} />
+          </div>
+          <div className={`${styles.skeletonPerks} ${styles.shimmer}`} style={{ width: "100%", height: 40, marginTop: 8 }} />
+          <div className={styles.skeletonDescBlock}>
+            <div className={`${styles.skeletonText} ${styles.shimmer}`} style={{ width: "100%", height: 16 }} />
+            <div className={`${styles.skeletonText} ${styles.shimmer}`} style={{ width: "95%", height: 16 }} />
+            <div className={`${styles.skeletonText} ${styles.shimmer}`} style={{ width: "85%", height: 16 }} />
+          </div>
+        </div>
+      </div>
+    </div>
+    <Footer />
+  </div>
+);
+
 // ─── Image Gallery with Zoom ───
 const ImageGallery = ({ images, productName, isWishlisted, onToggleWishlist }) => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -42,6 +94,7 @@ const ImageGallery = ({ images, productName, isWishlisted, onToggleWishlist }) =
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [offsetX, setOffsetX] = useState(0);
+  const [touchStartTime, setTouchStartTime] = useState(0);
   const imageRef = useRef(null);
 
   const allImages = images.length > 0 ? images : [{ url: "/placeholder-image.png", altText: productName }];
@@ -55,28 +108,62 @@ const ImageGallery = ({ images, productName, isWishlisted, onToggleWishlist }) =
     setOffsetX(0);
   };
 
-  // ── Touch Drag for Slider ──
+  // ── Touch Events for Mobile ──
   const handleTouchStart = (e) => {
-    setIsDragging(true);
-    setStartX(e.touches[0].clientX);
-    setIsZooming(false);
+    const touch = e.touches[0];
+    setStartX(touch.clientX);
+    setTouchStartTime(Date.now());
+    setIsDragging(false);
+    setOffsetX(0);
   };
 
   const handleTouchMove = (e) => {
-    if (!isDragging) return;
-    const currentX = e.touches[0].clientX;
-    const diff = startX - currentX;
-    setOffsetX(diff);
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      const currentX = touch.clientX;
+      const diff = startX - currentX;
+
+      if (Math.abs(diff) > 10) {
+        setIsDragging(true);
+        setIsZooming(false);
+        setOffsetX(diff);
+        e.preventDefault();
+      } else {
+        setIsDragging(false);
+      }
+    }
+
+    if (e.touches.length === 2) {
+      setIsZooming(true);
+      setIsDragging(false);
+      e.preventDefault();
+    }
   };
 
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-    if (Math.abs(offsetX) > 50) {
-      if (offsetX > 0) nextImage();
-      else prevImage();
+  const handleTouchEnd = (e) => {
+    if (isDragging) {
+      if (Math.abs(offsetX) > 50) {
+        if (offsetX > 0) {
+          nextImage();
+        } else {
+          prevImage();
+        }
+      }
+      setOffsetX(0);
+      setIsDragging(false);
+    } else {
+      const touchDuration = Date.now() - touchStartTime;
+      if (touchDuration < 300 && !isZooming) {
+        setIsZooming(true);
+        setTimeout(() => {
+          setIsZooming(false);
+        }, 3000);
+      } else if (touchDuration < 300 && isZooming) {
+        setIsZooming(false);
+      }
     }
-    setOffsetX(0);
-    setIsZooming(false);
+
+    setIsDragging(false);
   };
 
   // ── Mouse Zoom ──
@@ -95,6 +182,10 @@ const ImageGallery = ({ images, productName, isWishlisted, onToggleWishlist }) =
       x: Math.min(Math.max(x, 0), 100),
       y: Math.min(Math.max(y, 0), 100),
     });
+  };
+
+  const toggleZoom = () => {
+    setIsZooming(!isZooming);
   };
 
   return (
@@ -183,7 +274,7 @@ const ImageGallery = ({ images, productName, isWishlisted, onToggleWishlist }) =
           type="button"
           className={styles.zoomIndicator}
           aria-label="Zoom in"
-          onClick={() => setIsZooming(!isZooming)}
+          onClick={toggleZoom}
         >
           <FiZoomIn />
         </button>
@@ -199,6 +290,7 @@ const ImageGallery = ({ images, productName, isWishlisted, onToggleWishlist }) =
               onClick={() => {
                 setActiveIndex(idx);
                 setOffsetX(0);
+                setIsZooming(false);
               }}
             >
               <img src={img.url} alt={`Thumbnail ${idx + 1}`} />
@@ -252,16 +344,7 @@ export default function ProductDetail() {
 
   // ── Loading State ──
   if (currentProductLoading) {
-    return (
-      <div className={styles.page}>
-        <Header />
-        <div className={styles.loadingWrap}>
-          <div className={styles.spinner} />
-          <p>Loading product...</p>
-        </div>
-        <Footer />
-      </div>
-    );
+    return <ProductDetailSkeleton />;
   }
 
   // ── Error State ──
@@ -305,8 +388,8 @@ export default function ProductDetail() {
 
   const inStock = product.inventory?.availability === "In Stock";
   const stockQty = product.inventory?.stockQuantity || 0;
-  const minQty = product.inventory?.minOrderQty || 1;
-  const maxQty = product.inventory?.maxOrderQty || stockQty || 99;
+  const minQty = 1;
+  const maxQty = 5;
 
   const isWishlisted = wishlistItems.some(
     (i) => (i.product?._id || i.product) === product._id
@@ -328,9 +411,20 @@ export default function ProductDetail() {
     { label: "Gender", value: product.specifications?.gender },
   ].filter((s) => s.value && s.value !== "None" && s.value !== "");
 
-  // ── Handlers ──
-  const decreaseQty = () => setQuantity((q) => Math.max(minQty, q - 1));
-  const increaseQty = () => setQuantity((q) => Math.min(maxQty, stockQty, q + 1));
+  // ── Quantity Handlers ──
+  const decreaseQty = () => {
+    setQuantity((q) => {
+      const newQty = Math.max(minQty, q - 1);
+      return newQty;
+    });
+  };
+
+  const increaseQty = () => {
+    setQuantity((q) => {
+      const newQty = Math.min(maxQty, q + 1);
+      return newQty;
+    });
+  };
 
   const requireAuth = () => {
     if (!isAuthenticated) {
@@ -404,19 +498,37 @@ export default function ProductDetail() {
           <span className={styles.breadcrumbCurrent}>{product.productName}</span>
         </div>
 
-        {/* Main Grid - Transparent Background */}
+        {/* Main Grid */}
         <div className={styles.mainGrid}>
-          <ImageGallery 
-            images={allImages} 
-            productName={product.productName}
-            isWishlisted={isWishlisted}
-            onToggleWishlist={handleToggleWishlist}
-          />
+          {/* Left Column: Gallery + Specs */}
+          <div className={styles.leftColumn}>
+            <ImageGallery 
+              images={allImages} 
+              productName={product.productName}
+              isWishlisted={isWishlisted}
+              onToggleWishlist={handleToggleWishlist}
+            />
 
+            {/* Specifications - Moved below thumbnails */}
+            {allSpecs.length > 0 && (
+              <div className={styles.specsCompact}>
+                <h3 className={styles.specsCompactTitle}>Specifications</h3>
+                <div className={styles.specsCompactGrid}>
+                  {allSpecs.map((spec) => (
+                    <div key={spec.label} className={styles.specCompactItem}>
+                      <span className={styles.specCompactLabel}>{spec.label}</span>
+                      <span className={styles.specCompactValue}>{spec.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column: Info + Description */}
           <div className={styles.info}>
             <h1 className={styles.productName}>{product.productName}</h1>
 
-            {/* Description - Now above price */}
             {product.shortDescription && (
               <p className={styles.shortDescription}>{product.shortDescription}</p>
             )}
@@ -443,11 +555,21 @@ export default function ProductDetail() {
 
             <div className={styles.purchaseRow}>
               <div className={styles.qtySelector}>
-                <button type="button" onClick={decreaseQty} disabled={quantity <= minQty}>
+                <button 
+                  type="button" 
+                  onClick={decreaseQty} 
+                  disabled={quantity <= minQty}
+                  className={quantity <= minQty ? styles.qtyDisabled : ""}
+                >
                   <FiMinus />
                 </button>
                 <span>{quantity}</span>
-                <button type="button" onClick={increaseQty} disabled={quantity >= Math.min(maxQty, stockQty)}>
+                <button 
+                  type="button" 
+                  onClick={increaseQty} 
+                  disabled={quantity >= maxQty}
+                  className={quantity >= maxQty ? styles.qtyDisabled : ""}
+                >
                   <FiPlus />
                 </button>
               </div>
@@ -458,7 +580,7 @@ export default function ProductDetail() {
                 onClick={handleAddToCart}
                 disabled={!inStock || cartLoading}
               >
-                {addedToCart ? <><FiCheck /> Added</> : <><FiShoppingBag /> Add to Cart</>}
+                {addedToCart ? <><FiCheck /> Added</> : <><FiShoppingCart /> Add to Cart</>}
               </button>
 
               <button type="button" className={styles.buyNowBtn} onClick={handleBuyNow} disabled={!inStock}>
@@ -479,29 +601,14 @@ export default function ProductDetail() {
               </div>
             </div>
 
-            {/* Specifications - Now directly below perks to fill the space */}
-            {allSpecs.length > 0 && (
-              <div className={styles.specsCompact}>
-                <h3 className={styles.specsCompactTitle}>Specifications</h3>
-                <div className={styles.specsCompactGrid}>
-                  {allSpecs.map((spec) => (
-                    <div key={spec.label} className={styles.specCompactItem}>
-                      <span className={styles.specCompactLabel}>{spec.label}</span>
-                      <span className={styles.specCompactValue}>{spec.value}</span>
-                    </div>
-                  ))}
-                </div>
+            {/* Full Description - Moved into info column in place of specs */}
+            {product.fullDescription && (
+              <div className={styles.descriptionSectionInInfo}>
+                <p className={styles.fullDescription}>{product.fullDescription}</p>
               </div>
             )}
           </div>
         </div>
-
-        {/* Full Description if available */}
-        {product.fullDescription && (
-          <div className={styles.descriptionSection}>
-            <p className={styles.fullDescription}>{product.fullDescription}</p>
-          </div>
-        )}
       </div>
 
       <Footer />

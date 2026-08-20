@@ -774,13 +774,13 @@ export default function Collections() {
             {/* Products */}
             <div className={styles.productsWrapper}>
               {/* Desktop header: count only */}
-              {/* <div className={styles.productsHeader}>
+              <div className={styles.productsHeader}>
                 <span className={styles.productsCount}>
                   {isInitialLoading
                     ? "Loading..."
                     : `Showing ${filteredProducts.length} results`}
                 </span>
-              </div> */}
+              </div>
 
               {/* Skeleton Loading */}
               {isInitialLoading && (
