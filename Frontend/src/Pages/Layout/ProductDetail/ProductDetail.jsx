@@ -1,3 +1,4 @@
+
 // src/Pages/Layout/ProductDetail/ProductDetail.jsx
 
 import React, { useEffect, useState, useRef } from "react";
@@ -20,7 +21,7 @@ import {
   FiZoomIn,
 } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
-
+import { FiCreditCard } from "react-icons/fi";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import styles from "./ProductDetail.module.css";
@@ -51,18 +52,8 @@ const ProductDetailSkeleton = () => (
               <div key={i} className={`${styles.skeletonThumb} ${styles.shimmer}`} />
             ))}
           </div>
-          <div className={styles.skeletonSpecsBlock}>
-            <div className={`${styles.skeletonSpecsTitle} ${styles.shimmer}`} style={{ width: "40%", height: 20 }} />
-            <div className={styles.skeletonSpecsGrid}>
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className={styles.skeletonSpecRow}>
-                  <div className={`${styles.shimmer}`} style={{ width: "40%", height: 14 }} />
-                  <div className={`${styles.shimmer}`} style={{ width: "40%", height: 14 }} />
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
+
         <div className={styles.info}>
           <div className={`${styles.skeletonTitle} ${styles.shimmer}`} style={{ width: "80%", height: 32 }} />
           <div className={`${styles.skeletonText} ${styles.shimmer}`} style={{ width: "100%", height: 16 }} />
@@ -78,6 +69,18 @@ const ProductDetailSkeleton = () => (
             <div className={`${styles.skeletonText} ${styles.shimmer}`} style={{ width: "100%", height: 16 }} />
             <div className={`${styles.skeletonText} ${styles.shimmer}`} style={{ width: "95%", height: 16 }} />
             <div className={`${styles.skeletonText} ${styles.shimmer}`} style={{ width: "85%", height: 16 }} />
+          </div>
+        </div>
+
+        <div className={styles.skeletonSpecsBlock}>
+          <div className={`${styles.skeletonSpecsTitle} ${styles.shimmer}`} style={{ width: "40%", height: 20 }} />
+          <div className={styles.skeletonSpecsGrid}>
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className={styles.skeletonSpecRow}>
+                <div className={`${styles.shimmer}`} style={{ width: "40%", height: 14 }} />
+                <div className={`${styles.shimmer}`} style={{ width: "40%", height: 14 }} />
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -500,32 +503,17 @@ export default function ProductDetail() {
 
         {/* Main Grid */}
         <div className={styles.mainGrid}>
-          {/* Left Column: Gallery + Specs */}
+          {/* Gallery */}
           <div className={styles.leftColumn}>
-            <ImageGallery 
-              images={allImages} 
+            <ImageGallery
+              images={allImages}
               productName={product.productName}
               isWishlisted={isWishlisted}
               onToggleWishlist={handleToggleWishlist}
             />
-
-            {/* Specifications - Moved below thumbnails */}
-            {allSpecs.length > 0 && (
-              <div className={styles.specsCompact}>
-                <h3 className={styles.specsCompactTitle}>Specifications</h3>
-                <div className={styles.specsCompactGrid}>
-                  {allSpecs.map((spec) => (
-                    <div key={spec.label} className={styles.specCompactItem}>
-                      <span className={styles.specCompactLabel}>{spec.label}</span>
-                      <span className={styles.specCompactValue}>{spec.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* Right Column: Info + Description */}
+          {/* Info: name, price, purchase actions, perks, description */}
           <div className={styles.info}>
             <h1 className={styles.productName}>{product.productName}</h1>
 
@@ -555,18 +543,18 @@ export default function ProductDetail() {
 
             <div className={styles.purchaseRow}>
               <div className={styles.qtySelector}>
-                <button 
-                  type="button" 
-                  onClick={decreaseQty} 
+                <button
+                  type="button"
+                  onClick={decreaseQty}
                   disabled={quantity <= minQty}
                   className={quantity <= minQty ? styles.qtyDisabled : ""}
                 >
                   <FiMinus />
                 </button>
                 <span>{quantity}</span>
-                <button 
-                  type="button" 
-                  onClick={increaseQty} 
+                <button
+                  type="button"
+                  onClick={increaseQty}
                   disabled={quantity >= maxQty}
                   className={quantity >= maxQty ? styles.qtyDisabled : ""}
                 >
@@ -584,8 +572,9 @@ export default function ProductDetail() {
               </button>
 
               <button type="button" className={styles.buyNowBtn} onClick={handleBuyNow} disabled={!inStock}>
-                <FiShoppingBag /> Buy Now
+                <FiCreditCard /> Buy Now
               </button>
+
             </div>
 
             {/* Perks */}
@@ -601,13 +590,29 @@ export default function ProductDetail() {
               </div>
             </div>
 
-            {/* Full Description - Moved into info column in place of specs */}
+            {/* Full Description */}
             {product.fullDescription && (
               <div className={styles.descriptionSectionInInfo}>
                 <p className={styles.fullDescription}>{product.fullDescription}</p>
               </div>
             )}
           </div>
+
+          {/* Specifications - own grid area: sits under the gallery on desktop,
+              but reorders to the very end (after Info/highlights) on mobile */}
+          {allSpecs.length > 0 && (
+            <div className={styles.specsCompact}>
+              <h3 className={styles.specsCompactTitle}>Specifications</h3>
+              <div className={styles.specsCompactGrid}>
+                {allSpecs.map((spec) => (
+                  <div key={spec.label} className={styles.specCompactItem}>
+                    <span className={styles.specCompactLabel}>{spec.label}</span>
+                    <span className={styles.specCompactValue}>{spec.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

@@ -1,7 +1,8 @@
+
 /* src/Pages/Layout/ProductDetail/ProductDetail.module.css */
 
 .page {
-  background: #faf6ee;
+  background:transparent;
   min-height: 100vh;
 }
 
@@ -18,15 +19,15 @@
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: #8a7a5c;
+  color: var(--gold-deep);
   margin-bottom: 28px;
 }
 .breadcrumb a {
-  color: #8a7a5c;
+  color: var(--gold-deep);
   text-decoration: none;
 }
 .breadcrumb a:hover {
-  color: #b8934f;
+  color: var(--gold-deep);
   text-decoration: underline;
 }
 .breadcrumbCurrent {
@@ -34,21 +35,35 @@
   font-weight: 500;
 }
 
-/* ─── Main Grid ─── */
+/* ─── Main Grid ───
+   Desktop: 2 columns. Gallery + Specs stack in column 1,
+   Info (name/price/purchase/perks/description) spans both rows in column 2.
+   Mobile: single column, reordered via grid-template-areas so
+   Specifications render last, after the Info "highlights". */
 .mainGrid {
   display: grid;
   grid-template-columns: 1.1fr 1fr;
-  gap: 48px;
+  column-gap: 48px;
+  row-gap: 28px;
+  grid-template-areas:
+    "gallery info"
+    "specs   info";
 }
 @media (max-width: 900px) {
   .mainGrid {
     grid-template-columns: 1fr;
-    gap: 28px;
+    column-gap: 0;
+    row-gap: 28px;
+    grid-template-areas:
+      "gallery"
+      "info"
+      "specs";
   }
 }
 
-/* ─── Left Column ─── */
+/* ─── Left Column (Gallery) ─── */
 .leftColumn {
+  grid-area: gallery;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -65,7 +80,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  background: #f8f4ec;
+  background: transparent;
   overflow: hidden;
   border-radius: 12px;
   cursor: zoom-in;
@@ -112,8 +127,8 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(184, 147, 79, 0.2);
+  background: transparent;
+  border: 1px solid var(--gold-deep);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -126,7 +141,7 @@
 }
 .wishlistIconBtn:hover {
   background: #fff;
-  border-color: #b8934f;
+  border-color:var(--gold-deep);
   transform: scale(1.08);
 }
 .wishlistIconBtnActive {
@@ -169,7 +184,7 @@
 .imageNavBtn:hover {
   background: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  border-color: #b8934f;
+  border-color:var(--gold-deep);
 }
 .imageNavPrev {
   left: 14px;
@@ -200,7 +215,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
+  background: transparent;
   border: 1px solid rgba(184, 147, 79, 0.3);
   display: flex;
   align-items: center;
@@ -212,7 +227,7 @@
 }
 .zoomIndicator:hover {
   background: #fff;
-  border-color: #b8934f;
+  border-color: var(--gold-deep);
   transform: scale(1.05);
 }
 
@@ -230,7 +245,7 @@
   border-radius: 2px;
 }
 .thumbRow::-webkit-scrollbar-thumb {
-  background: #b8934f;
+  background: var(--gold-deep);
   border-radius: 2px;
 }
 
@@ -262,13 +277,14 @@
 
 /* ─── Info Column ─── */
 .info {
+  grid-area: info;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
 .productName {
-  font-family: "Playfair Display", serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   font-size: 28px;
   color: #201a10;
   margin: 0;
@@ -277,7 +293,7 @@
 
 .shortDescription {
   color: #5b5140;
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.6;
   margin: 0;
 }
@@ -382,7 +398,7 @@
   justify-content: center;
   gap: 10px;
   padding: 13px 24px;
-  background: linear-gradient(135deg, #d4af6a, #a97d34);
+  background: var(--gold-deep);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -410,7 +426,7 @@
   gap: 8px;
   padding: 13px 24px;
   border: none;
-  background: linear-gradient(135deg, #d4af6a, #a97d34);
+  background: var(--gold-deep);
   color: #fff;
   border-radius: 8px;
   font-weight: 600;
@@ -439,22 +455,26 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
-  color: #6b5d3f;
+  font-size: 14px;
+  color: var(--gold-deep);
 }
 .perkItem svg {
-  color: #b8934f;
+  color:var(--gold-deep);
   font-size: 16px;
 }
 
-/* ─── Compact Specifications ─── */
+/* ─── Compact Specifications ───
+   Own grid area ("specs"): sits under the gallery in column 1 on desktop,
+   but reorders to the end (after .info) on mobile via mainGrid's
+   grid-template-areas at the 900px breakpoint. */
 .specsCompact {
-  padding: 12px 0 4px;
+  grid-area: specs;
+  padding: 0;
 }
 
 .specsCompactTitle {
-  font-family: "Playfair Display", serif;
-  font-size: 16px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size: 17px;
   color: #201a10;
   margin: 0 0 10px 0;
   font-weight: 600;
@@ -525,7 +545,7 @@
   }
 }
 .notFoundWrap h2 {
-  font-family: "Playfair Display", serif;
+  font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   color: #201a10;
   margin: 0;
 }
@@ -581,8 +601,10 @@
   flex-shrink: 0;
 }
 
+/* Skeleton specs block mirrors .specsCompact's grid-area so the
+   skeleton reorders the same way the real content does. */
 .skeletonSpecsBlock {
-  margin-top: 16px;
+  grid-area: specs;
   display: flex;
   flex-direction: column;
   gap: 12px;
