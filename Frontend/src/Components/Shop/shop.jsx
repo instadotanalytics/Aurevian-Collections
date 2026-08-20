@@ -12,6 +12,7 @@ import shopHero from "../../assets/shophero.png";
 import { LuSlidersHorizontal } from "react-icons/lu";
 import { FiHeart } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
+import { FiPackage, FiCreditCard, FiPhoneCall } from "react-icons/fi";
 import { FiShoppingBag, FiCheck, FiChevronDown } from "react-icons/fi";
 
 import { fetchProductsByPlacement } from "../../redux/slices/storefrontProductSlice";
@@ -49,16 +50,20 @@ const PROMOTION_OPTIONS = [
 
 const perks = [
   {
-    icon: "📦",
+    icon: FiPackage,
     title: "Free Shipping",
     text: "Free delivery for orders above ₹2,000",
   },
   {
-    icon: "💳",
+    icon: FiCreditCard,
     title: "Flexible Payment",
     text: "Multiple secure payment options",
   },
-  { icon: "☎", title: "24×7 Support", text: "We support online all day" },
+  {
+    icon: FiPhoneCall,
+    title: "24×7 Support",
+    text: "We support online all day",
+  },
 ];
 
 const truncateName = (name) => {
@@ -698,15 +703,22 @@ export default function Shop() {
 
         {/* Perks Section */}
         <section className={styles.perks}>
-          {perks.map((perk) => (
-            <div className={styles.perk} key={perk.title}>
-              <div className={styles.icon}>{perk.icon}</div>
-              <div>
-                <h4>{perk.title}</h4>
-                <p>{perk.text}</p>
-              </div>
-            </div>
-          ))}
+          {perks.map((perk) => {
+  const Icon = perk.icon;
+
+  return (
+    <div className={styles.perk} key={perk.title}>
+      <div className={styles.icon}>
+        <Icon />
+      </div>
+
+      <div>
+        <h4>{perk.title}</h4>
+        <p>{perk.text}</p>
+      </div>
+    </div>
+  );
+})}
         </section>
 
         {/* Mobile Bottom Sheet Filter */}
