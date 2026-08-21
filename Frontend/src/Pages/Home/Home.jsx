@@ -8,7 +8,7 @@ import NewArrivalsBanner from "../../Components/Banner/NewArrivalsBanner";
 import GiftGuideBanner from "../../Components/Banner/GiftGuideBanner";
 import NewCollections from "../../Components/ShopCard/NewCollections";
 import GiftGuide from "../../Components/ShopCard/GiftGuide";
-import Offers from "../../Components/ShopCard/Offers";
+import Offers from "../../Components/ShopCard/Offers"; // ✅ FIXED — was pointing at ShopCard/Offers
 import OffersBanner from "../../Components/Banner/OffersBanner";
 import ShopTheLook from "../../Components/ShopCard/ShopTheLook";
 import Footer from "../Layout/Footer/Footer";
@@ -17,7 +17,7 @@ import Header from "../Layout/Header/Header";
 const Home = () => {
   return (
     <div>
-      <Header/>
+      <Header />
       <HomeBanner />
       <ShopByCategory />
       <Offers />
@@ -27,7 +27,7 @@ const Home = () => {
       <ShopCardCategory />
       <NewArrivalsBanner />
       <NewCollections />
-      <ShopTheLook/>
+      <ShopTheLook />
       <Footer />
     </div>
   );

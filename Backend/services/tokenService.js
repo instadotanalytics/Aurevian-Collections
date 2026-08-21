@@ -1,5 +1,3 @@
-// backend/services/tokenService.js
-
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
@@ -11,16 +9,19 @@ class TokenService {
       id: user._id || user.id,
       email: user.email,
       role: user.role || 'customer',
-      // ✅ Add this to identify super admin
+      // Add this to identify super admin
       isSuperAdmin: user.isSuperAdmin || user.role === 'super_admin',
     };
 
+    // Access token now lasts 24 hours by default.
+    // You can override this with JWT_ACCESS_EXPIRE in .env.
     const accessToken = jwt.sign(
       payload,
       process.env.JWT_ACCESS_SECRET,
-      { expiresIn: process.env.JWT_ACCESS_EXPIRE || '15m' }
+      { expiresIn: process.env.JWT_ACCESS_EXPIRE || '24h' }
     );
 
+    // Refresh token remains valid for 30 days by default.
     const refreshToken = jwt.sign(
       payload,
       process.env.JWT_REFRESH_SECRET,
@@ -65,14 +66,16 @@ class TokenService {
   setAuthCookies(res, accessToken, refreshToken) {
     const isProduction = process.env.NODE_ENV === 'production';
 
+    // Access token cookie: 24 hours
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? 'none' : 'lax',
-      maxAge: 15 * 60 * 1000,
+      maxAge: 24 * 60 * 60 * 1000,
       path: '/',
     });
 
+    // Refresh token cookie: 30 days
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: isProduction,
@@ -84,12 +87,14 @@ class TokenService {
 
   clearAuthCookies(res) {
     const isProduction = process.env.NODE_ENV === 'production';
+
     res.clearCookie('accessToken', {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? 'none' : 'lax',
       path: '/',
     });
+
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: isProduction,

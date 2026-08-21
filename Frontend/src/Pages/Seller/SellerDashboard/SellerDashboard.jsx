@@ -16,6 +16,8 @@ import {
   FiSearch,
   FiTrendingUp,
   FiUser,
+  FiStar,
+  FiGift, // ✅ NEW — icon for Curated For You
 } from "react-icons/fi";
 
 import { useSelector, useDispatch } from "react-redux";
@@ -34,8 +36,9 @@ import planStyles from "./components/PlanTheme.module.css";
 import DashboardOverview from "./components/DashboardOverview";
 import Upgrade from "./components/Upgrade";
 import ProductManagement from "./components/ProductManagement";
-import ProductFormWizard from "./components/ProductFormWizard"; // ✅ CHANGED: import wizard instead of form
+import ProductFormWizard from "./components/ProductFormWizard";
 import Orders from "./components/Orders";
+import FeaturedProductsManagement from "../SellerDashboard/components/FeaturedProductsManagement/FeaturedProductsManagement.jsx";
 
 import { sellerLogout } from "../../../redux/slices/sellerSlice";
 import { fetchCurrentSubscription } from "../../../redux/slices/sellerSubscriptionSlice";
@@ -43,9 +46,8 @@ import logo from "../../../assets/newlogo.png";
 import Earnings from "./components/Earnings";
 import Customers from "./components/Customers";
 import Settings from "./components/Settings";
-import SellerKYC from "../SellerKYC/SellerKYC.jsx"; // ✅ NEW — KYC page route
+import SellerKYC from "../SellerKYC/SellerKYC.jsx";
 
-// ✅ SOCKET.IO — seller notifications
 import useSellerNotifications from "../../../hooks/useSellerNotifications.js";
 import NotificationCenter from "../../../Components/common/NotificationCenter/NotificationCenter.jsx";
 
@@ -92,10 +94,11 @@ const getPlanTheme = (planId) => PLAN_THEME[planId] || PLAN_THEME.free;
 const menuItems = [
   { id: "", label: "Dashboard", icon: FiHome },
   { id: "products", label: "Products", icon: FiPackage },
+  { id: "featured-offers", label: "Offers Section", icon: FiStar },
+  { id: "curated-for-you", label: "Curated For You", icon: FiGift }, // ✅ NEW
   { id: "orders", label: "Orders", icon: FiShoppingBag },
   { id: "earnings", label: "Earnings", icon: FiDollarSign },
   { id: "customers", label: "Customers", icon: FiUsers },
-
   { id: "settings", label: "Settings", icon: FiSettings },
   { id: "upgrade", label: "Upgrade", icon: FiTrendingUp },
 ];
@@ -155,8 +158,6 @@ const SellerDashboard = () => {
     "free";
   const planTheme = getPlanTheme(planId);
 
-  // ✅ SOCKET.IO — mounted at the persistent dashboard shell level (not a
-  // sub-route), so it's active no matter which tab the seller is on.
   const { notifications, unreadCount, handleItemClick } =
     useSellerNotifications();
 
@@ -164,7 +165,6 @@ const SellerDashboard = () => {
     dispatch(fetchCurrentSubscription());
   }, [dispatch]);
 
-  // Close the mobile profile panel on outside click / route change
   useEffect(() => {
     setMobileProfileOpen(false);
   }, [location.pathname]);
@@ -286,7 +286,6 @@ const SellerDashboard = () => {
               </span>
             </button>
 
-            {/* Mobile-only profile dropdown — mirrors the desktop adminProfile content */}
             {mobileProfileOpen && (
               <>
                 <div
@@ -423,20 +422,41 @@ const SellerDashboard = () => {
             <Routes>
               <Route index element={<DashboardHome planTheme={planTheme} />} />
               <Route path="products" element={<ProductManagement />} />
-              <Route path="products/new" element={<ProductFormWizard />} />{" "}
-              {/* ✅ CHANGED: use wizard */}
+              <Route path="products/new" element={<ProductFormWizard />} />
+              <Route path="products/edit/:id" element={<ProductFormWizard />} />
+
+              {/* ✅ Offers Section — now passes explicit section/title props
+                   since FeaturedProductsManagement is shared/generalized */}
               <Route
-                path="products/edit/:id"
-                element={<ProductFormWizard />}
-              />{" "}
-              {/* ✅ CHANGED: use wizard */}
+                path="featured-offers"
+                element={
+                  <FeaturedProductsManagement
+                    section="specially-made"
+                    title="Offers Worth The Splurge"
+                    subtitle="Add or remove your products from this Home Page section, and control the order they appear in."
+                  />
+                }
+              />
+
+              {/* ✅ NEW — Curated For You / "You May Also Like" section */}
+              <Route
+                path="curated-for-you"
+                element={
+                  <FeaturedProductsManagement
+                    section="curated-for-you"
+                    title="Curated For You"
+                    subtitle="Add or remove your products from the 'You May Also Like' section on the homepage, and control the order they appear in."
+                    pickerTitle="Add Product to Curated For You"
+                  />
+                }
+              />
+
               <Route path="orders" element={<Orders />} />
               <Route path="earnings" element={<Earnings />} />
               <Route path="customers" element={<Customers />} />
               <Route path="settings" element={<Settings />} />
               <Route path="upgrade" element={<Upgrade />} />
-              <Route path="kyc" element={<SellerKYC />} />{" "}
-              {/* ✅ NEW — KYC page route */}
+              <Route path="kyc" element={<SellerKYC />} />
               <Route path="*" element={<Navigate to={basePath} replace />} />
             </Routes>
           </div>

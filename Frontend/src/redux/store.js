@@ -1,6 +1,5 @@
-// src/redux/store.js
-
 import { configureStore } from "@reduxjs/toolkit";
+
 import authReducer from "./slices/authSlice.js";
 import superAdminReducer from "./slices/superAdminSlice.js";
 import sellerReducer from "./slices/sellerSlice.js";
@@ -13,6 +12,10 @@ import supportReducer from "./slices/supportSlice";
 import headerConfigReducer from "./slices/headerConfigSlice.js";
 import sellerProductReducer from "./slices/sellerProductSlice.js";
 import storefrontProductReducer from "./slices/storefrontProductSlice.js";
+
+// ✅ ADDED: Featured Products reducer
+import featuredProductReducer from "./slices/featuredProductSlice.js";
+
 import cartReducer from "./slices/cartSlice.js";
 import wishlistReducer from "./slices/wishlistSlice.js";
 import orderReducer from "./slices/orderSlice.js";
@@ -31,14 +34,21 @@ export const store = configureStore({
     headerConfig: headerConfigReducer,
     sellerProduct: sellerProductReducer,
     storefrontProduct: storefrontProductReducer,
+
+    // ✅ ADDED: Featured Products
+    featuredProducts: featuredProductReducer,
+
     cart: cartReducer,
     wishlist: wishlistReducer,
     orders: orderReducer,
   },
+
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        // ✅ Ignore these action types
+        // ============================================
+        // IGNORED ACTION TYPES
+        // ============================================
         ignoredActions: [
           // Auth actions
           "auth/login/fulfilled",
@@ -142,7 +152,7 @@ export const store = configureStore({
           "sellerSubscription/cancel/pending",
           "sellerSubscription/cancel/rejected",
 
-          // Subscription Plan (admin) actions
+          // Subscription Plan actions
           "subscriptionPlans/fetchAll/fulfilled",
           "subscriptionPlans/fetchAll/pending",
           "subscriptionPlans/fetchAll/rejected",
@@ -181,33 +191,36 @@ export const store = configureStore({
           "sellerProduct/bulkUploadProducts/pending",
           "sellerProduct/bulkUploadProducts/rejected",
 
-          // ✅ Storefront Product actions
+          // Storefront Product actions
           "storefrontProducts/fetchByPlacement/fulfilled",
           "storefrontProducts/fetchByPlacement/pending",
           "storefrontProducts/fetchByPlacement/rejected",
+          "storefrontProducts/fetchByPlacement/fulfilled",
           "storefrontProducts/fetchBySlug/fulfilled",
           "storefrontProducts/fetchBySlug/pending",
           "storefrontProducts/fetchBySlug/rejected",
 
-          // ✅ Cart actions
+          // Cart actions
           "cart/fetch/fulfilled",
           "cart/addItem/fulfilled",
           "cart/updateItem/fulfilled",
           "cart/removeItem/fulfilled",
           "cart/clear/fulfilled",
 
-          // ✅ Wishlist actions
+          // Wishlist actions
           "wishlist/fetch/fulfilled",
           "wishlist/toggle/fulfilled",
           "wishlist/remove/fulfilled",
 
-          // ✅ Order actions
+          // Order actions
           "orders/fetchMine/fulfilled",
           "orders/fetchSeller/fulfilled",
           "orders/updateSellerStatus/fulfilled",
         ],
 
-        // ✅ Ignore these action paths
+        // ============================================
+        // IGNORED ACTION PATHS
+        // ============================================
         ignoredActionPaths: [
           "payload.createdAt",
           "payload.updatedAt",
@@ -240,21 +253,23 @@ export const store = configureStore({
           "payload.pagination",
           "payload.limitStatus",
 
-          // ✅ Storefront Product paths
+          // Storefront Product paths
           "payload.products.*.createdAt",
           "payload.products.*.updatedAt",
           "payload.pagination",
           "payload.placement",
 
-          // ✅ Cart paths
+          // Cart paths
           "payload.items.*.addedAt",
           "payload.createdAt",
 
-          // ✅ Order paths
+          // Order paths
           "payload.placedAt",
         ],
 
-        // ✅ Ignore these paths in state
+        // ============================================
+        // IGNORED STATE PATHS
+        // ============================================
         ignoredPaths: [
           // Seller paths
           "seller.seller.createdAt",
@@ -300,7 +315,6 @@ export const store = configureStore({
           "profile.profile.updatedAt",
           "profile.profile.lastLogin",
           "profile.profile.dateOfBirth",
-          "profile.profile.createdAt",
           "profile.orders.*.createdAt",
           "profile.orders.*.updatedAt",
           "profile.orders.*.deliveredAt",
@@ -332,20 +346,20 @@ export const store = configureStore({
           "sellerProduct.pagination",
           "sellerProduct.limitStatus",
 
-          // ✅ Storefront Product paths
+          // Storefront Product paths
           "storefrontProduct.byPlacement.*.products.*.createdAt",
           "storefrontProduct.byPlacement.*.products.*.updatedAt",
           "storefrontProduct.byPlacement.*.pagination",
           "storefrontProduct.currentProduct.createdAt",
           "storefrontProduct.currentProduct.updatedAt",
 
-          // ✅ Cart paths
+          // Cart paths
           "cart.items",
 
-          // ✅ Wishlist paths
+          // Wishlist paths
           "wishlist.items",
 
-          // ✅ Order paths
+          // Order paths
           "orders.myOrders",
           "orders.sellerOrders",
         ],

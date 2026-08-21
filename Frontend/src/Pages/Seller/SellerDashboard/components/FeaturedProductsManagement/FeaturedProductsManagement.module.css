@@ -1,0 +1,427 @@
+.container {
+  padding: 24px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1c1c1c;
+  margin: 0 0 4px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #6b6258;
+  margin: 0;
+  max-width: 480px;
+}
+
+.addButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #1c1c1c;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+.addButton:hover {
+  opacity: 0.85;
+}
+
+.loadingState,
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 20px;
+  color: #8a8072;
+  text-align: center;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #eee2d0;
+  border-top-color: #b6863c;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid #eee2d0;
+  border-radius: 10px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.table th {
+  text-align: left;
+  padding: 12px 16px;
+  background: #faf6ef;
+  color: #6b6258;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom: 1px solid #eee2d0;
+}
+
+.table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f2ece0;
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.productCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.productThumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid #eee2d0;
+}
+
+.productName {
+  font-weight: 600;
+  color: #1c1c1c;
+}
+
+.productStatus {
+  font-size: 11.5px;
+  color: #8a8072;
+  margin-top: 2px;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.statusBadge.active {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.statusBadge.inactive {
+  background: #f5f2ee;
+  color: #8a8072;
+}
+
+.orderControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.orderBtn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid #eee2d0;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orderBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.orderNumber {
+  min-width: 18px;
+  text-align: center;
+  font-weight: 600;
+  color: #1c1c1c;
+}
+
+.actionsCell {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.actionButton {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #eee2d0;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #1c1c1c;
+}
+
+.actionButton:hover {
+  background: #faf6ef;
+}
+
+.deleteButton {
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.deleteButton:hover {
+  background: #fef2f2;
+}
+
+/* ==========================================================
+   PICKER MODAL
+   ========================================================== */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 14, 6, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid #eee2d0;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1c1c1c;
+}
+
+.closeButton {
+  border: none;
+  background: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #6b6258;
+}
+
+.searchForm {
+  display: flex;
+  gap: 8px;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f2ece0;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid #eee2d0;
+  font-size: 13.5px;
+}
+
+.searchButton {
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: none;
+  background: #1c1c1c;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pickerList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 12px;
+}
+
+.pickerEmpty {
+  text-align: center;
+  padding: 30px 12px;
+  color: #8a8072;
+  font-size: 13px;
+}
+
+.pickerRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.pickerRow:hover {
+  background: #faf6ef;
+}
+
+.pickerRowSelected {
+  background: #f3e6d8;
+}
+
+.pickerThumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #eee2d0;
+  flex-shrink: 0;
+}
+
+.pickerInfo {
+  min-width: 0;
+}
+
+.pickerName {
+  font-weight: 600;
+  font-size: 13.5px;
+  color: #1c1c1c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pickerMeta {
+  font-size: 12px;
+  color: #8a8072;
+  margin-top: 2px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid #eee2d0;
+}
+
+.cancelButton {
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px solid #eee2d0;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submitButton {
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: none;
+  background: #1c1c1c;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Add to FeaturedProductsManagement.module.css */
+
+.filterBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.filterLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #495057;
+}
+
+.filterSelect {
+  padding: 6px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  min-width: 180px;
+  cursor: pointer;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: #6c63ff;
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+}
+
+.sellerName {
+  font-size: 13px;
+  color: #495057;
+  font-weight: 500;
+}
+
+.filterInfo {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #6c757d;
+  text-align: center;
+  border-top: 1px solid #e9ecef;
+}

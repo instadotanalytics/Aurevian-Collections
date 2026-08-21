@@ -1,138 +1,209 @@
 // src/Components/Offers/Offers.jsx
+//
+// Products come from FeaturedProduct entries (section: "specially-made"),
+// fetched via fetchFeaturedProducts. No hardcoded product data — image,
+// name, price, rating, and badge all come from the referenced
+// JewelleryProduct document. Cart/wishlist reuse the exact same Redux
+// actions and requireAuth pattern already used on the Shop page.
 
 import React, { useRef, useEffect, useState } from "react";
-import { FiArrowRight, FiArrowLeft, FiHeart, FiShoppingBag } from "react-icons/fi";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  FiArrowRight,
+  FiArrowLeft,
+  FiHeart,
+  FiShoppingBag,
+} from "react-icons/fi";
 import { FaHeart, FaStar } from "react-icons/fa";
+import toast from "react-hot-toast";
 import styles from "./Offers.module.css";
 
-// ==========================================================
-// OFFERS IMAGES
-// ==========================================================
-const OFFER_IMAGES = {
-  diwali: "https://i.pinimg.com/1200x/d0/53/0d/d0530dca94a42e2caef39cc9dd740dde.jpg",
-  summer: "https://i.pinimg.com/736x/2e/42/64/2e4264277939897b5a3ed0b996f148bf.jpg",
-  festive: "https://i.pinimg.com/1200x/dc/b9/9d/dcb99d9fd6de932c239de89b0ad6e684.jpg",
-  clearance: "https://i.pinimg.com/736x/b0/e6/27/b0e62737469ed749d17bb85563ce05ac.jpg",
-  bridal: "https://i.pinimg.com/736x/8d/7a/92/8d7a923b009698993ffeede1c68b7a92.jpg",
-  anniversary: "https://i.pinimg.com/736x/1f/5c/34/1f5c3450b9e81721e97df7486bf97c28.jpg",
-  wedding: "https://i.pinimg.com/736x/ba/92/43/ba9243fb483eb668e44d9fdccb1afb40.jpg",
-  gold: "https://i.pinimg.com/736x/f9/d6/06/f9d606f3f13a92ebdaa8009877864878.jpg",
-};
+import { fetchFeaturedProducts } from "../../redux/slices/featuredProductSlice";
+import { addItemToCart } from "../../redux/slices/cartSlice";
+import { toggleWishlistItem } from "../../redux/slices/wishlistSlice";
 
-/* ------------------------------------------------------------------
-   OFFERS DATA
-   `accent` cycles the card's color theme (ink / ivory / emerald),
-   mirroring how the reference "Daisy Bloom Ring" style cards alternate
-   dark / light / deep-color backgrounds.
------------------------------------------------------------------- */
+const SECTION = "specially-made";
 const ACCENTS = ["ink", "ivory", "emerald"];
-
-const OFFER_PRODUCTS = [
-  { id: "o1", name: "Diwali Special Gold Set", badge: "New", price: 19999, oldPrice: 29999, rating: 4.8, reviews: 124, image: OFFER_IMAGES.diwali },
-  { id: "o2", name: "Summer Collection Rings", badge: "Offers", price: 6999, oldPrice: 9999, rating: 4.7, reviews: 96, image: OFFER_IMAGES.summer },
-  { id: "o3", name: "Festive Gold Earrings", badge: "Trending", price: 8499, oldPrice: 12999, rating: 4.9, reviews: 78, image: OFFER_IMAGES.festive },
-  { id: "o4", name: "Clearance Sale Pendants", badge: "Best Seller", price: 4499, oldPrice: 7499, rating: 4.6, reviews: 150, image: OFFER_IMAGES.clearance },
-  { id: "o5", name: "Bridal Collection Offer", badge: "Offers", price: 15999, oldPrice: 21999, rating: 4.9, reviews: 112, image: OFFER_IMAGES.bridal },
-  { id: "o6", name: "Anniversary Diamond Set", badge: "New", price: 12999, oldPrice: 18999, rating: 4.7, reviews: 85, image: OFFER_IMAGES.anniversary },
-  { id: "o7", name: "Wedding Season Special", badge: "Trending", price: 24999, oldPrice: 34999, rating: 4.8, reviews: 134, image: OFFER_IMAGES.wedding },
-  { id: "o8", name: "Gold Rate Discount", badge: "Best Seller", price: 8999, oldPrice: 12999, rating: 4.6, reviews: 67, image: OFFER_IMAGES.gold },
-].map((product, index) => ({
-  ...product,
-  accent: ACCENTS[index % ACCENTS.length],
-}));
 
 function StarRating({ rating }) {
   const stars = [1, 2, 3, 4, 5];
   return (
     <span className={styles.stars} aria-hidden="true">
       {stars.map((s) => (
-        <FaStar key={s} className={s <= Math.round(rating) ? styles.starFilled : styles.starEmpty} />
+        <FaStar
+          key={s}
+          className={
+            s <= Math.round(rating) ? styles.starFilled : styles.starEmpty
+          }
+        />
       ))}
     </span>
   );
 }
 
-function ProductCard({ product, onClickCapture }) {
-  const [wishlisted, setWishlisted] = useState(false);
+const getBadgeLabel = (labels) => {
+  if (!labels) return null;
+  if (labels.newArrival) return "New";
+  if (labels.bestSeller) return "Best Seller";
+  if (labels.trending) return "Trending";
+  if (labels.flashSale) return "Flash Sale";
+  if (labels.featured) return "Featured";
+  return null;
+};
 
-  const toggleWishlist = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setWishlisted((prev) => !prev);
-  };
+function SkeletonCard() {
+  return (
+    <div className={styles.cardWrapper}>
+      <div className={`${styles.card} ${styles.skeletonCard}`}>
+        <div className={styles.imageFrame}>
+          <div className={styles.skeletonImage} />
+        </div>
+        <div className={styles.info}>
+          <div className={styles.skeletonLine} />
+          <div
+            className={`${styles.skeletonLine} ${styles.skeletonLineShort}`}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
-  const handleAddToCart = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // hook up to cart logic here
-  };
+function ProductCard({
+  product,
+  accent,
+  onClickCapture,
+  isInCart,
+  isInWishlist,
+  cartLoading,
+  onAddToCart,
+  onToggleWishlist,
+}) {
+  const displayPrice =
+    product.pricing?.salePrice || product.pricing?.originalPrice;
+  const hasDiscount =
+    product.pricing?.salePrice &&
+    product.pricing?.salePrice < product.pricing?.originalPrice;
+  const badge = getBadgeLabel(product.labels);
+  const hasReviews = (product.reviews?.totalReviews || 0) > 0;
 
   return (
     <div className={styles.cardWrapper}>
-
-    <a
-      href={`/product/${product.id}`}
-      className={`${styles.card} ${styles[`accent-${product.accent}`]}`}
-      aria-label={product.name}
-      onClickCapture={onClickCapture}
-      draggable="false"
-    >
-      <span className={styles.badge}>{product.badge}</span>
-
-      <button
-        type="button"
-        className={`${styles.wishlistBtn} ${wishlisted ? styles.wishlistBtnActive : ""}`}
-        onClick={toggleWishlist}
-        aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
-        aria-pressed={wishlisted}
+      <Link
+        to={`/product/${product.productSlug}`}
+        className={`${styles.card} ${styles[`accent-${accent}`]}`}
+        aria-label={product.productName}
+        onClickCapture={onClickCapture}
+        draggable="false"
       >
-        {wishlisted ? <FaHeart /> : <FiHeart />}
-      </button>
+        {badge && <span className={styles.badge}>{badge}</span>}
 
-      <div className={styles.imageFrame}>
-        {product.image ? (
-          <img
-            src={product.image}
-            alt={product.name}
-            className={styles.image}
-            loading="lazy"
-            draggable="false"
-          />
-        ) : (
-          <div className={styles.imagePlaceholder} aria-hidden="true" />
-        )}
-      </div>
+        <button
+          type="button"
+          className={`${styles.wishlistBtn} ${isInWishlist ? styles.wishlistBtnActive : ""}`}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onToggleWishlist(product._id);
+          }}
+          aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+          aria-pressed={isInWishlist}
+        >
+          {isInWishlist ? <FaHeart /> : <FiHeart />}
+        </button>
 
-      <div className={styles.info}>
-        <p className={styles.eyebrow}>Aurevian Collections</p>
-        <h3 className={styles.title}>{product.name}</h3>
-
-        <div className={styles.ratingRow}>
-          <StarRating rating={product.rating} />
-          <span className={styles.ratingValue}>
-            {product.rating.toFixed(1)} <span className={styles.ratingCount}>({product.reviews})</span>
-          </span>
+        <div className={styles.imageFrame}>
+          {product.thumbnail?.url ? (
+            <img
+              src={product.thumbnail.url}
+              alt={product.productName}
+              className={styles.image}
+              loading="lazy"
+              draggable="false"
+              onError={(e) => {
+                e.target.src = "/placeholder-image.jpg";
+              }}
+            />
+          ) : (
+            <div className={styles.imagePlaceholder} aria-hidden="true" />
+          )}
         </div>
 
-        <div className={styles.priceRow}>
-          <span className={styles.price}>₹{product.price.toLocaleString("en-IN")}</span>
-          <span className={styles.oldPrice}>₹{product.oldPrice.toLocaleString("en-IN")}</span>
-        </div>
-      </div>
+        <div className={styles.info}>
+          <p className={styles.eyebrow}>Aurevian Collections</p>
+          <h3 className={styles.title}>{product.productName}</h3>
 
-      <button type="button" className={styles.cartBtn} onClick={handleAddToCart} aria-label="Add to cart">
-        <FiShoppingBag />
-      </button>
-    </a>
+          {hasReviews && (
+            <div className={styles.ratingRow}>
+              <StarRating rating={product.reviews.averageRating} />
+              <span className={styles.ratingValue}>
+                {product.reviews.averageRating.toFixed(1)}{" "}
+                <span className={styles.ratingCount}>
+                  ({product.reviews.totalReviews})
+                </span>
+              </span>
+            </div>
+          )}
+
+          <div className={styles.priceRow}>
+            <span className={styles.price}>
+              ₹{displayPrice?.toLocaleString("en-IN") || "0"}
+            </span>
+            {hasDiscount && (
+              <span className={styles.oldPrice}>
+                ₹{product.pricing.originalPrice.toLocaleString("en-IN")}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          className={styles.cartBtn}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onAddToCart(product._id);
+          }}
+          aria-label={isInCart ? "Already in cart" : "Add to cart"}
+          disabled={isInCart || cartLoading}
+        >
+          <FiShoppingBag />
+        </button>
+      </Link>
     </div>
   );
 }
 
 export default function Offers() {
-  const scrollContainerRef = useRef(null);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const cartItems = useSelector((state) => state.cart.items);
+  const wishlistItems = useSelector((state) => state.wishlist.items);
+  const { products, isLoading, error } = useSelector(
+    (state) =>
+      state.featuredProducts.bySection[SECTION] || {
+        products: [],
+        isLoading: true,
+        error: null,
+      },
+  );
 
-  // Drag-to-scroll (click + drag with the cursor, left to right)
-  const dragState = useRef({ isDown: false, startX: 0, startScrollLeft: 0, moved: false });
+  const [cartLoadingId, setCartLoadingId] = useState(null);
+
+  useEffect(() => {
+    dispatch(fetchFeaturedProducts(SECTION));
+  }, [dispatch]);
+
+  const scrollContainerRef = useRef(null);
+  const dragState = useRef({
+    isDown: false,
+    startX: 0,
+    startScrollLeft: 0,
+    moved: false,
+  });
 
   const scrollLeft = () => {
     scrollContainerRef.current?.scrollBy({ left: -300, behavior: "smooth" });
@@ -168,7 +239,6 @@ export default function Offers() {
     el.scrollLeft = dragState.current.startScrollLeft - walk;
   };
 
-  // Prevent the click from firing (and navigating) right after a drag
   const handleClickCapture = (e) => {
     if (dragState.current.moved) {
       e.preventDefault();
@@ -189,6 +259,48 @@ export default function Offers() {
     };
   }, []);
 
+  const requireAuth = () => {
+    if (!isAuthenticated) {
+      toast.error("Please login to continue");
+      navigate("/login", { state: { from: "/" } });
+      return false;
+    }
+    return true;
+  };
+
+  const isInCart = (id) => cartItems.some((i) => i.product === id);
+  const isInWishlist = (id) =>
+    wishlistItems.some((i) => (i.product?._id || i.product) === id);
+
+  const handleToggleWishlist = (id) => {
+    if (!requireAuth()) return;
+    dispatch(toggleWishlistItem(id)).catch(() => {});
+  };
+
+  const handleAddToCart = async (id) => {
+    if (!requireAuth()) return;
+    try {
+      setCartLoadingId(id);
+      await dispatch(addItemToCart({ productId: id, quantity: 1 })).unwrap();
+      toast.success("Added to cart");
+    } catch (err) {
+      toast.error(err || "Failed to add to cart");
+    } finally {
+      setCartLoadingId(null);
+    }
+  };
+
+  // Empty (no products configured) or hard failure — hide the section
+  // rather than render broken cards. Home.jsx just stacks sections, so
+  // returning null here is a clean no-op in the page layout.
+  if (!isLoading && (error || products.length === 0)) {
+    return null;
+  }
+
+  const items = isLoading
+    ? Array.from({ length: 4 }, (_, i) => ({ _skeletonId: i }))
+    : products;
+
   return (
     <section className={styles.section} aria-labelledby="offers-heading">
       <div className={styles.container}>
@@ -198,7 +310,9 @@ export default function Offers() {
             <h2 id="offers-heading" className={styles.heading}>
               Offers Worth The Splurge
             </h2>
-            <p className={styles.subHeading}>Handpicked discounts on the pieces our customers love most</p>
+            <p className={styles.subHeading}>
+              Handpicked discounts on the pieces our customers love most
+            </p>
           </div>
 
           <div className={styles.headerActions}>
@@ -208,10 +322,20 @@ export default function Offers() {
             </a>
 
             <div className={styles.navArrows}>
-              <button type="button" className={styles.navBtn} onClick={scrollLeft} aria-label="Scroll left">
+              <button
+                type="button"
+                className={styles.navBtn}
+                onClick={scrollLeft}
+                aria-label="Scroll left"
+              >
                 <FiArrowLeft size={16} />
               </button>
-              <button type="button" className={styles.navBtn} onClick={scrollRight} aria-label="Scroll right">
+              <button
+                type="button"
+                className={styles.navBtn}
+                onClick={scrollRight}
+                aria-label="Scroll right"
+              >
                 <FiArrowRight size={16} />
               </button>
             </div>
@@ -224,9 +348,21 @@ export default function Offers() {
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
         >
-          {OFFER_PRODUCTS.map((product) => (
-            <ProductCard key={product.id} product={product} onClickCapture={handleClickCapture} />
-          ))}
+          {isLoading
+            ? items.map((item) => <SkeletonCard key={item._skeletonId} />)
+            : items.map((product, index) => (
+                <ProductCard
+                  key={product._id}
+                  product={product}
+                  accent={ACCENTS[index % ACCENTS.length]}
+                  onClickCapture={handleClickCapture}
+                  isInCart={isInCart(product._id)}
+                  isInWishlist={isInWishlist(product._id)}
+                  cartLoading={cartLoadingId === product._id}
+                  onAddToCart={handleAddToCart}
+                  onToggleWishlist={handleToggleWishlist}
+                />
+              ))}
         </div>
       </div>
     </section>
