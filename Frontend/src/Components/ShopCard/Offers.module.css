@@ -536,3 +536,59 @@
     transform: none !important;
   }
 }
+
+/* ==========================================================
+   SKELETON LOADING — additive, matches existing card shape
+   ========================================================== */
+.skeletonCard {
+  pointer-events: none;
+}
+
+.skeletonImage {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    rgba(182, 134, 60, 0.12) 20%,
+    rgba(182, 134, 60, 0.22) 40%,
+    rgba(182, 134, 60, 0.12) 60%
+  );
+  background-size: 200% 100%;
+  animation: offersSkeletonShimmer 1.4s ease-in-out infinite;
+}
+
+.skeletonLine {
+  height: 12px;
+  width: 70%;
+  margin: 0 auto;
+  border-radius: 4px;
+  background: linear-gradient(
+    100deg,
+    rgba(28, 28, 28, 0.08) 20%,
+    rgba(28, 28, 28, 0.16) 40%,
+    rgba(28, 28, 28, 0.08) 60%
+  );
+  background-size: 200% 100%;
+  animation: offersSkeletonShimmer 1.4s ease-in-out infinite;
+}
+
+.skeletonLineShort {
+  width: 40%;
+  height: 16px;
+}
+
+@keyframes offersSkeletonShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeletonImage,
+  .skeletonLine {
+    animation: none !important;
+  }
+}

@@ -1,4 +1,4 @@
-// backend/routes/jewelleryProductRoutes.js
+// Backend/routes/jewelleryProductRoutes.js
 
 import express from "express";
 import {
@@ -12,6 +12,7 @@ import {
   bulkUploadProducts,
   getProductsByPlacement,
   getPlacementCounts,
+  getRelevantProducts,
 } from "../controllers/jewelleryProductController.js";
 import { protectSeller } from "../middleware/sellerAuth.js";
 import upload, { handleMulterError } from "../middleware/upload.js";
@@ -37,6 +38,7 @@ router.get("/test", (req, res) => {
       bulkUpload: "/bulk-upload",
       placements: "/placements/:placement",
       placementCounts: "/placements/counts",
+      relevant: "/:productId/relevant",
       productBySlug: "/:slug",
       createProduct: "POST /",
       updateProduct: "PUT /:id",
@@ -74,6 +76,25 @@ router.get(
   getProductsByPlacement,
 );
 console.log("  📌 /placements/:placement route registered ✅");
+
+// ============================================
+// ✅ NEW: PUBLIC ROUTE - Relevant Products ("You May Also Like")
+// Two-segment path, so it can't collide with the single-segment
+// "/:slug" catch-all below regardless of registration order — kept
+// here with the other public routes for readability.
+// ============================================
+router.get(
+  "/:productId/relevant",
+  (req, res, next) => {
+    console.log(
+      "🔍 /:productId/relevant route called with productId:",
+      req.params.productId,
+    );
+    next();
+  },
+  getRelevantProducts,
+);
+console.log("  📌 /:productId/relevant route registered ✅ (public)");
 
 // ============================================
 // ✅ FIXED: PROTECTED ROUTES — protectSeller applied PER ROUTE now,
@@ -202,6 +223,7 @@ console.log("📌 Available routes in this router (in order):");
 console.log("  ✅ GET  /test (public)");
 console.log("  ✅ GET  /categories (public)");
 console.log("  ✅ GET  /placements/:placement (public)");
+console.log("  ✅ GET  /:productId/relevant (public)");
 console.log("  🔒 GET  /limit-status (protected)");
 console.log("  🔒 GET  /placements/counts (protected)");
 console.log("  🔒 POST /bulk-upload (protected)");

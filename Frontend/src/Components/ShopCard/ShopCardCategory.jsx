@@ -1,37 +1,18 @@
-
 // src/Components/ShopCardCategory/ShopCardCategory.jsx
+//
+// Products come from FeaturedProduct entries (section: "trending-picks"),
+// fetched via fetchFeaturedProducts — same pattern as GiftGuide.jsx /
+// Offers.jsx. No hardcoded product data. Layout, card markup/classes,
+// drag-to-scroll, and arrows are unchanged from the static version.
 
 import React, { useRef, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { FiArrowRight, FiArrowLeft, FiHeart } from "react-icons/fi";
 import styles from "./ShopCardCategory.module.css";
 
-// ==========================================================
-// JEWELLERY IMAGES (Unsplash - High Quality Jewellery Photos)
-// ==========================================================
-const JEWELLERY_IMAGES = {
-  earrings: "https://i.pinimg.com/736x/5b/0e/08/5b0e08f53ecb685fc53a3177f700f11b.jpg",
-  necklace: "https://img.staticdj.com/d163231c2f7292d419ed4cfba6a6c36c_2056x.jpeg",
-  ring: "https://i.pinimg.com/736x/83/1a/6f/831a6ffce13568ce2ddff2d1a8e629fd.jpg",
-  bracelet: "https://i.pinimg.com/736x/61/57/d5/6157d5bc2d28670ee98309576e6c861f.jpg",
-  jhumka: "https://i.pinimg.com/736x/86/2b/06/862b06ece38f21324da94e01faaeed01.jpg",
-  polki: "https://i.pinimg.com/736x/af/41/2a/af412a893dcdf665b50cbec0b4180814.jpg",
-  anklet: "https://i.pinimg.com/736x/07/12/a0/0712a04f3d2139237226823ee10cf46a.jpg",
-  nosepin: "https://i.pinimg.com/736x/be/d6/ca/bed6ca1d94b7cc31388bd8fe462250ff.jpg",
-};
+import { fetchFeaturedProducts } from "../../redux/slices/featuredProductSlice";
 
-/* ------------------------------------------------------------------
-   PRODUCT DATA
------------------------------------------------------------------- */
-const PRODUCTS = [
-  { id: "p1", name: "Zircon Drop Earrings", category: "Earrings", price: 1499, oldPrice: 2199, image: JEWELLERY_IMAGES.earrings },
-  { id: "p2", name: "Kundan Choker Necklace", category: "Necklace", price: 3299, oldPrice: 4999, image: JEWELLERY_IMAGES.necklace },
-  { id: "p3", name: "Rose Gold Band Ring", category: "Ring", price: 999, oldPrice: 1499, image: JEWELLERY_IMAGES.ring },
-  { id: "p4", name: "Pearl Charm Bracelet", category: "Bracelet", price: 1799, oldPrice: 2499, image: JEWELLERY_IMAGES.bracelet },
-  { id: "p5", name: "Temple Jhumka Earrings", category: "Earrings", price: 1299, oldPrice: 1999, image: JEWELLERY_IMAGES.jhumka },
-  { id: "p6", name: "Bridal Polki Necklace Set", category: "Necklace", price: 7999, oldPrice: 11999, image: JEWELLERY_IMAGES.polki },
-  { id: "p7", name: "Minimal Chain Anklet", category: "Anklet", price: 799, oldPrice: 1099, image: JEWELLERY_IMAGES.anklet },
-  { id: "p8", name: "Diamond Cut Nose Pin", category: "Nose Pin", price: 599, oldPrice: 899, image: JEWELLERY_IMAGES.nosepin },
-];
+const SECTION = "trending-picks";
 
 function ProductCard({ product, isWishlisted, onToggleWishlist, onAddToCart }) {
   const handleWishlistClick = (e) => {
@@ -51,7 +32,11 @@ function ProductCard({ product, isWishlisted, onToggleWishlist, onAddToCart }) {
     // wishlist <button> and the "Add To Cart" <button> can live outside
     // the <a> — buttons can't be nested inside anchors in valid HTML.
     <div className={styles.card}>
-      <a href={`/product/${product.id}`} className={styles.cardLink} aria-label={product.name}>
+      <a
+        href={`/product/${product.slug}`}
+        className={styles.cardLink}
+        aria-label={product.name}
+      >
         <div className={styles.frame}>
           <div className={styles.imageWrap}>
             {product.image ? (
@@ -61,6 +46,9 @@ function ProductCard({ product, isWishlisted, onToggleWishlist, onAddToCart }) {
                 className={styles.image}
                 loading="lazy"
                 draggable="false"
+                onError={(e) => {
+                  e.target.src = "/placeholder-image.jpg";
+                }}
               />
             ) : (
               <div className={styles.imagePlaceholder} aria-hidden="true" />
@@ -76,9 +64,13 @@ function ProductCard({ product, isWishlisted, onToggleWishlist, onAddToCart }) {
 
           <div className={styles.priceRow}>
             {product.oldPrice ? (
-              <span className={styles.oldPrice}>₹{product.oldPrice.toLocaleString("en-IN")}</span>
+              <span className={styles.oldPrice}>
+                ₹{product.oldPrice.toLocaleString("en-IN")}
+              </span>
             ) : null}
-            <span className={styles.price}>₹{product.price.toLocaleString("en-IN")}</span>
+            <span className={styles.price}>
+              ₹{product.price.toLocaleString("en-IN")}
+            </span>
           </div>
         </div>
       </a>
@@ -109,16 +101,95 @@ function ProductCard({ product, isWishlisted, onToggleWishlist, onAddToCart }) {
   );
 }
 
+// Skeleton reuses the card's own frame/imageWrap classes so it inherits the
+// exact card dimensions, with a .skeletonPulse animation swapped in for the
+// image (instead of the static "no image" .imagePlaceholder).
+function SkeletonCard() {
+  return (
+    <div className={styles.card}>
+      <div className={styles.frame}>
+        <div className={styles.imageWrap}>
+          <div className={styles.skeletonPulse} aria-hidden="true" />
+        </div>
+        <span className={styles.cornerTL} aria-hidden="true" />
+        <span className={styles.cornerBR} aria-hidden="true" />
+      </div>
+      <div className={styles.info}>
+        <p
+          className={`${styles.category} ${styles.skeletonPulse} ${styles.skeletonText}`}
+        >
+          &nbsp;
+        </p>
+        <h3
+          className={`${styles.title} ${styles.skeletonPulse} ${styles.skeletonText}`}
+          style={{ maxWidth: "70%", margin: "0 auto" }}
+        >
+          &nbsp;
+        </h3>
+      </div>
+    </div>
+  );
+}
+
+// Maps a FeaturedProduct entry's populated JewelleryProduct doc to the flat
+// shape ProductCard expects — keeps ProductCard's markup/classes untouched
+// from the static version.
+const toCardProduct = (product) => {
+  const displayPrice =
+    product.pricing?.salePrice || product.pricing?.originalPrice;
+  const hasDiscount =
+    product.pricing?.salePrice &&
+    product.pricing?.salePrice < product.pricing?.originalPrice;
+
+  return {
+    id: product._id,
+    slug: product.productSlug,
+    name: product.productName,
+    category:
+      product.category?.categoryData?.label ||
+      product.category?.subCategoryData?.label ||
+      "Jewellery",
+    price: displayPrice || 0,
+    oldPrice: hasDiscount ? product.pricing.originalPrice : null,
+    image: product.thumbnail?.url || null,
+  };
+};
+
 export default function ShopCardCategory() {
+  const dispatch = useDispatch();
   const scrollContainerRef = useRef(null);
   const [wishlist, setWishlist] = useState(() => new Set());
 
+  const { products, isLoading, error } = useSelector(
+    (state) =>
+      state.featuredProducts.bySection[SECTION] || {
+        products: [],
+        isLoading: true,
+        error: null,
+      },
+  );
+
+  useEffect(() => {
+    dispatch(fetchFeaturedProducts(SECTION));
+  }, [dispatch]);
+
+  const cardProducts = products.map(toCardProduct);
+  const showEmptyState = !isLoading && !error && cardProducts.length === 0;
+
   // Drag-to-scroll (click + drag with the cursor, left to right)
-  const dragState = useRef({ isDown: false, startX: 0, startScrollLeft: 0, moved: false });
+  const dragState = useRef({
+    isDown: false,
+    startX: 0,
+    startScrollLeft: 0,
+    moved: false,
+  });
 
   const scrollByAmount = (direction) => {
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: direction * 260, behavior: "smooth" });
+      scrollContainerRef.current.scrollBy({
+        left: direction * 260,
+        behavior: "smooth",
+      });
     }
   };
 
@@ -195,52 +266,68 @@ export default function ShopCardCategory() {
             <h2 id="shop-cards-heading" className={styles.heading}>
               Best Products For You
             </h2>
-            <h3 className={styles.subHeading}>Here you can find the latest trending pieces!</h3>
+            <h3 className={styles.subHeading}>
+              Here you can find the latest trending pieces!
+            </h3>
           </div>
 
-          <div className={styles.navArrows}>
-            <a href="/shop" className={styles.viewAllBtn}>
-              View All
-            </a>
+          {!showEmptyState && !error && (
+            <div className={styles.navArrows}>
+              <a href="/shop" className={styles.viewAllBtn}>
+                View All
+              </a>
 
-            <button
-              type="button"
-              className={styles.navArrowBtn}
-              onClick={() => scrollByAmount(-1)}
-              aria-label="Scroll left"
-            >
-              <FiArrowLeft size={16} />
-            </button>
-            <button
-              type="button"
-              className={styles.navArrowBtn}
-              onClick={() => scrollByAmount(1)}
-              aria-label="Scroll right"
-            >
-              <FiArrowRight size={16} />
-            </button>
-          </div>
+              <button
+                type="button"
+                className={styles.navArrowBtn}
+                onClick={() => scrollByAmount(-1)}
+                aria-label="Scroll left"
+              >
+                <FiArrowLeft size={16} />
+              </button>
+              <button
+                type="button"
+                className={styles.navArrowBtn}
+                onClick={() => scrollByAmount(1)}
+                aria-label="Scroll right"
+              >
+                <FiArrowRight size={16} />
+              </button>
+            </div>
+          )}
         </div>
 
-        <div className={styles.scrollWrapper}>
-          <div
-            className={styles.scrollContainer}
-            ref={scrollContainerRef}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onClickCapture={handleClickCapture}
-          >
-            {PRODUCTS.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                isWishlisted={wishlist.has(product.id)}
-                onToggleWishlist={toggleWishlist}
-                onAddToCart={handleAddToCart}
-              />
-            ))}
+        {error ? (
+          <p className={styles.stateMessage}>
+            Couldn't load trending picks right now. Please try again later.
+          </p>
+        ) : showEmptyState ? (
+          <p className={styles.stateMessage}>
+            No trending picks yet — check back soon.
+          </p>
+        ) : (
+          <div className={styles.scrollWrapper}>
+            <div
+              className={styles.scrollContainer}
+              ref={scrollContainerRef}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onClickCapture={handleClickCapture}
+            >
+              {isLoading
+                ? Array.from({ length: 4 }, (_, i) => <SkeletonCard key={i} />)
+                : cardProducts.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      isWishlisted={wishlist.has(product.id)}
+                      onToggleWishlist={toggleWishlist}
+                      onAddToCart={handleAddToCart}
+                    />
+                  ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

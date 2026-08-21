@@ -53,6 +53,30 @@ export const fetchProductBySlug = createAsyncThunk(
 );
 
 // ============================================
+// ✅ NEW: FETCH RELEVANT PRODUCTS ("You May Also Like") (Public)
+// One request per product-detail-page load, keyed by productId so a
+// fast product-to-product navigation can't let a slow, superseded
+// request overwrite the newer one (see fulfilled/rejected guards below).
+// ============================================
+export const fetchRelevantProducts = createAsyncThunk(
+  "storefrontProducts/fetchRelevant",
+  async ({ productId, limit = 8 }, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.get(
+        `${API_URL}/seller/products/${productId}/relevant?limit=${limit}`,
+      );
+      return { productId, products: data.data?.products || [] };
+    } catch (error) {
+      return rejectWithValue({
+        productId,
+        message:
+          error.response?.data?.message || "Failed to fetch relevant products",
+      });
+    }
+  },
+);
+
+// ============================================
 // SLICE
 // ============================================
 const storefrontProductSlice = createSlice({
@@ -82,6 +106,13 @@ const storefrontProductSlice = createSlice({
     currentProduct: null,
     currentProductLoading: false,
     currentProductError: null,
+    // ✅ NEW: relevant products ("You May Also Like") state
+    relevantProducts: {
+      products: [],
+      isLoading: false,
+      error: null,
+      forProductId: null, // guards against stale responses on fast navigation
+    },
   },
   reducers: {
     clearStorefrontError: (state) => {
@@ -122,6 +153,15 @@ const storefrontProductSlice = createSlice({
       state.currentProductError = null;
       state.currentProductLoading = false;
     },
+    // ✅ NEW: Clear relevant products (e.g. on unmount)
+    clearRelevantProducts: (state) => {
+      state.relevantProducts = {
+        products: [],
+        isLoading: false,
+        error: null,
+        forProductId: null,
+      };
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -159,6 +199,40 @@ const storefrontProductSlice = createSlice({
         state.currentProductLoading = false;
         state.currentProductError = action.payload || "Product not found";
         state.currentProduct = null;
+      })
+
+      // ✅ NEW: relevant products
+      .addCase(fetchRelevantProducts.pending, (state, action) => {
+        // Reset immediately — this is what guarantees stale product-A
+        // recommendations never linger visually once a request for
+        // product B has started.
+        state.relevantProducts = {
+          products: [],
+          isLoading: true,
+          error: null,
+          forProductId: action.meta.arg.productId,
+        };
+      })
+      .addCase(fetchRelevantProducts.fulfilled, (state, action) => {
+        // Ignore a response that arrives after a newer request has
+        // already superseded it (rapid product-to-product navigation).
+        if (action.payload.productId !== state.relevantProducts.forProductId) {
+          return;
+        }
+        state.relevantProducts.isLoading = false;
+        state.relevantProducts.products = action.payload.products;
+      })
+      .addCase(fetchRelevantProducts.rejected, (state, action) => {
+        const failedProductId = action.payload?.productId;
+        if (
+          failedProductId &&
+          failedProductId !== state.relevantProducts.forProductId
+        ) {
+          return;
+        }
+        state.relevantProducts.isLoading = false;
+        state.relevantProducts.error =
+          action.payload?.message || "Failed to fetch relevant products";
       });
   },
 });
@@ -168,6 +242,7 @@ export const {
   clearPlacementProducts,
   clearAllPlacements,
   clearCurrentProduct, // ✅ NEW: Export the new action
+  clearRelevantProducts, // ✅ NEW: Export the new action
 } = storefrontProductSlice.actions;
 
 export default storefrontProductSlice.reducer;

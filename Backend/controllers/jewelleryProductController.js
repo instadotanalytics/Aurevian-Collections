@@ -1216,6 +1216,129 @@ export const getPlacementCounts = async (req, res) => {
   }
 };
 
+// ============================================
+// ✅ NEW: GET RELEVANT PRODUCTS (Public - "You May Also Like")
+//
+// Fallback chain (deliberately does NOT fall back to unrelated products —
+// if a product is the only one in its category, this returns an empty
+// list rather than filling the section with irrelevant items):
+//   1. Same subCategoryId within the same categoryId
+//   2. Same categoryId (broader), deduped against step 1, fills remaining slots
+// One query set per request — no per-card fetching, no full-collection scan.
+// ============================================
+export const getRelevantProducts = async (req, res) => {
+  console.log(
+    "✅ getRelevantProducts called for productId:",
+    req.params.productId,
+  );
+  try {
+    const { productId } = req.params;
+    const requestedLimit = parseInt(req.query.limit) || 8;
+    const limit = Math.min(Math.max(requestedLimit, 1), 12); // cap 1–12
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      console.log("❌ Invalid productId:", productId);
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product ID",
+      });
+    }
+
+    const currentProduct = await JewelleryProduct.findById(productId)
+      .select("category status isActive")
+      .lean();
+
+    if (!currentProduct) {
+      console.log("❌ Product not found for id:", productId);
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    const categoryId = currentProduct.category?.categoryId;
+    const subCategoryId = currentProduct.category?.subCategoryId;
+
+    if (!categoryId) {
+      console.log("⚠️ Product has no category, returning empty list");
+      return res.status(200).json({
+        success: true,
+        data: { products: [] },
+      });
+    }
+
+    const selectFields =
+      "productName productSlug thumbnail pricing reviews labels category status isActive";
+
+    const seenIds = new Set([currentProduct._id.toString()]);
+    const collected = [];
+
+    const addResults = (docs) => {
+      for (const doc of docs) {
+        const idStr = doc._id.toString();
+        if (!seenIds.has(idStr)) {
+          seenIds.add(idStr);
+          collected.push(doc);
+        }
+      }
+    };
+
+    // Step 1 — same subcategory (only if the current product has one)
+    if (subCategoryId) {
+      const subMatches = await JewelleryProduct.find({
+        _id: { $ne: currentProduct._id },
+        status: "Published",
+        isActive: true,
+        "category.categoryId": categoryId,
+        "category.subCategoryId": subCategoryId,
+      })
+        .select(selectFields)
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .lean();
+      addResults(subMatches);
+      console.log(`📊 Step 1 (subcategory) matched: ${subMatches.length}`);
+    }
+
+    // Step 2 — same category, broader, fills remaining slots only
+    if (collected.length < limit) {
+      const remaining = limit - collected.length;
+      const categoryMatches = await JewelleryProduct.find({
+        _id: { $nin: Array.from(seenIds) },
+        status: "Published",
+        isActive: true,
+        "category.categoryId": categoryId,
+      })
+        .select(selectFields)
+        .sort({ createdAt: -1 })
+        .limit(remaining)
+        .lean();
+      addResults(categoryMatches);
+      console.log(`📊 Step 2 (category) matched: ${categoryMatches.length}`);
+    }
+
+    // ✅ Deliberately no "other products" fallback beyond this point —
+    // an empty/short result here means the category genuinely doesn't
+    // have enough relevant products, and the frontend should show an
+    // empty state rather than unrelated items.
+
+    console.log(
+      `📊 Total relevant products for ${productId}: ${collected.length}`,
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: { products: collected },
+    });
+  } catch (error) {
+    console.error("❌ Get relevant products error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get relevant products",
+    });
+  }
+};
+
 console.log("✅ jewelleryProductController fully loaded");
 console.log("📌 Exported functions:");
 console.log("  - getProductCategories");
@@ -1232,3 +1355,4 @@ console.log("  - deleteProduct");
 console.log("  - bulkUploadProducts");
 console.log("  - getProductsByPlacement (✅ NEW: Public storefront API)");
 console.log("  - getPlacementCounts (✅ NEW: Seller dashboard API)");
+console.log("  - getRelevantProducts (✅ NEW: Public 'You May Also Like' API)");

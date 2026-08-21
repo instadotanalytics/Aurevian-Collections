@@ -1,6 +1,12 @@
-import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import styles from "./shop.module.css";
@@ -11,6 +17,7 @@ import shopHero from "../../assets/shophero.png";
 import { LuSlidersHorizontal } from "react-icons/lu";
 import { FiHeart } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
+import { FiPackage, FiCreditCard, FiPhoneCall } from "react-icons/fi";
 import { FiShoppingBag, FiCheck, FiChevronDown } from "react-icons/fi";
 
 import { fetchProductsByPlacement } from "../../redux/slices/storefrontProductSlice";
@@ -48,16 +55,20 @@ const PROMOTION_OPTIONS = [
 
 const perks = [
   {
-    icon: "📦",
+    icon: FiPackage,
     title: "Free Shipping",
     text: "Free delivery for orders above ₹2,000",
   },
   {
-    icon: "💳",
+    icon: FiCreditCard,
     title: "Flexible Payment",
     text: "Multiple secure payment options",
   },
-  { icon: "☎", title: "24×7 Support", text: "We support online all day" },
+  {
+    icon: FiPhoneCall,
+    title: "24×7 Support",
+    text: "We support online all day",
+  },
 ];
 
 const truncateName = (name) => {
@@ -76,8 +87,16 @@ export default function Shop() {
   const cartItems = useSelector((state) => state.cart.items);
   const wishlistItems = useSelector((state) => state.wishlist.items);
 
+  // ✅ NEW — read ?category=<id> from the URL once on mount. This is how
+  // ShopByCategory (Home page) links into a specific category: it always
+  // passes the category's real HeaderConfig id, so this plugs straight
+  // into the existing categoryId filter below with no extra matching logic.
+  const [searchParams] = useSearchParams();
+
   const [categories, setCategories] = useState([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState(
+    () => searchParams.get("category") || "",
+  );
   const [priceRange, setPriceRange] = useState([0, 7000]);
   const [sort, setSort] = useState("");
   const [cartLoadingId, setCartLoadingId] = useState(null);
@@ -139,7 +158,7 @@ export default function Shop() {
             limit: 10,
             categoryId: selectedCategoryId || undefined,
             sort: sort || undefined,
-          })
+          }),
         ).unwrap();
 
         const fetched = result.products || [];
@@ -184,7 +203,7 @@ export default function Shop() {
           setPage((p) => p + 1);
         }
       },
-      { rootMargin: "200px" }
+      { rootMargin: "200px" },
     );
 
     observer.observe(loaderRef.current);
@@ -364,7 +383,7 @@ export default function Shop() {
             ? Math.round(
                 ((p.pricing.originalPrice - p.pricing.salePrice) /
                   p.pricing.originalPrice) *
-                  100
+                  100,
               )
             : 0;
 
@@ -581,10 +600,9 @@ export default function Shop() {
                         {p.pricing?.salePrice && p.pricing?.originalPrice && (
                           <span className={styles.badge}>
                             {Math.round(
-                              ((p.pricing.originalPrice -
-                                p.pricing.salePrice) /
+                              ((p.pricing.originalPrice - p.pricing.salePrice) /
                                 p.pricing.originalPrice) *
-                                100
+                                100,
                             )}
                             % off
                           </span>
@@ -636,12 +654,11 @@ export default function Shop() {
                               p.pricing?.salePrice || p.pricing?.originalPrice
                             )?.toLocaleString() || "0"}
                           </span>
-                          {p.pricing?.salePrice &&
-                            p.pricing?.originalPrice && (
-                              <span className={styles.priceOld}>
-                                ₹{p.pricing.originalPrice.toLocaleString()}
-                              </span>
-                            )}
+                          {p.pricing?.salePrice && p.pricing?.originalPrice && (
+                            <span className={styles.priceOld}>
+                              ₹{p.pricing.originalPrice.toLocaleString()}
+                            </span>
+                          )}
                         </div>
                         <button
                           type="button"
@@ -697,15 +714,22 @@ export default function Shop() {
 
         {/* Perks Section */}
         <section className={styles.perks}>
-          {perks.map((perk) => (
-            <div className={styles.perk} key={perk.title}>
-              <div className={styles.icon}>{perk.icon}</div>
-              <div>
-                <h4>{perk.title}</h4>
-                <p>{perk.text}</p>
+          {perks.map((perk) => {
+            const Icon = perk.icon;
+
+            return (
+              <div className={styles.perk} key={perk.title}>
+                <div className={styles.icon}>
+                  <Icon />
+                </div>
+
+                <div>
+                  <h4>{perk.title}</h4>
+                  <p>{perk.text}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </section>
 
         {/* Mobile Bottom Sheet Filter */}
@@ -850,9 +874,7 @@ export default function Shop() {
 
             {/* Price Range */}
             <div className={styles.mobileFilterGroup}>
-              <span className={styles.mobileFilterGroupLabel}>
-                Price Range
-              </span>
+              <span className={styles.mobileFilterGroupLabel}>Price Range</span>
               <input
                 type="range"
                 min="0"

@@ -2,6 +2,12 @@
 // Premium, compact "Shop by Category" section with a slow, continuous
 // left-moving marquee. Autoplay pauses on hover/focus, respects
 // prefers-reduced-motion, and the arrow buttons still work for manual paging.
+//
+// Categories are fetched from the active HeaderConfig (shopMegaMenu.categories)
+// via fetchPublicHeaderConfig — the same source that drives the navbar's Shop
+// mega menu. There is no hardcoded category list: if HeaderConfig has zero
+// categories, this section renders an empty state instead of falling back
+// to a fixed array.
 
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -11,19 +17,7 @@ import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import styles from "./Shopbycategory.module.css";
 import { fetchPublicHeaderConfig } from "./../../redux/slices/headerConfigSlice.js";
 
-// Fallback categories with 8 categories pre-loaded
-const FALLBACK_CATEGORIES = [
-  { id: "earrings", label: "Earrings", path: "/shop/earrings", image: "" },
-  { id: "necklaces", label: "Necklaces", path: "/shop/necklaces", image: "" },
-  { id: "rings", label: "Rings", path: "/shop/rings", image: "" },
-  { id: "bracelets", label: "Bracelets", path: "/shop/bracelets", image: "" },
-  { id: "anklets", label: "Anklets", path: "/shop/anklets", image: "" },
-  { id: "bridal", label: "Bridal", path: "/shop/bridal", image: "" },
-  { id: "nosepin", label: "Nosepin", path: "/shop/nosepin", image: "" },
-  { id: "chains", label: "Chains", path: "/shop/chains", image: "" },
-];
-
-// Skeleton placeholders
+// Skeleton placeholders — purely a loading-state visual, not real data
 const SKELETON_CATEGORIES = Array(8)
   .fill(null)
   .map((_, index) => ({
@@ -52,6 +46,15 @@ const getInitials = (label = "") =>
     .join("")
     .toUpperCase();
 
+// ✅ Categories navigate by their existing HeaderConfig id, via the Shop
+// page's ?category= query param — NOT by category.path (which is free-text
+// set by whoever edits HeaderConfig and isn't guaranteed to match a real
+// route). Shop.jsx reads this param on mount and feeds it into its
+// existing category filter, so this works for any category id, present
+// or future, without any per-category conditionals.
+const getCategoryHref = (category) =>
+  category?.id ? `/shop?category=${encodeURIComponent(category.id)}` : "/shop";
+
 // Skeleton Card
 const SkeletonCard = React.memo(function SkeletonCard() {
   return (
@@ -73,7 +76,7 @@ const CategoryCard = React.memo(function CategoryCard({ category }) {
   return (
     <motion.div className={styles.card} variants={cardVariants}>
       <Link
-        to={category.path || "/shop"}
+        to={getCategoryHref(category)}
         className={styles.cardLink}
         aria-label={`Explore ${category.label}`}
         tabIndex={-1}
@@ -117,7 +120,9 @@ export default function ShopByCategory() {
     }
   }, [dispatch, config]);
 
-  // Update categories when config loads
+  // Update categories when config loads.
+  // ✅ No hardcoded fallback array: if HeaderConfig has no categories,
+  // we set an empty list and let the empty-state UI below handle it.
   useEffect(() => {
     if (config?.shopMegaMenu?.categories?.length > 0) {
       const timer = setTimeout(() => {
@@ -127,18 +132,19 @@ export default function ShopByCategory() {
       return () => clearTimeout(timer);
     } else if (config && !configLoading) {
       const timer = setTimeout(() => {
-        setCategories(FALLBACK_CATEGORIES);
+        setCategories([]);
         setIsLoading(false);
       }, 300);
       return () => clearTimeout(timer);
     }
   }, [config, configLoading]);
 
-  // Fallback if loading takes too long
+  // Hard stop if the fetch stalls or fails — same empty-state result,
+  // no fabricated categories.
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (isLoading) {
-        setCategories(FALLBACK_CATEGORIES);
+        setCategories([]);
         setIsLoading(false);
       }
     }, 2000);
@@ -146,6 +152,7 @@ export default function ShopByCategory() {
   }, [isLoading]);
 
   const showSkeletons = isLoading || categories.some((c) => c.isSkeleton);
+  const isEmpty = !showSkeletons && categories.length === 0;
 
   /* ------------------------- continuous marquee ------------------------- */
 
@@ -175,7 +182,7 @@ export default function ShopByCategory() {
 
   // Autoplay loop — slow, constant-speed, seamless leftward drift
   useEffect(() => {
-    if (showSkeletons) return undefined;
+    if (showSkeletons || isEmpty) return undefined;
 
     const track = trackRef.current;
     if (!track) return undefined;
@@ -201,7 +208,7 @@ export default function ShopByCategory() {
 
     rafId = requestAnimationFrame(step);
     return () => cancelAnimationFrame(rafId);
-  }, [showSkeletons, reducedMotion, categories]);
+  }, [showSkeletons, isEmpty, reducedMotion, categories]);
 
   const pause = useCallback(() => {
     isPausedRef.current = true;
@@ -276,72 +283,89 @@ export default function ShopByCategory() {
           <div className={styles.headerDivider} aria-hidden="true" />
         </motion.div>
 
-        <div className={styles.sliderWrap}>
-          <button
-            type="button"
-            className={`${styles.navButton} ${styles.navButtonLeft} ${styles.desktopNav}`}
-            onClick={() => nudge(-1)}
-            aria-label="Show previous categories"
+        {isEmpty ? (
+          // No categories configured yet — no fabricated placeholder data,
+          // just an honest empty state until categories are added upstream.
+          <p
+            style={{
+              textAlign: "center",
+              color: "#8a8072",
+              padding: "24px 0",
+              fontSize: "14px",
+            }}
           >
-            <FiChevronLeft />
-          </button>
+            Categories are being updated. Check back shortly.
+          </p>
+        ) : (
+          <>
+            <div className={styles.sliderWrap}>
+              <button
+                type="button"
+                className={`${styles.navButton} ${styles.navButtonLeft} ${styles.desktopNav}`}
+                onClick={() => nudge(-1)}
+                aria-label="Show previous categories"
+              >
+                <FiChevronLeft />
+              </button>
 
-          <div
-            className={styles.marqueeViewport}
-            role="region"
-            aria-label="Jewellery categories"
-            tabIndex={0}
-            onMouseEnter={pause}
-            onMouseLeave={resume}
-            onFocus={pause}
-            onBlur={resume}
-          >
-            <div
-              className={`${styles.marqueeTrack} ${showSkeletons ? styles.loadingTrack : styles.loadedTrack}`}
-              ref={trackRef}
-            >
-              {showSkeletons
-                ? displayItems.map((_, index) => (
-                    <SkeletonCard key={`skeleton-${index}`} />
-                  ))
-                : displayItems.map((category, index) => (
-                    <CategoryCard
-                      key={`${category.id}-${index}`}
-                      category={category}
-                    />
-                  ))}
+              <div
+                className={styles.marqueeViewport}
+                role="region"
+                aria-label="Jewellery categories"
+                tabIndex={0}
+                onMouseEnter={pause}
+                onMouseLeave={resume}
+                onFocus={pause}
+                onBlur={resume}
+              >
+                <div
+                  className={`${styles.marqueeTrack} ${showSkeletons ? styles.loadingTrack : styles.loadedTrack}`}
+                  ref={trackRef}
+                >
+                  {showSkeletons
+                    ? displayItems.map((_, index) => (
+                        <SkeletonCard key={`skeleton-${index}`} />
+                      ))
+                    : displayItems.map((category, index) => (
+                        <CategoryCard
+                          key={`${category.id}-${index}`}
+                          category={category}
+                        />
+                      ))}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className={`${styles.navButton} ${styles.navButtonRight} ${styles.desktopNav}`}
+                onClick={() => nudge(1)}
+                aria-label="Show next categories"
+              >
+                <FiChevronRight />
+              </button>
             </div>
-          </div>
 
-          <button
-            type="button"
-            className={`${styles.navButton} ${styles.navButtonRight} ${styles.desktopNav}`}
-            onClick={() => nudge(1)}
-            aria-label="Show next categories"
-          >
-            <FiChevronRight />
-          </button>
-        </div>
+            <div className={styles.mobileNav}>
+              <button
+                type="button"
+                className={styles.navButton}
+                onClick={() => nudge(-1)}
+                aria-label="Show previous categories"
+              >
+                <FiChevronLeft />
+              </button>
 
-        <div className={styles.mobileNav}>
-          <button
-            type="button"
-            className={styles.navButton}
-            onClick={() => nudge(-1)}
-            aria-label="Show previous categories"
-          >
-            <FiChevronLeft />
-          </button>
-
-          <button
-            type="button"
-            className={styles.navButton}
-            onClick={() => nudge(1)}
-            aria-label="Show next categories"
-          >
-            <FiChevronRight />
-          </button>
-        </div>
+              <button
+                type="button"
+                className={styles.navButton}
+                onClick={() => nudge(1)}
+                aria-label="Show next categories"
+              >
+                <FiChevronRight />
+              </button>
+            </div>
+          </>
+        )}
 
         <motion.div
           className={styles.ctaWrap}
