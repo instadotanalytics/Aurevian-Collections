@@ -12,7 +12,7 @@ import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { FiHeart, FiShoppingBag, FiCheck } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
-import styles from "./ProductDetail.module.css";
+import styles from "./RelevantProducts.module.css";
 
 import {
   fetchRelevantProducts,
