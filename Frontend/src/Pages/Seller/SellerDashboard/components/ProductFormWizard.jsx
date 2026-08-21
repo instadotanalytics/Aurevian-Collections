@@ -271,6 +271,13 @@ const ProductFormWizard = () => {
     status: "Draft",
   });
 
+  // imagePreviews is the single source of truth for the gallery, both in
+  // create and edit mode. Each entry is either:
+  //   - { url, publicId, altText, isExisting: true }  — already on the product
+  //   - { file, url (blob), isExisting: false }        — newly picked, not uploaded yet
+  // formData.images/thumbnail are ONLY ever set to actual File objects the
+  // seller just picked — never to existing product data — so the update
+  // thunk can tell "no new file chosen" apart from "here's a replacement".
   const [imagePreviews, setImagePreviews] = useState([]);
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
   const fileInputRef = useRef(null);
@@ -329,7 +336,7 @@ const ProductFormWizard = () => {
       categoryId: product.category?.categoryId || "",
       subCategoryId: product.category?.subCategoryId || "",
       placements: product.placements || [],
-      thumbnail: null,
+      thumbnail: null, // stays null until the seller picks a NEW file
       images: [],
       originalPrice: product.pricing?.originalPrice || "",
       salePrice: product.pricing?.salePrice || "",
@@ -393,15 +400,19 @@ const ProductFormWizard = () => {
           isExisting: true,
         })),
       );
+    } else {
+      setImagePreviews([]);
     }
 
-    if (product.thumbnail) {
+    if (product.thumbnail?.url) {
       setThumbnailPreview({
         url: product.thumbnail.url,
         publicId: product.thumbnail.publicId,
         altText: product.thumbnail.altText || "",
         isExisting: true,
       });
+    } else {
+      setThumbnailPreview(null);
     }
 
     const allSteps = new Set([1, 2, 3, 4, 5, 6, 7]);
@@ -446,6 +457,11 @@ const ProductFormWizard = () => {
       toast.error("Image must be under 10MB");
       return;
     }
+    // Revoke the previous blob preview URL if the seller had already picked
+    // (but not yet saved) a different replacement thumbnail
+    if (thumbnailPreview && !thumbnailPreview.isExisting) {
+      URL.revokeObjectURL(thumbnailPreview.url);
+    }
     setFormData({ ...formData, thumbnail: file });
     setThumbnailPreview({
       url: URL.createObjectURL(file),
@@ -471,24 +487,22 @@ const ProductFormWizard = () => {
       url: URL.createObjectURL(file),
       isExisting: false,
     }));
-    setImagePreviews([...imagePreviews, ...newImages]);
-    setFormData({
-      ...formData,
-      images: [...formData.images, ...files],
-    });
+    // imagePreviews is the single source of truth — formData.images is
+    // derived from it at submit time, so we don't maintain a second
+    // parallel array here (that's what caused removeImage to delete the
+    // wrong file previously).
+    setImagePreviews((prev) => [...prev, ...newImages]);
     e.target.value = "";
   };
 
   const removeImage = (index) => {
-    const newPreviews = [...imagePreviews];
-    const removed = newPreviews.splice(index, 1)[0];
-    if (!removed.isExisting && removed.url) {
-      URL.revokeObjectURL(removed.url);
-    }
-    setImagePreviews(newPreviews);
-    setFormData({
-      ...formData,
-      images: formData.images.filter((_, i) => i !== index),
+    setImagePreviews((prev) => {
+      const next = [...prev];
+      const removed = next.splice(index, 1)[0];
+      if (removed && !removed.isExisting && removed.url) {
+        URL.revokeObjectURL(removed.url);
+      }
+      return next;
     });
   };
 
@@ -579,7 +593,13 @@ const ProductFormWizard = () => {
         }
         return true;
       case 2:
-        if (!formData.thumbnail) {
+        // ✅ FIX: check thumbnailPreview, not formData.thumbnail.
+        // formData.thumbnail is only ever set when the seller picks a NEW
+        // file — in edit mode it's deliberately null until they replace
+        // it. thumbnailPreview reflects the actual current thumbnail
+        // (existing OR newly picked), which is what "is there a thumbnail
+        // at all" should be checking.
+        if (!thumbnailPreview) {
           toast.error("Thumbnail image is required");
           return false;
         }
@@ -654,8 +674,33 @@ const ProductFormWizard = () => {
     setIsSubmitting(true);
     try {
       const submitData = { ...formData };
-      submitData.images = formData.images;
+
+      // ✅ FIX: derive the new-files-only image list from imagePreviews
+      // (the single source of truth) instead of the old parallel
+      // formData.images array, which could drift out of sync with
+      // imagePreviews after adds/removes.
+      const newImageFiles = imagePreviews
+        .filter((img) => !img.isExisting && img.file)
+        .map((img) => img.file);
+      submitData.images = newImageFiles;
+
+      // thumbnail: File if the seller picked a new one, otherwise null —
+      // the update thunk only appends it to the request when it's an
+      // actual File, so "null" here correctly means "keep the existing one"
       submitData.thumbnail = formData.thumbnail;
+
+      // ✅ NEW: tell the backend exactly which existing images the seller
+      // kept, so it can merge them with any new uploads instead of wiping
+      // the whole gallery whenever new files are added.
+      if (isEdit) {
+        submitData.existingImages = imagePreviews
+          .filter((img) => img.isExisting)
+          .map((img) => ({
+            url: img.url,
+            publicId: img.publicId,
+            altText: img.altText || "",
+          }));
+      }
 
       if (!submitData.salePrice) delete submitData.salePrice;
       if (!submitData.maxOrderQty) delete submitData.maxOrderQty;

@@ -17,7 +17,9 @@ import {
   FiTrendingUp,
   FiUser,
   FiStar,
-  FiGift, // ✅ NEW — icon for Curated For You
+  FiGift,
+  FiAward,
+  FiSunrise, // ✅ NEW — icon for New Collections
 } from "react-icons/fi";
 
 import { useSelector, useDispatch } from "react-redux";
@@ -91,11 +93,14 @@ const PLAN_THEME = {
 
 const getPlanTheme = (planId) => PLAN_THEME[planId] || PLAN_THEME.free;
 
+// ✅ Updated menuItems with New Collections
 const menuItems = [
   { id: "", label: "Dashboard", icon: FiHome },
   { id: "products", label: "Products", icon: FiPackage },
   { id: "featured-offers", label: "Offers Section", icon: FiStar },
-  { id: "curated-for-you", label: "Curated For You", icon: FiGift }, // ✅ NEW
+  { id: "curated-for-you", label: "Curated For You", icon: FiGift },
+  { id: "trending-picks", label: "Trending Picks", icon: FiAward },
+  { id: "new-collections", label: "New Collections", icon: FiSunrise }, // ✅ NEW
   { id: "orders", label: "Orders", icon: FiShoppingBag },
   { id: "earnings", label: "Earnings", icon: FiDollarSign },
   { id: "customers", label: "Customers", icon: FiUsers },
@@ -425,8 +430,7 @@ const SellerDashboard = () => {
               <Route path="products/new" element={<ProductFormWizard />} />
               <Route path="products/edit/:id" element={<ProductFormWizard />} />
 
-              {/* ✅ Offers Section — now passes explicit section/title props
-                   since FeaturedProductsManagement is shared/generalized */}
+              {/* ✅ Offers Section — "Offers Worth The Splurge" */}
               <Route
                 path="featured-offers"
                 element={
@@ -438,7 +442,7 @@ const SellerDashboard = () => {
                 }
               />
 
-              {/* ✅ NEW — Curated For You / "You May Also Like" section */}
+              {/* ✅ Curated For You — "You May Also Like" section */}
               <Route
                 path="curated-for-you"
                 element={
@@ -447,6 +451,32 @@ const SellerDashboard = () => {
                     title="Curated For You"
                     subtitle="Add or remove your products from the 'You May Also Like' section on the homepage, and control the order they appear in."
                     pickerTitle="Add Product to Curated For You"
+                  />
+                }
+              />
+
+              {/* ✅ Trending Picks section */}
+              <Route
+                path="trending-picks"
+                element={
+                  <FeaturedProductsManagement
+                    section="trending-picks"
+                    title="Trending Picks"
+                    subtitle="Add or remove your products from the 'Trending Picks' section on the homepage, and control the order they appear in."
+                    pickerTitle="Add Product to Trending Picks"
+                  />
+                }
+              />
+
+              {/* ✅ NEW — New Collections / "Fresh Arrivals" section */}
+              <Route
+                path="new-collections"
+                element={
+                  <FeaturedProductsManagement
+                    section="new-collections"
+                    title="New Collections"
+                    subtitle="Add or remove your products from the 'Fresh Arrivals — New Collections' section on the homepage, and control the order they appear in."
+                    pickerTitle="Add Product to New Collections"
                   />
                 }
               />

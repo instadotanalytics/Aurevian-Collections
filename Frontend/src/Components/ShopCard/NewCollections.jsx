@@ -1,6 +1,14 @@
 // src/Components/NewCollections/NewCollections.jsx
+//
+// Products come from FeaturedProduct entries (section: "new-collections"),
+// fetched via fetchFeaturedProducts — same pattern as ShopCardCategory.jsx /
+// GiftGuide.jsx. No hardcoded product data. Layout, card markup/classes,
+// and scroll behavior are unchanged from the static version. wishlistBtn
+// and bagBtn remain static (no onClick/state) — that matches the original
+// file, which never wired them up either.
 
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   FiArrowRight,
   FiArrowLeft,
@@ -10,143 +18,9 @@ import {
 import { FaStar, FaRegStar } from "react-icons/fa";
 import styles from "./NewCollections.module.css";
 
-// ==========================================================
-// NEW COLLECTION IMAGES
-// ==========================================================
-const NEW_COLLECTION_IMAGES = {
-  diamondNecklace:
-    "https://i.pinimg.com/736x/c9/7e/9f/c97e9f9a6888e906eff403d2b703297c.jpg",
-  goldRing:
-    "https://i.pinimg.com/1200x/4d/94/ee/4d94ee4c9ac395cc0b8339b2aedd9fb1.jpg",
-  emeraldEarrings:
-    "https://i.pinimg.com/736x/7f/00/a0/7f00a0eed6732c3827f5a41a1f2a9c45.jpg",
-  pearlBracelet:
-    "https://i.pinimg.com/736x/b3/0a/b5/b30ab5738f474f74e01baddc9f11d9eb.jpg",
-  sapphirePendant:
-    "https://i.pinimg.com/736x/03/55/9c/03559cf6a40ba8d586b1c91aee84910a.jpg",
-  rubyStuds:
-    "https://i.pinimg.com/1200x/82/b8/a9/82b8a9520e7037d5de2cb82ce4896902.jpg",
-  platinumBand:
-    "https://i.pinimg.com/736x/4f/38/fb/4f38fba0d238d0d74979baa86abe77da.jpg",
-  tanzaniteRing:
-    "https://i.pinimg.com/736x/92/48/bc/9248bcb8e9b4cec255ea2f5dbf891209.jpg",
-};
+import { fetchFeaturedProducts } from "../../redux/slices/featuredProductSlice";
 
-// ==========================================================
-// NEW COLLECTION PRODUCT DATA
-// ==========================================================
-const NEW_PRODUCTS = [
-  {
-    id: "n1",
-    name: "Diamond Halo Necklace",
-    price: 12999,
-    oldPrice: 16999,
-    rating: 4.9,
-    reviewCount: 124,
-    collection: "Aurevian Collections",
-    image: NEW_COLLECTION_IMAGES.diamondNecklace,
-  },
-  {
-    id: "n2",
-    name: "18K Gold Statement Ring",
-    price: 8999,
-    oldPrice: 11999,
-    rating: 4.8,
-    reviewCount: 98,
-    collection: "Aurevian Collections",
-    image: NEW_COLLECTION_IMAGES.goldRing,
-  },
-  {
-    id: "n3",
-    name: "Emerald Drop Earrings",
-    price: 7499,
-    oldPrice: 9999,
-    rating: 4.7,
-    reviewCount: 76,
-    collection: "Aurevian Collections",
-    image: NEW_COLLECTION_IMAGES.emeraldEarrings,
-  },
-  {
-    id: "n4",
-    name: "Freshwater Pearl Bracelet",
-    price: 5499,
-    oldPrice: 6999,
-    rating: 4.6,
-    reviewCount: 61,
-    collection: "Aurevian Collections",
-    image: NEW_COLLECTION_IMAGES.pearlBracelet,
-  },
-  {
-    id: "n5",
-    name: "Sapphire Pendant Set",
-    price: 9999,
-    oldPrice: 13999,
-    rating: 4.9,
-    reviewCount: 142,
-    collection: "Aurevian Collections",
-    image: NEW_COLLECTION_IMAGES.sapphirePendant,
-  },
-  {
-    id: "n6",
-    name: "Ruby Stud Earrings",
-    price: 6499,
-    oldPrice: 8499,
-    rating: 4.7,
-    reviewCount: 85,
-    collection: "Aurevian Collections",
-    image: NEW_COLLECTION_IMAGES.rubyStuds,
-  },
-  {
-    id: "n7",
-    name: "Platinum Wedding Band",
-    price: 15999,
-    oldPrice: 19999,
-    rating: 4.9,
-    reviewCount: 156,
-    collection: "Aurevian Collections",
-    image: NEW_COLLECTION_IMAGES.platinumBand,
-  },
-  {
-    id: "n8",
-    name: "Tanzanite Cocktail Ring",
-    price: 11999,
-    oldPrice: 15999,
-    rating: 4.8,
-    reviewCount: 103,
-    collection: "Aurevian Collections",
-    image: NEW_COLLECTION_IMAGES.tanzaniteRing,
-  },
-  {
-    id: "n9",
-    name: "Rose Gold Pendant",
-    price: 7999,
-    oldPrice: 10999,
-    rating: 4.8,
-    reviewCount: 91,
-    collection: "Aurevian Collections",
-    image: NEW_COLLECTION_IMAGES.diamondNecklace,
-  },
-  {
-    id: "n10",
-    name: "Silver Chain Bracelet",
-    price: 4499,
-    oldPrice: 5999,
-    rating: 4.6,
-    reviewCount: 54,
-    collection: "Aurevian Collections",
-    image: NEW_COLLECTION_IMAGES.pearlBracelet,
-  },
-  {
-    id: "n11",
-    name: "Pearl Stud Earrings",
-    price: 3499,
-    oldPrice: 4999,
-    rating: 4.7,
-    reviewCount: 67,
-    collection: "Aurevian Collections",
-    image: NEW_COLLECTION_IMAGES.rubyStuds,
-  },
-];
+const SECTION = "new-collections";
 
 function Stars({ rating }) {
   const stars = [];
@@ -176,7 +50,7 @@ function ProductCard({ product }) {
       </button>
 
       <a
-        href={`/product/${product.id}`}
+        href={`/product/${product.slug}`}
         className={styles.cardLink}
         aria-label={product.name}
       >
@@ -187,6 +61,9 @@ function ProductCard({ product }) {
               alt={product.name}
               className={styles.image}
               loading="lazy"
+              onError={(e) => {
+                e.target.src = "/placeholder-image.jpg";
+              }}
             />
           ) : (
             <div className={styles.imagePlaceholder} aria-hidden="true" />
@@ -224,8 +101,92 @@ function ProductCard({ product }) {
   );
 }
 
+// Skeleton reuses the card's own .card/.imageCircle/.body classes so it
+// inherits the exact card shape (arched corners, gold backing edge, image
+// medallion) with no new structural CSS needed — only .skeletonPulse /
+// .skeletonText are new. Badge/wishlist/bag are omitted while loading.
+function SkeletonCard() {
+  return (
+    <div className={styles.card}>
+      <div className={styles.imageCircle}>
+        <div className={styles.skeletonPulse} aria-hidden="true" />
+      </div>
+      <div className={styles.body}>
+        <p
+          className={`${styles.collectionTag} ${styles.skeletonPulse} ${styles.skeletonText}`}
+          style={{ width: "55%", margin: "0 auto" }}
+        >
+          &nbsp;
+        </p>
+        <h3
+          className={`${styles.title} ${styles.skeletonPulse} ${styles.skeletonText}`}
+          style={{ width: "75%", height: "1.1em", margin: "0 auto" }}
+        >
+          &nbsp;
+        </h3>
+        <div className={styles.metaRow}>
+          <span
+            className={`${styles.skeletonPulse} ${styles.skeletonText}`}
+            style={{ width: "60%", margin: "0 auto" }}
+          >
+            &nbsp;
+          </span>
+        </div>
+        <div className={styles.priceRow}>
+          <span
+            className={`${styles.price} ${styles.skeletonPulse} ${styles.skeletonText}`}
+            style={{ width: "45%", margin: "0 auto" }}
+          >
+            &nbsp;
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Maps a FeaturedProduct entry's populated JewelleryProduct doc to the flat
+// shape ProductCard expects — keeps ProductCard's markup/classes untouched
+// from the static version.
+const toCardProduct = (product) => {
+  const displayPrice =
+    product.pricing?.salePrice || product.pricing?.originalPrice;
+  const hasDiscount =
+    product.pricing?.salePrice &&
+    product.pricing?.salePrice < product.pricing?.originalPrice;
+
+  return {
+    id: product._id,
+    slug: product.productSlug,
+    name: product.productName,
+    price: displayPrice || 0,
+    oldPrice: hasDiscount ? product.pricing.originalPrice : null,
+    rating: product.reviews?.averageRating || 0,
+    reviewCount: product.reviews?.totalReviews || 0,
+    collection: product.specifications?.collection || "Aurevian Collections",
+    image: product.thumbnail?.url || null,
+  };
+};
+
 export default function NewCollections() {
+  const dispatch = useDispatch();
   const scrollContainerRef = useRef(null);
+
+  const { products, isLoading, error } = useSelector(
+    (state) =>
+      state.featuredProducts.bySection[SECTION] || {
+        products: [],
+        isLoading: true,
+        error: null,
+      },
+  );
+
+  useEffect(() => {
+    dispatch(fetchFeaturedProducts(SECTION));
+  }, [dispatch]);
+
+  const cardProducts = products.map(toCardProduct);
+  const showEmptyState = !isLoading && !error && cardProducts.length === 0;
 
   const scrollByPage = (direction) => {
     const el = scrollContainerRef.current;
@@ -253,37 +214,51 @@ export default function NewCollections() {
             </div>
           </div>
 
-          <div className={styles.headerRight}>
-            <a href="/shop/new-arrivals" className={styles.viewAllBtn}>
-              View All
-            </a>
+          {!showEmptyState && !error && (
+            <div className={styles.headerRight}>
+              <a href="/shop/new-arrivals" className={styles.viewAllBtn}>
+                View All
+              </a>
 
-            <div className={styles.navArrows}>
-              <button
-                type="button"
-                className={styles.navBtn}
-                onClick={scrollLeft}
-                aria-label="Scroll left"
-              >
-                <FiArrowLeft size={15} />
-              </button>
-              <button
-                type="button"
-                className={styles.navBtn}
-                onClick={scrollRight}
-                aria-label="Scroll right"
-              >
-                <FiArrowRight size={15} />
-              </button>
+              <div className={styles.navArrows}>
+                <button
+                  type="button"
+                  className={styles.navBtn}
+                  onClick={scrollLeft}
+                  aria-label="Scroll left"
+                >
+                  <FiArrowLeft size={15} />
+                </button>
+                <button
+                  type="button"
+                  className={styles.navBtn}
+                  onClick={scrollRight}
+                  aria-label="Scroll right"
+                >
+                  <FiArrowRight size={15} />
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
-        <div className={styles.scrollContainer} ref={scrollContainerRef}>
-          {NEW_PRODUCTS.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {error ? (
+          <p className={styles.stateMessage}>
+            Couldn't load new collections right now. Please try again later.
+          </p>
+        ) : showEmptyState ? (
+          <p className={styles.stateMessage}>
+            No new collections yet — check back soon.
+          </p>
+        ) : (
+          <div className={styles.scrollContainer} ref={scrollContainerRef}>
+            {isLoading
+              ? Array.from({ length: 4 }, (_, i) => <SkeletonCard key={i} />)
+              : cardProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+          </div>
+        )}
       </div>
     </section>
   );

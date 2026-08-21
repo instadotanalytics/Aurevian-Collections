@@ -691,3 +691,59 @@
     font-size: 13px;
   }
 }
+
+/* ==========================================================
+   ✅ NEW — DYNAMIC DATA STATES (loading / empty / error)
+   Added for the New Collections section going live from the
+   backend. Uses the same design tokens (--gold, --gold-deep,
+   --ink, --text-secondary) as the rest of this file — no new
+   tokens introduced.
+   ========================================================== */
+
+/* Empty / error state message, shown in place of the scroll row */
+.stateMessage {
+  text-align: center;
+  padding: 56px 16px;
+  margin: 0;
+  font-family: "Work Sans", "Segoe UI", sans-serif;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* Shimmering placeholder block used inside SkeletonCard, for both the
+   image medallion (fills .imageCircle, clipped to its circular shape by
+   the parent's border-radius + overflow:hidden) and the text lines
+   (paired with .skeletonText below to collapse them to a short bar) */
+.skeletonPulse {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(150deg, #f2ece1 0%, #e6dbc6 100%);
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+/* Collapses .collectionTag/.title/.price's normal text box down to a
+   short filled bar so the pulse reads as a text placeholder */
+.skeletonText {
+  position: relative;
+  display: block;
+  height: 0.9em;
+  color: transparent;
+  overflow: hidden;
+}
+
+@keyframes skeletonPulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeletonPulse {
+    animation: none !important;
+  }
+}

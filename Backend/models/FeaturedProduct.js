@@ -8,8 +8,13 @@
  */
 import mongoose from "mongoose";
 
-// ✅ Updated: Added "curated-for-you" section
-const FEATURED_SECTIONS = ["specially-made", "curated-for-you"];
+// ✅ Updated: Added "new-collections" section
+const FEATURED_SECTIONS = [
+  "specially-made",
+  "curated-for-you",
+  "trending-picks",
+  "new-collections",
+];
 
 const featuredProductSchema = new mongoose.Schema(
   {

@@ -13,38 +13,54 @@ class TokenService {
       isSuperAdmin: user.isSuperAdmin || user.role === 'super_admin',
     };
 
-    // Access token now lasts 24 hours by default.
-    // You can override this with JWT_ACCESS_EXPIRE in .env.
+    // FORCE access token to expire after 24 hours.
+    // This intentionally does NOT use JWT_ACCESS_EXPIRE from .env,
+    // so a production environment variable such as JWT_ACCESS_EXPIRE=15m
+    // cannot override it.
     const accessToken = jwt.sign(
       payload,
       process.env.JWT_ACCESS_SECRET,
-      { expiresIn: process.env.JWT_ACCESS_EXPIRE || '24h' }
+      {
+        expiresIn: '24h',
+      }
     );
 
-    // Refresh token remains valid for 30 days by default.
+    // Refresh token remains valid for 30 days.
     const refreshToken = jwt.sign(
       payload,
       process.env.JWT_REFRESH_SECRET,
-      { expiresIn: process.env.JWT_REFRESH_EXPIRE || '30d' }
+      {
+        expiresIn: process.env.JWT_REFRESH_EXPIRE || '30d',
+      }
     );
 
-    return { accessToken, refreshToken };
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 
   verifyAccessToken(token) {
     try {
-      return jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+      return jwt.verify(
+        token,
+        process.env.JWT_ACCESS_SECRET
+      );
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
         throw new Error('Access token expired');
       }
+
       throw new Error('Invalid access token');
     }
   }
 
   verifyRefreshToken(token) {
     try {
-      return jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+      return jwt.verify(
+        token,
+        process.env.JWT_REFRESH_SECRET
+      );
     } catch (error) {
       throw new Error('Invalid refresh token');
     }
@@ -57,7 +73,10 @@ class TokenService {
   getTokenExpiry(token) {
     try {
       const decoded = jwt.decode(token);
-      return decoded?.exp ? new Date(decoded.exp * 1000) : null;
+
+      return decoded?.exp
+        ? new Date(decoded.exp * 1000)
+        : null;
     } catch {
       return null;
     }
@@ -66,7 +85,7 @@ class TokenService {
   setAuthCookies(res, accessToken, refreshToken) {
     const isProduction = process.env.NODE_ENV === 'production';
 
-    // Access token cookie: 24 hours
+    // Access token cookie: FORCE 24 hours
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: isProduction,
