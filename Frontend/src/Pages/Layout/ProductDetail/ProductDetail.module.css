@@ -1,7 +1,7 @@
 /* src/Pages/Layout/ProductDetail/ProductDetail.module.css */
 
 .page {
-  background: transparent;
+  background: #faf6ee;
   min-height: 100vh;
 }
 
@@ -18,15 +18,15 @@
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: var(--gold-deep);
+  color: #8a7a5c;
   margin-bottom: 28px;
 }
 .breadcrumb a {
-  color: var(--gold-deep);
+  color: #8a7a5c;
   text-decoration: none;
 }
 .breadcrumb a:hover {
-  color: var(--gold-deep);
+  color: #b8934f;
   text-decoration: underline;
 }
 .breadcrumbCurrent {
@@ -34,38 +34,17 @@
   font-weight: 500;
 }
 
-/* ─── Main Grid ───
-   Desktop: 2 columns. Gallery + Specs stack in column 1,
-   Info (name/price/purchase/perks/description) spans both rows in column 2.
-   Mobile: single column, reordered via grid-template-areas so
-   Specifications render last, after the Info "highlights". */
+/* ─── Main Grid ─── */
 .mainGrid {
   display: grid;
   grid-template-columns: 1.1fr 1fr;
-  column-gap: 48px;
-  row-gap: 28px;
-  grid-template-areas:
-    "gallery info"
-    "specs   info";
+  gap: 48px;
 }
 @media (max-width: 900px) {
   .mainGrid {
     grid-template-columns: 1fr;
-    column-gap: 0;
-    row-gap: 28px;
-    grid-template-areas:
-      "gallery"
-      "info"
-      "specs";
+    gap: 28px;
   }
-}
-
-/* ─── Left Column (Gallery) ─── */
-.leftColumn {
-  grid-area: gallery;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
 }
 
 /* ─── Gallery ─── */
@@ -79,13 +58,10 @@
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  background: transparent;
+  background: #fff;
   overflow: hidden;
-  border-radius: 12px;
+  border: 1px solid rgba(184, 147, 79, 0.15);
   cursor: zoom-in;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: none;
 }
 .mainImageWrap.zooming {
   cursor: grab;
@@ -94,100 +70,47 @@
   cursor: grabbing;
 }
 
-.imageSlider {
-  display: flex;
-  height: 100%;
-  transition: transform 0.4s ease;
-  will-change: transform;
-}
-
-.slideImage {
-  flex: 0 0 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .mainImage {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  transition: transform 0.15s ease;
+  transition: transform 0.1s ease;
   will-change: transform;
-  pointer-events: none;
-}
-
-/* ─── Wishlist Icon on Image ─── */
-.wishlistIconBtn {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: transparent;
-  border: 1px solid var(--gold-deep);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #2a2318;
-  font-size: 20px;
-  z-index: 5;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(4px);
-}
-.wishlistIconBtn:hover {
-  background: #fff;
-  border-color: var(--gold-deep);
-  transform: scale(1.08);
-}
-.wishlistIconBtnActive {
-  color: #c0392b;
-  border-color: #c0392b;
 }
 
 .zoomLens {
   position: absolute;
-  width: 16%;
-  height: 16%;
+  width: 14%;
+  height: 14%;
   border: 2px solid rgba(184, 147, 79, 0.6);
   border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.3) 0%,
-    rgba(255, 255, 255, 0.05) 100%
-  );
+  background: rgba(255, 255, 255, 0.15);
   pointer-events: none;
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(2px);
-  z-index: 3;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
 .imageNavBtn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(184, 147, 79, 0.2);
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   font-size: 18px;
   color: #2a2318;
-  z-index: 4;
+  z-index: 2;
   transition: all 0.2s ease;
 }
 .imageNavBtn:hover {
   background: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  border-color: var(--gold-deep);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 .imageNavPrev {
   left: 14px;
@@ -196,76 +119,43 @@
   right: 14px;
 }
 
-.imageCounter {
-  position: absolute;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-  z-index: 4;
-  backdrop-filter: blur(4px);
-}
-
 .zoomIndicator {
   position: absolute;
   bottom: 16px;
   right: 16px;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.85);
   border: 1px solid rgba(184, 147, 79, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #2a2318;
   cursor: pointer;
-  z-index: 4;
+  z-index: 2;
   transition: all 0.2s ease;
 }
 .zoomIndicator:hover {
   background: #fff;
-  border-color: var(--gold-deep);
-  transform: scale(1.05);
+  border-color: #b8934f;
 }
 
 .thumbRow {
   display: flex;
   gap: 10px;
   overflow-x: auto;
-  padding: 4px 0;
+  padding-bottom: 4px;
 }
-.thumbRow::-webkit-scrollbar {
-  height: 4px;
-}
-.thumbRow::-webkit-scrollbar-track {
-  background: #f0ebe0;
-  border-radius: 2px;
-}
-.thumbRow::-webkit-scrollbar-thumb {
-  background: var(--gold-deep);
-  border-radius: 2px;
-}
-
 .thumbBtn {
   flex-shrink: 0;
-  width: 76px;
-  height: 76px;
+  width: 72px;
+  height: 72px;
   overflow: hidden;
   border: 2px solid transparent;
-  border-radius: 8px;
   cursor: pointer;
   padding: 0;
-  background: #f8f4ec;
-  transition: all 0.2s ease;
-}
-.thumbBtn:hover {
-  border-color: #d4af6a;
+  background: #fff;
 }
 .thumbBtn img {
   width: 100%;
@@ -275,41 +165,21 @@
 }
 .thumbBtnActive {
   border-color: #b8934f;
-  box-shadow: 0 0 0 3px rgba(184, 147, 79, 0.2);
 }
 
 /* ─── Info Column ─── */
 .info {
-  grid-area: info;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
 .productName {
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    "Open Sans",
-    "Helvetica Neue",
-    sans-serif;
-  font-size: 28px;
+  font-family: "Playfair Display", serif;
+  font-size: 30px;
   color: #201a10;
   margin: 0;
   line-height: 1.25;
-}
-
-.shortDescription {
-  color: #5b5140;
-  font-size: 17px;
-  line-height: 1.6;
-  margin: 0;
 }
 
 .priceRow {
@@ -317,24 +187,24 @@
   align-items: baseline;
   gap: 12px;
   flex-wrap: wrap;
-  padding: 8px 0;
+  margin-top: 4px;
 }
 .currentPrice {
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 700;
   color: #201a10;
 }
 .originalPrice {
-  font-size: 18px;
+  font-size: 16px;
   color: #a89a7d;
   text-decoration: line-through;
 }
 .discountPill {
   background: rgba(192, 57, 43, 0.1);
   color: #c0392b;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
-  padding: 4px 14px;
+  padding: 3px 10px;
   border-radius: 20px;
 }
 
@@ -357,65 +227,50 @@
 .purchaseRow {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 8px;
+  gap: 16px;
+  margin-top: 12px;
   flex-wrap: wrap;
 }
 
 .qtySelector {
   display: flex;
   align-items: center;
-  border: 1px solid rgba(184, 147, 79, 0.3);
-  border-radius: 8px;
+  border: 1px solid rgba(184, 147, 79, 0.35);
   overflow: hidden;
-  background: #fff;
-  flex-shrink: 0;
 }
 .qtySelector button {
-  width: 40px;
-  height: 44px;
-  background: transparent;
+  width: 38px;
+  height: 42px;
+  background: #fff;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #201a10;
-  transition: background 0.2s ease;
-  font-size: 16px;
 }
-.qtySelector button:hover:not(:disabled) {
-  background: #f8f4ec;
-}
-.qtySelector button:disabled,
-.qtySelector button.qtyDisabled {
+.qtySelector button:disabled {
   opacity: 0.3;
   cursor: not-allowed;
 }
-.qtySelector button:disabled:hover,
-.qtySelector button.qtyDisabled:hover {
-  background: transparent;
-}
 .qtySelector span {
-  width: 44px;
+  width: 40px;
   text-align: center;
   font-weight: 600;
   color: #201a10;
-  font-size: 16px;
 }
 
 .addToCartBtn {
   flex: 1;
-  min-width: 160px;
+  min-width: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   padding: 13px 24px;
-  background: var(--gold-deep);
+  background: linear-gradient(135deg, #d4af6a, #a97d34);
   color: #fff;
   border: none;
-  border-radius: 8px;
   font-weight: 600;
   font-size: 15px;
   cursor: pointer;
@@ -423,7 +278,7 @@
 }
 .addToCartBtn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(169, 125, 52, 0.3);
+  box-shadow: 0 10px 24px rgba(169, 125, 52, 0.3);
 }
 .addToCartBtn:disabled {
   opacity: 0.5;
@@ -439,18 +294,17 @@
   justify-content: center;
   gap: 8px;
   padding: 13px 24px;
-  border: none;
-  background: var(--gold-deep);
-  color: #fff;
-  border-radius: 8px;
+  border: 1.5px solid #201a10;
+  background: #fff;
+  color: #201a10;
   font-weight: 600;
   font-size: 15px;
   cursor: pointer;
   transition: all 0.25s ease;
 }
 .buyNowBtn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(169, 125, 52, 0.3);
+  background: #201a10;
+  color: #fff;
 }
 .buyNowBtn:disabled {
   opacity: 0.5;
@@ -461,87 +315,160 @@
   display: flex;
   flex-wrap: wrap;
   gap: 18px;
-  padding: 14px 0;
-  border-top: 1px solid rgba(184, 147, 79, 0.15);
-  border-bottom: 1px solid rgba(184, 147, 79, 0.15);
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(184, 147, 79, 0.2);
 }
 .perkItem {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
-  color: var(--gold-deep);
+  font-size: 13px;
+  color: #6b5d3f;
 }
 .perkItem svg {
-  color: var(--gold-deep);
+  color: #b8934f;
   font-size: 16px;
 }
 
-/* ─── Compact Specifications ───
-   Own grid area ("specs"): sits under the gallery in column 1 on desktop,
-   but reorders to the end (after .info) on mobile via mainGrid's
-   grid-template-areas at the 900px breakpoint. */
-.specsCompact {
-  grid-area: specs;
-  padding: 0;
-}
-
-.specsCompactTitle {
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    "Open Sans",
-    "Helvetica Neue",
-    sans-serif;
-  font-size: 17px;
-  color: #201a10;
-  margin: 0 0 10px 0;
-  font-weight: 600;
-}
-
-.specsCompactGrid {
+/* ─── Details Grid (Metal & Diamond) ─── */
+.detailsGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px 20px;
+  gap: 24px;
+  margin-top: 48px;
+}
+@media (max-width: 800px) {
+  .detailsGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
-.specCompactItem {
+.detailsCard {
+  background: #fff;
+  border: 1px solid rgba(184, 147, 79, 0.15);
+  border-radius: 16px;
+  padding: 24px 28px;
+}
+.detailsCard h3 {
+  font-family: "Playfair Display", serif;
+  font-size: 19px;
+  color: #201a10;
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(184, 147, 79, 0.15);
+}
+
+.specsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+}
+.specItem {
   display: flex;
   justify-content: space-between;
-  padding: 4px 0;
-  border-bottom: 1px solid rgba(184, 147, 79, 0.06);
-  font-size: 13px;
-}
-
-.specCompactLabel {
-  color: #8a7a5c;
-  font-weight: 500;
-}
-
-.specCompactValue {
-  color: #201a10;
-  font-weight: 500;
-}
-
-/* ─── Description in Info Column ─── */
-.descriptionSectionInInfo {
-  margin-top: 8px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(184, 147, 79, 0.15);
-}
-
-.fullDescription {
+  font-size: 14px;
   color: #5b5140;
-  font-size: 15px;
-  line-height: 1.8;
-  white-space: pre-line;
+}
+.specItem dt {
+  font-weight: 600;
+  color: #201a10;
+}
+.specItem dd {
   margin: 0;
+  font-weight: 400;
+}
+
+/* ─── Price Breakdown Accordion ─── */
+.priceBreakdown {
+  margin-top: 40px;
+  border: 1px solid rgba(184, 147, 79, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.breakdownToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  background: #faf6ee;
+  border: none;
+  font-family: "Playfair Display", serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #201a10;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.breakdownToggle:hover {
+  background: #f5ede0;
+}
+.breakdownToggle svg {
+  font-size: 20px;
+  color: #b8934f;
+}
+
+.breakdownContent {
+  padding: 20px 24px 24px;
+}
+
+.breakdownTableWrap {
+  overflow-x: auto;
+  margin-bottom: 16px;
+}
+.breakdownTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.breakdownTable th {
+  text-align: left;
+  padding: 10px 12px;
+  background: #faf6ee;
+  font-weight: 600;
+  color: #201a10;
+  border-bottom: 2px solid rgba(184, 147, 79, 0.2);
+}
+.breakdownTable td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(184, 147, 79, 0.08);
+  color: #5b5140;
+}
+.breakdownTable .discountRow td {
+  color: #c0392b;
+}
+.breakdownTable .subtotalRow td {
+  font-weight: 600;
+  color: #201a10;
+}
+.breakdownTable .grandTotalRow td {
+  font-weight: 700;
+  color: #b8934f;
+  border-bottom: none;
+}
+
+.skuId {
+  font-size: 13px;
+  color: #8a7a5c;
+  padding: 12px 0 8px;
+  border-top: 1px solid rgba(184, 147, 79, 0.1);
+}
+.skuId span {
+  font-weight: 600;
+  color: #201a10;
+}
+
+.cleaningNote {
+  font-size: 13px;
+  color: #6b5d3f;
+  font-style: italic;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(184, 147, 79, 0.1);
 }
 
 /* ─── Loading / Not Found ─── */
@@ -570,18 +497,7 @@
   }
 }
 .notFoundWrap h2 {
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    "Open Sans",
-    "Helvetica Neue",
-    sans-serif;
+  font-family: "Playfair Display", serif;
   color: #201a10;
   margin: 0;
 }
@@ -602,124 +518,15 @@
   cursor: pointer;
 }
 
-/* ─── Skeleton Loader ─── */
-.shimmer {
-  background: linear-gradient(90deg, #f0ebe0 25%, #f8f4ec 50%, #f0ebe0 75%);
-  background-size: 200% 100%;
-  animation: skeletonShimmer 1.5s infinite;
-  border-radius: 6px;
-}
-@keyframes skeletonShimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-.skeletonBreadcrumb {
-  margin-bottom: 28px;
-}
-
-.skeletonMainImage {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 12px;
-}
-
-.skeletonThumbRow {
-  display: flex;
-  gap: 10px;
-  padding: 4px 0;
-}
-
-.skeletonThumb {
-  width: 76px;
-  height: 76px;
-  border-radius: 8px;
-  flex-shrink: 0;
-}
-
-/* Skeleton specs block mirrors .specsCompact's grid-area so the
-   skeleton reorders the same way the real content does. */
-.skeletonSpecsBlock {
-  grid-area: specs;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.skeletonSpecsTitle {
-  border-radius: 4px;
-}
-
-.skeletonSpecsGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px 20px;
-}
-
-.skeletonSpecRow {
-  display: flex;
-  justify-content: space-between;
-  padding: 4px 0;
-}
-
-.skeletonTitle {
-  border-radius: 4px;
-}
-
-.skeletonPrice {
-  border-radius: 6px;
-}
-
-.skeletonPurchaseRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 8px;
-  flex-wrap: wrap;
-}
-
-.skeletonQty {
-  border-radius: 8px;
-}
-
-.skeletonBtn {
-  border-radius: 8px;
-  min-width: 160px;
-}
-
-.skeletonPerks {
-  border-radius: 8px;
-}
-
-.skeletonDescBlock {
-  margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 /* ─── Mobile Responsiveness ─── */
-@media (max-width: 900px) {
-  .specsCompactGrid {
-    grid-template-columns: 1fr;
-  }
-  .skeletonSpecsGrid {
-    grid-template-columns: 1fr;
-  }
-}
-
 @media (max-width: 600px) {
   .container {
-    padding: 40px 12px 40px;
+    padding: 16px 12px 40px;
     margin-top: 80px;
   }
 
   .productName {
-    font-size: 22px;
+    font-size: 24px;
   }
   .currentPrice {
     font-size: 24px;
@@ -735,13 +542,11 @@
     flex: 0 0 auto;
   }
   .qtySelector button {
-    width: 34px;
+    width: 30px;
     height: 38px;
-    font-size: 14px;
   }
   .qtySelector span {
-    width: 32px;
-    font-size: 14px;
+    width: 28px;
   }
   .addToCartBtn,
   .buyNowBtn {
@@ -757,281 +562,30 @@
     flex-shrink: 0;
   }
 
-  .perksRow {
-    gap: 12px;
-    padding: 12px 0;
+  .detailsCard {
+    padding: 16px 18px;
   }
-  .perkItem {
+  .detailsCard h3 {
+    font-size: 17px;
+  }
+
+  .breakdownToggle {
+    font-size: 16px;
+    padding: 14px 16px;
+  }
+  .breakdownContent {
+    padding: 12px 16px 16px;
+  }
+  .breakdownTable {
     font-size: 12px;
+  }
+  .breakdownTable th,
+  .breakdownTable td {
+    padding: 6px 8px;
   }
 
   .thumbBtn {
     width: 56px;
     height: 56px;
-  }
-
-  .skeletonThumb {
-    width: 56px;
-    height: 56px;
-  }
-
-  .wishlistIconBtn {
-    width: 38px;
-    height: 38px;
-    font-size: 16px;
-    top: 12px;
-    right: 12px;
-  }
-
-  .specsCompactTitle {
-    font-size: 15px;
-  }
-  .specCompactItem {
-    font-size: 12px;
-    padding: 3px 0;
-  }
-
-  .imageNavBtn {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
-  }
-  .imageNavPrev {
-    left: 8px;
-  }
-  .imageNavNext {
-    right: 8px;
-  }
-
-  .skeletonPurchaseRow {
-    flex-wrap: nowrap;
-    gap: 6px;
-  }
-  .skeletonBtn {
-    min-width: 0;
-  }
-}
-
-/* ─── Reduced Motion ─── */
-@media (prefers-reduced-motion: reduce) {
-  .imageSlider,
-  .mainImage,
-  .addToCartBtn,
-  .buyNowBtn,
-  .thumbBtn,
-  .wishlistIconBtn,
-  .shimmer {
-    transition: none !important;
-    animation: none !important;
-  }
-  .imageSlider {
-    transition: none !important;
-  }
-}
-
-/* ─── Relevant Products ("You May Also Like") ───
-   Uses the same design tokens as the rest of this page (--gold-deep,
-   12px image radius, same shimmer skeleton) so it reads as part of the
-   existing product page rather than a bolted-on section. */
-.relevantSection {
-  margin-top: 48px;
-  padding-top: 32px;
-  border-top: 1px solid rgba(184, 147, 79, 0.15);
-}
-
-.relevantTitle {
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    "Open Sans",
-    "Helvetica Neue",
-    sans-serif;
-  font-size: 22px;
-  font-weight: 700;
-  color: #201a10;
-  margin: 0 0 20px;
-}
-
-.relevantGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-}
-
-.relevantCard {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.relevantImageWrap {
-  position: relative;
-  display: block;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #f8f4ec;
-}
-
-.relevantImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.35s ease;
-}
-
-.relevantCard:hover .relevantImage {
-  transform: scale(1.05);
-}
-
-.relevantWishlistBtn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(184, 147, 79, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #2a2318;
-  font-size: 15px;
-  transition: all 0.2s ease;
-}
-
-.relevantWishlistBtn:hover {
-  background: #fff;
-  transform: scale(1.08);
-}
-
-.relevantWishlistBtnActive {
-  color: #c0392b;
-  border-color: #c0392b;
-}
-
-.relevantBody {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.relevantName {
-  font-size: 14px;
-  font-weight: 600;
-  color: #201a10;
-  text-decoration: none;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.relevantName:hover {
-  color: var(--gold-deep);
-}
-
-.relevantPriceRow {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.relevantPrice {
-  font-size: 15px;
-  font-weight: 700;
-  color: #201a10;
-}
-
-.relevantOldPrice {
-  font-size: 12px;
-  color: #a89a7d;
-  text-decoration: line-through;
-}
-
-.relevantCartBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px 10px;
-  background: var(--gold-deep);
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 12.5px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.relevantCartBtn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(169, 125, 52, 0.3);
-}
-
-.relevantCartBtn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.relevantCartBtnActive {
-  background: linear-gradient(135deg, #2e7d4f, #1f5c38);
-}
-
-@media (max-width: 900px) {
-  .relevantGrid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-  }
-}
-
-@media (max-width: 600px) {
-  .relevantSection {
-    margin-top: 32px;
-    padding-top: 24px;
-  }
-
-  .relevantTitle {
-    font-size: 18px;
-    margin-bottom: 14px;
-  }
-
-  .relevantGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-
-  .relevantName {
-    font-size: 12.5px;
-  }
-
-  .relevantPrice {
-    font-size: 13.5px;
-  }
-
-  .relevantCartBtn {
-    font-size: 11px;
-    padding: 7px 8px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .relevantImage,
-  .relevantWishlistBtn,
-  .relevantCartBtn {
-    transition: none !important;
-  }
-  .relevantCard:hover .relevantImage {
-    transform: none !important;
   }
 }
