@@ -40,7 +40,7 @@ const generateTokens = (sellerId) => {
   const accessToken = jwt.sign(
     { id: sellerId, role: "seller" },
     process.env.JWT_ACCESS_SECRET,
-    { expiresIn: "15m" },
+    { expiresIn: "30d" }, // ✅ FIXED — was "15m", causing seller logouts every 15 min
   );
 
   const refreshToken = jwt.sign(
@@ -411,12 +411,10 @@ export const verifyPhoneOTP = async (req, res) => {
     // even with a correct OTP.
     const phoneCheck = normalizePhoneNumber(phone);
     if (!phoneCheck.valid) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: phoneCheck.reason || "Invalid phone number",
-        });
+      return res.status(400).json({
+        success: false,
+        message: phoneCheck.reason || "Invalid phone number",
+      });
     }
     const normalizedPhone = phoneCheck.e164;
 
