@@ -588,4 +588,62 @@
     width: 56px;
     height: 56px;
   }
+
+  .skeletonThumb {
+    width: 56px;
+    height: 56px;
+  }
+
+  .wishlistIconBtn {
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+    top: 12px;
+    right: 12px;
+  }
+
+  .specsCompactTitle {
+    font-size: 15px;
+  }
+  .specCompactItem {
+    font-size: 12px;
+    padding: 3px 0;
+  }
+
+  .imageNavBtn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+  .imageNavPrev {
+    left: 8px;
+  }
+  .imageNavNext {
+    right: 8px;
+  }
+
+  .skeletonPurchaseRow {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+  .skeletonBtn {
+    min-width: 0;
+  }
+}
+
+/* ─── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .imageSlider,
+  .mainImage,
+  .addToCartBtn,
+  .buyNowBtn,
+  .thumbBtn,
+  .wishlistIconBtn,
+  .shimmer {
+    transition: none !important;
+    animation: none !important;
+  }
+  .imageSlider {
+    transition: none !important;
+  }
 }

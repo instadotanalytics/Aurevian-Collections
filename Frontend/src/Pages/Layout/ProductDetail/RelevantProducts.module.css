@@ -1,0 +1,206 @@
+/* ─── Relevant Products ("You May Also Like") ───
+   Uses the same design tokens as the rest of this page (--gold-deep,
+   12px image radius, same shimmer skeleton) so it reads as part of the
+   existing product page rather than a bolted-on section. */
+.relevantSection {
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(184, 147, 79, 0.15);
+}
+
+.relevantTitle {
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    "Open Sans",
+    "Helvetica Neue",
+    sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #201a10;
+  margin: 0 0 20px;
+}
+
+.relevantGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.relevantCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.relevantImageWrap {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f8f4ec;
+}
+
+.relevantImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.35s ease;
+}
+
+.relevantCard:hover .relevantImage {
+  transform: scale(1.05);
+}
+
+.relevantWishlistBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(184, 147, 79, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #2a2318;
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+.relevantWishlistBtn:hover {
+  background: #fff;
+  transform: scale(1.08);
+}
+
+.relevantWishlistBtnActive {
+  color: #c0392b;
+  border-color: #c0392b;
+}
+
+.relevantBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.relevantName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #201a10;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.relevantName:hover {
+  color: var(--gold-deep);
+}
+
+.relevantPriceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.relevantPrice {
+  font-size: 15px;
+  font-weight: 700;
+  color: #201a10;
+}
+
+.relevantOldPrice {
+  font-size: 12px;
+  color: #a89a7d;
+  text-decoration: line-through;
+}
+
+.relevantCartBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: var(--gold-deep);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.relevantCartBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(169, 125, 52, 0.3);
+}
+
+.relevantCartBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.relevantCartBtnActive {
+  background: linear-gradient(135deg, #2e7d4f, #1f5c38);
+}
+
+@media (max-width: 900px) {
+  .relevantGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .relevantSection {
+    margin-top: 32px;
+    padding-top: 24px;
+  }
+
+  .relevantTitle {
+    font-size: 18px;
+    margin-bottom: 14px;
+  }
+
+  .relevantGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .relevantName {
+    font-size: 12.5px;
+  }
+
+  .relevantPrice {
+    font-size: 13.5px;
+  }
+
+  .relevantCartBtn {
+    font-size: 11px;
+    padding: 7px 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .relevantImage,
+  .relevantWishlistBtn,
+  .relevantCartBtn {
+    transition: none !important;
+  }
+  .relevantCard:hover .relevantImage {
+    transform: none !important;
+  }
+}
