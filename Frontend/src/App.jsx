@@ -271,13 +271,11 @@ const App = () => {
             <Route path={ROUTES.BECOME_A_PARTNER} element={<BecomePartner />} />
 
             {/* ============================================
-                  SHOP ROUTE - WITH HEADER
-                  ============================================ */}
-            <Route path={ROUTES.SHOP} element={<Shop />} />
-            <Route path={ROUTES.EARRINGS} element={<Earrings />} />
-
+  SHOP ROUTE - WITH HEADER
+  ============================================ */}
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/shop/:categorySlug" element={<Shop />} />
             <Route path={ROUTES.GIFTS} element={<Gifts />} />
-
             <Route path={ROUTES.GIFT_GUIDE} element={<Gifts />} />
 
             {/* ============================================
@@ -639,15 +637,14 @@ const App = () => {
               }
             />
 
-
             <Route
-  path="/settings"
-  element={
-    <PrivateRoute>
-      <Settings />
-    </PrivateRoute>
-  }
-/>
+              path="/settings"
+              element={
+                <PrivateRoute>
+                  <Settings />
+                </PrivateRoute>
+              }
+            />
 
             {/* ============================================
                   ORDER SUCCESS & ORDER DETAIL ROUTES - WITH HEADER
