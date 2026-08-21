@@ -1,9 +1,11 @@
-
 // src/Pages/Layout/Header/Header.jsx
 
 import React, { useState, useRef, useEffect } from "react";
+
 import { useDispatch, useSelector } from "react-redux";
+
 import { Link, useNavigate } from "react-router-dom";
+
 import {
   FiSearch,
   FiHeart,
@@ -24,22 +26,27 @@ import {
   FiTag,
 } from "react-icons/fi";
 import { FaUserPlus, FaUserCheck } from "react-icons/fa6";
-
 import styles from "./Header.module.css";
-
 import AnnouncementBar from "./AnnouncementBar";
 import SearchPanel from "./Searchpanel";
 import {
   mainNav as fallbackMainNav,
   aboutDropdown as fallbackAboutDropdown,
 } from "./NavData";
-
 import logo from "../../../assets/newlogo.png";
 import { logoutUser } from "../../../redux/slices/authSlice.js";
 import { fetchPublicHeaderConfig } from "../../../redux/slices/headerConfigSlice.js";
 import { fetchCart } from "../../../redux/slices/cartSlice.js";
 import { fetchWishlist } from "../../../redux/slices/wishlistSlice.js";
 import toast from "react-hot-toast";
+
+// Helper function to generate slug from label
+const generateSlugFromLabel = (label) => {
+  return label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+};
 
 const defaultRecentSearches = [
   "Bridal lehenga",
@@ -55,10 +62,8 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
   const { config } = useSelector((state) => state.headerConfig);
   const cartItems = useSelector((state) => state.cart.items);
   const wishlistItems = useSelector((state) => state.wishlist.items);
-
   const cartCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
   const wishlistCount = wishlistItems.length;
-
   const avatarUrl = user?.profileImage?.url || user?.avatar?.url || null;
 
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -67,14 +72,11 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
   const [accountOpen, setAccountOpen] = useState(false);
   const [mobileShopSubOpen, setMobileShopSubOpen] = useState(null);
   const [mobileGiftSubOpen, setMobileGiftSubOpen] = useState(null);
-
   const accountRef = useRef(null);
   const searchRef = useRef(null);
   const drawerRef = useRef(null);
-
   const navbarRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(0);
-
   const scrollYRef = useRef(0);
 
   useEffect(() => {
@@ -91,23 +93,25 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
   const announcements = config?.announcements?.length
     ? config.announcements
     : undefined;
+
   const mainNav = (
-  config?.mainNav?.length ? config.mainNav : fallbackMainNav
-).map((item) =>
-  item.id === "gift-guide"
-    ? { ...item, path: "/gifts" }
-    : item
-);
+    config?.mainNav?.length ? config.mainNav : fallbackMainNav
+  ).map((item) =>
+    item.id === "gift-guide" ? { ...item, path: "/gifts" } : item,
+  );
+
   const shopCategories = config?.shopMegaMenu?.categories || [];
   const shopQuickLinks = config?.shopMegaMenu?.quickLinks || [];
   const shopByStyle = config?.shopMegaMenu?.byStyle || [];
   const fashionItems = config?.shopMegaMenu?.fashionItems || [];
   const shopBanner = config?.shopMegaMenu?.banner || {};
+
   const giftGuide = config?.giftGuideMegaMenu || {
     byRecipient: [],
     byOccasion: [],
     byBudget: [],
   };
+
   const collectionsDropdown = config?.collectionsDropdown || [];
   const offersDropdown = config?.offersDropdown || [];
   const aboutDropdown = config?.aboutDropdown?.length
@@ -120,6 +124,7 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
     { id: "style", label: "Shop by Style", items: shopByStyle },
     { id: "fashion", label: "Fashion Items", items: fashionItems },
   ];
+
   const mobileGiftColumns = [
     { id: "recipient", label: "By Recipient", items: giftGuide.byRecipient },
     { id: "occasion", label: "By Occasion", items: giftGuide.byOccasion },
@@ -129,13 +134,10 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
   useEffect(() => {
     const node = navbarRef.current;
     if (!node) return;
-
     const updateHeaderHeight = () => {
       setHeaderHeight(node.getBoundingClientRect().height);
     };
-
     updateHeaderHeight();
-
     if (typeof ResizeObserver !== "undefined") {
       const observer = new ResizeObserver(updateHeaderHeight);
       observer.observe(node);
@@ -145,7 +147,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
         window.removeEventListener("orientationchange", updateHeaderHeight);
       };
     }
-
     window.addEventListener("resize", updateHeaderHeight);
     return () => window.removeEventListener("resize", updateHeaderHeight);
   }, [mainNav]);
@@ -179,7 +180,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
 
   useEffect(() => {
     const isLocked = mobileOpen || searchOpen;
-
     if (isLocked) {
       scrollYRef.current = window.scrollY;
       document.body.style.position = "fixed";
@@ -195,13 +195,11 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
       document.body.style.right = "";
       document.body.style.width = "";
       document.body.style.overflow = "";
-
       if (scrollYRef.current) {
         window.scrollTo(0, scrollYRef.current);
         scrollYRef.current = 0;
       }
     }
-
     return () => {
       document.body.style.position = "";
       document.body.style.top = "";
@@ -241,7 +239,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
 
   useEffect(() => {
     if (!mobileOpen) return;
-
     const handleClickOutside = (e) => {
       if (drawerRef.current && !drawerRef.current.contains(e.target)) {
         setMobileOpen(false);
@@ -250,7 +247,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
         setMobileGiftSubOpen(null);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [mobileOpen]);
@@ -328,7 +324,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
       style={{ "--header-h": headerHeight ? `${headerHeight}px` : undefined }}
     >
       <AnnouncementBar items={announcements} />
-
       <div className={styles.topRow}>
         <button
           className={styles.hamburgerBtn}
@@ -337,7 +332,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
         >
           <FiMenu />
         </button>
-
         <Link to={logoHref} className={styles.logo}>
           <img
             src={logo}
@@ -352,7 +346,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
             }}
           />
         </Link>
-
         <nav className={styles.desktopNav} aria-label="Primary navigation">
           <ul className={styles.mainNav}>
             {mainNav.map((item) => {
@@ -372,7 +365,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
                       />
                     )}
                   </Link>
-
                   {item.id === "shop" && (
                     <div
                       className={`${styles.megaMenu} ${styles.megaMenuShop}`}
@@ -381,21 +373,27 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
                         <div className={styles.megaCol}>
                           <h4>Shop by Category</h4>
                           <ul>
-                            {shopCategories.map((c) => (
-                              <li key={c.id}>
-                                <Link to={c.path}>{c.label}</Link>
-                              </li>
-                            ))}
+                            {shopCategories.map((c) => {
+                              const slug = generateSlugFromLabel(c.label);
+                              return (
+                                <li key={c.id}>
+                                  <Link to={`/shop/${slug}`}>{c.label}</Link>
+                                </li>
+                              );
+                            })}
                           </ul>
                         </div>
                         <div className={styles.megaCol}>
                           <h4>Quick Links</h4>
                           <ul>
-                            {shopQuickLinks.map((c) => (
-                              <li key={c.id}>
-                                <Link to={c.path}>{c.label}</Link>
-                              </li>
-                            ))}
+                            {shopQuickLinks.map((c) => {
+                              const slug = generateSlugFromLabel(c.label);
+                              return (
+                                <li key={c.id}>
+                                  <Link to={`/shop/${slug}`}>{c.label}</Link>
+                                </li>
+                              );
+                            })}
                           </ul>
                         </div>
                         <div className={styles.megaCol}>
@@ -431,7 +429,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
                       </div>
                     </div>
                   )}
-
                   {item.id === "collections" && (
                     <div className={styles.dropdown}>
                       {collectionsDropdown.map((c) => (
@@ -441,7 +438,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
                       ))}
                     </div>
                   )}
-
                   {item.id === "gift-guide" && (
                     <div className={styles.megaMenu}>
                       <div className={styles.megaMenuFlex}>
@@ -478,7 +474,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
                       </div>
                     </div>
                   )}
-
                   {item.id === "offers" && (
                     <div className={styles.dropdown}>
                       {offersDropdown.map((o) => (
@@ -488,7 +483,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
                       ))}
                     </div>
                   )}
-
                   {item.id === "about" && (
                     <div className={styles.dropdown}>
                       {aboutDropdown.map((a) => (
@@ -503,7 +497,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
             })}
           </ul>
         </nav>
-
         <div className={styles.iconGroup}>
           <div className={styles.searchWrap} ref={searchRef}>
             <button
@@ -514,7 +507,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
             >
               <FiSearch />
             </button>
-
             <div
               className={`${styles.searchPanel} ${searchOpen ? styles.open : ""}`}
             >
@@ -537,19 +529,16 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
               />
             </div>
           </div>
-
           <Link to="/wishlist" className={styles.iconBtn} aria-label="Wishlist">
             <FiHeart />
             {wishlistCount > 0 && (
               <span className={styles.badge}>{wishlistCount}</span>
             )}
           </Link>
-
           <Link to="/cart" className={styles.iconBtn} aria-label="Cart">
             <FiShoppingBag />
             {cartCount > 0 && <span className={styles.badge}>{cartCount}</span>}
           </Link>
-
           <div className={styles.accountWrap} ref={accountRef}>
             <button
               className={styles.iconBtn}
@@ -571,7 +560,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
                 <FiUser />
               )}
             </button>
-
             <div
               className={`${styles.accountDropdown} ${accountOpen ? styles.open : ""}`}
             >
@@ -596,9 +584,7 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
                       <span>{user.email}</span>
                     </div>
                   </div>
-
                   <div className={styles.accountDivider} />
-
                   {accountMenuItems.map((item) => (
                     <Link
                       key={item.path}
@@ -610,9 +596,7 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
                       <span>{item.label}</span>
                     </Link>
                   ))}
-
                   <div className={styles.accountDivider} />
-
                   <button
                     onClick={handleLogout}
                     className={`${styles.accountMenuItem} ${styles.logoutItem}`}
@@ -645,12 +629,10 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
           </div>
         </div>
       </div>
-
       <div
         className={`${styles.searchOverlay} ${searchOpen ? styles.show : ""}`}
         onClick={() => setSearchOpen(false)}
       />
-
       <div
         className={`${styles.overlay} ${mobileOpen ? styles.show : ""}`}
         onClick={handleOverlayClick}
@@ -672,7 +654,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
             <FiX />
           </button>
         </div>
-
         {isAuthenticated && user && (
           <div className={styles.drawerUserInfo}>
             <div className={styles.drawerUserAvatar}>
@@ -694,7 +675,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
             </div>
           </div>
         )}
-
         <ul className={styles.drawerNav}>
           {mainNav.map((item) => {
             const hasSub = item.hasDropdown || item.hasMegaMenu;
@@ -721,7 +701,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
                     {item.label}
                   </Link>
                 )}
-
                 {item.id === "shop" && (
                   <div
                     className={`${styles.drawerSubPanel} ${expanded ? styles.expanded : ""}`}
@@ -743,22 +722,24 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
                         </button>
                         {mobileShopSubOpen === col.id && (
                           <div className={styles.drawerSubItems}>
-                            {col.items.map((it) => (
-                              <Link
-                                key={it.id}
-                                to={it.path}
-                                onClick={closeMobileMenu}
-                              >
-                                {it.label}
-                              </Link>
-                            ))}
+                            {col.items.map((it) => {
+                              const slug = generateSlugFromLabel(it.label);
+                              return (
+                                <Link
+                                  key={it.id}
+                                  to={`/shop/${slug}`}
+                                  onClick={closeMobileMenu}
+                                >
+                                  {it.label}
+                                </Link>
+                              );
+                            })}
                           </div>
                         )}
                       </div>
                     ))}
                   </div>
                 )}
-
                 {item.id === "collections" && (
                   <div
                     className={`${styles.drawerSubPanel} ${expanded ? styles.expanded : ""}`}
@@ -772,7 +753,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
                     </div>
                   </div>
                 )}
-
                 {item.id === "gift-guide" && (
                   <div
                     className={`${styles.drawerSubPanel} ${expanded ? styles.expanded : ""}`}
@@ -809,7 +789,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
                     ))}
                   </div>
                 )}
-
                 {item.id === "offers" && (
                   <div
                     className={`${styles.drawerSubPanel} ${expanded ? styles.expanded : ""}`}
@@ -823,7 +802,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
                     </div>
                   </div>
                 )}
-
                 {item.id === "about" && (
                   <div
                     className={`${styles.drawerSubPanel} ${expanded ? styles.expanded : ""}`}
@@ -840,7 +818,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
               </li>
             );
           })}
-
           <li className={styles.drawerNavItem}>
             <button
               className={styles.drawerNavLink}
@@ -891,7 +868,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
             </div>
           </li>
         </ul>
-
         <div className={styles.drawerFooterIcons}>
           <Link to="/wishlist" className={styles.iconBtn}>
             <FiHeart />
@@ -907,7 +883,6 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
           </Link>
         </div>
       </aside>
-
       <nav
         className={styles.mobileBottomNav}
         aria-label="Mobile bottom navigation"

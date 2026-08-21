@@ -6,20 +6,23 @@ import React, {
   useMemo,
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useSearchParams,
+  useParams,
+} from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import styles from "./shop.module.css";
 import Header from "../../Pages/Layout/Header/Header";
 import Footer from "../../Pages/Layout/Footer/Footer";
 import shopHero from "../../assets/shophero.png";
-
 import { LuSlidersHorizontal } from "react-icons/lu";
 import { FiHeart } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 import { FiPackage, FiCreditCard, FiPhoneCall } from "react-icons/fi";
 import { FiShoppingBag, FiCheck, FiChevronDown } from "react-icons/fi";
-
 import { fetchProductsByPlacement } from "../../redux/slices/storefrontProductSlice";
 import { addItemToCart } from "../../redux/slices/cartSlice";
 import {
@@ -80,6 +83,14 @@ const truncateName = (name) => {
   return name;
 };
 
+// Helper function to generate slug from label
+const generateSlugFromLabel = (label) => {
+  return label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+};
+
 export default function Shop() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -87,16 +98,13 @@ export default function Shop() {
   const cartItems = useSelector((state) => state.cart.items);
   const wishlistItems = useSelector((state) => state.wishlist.items);
 
-  // ✅ NEW — read ?category=<id> from the URL once on mount. This is how
-  // ShopByCategory (Home page) links into a specific category: it always
-  // passes the category's real HeaderConfig id, so this plugs straight
-  // into the existing categoryId filter below with no extra matching logic.
+  // Get URL parameters
   const [searchParams] = useSearchParams();
+  const { categorySlug } = useParams();
 
   const [categories, setCategories] = useState([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState(
-    () => searchParams.get("category") || "",
-  );
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
+  const [isResolvingSlug, setIsResolvingSlug] = useState(true);
   const [priceRange, setPriceRange] = useState([0, 7000]);
   const [sort, setSort] = useState("");
   const [cartLoadingId, setCartLoadingId] = useState(null);
@@ -112,6 +120,7 @@ export default function Shop() {
   const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [categoryError, setCategoryError] = useState(null);
   const loaderRef = useRef(null);
 
   // Mobile filter sheet
@@ -128,29 +137,67 @@ export default function Shop() {
   const [isSidebarSortOpen, setIsSidebarSortOpen] = useState(false);
   const sidebarSortRef = useRef(null);
 
+  // Fetch categories first
   useEffect(() => {
     axios
       .get(`${API_URL}/seller/products/categories`)
       .then((res) => {
         const data = res.data.data || [];
         setCategories(data);
+        setIsResolvingSlug(false);
       })
       .catch((err) => {
         console.error("Failed to fetch categories:", err);
         setCategories([]);
+        setIsResolvingSlug(false);
       });
   }, []);
+
+  // Resolve category from slug or query param after categories load
+  useEffect(() => {
+    if (isResolvingSlug || categories.length === 0) return;
+
+    // First check if we have a query parameter
+    const queryCategoryId = searchParams.get("category");
+
+    if (queryCategoryId) {
+      setSelectedCategoryId(queryCategoryId);
+      return;
+    }
+
+    // If we have a slug in the URL (e.g., /shop/earrings)
+    if (categorySlug) {
+      // Find the category by matching slug with the label
+      const matchingCategory = categories.find((c) => {
+        const categorySlugFromLabel = generateSlugFromLabel(c.label);
+        return categorySlugFromLabel === categorySlug;
+      });
+
+      if (matchingCategory) {
+        setSelectedCategoryId(matchingCategory.id);
+      } else {
+        // If no matching category found, try to find by ID (for backward compatibility)
+        const idMatch = categories.find((c) => c.id === categorySlug);
+        if (idMatch) {
+          setSelectedCategoryId(idMatch.id);
+        }
+      }
+    }
+  }, [categories, categorySlug, searchParams, isResolvingSlug]);
 
   // Fetch products (infinite scroll)
   useEffect(() => {
     const load = async () => {
       const isFirst = page === 1;
-      if (isFirst) setIsInitialLoading(true);
-      else setIsLoadingMore(true);
+      if (isFirst) {
+        setIsInitialLoading(true);
+      } else {
+        setIsLoadingMore(true);
+      }
 
       const start = Date.now();
-
       try {
+        setCategoryError(null);
         const result = await dispatch(
           fetchProductsByPlacement({
             placement: "shop",
@@ -166,6 +213,8 @@ export default function Shop() {
         setHasMore(page < (result.pagination?.totalPages || 1));
       } catch (err) {
         console.error(err);
+        setCategoryError("Failed to load products. Please try again.");
+        toast.error("Failed to load products");
       } finally {
         const elapsed = Date.now() - start;
         const remaining = Math.max(0, 1000 - elapsed);
@@ -176,8 +225,10 @@ export default function Shop() {
       }
     };
 
-    load();
-  }, [page, refreshKey, dispatch, selectedCategoryId, sort]);
+    if (!isResolvingSlug) {
+      load();
+    }
+  }, [page, refreshKey, dispatch, selectedCategoryId, sort, isResolvingSlug]);
 
   // Reset on filter change
   useEffect(() => {
@@ -334,6 +385,8 @@ export default function Shop() {
     setSort("");
     setBudgetFilter("all");
     setPromotionFilter("all");
+    // Navigate to base shop page when clearing filters
+    navigate("/shop");
   };
 
   const openMobileFilter = () => {
@@ -369,14 +422,12 @@ export default function Shop() {
   const filteredProducts = useMemo(() => {
     return allProducts.filter((p) => {
       const price = p.pricing?.salePrice || p.pricing?.originalPrice || 0;
-
       if (budgetFilter === "under-1000" && price >= 1000) return false;
       if (budgetFilter === "1000-3000" && (price < 1000 || price > 3000))
         return false;
       if (budgetFilter === "3000-6000" && (price < 3000 || price > 6000))
         return false;
       if (budgetFilter === "above-6000" && price <= 6000) return false;
-
       if (promotionFilter !== "all") {
         const discount =
           p.pricing?.originalPrice && p.pricing?.salePrice
@@ -386,7 +437,6 @@ export default function Shop() {
                   100,
               )
             : 0;
-
         if (promotionFilter === "best-seller" && discount < 20) return false;
         if (promotionFilter === "trending" && price < 500) return false;
         if (
@@ -396,12 +446,18 @@ export default function Shop() {
           return false;
         if (promotionFilter === "premium-gift" && price < 2000) return false;
       }
-
       return true;
     });
   }, [allProducts, budgetFilter, promotionFilter]);
 
   const skeletonItems = Array.from({ length: 10 }, (_, i) => i);
+
+  // Get the category name for display
+  const getCategoryName = () => {
+    if (!selectedCategoryId) return "All Products";
+    const category = categories.find((c) => c.id === selectedCategoryId);
+    return category ? category.label : "Category";
+  };
 
   return (
     <div className={styles.page}>
@@ -434,7 +490,6 @@ export default function Shop() {
           {/* Desktop Filter Sidebar */}
           <aside className={styles.filterSidebar}>
             <h3 className={styles.filterTitle}>Filter</h3>
-
             {/* Sort By — Desktop Sidebar */}
             <div className={styles.filterGroup}>
               <span className={styles.filterGroupLabel}>Sort By</span>
@@ -451,7 +506,6 @@ export default function Shop() {
                     }`}
                   />
                 </button>
-
                 {isSidebarSortOpen && (
                   <div className={styles.sidebarSortDropdown}>
                     {SORT_OPTIONS.map((option) => (
@@ -484,6 +538,7 @@ export default function Shop() {
                   checked={selectedCategoryId === ""}
                   onChange={() => {
                     setSelectedCategoryId("");
+                    navigate("/shop");
                   }}
                 />
                 All
@@ -496,6 +551,8 @@ export default function Shop() {
                     checked={selectedCategoryId === c.id}
                     onChange={() => {
                       setSelectedCategoryId(c.id);
+                      const slug = generateSlugFromLabel(c.label);
+                      navigate(`/shop/${slug}`);
                     }}
                   />
                   {c.label}
@@ -563,7 +620,7 @@ export default function Shop() {
               <span className={styles.resultsCount}>
                 {isInitialLoading
                   ? "Loading..."
-                  : `Showing ${filteredProducts.length} results`}
+                  : `Showing ${filteredProducts.length} results for ${getCategoryName()}`}
               </span>
             </div>
 
@@ -583,111 +640,161 @@ export default function Shop() {
               </div>
             )}
 
-            {/* Products */}
-            {!isInitialLoading && (
-              <div className={styles.productGrid}>
-                {filteredProducts.map((p) => {
-                  const inCart = isInCart(p._id);
-                  const inWishlist = isInWishlist(p._id);
-                  const addingToCart = cartLoadingId === p._id;
-                  const displayName = truncateName(p.productName);
-                  return (
-                    <div className={styles.productCard} key={p._id}>
-                      <Link
-                        to={`/product/${p.productSlug}`}
-                        className={styles.productMedia}
-                      >
-                        {p.pricing?.salePrice && p.pricing?.originalPrice && (
-                          <span className={styles.badge}>
-                            {Math.round(
-                              ((p.pricing.originalPrice - p.pricing.salePrice) /
-                                p.pricing.originalPrice) *
-                                100,
-                            )}
-                            % off
-                          </span>
-                        )}
-                        <span className={styles.productCatOverlay}>
-                          {p.category?.categoryData?.label || "Uncategorized"}
-                        </span>
-                        <div className={styles.wishlistActions}>
-                          <button
-                            type="button"
-                            className={`${styles.wishlistBtn} ${
-                              inWishlist ? styles.wishlistBtnActive : ""
-                            }`}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleToggleWishlist(p._id);
-                            }}
-                            aria-label={
-                              inWishlist
-                                ? "Remove from wishlist"
-                                : "Add to wishlist"
-                            }
-                          >
-                            {inWishlist ? <FaHeart /> : <FiHeart />}
-                          </button>
-                        </div>
-                        <img
-                          src={p.thumbnail?.url || "/placeholder-image.jpg"}
-                          alt={p.productName}
-                          className={styles.productImage}
-                          onError={(e) => {
-                            e.target.src = "/placeholder-image.jpg";
-                          }}
-                        />
-                      </Link>
-                      <div className={styles.productInfo}>
-                        <Link
-                          to={`/product/${p.productSlug}`}
-                          className={styles.productName}
-                          title={p.productName}
-                        >
-                          {displayName}
-                        </Link>
-                        <div className={styles.productPrice}>
-                          <span className={styles.priceNow}>
-                            ₹
-                            {(
-                              p.pricing?.salePrice || p.pricing?.originalPrice
-                            )?.toLocaleString() || "0"}
-                          </span>
-                          {p.pricing?.salePrice && p.pricing?.originalPrice && (
-                            <span className={styles.priceOld}>
-                              ₹{p.pricing.originalPrice.toLocaleString()}
-                            </span>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          className={`${styles.addToCartBtn} ${
-                            inCart ? styles.addToCartBtnActive : ""
-                          }`}
-                          onClick={() => handleAddToCart(p._id)}
-                          disabled={inCart || addingToCart}
-                        >
-                          {inCart ? (
-                            <>
-                              <FiCheck /> Added to Cart
-                            </>
-                          ) : (
-                            <>
-                              <FiShoppingBag />{" "}
-                              {addingToCart ? "Adding..." : "Add to Cart"}
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
+            {/* Error State */}
+            {categoryError && !isInitialLoading && (
+              <div className={styles.errorState}>
+                <div className={styles.errorStateIcon}>⚠️</div>
+                <h3>Something went wrong</h3>
+                <p>{categoryError}</p>
+                <button
+                  className={styles.errorStateButton}
+                  onClick={() => setRefreshKey((k) => k + 1)}
+                >
+                  Try Again
+                </button>
               </div>
             )}
 
+            {/* Products */}
+            {!isInitialLoading && !categoryError && (
+              <>
+                {filteredProducts.length === 0 && selectedCategoryId && (
+                  <div className={styles.emptyState}>
+                    <div className={styles.emptyStateIcon}>🔍</div>
+                    <h3>No Products Found</h3>
+                    <p>
+                      We couldn't find any products in "{getCategoryName()}".
+                      Try browsing our other collections!
+                    </p>
+                    <Link to="/shop" className={styles.emptyStateButton}>
+                      Browse All Products
+                    </Link>
+                  </div>
+                )}
+
+                {filteredProducts.length === 0 && !selectedCategoryId && (
+                  <div className={styles.emptyState}>
+                    <div className={styles.emptyStateIcon}>🛍️</div>
+                    <h3>No Products Available</h3>
+                    <p>
+                      We're currently updating our collection. Please check back
+                      later!
+                    </p>
+                  </div>
+                )}
+
+                {filteredProducts.length > 0 && (
+                  <div className={styles.productGrid}>
+                    {filteredProducts.map((p) => {
+                      const inCart = isInCart(p._id);
+                      const inWishlist = isInWishlist(p._id);
+                      const addingToCart = cartLoadingId === p._id;
+                      const displayName = truncateName(p.productName);
+
+                      return (
+                        <div className={styles.productCard} key={p._id}>
+                          <Link
+                            to={`/product/${p.productSlug}`}
+                            className={styles.productMedia}
+                          >
+                            {p.pricing?.salePrice &&
+                              p.pricing?.originalPrice && (
+                                <span className={styles.badge}>
+                                  {Math.round(
+                                    ((p.pricing.originalPrice -
+                                      p.pricing.salePrice) /
+                                      p.pricing.originalPrice) *
+                                      100,
+                                  )}
+                                  % off
+                                </span>
+                              )}
+                            <span className={styles.productCatOverlay}>
+                              {p.category?.categoryData?.label ||
+                                "Uncategorized"}
+                            </span>
+                            <div className={styles.wishlistActions}>
+                              <button
+                                type="button"
+                                className={`${styles.wishlistBtn} ${
+                                  inWishlist ? styles.wishlistBtnActive : ""
+                                }`}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleToggleWishlist(p._id);
+                                }}
+                                aria-label={
+                                  inWishlist
+                                    ? "Remove from wishlist"
+                                    : "Add to wishlist"
+                                }
+                              >
+                                {inWishlist ? <FaHeart /> : <FiHeart />}
+                              </button>
+                            </div>
+                            <img
+                              src={p.thumbnail?.url || "/placeholder-image.jpg"}
+                              alt={p.productName}
+                              className={styles.productImage}
+                              onError={(e) => {
+                                e.target.src = "/placeholder-image.jpg";
+                              }}
+                            />
+                          </Link>
+                          <div className={styles.productInfo}>
+                            <Link
+                              to={`/product/${p.productSlug}`}
+                              className={styles.productName}
+                              title={p.productName}
+                            >
+                              {displayName}
+                            </Link>
+                            <div className={styles.productPrice}>
+                              <span className={styles.priceNow}>
+                                ₹
+                                {(
+                                  p.pricing?.salePrice ||
+                                  p.pricing?.originalPrice
+                                )?.toLocaleString() || "0"}
+                              </span>
+                              {p.pricing?.salePrice &&
+                                p.pricing?.originalPrice && (
+                                  <span className={styles.priceOld}>
+                                    ₹{p.pricing.originalPrice.toLocaleString()}
+                                  </span>
+                                )}
+                            </div>
+                            <button
+                              type="button"
+                              className={`${styles.addToCartBtn} ${
+                                inCart ? styles.addToCartBtnActive : ""
+                              }`}
+                              onClick={() => handleAddToCart(p._id)}
+                              disabled={inCart || addingToCart}
+                            >
+                              {inCart ? (
+                                <>
+                                  <FiCheck /> Added to Cart
+                                </>
+                              ) : (
+                                <>
+                                  <FiShoppingBag />{" "}
+                                  {addingToCart ? "Adding..." : "Add to Cart"}
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
+            )}
+
             {/* Infinite scroll loader */}
-            {!isInitialLoading && hasMore && (
+            {!isInitialLoading && !categoryError && hasMore && (
               <div ref={loaderRef} className={styles.infiniteLoader}>
                 {isLoadingMore && (
                   <div className={styles.skeletonGrid}>
@@ -716,13 +823,11 @@ export default function Shop() {
         <section className={styles.perks}>
           {perks.map((perk) => {
             const Icon = perk.icon;
-
             return (
               <div className={styles.perk} key={perk.title}>
                 <div className={styles.icon}>
                   <Icon />
                 </div>
-
                 <div>
                   <h4>{perk.title}</h4>
                   <p>{perk.text}</p>
@@ -736,7 +841,6 @@ export default function Shop() {
         {isMobileFilterOpen && (
           <div className={styles.filterOverlay} onClick={closeMobileFilter} />
         )}
-
         <div
           ref={sheetRef}
           className={`${styles.mobileFilterSheet} ${
@@ -756,7 +860,6 @@ export default function Shop() {
               setIsDraggingSheet(true);
             }}
           />
-
           <div className={styles.mobileFilterHeader}>
             <h3 className={styles.mobileFilterTitle}>Filter</h3>
             <button
@@ -766,7 +869,6 @@ export default function Shop() {
               ✕
             </button>
           </div>
-
           <div className={styles.mobileFilterContent}>
             {/* Sort By */}
             <div className={styles.mobileFilterGroup}>
@@ -784,7 +886,6 @@ export default function Shop() {
                     }`}
                   />
                 </button>
-
                 {isSortDropdownOpen && (
                   <div className={styles.mobileSortDropdown}>
                     {SORT_OPTIONS.map((option) => (
@@ -816,6 +917,7 @@ export default function Shop() {
                     checked={selectedCategoryId === ""}
                     onChange={() => {
                       setSelectedCategoryId("");
+                      navigate("/shop");
                     }}
                   />
                   All
@@ -828,6 +930,8 @@ export default function Shop() {
                       checked={selectedCategoryId === c.id}
                       onChange={() => {
                         setSelectedCategoryId(c.id);
+                        const slug = generateSlugFromLabel(c.label);
+                        navigate(`/shop/${slug}`);
                       }}
                     />
                     {c.label}
@@ -894,7 +998,6 @@ export default function Shop() {
             <button className={styles.filterClearBtn} onClick={clearAllFilters}>
               Clear All Filters
             </button>
-
             <button
               className={styles.mobileFilterApply}
               onClick={closeMobileFilter}
