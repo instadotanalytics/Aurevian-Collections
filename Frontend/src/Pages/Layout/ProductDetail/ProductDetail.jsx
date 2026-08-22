@@ -1,9 +1,11 @@
-// src/Pages/Layout/ProductDetail/ProductDetail.jsx
-
 import React, { useEffect, useState, useRef } from "react";
+
 import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
+
 import { useDispatch, useSelector } from "react-redux";
+
 import toast from "react-hot-toast";
+
 import {
   FiHeart,
   FiShoppingBag,
@@ -20,53 +22,95 @@ import {
   FiChevronUp,
   FiZoomIn,
 } from "react-icons/fi";
+
 import { FaHeart } from "react-icons/fa";
 
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
+
 import styles from "./ProductDetail.module.css";
 
 import {
   fetchProductBySlug,
   clearCurrentProduct,
 } from "../../../redux/slices/storefrontProductSlice";
+
 import { addItemToCart } from "../../../redux/slices/cartSlice";
+
 import {
   toggleWishlistItem,
   fetchWishlist,
 } from "../../../redux/slices/wishlistSlice";
 
-// ─── Helper: Price Breakdown Accordion ───
+/*
+ * IMPORTANT:
+ * This is the missing import that makes the
+ * "You May Also Like" section available.
+ */
+import RelevantProducts from "./RelevantProducts";
+
+/* ─── Helper: Price Breakdown Accordion ─── */
+
 const PriceBreakdown = ({ product }) => {
   const [isOpen, setIsOpen] = useState(false);
+
   const originalPrice = product.pricing?.originalPrice || 0;
+
   const salePrice = product.pricing?.salePrice;
+
   const hasDiscount = salePrice && salePrice < originalPrice;
-  const displayPrice = salePrice || originalPrice;
+
   const discountPct = hasDiscount
     ? Math.round(((originalPrice - salePrice) / originalPrice) * 100)
     : 0;
 
-  // Static breakdown data (replace with real data from API if available)
   const breakdownItems = [
-    { label: "18KT Yellow Gold", rate: "₹11712.27/g", weight: "1.652g", discount: "-", value: "₹19346.33" },
-    { label: "Stone", rate: "-", weight: "0.096 ct / 0.019 g", discount: "-", value: "₹13728.00" },
-    { label: "Making Charges", rate: "-", weight: "-", discount: "-", value: "₹8776.00" },
-    { label: "Sub Total", rate: "-", weight: "1.671g Gross Wt.", discount: "-", value: `₹${originalPrice.toLocaleString()}` },
+    {
+      label: "18KT Yellow Gold",
+      rate: "₹11712.27/g",
+      weight: "1.652g",
+      discount: "-",
+      value: "₹19346.33",
+    },
+    {
+      label: "Stone",
+      rate: "-",
+      weight: "0.096 ct / 0.019 g",
+      discount: "-",
+      value: "₹13728.00",
+    },
+    {
+      label: "Making Charges",
+      rate: "-",
+      weight: "-",
+      discount: "-",
+      value: "₹8776.00",
+    },
+    {
+      label: "Sub Total",
+      rate: "-",
+      weight: "1.671g Gross Wt.",
+      discount: "-",
+      value: `₹${originalPrice.toLocaleString()}`,
+    },
   ];
 
   const discountAmount = hasDiscount ? originalPrice - salePrice : 0;
+
   const subtotalAfterDiscount = hasDiscount ? salePrice : originalPrice;
-  const gstAmount = Math.round(subtotalAfterDiscount * 0.03); // Assumed 3% GST
+
+  const gstAmount = Math.round(subtotalAfterDiscount * 0.03);
 
   return (
     <div className={styles.priceBreakdown}>
       <button
+        type="button"
         className={styles.breakdownToggle}
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
       >
         <span>Product Details & Price Breakup</span>
+
         {isOpen ? <FiChevronUp /> : <FiChevronDown />}
       </button>
 
@@ -83,6 +127,7 @@ const PriceBreakdown = ({ product }) => {
                   <th>Value</th>
                 </tr>
               </thead>
+
               <tbody>
                 {breakdownItems.map((item, idx) => (
                   <tr key={idx}>
@@ -93,27 +138,42 @@ const PriceBreakdown = ({ product }) => {
                     <td>{item.value}</td>
                   </tr>
                 ))}
+
                 {hasDiscount && (
                   <tr className={styles.discountRow}>
                     <td colSpan="3">Discount</td>
+
                     <td>{discountPct}%</td>
-                    <td>-₹{discountAmount.toLocaleString()}</td>
+
+                    <td>
+                      -₹
+                      {discountAmount.toLocaleString()}
+                    </td>
                   </tr>
                 )}
+
                 <tr className={styles.subtotalRow}>
                   <td colSpan="3">Subtotal after Discount</td>
+
                   <td>-</td>
+
                   <td>₹{subtotalAfterDiscount.toLocaleString()}</td>
                 </tr>
+
                 <tr>
                   <td colSpan="3">GST</td>
                   <td>-</td>
                   <td>₹{gstAmount.toLocaleString()}</td>
                 </tr>
+
                 <tr className={styles.grandTotalRow}>
                   <td colSpan="3">Grand Total</td>
+
                   <td>-</td>
-                  <td>₹{(subtotalAfterDiscount + gstAmount).toLocaleString()}</td>
+
+                  <td>
+                    ₹{(subtotalAfterDiscount + gstAmount).toLocaleString()}
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -124,7 +184,8 @@ const PriceBreakdown = ({ product }) => {
           </div>
 
           <div className={styles.cleaningNote}>
-            Enjoy sparkling jewellery! We provide free jewellery cleaning services!
+            Enjoy sparkling jewellery! We provide free jewellery cleaning
+            services!
           </div>
         </div>
       )}
@@ -132,39 +193,66 @@ const PriceBreakdown = ({ product }) => {
   );
 };
 
-// ─── Helper: Image Gallery with Zoom ───
+/* ─── Helper: Image Gallery with Zoom ─── */
+
 const ImageGallery = ({ images, productName }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+
   const [isZooming, setIsZooming] = useState(false);
-  const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
+
+  const [zoomPosition, setZoomPosition] = useState({
+    x: 50,
+    y: 50,
+  });
+
   const imageRef = useRef(null);
+
   const containerRef = useRef(null);
 
-  const allImages = images.length > 0 ? images : [{ url: "/placeholder-image.png", altText: productName }];
+  const allImages =
+    images.length > 0
+      ? images
+      : [
+          {
+            url: "/placeholder-image.png",
+            altText: productName,
+          },
+        ];
+
   const activeImage = allImages[activeIndex];
 
-  // ── Zoom on hover/drag ──
   const handleMouseEnter = () => setIsZooming(true);
+
   const handleMouseLeave = () => setIsZooming(false);
 
   const handleMouseMove = (e) => {
     if (!isZooming || !imageRef.current) return;
+
     const rect = imageRef.current.getBoundingClientRect();
+
     const x = ((e.clientX - rect.left) / rect.width) * 100;
+
     const y = ((e.clientY - rect.top) / rect.height) * 100;
+
     setZoomPosition({
       x: Math.min(Math.max(x, 0), 100),
       y: Math.min(Math.max(y, 0), 100),
     });
   };
 
-  // ── Touch drag for zoom on mobile ──
   const handleTouchMove = (e) => {
-    if (!isZooming || !imageRef.current || !e.touches.length) return;
+    if (!isZooming || !imageRef.current || !e.touches.length) {
+      return;
+    }
+
     const rect = imageRef.current.getBoundingClientRect();
+
     const touch = e.touches[0];
+
     const x = ((touch.clientX - rect.left) / rect.width) * 100;
+
     const y = ((touch.clientY - rect.top) / rect.height) * 100;
+
     setZoomPosition({
       x: Math.min(Math.max(x, 0), 100),
       y: Math.min(Math.max(y, 0), 100),
@@ -172,10 +260,14 @@ const ImageGallery = ({ images, productName }) => {
   };
 
   const handleTouchStart = () => setIsZooming(true);
+
   const handleTouchEnd = () => setIsZooming(false);
 
-  const prevImage = () => setActiveIndex((i) => (i === 0 ? allImages.length - 1 : i - 1));
-  const nextImage = () => setActiveIndex((i) => (i === allImages.length - 1 ? 0 : i + 1));
+  const prevImage = () =>
+    setActiveIndex((i) => (i === 0 ? allImages.length - 1 : i - 1));
+
+  const nextImage = () =>
+    setActiveIndex((i) => (i === allImages.length - 1 ? 0 : i + 1));
 
   return (
     <div className={styles.gallery} ref={containerRef}>
@@ -201,9 +293,11 @@ const ImageGallery = ({ images, productName }) => {
                 }
               : {}
           }
+          onError={(e) => {
+            e.currentTarget.src = "/placeholder-image.png";
+          }}
         />
 
-        {/* Zoom Lens Effect */}
         {isZooming && (
           <div
             className={styles.zoomLens}
@@ -214,7 +308,6 @@ const ImageGallery = ({ images, productName }) => {
           />
         )}
 
-        {/* Navigation Buttons */}
         {allImages.length > 1 && (
           <>
             <button
@@ -225,6 +318,7 @@ const ImageGallery = ({ images, productName }) => {
             >
               <FiChevronLeft />
             </button>
+
             <button
               type="button"
               className={`${styles.imageNavBtn} ${styles.imageNavNext}`}
@@ -245,17 +339,24 @@ const ImageGallery = ({ images, productName }) => {
         </button>
       </div>
 
-      {/* Thumbnails */}
       {allImages.length > 1 && (
         <div className={styles.thumbRow}>
           {allImages.map((img, idx) => (
             <button
               type="button"
               key={idx}
-              className={`${styles.thumbBtn} ${idx === activeIndex ? styles.thumbBtnActive : ""}`}
+              className={`${styles.thumbBtn} ${
+                idx === activeIndex ? styles.thumbBtnActive : ""
+              }`}
               onClick={() => setActiveIndex(idx)}
             >
-              <img src={img.url} alt={`Thumbnail ${idx + 1}`} />
+              <img
+                src={img.url}
+                alt={`Thumbnail ${idx + 1}`}
+                onError={(e) => {
+                  e.currentTarget.src = "/placeholder-image.png";
+                }}
+              />
             </button>
           ))}
         </div>
@@ -264,31 +365,43 @@ const ImageGallery = ({ images, productName }) => {
   );
 };
 
-// ─── Main Component ───
+/* ─── Main Component ─── */
+
 export default function ProductDetail() {
   const { slug } = useParams();
+
   const dispatch = useDispatch();
+
   const navigate = useNavigate();
+
   const location = useLocation();
 
   const { currentProduct, currentProductLoading, currentProductError } =
     useSelector((state) => state.storefrontProduct);
+
   const { isAuthenticated } = useSelector((state) => state.auth);
-  const wishlistItems = useSelector((state) => state.wishlist.items);
+
+  const wishlistItems = useSelector((state) => state.wishlist?.items || []);
 
   const [quantity, setQuantity] = useState(1);
+
   const [addedToCart, setAddedToCart] = useState(false);
+
   const [cartLoading, setCartLoading] = useState(false);
 
-  // ── Fetch product data ──
+  /* ── Fetch product data ── */
+
   useEffect(() => {
     if (slug) {
       dispatch(fetchProductBySlug(slug));
     }
+
     return () => {
       dispatch(clearCurrentProduct());
     };
   }, [dispatch, slug]);
+
+  /* ── Fetch wishlist ── */
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -296,46 +409,60 @@ export default function ProductDetail() {
     }
   }, [dispatch, isAuthenticated]);
 
+  /* ── Reset quantity/cart state when product changes ── */
+
   useEffect(() => {
     if (currentProduct?.productName) {
-      document.title = `${currentProduct.seo?.title || currentProduct.productName} | Aurevian Collections`;
+      document.title = `${
+        currentProduct.seo?.title || currentProduct.productName
+      } | Aurevian Collections`;
     }
+
     setQuantity(1);
     setAddedToCart(false);
   }, [currentProduct]);
 
-  // ── Loading State ──
+  /* ── Loading State ── */
+
   if (currentProductLoading) {
     return (
       <div className={styles.page}>
         <Header />
+
         <div className={styles.loadingWrap}>
           <div className={styles.spinner} />
           <p>Loading product...</p>
         </div>
+
         <Footer />
       </div>
     );
   }
 
-  // ── Error State ──
+  /* ── Error State ── */
+
   if (currentProductError || !currentProduct) {
     return (
       <div className={styles.page}>
         <Header />
+
         <div className={styles.notFoundWrap}>
           <h2>Product not found</h2>
+
           <p>
             {currentProductError ||
               "This product may have been removed or is no longer available."}
           </p>
+
           <button
             className={styles.backHomeBtn}
             onClick={() => navigate("/shop")}
           >
-            <FiArrowLeft /> Back to Shop
+            <FiArrowLeft />
+            Back to Shop
           </button>
         </div>
+
         <Footer />
       </div>
     );
@@ -343,64 +470,132 @@ export default function ProductDetail() {
 
   const product = currentProduct;
 
-  // ── Product Data ──
+  /* ── Product Data ── */
+
   const allImages = [
-    ...(product.thumbnail?.url ? [{ url: product.thumbnail.url, altText: product.thumbnail.altText }] : []),
+    ...(product.thumbnail?.url
+      ? [
+          {
+            url: product.thumbnail.url,
+            altText: product.thumbnail.altText,
+          },
+        ]
+      : []),
+
     ...(product.images || []),
   ];
 
   const originalPrice = product.pricing?.originalPrice || 0;
+
   const salePrice = product.pricing?.salePrice;
+
   const hasDiscount = salePrice && salePrice < originalPrice;
+
   const displayPrice = salePrice || originalPrice;
+
   const discountPct = hasDiscount
     ? Math.round(((originalPrice - salePrice) / originalPrice) * 100)
     : 0;
 
   const inStock = product.inventory?.availability === "In Stock";
+
   const stockQty = product.inventory?.stockQuantity || 0;
+
   const minQty = product.inventory?.minOrderQty || 1;
+
   const maxQty = product.inventory?.maxOrderQty || stockQty || 99;
 
   const isWishlisted = wishlistItems.some(
-    (i) => (i.product?._id || i.product) === product._id
+    (i) => (i.product?._id || i.product) === product._id,
   );
 
-  // ── Specs for Metal & Diamond Details ──
+  /* ── Metal Specs ── */
+
   const metalSpecs = [
-    { label: "Karatage", value: product.specifications?.karatage || "18K" },
-    { label: "Metal", value: product.specifications?.material || "Gold" },
-    { label: "Material Colour", value: product.specifications?.materialColor || "Yellow" },
-    { label: "Gross Weight", value: product.specifications?.weight?.value ? `${product.specifications.weight.value}g` : "1.671g" },
-  ].filter(s => s.value && s.value !== "None");
+    {
+      label: "Karatage",
+      value: product.specifications?.karatage || "18K",
+    },
+    {
+      label: "Metal",
+      value: product.specifications?.material || "Gold",
+    },
+    {
+      label: "Material Colour",
+      value: product.specifications?.materialColor || "Yellow",
+    },
+    {
+      label: "Gross Weight",
+      value: product.specifications?.weight?.value
+        ? `${product.specifications.weight.value}g`
+        : "1.671g",
+    },
+  ].filter((s) => s.value && s.value !== "None");
+
+  /* ── Diamond Specs ── */
 
   const diamondSpecs = [
-    { label: "Clarity", value: product.specifications?.stoneClarity || "VS" },
-    { label: "Color", value: product.specifications?.stoneColor || "G-H" },
-    { label: "Carat Weight", value: product.specifications?.stoneCarat || "0.096 ct" },
-    { label: "Cut", value: product.specifications?.stoneCut || "Brilliant" },
-  ].filter(s => s.value && s.value !== "None");
+    {
+      label: "Clarity",
+      value: product.specifications?.stoneClarity || "VS",
+    },
+    {
+      label: "Color",
+      value: product.specifications?.stoneColor || "G-H",
+    },
+    {
+      label: "Carat Weight",
+      value: product.specifications?.stoneCarat || "0.096 ct",
+    },
+    {
+      label: "Cut",
+      value: product.specifications?.stoneCut || "Brilliant",
+    },
+  ].filter((s) => s.value && s.value !== "None");
 
-  // ── Handlers ──
-  const decreaseQty = () => setQuantity((q) => Math.max(minQty, q - 1));
-  const increaseQty = () => setQuantity((q) => Math.min(maxQty, stockQty, q + 1));
+  /* ── Handlers ── */
+
+  const decreaseQty = () => {
+    setQuantity((q) => Math.max(minQty, q - 1));
+  };
+
+  const increaseQty = () => {
+    setQuantity((q) => Math.min(maxQty, stockQty, q + 1));
+  };
 
   const requireAuth = () => {
     if (!isAuthenticated) {
       toast.error("Please login to continue");
-      navigate("/login", { state: { from: location.pathname } });
+
+      navigate("/login", {
+        state: {
+          from: location.pathname,
+        },
+      });
+
       return false;
     }
+
     return true;
   };
 
   const handleAddToCart = async () => {
     if (!inStock) return;
+
     if (!requireAuth()) return;
+
     try {
       setCartLoading(true);
-      await dispatch(addItemToCart({ productId: product._id, quantity })).unwrap();
+
+      await dispatch(
+        addItemToCart({
+          productId: product._id,
+          quantity,
+        }),
+      ).unwrap();
+
       toast.success("Added to cart");
+
       setAddedToCart(true);
     } catch (err) {
       toast.error(err || "Failed to add to cart");
@@ -411,7 +606,9 @@ export default function ProductDetail() {
 
   const handleBuyNow = () => {
     if (!inStock) return;
+
     if (!requireAuth()) return;
+
     navigate("/checkout", {
       state: {
         items: [
@@ -429,6 +626,7 @@ export default function ProductDetail() {
 
   const handleToggleWishlist = async () => {
     if (!requireAuth()) return;
+
     try {
       await dispatch(toggleWishlistItem(product._id)).unwrap();
     } catch (err) {
@@ -436,28 +634,39 @@ export default function ProductDetail() {
     }
   };
 
-  // ── Render ──
+  /* ── Render ── */
+
   return (
     <div className={styles.page}>
       <Header />
 
       <div className={styles.container}>
         {/* Breadcrumb */}
+
         <div className={styles.breadcrumb}>
           <Link to="/">Home</Link>
+
           <span>/</span>
+
           <Link to="/shop">Shop</Link>
+
           {product.category?.categoryData?.label && (
             <>
               <span>/</span>
+
               <span>{product.category.categoryData.label}</span>
             </>
           )}
+
           <span>/</span>
-          <span className={styles.breadcrumbCurrent}>{product.productName}</span>
+
+          <span className={styles.breadcrumbCurrent}>
+            {product.productName}
+          </span>
         </div>
 
         {/* Main Grid */}
+
         <div className={styles.mainGrid}>
           <ImageGallery images={allImages} productName={product.productName} />
 
@@ -465,11 +674,19 @@ export default function ProductDetail() {
             <h1 className={styles.productName}>{product.productName}</h1>
 
             <div className={styles.priceRow}>
-              <span className={styles.currentPrice}>₹{displayPrice.toLocaleString()}</span>
+              <span className={styles.currentPrice}>
+                ₹{displayPrice.toLocaleString()}
+              </span>
+
               {hasDiscount && (
                 <>
-                  <span className={styles.originalPrice}>₹{originalPrice.toLocaleString()}</span>
-                  <span className={styles.discountPill}>Save {discountPct}%</span>
+                  <span className={styles.originalPrice}>
+                    ₹{originalPrice.toLocaleString()}
+                  </span>
+
+                  <span className={styles.discountPill}>
+                    Save {discountPct}%
+                  </span>
                 </>
               )}
             </div>
@@ -477,7 +694,9 @@ export default function ProductDetail() {
             <p className={styles.stockStatus}>
               {inStock ? (
                 <span className={styles.inStock}>
-                  <FiCheck /> In Stock {stockQty > 0 && stockQty <= 10 && `(only ${stockQty} left)`}
+                  <FiCheck />
+                  In Stock{" "}
+                  {stockQty > 0 && stockQty <= 10 && `(only ${stockQty} left)`}
                 </span>
               ) : (
                 <span className={styles.outOfStock}>Out of Stock</span>
@@ -486,53 +705,90 @@ export default function ProductDetail() {
 
             <div className={styles.purchaseRow}>
               <div className={styles.qtySelector}>
-                <button type="button" onClick={decreaseQty} disabled={quantity <= minQty}>
+                <button
+                  type="button"
+                  onClick={decreaseQty}
+                  disabled={quantity <= minQty}
+                >
                   <FiMinus />
                 </button>
+
                 <span>{quantity}</span>
-                <button type="button" onClick={increaseQty} disabled={quantity >= Math.min(maxQty, stockQty)}>
+
+                <button
+                  type="button"
+                  onClick={increaseQty}
+                  disabled={quantity >= Math.min(maxQty, stockQty)}
+                >
                   <FiPlus />
                 </button>
               </div>
 
               <button
                 type="button"
-                className={`${styles.addToCartBtn} ${addedToCart ? styles.addToCartBtnActive : ""}`}
+                className={`${styles.addToCartBtn} ${
+                  addedToCart ? styles.addToCartBtnActive : ""
+                }`}
                 onClick={handleAddToCart}
                 disabled={!inStock || cartLoading}
               >
-                {addedToCart ? <><FiCheck /> Added</> : <><FiShoppingBag /> Add to Cart</>}
+                {addedToCart ? (
+                  <>
+                    <FiCheck />
+                    Added
+                  </>
+                ) : (
+                  <>
+                    <FiShoppingBag />
+                    Add to Cart
+                  </>
+                )}
               </button>
 
-              <button type="button" className={styles.buyNowBtn} onClick={handleBuyNow} disabled={!inStock}>
-                <FiShoppingBag /> Buy Now
+              <button
+                type="button"
+                className={styles.buyNowBtn}
+                onClick={handleBuyNow}
+                disabled={!inStock}
+              >
+                <FiShoppingBag />
+                Buy Now
               </button>
             </div>
 
             {/* Perks */}
+
             <div className={styles.perksRow}>
               <div className={styles.perkItem}>
-                <FiTruck /> <span>Free Shipping</span>
+                <FiTruck />
+                <span>Free Shipping</span>
               </div>
+
               <div className={styles.perkItem}>
-                <FiRefreshCw /> <span>15-day returns</span>
+                <FiRefreshCw />
+                <span>15-day returns</span>
               </div>
+
               <div className={styles.perkItem}>
-                <FiShield /> <span>1-year warranty</span>
+                <FiShield />
+                <span>1-year warranty</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Details Grid (Metal & Diamond Details) */}
+        {/* Details Grid */}
+
         <div className={styles.detailsGrid}>
           {metalSpecs.length > 0 && (
             <div className={styles.detailsCard}>
               <h3>Metal Details</h3>
+
               <dl className={styles.specsList}>
                 {metalSpecs.map((spec) => (
                   <div key={spec.label} className={styles.specItem}>
                     <dt>{spec.label}</dt>
+
                     <dd>{spec.value}</dd>
                   </div>
                 ))}
@@ -543,10 +799,12 @@ export default function ProductDetail() {
           {diamondSpecs.length > 0 && (
             <div className={styles.detailsCard}>
               <h3>Diamond Details</h3>
+
               <dl className={styles.specsList}>
                 {diamondSpecs.map((spec) => (
                   <div key={spec.label} className={styles.specItem}>
                     <dt>{spec.label}</dt>
+
                     <dd>{spec.value}</dd>
                   </div>
                 ))}
@@ -555,8 +813,16 @@ export default function ProductDetail() {
           )}
         </div>
 
-        {/* Price Breakdown Accordion */}
+        {/* Price Breakdown */}
+
         <PriceBreakdown product={product} />
+
+        {/* =====================================================
+            RELEVANT PRODUCTS
+            This was missing from your original ProductDetail.
+            ===================================================== */}
+
+        <RelevantProducts productId={product._id} />
       </div>
 
       <Footer />

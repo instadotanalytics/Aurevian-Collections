@@ -1,11 +1,3 @@
-// src/Pages/Layout/ProductDetail/RelevantProducts.jsx
-//
-// Self-contained: fetches its own data keyed on `productId`, manages its
-// own cart/wishlist interactions independently of the parent product's
-// quantity/addedToCart state. Renders null on empty result or error, so
-// a slow/failed relevant-products call never blocks or breaks the rest
-// of the product page (product info above renders regardless).
-
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
@@ -18,6 +10,7 @@ import {
   fetchRelevantProducts,
   clearRelevantProducts,
 } from "../../../redux/slices/storefrontProductSlice";
+
 import { addItemToCart } from "../../../redux/slices/cartSlice";
 import { toggleWishlistItem } from "../../../redux/slices/wishlistSlice";
 
@@ -25,14 +18,25 @@ function RelevantSkeletonCard() {
   return (
     <div className={styles.relevantCard}>
       <div className={`${styles.relevantImageWrap} ${styles.shimmer}`} />
+
       <div className={styles.relevantBody}>
         <div
           className={styles.shimmer}
-          style={{ height: 14, width: "80%", borderRadius: 4 }}
+          style={{
+            height: 14,
+            width: "80%",
+            borderRadius: 4,
+          }}
         />
+
         <div
           className={styles.shimmer}
-          style={{ height: 16, width: "40%", borderRadius: 4, marginTop: 6 }}
+          style={{
+            height: 16,
+            width: "40%",
+            borderRadius: 4,
+            marginTop: 6,
+          }}
         />
       </div>
     </div>
@@ -42,31 +46,57 @@ function RelevantSkeletonCard() {
 export default function RelevantProducts({ productId }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { relevantProducts } = useSelector((state) => state.storefrontProduct);
-  const { isAuthenticated } = useSelector((state) => state.auth);
-  const cartItems = useSelector((state) => state.cart.items);
-  const wishlistItems = useSelector((state) => state.wishlist.items);
+
+  const relevantProductsState = useSelector(
+    (state) => state.storefrontProduct?.relevantProducts,
+  );
+
+  const {
+    products = [],
+    isLoading = false,
+    error = null,
+  } = relevantProductsState || {};
+
+  const { isAuthenticated } = useSelector((state) => state.auth || {});
+
+  const cartItems = useSelector((state) => state.cart?.items || []);
+
+  const wishlistItems = useSelector((state) => state.wishlist?.items || []);
+
   const [cartLoadingId, setCartLoadingId] = useState(null);
 
-  // ✅ Refetches whenever productId changes — this is what makes the
-  // section update on in-app navigation from Product A to Product B
-  // (Test 5) without a full page reload. Cleanup clears state on every
-  // id change (including the brief moment it's undefined while a new
-  // slug is loading), so Product A's recommendations never linger
-  // while Product B's are being fetched.
+  /*
+   * Fetch recommendations whenever productId changes.
+   *
+   * This is important for SPA navigation:
+   * Product A -> Product B
+   *
+   * The component stays mounted, but productId changes,
+   * so recommendations are fetched again for Product B.
+   */
   useEffect(() => {
-    if (productId) {
-      dispatch(fetchRelevantProducts({ productId, limit: 8 }));
-    }
-    return () => {
+    if (!productId) {
       dispatch(clearRelevantProducts());
-    };
+      return;
+    }
+
+    dispatch(clearRelevantProducts());
+
+    dispatch(
+      fetchRelevantProducts({
+        productId,
+        limit: 8,
+      }),
+    );
   }, [dispatch, productId]);
 
-  const { products, isLoading, error } = relevantProducts;
-
-  // Empty result, error, or nothing to show yet and not loading —
-  // hide the section rather than render an empty/broken shell (Test 3).
+  /*
+   * Don't render the section if:
+   * - the request finished with an error
+   * - there are no recommended products
+   *
+   * While loading, render the skeleton.
+   */
   if (!isLoading && (error || products.length === 0)) {
     return null;
   }
@@ -74,26 +104,50 @@ export default function RelevantProducts({ productId }) {
   const requireAuth = () => {
     if (!isAuthenticated) {
       toast.error("Please login to continue");
-      navigate("/login", { state: { from: window.location.pathname } });
+
+      navigate("/login", {
+        state: {
+          from: window.location.pathname,
+        },
+      });
+
       return false;
     }
+
     return true;
   };
 
-  const isInCart = (id) => cartItems.some((i) => i.product === id);
-  const isInWishlist = (id) =>
-    wishlistItems.some((i) => (i.product?._id || i.product) === id);
+  const isInCart = (id) => {
+    return cartItems.some(
+      (item) => item.product === id || item.product?._id === id,
+    );
+  };
+
+  const isInWishlist = (id) => {
+    return wishlistItems.some(
+      (item) => (item.product?._id || item.product) === id,
+    );
+  };
 
   const handleToggleWishlist = (id) => {
     if (!requireAuth()) return;
+
     dispatch(toggleWishlistItem(id)).catch(() => {});
   };
 
   const handleAddToCart = async (id) => {
     if (!requireAuth()) return;
+
     try {
       setCartLoadingId(id);
-      await dispatch(addItemToCart({ productId: id, quantity: 1 })).unwrap();
+
+      await dispatch(
+        addItemToCart({
+          productId: id,
+          quantity: 1,
+        }),
+      ).unwrap();
+
       toast.success("Added to cart");
     } catch (err) {
       toast.error(err || "Failed to add to cart");
@@ -103,7 +157,9 @@ export default function RelevantProducts({ productId }) {
   };
 
   const items = isLoading
-    ? Array.from({ length: 4 }, (_, i) => ({ _skeletonId: i }))
+    ? Array.from({ length: 4 }, (_, index) => ({
+        _skeletonId: index,
+      }))
     : products;
 
   return (
@@ -120,29 +176,34 @@ export default function RelevantProducts({ productId }) {
           ? items.map((item) => <RelevantSkeletonCard key={item._skeletonId} />)
           : items.map((p) => {
               const displayPrice =
-                p.pricing?.salePrice || p.pricing?.originalPrice;
+                p.pricing?.salePrice || p.pricing?.originalPrice || 0;
+
               const hasDiscount =
                 p.pricing?.salePrice &&
-                p.pricing?.salePrice < p.pricing?.originalPrice;
+                p.pricing?.originalPrice &&
+                p.pricing.salePrice < p.pricing.originalPrice;
+
               const inCart = isInCart(p._id);
               const inWishlist = isInWishlist(p._id);
               const addingToCart = cartLoadingId === p._id;
 
+              const productUrl = p.productSlug
+                ? `/product/${p.productSlug}`
+                : `/product/${p._id}`;
+
               return (
                 <div className={styles.relevantCard} key={p._id}>
-                  <Link
-                    to={`/product/${p.productSlug}`}
-                    className={styles.relevantImageWrap}
-                  >
+                  <Link to={productUrl} className={styles.relevantImageWrap}>
                     <img
                       src={p.thumbnail?.url || "/placeholder-image.jpg"}
-                      alt={p.productName}
+                      alt={p.productName || "Recommended product"}
                       className={styles.relevantImage}
                       loading="lazy"
                       onError={(e) => {
-                        e.target.src = "/placeholder-image.jpg";
+                        e.currentTarget.src = "/placeholder-image.jpg";
                       }}
                     />
+
                     <button
                       type="button"
                       className={`${styles.relevantWishlistBtn} ${
@@ -151,6 +212,7 @@ export default function RelevantProducts({ productId }) {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
+
                         handleToggleWishlist(p._id);
                       }}
                       aria-label={
@@ -163,22 +225,25 @@ export default function RelevantProducts({ productId }) {
 
                   <div className={styles.relevantBody}>
                     <Link
-                      to={`/product/${p.productSlug}`}
+                      to={productUrl}
                       className={styles.relevantName}
                       title={p.productName}
                     >
                       {p.productName}
                     </Link>
+
                     <div className={styles.relevantPriceRow}>
                       <span className={styles.relevantPrice}>
-                        ₹{displayPrice?.toLocaleString() || "0"}
+                        ₹{displayPrice.toLocaleString()}
                       </span>
+
                       {hasDiscount && (
                         <span className={styles.relevantOldPrice}>
                           ₹{p.pricing.originalPrice.toLocaleString()}
                         </span>
                       )}
                     </div>
+
                     <button
                       type="button"
                       className={`${styles.relevantCartBtn} ${
@@ -189,11 +254,12 @@ export default function RelevantProducts({ productId }) {
                     >
                       {inCart ? (
                         <>
-                          <FiCheck /> Added
+                          <FiCheck />
+                          Added
                         </>
                       ) : (
                         <>
-                          <FiShoppingBag />{" "}
+                          <FiShoppingBag />
                           {addingToCart ? "Adding..." : "Add to Cart"}
                         </>
                       )}
