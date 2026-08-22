@@ -14,6 +14,11 @@ import {
 import { addItemToCart } from "../../redux/slices/cartSlice";
 import Header from "../Layout/Header/Header";
 
+// Same fallback rule as Cart: items added before the shortDescription/slug
+// snapshot existed fall back to the productId, which ProductDetail already
+// resolves gracefully ("Product not found") rather than breaking navigation.
+const productUrl = (item) => `/product/${item.slug || item.product}`;
+
 const Wishlist = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -43,7 +48,6 @@ const Wishlist = () => {
     }
   };
 
-  // Helper function to truncate description
   const truncateText = (text, maxLength = 100) => {
     if (!text) return "";
     if (text.length <= maxLength) return text;
@@ -99,25 +103,24 @@ const Wishlist = () => {
           ) : (
             wishlist.map((item) => (
               <div className={styles.wishlistCard} key={item.product}>
-                <div className={styles.imageWrapper}>
+                <Link to={productUrl(item)} className={styles.imageWrapper}>
                   <img
                     src={item.image}
                     alt={item.name}
                     className={styles.productImage}
                   />
-                </div>
+                </Link>
 
                 <div className={styles.productDetails}>
                   <div className={styles.productHeader}>
-                    <div className={styles.productInfo}>
+                    <Link to={productUrl(item)} className={styles.productInfo}>
                       <h3 className={styles.productName}>{item.name}</h3>
-                      {/* Product Description */}
-                      {item.description && (
+                      {item.shortDescription && (
                         <p className={styles.productDescription}>
-                          {truncateText(item.description, 100)}
+                          {truncateText(item.shortDescription, 100)}
                         </p>
                       )}
-                    </div>
+                    </Link>
                     <button
                       className={styles.removeBtn}
                       onClick={() => removeItem(item.product)}
@@ -159,10 +162,12 @@ const Wishlist = () => {
         <div className={styles.bottomBanner}>
           <div className={styles.bannerContent}>
             <FaHeart className={styles.bannerHeart} />
-            <h2 className={styles.bannerTitle}>Luxury Never Leaves Your Heart</h2>
+            <h2 className={styles.bannerTitle}>
+              Luxury Never Leaves Your Heart
+            </h2>
             <p className={styles.bannerDesc}>
-              Every Aurevian piece is designed to become part of your story. Save
-              it today and own it tomorrow.
+              Every Aurevian piece is designed to become part of your story.
+              Save it today and own it tomorrow.
             </p>
           </div>
         </div>

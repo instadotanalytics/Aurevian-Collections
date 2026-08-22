@@ -803,3 +803,30 @@
     transform: none !important;
   }
 }
+
+/* APPEND TO: src/Pages/Wishlist/Wishlist.module.css */
+
+/* ============================================
+   PRODUCT CLICK-THROUGH (Link resets)
+   ============================================
+   .imageWrapper and .productInfo are now react-router <Link>s instead of
+   plain <div>s, so the whole image and the name+description block are
+   clickable. removeBtn and moveToCartSelected stay outside these Links
+   entirely (siblings), so they keep working independently with no
+   stopPropagation needed. */
+
+.imageWrapper {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.productInfo {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  display: block;
+}
+
+.productInfo:hover .productName {
+  color: var(--gold-dark);
+}

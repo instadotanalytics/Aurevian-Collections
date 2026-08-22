@@ -7,7 +7,7 @@
   --gold: #d4af37;
   --gold-light: #f5f0e8;
   --gold-dark: #b8962e;
-   --gold-deep: #9c7a2e;
+  --gold-deep: #9c7a2e;
   --gold-gradient: linear-gradient(
     135deg,
     #d4af37 0%,
@@ -514,7 +514,7 @@
 .whyAurevian {
   margin-top: 60px;
   padding: 60px 40px;
-  background:transparent;
+  background: transparent;
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
   position: relative;
@@ -1067,4 +1067,86 @@
   color: #999;
   margin: 4px 0 16px;
   line-height: 1.4;
+}
+
+/* APPEND TO: src/Pages/Cart/Cart.module.css */
+
+/* ============================================
+   PRODUCT CLICK-THROUGH (Link resets)
+   ============================================
+   .productCell, .mobileImageWrap, and .productName are now rendered as
+   react-router <Link> (an <a>) instead of a plain <div>/<h3> for the
+   clickable regions. These resets keep them visually identical to the
+   original divs/headings — no new design language introduced. */
+
+.productCell {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.productCell:hover .productName {
+  color: var(--gold-deep);
+}
+
+.mobileImageWrap {
+  display: block;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.mobileInfoHead .productName {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  display: block;
+}
+
+.mobileInfoHead a.productName:hover {
+  color: var(--gold-deep);
+}
+
+/* ============================================
+   SHORT DESCRIPTION (desktop)
+   ============================================ */
+.productDescription {
+  font-size: 13px;
+  color: var(--gray);
+  font-weight: 300;
+  line-height: 1.5;
+  margin: 4px 0 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 46ch;
+}
+
+/* ============================================
+   SHORT DESCRIPTION (mobile) — its own compact
+   line-clamp so the mobile card never grows tall
+   ============================================ */
+.productDescriptionMobile {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--gray);
+  font-weight: 300;
+  text-decoration: none;
+  cursor: pointer;
+  margin: -2px 0 0;
+}
+
+.productDescriptionMobile:hover {
+  color: var(--dark-soft);
+}
+
+@media (max-width: 480px) {
+  .productDescriptionMobile {
+    font-size: 11.5px;
+    -webkit-line-clamp: 2;
+  }
 }

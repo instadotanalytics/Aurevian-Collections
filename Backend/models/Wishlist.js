@@ -11,6 +11,8 @@ const wishlistItemSchema = new mongoose.Schema(
     name: { type: String, required: true },
     image: { type: String },
     slug: { type: String },
+    // ✅ NEW — same snapshot pattern as Cart.js
+    shortDescription: { type: String, default: "" },
     price: { type: Number },
     addedAt: { type: Date, default: Date.now },
   },
