@@ -224,90 +224,156 @@
   font-weight: 600;
 }
 
+/* ==========================================================
+   PURCHASE ROW - UPDATED BUTTON STYLES
+   ========================================================== */
 .purchaseRow {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-top: 12px;
+  gap: 12px;
+  margin-top: 16px;
   flex-wrap: wrap;
 }
 
+/* Quantity Selector */
 .qtySelector {
   display: flex;
   align-items: center;
-  border: 1px solid rgba(184, 147, 79, 0.35);
+  border: 1px solid #e7e0d2;
+  border-radius: 4px;
   overflow: hidden;
-}
-.qtySelector button {
-  width: 38px;
-  height: 42px;
   background: #fff;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #201a10;
-}
-.qtySelector button:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-.qtySelector span {
-  width: 40px;
-  text-align: center;
-  font-weight: 600;
-  color: #201a10;
+  flex-shrink: 0;
 }
 
-.addToCartBtn {
-  flex: 1;
-  min-width: 200px;
+.qtySelector button {
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 13px 24px;
-  background: linear-gradient(135deg, #d4af6a, #a97d34);
-  color: #fff;
+  background: none;
   border: none;
-  font-weight: 600;
+  cursor: pointer;
+  color: #1c1917;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+.qtySelector button:hover:not(:disabled) {
+  background: #f5ede0;
+}
+
+.qtySelector button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.qtySelector span {
+  min-width: 40px;
+  text-align: center;
   font-size: 15px;
+  font-weight: 500;
+  color: #1c1917;
+}
+
+/* Add to Cart Button */
+.addToCartBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 24px;
+  height: 40px;
+  background: #a9812f;
+  color: #ffffff;
+  border: 1px solid #a9812f;
+  border-radius: 4px;
+  font-family: "Jost", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
   cursor: pointer;
   transition: all 0.25s ease;
-}
-.addToCartBtn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(169, 125, 52, 0.3);
-}
-.addToCartBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.addToCartBtnActive {
-  background: linear-gradient(135deg, #2e7d4f, #1f5c38);
+  flex: 1;
+  min-width: 140px;
 }
 
+.addToCartBtn svg {
+  font-size: 18px;
+  color: #ffffff;
+}
+
+.addToCartBtn:hover:not(:disabled) {
+  background: #7c5e22;
+  border-color: #7c5e22;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(124, 94, 34, 0.25);
+}
+
+.addToCartBtn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.addToCartBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.addToCartBtnActive {
+  background: #2e7d4f;
+  border-color: #2e7d4f;
+}
+
+.addToCartBtnActive:hover:not(:disabled) {
+  background: #1f5c38;
+  border-color: #1f5c38;
+}
+
+.addToCartBtnActive svg {
+  color: #ffffff;
+}
+
+/* Buy Now Button */
 .buyNowBtn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 13px 24px;
-  border: 1.5px solid #201a10;
-  background: #fff;
-  color: #201a10;
-  font-weight: 600;
-  font-size: 15px;
+  padding: 0 24px;
+  height: 40px;
+  background: #1c1917;
+  color: #ffffff;
+  border: 1px solid #1c1917;
+  border-radius: 4px;
+  font-family: "Jost", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
   cursor: pointer;
   transition: all 0.25s ease;
+  flex: 1;
+  min-width: 140px;
 }
+
+.buyNowBtn svg {
+  font-size: 18px;
+  color: #ffffff;
+}
+
 .buyNowBtn:hover:not(:disabled) {
-  background: #201a10;
-  color: #fff;
+  background: #000000;
+  border-color: #000000;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
+
+.buyNowBtn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
 .buyNowBtn:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
@@ -518,8 +584,10 @@
   cursor: pointer;
 }
 
-/* ─── Mobile Responsiveness ─── */
-@media (max-width: 600px) {
+/* ==========================================================
+   RESPONSIVE - BUTTONS
+   ========================================================== */
+@media (max-width: 640px) {
   .container {
     padding: 16px 12px 40px;
     margin-top: 80px;
@@ -538,28 +606,31 @@
     gap: 6px;
     width: 100%;
   }
+
   .qtySelector {
     flex: 0 0 auto;
   }
   .qtySelector button {
-    width: 30px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
   }
   .qtySelector span {
-    width: 28px;
+    min-width: 36px;
+    font-size: 14px;
   }
+
   .addToCartBtn,
   .buyNowBtn {
-    flex: 1;
-    min-width: 0;
-    padding: 10px 8px;
+    height: 38px;
     font-size: 12px;
-    white-space: nowrap;
+    padding: 0 16px;
+    min-width: 0;
+    flex: 1;
   }
+
   .addToCartBtn svg,
   .buyNowBtn svg {
-    font-size: 14px;
-    flex-shrink: 0;
+    font-size: 16px;
   }
 
   .detailsCard {
@@ -589,27 +660,6 @@
     height: 56px;
   }
 
-  .skeletonThumb {
-    width: 56px;
-    height: 56px;
-  }
-
-  .wishlistIconBtn {
-    width: 38px;
-    height: 38px;
-    font-size: 16px;
-    top: 12px;
-    right: 12px;
-  }
-
-  .specsCompactTitle {
-    font-size: 15px;
-  }
-  .specCompactItem {
-    font-size: 12px;
-    padding: 3px 0;
-  }
-
   .imageNavBtn {
     width: 32px;
     height: 32px;
@@ -621,13 +671,33 @@
   .imageNavNext {
     right: 8px;
   }
+}
 
-  .skeletonPurchaseRow {
-    flex-wrap: nowrap;
-    gap: 6px;
+@media (max-width: 400px) {
+  .purchaseRow {
+    gap: 4px;
   }
-  .skeletonBtn {
-    min-width: 0;
+
+  .qtySelector button {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+  .qtySelector span {
+    min-width: 28px;
+    font-size: 13px;
+  }
+
+  .addToCartBtn,
+  .buyNowBtn {
+    height: 36px;
+    font-size: 11px;
+    padding: 0 12px;
+  }
+
+  .addToCartBtn svg,
+  .buyNowBtn svg {
+    font-size: 14px;
   }
 }
 

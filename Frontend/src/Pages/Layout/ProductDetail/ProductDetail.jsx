@@ -8,7 +8,6 @@ import toast from "react-hot-toast";
 
 import {
   FiHeart,
-  FiShoppingBag,
   FiCheck,
   FiChevronLeft,
   FiChevronRight,
@@ -23,7 +22,8 @@ import {
   FiZoomIn,
 } from "react-icons/fi";
 
-import { FaHeart } from "react-icons/fa";
+import { IoCartOutline } from "react-icons/io5";
+import { FaHeart, FaShoppingBag } from "react-icons/fa";
 
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
@@ -724,6 +724,7 @@ export default function ProductDetail() {
                 </button>
               </div>
 
+              {/* Add to Cart Button - Using IoCartOutline */}
               <button
                 type="button"
                 className={`${styles.addToCartBtn} ${
@@ -739,19 +740,20 @@ export default function ProductDetail() {
                   </>
                 ) : (
                   <>
-                    <FiShoppingBag />
+                    <IoCartOutline />
                     Add to Cart
                   </>
                 )}
               </button>
 
+              {/* Buy Now Button - Using FaShoppingBag */}
               <button
                 type="button"
                 className={styles.buyNowBtn}
                 onClick={handleBuyNow}
                 disabled={!inStock}
               >
-                <FiShoppingBag />
+                <FaShoppingBag />
                 Buy Now
               </button>
             </div>
@@ -819,7 +821,6 @@ export default function ProductDetail() {
 
         {/* =====================================================
             RELEVANT PRODUCTS
-            This was missing from your original ProductDetail.
             ===================================================== */}
 
         <RelevantProducts productId={product._id} />

@@ -132,7 +132,7 @@ export default function RelevantProducts({ productId }) {
       aria-labelledby="relevant-products-heading"
     >
       <h2 id="relevant-products-heading" className={styles.relevantTitle}>
-        You May Also Like
+        Made for your special moments
       </h2>
 
       <div className={styles.relevantGrid}>
