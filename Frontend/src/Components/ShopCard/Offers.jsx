@@ -1,10 +1,4 @@
 // src/Components/Offers/Offers.jsx
-//
-// Products come from FeaturedProduct entries (section: "specially-made"),
-// fetched via fetchFeaturedProducts. No hardcoded product data — image,
-// name, price, rating, and badge all come from the referenced
-// JewelleryProduct document. Cart/wishlist reuse the exact same Redux
-// actions and requireAuth pattern already used on the Shop page.
 
 import React, { useRef, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -52,6 +46,15 @@ const getBadgeLabel = (labels) => {
   return null;
 };
 
+const getDiscount = (product) => {
+  const original = product.pricing?.originalPrice;
+  const sale = product.pricing?.salePrice;
+  if (sale && original && sale < original) {
+    return Math.round(((original - sale) / original) * 100);
+  }
+  return 0;
+};
+
 function SkeletonCard() {
   return (
     <div className={styles.cardWrapper}>
@@ -61,9 +64,8 @@ function SkeletonCard() {
         </div>
         <div className={styles.info}>
           <div className={styles.skeletonLine} />
-          <div
-            className={`${styles.skeletonLine} ${styles.skeletonLineShort}`}
-          />
+          <div className={`${styles.skeletonLine} ${styles.skeletonLineShort}`} />
+          <div className={styles.skeletonBtn} />
         </div>
       </div>
     </div>
@@ -86,7 +88,9 @@ function ProductCard({
     product.pricing?.salePrice &&
     product.pricing?.salePrice < product.pricing?.originalPrice;
   const badge = getBadgeLabel(product.labels);
+  const discount = getDiscount(product);
   const hasReviews = (product.reviews?.totalReviews || 0) > 0;
+  const categoryLabel = product.category?.categoryData?.label || "";
 
   return (
     <div className={styles.cardWrapper}>
@@ -97,8 +101,12 @@ function ProductCard({
         onClickCapture={onClickCapture}
         draggable="false"
       >
-        {badge && <span className={styles.badge}>{badge}</span>}
+        {/* Discount Badge - Top Left */}
+        {discount > 0 && (
+          <span className={styles.badge}>{discount}% off</span>
+        )}
 
+        {/* Wishlist Button - Top Right */}
         <button
           type="button"
           className={`${styles.wishlistBtn} ${isInWishlist ? styles.wishlistBtnActive : ""}`}
@@ -128,11 +136,21 @@ function ProductCard({
           ) : (
             <div className={styles.imagePlaceholder} aria-hidden="true" />
           )}
+
+          {/* Category Overlay - Bottom Left */}
+          {categoryLabel && (
+            <span className={styles.categoryOverlay}>{categoryLabel}</span>
+          )}
         </div>
 
         <div className={styles.info}>
-          <p className={styles.eyebrow}>Aurevian Collections</p>
-          <h3 className={styles.title}>{product.productName}</h3>
+          <Link
+            to={`/product/${product.productSlug}`}
+            className={styles.productName}
+            title={product.productName}
+          >
+            {product.productName}
+          </Link>
 
           {hasReviews && (
             <div className={styles.ratingRow}>
@@ -170,6 +188,7 @@ function ProductCard({
           disabled={isInCart || cartLoading}
         >
           <FiShoppingBag />
+          Add to Cart
         </button>
       </Link>
     </div>
@@ -290,9 +309,6 @@ export default function Offers() {
     }
   };
 
-  // Empty (no products configured) or hard failure — hide the section
-  // rather than render broken cards. Home.jsx just stacks sections, so
-  // returning null here is a clean no-op in the page layout.
   if (!isLoading && (error || products.length === 0)) {
     return null;
   }

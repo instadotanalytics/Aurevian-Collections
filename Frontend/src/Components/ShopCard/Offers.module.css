@@ -6,13 +6,18 @@
 .section {
   --ivory: #fdf5ea;
   --ink: #1c1c1c;
-  --gold: #b6863c;
-  --gold-deep: #8a6a30;
-  --line: rgba(36, 26, 18, 0.14);
+  --gold: #a9812f;
+  --gold-deep: #7c5e22;
+  --gold-light: #e7d5ab;
+  --cream-card: #f5ede0;
+  --cream-card-hover: #ede0d2;
+  --cream-line: #e7e0d2;
+  --sale: #3f3626;
+  --text-muted: #8a8072;
 
   padding: 52px 24px 60px;
   background: #fcfaf7;
-  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+  font-family: "Jost", "Helvetica Neue", Arial, sans-serif;
 }
 
 .container {
@@ -21,14 +26,12 @@
 }
 
 /* ==========================================================
-   HEADER — stays a single row (text left, actions right)
-   on every device, matching ShopCardCategory's header
+   HEADER
    ========================================================== */
 .header {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  /* gap: 16px; */
   margin-bottom: 30px;
   flex-wrap: nowrap;
 }
@@ -124,13 +127,14 @@
 }
 
 /* ==========================================================
-   SCROLL CONTAINER — cursor drag, left to right
+   SCROLL CONTAINER
    ========================================================== */
 .scrollContainer {
   display: flex;
-  gap: 28px;
+  gap: 20px;
   overflow-x: auto;
-  padding: 10px 6px 20px;
+  overflow-y: visible;
+  padding: 10px 6px 30px;
   scroll-behavior: smooth;
   scroll-snap-type: x proximity;
   -webkit-overflow-scrolling: touch;
@@ -151,125 +155,125 @@
 }
 
 /* ==========================================================
-   SHIELD CARD — flat top, tapered point at the bottom, cart
-   button straddling the tip. Mirrors the "Daisy Bloom Ring"
-   reference card.
+   CARD — EXACTLY LIKE COLLECTIONS PAGE
    ========================================================== */
-.card {
-  --card-bg: #ffffff;
-  --card-fg: #1c1c1c;
-  --card-muted: rgba(28, 28, 28, 0.55);
-  --card-line: rgba(28, 28, 28, 0.12);
+.cardWrapper {
+  position: relative;
+}
 
+.card {
   position: relative;
   flex: 0 0 auto;
-  width: 250px;
+  width: 220px;
   scroll-snap-align: start;
   display: flex;
   flex-direction: column;
-  align-items: center;
   text-decoration: none;
-  background: var(--card-bg);
-  color: var(--card-fg);
-  padding: 20px 18px 60px;
-  clip-path: polygon(0% 5%, 5% 0%, 95% 0%, 100% 5%, 100% 84%, 50% 100%, 0% 84%);
-  box-shadow: 0 18px 34px -20px rgba(20, 14, 6, 0.35);
-  transition:
-    transform 0.35s ease,
-    box-shadow 0.35s ease;
+  background: var(--cream-card);
+  border: 1px solid var(--cream-line);
+  border-radius: 0;
+  overflow: hidden;
+  transition: box-shadow 0.25s, transform 0.25s;
 }
 
 .card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 26px 44px -20px rgba(20, 14, 6, 0.4);
+  box-shadow: 0 14px 30px rgba(28, 25, 23, 0.09);
+  transform: translateY(-3px);
+  background: var(--cream-card-hover);
 }
 
-/* Accent themes */
-.accent-ink {
-  --card-bg: #f3e6d8;
-  --card-fg: #ffffff;
-  --card-muted: rgba(255, 255, 255, 0.6);
-  --card-line: rgba(255, 255, 255, 0.16);
-}
-
-.accent-ivory {
-  --card-bg: #f3e6d8;
-  --card-fg: #ffffff;
-  --card-muted: rgba(255, 255, 255, 0.6);
-  --card-line: rgba(255, 255, 255, 0.16);
-}
-
+/* Accent themes - all same */
+.accent-ink,
+.accent-ivory,
 .accent-emerald {
-  --card-bg: #f3e6d8;
-  --card-fg: #ffffff;
-  --card-muted: rgba(255, 255, 255, 0.6);
-  --card-line: rgba(255, 255, 255, 0.16);
+  --card-bg: var(--cream-card);
+  --card-fg: #1c1c1c;
 }
 
 /* ==========================================================
-   BADGE
+   DISCOUNT BADGE - White background (like Collections)
    ========================================================== */
 .badge {
   position: absolute;
-  top: 16px;
-  left: 16px;
+  top: 12px;
+  left: 12px;
   z-index: 2;
-  background: var(--gold);
-  color: white;
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-  padding: 5px 11px;
-  border-radius: 999px;
+  background: #ffffff;
+  color: var(--sale);
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  text-transform: lowercase;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 /* ==========================================================
-   WISHLIST
+   WISHLIST BUTTON - Top Right (like Collections)
    ========================================================== */
 .wishlistBtn {
   position: absolute;
   top: 14px;
   right: 14px;
   z-index: 2;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  border: none;
-  background: rgba(28, 28, 28, 0.06);
-  /* color: white; */
+  background: #fff;
+  border: 1px solid var(--cream-line);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
+  line-height: 1;
   cursor: pointer;
-  backdrop-filter: blur(4px);
-  transition: all 0.25s ease;
-}
-
-.accent-ivory .wishlistBtn {
-  background: rgba(28, 28, 28, 0.06);
+  color: #1c1917;
+  transition: transform 0.2s ease, font-size 0.2s ease, color 0.2s ease,
+    background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .wishlistBtn:hover {
-  transform: scale(1.08);
+  font-size: 18px;
+  color: var(--gold-deep);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(28, 25, 23, 0.18);
+}
+
+.wishlistBtn:active {
+  transform: scale(0.85);
+  background: var(--gold-light);
+  color: var(--sale);
+  box-shadow: 0 2px 6px rgba(28, 25, 23, 0.2);
 }
 
 .wishlistBtnActive {
   color: #d9534f;
+  background: #fff;
+  border-color: #d9534f;
+}
+
+.wishlistBtnActive:hover {
+  color: #d9534f;
 }
 
 /* ==========================================================
-   IMAGE FRAME — circular, thin gold ring
+   IMAGE - Square with pattern (like Collections)
    ========================================================== */
 .imageFrame {
-  width: 78%;
+  position: relative;
+  width: 100%;
   aspect-ratio: 1 / 1;
-  border-radius: 50%;
   overflow: hidden;
-  border: 1px solid rgba(182, 134, 60, 0.5);
-  margin-top: 26px;
-  background: rgba(120, 120, 120, 0.08);
+  background: repeating-linear-gradient(
+    45deg,
+    #efe9db,
+    #efe9db 10px,
+    #e7ddc7 10px,
+    #e7ddc7 20px
+  );
+  border-bottom: 1px solid var(--cream-line);
+  flex-shrink: 0;
 }
 
 .image {
@@ -277,12 +281,12 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.5s ease;
+  transition: transform 0.3s ease;
   pointer-events: none;
 }
 
 .card:hover .image {
-  transform: scale(1.08);
+  transform: scale(1.05);
 }
 
 .imagePlaceholder {
@@ -290,51 +294,68 @@
   height: 100%;
   background: linear-gradient(
     150deg,
-    rgba(182, 134, 60, 0.25),
-    rgba(182, 134, 60, 0.08)
+    rgba(182, 134, 60, 0.20),
+    rgba(182, 134, 60, 0.06)
   );
 }
 
 /* ==========================================================
-   INFO
+   CATEGORY OVERLAY - Bottom Left (like Collections)
+   ========================================================== */
+.categoryOverlay {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 2;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  background: rgba(255, 255, 255, 0.85);
+  padding: 4px 10px;
+  border-radius: 20px;
+  backdrop-filter: blur(2px);
+  font-weight: 600;
+}
+
+/* ==========================================================
+   INFO - Like Collections
    ========================================================== */
 .info {
   width: 100%;
-  text-align: center;
-  margin-top: 16px;
+  text-align: left;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  flex: 1;
+  justify-content: space-between;
+  padding: 0;
 }
 
-.eyebrow {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 1.6px;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin: 0;
-}
-
-.title {
-  font-family: "Cormorant Garamond", serif;
-  font-size: 17px;
-  font-weight: 600;
-  margin: 0;
+.productName {
+  font-family: "Jost", "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1c1917;
   line-height: 1.3;
-  color: black;
   display: -webkit-box;
-  -webkit-line-clamp: 1;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-decoration: none;
+  padding: 10px 12px 5px;
+  margin: 0;
+}
+
+.productName:hover {
+  text-decoration: none;
+  color: var(--gold-deep);
 }
 
 .ratingRow {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
-  margin-top: 2px;
+  padding: 0 12px 6px;
 }
 
 .stars {
@@ -348,7 +369,7 @@
 }
 
 .starEmpty {
-  color: var(--card-line);
+  color: #d9d0c4;
 }
 
 .ratingValue {
@@ -361,54 +382,75 @@
   font-weight: 400;
 }
 
+/* ==========================================================
+   PRICE ROW - Like Collections
+   ========================================================== */
 .priceRow {
   display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 4px;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  flex-wrap: wrap;
+  padding: 0 15px 6px;
 }
 
 .price {
-  font-size: 16px;
-  font-weight: 700;
-  color: black;
+  color: var(--sale);
+  font-weight: 600;
+  font-size: 15px;
 }
 
 .oldPrice {
-  font-size: 12px;
-  color: rgba(28, 28, 28, 0.55);
+  color: var(--text-muted);
   text-decoration: line-through;
+  font-size: 13px;
 }
 
 /* ==========================================================
-   CART BUTTON — straddles the shield's bottom point
+   ADD TO CART BUTTON - Full width (like Collections)
    ========================================================== */
 .cartBtn {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 3;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: none;
-  background: var(--gold);
-  color: whitesmoke;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 17px;
+  gap: 5px;
+  width: calc(100% + 0px);
+  margin: 0;
+  padding: 11px 0;
+  font-family: "Jost", sans-serif;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #f7f2e9;
+  background: var(--gold);
+  border: 1px solid var(--gold);
   cursor: pointer;
-  box-shadow: 0 10px 18px -6px rgba(20, 14, 6, 0.5);
-  transition: all 0.25s ease;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease,
+    box-shadow 0.2s ease;
+  min-height: 40px;
+  flex-shrink: 0;
+  margin-top: auto;
+  border-radius: 0;
 }
 
-.cartBtn:hover {
-  background: var(--ink);
-  color: #fff;
-  transform: translateX(-50%) scale(1.08);
+.cartBtn:hover:not(:disabled) {
+  background: var(--gold-deep);
+  border-color: var(--gold-deep);
+  box-shadow: 0 8px 18px rgba(124, 94, 34, 0.25);
+}
+
+.cartBtn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.cartBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.cartBtn svg {
+  font-size: 13px;
 }
 
 /* ==========================================================
@@ -420,16 +462,10 @@
   }
 
   .card {
-    width: 220px;
+    width: 200px;
   }
 }
 
-/* ----------------------------------------------------------
-   MOBILE ONLY (<=640px)
-   - heading compacted to 1–2 lines instead of wrapping to 3
-   - nav arrows removed (row is swipe/drag-scrollable already)
-   - "View All" gets room to breathe now that arrows are gone
----------------------------------------------------------- */
 @media (max-width: 640px) {
   .section {
     padding: 28px 14px 36px;
@@ -476,34 +512,62 @@
     font-size: 12px;
   }
 
-  /* arrows removed on mobile — drag/swipe scroll already works */
   .navArrows {
     display: none;
   }
 
   .card {
-    width: 62vw;
-    min-width: 190px;
-    padding: 18px 14px 53px;
+    width: 48vw;
+    min-width: 170px;
   }
 
   .scrollContainer {
-    gap: 16px;
+    gap: 14px;
   }
 
-  .title {
-    font-size: 16px;
+  .badge {
+    font-size: 10px;
+    padding: 4px 8px;
+    top: 10px;
+    left: 10px;
+  }
+
+  .wishlistBtn {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+    top: 10px;
+    right: 10px;
+  }
+
+  .categoryOverlay {
+    font-size: 9px;
+    padding: 3px 8px;
+    bottom: 10px;
+    left: 10px;
+  }
+
+  .productName {
+    font-size: 13px;
+    padding: 8px 12px 2px;
   }
 
   .price {
-    font-size: 15px;
+    font-size: 13px;
+  }
+
+  .oldPrice {
+    font-size: 11px;
   }
 
   .cartBtn {
-    width: 40px;
-    height: 40px;
-    font-size: 15px;
-    bottom: 8px;
+    font-size: 10px;
+    min-height: 36px;
+    padding: 9px 0;
+  }
+
+  .cartBtn svg {
+    font-size: 12px;
   }
 }
 
@@ -513,7 +577,27 @@
   }
 
   .card {
-    width: 68vw;
+    width: 52vw;
+    min-width: 150px;
+  }
+
+  .productName {
+    font-size: 12px;
+    padding: 6px 12px 2px;
+  }
+
+  .price {
+    font-size: 12px;
+  }
+
+  .oldPrice {
+    font-size: 10px;
+  }
+
+  .cartBtn {
+    font-size: 9px;
+    min-height: 32px;
+    padding: 7px 0;
   }
 }
 
@@ -538,7 +622,7 @@
 }
 
 /* ==========================================================
-   SKELETON LOADING — additive, matches existing card shape
+   SKELETON LOADING
    ========================================================== */
 .skeletonCard {
   pointer-events: none;
@@ -548,28 +632,28 @@
   width: 100%;
   height: 100%;
   background: linear-gradient(
-    100deg,
-    rgba(182, 134, 60, 0.12) 20%,
-    rgba(182, 134, 60, 0.22) 40%,
-    rgba(182, 134, 60, 0.12) 60%
+    90deg,
+    #efe9db 25%,
+    #f5f0e6 50%,
+    #efe9db 75%
   );
   background-size: 200% 100%;
-  animation: offersSkeletonShimmer 1.4s ease-in-out infinite;
+  animation: shimmer 1.5s infinite;
 }
 
 .skeletonLine {
-  height: 12px;
+  height: 14px;
   width: 70%;
-  margin: 0 auto;
+  margin: 8px 12px 4px;
   border-radius: 4px;
   background: linear-gradient(
-    100deg,
-    rgba(28, 28, 28, 0.08) 20%,
-    rgba(28, 28, 28, 0.16) 40%,
-    rgba(28, 28, 28, 0.08) 60%
+    90deg,
+    #efe9db 25%,
+    #f5f0e6 50%,
+    #efe9db 75%
   );
   background-size: 200% 100%;
-  animation: offersSkeletonShimmer 1.4s ease-in-out infinite;
+  animation: shimmer 1.5s infinite;
 }
 
 .skeletonLineShort {
@@ -577,7 +661,21 @@
   height: 16px;
 }
 
-@keyframes offersSkeletonShimmer {
+.skeletonBtn {
+  width: 100%;
+  height: 40px;
+  margin-top: 10px;
+  background: linear-gradient(
+    90deg,
+    #efe9db 25%,
+    #f5f0e6 50%,
+    #efe9db 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
   0% {
     background-position: 200% 0;
   }
@@ -588,7 +686,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .skeletonImage,
-  .skeletonLine {
+  .skeletonLine,
+  .skeletonBtn {
     animation: none !important;
   }
 }
