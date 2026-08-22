@@ -17,27 +17,13 @@ import { toggleWishlistItem } from "../../../redux/slices/wishlistSlice";
 function RelevantSkeletonCard() {
   return (
     <div className={styles.relevantCard}>
-      <div className={`${styles.relevantImageWrap} ${styles.shimmer}`} />
-
+      <div className={styles.relevantImageWrap}>
+        <div className={styles.skeletonImage} />
+      </div>
       <div className={styles.relevantBody}>
-        <div
-          className={styles.shimmer}
-          style={{
-            height: 14,
-            width: "80%",
-            borderRadius: 4,
-          }}
-        />
-
-        <div
-          className={styles.shimmer}
-          style={{
-            height: 16,
-            width: "40%",
-            borderRadius: 4,
-            marginTop: 6,
-          }}
-        />
+        <div className={styles.skeletonText} />
+        <div className={`${styles.skeletonText} ${styles.skeletonTextShort}`} />
+        <div className={styles.skeletonBtn} />
       </div>
     </div>
   );
@@ -65,15 +51,6 @@ export default function RelevantProducts({ productId }) {
 
   const [cartLoadingId, setCartLoadingId] = useState(null);
 
-  /*
-   * Fetch recommendations whenever productId changes.
-   *
-   * This is important for SPA navigation:
-   * Product A -> Product B
-   *
-   * The component stays mounted, but productId changes,
-   * so recommendations are fetched again for Product B.
-   */
   useEffect(() => {
     if (!productId) {
       dispatch(clearRelevantProducts());
@@ -85,18 +62,11 @@ export default function RelevantProducts({ productId }) {
     dispatch(
       fetchRelevantProducts({
         productId,
-        limit: 8,
+        limit: 6,
       }),
     );
   }, [dispatch, productId]);
 
-  /*
-   * Don't render the section if:
-   * - the request finished with an error
-   * - there are no recommended products
-   *
-   * While loading, render the skeleton.
-   */
   if (!isLoading && (error || products.length === 0)) {
     return null;
   }
@@ -104,16 +74,13 @@ export default function RelevantProducts({ productId }) {
   const requireAuth = () => {
     if (!isAuthenticated) {
       toast.error("Please login to continue");
-
       navigate("/login", {
         state: {
           from: window.location.pathname,
         },
       });
-
       return false;
     }
-
     return true;
   };
 
@@ -131,7 +98,6 @@ export default function RelevantProducts({ productId }) {
 
   const handleToggleWishlist = (id) => {
     if (!requireAuth()) return;
-
     dispatch(toggleWishlistItem(id)).catch(() => {});
   };
 
@@ -140,14 +106,12 @@ export default function RelevantProducts({ productId }) {
 
     try {
       setCartLoadingId(id);
-
       await dispatch(
         addItemToCart({
           productId: id,
           quantity: 1,
         }),
       ).unwrap();
-
       toast.success("Added to cart");
     } catch (err) {
       toast.error(err || "Failed to add to cart");
@@ -157,7 +121,7 @@ export default function RelevantProducts({ productId }) {
   };
 
   const items = isLoading
-    ? Array.from({ length: 4 }, (_, index) => ({
+    ? Array.from({ length: 6 }, (_, index) => ({
         _skeletonId: index,
       }))
     : products;
@@ -183,6 +147,14 @@ export default function RelevantProducts({ productId }) {
                 p.pricing?.originalPrice &&
                 p.pricing.salePrice < p.pricing.originalPrice;
 
+              const discount = hasDiscount
+                ? Math.round(
+                    ((p.pricing.originalPrice - p.pricing.salePrice) /
+                      p.pricing.originalPrice) *
+                      100
+                  )
+                : 0;
+
               const inCart = isInCart(p._id);
               const inWishlist = isInWishlist(p._id);
               const addingToCart = cartLoadingId === p._id;
@@ -204,6 +176,16 @@ export default function RelevantProducts({ productId }) {
                       }}
                     />
 
+                    {discount > 0 && (
+                      <span className={styles.relevantDiscount}>
+                        {discount}% OFF
+                      </span>
+                    )}
+
+                    <span className={styles.relevantCategoryOverlay}>
+                      {p.category?.categoryData?.label || "Uncategorized"}
+                    </span>
+
                     <button
                       type="button"
                       className={`${styles.relevantWishlistBtn} ${
@@ -212,7 +194,6 @@ export default function RelevantProducts({ productId }) {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-
                         handleToggleWishlist(p._id);
                       }}
                       aria-label={
@@ -255,7 +236,7 @@ export default function RelevantProducts({ productId }) {
                       {inCart ? (
                         <>
                           <FiCheck />
-                          Added
+                          Added to Cart
                         </>
                       ) : (
                         <>
