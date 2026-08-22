@@ -1,7 +1,9 @@
+// backend/controllers/orderController.js
 import Order, { FULFILLMENT_STATUS } from "../models/Order.js";
 import Cart from "../models/Cart.js";
 import JewelleryProduct from "../models/JewelleryProduct.js";
 import razorpayService from "../services/razorpayService.js";
+import PaymentSettings from "../models/PaymentSettings.js"; // ✅ NEW
 import {
   createShipmentForOrder,
   calculateShippingRate,
@@ -11,7 +13,7 @@ import {
 } from "./shippingController.js";
 
 // ============================================
-// SOCKET.IO IMPORTS (ADDED)
+// SOCKET.IO IMPORTS
 // ============================================
 import {
   emitOrderCreated,
@@ -170,10 +172,32 @@ const validateShippingAddress = (shippingAddress) => {
   );
 };
 
+// ✅ NEW — normalizes an optional client-supplied idempotency key. Empty
+// string / non-string input is treated as "no key" rather than an error,
+// since idempotency is a best-effort convenience, not a required field.
+const normalizeClientRequestId = (value) => {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.length > 100) return null;
+  return trimmed;
+};
+
+// ✅ NEW — shared "already created this exact order?" lookup, used by both
+// payment flows before doing any product/shipping work.
+const findExistingOrderByIdempotencyKey = async (userId, clientRequestId) => {
+  if (!clientRequestId) return null;
+  return Order.findOne({ user: userId, idempotencyKey: clientRequestId });
+};
+
 export const createRazorpayOrder = async (req, res) => {
   try {
     const userId = req.user._id || req.user.id;
-    const { items, shippingAddress } = req.body;
+    const {
+      items,
+      shippingAddress,
+      clientRequestId: rawClientRequestId,
+    } = req.body;
+    const clientRequestId = normalizeClientRequestId(rawClientRequestId);
 
     if (!items || !items.length) {
       return res
@@ -185,6 +209,40 @@ export const createRazorpayOrder = async (req, res) => {
         success: false,
         message:
           "Complete shipping address with a valid 6-digit pincode is required",
+      });
+    }
+
+    // ✅ NEW — idempotent replay: same checkout attempt clicked again
+    // (double-click, network retry) returns the SAME order instead of
+    // creating a second one.
+    const existing = await findExistingOrderByIdempotencyKey(
+      userId,
+      clientRequestId,
+    );
+    if (existing) {
+      return res.status(200).json({
+        success: true,
+        message: "Order already created",
+        data: {
+          orderId: existing._id,
+          orderNumber: existing.orderNumber,
+          razorpayOrderId: existing.razorpay?.orderId,
+          amount: Math.round(existing.totalAmount * 100),
+          currency: "INR",
+          mock: !razorpayService.isConfigured,
+          itemsTotal: existing.itemsTotal,
+          shippingFee: existing.shippingFee,
+          totalAmount: existing.totalAmount,
+        },
+      });
+    }
+
+    const paymentSettings = await PaymentSettings.getSingleton();
+    if (!paymentSettings.onlinePaymentEnabled) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Online payment is currently unavailable. Please try Cash on Delivery.",
       });
     }
 
@@ -222,25 +280,57 @@ export const createRazorpayOrder = async (req, res) => {
 
     const totalAmount = itemsTotal + shippingFee;
 
-    const order = await Order.create({
-      orderNumber: generateOrderNumber(),
-      user: userId,
-      seller: sellerId,
-      customerName:
-        req.user.fullName ||
-        `${req.user.firstName || ""} ${req.user.lastName || ""}`.trim() ||
-        shippingAddress.fullName,
-      customerEmail: req.user.email,
-      customerPhone: req.user.phone || shippingAddress.phone,
-      items: orderItems,
-      shippingAddress,
-      itemsTotal,
-      shippingFee,
-      totalAmount,
-      paymentMethod: "razorpay",
-      paymentStatus: "pending",
-      orderStatus: "placed",
-    });
+    let order;
+    try {
+      order = await Order.create({
+        orderNumber: generateOrderNumber(),
+        idempotencyKey: clientRequestId || undefined,
+        user: userId,
+        seller: sellerId,
+        customerName:
+          req.user.fullName ||
+          `${req.user.firstName || ""} ${req.user.lastName || ""}`.trim() ||
+          shippingAddress.fullName,
+        customerEmail: req.user.email,
+        customerPhone: req.user.phone || shippingAddress.phone,
+        items: orderItems,
+        shippingAddress,
+        itemsTotal,
+        shippingFee,
+        totalAmount,
+        paymentMethod: "razorpay",
+        paymentStatus: "pending",
+        orderStatus: "placed",
+      });
+    } catch (createErr) {
+      // ✅ NEW — race condition: two near-simultaneous requests with the
+      // same clientRequestId. The unique index rejects the second insert;
+      // fetch and return the one that actually landed instead of erroring.
+      if (createErr.code === 11000 && clientRequestId) {
+        const raced = await findExistingOrderByIdempotencyKey(
+          userId,
+          clientRequestId,
+        );
+        if (raced) {
+          return res.status(200).json({
+            success: true,
+            message: "Order already created",
+            data: {
+              orderId: raced._id,
+              orderNumber: raced.orderNumber,
+              razorpayOrderId: raced.razorpay?.orderId,
+              amount: Math.round(raced.totalAmount * 100),
+              currency: "INR",
+              mock: !razorpayService.isConfigured,
+              itemsTotal: raced.itemsTotal,
+              shippingFee: raced.shippingFee,
+              totalAmount: raced.totalAmount,
+            },
+          });
+        }
+      }
+      throw createErr;
+    }
 
     const rzpResult = await razorpayService.createOrder({
       amount: Math.round(totalAmount * 100),
@@ -306,6 +396,17 @@ export const verifyRazorpayPayment = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Order not found" });
 
+    // ✅ NEW — idempotent: if this order was already verified (e.g. the
+    // client retried after a network hiccup on the first success), don't
+    // re-run stock decrement / cart cleanup / emit a second event.
+    if (order.paymentStatus === "paid") {
+      return res.status(200).json({
+        success: true,
+        message: "Payment already verified",
+        data: order,
+      });
+    }
+
     const isValid = razorpayService.verifySignature({
       orderId: razorpay_order_id || order.razorpay?.orderId,
       paymentId: razorpay_payment_id,
@@ -336,9 +437,10 @@ export const verifyRazorpayPayment = async (req, res) => {
     };
     await order.save();
 
+    // Cart is only cleared once payment is actually verified — a failed,
+    // cancelled, or abandoned payment leaves the cart untouched.
     await finalizeInventoryAndCart(order, userId);
 
-    // ✅ SOCKET.IO — notify the seller in real time
     emitOrderCreated(order);
 
     return res.status(200).json({
@@ -359,7 +461,12 @@ export const verifyRazorpayPayment = async (req, res) => {
 export const createCODOrder = async (req, res) => {
   try {
     const userId = req.user._id || req.user.id;
-    const { items, shippingAddress } = req.body;
+    const {
+      items,
+      shippingAddress,
+      clientRequestId: rawClientRequestId,
+    } = req.body;
+    const clientRequestId = normalizeClientRequestId(rawClientRequestId);
 
     if (!items || !items.length) {
       return res
@@ -371,6 +478,31 @@ export const createCODOrder = async (req, res) => {
         success: false,
         message:
           "Complete shipping address with a valid 6-digit pincode is required",
+      });
+    }
+
+    // ✅ NEW — idempotent replay for COD too (double-click on "Place Order").
+    const existing = await findExistingOrderByIdempotencyKey(
+      userId,
+      clientRequestId,
+    );
+    if (existing) {
+      return res.status(200).json({
+        success: true,
+        message: "Order placed (Cash on Delivery)",
+        data: existing,
+      });
+    }
+
+    // ✅ NEW — backend is the single source of truth for COD availability.
+    // The frontend hides the option when disabled, but this check is what
+    // actually enforces it.
+    const paymentSettings = await PaymentSettings.getSingleton();
+    if (!paymentSettings.codEnabled) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Cash on Delivery is currently unavailable. Please choose an online payment method.",
       });
     }
 
@@ -408,38 +540,78 @@ export const createCODOrder = async (req, res) => {
 
     const totalAmount = itemsTotal + shippingFee;
 
-    const order = await Order.create({
-      orderNumber: generateOrderNumber(),
-      user: userId,
-      seller: sellerId,
-      customerName:
-        req.user.fullName ||
-        `${req.user.firstName || ""} ${req.user.lastName || ""}`.trim() ||
-        shippingAddress.fullName,
-      customerEmail: req.user.email,
-      customerPhone: req.user.phone || shippingAddress.phone,
-      items: orderItems,
-      shippingAddress,
-      itemsTotal,
-      shippingFee,
-      totalAmount,
-      paymentMethod: "cod",
-      paymentStatus: "pending",
-      orderStatus: "processing",
-      fulfillmentStatus: FULFILLMENT_STATUS.PENDING_SELLER_CONFIRMATION,
-      statusHistory: [
-        {
-          status: FULFILLMENT_STATUS.PENDING_SELLER_CONFIRMATION,
-          role: "system",
-          timestamp: new Date(),
-        },
-      ],
-      placedAt: new Date(),
-    });
+    // ✅ NEW — min/max order value gating for COD, configurable by admin.
+    if (
+      paymentSettings.codMinOrderAmount > 0 &&
+      totalAmount < paymentSettings.codMinOrderAmount
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: `Cash on Delivery is only available for orders above ₹${paymentSettings.codMinOrderAmount.toLocaleString("en-IN")}`,
+      });
+    }
+    if (
+      paymentSettings.codMaxOrderAmount > 0 &&
+      totalAmount > paymentSettings.codMaxOrderAmount
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: `Cash on Delivery is only available for orders up to ₹${paymentSettings.codMaxOrderAmount.toLocaleString("en-IN")}`,
+      });
+    }
 
+    let order;
+    try {
+      order = await Order.create({
+        orderNumber: generateOrderNumber(),
+        idempotencyKey: clientRequestId || undefined,
+        user: userId,
+        seller: sellerId,
+        customerName:
+          req.user.fullName ||
+          `${req.user.firstName || ""} ${req.user.lastName || ""}`.trim() ||
+          shippingAddress.fullName,
+        customerEmail: req.user.email,
+        customerPhone: req.user.phone || shippingAddress.phone,
+        items: orderItems,
+        shippingAddress,
+        itemsTotal,
+        shippingFee,
+        totalAmount,
+        paymentMethod: "cod",
+        paymentStatus: "pending",
+        orderStatus: "processing",
+        fulfillmentStatus: FULFILLMENT_STATUS.PENDING_SELLER_CONFIRMATION,
+        statusHistory: [
+          {
+            status: FULFILLMENT_STATUS.PENDING_SELLER_CONFIRMATION,
+            role: "system",
+            timestamp: new Date(),
+          },
+        ],
+        placedAt: new Date(),
+      });
+    } catch (createErr) {
+      if (createErr.code === 11000 && clientRequestId) {
+        const raced = await findExistingOrderByIdempotencyKey(
+          userId,
+          clientRequestId,
+        );
+        if (raced) {
+          return res.status(200).json({
+            success: true,
+            message: "Order placed (Cash on Delivery)",
+            data: raced,
+          });
+        }
+      }
+      throw createErr;
+    }
+
+    // COD is "successfully created" the moment the order exists — there is
+    // no online transaction to wait for, so the cart clears immediately.
     await finalizeInventoryAndCart(order, userId);
 
-    // ✅ SOCKET.IO — notify the seller in real time
     emitOrderCreated(order);
 
     return res.status(201).json({
@@ -523,7 +695,15 @@ export const getSellerOrders = async (req, res) => {
         },
         items: sellerItems,
         sellerSubtotal,
+        totalAmount: order.totalAmount,
+        // ✅ NEW — payment method + reference, visible to the seller so
+        // they know upfront whether they're collecting cash on delivery.
+        paymentMethod: order.paymentMethod,
         paymentStatus: order.paymentStatus,
+        paymentReference:
+          order.paymentMethod === "cod"
+            ? null
+            : order.razorpay?.paymentId || null,
         orderStatus: order.orderStatus,
         fulfillmentStatus: order.fulfillmentStatus,
         sellerConfirmedAt: order.sellerConfirmedAt,
@@ -545,7 +725,6 @@ export const getSellerOrders = async (req, res) => {
   }
 };
 
-// ✅ NEW: SUPER ADMIN — GET /orders/admin/all?fulfillmentStatus=SELLER_CONFIRMED
 export const getAdminOrders = async (req, res) => {
   try {
     if (req.user.role !== "admin" && req.user.role !== "super_admin") {
@@ -559,8 +738,6 @@ export const getAdminOrders = async (req, res) => {
     if (fulfillmentStatus) {
       filter.fulfillmentStatus = fulfillmentStatus;
     } else {
-      // Default: everything relevant to admin action/monitoring, excludes
-      // orders still waiting on the seller (nothing for admin to do there yet).
       filter.fulfillmentStatus = {
         $ne: FULFILLMENT_STATUS.PENDING_SELLER_CONFIRMATION,
       };
@@ -635,7 +812,6 @@ export const updateOrderStatus = async (req, res) => {
     order.orderStatus = status;
     await order.save();
 
-    // ✅ SOCKET.IO
     emitOrderStatusUpdated(order);
 
     return res
@@ -677,7 +853,9 @@ export const sellerConfirmOrder = async (req, res) => {
         .json({ success: false, message: "Not authorized for this order" });
     }
 
-    if (order.paymentStatus !== "paid") {
+    // COD orders are payment-pending by design until delivery, so seller
+    // confirmation for COD does not require paymentStatus === "paid".
+    if (order.paymentMethod !== "cod" && order.paymentStatus !== "paid") {
       return res.status(400).json({
         success: false,
         message: "Cannot confirm an order that has not been paid for",
@@ -704,7 +882,6 @@ export const sellerConfirmOrder = async (req, res) => {
     });
     await order.save();
 
-    // ✅ SOCKET.IO — customer + super admin
     emitSellerConfirmed(order);
 
     return res
@@ -773,7 +950,6 @@ export const sellerRejectOrder = async (req, res) => {
     });
     await order.save();
 
-    // ✅ SOCKET.IO — customer + super admin
     emitSellerRejected(order);
 
     return res
@@ -803,7 +979,7 @@ export const adminApproveOrder = async (req, res) => {
         .json({ success: false, message: "Order not found" });
     }
 
-    if (order.paymentStatus !== "paid") {
+    if (order.paymentMethod !== "cod" && order.paymentStatus !== "paid") {
       return res
         .status(400)
         .json({ success: false, message: "Order has not been paid for" });
@@ -852,7 +1028,6 @@ export const adminApproveOrder = async (req, res) => {
       });
       await updatedOrder.save();
 
-      // ✅ SOCKET.IO — customer + seller + order room
       emitAdminApproved(updatedOrder);
 
       return res.status(200).json({
@@ -870,7 +1045,6 @@ export const adminApproveOrder = async (req, res) => {
       });
       await order.save();
 
-      // ✅ SOCKET.IO — surface the failure live too, not just on refresh
       emitAdminApproved(order);
 
       return res.status(502).json({
@@ -931,7 +1105,6 @@ export const adminRejectOrder = async (req, res) => {
     });
     await order.save();
 
-    // ✅ SOCKET.IO — customer + seller + order room
     emitAdminRejected(order);
 
     return res
@@ -945,11 +1118,6 @@ export const adminRejectOrder = async (req, res) => {
   }
 };
 
-// ============================================
-// SUPER ADMIN: GET /orders/admin/history
-// Full paginated, filtered, searchable order history. Never deletes or
-// hides anything based on status — this is the permanent audit view.
-// ============================================
 const DATE_RANGE_TO_START = {
   today: () => {
     const d = new Date();
@@ -960,13 +1128,6 @@ const DATE_RANGE_TO_START = {
   "30d": () => new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
 };
 
-// Maps the frontend's requested status filter labels to actual queries.
-// Some labels map to `fulfillmentStatus` (seller/admin lifecycle stages,
-// which the app itself writes) and some map to the legacy `orderStatus`
-// field (shipment-progress stages, which only the Shiprocket webhook
-// writes — fulfillmentStatus is never updated for these today).
-// "SELLER_CONFIRMED" also covers what the UI calls "Pending Admin
-// Approval" — they are the same stored value, not two different ones.
 const buildStatusFilter = (statusKey) => {
   switch (statusKey) {
     case "PENDING_SELLER_CONFIRMATION":
@@ -1004,9 +1165,6 @@ const buildStatusFilter = (statusKey) => {
   }
 };
 
-// "refunded" has no corresponding value in the current paymentStatus enum
-// (pending/paid/failed) — passing it returns zero results rather than
-// silently matching everything or crashing.
 const buildShiprocketFilter = (key) => {
   switch (key) {
     case "NOT_CREATED":
@@ -1127,11 +1285,6 @@ export const getOrderHistory = async (req, res) => {
   }
 };
 
-// ============================================
-// SUPER ADMIN: GET /orders/admin/history/:id
-// Full single-order detail for the history modal — returns the complete
-// stored document, nothing synthesized.
-// ============================================
 export const getOrderHistoryDetail = async (req, res) => {
   try {
     if (req.user.role !== "admin" && req.user.role !== "super_admin") {

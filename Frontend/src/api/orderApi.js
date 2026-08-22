@@ -1,3 +1,4 @@
+// src/api/orderApi.js
 import axiosInstance from "./axiosConfig.js";
 import axios from "axios";
 
@@ -10,8 +11,6 @@ const sellerAuthHeader = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-// Mirrors the fallback SuperAdminDashboard.jsx already uses when reading
-// the token out of localStorage.
 const adminAuthHeader = () => {
   const token =
     localStorage.getItem("superAdminToken") ||
@@ -19,16 +18,35 @@ const adminAuthHeader = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-export const createRazorpayOrder = async (items, shippingAddress) => {
+export const createRazorpayOrder = async (
+  items,
+  shippingAddress,
+  clientRequestId,
+) => {
   const response = await axiosInstance.post("/orders/razorpay/create", {
     items,
     shippingAddress,
+    clientRequestId,
   });
   return response.data;
 };
 
 export const verifyRazorpayPayment = async (payload) => {
   const response = await axiosInstance.post("/orders/razorpay/verify", payload);
+  return response.data;
+};
+
+// ✅ NEW — Cash on Delivery order creation.
+export const createCODOrder = async (
+  items,
+  shippingAddress,
+  clientRequestId,
+) => {
+  const response = await axiosInstance.post("/orders/cod/create", {
+    items,
+    shippingAddress,
+    clientRequestId,
+  });
   return response.data;
 };
 

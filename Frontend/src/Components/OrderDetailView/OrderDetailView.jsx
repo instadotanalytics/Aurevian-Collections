@@ -75,6 +75,7 @@ const OrderDetailView = ({ order, justPlaced = true }) => {
   } = order;
 
   const totalUnits = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+  const isCOD = paymentMethod === "cod";
 
   return (
     <div className={styles.page}>
@@ -91,8 +92,9 @@ const OrderDetailView = ({ order, justPlaced = true }) => {
           <span className={styles.eyebrow}>Certificate of Purchase</span>
           <h1 className={styles.successTitle}>Your Order is Sealed</h1>
           <p className={styles.successSub}>
-            Thank you for choosing Aurevian. A confirmation has been sent to
-            your email, and every piece is now being prepared with care.
+            {isCOD
+              ? "Thank you for choosing Aurevian. Please keep the exact amount ready — you'll pay in cash when your order arrives."
+              : "Thank you for choosing Aurevian. A confirmation has been sent to your email, and every piece is now being prepared with care."}
           </p>
         </div>
       )}
@@ -214,7 +216,9 @@ const OrderDetailView = ({ order, justPlaced = true }) => {
                     styles[paymentStatus] || ""
                   }`}
                 >
-                  {PAYMENT_STATUS_LABEL[paymentStatus] || paymentStatus}
+                  {isCOD && paymentStatus === "pending"
+                    ? "Pay on Delivery"
+                    : PAYMENT_STATUS_LABEL[paymentStatus] || paymentStatus}
                 </span>
               </div>
               {razorpay?.paymentId && (
@@ -224,6 +228,15 @@ const OrderDetailView = ({ order, justPlaced = true }) => {
                     value={razorpay.paymentId}
                     label="transaction ID"
                   />
+                </div>
+              )}
+              {isCOD && (
+                <div className={styles.kvRow}>
+                  <span className={styles.kvLabel}>Amount Due on Delivery</span>
+                  <span className={styles.kvValue}>
+                    <FaRupeeSign size={11} />
+                    {totalAmount.toLocaleString("en-IN")}
+                  </span>
                 </div>
               )}
             </div>
@@ -258,7 +271,7 @@ const OrderDetailView = ({ order, justPlaced = true }) => {
             </div>
           </div>
           <div className={styles.totalRow}>
-            <span>Total Paid</span>
+            <span>{isCOD ? "Total to Pay on Delivery" : "Total Paid"}</span>
             <span>
               <FaRupeeSign size={16} />
               {totalAmount.toLocaleString("en-IN")}

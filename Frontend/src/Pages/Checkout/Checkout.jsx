@@ -1,6 +1,5 @@
-
 // src/Pages/Checkout/Checkout.jsx
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
@@ -9,13 +8,19 @@ import {
   FiTruck,
   FiLoader,
   FiAlertCircle,
+  FiCreditCard,
+  FiPackage,
+  FiCheck,
+  FiZap,
 } from "react-icons/fi";
 import { FaRupeeSign } from "react-icons/fa";
 import Header from "../Layout/Header/Header";
 import Footer from "../Layout/Footer/Footer";
 import styles from "./Checkout.module.css";
+import pmStyles from "./PaymentMethod.module.css";
 import * as orderApi from "../../api/orderApi.js";
 import * as cartApi from "../../api/cartApi.js";
+import * as paymentSettingsApi from "../../api/paymentSettingsApi.js";
 
 const loadRazorpayScript = () =>
   new Promise((resolve) => {
@@ -43,6 +48,14 @@ const initialShippingQuote = {
   message: null,
 };
 
+// Generates a per-checkout-attempt idempotency key. One value is used for
+// every create/retry within this mount of the page, so double-clicks and
+// network retries always resolve to the same backend order.
+const generateClientRequestId = () => {
+  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+  return `crid_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
+};
+
 const Checkout = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -59,11 +72,27 @@ const Checkout = () => {
     state: "",
     pincode: "",
   });
-  const [paying, setPaying] = useState(false);
+
+  // "online" | "cod"
+  const [paymentMethod, setPaymentMethod] = useState("online");
+  const [paymentSettings, setPaymentSettings] = useState(null);
+  const [settingsLoading, setSettingsLoading] = useState(true);
+
+  // idle | creating | awaiting_payment | verifying | failed | cancelled | placing_cod
+  const [paymentState, setPaymentState] = useState("idle");
+  const [paymentStateMessage, setPaymentStateMessage] = useState(null);
+
   const [shippingQuote, setShippingQuote] = useState(initialShippingQuote);
 
   const requestIdRef = useRef(0);
   const debounceTimerRef = useRef(null);
+  // Hard lock against double-submits — separate from React state because
+  // state updates are async and a second click can land before re-render.
+  const submitLockRef = useRef(false);
+  // Stable for the lifetime of this checkout attempt so retries after a
+  // failed/cancelled payment reuse the same order instead of creating a
+  // new one.
+  const clientRequestIdRef = useRef(generateClientRequestId());
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -76,6 +105,32 @@ const Checkout = () => {
       navigate("/cart");
     }
   }, [items, navigate]);
+
+  // ✅ Fetch COD availability — backend is the single source of truth.
+  // COD is never shown just because we assume it's available.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await paymentSettingsApi.getPaymentSettings();
+        if (cancelled) return;
+        if (res.success) {
+          setPaymentSettings(res.data);
+          // If COD isn't available, make sure "online" stays selected.
+          if (!res.data.codEnabled) setPaymentMethod("online");
+        }
+      } catch (error) {
+        // If settings can't be fetched, fail safe: don't offer COD.
+        if (!cancelled)
+          setPaymentSettings({ codEnabled: false, onlinePaymentEnabled: true });
+      } finally {
+        if (!cancelled) setSettingsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (debounceTimerRef.current) {
@@ -99,7 +154,7 @@ const Checkout = () => {
       try {
         const res = await cartApi.calculateShippingRate(
           address.pincode,
-          "prepaid",
+          paymentMethod === "cod" ? "cod" : "prepaid",
         );
 
         if (requestIdRef.current !== thisRequestId) return;
@@ -137,8 +192,9 @@ const Checkout = () => {
     return () => {
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     };
+    // Re-quote when payment method changes too (COD/prepaid rates can differ)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address.pincode]);
+  }, [address.pincode, paymentMethod]);
 
   if (items.length === 0) return null;
 
@@ -150,7 +206,26 @@ const Checkout = () => {
   const shippingFee = quoteIsCurrent ? shippingQuote.fee : 0;
   const totalAmount = itemsTotal + shippingFee;
 
-  const canPay = quoteIsCurrent && !paying;
+  const isProcessing = [
+    "creating",
+    "awaiting_payment",
+    "verifying",
+    "placing_cod",
+  ].includes(paymentState);
+
+  const codAvailable = !!paymentSettings?.codEnabled;
+  const codWithinRange = useMemo(() => {
+    if (!paymentSettings) return true;
+    const { codMinOrderAmount = 0, codMaxOrderAmount = 0 } = paymentSettings;
+    if (codMinOrderAmount > 0 && totalAmount < codMinOrderAmount) return false;
+    if (codMaxOrderAmount > 0 && totalAmount > codMaxOrderAmount) return false;
+    return true;
+  }, [paymentSettings, totalAmount]);
+
+  const canPay =
+    quoteIsCurrent &&
+    !isProcessing &&
+    (paymentMethod === "cod" ? codAvailable && codWithinRange : true);
 
   const handleChange = (e) => {
     setAddress((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -202,34 +277,108 @@ const Checkout = () => {
     }
   };
 
-  const handlePay = async (e) => {
-    e.preventDefault();
-
+  const validateAddressFields = () => {
     const { fullName, phone, addressLine1, city, state, pincode } = address;
     if (!fullName || !phone || !addressLine1 || !city || !state || !pincode) {
       toast.error("Please fill in all required address fields");
-      return;
+      return false;
     }
     if (!isValidPincode(pincode)) {
       toast.error("Please enter a valid 6-digit pincode");
-      return;
+      return false;
     }
     if (!quoteIsCurrent) {
       toast.error("Please wait for shipping to be calculated for this pincode");
+      return false;
+    }
+    return true;
+  };
+
+  // ============================================
+  // CASH ON DELIVERY FLOW
+  // No gateway redirect. Backend re-validates everything (cart, prices,
+  // stock, shipping, COD availability) — the frontend total is never
+  // trusted for the actual charge.
+  // ============================================
+  const handlePlaceCODOrder = async () => {
+    if (submitLockRef.current) return;
+    if (!validateAddressFields()) return;
+    if (!codAvailable) {
+      toast.error("Cash on Delivery is currently unavailable");
+      return;
+    }
+    if (!codWithinRange) {
+      toast.error("This order amount isn't eligible for Cash on Delivery");
       return;
     }
 
-    setPaying(true);
+    submitLockRef.current = true;
+    setPaymentState("placing_cod");
+    setPaymentStateMessage(null);
+
     try {
       const orderItems = items.map((i) => ({
         productId: i.productId,
         quantity: i.quantity,
       }));
-      const createRes = await orderApi.createRazorpayOrder(orderItems, address);
+      const res = await orderApi.createCODOrder(
+        orderItems,
+        address,
+        clientRequestIdRef.current,
+      );
+
+      if (!res.success) {
+        setPaymentState("failed");
+        setPaymentStateMessage(res.message || "Failed to place order");
+        toast.error(res.message || "Failed to place order");
+        submitLockRef.current = false;
+        return;
+      }
+
+      // COD order creation IS the success condition — cart has already
+      // been cleared server-side at this point.
+      toast.success("Order placed successfully — pay on delivery");
+      navigate(`/order-success/${res.data._id || res.data.orderId}`);
+    } catch (error) {
+      setPaymentState("failed");
+      const msg = error.response?.data?.message || "Something went wrong";
+      setPaymentStateMessage(msg);
+      toast.error(msg);
+      submitLockRef.current = false;
+    }
+  };
+
+  // ============================================
+  // ONLINE PAYMENT (RAZORPAY) FLOW
+  // Cart is only cleared after server-side signature verification
+  // succeeds — never on gateway "success" alone, and never on close/
+  // cancel/failure.
+  // ============================================
+  const handlePlaceOnlineOrder = async (e) => {
+    e?.preventDefault?.();
+    if (submitLockRef.current) return;
+    if (!validateAddressFields()) return;
+
+    submitLockRef.current = true;
+    setPaymentState("creating");
+    setPaymentStateMessage(null);
+
+    try {
+      const orderItems = items.map((i) => ({
+        productId: i.productId,
+        quantity: i.quantity,
+      }));
+      const createRes = await orderApi.createRazorpayOrder(
+        orderItems,
+        address,
+        clientRequestIdRef.current,
+      );
 
       if (!createRes.success) {
+        setPaymentState("failed");
+        setPaymentStateMessage(createRes.message || "Failed to create order");
         toast.error(createRes.message || "Failed to create order");
-        setPaying(false);
+        submitLockRef.current = false;
         return;
       }
 
@@ -237,18 +386,23 @@ const Checkout = () => {
         createRes.data;
 
       if (mock) {
-        // Backend running without real Razorpay keys — auto-verify
+        setPaymentState("verifying");
         const verifyRes = await orderApi.verifyRazorpayPayment({
           orderId,
           razorpay_order_id: razorpayOrderId,
           razorpay_payment_id: `mock_pay_${Date.now()}`,
           razorpay_signature: "mock_signature",
         });
-        setPaying(false);
+        submitLockRef.current = false;
         if (verifyRes.success) {
+          setPaymentState("idle");
           toast.success("Order placed successfully (test mode)");
           navigate(`/order-success/${orderId}`);
         } else {
+          setPaymentState("failed");
+          setPaymentStateMessage(
+            verifyRes.message || "Payment verification failed",
+          );
           toast.error(verifyRes.message || "Payment verification failed");
         }
         return;
@@ -256,10 +410,16 @@ const Checkout = () => {
 
       const scriptLoaded = await loadRazorpayScript();
       if (!scriptLoaded) {
+        setPaymentState("failed");
+        setPaymentStateMessage(
+          "Failed to load payment gateway. Check your connection.",
+        );
         toast.error("Failed to load payment gateway. Check your connection.");
-        setPaying(false);
+        submitLockRef.current = false;
         return;
       }
+
+      setPaymentState("awaiting_payment");
 
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -275,6 +435,7 @@ const Checkout = () => {
         },
         theme: { color: "#1c1815" },
         handler: async (response) => {
+          setPaymentState("verifying");
           try {
             const verifyRes = await orderApi.verifyRazorpayPayment({
               orderId,
@@ -283,32 +444,80 @@ const Checkout = () => {
               razorpay_signature: response.razorpay_signature,
             });
             if (verifyRes.success) {
+              setPaymentState("idle");
               toast.success("Payment successful! Order placed.");
               navigate(`/order-success/${orderId}`);
             } else {
+              setPaymentState("failed");
+              setPaymentStateMessage(
+                verifyRes.message || "Payment verification failed",
+              );
               toast.error(verifyRes.message || "Payment verification failed");
             }
           } catch (err) {
+            setPaymentState("failed");
+            setPaymentStateMessage("Payment verification failed");
             toast.error("Payment verification failed");
           } finally {
-            setPaying(false);
+            submitLockRef.current = false;
           }
         },
         modal: {
-          ondismiss: () => setPaying(false),
+          // Customer closed the window without paying — the order stays
+          // pending server-side (never marked paid), cart stays intact,
+          // and the customer can retry with the same order (same
+          // clientRequestId -> same razorpayOrderId is reused on retry).
+          ondismiss: () => {
+            setPaymentState("cancelled");
+            setPaymentStateMessage(
+              "Payment window closed. You can try again — your cart is safe.",
+            );
+            submitLockRef.current = false;
+          },
         },
       };
 
       const rzp = new window.Razorpay(options);
       rzp.on("payment.failed", () => {
+        setPaymentState("failed");
+        setPaymentStateMessage(
+          "Payment failed. You can retry — your cart is safe.",
+        );
         toast.error("Payment failed. Please try again.");
-        setPaying(false);
+        submitLockRef.current = false;
       });
       rzp.open();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
-      setPaying(false);
+      setPaymentState("failed");
+      const msg = error.response?.data?.message || "Something went wrong";
+      setPaymentStateMessage(msg);
+      toast.error(msg);
+      submitLockRef.current = false;
     }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (paymentMethod === "cod") {
+      handlePlaceCODOrder();
+    } else {
+      handlePlaceOnlineOrder(e);
+    }
+  };
+
+  const getButtonLabel = () => {
+    if (!isValidPincode(address.pincode)) return "Enter Pincode to Continue";
+    if (!quoteIsCurrent) return "Calculating Shipping...";
+    if (paymentMethod === "cod") {
+      if (!codAvailable) return "COD Unavailable";
+      if (!codWithinRange) return "Amount Not Eligible for COD";
+      if (paymentState === "placing_cod") return "Placing Order...";
+      return `Place Order — Pay ₹${totalAmount.toLocaleString("en-IN")} on Delivery`;
+    }
+    if (paymentState === "creating") return "Preparing Payment...";
+    if (paymentState === "awaiting_payment") return "Waiting for Payment...";
+    if (paymentState === "verifying") return "Verifying Payment...";
+    return `Pay ₹${totalAmount.toLocaleString("en-IN")} with Razorpay`;
   };
 
   return (
@@ -318,11 +527,12 @@ const Checkout = () => {
         <div className={styles.eyebrow}>Secure Checkout</div>
         <h1 className={styles.pageTitle}>Complete Your Order</h1>
         <p className={styles.pageSubtitle}>
-          Every piece is inspected, packaged, and insured before it leaves our atelier.
+          Every piece is inspected, packaged, and insured before it leaves our
+          atelier.
         </p>
 
         <div className={styles.checkoutGrid}>
-          <form className={styles.addressForm} onSubmit={handlePay}>
+          <form className={styles.addressForm} onSubmit={handleSubmit}>
             <h3>
               <FiTruck /> Shipping Address
             </h3>
@@ -393,19 +603,141 @@ const Checkout = () => {
               </p>
             )}
 
+            {/* ============================================
+                PAYMENT METHOD SECTION — UPDATED
+                ============================================ */}
+            <div className={pmStyles.section}>
+              <h3 className={pmStyles.sectionTitle}>
+                <FiCreditCard /> Payment Method
+              </h3>
+
+              {settingsLoading ? (
+                <p className={pmStyles.settingsLoading}>
+                  <FiLoader className={styles.spinIcon} /> Loading payment
+                  options...
+                </p>
+              ) : (
+                <div className={pmStyles.optionsGrid}>
+                  <label
+                    className={`${pmStyles.option} ${
+                      paymentMethod === "online" ? pmStyles.optionActive : ""
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="online"
+                      checked={paymentMethod === "online"}
+                      onChange={() => setPaymentMethod("online")}
+                      className={pmStyles.optionRadio}
+                    />
+                    <span className={pmStyles.optionIconWrap}>
+                      <FiZap size={16} />
+                    </span>
+                    <span className={pmStyles.optionBody}>
+                      <span className={pmStyles.optionLabel}>
+                        Pay Now (Online)
+                      </span>
+                      <span className={pmStyles.optionSub}>
+                        Cards, UPI, netbanking via Razorpay
+                      </span>
+                    </span>
+                    {paymentMethod === "online" && (
+                      <span className={pmStyles.optionCheck}>
+                        <FiCheck size={12} />
+                      </span>
+                    )}
+                  </label>
+
+                  {/* COD is only ever rendered when the backend says it's
+                      enabled — never shown greyed-out or disabled. */}
+                  {codAvailable && (
+                    <label
+                      className={`${pmStyles.option} ${
+                        paymentMethod === "cod" ? pmStyles.optionActive : ""
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="cod"
+                        checked={paymentMethod === "cod"}
+                        onChange={() => setPaymentMethod("cod")}
+                        className={pmStyles.optionRadio}
+                      />
+                      <span className={pmStyles.optionIconWrap}>
+                        <FiPackage size={16} />
+                      </span>
+                      <span className={pmStyles.optionBody}>
+                        <span className={pmStyles.optionLabel}>
+                          Cash on Delivery
+                        </span>
+                        <span className={pmStyles.optionSub}>
+                          Pay in cash when your order arrives
+                        </span>
+                      </span>
+                      {paymentMethod === "cod" && (
+                        <span className={pmStyles.optionCheck}>
+                          <FiCheck size={12} />
+                        </span>
+                      )}
+                    </label>
+                  )}
+                </div>
+              )}
+
+              {paymentMethod === "cod" && codAvailable && !codWithinRange && (
+                <div className={pmStyles.codNote}>
+                  <FiAlertCircle />
+                  {paymentSettings.codMinOrderAmount > 0 &&
+                  totalAmount < paymentSettings.codMinOrderAmount
+                    ? `Cash on Delivery is only available for orders above ₹${paymentSettings.codMinOrderAmount.toLocaleString("en-IN")}`
+                    : `Cash on Delivery is only available for orders up to ₹${paymentSettings.codMaxOrderAmount.toLocaleString("en-IN")}`}
+                </div>
+              )}
+
+              {paymentMethod === "cod" && codAvailable && codWithinRange && (
+                <div className={pmStyles.codNote}>
+                  <FiPackage />
+                  You'll pay ₹{totalAmount.toLocaleString("en-IN")} in cash to
+                  the delivery agent when your order arrives. No payment is
+                  required now.
+                </div>
+              )}
+
+              {paymentState === "failed" && paymentStateMessage && (
+                <div
+                  className={`${pmStyles.paymentStateBanner} ${pmStyles.stateFailed}`}
+                >
+                  <FiAlertCircle /> {paymentStateMessage}
+                </div>
+              )}
+              {paymentState === "cancelled" && paymentStateMessage && (
+                <div
+                  className={`${pmStyles.paymentStateBanner} ${pmStyles.stateCancelled}`}
+                >
+                  <FiAlertCircle /> {paymentStateMessage}
+                </div>
+              )}
+              {paymentState === "verifying" && (
+                <div
+                  className={`${pmStyles.paymentStateBanner} ${pmStyles.stateVerifying}`}
+                >
+                  <FiLoader className={styles.spinIcon} /> Verifying your
+                  payment — please don't close this page.
+                </div>
+              )}
+            </div>
+
             <button type="submit" className={styles.payBtn} disabled={!canPay}>
-              <FiLock />{" "}
-              {paying
-                ? "Processing..."
-                : !isValidPincode(address.pincode)
-                  ? "Enter Pincode to Continue"
-                  : !quoteIsCurrent
-                    ? "Calculating Shipping..."
-                    : `Pay ₹${totalAmount.toLocaleString("en-IN")} with Razorpay`}
+              <FiLock /> {getButtonLabel()}
             </button>
 
             <div className={styles.secureNote}>
-              <FiLock size={11} /> 256-bit encrypted payment
+              <FiLock size={11} />{" "}
+              {paymentMethod === "cod"
+                ? "No online payment required for Cash on Delivery"
+                : "256-bit encrypted payment"}
             </div>
           </form>
 
@@ -435,6 +767,14 @@ const Checkout = () => {
             <div className={styles.summaryRow}>
               <span>Shipping</span>
               {renderShippingLine()}
+            </div>
+            <div className={styles.summaryRow}>
+              <span>Payment Method</span>
+              <span>
+                {paymentMethod === "cod"
+                  ? "Cash on Delivery"
+                  : "Online (Razorpay)"}
+              </span>
             </div>
             <div className={styles.summaryTotal}>
               <span>Total</span>
