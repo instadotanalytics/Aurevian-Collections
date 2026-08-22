@@ -275,18 +275,33 @@ const App = () => {
   ============================================ */}
             <Route path="/shop" element={<Shop />} />
             <Route path="/shop/:categorySlug" element={<Shop />} />
+
+            {/* ============================================
+                  GIFTS ROUTE - WITH HEADER
+                  ============================================ */}
             <Route path={ROUTES.GIFTS} element={<Gifts />} />
             <Route path={ROUTES.GIFT_GUIDE} element={<Gifts />} />
+            {/* ✅ NEW — giftGuideMegaMenu.byRecipient/byOccasion/byBudget
+                 links (e.g. "/gifts/birthday") previously had no route
+                 and fell through to the "*" catch-all -> home redirect. */}
+            <Route path="/gifts/:filterSlug" element={<Gifts />} />
 
             {/* ============================================
                   COLLECTIONS ROUTE - WITH HEADER
                   ============================================ */}
             <Route path={ROUTES.COLLECTIONS} element={<Collections />} />
+            {/* ✅ NEW — shopMegaMenu.byStyle / collectionsDropdown links
+                 (e.g. "/collections/bridal-collection") previously had
+                 no route. */}
+            <Route path="/collections/:filterSlug" element={<Collections />} />
 
             {/* ============================================
                   OFFERS ROUTE - WITH HEADER
                   ============================================ */}
             <Route path={ROUTES.OFFERS} element={<Offers />} />
+            {/* ✅ NEW — offersDropdown links (e.g. "/offers/flash-sale")
+                 previously had no route. */}
+            <Route path="/offers/:filterSlug" element={<Offers />} />
 
             {/* ============================================
                   PUBLIC PRODUCT DETAIL ROUTE - WITH HEADER ✅

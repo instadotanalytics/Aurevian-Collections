@@ -13,6 +13,9 @@ import {
   getProductsByPlacement,
   getPlacementCounts,
   getRelevantProducts,
+  // ❌ REMOVE these - they were removed from the controller
+  // getProductsByCollection,
+  // getProductsByCategory,
 } from "../controllers/jewelleryProductController.js";
 import { protectSeller } from "../middleware/sellerAuth.js";
 import upload, { handleMulterError } from "../middleware/upload.js";
@@ -39,6 +42,9 @@ router.get("/test", (req, res) => {
       placements: "/placements/:placement",
       placementCounts: "/placements/counts",
       relevant: "/:productId/relevant",
+      // ❌ Remove these routes too - they're not needed
+      // collections: "/collections/:collectionSlug",
+      // category: "/category/:categoryId",
       productBySlug: "/:slug",
       createProduct: "POST /",
       updateProduct: "PUT /:id",
@@ -76,6 +82,33 @@ router.get(
   getProductsByPlacement,
 );
 console.log("  📌 /placements/:placement route registered ✅");
+
+// ❌ REMOVE these routes - they were replaced by the extended getProductsByPlacement
+// router.get(
+//   "/collections/:collectionSlug",
+//   (req, res, next) => {
+//     console.log(
+//       "🔍 /collections/:collectionSlug route called with:",
+//       req.params.collectionSlug,
+//     );
+//     next();
+//   },
+//   getProductsByCollection,
+// );
+// console.log("  📌 /collections/:collectionSlug route registered ✅ (public)");
+
+// router.get(
+//   "/category/:categoryId",
+//   (req, res, next) => {
+//     console.log(
+//       "🔍 /category/:categoryId route called with:",
+//       req.params.categoryId,
+//     );
+//     next();
+//   },
+//   getProductsByCategory,
+// );
+// console.log("  📌 /category/:categoryId route registered ✅ (public)");
 
 // ============================================
 // ✅ NEW: PUBLIC ROUTE - Relevant Products ("You May Also Like")

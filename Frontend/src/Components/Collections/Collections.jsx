@@ -2,15 +2,10 @@
 
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
-import {
-  FiHeart,
-  FiShoppingBag,
-  FiCheck,
-  FiChevronDown,
-} from "react-icons/fi";
+import { FiHeart, FiShoppingBag, FiCheck, FiChevronDown } from "react-icons/fi";
 import { LuSlidersHorizontal } from "react-icons/lu";
 import styles from "./Collections.module.css";
 import Footer from "../../Pages/Layout/Footer/Footer.jsx";
@@ -25,6 +20,15 @@ import {
 const API_URL =
   import.meta.env.VITE_API_URL ||
   "https://aurevian-collections.onrender.com/api";
+
+// Same slug helper Header.jsx / Shop.jsx already use — kept identical
+// so a link generated in the header always resolves to the same filter
+// here.
+const slugify = (label) =>
+  label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 
 /* ----------------------------------------------------------------
    Data — Hero slides, features, categories, closing images
@@ -119,15 +123,12 @@ const CLOSING_IMAGES = [
   "https://i.pinimg.com/1200x/b4/7e/e8/b47ee8ae94d4253ef2da698538ac5c81.jpg",
 ];
 
-const FILTER_CATEGORIES = [
-  "All",
-  "Rings",
-  "Earrings",
-  "Necklaces",
-  "Bracelets",
-  "Anklets",
-  "Bridal Sets",
-];
+// ✅ REMOVED the hardcoded FILTER_CATEGORIES array. It sent the display
+// LABEL ("Rings") as `categoryId` to the API, which matches against real
+// ids like "rings" — so every non-"All" selection silently returned zero
+// products. Categories are now fetched live from the same seller-panel
+// -controlled endpoint Shop.jsx already uses (see the new effect below),
+// and the real `.id` is sent, not the label.
 
 const SORT_OPTIONS = [
   { value: "latest", label: "Sort by latest" },
@@ -209,6 +210,7 @@ function Reveal({
 export default function Collections() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { filterSlug } = useParams(); // e.g. "/collections/bridal-collection"
   const { byPlacement } = useSelector((state) => state.storefrontProduct);
   const { isAuthenticated } = useSelector((state) => state.auth);
   const cartItems = useSelector((state) => state.cart.items);
@@ -217,8 +219,25 @@ export default function Collections() {
   const heroRef = useRef(null);
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Filter states
+  // ✅ NEW: real, seller-panel-controlled shop categories — same source
+  // Shop.jsx uses. selectedCategory now stores a real category `id`
+  // ("rings"), never a display label.
+  const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
+
+  // ✅ NEW: the "style/collection" filter driven by the URL — this is
+  // what "Bridal Collection", "Party Wear" etc. from the header's
+  // Shop-by-Style column and Collections dropdown resolve to. It maps to
+  // specifications.collection on the product (see backend patch).
+  const [activeCollectionSlug, setActiveCollectionSlug] = useState(
+    filterSlug || null,
+  );
+  const [activeCollectionLabel, setActiveCollectionLabel] = useState(
+    filterSlug
+      ? filterSlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+      : null,
+  );
+
   const [priceRange, setPriceRange] = useState([0, 7000]);
   const [sortBy, setSortBy] = useState("latest");
   const [budgetFilter, setBudgetFilter] = useState("all");
@@ -249,6 +268,31 @@ export default function Collections() {
   const [refreshKey, setRefreshKey] = useState(0);
   const loaderRef = useRef(null);
 
+  // ✅ NEW: fetch real categories (seller-panel controlled via
+  // HeaderConfig -> shopMegaMenu.categories), same endpoint Shop.jsx uses.
+  useEffect(() => {
+    axios
+      .get(`${API_URL}/seller/products/categories`)
+      .then((res) => setCategories(res.data.data || []))
+      .catch((err) => {
+        console.error("Failed to fetch categories:", err);
+        setCategories([]);
+      });
+  }, []);
+
+  // ✅ NEW: keep the "collection/style" filter in sync if the user
+  // navigates between header links without a full page reload
+  // (e.g. clicking a different Shop-by-Style item while already on
+  // /collections/:filterSlug).
+  useEffect(() => {
+    setActiveCollectionSlug(filterSlug || null);
+    setActiveCollectionLabel(
+      filterSlug
+        ? filterSlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+        : null,
+    );
+  }, [filterSlug]);
+
   // Fetch products (infinite scroll)
   useEffect(() => {
     const load = async () => {
@@ -264,7 +308,11 @@ export default function Collections() {
             placement: "collections",
             page,
             limit: 10,
-            categoryId: selectedCategory !== "All" ? selectedCategory : undefined,
+            categoryId:
+              selectedCategory !== "All" ? selectedCategory : undefined,
+            collection: activeCollectionSlug
+              ? activeCollectionSlug.replace(/-/g, " ")
+              : undefined,
             sort: sortBy || undefined,
           }),
         ).unwrap();
@@ -285,7 +333,14 @@ export default function Collections() {
     };
 
     load();
-  }, [page, refreshKey, dispatch, selectedCategory, sortBy]);
+  }, [
+    page,
+    refreshKey,
+    dispatch,
+    selectedCategory,
+    sortBy,
+    activeCollectionSlug,
+  ]);
 
   // Reset on filter change
   useEffect(() => {
@@ -293,7 +348,13 @@ export default function Collections() {
     setAllProducts([]);
     setHasMore(true);
     setRefreshKey((k) => k + 1);
-  }, [selectedCategory, sortBy, budgetFilter, promotionFilter]);
+  }, [
+    selectedCategory,
+    sortBy,
+    budgetFilter,
+    promotionFilter,
+    activeCollectionSlug,
+  ]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -438,11 +499,15 @@ export default function Collections() {
     setPriceRange([0, 7000]);
     setSortBy("latest");
     setBudgetFilter("all");
-        setPromotionFilter("all");
+    setPromotionFilter("all");
     setPage(1);
     setAllProducts([]);
     setHasMore(true);
     setRefreshKey((k) => k + 1);
+    // Also clear the collection filter by navigating to the base collections page
+    if (activeCollectionSlug) {
+      navigate("/collections");
+    }
   };
 
   const openMobileFilter = () => {
@@ -535,7 +600,7 @@ export default function Collections() {
             ? Math.round(
                 ((p.pricing.originalPrice - p.pricing.salePrice) /
                   p.pricing.originalPrice) *
-                  100
+                  100,
               )
             : 0;
 
@@ -648,23 +713,16 @@ export default function Collections() {
               {/* Sort By — Desktop Sidebar */}
               <div className={styles.filterGroup}>
                 <span className={styles.filterGroupLabel}>Sort By</span>
-                <div
-                  className={styles.sidebarSortWrapper}
-                  ref={sidebarSortRef}
-                >
+                <div className={styles.sidebarSortWrapper} ref={sidebarSortRef}>
                   <button
                     className={styles.sidebarSortButton}
-                    onClick={() =>
-                      setIsSidebarSortOpen(!isSidebarSortOpen)
-                    }
+                    onClick={() => setIsSidebarSortOpen(!isSidebarSortOpen)}
                     aria-expanded={isSidebarSortOpen}
                   >
                     <span>{getSortLabel()}</span>
                     <FiChevronDown
                       className={`${styles.sidebarSortChevron} ${
-                        isSidebarSortOpen
-                          ? styles.sidebarSortChevronOpen
-                          : ""
+                        isSidebarSortOpen ? styles.sidebarSortChevronOpen : ""
                       }`}
                     />
                   </button>
@@ -692,20 +750,35 @@ export default function Collections() {
                 </div>
               </div>
 
-              {/* Category */}
+              {/* Category — ✅ now real, seller-panel data */}
               <div className={styles.filterGroup}>
                 <span className={styles.filterGroupLabel}>Category</span>
-                {FILTER_CATEGORIES.map((cat) => (
-                  <label key={cat} className={styles.filterOption}>
-                    <input
-                      type="radio"
-                      name="category"
-                      checked={selectedCategory === cat}
-                      onChange={() => setSelectedCategory(cat)}
-                    />
-                    {cat}
-                  </label>
-                ))}
+                <label className={styles.filterOption}>
+                  <input
+                    type="radio"
+                    name="category"
+                    checked={selectedCategory === "All"}
+                    onChange={() => setSelectedCategory("All")}
+                  />
+                  All
+                </label>
+                {categories.length === 0 ? (
+                  <span className={styles.filterEmptyNote}>
+                    No categories configured yet
+                  </span>
+                ) : (
+                  categories.map((c) => (
+                    <label key={c.id} className={styles.filterOption}>
+                      <input
+                        type="radio"
+                        name="category"
+                        checked={selectedCategory === c.id}
+                        onChange={() => setSelectedCategory(c.id)}
+                      />
+                      {c.label}
+                    </label>
+                  ))
+                )}
               </div>
 
               {/* Budget */}
@@ -749,9 +822,7 @@ export default function Collections() {
                   max="7000"
                   step="100"
                   value={priceRange[1]}
-                  onChange={(e) =>
-                    setPriceRange([0, Number(e.target.value)])
-                  }
+                  onChange={(e) => setPriceRange([0, Number(e.target.value)])}
                   className={styles.filterPriceInput}
                   style={{
                     "--_progress": `${(priceRange[1] / 7000) * 100}%`,
@@ -773,13 +844,25 @@ export default function Collections() {
 
             {/* Products */}
             <div className={styles.productsWrapper}>
-              {/* Desktop header: count only */}
+              {/* Desktop header: count + active style/collection filter */}
               <div className={styles.productsHeader}>
                 <span className={styles.productsCount}>
                   {isInitialLoading
                     ? "Loading..."
-                    : `Showing ${filteredProducts.length} results`}
+                    : activeCollectionLabel
+                      ? `Showing ${filteredProducts.length} results in "${activeCollectionLabel}"`
+                      : `Showing ${filteredProducts.length} results`}
                 </span>
+                {activeCollectionLabel && (
+                  <button
+                    type="button"
+                    className={styles.filterClearBtn}
+                    style={{ marginTop: 8 }}
+                    onClick={() => navigate("/collections")}
+                  >
+                    Clear "{activeCollectionLabel}" filter
+                  </button>
+                )}
               </div>
 
               {/* Skeleton Loading */}
@@ -798,8 +881,30 @@ export default function Collections() {
                 </div>
               )}
 
+              {/* Empty state — a real filter matched zero products */}
+              {!isInitialLoading && filteredProducts.length === 0 && (
+                <div className={styles.emptyState}>
+                  <div className={styles.emptyStateIcon}>✨</div>
+                  <h3>
+                    {activeCollectionLabel
+                      ? `No products in "${activeCollectionLabel}" yet`
+                      : "No products in this collection yet"}
+                  </h3>
+                  <p>
+                    {activeCollectionLabel
+                      ? "This collection is still being curated. Check back soon, or browse everything below."
+                      : "We're currently updating this section. Please check back soon."}
+                  </p>
+                  {activeCollectionLabel && (
+                    <Link to="/collections" className={styles.emptyStateButton}>
+                      Browse All Collections
+                    </Link>
+                  )}
+                </div>
+              )}
+
               {/* Products */}
-              {!isInitialLoading && (
+              {!isInitialLoading && filteredProducts.length > 0 && (
                 <div className={styles.productsGrid}>
                   {filteredProducts.map((product) => {
                     const inCart = isInCart(product._id);
@@ -812,7 +917,7 @@ export default function Collections() {
                             ((product.pricing.originalPrice -
                               product.pricing.salePrice) /
                               product.pricing.originalPrice) *
-                              100
+                              100,
                           )
                         : 0;
                     return (
@@ -845,9 +950,7 @@ export default function Collections() {
                             <button
                               type="button"
                               className={`${styles.wishlistBtn} ${
-                                inWishlist
-                                  ? styles.wishlistBtnActive
-                                  : ""
+                                inWishlist ? styles.wishlistBtnActive : ""
                               }`}
                               onClick={(e) => {
                                 e.preventDefault();
@@ -877,9 +980,7 @@ export default function Collections() {
                             {product.productName}
                           </Link>
                           <div className={styles.productPriceRow}>
-                            <span
-                              className={styles.productCurrentPrice}
-                            >
+                            <span className={styles.productCurrentPrice}>
                               ₹
                               {(
                                 product.pricing?.salePrice ||
@@ -888,11 +989,7 @@ export default function Collections() {
                             </span>
                             {product.pricing?.salePrice &&
                               product.pricing?.originalPrice && (
-                                <span
-                                  className={
-                                    styles.productOriginalPrice
-                                  }
-                                >
+                                <span className={styles.productOriginalPrice}>
                                   ₹
                                   {product.pricing.originalPrice.toLocaleString()}
                                 </span>
@@ -901,13 +998,9 @@ export default function Collections() {
                           <button
                             type="button"
                             className={`${styles.productAddBtn} ${
-                              inCart
-                                ? styles.productAddBtnActive
-                                : ""
+                              inCart ? styles.productAddBtnActive : ""
                             }`}
-                            onClick={() =>
-                              handleAddToCart(product._id)
-                            }
+                            onClick={() => handleAddToCart(product._id)}
                             disabled={inCart || addingToCart}
                           >
                             {inCart ? (
@@ -917,9 +1010,7 @@ export default function Collections() {
                             ) : (
                               <>
                                 <FiShoppingBag />{" "}
-                                {addingToCart
-                                  ? "Adding..."
-                                  : "Add to Cart"}
+                                {addingToCart ? "Adding..." : "Add to Cart"}
                               </>
                             )}
                           </button>
@@ -932,17 +1023,11 @@ export default function Collections() {
 
               {/* Infinite scroll loader */}
               {!isInitialLoading && hasMore && (
-                <div
-                  ref={loaderRef}
-                  className={styles.infiniteLoader}
-                >
+                <div ref={loaderRef} className={styles.infiniteLoader}>
                   {isLoadingMore && (
                     <div className={styles.skeletonGrid}>
                       {Array.from({ length: 3 }).map((_, i) => (
-                        <div
-                          className={styles.skeletonCard}
-                          key={`more-${i}`}
-                        >
+                        <div className={styles.skeletonCard} key={`more-${i}`}>
                           <div className={styles.skeletonImage} />
                           <div className={styles.skeletonText} />
                           <div
@@ -956,23 +1041,15 @@ export default function Collections() {
                 </div>
               )}
 
-              {!isInitialLoading &&
-                !hasMore &&
-                filteredProducts.length > 0 && (
-                  <div className={styles.endMessage}>
-                    No more products
-                  </div>
-                )}
+              {!isInitialLoading && !hasMore && filteredProducts.length > 0 && (
+                <div className={styles.endMessage}>No more products</div>
+              )}
             </div>
           </div>
 
           {/* ---------------- From: Blush Set ---------------- */}
           <div className={styles.featureSection}>
-            <Reveal
-              as="div"
-              className={styles.featureImageWrap}
-              delay={0}
-            >
+            <Reveal as="div" className={styles.featureImageWrap} delay={0}>
               <img
                 className={styles.featureImage}
                 src="https://i.pinimg.com/736x/07/ac/c1/07acc1c388356058bb35ea2b1bb7e8c9.jpg"
@@ -981,40 +1058,25 @@ export default function Collections() {
               />
             </Reveal>
 
-            <Reveal
-              as="div"
-              className={styles.featureContent}
-              delay={150}
-            >
+            <Reveal as="div" className={styles.featureContent} delay={150}>
               <span className={styles.pill}>From: Blush Set</span>
               <h3 className={styles.featureTitle}>
                 Introducing The Blossom Set
               </h3>
               <p className={styles.featureBody}>
-                Inspired by nature's delicate beauty, the Blossom Set
-                brings a touch of freshness and femininity to your
-                everyday look.
+                Inspired by nature's delicate beauty, the Blossom Set brings a
+                touch of freshness and femininity to your everyday look.
               </p>
 
               <ul className={styles.featureList}>
                 {FEATURES.map((f) => (
-                  <li
-                    className={styles.featureItem}
-                    key={f.title}
-                  >
-                    <span
-                      className={styles.featureDot}
-                      aria-hidden="true"
-                    >
+                  <li className={styles.featureItem} key={f.title}>
+                    <span className={styles.featureDot} aria-hidden="true">
                       ✦
                     </span>
                     <div>
-                      <p className={styles.featureItemTitle}>
-                        {f.title}
-                      </p>
-                      <p className={styles.featureItemBody}>
-                        {f.body}
-                      </p>
+                      <p className={styles.featureItemTitle}>{f.title}</p>
+                      <p className={styles.featureItemBody}>{f.body}</p>
                     </div>
                   </li>
                 ))}
@@ -1032,11 +1094,7 @@ export default function Collections() {
         </div>
 
         {/* ---------------- Explore More ---------------- */}
-        <Reveal
-          as="div"
-          className={styles.exploreSection}
-          delay={100}
-        >
+        <Reveal as="div" className={styles.exploreSection} delay={100}>
           <div className={styles.container}>
             <div className={styles.exploreInner}>
               <div className={styles.exploreHeading}>
@@ -1053,9 +1111,7 @@ export default function Collections() {
                     <span className={styles.exploreThumb}>
                       <img src={cat.img} alt="" loading="lazy" />
                     </span>
-                    <span className={styles.exploreLabel}>
-                      {cat.name}
-                    </span>
+                    <span className={styles.exploreLabel}>{cat.name}</span>
                   </div>
                 ))}
               </div>
@@ -1066,11 +1122,7 @@ export default function Collections() {
         {/* ---------------- Shine in your own way ---------------- */}
         <div className={styles.container}>
           <div className={styles.closingSection}>
-            <Reveal
-              as="div"
-              className={styles.closingContent}
-              delay={100}
-            >
+            <Reveal as="div" className={styles.closingContent} delay={100}>
               <h3 className={styles.closingTitle}>
                 Shine in <em>your</em>
                 <br />
@@ -1106,18 +1158,13 @@ export default function Collections() {
 
         {/* ---------------- Mobile Bottom Sheet Filter ---------------- */}
         {isMobileFilterOpen && (
-          <div
-            className={styles.filterOverlay}
-            onClick={closeMobileFilter}
-          />
+          <div className={styles.filterOverlay} onClick={closeMobileFilter} />
         )}
 
         <div
           ref={sheetRef}
           className={`${styles.mobileFilterSheet} ${
-            isMobileFilterOpen
-              ? styles.mobileFilterSheetActive
-              : ""
+            isMobileFilterOpen ? styles.mobileFilterSheetActive : ""
           }`}
         >
           <div
@@ -1147,26 +1194,17 @@ export default function Collections() {
           <div className={styles.mobileFilterContent}>
             {/* Sort By */}
             <div className={styles.mobileFilterGroup}>
-              <span className={styles.mobileFilterGroupLabel}>
-                Sort By
-              </span>
-              <div
-                className={styles.mobileSortWrapper}
-                ref={mobileSortRef}
-              >
+              <span className={styles.mobileFilterGroupLabel}>Sort By</span>
+              <div className={styles.mobileSortWrapper} ref={mobileSortRef}>
                 <button
                   className={styles.mobileSortButton}
-                  onClick={() =>
-                    setIsMobileSortOpen(!isMobileSortOpen)
-                  }
+                  onClick={() => setIsMobileSortOpen(!isMobileSortOpen)}
                   aria-expanded={isMobileSortOpen}
                 >
                   <span>{getSortLabel()}</span>
                   <FiChevronDown
                     className={`${styles.mobileSortChevron} ${
-                      isMobileSortOpen
-                        ? styles.mobileSortChevronOpen
-                        : ""
+                      isMobileSortOpen ? styles.mobileSortChevronOpen : ""
                     }`}
                   />
                 </button>
@@ -1181,9 +1219,7 @@ export default function Collections() {
                             ? styles.mobileSortOptionActive
                             : ""
                         }`}
-                        onClick={() =>
-                          handleSortSelect(option.value)
-                        }
+                        onClick={() => handleSortSelect(option.value)}
                       >
                         {option.label}
                       </button>
@@ -1193,40 +1229,45 @@ export default function Collections() {
               </div>
             </div>
 
-            {/* Category */}
+            {/* Category — ✅ now real, seller-panel data */}
             <div className={styles.mobileFilterGroup}>
-              <span className={styles.mobileFilterGroupLabel}>
-                Category
-              </span>
+              <span className={styles.mobileFilterGroupLabel}>Category</span>
               <div className={styles.mobileFilterGrid}>
-                {FILTER_CATEGORIES.map((cat) => (
-                  <label
-                    key={cat}
-                    className={styles.mobileFilterOption}
-                  >
-                    <input
-                      type="radio"
-                      name="mobile_category"
-                      checked={selectedCategory === cat}
-                      onChange={() => setSelectedCategory(cat)}
-                    />
-                    {cat}
-                  </label>
-                ))}
+                <label className={styles.mobileFilterOption}>
+                  <input
+                    type="radio"
+                    name="mobile_category"
+                    checked={selectedCategory === "All"}
+                    onChange={() => setSelectedCategory("All")}
+                  />
+                  All
+                </label>
+                {categories.length === 0 ? (
+                  <span className={styles.filterEmptyNote}>
+                    No categories configured yet
+                  </span>
+                ) : (
+                  categories.map((c) => (
+                    <label key={c.id} className={styles.mobileFilterOption}>
+                      <input
+                        type="radio"
+                        name="mobile_category"
+                        checked={selectedCategory === c.id}
+                        onChange={() => setSelectedCategory(c.id)}
+                      />
+                      {c.label}
+                    </label>
+                  ))
+                )}
               </div>
             </div>
 
             {/* Budget */}
             <div className={styles.mobileFilterGroup}>
-              <span className={styles.mobileFilterGroupLabel}>
-                Budget
-              </span>
+              <span className={styles.mobileFilterGroupLabel}>Budget</span>
               <div className={styles.mobileFilterGrid}>
                 {BUDGET_OPTIONS.map((opt) => (
-                  <label
-                    key={opt.value}
-                    className={styles.mobileFilterOption}
-                  >
+                  <label key={opt.value} className={styles.mobileFilterOption}>
                     <input
                       type="radio"
                       name="mobile_budget"
@@ -1241,22 +1282,15 @@ export default function Collections() {
 
             {/* Promotions */}
             <div className={styles.mobileFilterGroup}>
-              <span className={styles.mobileFilterGroupLabel}>
-                Promotions
-              </span>
+              <span className={styles.mobileFilterGroupLabel}>Promotions</span>
               <div className={styles.mobileFilterGrid}>
                 {PROMOTION_OPTIONS.map((opt) => (
-                  <label
-                    key={opt.value}
-                    className={styles.mobileFilterOption}
-                  >
+                  <label key={opt.value} className={styles.mobileFilterOption}>
                     <input
                       type="radio"
                       name="mobile_promotion"
                       checked={promotionFilter === opt.value}
-                      onChange={() =>
-                        setPromotionFilter(opt.value)
-                      }
+                      onChange={() => setPromotionFilter(opt.value)}
                     />
                     {opt.label}
                   </label>
@@ -1266,18 +1300,14 @@ export default function Collections() {
 
             {/* Price Range */}
             <div className={styles.mobileFilterGroup}>
-              <span className={styles.mobileFilterGroupLabel}>
-                Price Range
-              </span>
+              <span className={styles.mobileFilterGroupLabel}>Price Range</span>
               <input
                 type="range"
                 min="0"
                 max="7000"
                 step="100"
                 value={priceRange[1]}
-                onChange={(e) =>
-                  setPriceRange([0, Number(e.target.value)])
-                }
+                onChange={(e) => setPriceRange([0, Number(e.target.value)])}
                 className={styles.filterPriceInput}
                 style={{
                   "--_progress": `${(priceRange[1] / 7000) * 100}%`,
@@ -1289,10 +1319,7 @@ export default function Collections() {
               </div>
             </div>
 
-            <button
-              className={styles.filterClearBtn}
-              onClick={clearAllFilters}
-            >
+            <button className={styles.filterClearBtn} onClick={clearAllFilters}>
               Clear All Filters
             </button>
 

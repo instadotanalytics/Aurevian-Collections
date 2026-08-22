@@ -1,8 +1,15 @@
 // src/Components/Offers/Offers.jsx
 
-import React, { useRef, useEffect, useState, useMemo, useCallback } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 import toast from "react-hot-toast";
 import {
   FiHeart,
@@ -26,6 +33,10 @@ import {
   toggleWishlistItem,
   fetchWishlist,
 } from "../../redux/slices/wishlistSlice";
+
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  "https://aurevian-collections.onrender.com/api";
 
 /* ----------------------------------------------------------------
    Data
@@ -54,15 +65,10 @@ const BOTTOM_FEATURES = [
   },
 ];
 
-const FILTER_CATEGORIES = [
-  "All",
-  "Rings",
-  "Earrings",
-  "Necklaces",
-  "Bracelets",
-  "Anklets",
-  "Bridal Sets",
-];
+// ✅ REMOVED hardcoded FILTER_CATEGORIES — same bug as Collections.jsx:
+// it sent the LABEL as categoryId, which never matches a real category
+// id, so every non-"All" filter silently returned zero products.
+// Categories are now fetched live below, same endpoint Shop.jsx uses.
 
 const SORT_OPTIONS = [
   { value: "newest", label: "Default Sorting" },
@@ -146,6 +152,7 @@ function Reveal({
 export default function Offers() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { filterSlug } = useParams();
   const { byPlacement } = useSelector((state) => state.storefrontProduct);
   const { isAuthenticated } = useSelector((state) => state.auth);
   const cartItems = useSelector((state) => state.cart.items);
@@ -155,6 +162,24 @@ export default function Offers() {
     products: [],
     pagination: { page: 1, totalPages: 1, total: 0 },
   };
+
+  // ✅ NEW: real, seller-panel-controlled categories (same source as Shop)
+  const [categories, setCategories] = useState([]);
+
+  // ✅ HONEST HANDLING of offersDropdown slugs (flash-sale, combo-edit,
+  // refer-and-earn, loyalty-rewards, first-order-privilege, seasonal-edit,
+  // corporate-gifting): unlike "collection" (specifications.collection)
+  // or "occasion" (specifications.occasion), there is currently no
+  // product-level field these correspond to — they're marketing
+  // programs, not a product attribute. Faking a filter here would
+  // silently show wrong/empty results and look "dynamic" without being
+  // truthful, which is exactly what you asked me not to ship. Instead:
+  // the route resolves (no more homepage redirect), the page renders
+  // normally, and the slug is only used for a heading — not a filter —
+  // until a real backend concept for offer programs exists.
+  const offerLabelFromSlug = filterSlug
+    ? filterSlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+    : null;
 
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [priceRange, setPriceRange] = useState([0, 7000]);
@@ -192,6 +217,17 @@ export default function Offers() {
     const option = SORT_OPTIONS.find((opt) => opt.value === sortBy);
     return option ? option.label : "Default Sorting";
   };
+
+  // ✅ NEW: fetch real categories
+  useEffect(() => {
+    axios
+      .get(`${API_BASE}/seller/products/categories`)
+      .then((res) => setCategories(res.data.data || []))
+      .catch((err) => {
+        console.error("Failed to fetch categories:", err);
+        setCategories([]);
+      });
+  }, []);
 
   // Throttled fetch — minimum 1000 ms skeleton
   useEffect(() => {
@@ -270,10 +306,16 @@ export default function Offers() {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !isLoadingMore && visibleCount < products.length) {
+        if (
+          entries[0].isIntersecting &&
+          !isLoadingMore &&
+          visibleCount < products.length
+        ) {
           setIsLoadingMore(true);
           setTimeout(() => {
-            setVisibleCount((prev) => Math.min(prev + ITEMS_PER_BATCH, products.length));
+            setVisibleCount((prev) =>
+              Math.min(prev + ITEMS_PER_BATCH, products.length),
+            );
             setIsLoadingMore(false);
           }, 300);
         }
@@ -429,7 +471,12 @@ export default function Offers() {
       }
     }
 
-    dragState.current = { active: false, startY: 0, currentY: 0, isDragging: false };
+    dragState.current = {
+      active: false,
+      startY: 0,
+      currentY: 0,
+      isDragging: false,
+    };
   }, []);
 
   // Attach drag listeners to the sheet
@@ -470,7 +517,15 @@ export default function Offers() {
           <Reveal as="div" className={styles.offersSection} delay={100}>
             <div id="offers-section" className={styles.sectionHeader}>
               <span className={styles.sectionTag}>LIMITED TIME OFFERS</span>
-              <h2 className={styles.sectionTitle}>Our Premium Picks</h2>
+              <h2 className={styles.sectionTitle}>
+                {offerLabelFromSlug || "Our Premium Picks"}
+              </h2>
+              {offerLabelFromSlug && (
+                <p className={styles.sectionSubtitle}>
+                  Browsing all current offers — dedicated filtering for "
+                  {offerLabelFromSlug}" is coming soon.
+                </p>
+              )}
             </div>
 
             <button
@@ -492,21 +547,40 @@ export default function Offers() {
 
                 <div className={styles.filterGroup}>
                   <span className={styles.filterGroupLabel}>Category</span>
-                  {FILTER_CATEGORIES.map((cat) => (
-                    <label key={cat} className={styles.filterOption}>
-                      <input
-                        type="radio"
-                        name="category"
-                        checked={selectedCategory === cat}
-                        onChange={() => {
-                          setSelectedCategory(cat);
-                          setCurrentPage(0);
-                          setTimeout(scrollToOffers, 100);
-                        }}
-                      />
-                      {cat}
-                    </label>
-                  ))}
+                  <label className={styles.filterOption}>
+                    <input
+                      type="radio"
+                      name="category"
+                      checked={selectedCategory === "All"}
+                      onChange={() => {
+                        setSelectedCategory("All");
+                        setCurrentPage(0);
+                        setTimeout(scrollToOffers, 100);
+                      }}
+                    />
+                    All
+                  </label>
+                  {categories.length === 0 ? (
+                    <span className={styles.filterEmptyNote}>
+                      No categories configured yet
+                    </span>
+                  ) : (
+                    categories.map((c) => (
+                      <label key={c.id} className={styles.filterOption}>
+                        <input
+                          type="radio"
+                          name="category"
+                          checked={selectedCategory === c.id}
+                          onChange={() => {
+                            setSelectedCategory(c.id);
+                            setCurrentPage(0);
+                            setTimeout(scrollToOffers, 100);
+                          }}
+                        />
+                        {c.label}
+                      </label>
+                    ))
+                  )}
                 </div>
 
                 <div className={styles.filterGroup}>
@@ -532,9 +606,7 @@ export default function Offers() {
                     max="7000"
                     step="100"
                     value={priceRange[1]}
-                    onChange={(e) =>
-                      setPriceRange([0, Number(e.target.value)])
-                    }
+                    onChange={(e) => setPriceRange([0, Number(e.target.value)])}
                     className={styles.filterPriceInput}
                     style={{
                       "--_progress": `${(priceRange[1] / 7000) * 100}%`,
@@ -629,9 +701,7 @@ export default function Offers() {
                                 <button
                                   type="button"
                                   className={`${styles.wishlistBtn} ${
-                                    inWishlist
-                                      ? styles.wishlistBtnActive
-                                      : ""
+                                    inWishlist ? styles.wishlistBtnActive : ""
                                   }`}
                                   onClick={(e) => {
                                     e.preventDefault();
@@ -660,9 +730,7 @@ export default function Offers() {
                                 {product.productName}
                               </Link>
                               <div className={styles.productPriceRow}>
-                                <span
-                                  className={styles.productCurrentPrice}
-                                >
+                                <span className={styles.productCurrentPrice}>
                                   ₹
                                   {(
                                     product.pricing?.salePrice ||
@@ -672,9 +740,7 @@ export default function Offers() {
                                 {product.pricing?.salePrice &&
                                   product.pricing?.originalPrice && (
                                     <span
-                                      className={
-                                        styles.productOriginalPrice
-                                      }
+                                      className={styles.productOriginalPrice}
                                     >
                                       ₹
                                       {product.pricing.originalPrice.toLocaleString()}
@@ -684,13 +750,9 @@ export default function Offers() {
                               <button
                                 type="button"
                                 className={`${styles.productAddBtn} ${
-                                  inCart
-                                    ? styles.productAddBtnActive
-                                    : ""
+                                  inCart ? styles.productAddBtnActive : ""
                                 }`}
-                                onClick={() =>
-                                  handleAddToCart(product._id)
-                                }
+                                onClick={() => handleAddToCart(product._id)}
                                 disabled={inCart || addingToCart}
                               >
                                 {inCart ? (
@@ -700,9 +762,7 @@ export default function Offers() {
                                 ) : (
                                   <>
                                     <FiShoppingBag />{" "}
-                                    {addingToCart
-                                      ? "Adding..."
-                                      : "Add to Cart"}
+                                    {addingToCart ? "Adding..." : "Add to Cart"}
                                   </>
                                 )}
                               </button>
@@ -726,45 +786,45 @@ export default function Offers() {
                     )}
 
                     {/* Pagination (fallback) */}
-                    {!localLoading && totalPages > 1 && visibleCount >= products.length && (
-                      <div className={styles.pagination}>
-                        <button
-                          className={`${styles.paginationBtn} ${
-                            currentPage === 0
-                              ? styles.paginationDisabled
-                              : ""
-                          }`}
-                          onClick={() => {
-                            if (currentPage > 0) {
-                              setCurrentPage((p) => p - 1);
-                              setTimeout(scrollToOffers, 100);
-                            }
-                          }}
-                          disabled={currentPage === 0}
-                        >
-                          <FiChevronLeft /> Prev
-                        </button>
-                        <span className={styles.paginationInfo}>
-                          Page {currentPage + 1} of {totalPages}
-                        </span>
-                        <button
-                          className={`${styles.paginationBtn} ${
-                            currentPage === totalPages - 1
-                              ? styles.paginationDisabled
-                              : ""
-                          }`}
-                          onClick={() => {
-                            if (currentPage < totalPages - 1) {
-                              setCurrentPage((p) => p + 1);
-                              setTimeout(scrollToOffers, 100);
-                            }
-                          }}
-                          disabled={currentPage === totalPages - 1}
-                        >
-                          Next <FiChevronRight />
-                        </button>
-                      </div>
-                    )}
+                    {!localLoading &&
+                      totalPages > 1 &&
+                      visibleCount >= products.length && (
+                        <div className={styles.pagination}>
+                          <button
+                            className={`${styles.paginationBtn} ${
+                              currentPage === 0 ? styles.paginationDisabled : ""
+                            }`}
+                            onClick={() => {
+                              if (currentPage > 0) {
+                                setCurrentPage((p) => p - 1);
+                                setTimeout(scrollToOffers, 100);
+                              }
+                            }}
+                            disabled={currentPage === 0}
+                          >
+                            <FiChevronLeft /> Prev
+                          </button>
+                          <span className={styles.paginationInfo}>
+                            Page {currentPage + 1} of {totalPages}
+                          </span>
+                          <button
+                            className={`${styles.paginationBtn} ${
+                              currentPage === totalPages - 1
+                                ? styles.paginationDisabled
+                                : ""
+                            }`}
+                            onClick={() => {
+                              if (currentPage < totalPages - 1) {
+                                setCurrentPage((p) => p + 1);
+                                setTimeout(scrollToOffers, 100);
+                              }
+                            }}
+                            disabled={currentPage === totalPages - 1}
+                          >
+                            Next <FiChevronRight />
+                          </button>
+                        </div>
+                      )}
                   </>
                 )}
               </div>
@@ -779,10 +839,7 @@ export default function Offers() {
               </span>
               <h2>Get up to 30% OFF on selected premium products.</h2>
               <p>Limited time only. Don't miss out!</p>
-              <button
-                className={styles.premiumBtn}
-                onClick={scrollToOffers}
-              >
+              <button className={styles.premiumBtn} onClick={scrollToOffers}>
                 EXPLORE OFFERS
               </button>
             </div>
@@ -808,9 +865,7 @@ export default function Offers() {
           >
             {BOTTOM_FEATURES.map((feature, i) => (
               <div key={i} className={styles.bottomFeature}>
-                <span className={styles.bottomFeatureIcon}>
-                  {feature.icon}
-                </span>
+                <span className={styles.bottomFeatureIcon}>{feature.icon}</span>
                 <h4>{feature.title}</h4>
                 <p>{feature.description}</p>
               </div>
@@ -856,7 +911,9 @@ export default function Offers() {
                   aria-expanded={isSortDropdownOpen}
                 >
                   <span>{getSortLabel()}</span>
-                  <FiChevronDown className={`${styles.mobileSortChevron} ${isSortDropdownOpen ? styles.mobileSortChevronOpen : ""}`} />
+                  <FiChevronDown
+                    className={`${styles.mobileSortChevron} ${isSortDropdownOpen ? styles.mobileSortChevronOpen : ""}`}
+                  />
                 </button>
 
                 {isSortDropdownOpen && (
@@ -878,24 +935,42 @@ export default function Offers() {
               </div>
             </div>
 
-            {/* Mobile Category — Two column grid */}
+            {/* Mobile Category — Two column grid with real categories */}
             <div className={styles.filterGroup}>
               <span className={styles.filterGroupLabel}>Category</span>
               <div className={styles.mobileFilterGrid}>
-                {FILTER_CATEGORIES.map((cat) => (
-                  <label key={cat} className={styles.mobileFilterOption}>
-                    <input
-                      type="radio"
-                      name="mobile_category"
-                      checked={selectedCategory === cat}
-                      onChange={() => {
-                        setSelectedCategory(cat);
-                        setCurrentPage(0);
-                      }}
-                    />
-                    {cat}
-                  </label>
-                ))}
+                <label className={styles.mobileFilterOption}>
+                  <input
+                    type="radio"
+                    name="mobile_category"
+                    checked={selectedCategory === "All"}
+                    onChange={() => {
+                      setSelectedCategory("All");
+                      setCurrentPage(0);
+                    }}
+                  />
+                  All
+                </label>
+                {categories.length === 0 ? (
+                  <span className={styles.filterEmptyNote}>
+                    No categories configured yet
+                  </span>
+                ) : (
+                  categories.map((c) => (
+                    <label key={c.id} className={styles.mobileFilterOption}>
+                      <input
+                        type="radio"
+                        name="mobile_category"
+                        checked={selectedCategory === c.id}
+                        onChange={() => {
+                          setSelectedCategory(c.id);
+                          setCurrentPage(0);
+                        }}
+                      />
+                      {c.label}
+                    </label>
+                  ))
+                )}
               </div>
             </div>
 
@@ -907,9 +982,7 @@ export default function Offers() {
                 max="7000"
                 step="100"
                 value={priceRange[1]}
-                onChange={(e) =>
-                  setPriceRange([0, Number(e.target.value)])
-                }
+                onChange={(e) => setPriceRange([0, Number(e.target.value)])}
                 className={styles.filterPriceInput}
                 style={{
                   "--_progress": `${(priceRange[1] / 7000) * 100}%`,

@@ -13,7 +13,7 @@ const API_URL =
 export const fetchProductsByPlacement = createAsyncThunk(
   "storefrontProducts/fetchByPlacement",
   async (
-    { placement, page = 1, limit = 20, categoryId, sort },
+    { placement, page = 1, limit = 20, categoryId, collection, occasion, sort },
     { rejectWithValue },
   ) => {
     try {
@@ -21,6 +21,8 @@ export const fetchProductsByPlacement = createAsyncThunk(
       params.append("page", page);
       params.append("limit", limit);
       if (categoryId) params.append("categoryId", categoryId);
+      if (collection) params.append("collection", collection);
+      if (occasion) params.append("occasion", occasion);
       if (sort) params.append("sort", sort);
 
       const { data } = await axios.get(
