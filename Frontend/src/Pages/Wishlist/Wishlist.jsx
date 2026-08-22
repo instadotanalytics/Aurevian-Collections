@@ -42,9 +42,9 @@ const Wishlist = () => {
         addItemToCart({ productId: item.product, quantity: 1 }),
       ).unwrap();
       dispatch(removeWishlistItem(item.product));
-      toast.success("Moved to cart");
+      toast.success("Add to cart");
     } catch (err) {
-      toast.error(err || "Failed to move to cart");
+      toast.error(err || "Failed to Add to cart");
     }
   };
 
@@ -143,7 +143,7 @@ const Wishlist = () => {
                         className={styles.moveToCartSelected}
                         onClick={() => moveToCart(item)}
                       >
-                        <FaShoppingBag /> Move to Cart
+                        <FaShoppingBag /> Add to Cart
                       </button>
                     </div>
                   </div>
@@ -153,11 +153,7 @@ const Wishlist = () => {
           )}
         </div>
 
-        {wishlist.length > 0 && (
-          <div className={styles.bottomActions}>
-            <span>{wishlist.length} items in wishlist</span>
-          </div>
-        )}
+        
 
         <div className={styles.bottomBanner}>
           <div className={styles.bannerContent}>

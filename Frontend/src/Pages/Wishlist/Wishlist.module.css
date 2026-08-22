@@ -31,7 +31,7 @@
   max-width: 1170px;
   margin: 130px auto;
   padding: 0;
-  background: #faf8f6;
+  background:transparent;
   font-family:
     "Inter",
     -apple-system,
@@ -44,7 +44,7 @@
    SHIPPING BANNER
    ============================================ */
 .shippingBanner {
-  background: var(--gold-gradient);
+  background: transparent;
   color: white;
   text-align: center;
   padding: 1rem;
@@ -59,10 +59,10 @@
    ============================================ */
 .header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 1.5rem 2rem;
-  background: white;
+  background: rgba(255, 255, 255, 0);
   border-bottom: 1px solid var(--border);
 }
 
@@ -96,7 +96,7 @@
   color: var(--gray);
   background: var(--light-gray);
   padding: 0.3rem 1rem;
-  border-radius: 20px;
+;
 }
 
 /* ============================================
@@ -106,7 +106,7 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  background: white;
+  background: rgba(255, 255, 255, 0);
 }
 
 /* ============================================
@@ -135,7 +135,7 @@
   width: 120px;
   height: 120px;
   background: var(--light-gray);
-  border-radius: 8px;
+
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -292,7 +292,7 @@
 
 .stockStatus {
   padding: 0.2rem 0.8rem;
-  border-radius: 20px;
+
   font-size: 0.7rem;
   font-weight: 500;
   width: fit-content;
@@ -322,7 +322,7 @@
   background: var(--gold-gradient);
   color: white;
   border: none;
-  border-radius: 6px;
+
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
@@ -342,7 +342,7 @@
   justify-content: flex-end;
   align-items: center;
   padding: 1rem 2rem;
-  background: white;
+  background: rgba(255, 255, 255, 0);
   border-top: 1px solid var(--border);
   margin-top: 0;
   gap: 1rem;
@@ -384,7 +384,7 @@
   cursor: pointer;
   transition: var(--transition);
   text-decoration: none;
-  border-radius: 6px;
+ 
 }
 
 .exploreBtn:hover {
@@ -397,7 +397,7 @@
    ============================================ */
 .bottomBanner {
   padding: 3rem 2rem;
-  background: linear-gradient(135deg, var(--dark) 0%, #2d1f14 100%);
+  background: linear-gradient(135deg, var(--dark) 0%, #b85001 100%);
   border-top: 1px solid var(--gold);
   position: relative;
   overflow: hidden;
@@ -428,7 +428,7 @@
 
 .bannerHeart {
   font-size: 2.5rem;
-  color: var(--gold);
+  color: rgb(255, 123, 0);
   margin-bottom: 1rem;
 }
 
@@ -591,7 +591,7 @@
   .imageWrapper {
     width: 80px;
     height: 80px;
-    border-radius: 6px;
+ 
   }
 
   .productImage {

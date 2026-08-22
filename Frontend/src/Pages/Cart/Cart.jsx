@@ -403,15 +403,7 @@ const Cart = () => {
                 with confidence.
               </p>
             </div>
-            <div className={styles.whyRight}>
-              <div className={styles.whyImage}>
-                <img
-                  src={logo}
-                  alt="Aurevian Logo"
-                  className={styles.whyImageLogo}
-                />
-              </div>
-            </div>
+           
           </div>
         </section>
       </div>
