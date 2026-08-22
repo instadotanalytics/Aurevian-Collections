@@ -1,10 +1,9 @@
 // src/Pages/Profile/tabs/WishlistTab.jsx
 
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   FiHeart,
-  FiShoppingBag,
   FiTrash2,
   FiStar,
   FiStar as FiStarFilled,
@@ -15,20 +14,80 @@ import toast from "react-hot-toast";
 import { removeWishlist } from "../../../redux/slices/profileSlice";
 import styles from "../Profile.module.css";
 
+// ── Pure helpers, hoisted so they aren't recreated every render ──
+const renderStars = (rating) => {
+  const stars = [];
+  const fullStars = Math.floor(rating || 0);
+  const hasHalfStar = (rating || 0) % 1 >= 0.5;
+
+  for (let i = 0; i < fullStars; i++) {
+    stars.push(<FiStarFilled key={`star-${i}`} className={styles.starFilled} />);
+  }
+  if (hasHalfStar) {
+    stars.push(<FiStarFilled key="half-star" className={styles.starHalf} />);
+  }
+  const emptyStars = 5 - stars.length;
+  for (let i = 0; i < emptyStars; i++) {
+    stars.push(<FiStar key={`empty-${i}`} className={styles.starEmpty} />);
+  }
+  return stars;
+};
+
+const getStockStatus = (stock) => {
+  if (stock > 10) return { label: "In Stock", className: styles.inStock };
+  if (stock > 0) return { label: "Low Stock", className: styles.lowStock };
+  return { label: "Out of Stock", className: styles.outOfStock };
+};
+
+const getDiscountBadge = (originalPrice, discountedPrice) => {
+  if (!originalPrice || !discountedPrice || originalPrice <= discountedPrice)
+    return null;
+  const discount = Math.round(
+    ((originalPrice - discountedPrice) / originalPrice) * 100,
+  );
+  return <span className={styles.discountBadge}>{discount}% OFF</span>;
+};
+
+// ── Skeleton loading (same theme, transparent bg, throttled) ──
+const WishlistSkeleton = () => (
+  <div className={styles.wishlistGrid}>
+    {Array.from({ length: 4 }).map((_, i) => (
+      <div
+        key={i}
+        className={`${styles.skeletonBox} ${styles.skeletonWishlistCard}`}
+      />
+    ))}
+  </div>
+);
+
 const WishlistTab = () => {
   const dispatch = useDispatch();
   const { wishlist, loading } = useSelector((state) => state.profile);
   const [addingToCart, setAddingToCart] = useState(null);
 
-  const removeFromWishlist = async (productId) => {
-    try {
-      await dispatch(removeWishlist(productId)).unwrap();
-    } catch (error) {
-      // Error handled in slice
+  const [showSkeleton, setShowSkeleton] = useState(true);
+  useEffect(() => {
+    let timer;
+    if (loading) {
+      setShowSkeleton(true);
+    } else {
+      timer = setTimeout(() => setShowSkeleton(false), 500);
     }
-  };
+    return () => clearTimeout(timer);
+  }, [loading]);
 
-  const addToCart = async (product) => {
+  const removeFromWishlist = useCallback(
+    async (productId) => {
+      try {
+        await dispatch(removeWishlist(productId)).unwrap();
+      } catch (error) {
+        // Error handled in slice
+      }
+    },
+    [dispatch],
+  );
+
+  const addToCart = useCallback(async (product) => {
     setAddingToCart(product._id);
     try {
       const response = await fetch("/api/cart", {
@@ -50,60 +109,28 @@ const WishlistTab = () => {
     } finally {
       setAddingToCart(null);
     }
-  };
+  }, []);
 
-  const handleBuyNow = async (product) => {
-    await addToCart(product);
-    // Navigate to checkout
-    // navigate('/checkout');
-  };
+  const handleBuyNow = useCallback(
+    async (product) => {
+      await addToCart(product);
+      // Navigate to checkout
+      // navigate('/checkout');
+    },
+    [addToCart],
+  );
 
-  const handleViewProduct = (productId) => {
-    toast.info("Product page coming soon");
-  };
+  const handleViewProduct = useCallback(() => {
+    toast("Product page coming soon");
+  }, []);
 
-  const renderStars = (rating) => {
-    const stars = [];
-    const fullStars = Math.floor(rating || 0);
-    const hasHalfStar = (rating || 0) % 1 >= 0.5;
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(
-        <FiStarFilled key={`star-${i}`} className={styles.starFilled} />,
-      );
-    }
-    if (hasHalfStar) {
-      stars.push(<FiStarFilled key="half-star" className={styles.starHalf} />);
-    }
-    const emptyStars = 5 - stars.length;
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(<FiStar key={`empty-${i}`} className={styles.starEmpty} />);
-    }
-    return stars;
-  };
-
-  const getStockStatus = (stock) => {
-    if (stock > 10) return { label: "In Stock", className: styles.inStock };
-    if (stock > 0) return { label: "Low Stock", className: styles.lowStock };
-    return { label: "Out of Stock", className: styles.outOfStock };
-  };
-
-  const getDiscountBadge = (originalPrice, discountedPrice) => {
-    if (!originalPrice || !discountedPrice || originalPrice <= discountedPrice)
-      return null;
-    const discount = Math.round(
-      ((originalPrice - discountedPrice) / originalPrice) * 100,
-    );
-    return <span className={styles.discountBadge}>{discount}% OFF</span>;
-  };
-
-  if (loading) {
+  if (showSkeleton || loading) {
     return (
       <div className={styles.tabContent}>
-        <div className={styles.loadingContainer}>
-          <div className={styles.spinner}></div>
-          <p>Loading wishlist...</p>
+        <div className={styles.tabHeader}>
+          <h2>My Wishlist</h2>
         </div>
+        <WishlistSkeleton />
       </div>
     );
   }
@@ -138,6 +165,7 @@ const WishlistTab = () => {
             product.originalPrice || product.mrp,
             product.price,
           );
+          const isOutOfStock = stockStatus.className === styles.outOfStock;
 
           return (
             <div key={item._id || product._id} className={styles.wishlistCard}>
@@ -151,6 +179,7 @@ const WishlistTab = () => {
                   alt={product.name}
                   className={styles.wishlistImage}
                   onClick={() => handleViewProduct(product._id)}
+                  loading="lazy"
                 />
                 <button
                   className={styles.wishlistRemoveBtn}
@@ -202,32 +231,28 @@ const WishlistTab = () => {
                   <button
                     className={styles.wishlistCartBtn}
                     onClick={() => addToCart(product)}
-                    disabled={
-                      addingToCart === product._id ||
-                      stockStatus.className === styles.outOfStock
-                    }
+                    disabled={addingToCart === product._id || isOutOfStock}
                   >
                     {addingToCart === product._id ? (
                       "Adding..."
                     ) : (
                       <>
                         <FiShoppingCart size={16} />
-                        {stockStatus.className === styles.outOfStock
-                          ? "Out of Stock"
-                          : "Move to Cart"}
+                        {isOutOfStock ? "Out of Stock" : "Move to Cart"}
                       </>
                     )}
                   </button>
                   <button
                     className={styles.wishlistBuyBtn}
                     onClick={() => handleBuyNow(product)}
-                    disabled={stockStatus.className === styles.outOfStock}
+                    disabled={isOutOfStock}
                   >
                     Buy Now
                   </button>
                   <button
                     className={styles.wishlistViewBtn}
                     onClick={() => handleViewProduct(product._id)}
+                    aria-label="View product"
                   >
                     <FiInfo size={16} />
                   </button>

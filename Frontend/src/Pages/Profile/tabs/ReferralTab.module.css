@@ -1,4 +1,12 @@
-/* src/Pages/Profile/tabs/ReferralTab.module.css */
+/* src/Pages/Profile/tabs/ReferralTab.module.css
+   Colors use the CSS custom properties defined on .pageWrapper in
+   Profile.module.css (--gold, --ink, --surface, etc.). This file is
+   always rendered as a descendant of .pageWrapper, so the variables
+   inherit correctly through the DOM even though this is a separate
+   CSS module — that's what keeps this tab visually consistent with
+   the rest of the profile page. Fallback values are provided in case
+   this component is ever rendered outside that wrapper.
+*/
 
 .referralTab {
   max-width: 1000px;
@@ -18,11 +26,18 @@
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #e2e8f0;
-  border-top-color: #6366f1;
-  border-radius: 50%;
+  border: 4px solid var(--gold-pale, #f3e7d0);
+  border-top-color: var(--gold, #b98a4c);
+  border-radius: 0;
   animation: spin 0.8s linear infinite;
   margin-bottom: 1rem;
+}
+
+/* Icon-only spinner (for FiLoader icons) — distinct from the boxed
+   .spinner div loader so icons don't inherit its border/box. */
+.spinnerIcon {
+  display: inline-flex;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
@@ -33,15 +48,15 @@
 .referralHero {
   text-align: center;
   padding: 2.5rem 2rem;
-  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 50%, #faf5ff 100%);
-  border-radius: 16px;
+  background: transparent;
+  border-radius: 0;
   margin-bottom: 2rem;
-  border: 1px solid #e9d5ff;
+  border: 1px solid var(--gold-line, #e6d5b0);
 }
 
 .heroIcon {
   font-size: 4rem;
-  color: #f59e0b;
+  color: var(--gold, #b98a4c);
   margin-bottom: 0.5rem;
   animation: pulse 2s ease-in-out infinite;
 }
@@ -53,12 +68,12 @@
 
 .referralHero h2 {
   font-size: 2rem;
-  color: #1e293b;
+  color: var(--ink, #2b2420);
   margin: 0.5rem 0;
 }
 
 .referralHero p {
-  color: #64748b;
+  color: var(--ink-muted, #8c8175);
   max-width: 550px;
   margin: 0 auto;
   font-size: 1rem;
@@ -67,24 +82,24 @@
 
 /* Main Card */
 .referralMainCard {
-  background: white;
-  border-radius: 16px;
+  background: transparent;
+  border-radius: 0;
   padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  border: 1px solid #e2e8f0;
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(43, 36, 32, 0.06));
+  border: 1px solid var(--border, #ece3d3);
 }
 
 /* Referral Code Section */
 .referralCodeSection {
   text-align: center;
   padding-bottom: 2rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border, #ece3d3);
   margin-bottom: 2rem;
 }
 
 .referralCodeSection h3 {
   font-size: 1.1rem;
-  color: #1e293b;
+  color: var(--ink, #2b2420);
   margin-bottom: 1.5rem;
 }
 
@@ -94,39 +109,47 @@
   align-items: center;
   gap: 1rem;
   padding: 2rem;
-  background: #f8fafc;
-  border-radius: 12px;
-  border: 2px dashed #d1d5db;
+  background: transparent;
+  border-radius: 0;
+  border: 2px dashed var(--border, #ece3d3);
 }
 
 .noCodeIcon {
   font-size: 2.5rem;
-  color: #94a3b8;
+  color: var(--ink-muted, #8c8175);
 }
 
 .noCodeContainer p {
-  color: #64748b;
+  color: var(--ink-muted, #8c8175);
   font-size: 0.95rem;
 }
 
 .generateBtn {
   padding: 0.75rem 2rem;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: var(--gold, #b98a4c);
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 0;
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: filter 0.15s ease, background 0.3s ease, transform 0.2s ease;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
 .generateBtn:hover:not(:disabled) {
+  background: var(--gold-dark, #7c5c33);
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+  box-shadow: var(--shadow-md, 0 8px 24px rgba(43, 36, 32, 0.08));
+}
+.generateBtn:active:not(:disabled) {
+  filter: brightness(0.94);
+}
+.generateBtn:focus-visible {
+  outline: 2px solid var(--gold, #b98a4c);
+  outline-offset: 2px;
 }
 
 .generateBtn:disabled {
@@ -135,17 +158,17 @@
 }
 
 .referralCodeDisplay {
-  background: #f8fafc;
+  background: transparent;
   padding: 1.5rem;
-  border-radius: 12px;
-  border: 2px dashed #d1d5db;
+  border-radius: 0;
+  border: 2px dashed var(--border, #ece3d3);
   margin-bottom: 1.5rem;
 }
 
 .referralCodeDisplay .code {
   font-size: 2.5rem;
   font-weight: 800;
-  color: #6366f1;
+  color: var(--gold-dark, #7c5c33);
   letter-spacing: 6px;
   font-family: monospace;
 }
@@ -159,35 +182,46 @@
 .referralLinkInput {
   flex: 1;
   padding: 0.75rem 1rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
+  border: 1px solid var(--border, #ece3d3);
+  border-radius: 0;
   font-size: 0.85rem;
-  background: #f8fafc;
-  color: #1e293b;
+  background: var(--surface-alt, #f7f2ea);
+  color: var(--ink, #2b2420);
   cursor: text;
   font-family: monospace;
+  transition: border-color 0.2s ease;
 }
 
+.referralLinkInput:hover {
+  border-color: var(--gold-line, #e6d5b0);
+}
 .referralLinkInput:focus {
   outline: none;
-  border-color: #6366f1;
-  background: white;
+  border-color: var(--gold, #b98a4c);
+  background: var(--surface, #ffffff);
 }
 
 .copyLinkBtn {
   padding: 0.75rem 1.5rem;
-  background: #6366f1;
-  color: white;
+  background: var(--gold, #b98a4c);
+  color: rgb(14, 13, 13);
   border: none;
-  border-radius: 10px;
+  border-radius: 0;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: filter 0.15s ease, background 0.3s ease, transform 0.2s ease;
   font-size: 1.1rem;
 }
 
 .copyLinkBtn:hover {
-  background: #4f46e5;
+  background: var(--gold-dark, #7c5c33);
   transform: scale(1.05);
+}
+.copyLinkBtn:active {
+  filter: brightness(0.94);
+}
+.copyLinkBtn:focus-visible {
+  outline: 2px solid var(--gold, #b98a4c);
+  outline-offset: 2px;
 }
 
 .shareButtons {
@@ -195,6 +229,7 @@
   gap: 0.75rem;
   justify-content: center;
   flex-wrap: wrap;
+  color: #2b2420;
 }
 
 .shareWhatsApp,
@@ -202,58 +237,73 @@
 .shareLink {
   padding: 0.6rem 1.5rem;
   border: none;
-  border-radius: 10px;
+  border-radius: 0;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: filter 0.15s ease, background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-size: 0.9rem;
 }
+.shareWhatsApp:active,
+.shareEmail:active,
+.shareLink:active {
+  filter: brightness(0.94);
+}
+.shareWhatsApp:focus-visible,
+.shareEmail:focus-visible,
+.shareLink:focus-visible {
+  outline: 2px solid var(--gold, #b98a4c);
+  outline-offset: 2px;
+}
 
 .shareWhatsApp {
   background: #25d366;
-  color: white;
+  color: rgb(8, 8, 8);
 }
 
 .shareWhatsApp:hover {
   background: #128c7e;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+  color: #fff;
 }
 
 .shareEmail {
-  background: #ea4335;
-  color: white;
+  background: var(--danger, #c1594a);
+  color: rgb(4, 4, 4);
 }
 
 .shareEmail:hover {
-  background: #c5221f;
+  background: #a4432f;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(234, 67, 53, 0.3);
+  box-shadow: 0 4px 12px rgba(193, 89, 74, 0.3);
+  color: #fff;
 }
 
 .shareLink {
-  background: #e2e8f0;
-  color: #1e293b;
+  background: var(--surface-alt, #f7f2ea);
+  color: var(--ink, #2b2420);
+  border: 1px solid var(--border, #ece3d3);
 }
 
 .shareLink:hover {
-  background: #cbd5e1;
+  background: var(--gold-pale, #f3e7d0);
+  color: var(--gold-dark, #7c5c33);
   transform: translateY(-2px);
 }
 
 /* Stats Section */
 .referralStatsSection {
   padding-bottom: 2rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border, #ece3d3);
   margin-bottom: 2rem;
 }
 
 .referralStatsSection h3 {
   font-size: 1.1rem;
-  color: #1e293b;
+  color: var(--ink, #2b2420);
   margin-bottom: 1.5rem;
   text-align: center;
 }
@@ -265,12 +315,12 @@
 }
 
 .statBox {
-  background: #f8fafc;
+  background: transparent;
   padding: 1.5rem;
-  border-radius: 12px;
+  border-radius: 0;
   text-align: center;
-  border: 1px solid #e2e8f0;
-  transition: all 0.3s ease;
+  border: 1px solid var(--border, #ece3d3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.2s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -279,35 +329,36 @@
 
 .statBox:hover {
   transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(43, 36, 32, 0.06));
+  border-color: var(--gold-line, #e6d5b0);
 }
 
 .statIcon {
   font-size: 1.5rem;
-  color: #6366f1;
+  color: var(--gold, #b98a4c);
 }
 
 .statBox .statNumber {
   font-size: 2rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--ink, #2b2420);
 }
 
 .statBox .statLabel {
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--ink-muted, #8c8175);
 }
 
 /* How It Works */
 .howItWorks {
   padding-bottom: 2rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border, #ece3d3);
   margin-bottom: 2rem;
 }
 
 .howItWorks h3 {
   font-size: 1.1rem;
-  color: #1e293b;
+  color: var(--ink, #2b2420);
   margin-bottom: 1.5rem;
   text-align: center;
 }
@@ -323,15 +374,16 @@
   align-items: flex-start;
   gap: 1rem;
   padding: 1rem;
-  background: #f8fafc;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  transition: all 0.3s ease;
+  background: transparent;
+  border-radius: 0;
+  border: 1px solid var(--border, #ece3d3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.2s ease;
 }
 
 .step:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(43, 36, 32, 0.06));
+  border-color: var(--gold-line, #e6d5b0);
 }
 
 .stepNumber {
@@ -340,29 +392,29 @@
   justify-content: center;
   min-width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: var(--gold, #b98a4c);
   color: white;
-  border-radius: 50%;
+  border-radius: 0;
   font-weight: 700;
   font-size: 1rem;
 }
 
 .stepContent h4 {
   font-size: 0.95rem;
-  color: #1e293b;
+  color: var(--ink, #2b2420);
   margin-bottom: 0.25rem;
 }
 
 .stepContent p {
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--ink-muted, #8c8175);
   margin: 0;
 }
 
 /* Benefits Section */
 .benefitsSection h3 {
   font-size: 1.1rem;
-  color: #1e293b;
+  color: var(--ink, #2b2420);
   margin-bottom: 1.5rem;
   text-align: center;
 }
@@ -378,26 +430,26 @@
   align-items: flex-start;
   gap: 1rem;
   padding: 1rem;
-  background: #f0fdf4;
-  border-radius: 12px;
-  border: 1px solid #86efac;
+  background: transparent;
+  border-radius: 0;
+  border: 1px solid var(--success, #4f7a5b);
 }
 
 .benefitIcon {
   font-size: 1.5rem;
-  color: #16a34a;
+  color: var(--success, #4f7a5b);
   margin-top: 0.25rem;
 }
 
 .benefitItem h4 {
   font-size: 0.95rem;
-  color: #1e293b;
+  color: var(--ink, #2b2420);
   margin-bottom: 0.25rem;
 }
 
 .benefitItem p {
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--ink-muted, #8c8175);
   margin: 0;
 }
 
@@ -430,6 +482,7 @@
 
   .shareButtons {
     flex-direction: column;
+    color: #2b2420 !important;
   }
 
   .shareWhatsApp,
@@ -464,5 +517,21 @@
 
   .statBox .statNumber {
     font-size: 1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner,
+  .spinnerIcon,
+  .heroIcon,
+  .generateBtn,
+  .copyLinkBtn,
+  .shareWhatsApp,
+  .shareEmail,
+  .shareLink,
+  .statBox,
+  .step {
+    animation: none !important;
+    transition: none !important;
   }
 }

@@ -21,9 +21,20 @@
   --success-pale: #e7efe8;
   --warning: #c98f3a;
   --warning-pale: #f6ecd9;
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+
+  /* Corners are intentionally flat across the whole page — do not
+     reintroduce rounded corners on cards, buttons, pills, or avatars. */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+
+  /* Consistent spacing scale used across header, cards, and tabs */
+  --space-xs: 6px;
+  --space-sm: 10px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
   --shadow-sm: 0 1px 2px rgba(43, 36, 32, 0.06);
   --shadow-md: 0 8px 24px rgba(43, 36, 32, 0.08);
   --shadow-lg: 0 16px 40px rgba(43, 36, 32, 0.12);
@@ -55,6 +66,20 @@
   cursor: pointer;
   border: none;
   background: none;
+  transition:
+    filter 0.15s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.pageWrapper button:active:not(:disabled) {
+  filter: brightness(0.94);
+}
+
+.pageWrapper button:disabled {
+  cursor: not-allowed;
 }
 
 .pageWrapper input,
@@ -86,7 +111,8 @@
 }
 
 /* ============================================
-   Loading
+   Loading (legacy spinner — kept for any callers
+   that still reference it; skeleton is preferred)
    ============================================ */
 .loadingContainer {
   display: flex;
@@ -104,7 +130,7 @@
   height: 34px;
   border: 3px solid var(--gold-pale);
   border-top-color: var(--gold);
-  border-radius: 50%;
+  border-radius: 0;
   animation: spin 0.8s linear infinite;
 }
 
@@ -118,7 +144,7 @@
   padding: 12px 28px;
   background: var(--gold);
   color: #fff;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.9rem;
   letter-spacing: 0.02em;
   transition:
@@ -128,6 +154,9 @@
 .primaryBtn:hover {
   background: var(--gold-dark);
   transform: translateY(-1px);
+}
+.primaryBtn:focus-visible {
+  outline-offset: 3px;
 }
 
 /* ============================================
@@ -140,11 +169,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  background: var(--surface);
-  border-radius: var(--radius-lg);
+  flex-wrap: wrap;
+  background: transparent;
+  border-radius: 0;
+  border: 1px solid var(--border);
   padding: 32px 36px;
   box-shadow: var(--shadow-md);
-  margin-bottom: 20px;
+  margin-bottom: var(--space-lg);
 }
 
 .profileHeader::before {
@@ -177,7 +208,7 @@
   width: 84px;
   height: 84px;
   flex-shrink: 0;
-  border-radius: 50%;
+  border-radius: 0;
   padding: 3px;
   background: conic-gradient(
     from 180deg,
@@ -190,7 +221,7 @@
 .avatar {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
+  border-radius: 0;
   object-fit: cover;
   display: block;
   border: 3px solid var(--surface);
@@ -199,7 +230,7 @@
 .avatarPlaceholder {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
+  border-radius: 0;
   border: 3px solid var(--surface);
   display: flex;
   align-items: center;
@@ -217,7 +248,7 @@
   right: -2px;
   width: 28px;
   height: 28px;
-  border-radius: 50%;
+  border-radius: 0;
   background: var(--ink);
   color: #fff;
   display: flex;
@@ -244,45 +275,97 @@
   font-size: 0.78rem;
   background: var(--success);
   color: #fff;
-  border-radius: 999px;
+  border-radius: 0;
+}
+.uploadConfirmBtn:hover:not(:disabled) {
+  background: #3f6449;
+}
+.uploadConfirmBtn:disabled {
+  opacity: 0.6;
 }
 
 .userInfo {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 
 .userName {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
   font-size: 1.5rem;
   line-height: 1.2;
 }
 
-.userEmail {
+.userEmail,
+.userPhone {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   color: var(--ink-muted);
   font-size: 0.88rem;
   margin: 0;
 }
 
-.userPhone {
-  color: var(--ink-muted);
-  font-size: 0.85rem;
-  margin: 0;
+.contactToggleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  margin-top: 2px;
+  padding: 2px 0;
+  font-size: 0.76rem;
+  color: var(--gold-dark);
+  font-weight: 500;
+}
+.contactToggleBtn:hover {
+  color: var(--gold);
+  text-decoration: underline;
 }
 
 .userBadge {
   display: inline-flex;
   align-items: center;
   width: fit-content;
-  margin-top: 6px;
   padding: 3px 12px;
   font-size: 0.7rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--gold-pale);
   color: var(--gold-dark);
   font-weight: 600;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.editProfileBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 0;
+  border: 1px solid var(--gold-line);
+  color: var(--gold-dark);
+  background: var(--gold-pale);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease;
+}
+.editProfileBtn:hover {
+  background: var(--gold);
+  color: #fff;
+  transform: translateY(-1px);
 }
 
 .logoutBtn {
@@ -290,7 +373,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  border-radius: 999px;
+  border-radius: 0;
   border: 1px solid var(--danger-pale);
   color: var(--danger);
   font-size: 0.85rem;
@@ -298,8 +381,6 @@
   transition:
     background 0.2s ease,
     transform 0.15s ease;
-  z-index: 1;
-  flex-shrink: 0;
 }
 .logoutBtn:hover {
   background: #f0d3cc;
@@ -312,10 +393,11 @@
 .tabsContainer {
   display: flex;
   gap: 4px;
-  background: var(--surface);
-  border-radius: var(--radius-md);
+  background: transparent;
+  border-radius: 0;
+  border: 1px solid var(--border);
   padding: 6px;
-  margin-bottom: 20px;
+  margin-bottom: var(--space-lg);
   box-shadow: var(--shadow-sm);
   overflow-x: auto;
 }
@@ -325,7 +407,7 @@
   align-items: center;
   gap: 8px;
   padding: 11px 20px;
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   font-size: 0.86rem;
   color: var(--ink-muted);
   white-space: nowrap;
@@ -365,7 +447,7 @@
 .tabContent {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--space-lg);
 }
 
 .tabHeader {
@@ -393,7 +475,8 @@
   color: var(--ink-muted);
   background: var(--surface-alt);
   padding: 5px 12px;
-  border-radius: 999px;
+  border-radius: 0;
+  border: 1px solid var(--border);
 }
 
 .editBtn {
@@ -401,7 +484,7 @@
   align-items: center;
   gap: 7px;
   padding: 9px 18px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--gold);
   color: #fff;
   font-size: 0.84rem;
@@ -419,7 +502,7 @@
   align-items: center;
   gap: 6px;
   padding: 9px 18px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--surface-alt);
   color: var(--ink-muted);
   font-size: 0.84rem;
@@ -439,8 +522,9 @@
   align-items: center;
   gap: 10px;
   padding: 64px 20px;
-  background: var(--surface);
-  border-radius: var(--radius-lg);
+  background: transparent;
+  border-radius: 0;
+  border: 1px solid var(--border);
   color: var(--ink-muted);
   text-align: center;
   box-shadow: var(--shadow-sm);
@@ -464,7 +548,7 @@
   padding: 11px 26px;
   background: var(--ink);
   color: #fff;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.85rem;
   transition: background 0.2s ease;
 }
@@ -478,7 +562,7 @@
 .overviewTab {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--space-lg);
 }
 
 .statsGrid {
@@ -491,25 +575,28 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  background: var(--surface);
-  border-radius: var(--radius-md);
+  background: transparent;
+  border-radius: 0;
+  border: 1px solid var(--border);
   padding: 20px;
   box-shadow: var(--shadow-sm);
   transition:
     box-shadow 0.2s ease,
-    transform 0.2s ease;
+    transform 0.2s ease,
+    border-color 0.2s ease;
 }
 .statCard:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
+  border-color: var(--gold-line);
 }
 
 .statIcon {
   width: 42px;
   height: 42px;
   min-width: 42px;
-  border-radius: 50%;
-  background: var(--gold-pale);
+  border-radius: 0;
+  /* background: var(--gold-pale);  */
   color: var(--gold-dark);
   display: flex;
   align-items: center;
@@ -534,8 +621,9 @@
    Completion card
    ============================================ */
 .completionCard {
-  background: var(--surface);
-  border-radius: var(--radius-md);
+  background: transparent;
+  border-radius: 0;
+  border: 1px solid var(--border);
   padding: 22px 24px;
   box-shadow: var(--shadow-sm);
 }
@@ -560,14 +648,14 @@
 
 .progressBar {
   height: 8px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--surface-alt);
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
-  border-radius: 999px;
+  border-radius: 0;
   background: linear-gradient(90deg, var(--gold), var(--gold-dark));
   transition: width 0.5s ease;
 }
@@ -589,8 +677,9 @@
    Info card / Personal info
    ============================================ */
 .infoCard {
-  background: var(--surface);
-  border-radius: var(--radius-lg);
+  background: transparent;
+  border-radius: 0;
+  border: 1px solid var(--border);
   padding: 28px 30px;
   box-shadow: var(--shadow-sm);
 }
@@ -649,7 +738,7 @@
   color: var(--ink-muted);
   background: var(--surface-alt);
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: 0;
   margin-left: 4px;
 }
 
@@ -666,7 +755,7 @@
   display: inline-block;
   width: 7px;
   height: 7px;
-  border-radius: 50%;
+  border-radius: 0;
   background: var(--success);
   margin-right: 6px;
 }
@@ -680,7 +769,7 @@
   display: inline-block;
   width: 7px;
   height: 7px;
-  border-radius: 50%;
+  border-radius: 0;
   background: var(--danger);
   margin-right: 6px;
 }
@@ -690,11 +779,15 @@
   width: 100%;
   padding: 10px 13px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   background: var(--surface);
   color: var(--ink);
   font-size: 0.9rem;
   transition: border-color 0.2s ease;
+}
+.editInput:hover,
+.editSelect:hover {
+  border-color: var(--gold-line);
 }
 .editInput:focus,
 .editSelect:focus {
@@ -739,7 +832,7 @@
   padding: 12px 26px;
   background: var(--gold);
   color: #fff;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.88rem;
   transition:
     background 0.2s ease,
@@ -759,9 +852,9 @@
    Address Tab — full form + cards
    ============================================ */
 .addressForm {
-  background: var(--surface);
+  background: transparent;
   border: 1px solid var(--gold-line);
-  border-radius: var(--radius-lg);
+  border-radius: 0;
   padding: 26px 28px;
   box-shadow: var(--shadow-sm);
   display: flex;
@@ -797,7 +890,7 @@
   align-items: center;
   gap: 6px;
   padding: 12px 22px;
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   border: 1px solid var(--border);
   color: var(--ink-muted);
   font-size: 0.78rem;
@@ -830,11 +923,16 @@
 .formGroup textarea {
   padding: 10px 13px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   background: var(--surface);
   color: var(--ink);
   font-size: 0.9rem;
   transition: border-color 0.2s ease;
+}
+.formGroup input:hover,
+.formGroup select:hover,
+.formGroup textarea:hover {
+  border-color: var(--gold-line);
 }
 .formGroup input:focus,
 .formGroup select:focus,
@@ -889,7 +987,7 @@
   padding: 11px 24px;
   background: var(--gold);
   color: #fff;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.86rem;
   transition: background 0.2s ease;
 }
@@ -909,17 +1007,21 @@
 
 .addressCard {
   position: relative;
-  background: var(--surface);
-  border-radius: var(--radius-md);
+  background: transparent;
+  border-radius: 0;
+  border: 1px solid var(--border);
   padding: 20px 22px;
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   gap: 12px;
-  transition: box-shadow 0.2s ease;
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
 }
 .addressCard:hover {
   box-shadow: var(--shadow-md);
+  border-color: var(--gold-line);
 }
 
 .addressTypeBadge {
@@ -938,7 +1040,7 @@
   background: var(--gold);
   color: #fff;
   padding: 2px 9px;
-  border-radius: 999px;
+  border-radius: 0;
   margin-left: 4px;
 }
 
@@ -981,7 +1083,7 @@
   color: var(--ink-muted);
   background: var(--surface-alt);
   padding: 8px 10px;
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   margin-top: 6px;
 }
 
@@ -996,7 +1098,7 @@
 .addressDefaultBtn {
   padding: 6px 12px;
   font-size: 0.76rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--surface-alt);
   color: var(--ink-muted);
   transition: background 0.2s ease;
@@ -1012,7 +1114,7 @@
   gap: 5px;
   padding: 6px 12px;
   font-size: 0.76rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--surface-alt);
   color: var(--ink);
   transition: background 0.2s ease;
@@ -1026,7 +1128,7 @@
   display: inline-flex;
   align-items: center;
   padding: 6px 10px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--danger-pale);
   color: var(--danger);
   margin-left: auto;
@@ -1040,7 +1142,7 @@
   position: absolute;
   inset: 0;
   background: rgba(43, 36, 32, 0.55);
-  border-radius: var(--radius-md);
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1049,8 +1151,8 @@
 }
 
 .deleteConfirmModal {
-  background: var(--surface);
-  border-radius: var(--radius-md);
+  background: transparent;
+  border-radius: 0;
   padding: 20px;
   width: 100%;
   box-shadow: var(--shadow-lg);
@@ -1082,7 +1184,7 @@
   padding: 9px 16px;
   background: var(--danger);
   color: #fff;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.82rem;
 }
 
@@ -1090,7 +1192,7 @@
   padding: 9px 16px;
   background: var(--surface-alt);
   color: var(--ink);
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.82rem;
 }
 
@@ -1104,14 +1206,18 @@
 }
 
 .orderCard {
-  background: var(--surface);
-  border-radius: var(--radius-md);
+  background: transparent;
+  border-radius: 0;
+  border: 1px solid var(--border);
   padding: 20px 22px;
   box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.2s ease;
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
 }
 .orderCard:hover {
   box-shadow: var(--shadow-md);
+  border-color: var(--gold-line);
 }
 
 .orderHeader {
@@ -1149,7 +1255,7 @@
   align-items: center;
   gap: 6px;
   padding: 5px 13px;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.76rem;
   font-weight: 500;
   text-transform: capitalize;
@@ -1191,7 +1297,7 @@
 .orderItemImage {
   width: 46px;
   height: 46px;
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   object-fit: cover;
   border: 1px solid var(--border);
 }
@@ -1263,7 +1369,7 @@
   align-items: center;
   gap: 5px;
   padding: 3px 10px;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.74rem;
 }
 .paymentPaid {
@@ -1297,7 +1403,7 @@
   gap: 6px;
   padding: 8px 15px;
   font-size: 0.8rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--surface-alt);
   color: var(--ink);
   transition: background 0.2s ease;
@@ -1315,7 +1421,7 @@
   gap: 6px;
   padding: 8px 15px;
   font-size: 0.8rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--danger-pale);
   color: var(--danger);
   transition: background 0.2s ease;
@@ -1340,8 +1446,8 @@
 }
 
 .modalContent {
-  background: var(--surface);
-  border-radius: var(--radius-lg);
+  background: transparent;
+  border-radius: 0;
   max-width: 560px;
   width: 100%;
   max-height: 88vh;
@@ -1368,7 +1474,7 @@
 .closeModalBtn {
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1419,7 +1525,7 @@
 .timelineIcon {
   width: 30px;
   height: 30px;
-  border-radius: 50%;
+  border-radius: 0;
   background: var(--gold-pale);
   color: var(--gold-dark);
   display: flex;
@@ -1462,7 +1568,7 @@
 .orderDetailItemImage {
   width: 48px;
   height: 48px;
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   object-fit: cover;
   border: 1px solid var(--border);
 }
@@ -1486,7 +1592,7 @@
 
 .orderDetailSummary {
   background: var(--surface-alt);
-  border-radius: var(--radius-md);
+  border-radius: 0;
   padding: 16px 18px;
   display: flex;
   flex-direction: column;
@@ -1521,7 +1627,7 @@
   padding: 10px 18px;
   background: var(--ink);
   color: #fff;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.84rem;
 }
 
@@ -1535,23 +1641,27 @@
 }
 
 .wishlistCard {
-  background: var(--surface);
-  border-radius: var(--radius-md);
+  background: transparent;
+  border-radius: 0;
+  border: 1px solid var(--border);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   transition:
     box-shadow 0.2s ease,
-    transform 0.2s ease;
+    transform 0.2s ease,
+    border-color 0.2s ease;
 }
 .wishlistCard:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-3px);
+  border-color: var(--gold-line);
 }
 
 .wishlistImageContainer {
   position: relative;
   aspect-ratio: 1;
   background: var(--surface-alt);
+  overflow: hidden;
 }
 
 .wishlistImage {
@@ -1560,6 +1670,10 @@
   object-fit: cover;
   cursor: pointer;
   display: block;
+  transition: transform 0.35s ease;
+}
+.wishlistCard:hover .wishlistImage {
+  transform: scale(1.06);
 }
 
 .wishlistRemoveBtn {
@@ -1568,7 +1682,7 @@
   right: 10px;
   width: 30px;
   height: 30px;
-  border-radius: 50%;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.92);
   color: var(--danger);
   display: flex;
@@ -1590,7 +1704,7 @@
   color: #fff;
   font-size: 0.7rem;
   font-weight: 600;
-  border-radius: 999px;
+  border-radius: 0;
 }
 
 .newBadge {
@@ -1602,7 +1716,7 @@
   color: #fff;
   font-size: 0.7rem;
   font-weight: 600;
-  border-radius: 999px;
+  border-radius: 0;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -1625,6 +1739,9 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+.wishlistName:hover {
+  color: var(--gold-dark);
 }
 
 .wishlistRating {
@@ -1679,7 +1796,7 @@
 .stockStatus {
   font-size: 0.68rem;
   padding: 3px 9px;
-  border-radius: 999px;
+  border-radius: 0;
   font-weight: 500;
 }
 .inStock {
@@ -1710,7 +1827,7 @@
   padding: 9px 10px;
   background: var(--ink);
   color: #fff;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.76rem;
   transition: background 0.2s ease;
 }
@@ -1727,7 +1844,7 @@
   padding: 9px 10px;
   background: var(--gold);
   color: #fff;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.76rem;
   transition: background 0.2s ease;
 }
@@ -1744,7 +1861,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--surface-alt);
   color: var(--ink-muted);
   transition: background 0.2s ease;
@@ -1760,12 +1877,13 @@
 .settingsTab {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--space-lg);
 }
 
 .settingsCard {
-  background: var(--surface);
-  border-radius: var(--radius-lg);
+  background: transparent;
+  border-radius: 0;
+  border: 1px solid var(--border);
   padding: 26px 28px;
   box-shadow: var(--shadow-sm);
 }
@@ -1839,6 +1957,9 @@
   transition: color 0.2s ease;
   flex-shrink: 0;
 }
+.toggleBtn:hover {
+  color: var(--gold-line);
+}
 .toggleBtn svg:last-child {
   color: var(--gold);
 }
@@ -1850,13 +1971,14 @@
   margin-top: 20px;
   padding: 11px 24px;
   background: var(--gold);
-  color: #fff;
-  border-radius: 999px;
+  color: #191717;
+  border-radius: 0;
   font-size: 0.86rem;
   transition: background 0.2s ease;
 }
 .saveSettingsBtn:hover {
   background: var(--gold-dark);
+  color: #fff;
 }
 .saveSettingsBtn:disabled {
   opacity: 0.6;
@@ -1890,8 +2012,8 @@
   gap: 8px;
   padding: 10px 22px;
   background: var(--ink);
-  color: #fff;
-  border-radius: 999px;
+  color: #131313;
+  border-radius: 0;
   font-size: 0.84rem;
   width: fit-content;
   transition: background 0.2s ease;
@@ -1899,6 +2021,7 @@
 .changePasswordBtn:hover,
 .changeEmailBtn:hover {
   background: var(--gold-dark);
+  color: #fff;
 }
 
 .devicesList {
@@ -1914,7 +2037,8 @@
   gap: 12px;
   padding: 14px 16px;
   background: var(--surface-alt);
-  border-radius: var(--radius-sm);
+  border-radius: 0;
+  border: 1px solid var(--border);
   flex-wrap: wrap;
 }
 
@@ -1947,7 +2071,7 @@
   padding: 3px 10px;
   background: var(--success-pale);
   color: var(--success);
-  border-radius: 999px;
+  border-radius: 0;
 }
 
 .revokeDeviceBtn {
@@ -1958,7 +2082,7 @@
   font-size: 0.76rem;
   background: var(--danger-pale);
   color: var(--danger);
-  border-radius: 999px;
+  border-radius: 0;
 }
 
 .accountActions {
@@ -1974,7 +2098,7 @@
   gap: 16px;
   padding: 16px 18px;
   border: 1px solid var(--danger-pale);
-  border-radius: var(--radius-md);
+  border-radius: 0;
   flex-wrap: wrap;
 }
 
@@ -1989,7 +2113,7 @@
 
 .deactivateBtn {
   padding: 9px 18px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--warning-pale);
   color: var(--warning);
   font-size: 0.82rem;
@@ -2001,9 +2125,9 @@
   align-items: center;
   gap: 6px;
   padding: 9px 18px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--danger);
-  color: #fff;
+  color: var(--warning);
   font-size: 0.82rem;
   white-space: nowrap;
 }
@@ -2054,7 +2178,7 @@
   padding: 10px 22px;
   background: var(--warning);
   color: #fff;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.85rem;
 }
 
@@ -2065,8 +2189,101 @@
   padding: 10px 22px;
   background: var(--danger);
   color: #fff;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.85rem;
+}
+
+/* ============================================
+   Skeleton loading (same theme, transparent bg)
+   ============================================ */
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+.skeletonBox {
+  background: linear-gradient(90deg, #ece1c9 0%, #f7f2ea 50%, #ece1c9 100%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 0;
+}
+
+.skeletonHeader {
+  background: transparent;
+  box-shadow: none;
+  border-color: var(--border);
+}
+.skeletonHeader::before {
+  display: none;
+}
+
+.skeletonAvatar {
+  width: 84px;
+  height: 84px;
+  flex-shrink: 0;
+}
+
+.skeletonName {
+  width: 180px;
+  height: 22px;
+}
+
+.skeletonLine {
+  width: 220px;
+  height: 13px;
+}
+
+.skeletonLineShort {
+  width: 150px;
+  height: 13px;
+}
+
+.skeletonLogout {
+  width: 120px;
+  height: 40px;
+}
+
+.skeletonTab {
+  width: 110px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+.skeletonContent {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: transparent;
+}
+
+.skeletonStatCard {
+  height: 84px;
+}
+
+.skeletonPanel {
+  width: 100%;
+  height: 320px;
+}
+
+.skeletonCard {
+  width: 100%;
+  height: 160px;
+}
+
+.skeletonWishlistCard {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+}
+
+/* Icon-only spinner (for FiLoader-style inline icons) — distinct from
+   the boxed .spinner div loader so icons don't inherit its border/box. */
+.spinnerIcon {
+  display: inline-flex;
+  animation: spin 1s linear infinite;
 }
 
 /* ============================================
@@ -2081,8 +2298,13 @@
     align-items: flex-start;
     padding: 24px;
   }
-  .logoutBtn {
+  .headerActions {
     align-self: stretch;
+    justify-content: flex-end;
+  }
+  .logoutBtn,
+  .editProfileBtn {
+    flex: 1;
     justify-content: center;
   }
   .formRow,
@@ -2104,17 +2326,24 @@
     width: 100%;
     justify-content: center;
   }
+  .skeletonHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .skeletonLogout {
+    align-self: stretch;
+  }
 }
 /* ============================================
    REFERRAL SECTION STYLES
    ============================================ */
 
 .referralCard {
-  background: linear-gradient(135deg, #faf5ff 0%, #ffffff 100%);
-  border-radius: 16px;
+  background: transparent;
+  border-radius: 0;
+  border: 1px solid #e9d5ff;
   padding: 1.5rem 2rem;
   margin-bottom: 2rem;
-  border: 1px solid #e9d5ff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
@@ -2142,7 +2371,7 @@
   background: linear-gradient(135deg, #10b981, #059669);
   color: white;
   padding: 4px 14px;
-  border-radius: 20px;
+  border-radius: 0;
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -2163,24 +2392,9 @@
   color: #64748b;
 }
 
-.spinner {
-  animation: spin 1s linear infinite;
-  font-size: 1.2rem;
-  color: #6366f1;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .referralCodeBox {
   background: white;
-  border-radius: 12px;
+  border-radius: 0;
   padding: 1.25rem 1.5rem;
   border: 2px dashed #d1d5db;
   display: flex;
@@ -2221,12 +2435,23 @@
   background: linear-gradient(135deg, #06a4ff, #5cc5f6) !important;
   color: rgb(255, 255, 255);
   border: none;
-  border-radius: 6px;
+  border-radius: 0;
   font-size: 1rem;
   cursor: pointer;
   font-weight: 500;
   transition: all 0.3s ease;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    "Open Sans",
+    "Helvetica Neue",
+    sans-serif;
 }
 
 .generateCodeBtn:hover {
@@ -2260,7 +2485,7 @@
   gap: 0.5rem;
   padding: 0.5rem 1.25rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 0;
   font-weight: 500;
   font-size: 0.85rem;
   cursor: pointer;
@@ -2300,13 +2525,8 @@
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   background: #f8fafc;
-  border-radius: 10px;
+  border-radius: 0;
   border: 1px solid #e2e8f0;
-}
-
-.statIcon {
-  color: #6366f1;
-  font-size: 1.1rem;
 }
 
 .statItem div {
@@ -2334,7 +2554,7 @@
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   background: #fef3c7;
-  border-radius: 10px;
+  border-radius: 0;
   border: 1px solid #fcd34d;
   color: #92400e;
   font-size: 0.9rem;

@@ -1,6 +1,6 @@
 // src/Pages/Profile/tabs/SettingsTab.jsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   FiBell,
@@ -10,8 +10,6 @@ import {
   FiToggleRight,
   FiSave,
   FiUser,
-  FiGlobe,
-  FiDollarSign,
   FiShield,
   FiSmartphone,
   FiTrash2,
@@ -23,14 +21,77 @@ import toast from "react-hot-toast";
 import { updatePreferences } from "../../../redux/slices/profileSlice";
 import styles from "../Profile.module.css";
 
+// ── Static reference data, hoisted so it isn't rebuilt on every render ──
+const LANGUAGES = [
+  { value: "en", label: "English" },
+  { value: "hi", label: "Hindi" },
+  { value: "es", label: "Spanish" },
+  { value: "fr", label: "French" },
+  { value: "de", label: "German" },
+  { value: "zh", label: "Chinese" },
+];
+
+const CURRENCIES = [
+  { value: "USD", label: "USD ($)" },
+  { value: "EUR", label: "EUR (€)" },
+  { value: "GBP", label: "GBP (£)" },
+  { value: "INR", label: "INR (₹)" },
+];
+
+const TIMEZONES = [
+  { value: "UTC-12:00", label: "UTC-12:00" },
+  { value: "UTC-11:00", label: "UTC-11:00" },
+  { value: "UTC-10:00", label: "UTC-10:00" },
+  { value: "UTC-09:00", label: "UTC-09:00" },
+  { value: "UTC-08:00", label: "UTC-08:00" },
+  { value: "UTC-07:00", label: "UTC-07:00" },
+  { value: "UTC-06:00", label: "UTC-06:00" },
+  { value: "UTC-05:00", label: "UTC-05:00" },
+  { value: "UTC-04:00", label: "UTC-04:00" },
+  { value: "UTC-03:00", label: "UTC-03:00" },
+  { value: "UTC-02:00", label: "UTC-02:00" },
+  { value: "UTC-01:00", label: "UTC-01:00" },
+  { value: "UTC+00:00", label: "UTC+00:00" },
+  { value: "UTC+01:00", label: "UTC+01:00" },
+  { value: "UTC+02:00", label: "UTC+02:00" },
+  { value: "UTC+03:00", label: "UTC+03:00" },
+  { value: "UTC+04:00", label: "UTC+04:00" },
+  { value: "UTC+05:00", label: "UTC+05:00" },
+  { value: "UTC+05:30", label: "UTC+05:30" },
+  { value: "UTC+06:00", label: "UTC+06:00" },
+  { value: "UTC+07:00", label: "UTC+07:00" },
+  { value: "UTC+08:00", label: "UTC+08:00" },
+  { value: "UTC+09:00", label: "UTC+09:00" },
+  { value: "UTC+10:00", label: "UTC+10:00" },
+  { value: "UTC+11:00", label: "UTC+11:00" },
+  { value: "UTC+12:00", label: "UTC+12:00" },
+];
+
+const PROFILE_VISIBILITIES = [
+  { value: "public", label: "Public" },
+  { value: "private", label: "Private" },
+  { value: "friends", label: "Friends Only" },
+];
+
+// ── Sensitive data protection: mask device IP addresses ──
+const maskIP = (ip) => {
+  if (!ip) return "";
+  const parts = ip.split(".");
+  if (parts.length !== 4) return ip;
+  return `${parts[0]}.${parts[1]}.•.•`;
+};
+
 const SettingsTab = () => {
   const dispatch = useDispatch();
-  const { profile, loading } = useSelector((state) => state.profile);
+  const { profile } = useSelector((state) => state.profile);
   const [saving, setSaving] = useState(false);
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [emailSaving, setEmailSaving] = useState(false);
   const [showDeactivateModal, setShowDeactivateModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deactivating, setDeactivating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  // Settings stored in profile.preferences
   const [settings, setSettings] = useState({
     language: profile?.preferences?.language || "en",
     currency: profile?.preferences?.currency || "USD",
@@ -89,56 +150,58 @@ const SettingsTab = () => {
     ]);
   }, [profile]);
 
-  const handleToggle = (key) => {
+  const handleToggle = useCallback((key) => {
     setSettings((prev) => ({
       ...prev,
       [key]: !prev[key],
     }));
-  };
+  }, []);
 
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setSettings((prev) => ({
       ...prev,
       [name]: value,
     }));
-  };
+  }, []);
 
-  const handlePasswordChange = (e) => {
+  const handlePasswordChange = useCallback((e) => {
     const { name, value } = e.target;
     setPasswordData((prev) => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
-  const handleEmailChange = (e) => {
+  const handleEmailChange = useCallback((e) => {
     const { name, value } = e.target;
     setEmailData((prev) => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
-  const saveSettings = async () => {
+  const saveSettings = useCallback(async () => {
     setSaving(true);
     try {
       await dispatch(updatePreferences(settings)).unwrap();
+      toast.success("Preferences saved");
     } catch (error) {
       // Error handled in slice
     } finally {
       setSaving(false);
     }
-  };
+  }, [dispatch, settings]);
 
-  const changePassword = async () => {
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error("Passwords do not match");
+  const changePassword = useCallback(async () => {
+    if (!passwordData.currentPassword) {
+      toast.error("Please enter your current password");
       return;
     }
     if (passwordData.newPassword.length < 8) {
       toast.error("Password must be at least 8 characters");
       return;
     }
-    if (!passwordData.currentPassword) {
-      toast.error("Please enter your current password");
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error("Passwords do not match");
       return;
     }
 
+    setPasswordSaving(true);
     try {
       const response = await fetch("/api/users/change-password", {
         method: "PUT",
@@ -164,10 +227,16 @@ const SettingsTab = () => {
       }
     } catch (error) {
       toast.error("Failed to change password");
+    } finally {
+      setPasswordSaving(false);
     }
-  };
+  }, [passwordData]);
 
-  const changeEmail = async () => {
+  const changeEmail = useCallback(async () => {
+    if (!emailData.newEmail || !/^\S+@\S+\.\S+$/.test(emailData.newEmail)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
     if (emailData.newEmail !== emailData.confirmEmail) {
       toast.error("Emails do not match");
       return;
@@ -177,6 +246,7 @@ const SettingsTab = () => {
       return;
     }
 
+    setEmailSaving(true);
     try {
       const response = await fetch("/api/users/change-email", {
         method: "PUT",
@@ -200,10 +270,13 @@ const SettingsTab = () => {
       }
     } catch (error) {
       toast.error("Failed to change email");
+    } finally {
+      setEmailSaving(false);
     }
-  };
+  }, [emailData]);
 
-  const handleDeactivateAccount = async () => {
+  const handleDeactivateAccount = useCallback(async () => {
+    setDeactivating(true);
     try {
       const response = await fetch("/api/users/deactivate", {
         method: "POST",
@@ -221,10 +294,13 @@ const SettingsTab = () => {
       }
     } catch (error) {
       toast.error("Failed to deactivate account");
+    } finally {
+      setDeactivating(false);
     }
-  };
+  }, []);
 
-  const handleDeleteAccount = async () => {
+  const handleDeleteAccount = useCallback(async () => {
+    setDeleting(true);
     try {
       const response = await fetch("/api/users/delete", {
         method: "DELETE",
@@ -242,59 +318,15 @@ const SettingsTab = () => {
       }
     } catch (error) {
       toast.error("Failed to delete account");
+    } finally {
+      setDeleting(false);
     }
-  };
+  }, []);
 
-  const languages = [
-    { value: "en", label: "English" },
-    { value: "hi", label: "Hindi" },
-    { value: "es", label: "Spanish" },
-    { value: "fr", label: "French" },
-    { value: "de", label: "German" },
-    { value: "zh", label: "Chinese" },
-  ];
-
-  const currencies = [
-    { value: "USD", label: "USD ($)" },
-    { value: "EUR", label: "EUR (€)" },
-    { value: "GBP", label: "GBP (£)" },
-    { value: "INR", label: "INR (₹)" },
-  ];
-
-  const timezones = [
-    { value: "UTC-12:00", label: "UTC-12:00" },
-    { value: "UTC-11:00", label: "UTC-11:00" },
-    { value: "UTC-10:00", label: "UTC-10:00" },
-    { value: "UTC-09:00", label: "UTC-09:00" },
-    { value: "UTC-08:00", label: "UTC-08:00" },
-    { value: "UTC-07:00", label: "UTC-07:00" },
-    { value: "UTC-06:00", label: "UTC-06:00" },
-    { value: "UTC-05:00", label: "UTC-05:00" },
-    { value: "UTC-04:00", label: "UTC-04:00" },
-    { value: "UTC-03:00", label: "UTC-03:00" },
-    { value: "UTC-02:00", label: "UTC-02:00" },
-    { value: "UTC-01:00", label: "UTC-01:00" },
-    { value: "UTC+00:00", label: "UTC+00:00" },
-    { value: "UTC+01:00", label: "UTC+01:00" },
-    { value: "UTC+02:00", label: "UTC+02:00" },
-    { value: "UTC+03:00", label: "UTC+03:00" },
-    { value: "UTC+04:00", label: "UTC+04:00" },
-    { value: "UTC+05:00", label: "UTC+05:00" },
-    { value: "UTC+05:30", label: "UTC+05:30" },
-    { value: "UTC+06:00", label: "UTC+06:00" },
-    { value: "UTC+07:00", label: "UTC+07:00" },
-    { value: "UTC+08:00", label: "UTC+08:00" },
-    { value: "UTC+09:00", label: "UTC+09:00" },
-    { value: "UTC+10:00", label: "UTC+10:00" },
-    { value: "UTC+11:00", label: "UTC+11:00" },
-    { value: "UTC+12:00", label: "UTC+12:00" },
-  ];
-
-  const profileVisibilities = [
-    { value: "public", label: "Public" },
-    { value: "private", label: "Private" },
-    { value: "friends", label: "Friends Only" },
-  ];
+  const handleRevokeDevice = useCallback((index) => {
+    setActiveDevices((prev) => prev.filter((_, i) => i !== index));
+    toast.success("Device signed out");
+  }, []);
 
   return (
     <div className={styles.settingsTab}>
@@ -312,7 +344,7 @@ const SettingsTab = () => {
               onChange={handleChange}
               className={styles.editSelect}
             >
-              {languages.map((lang) => (
+              {LANGUAGES.map((lang) => (
                 <option key={lang.value} value={lang.value}>
                   {lang.label}
                 </option>
@@ -327,7 +359,7 @@ const SettingsTab = () => {
               onChange={handleChange}
               className={styles.editSelect}
             >
-              {currencies.map((curr) => (
+              {CURRENCIES.map((curr) => (
                 <option key={curr.value} value={curr.value}>
                   {curr.label}
                 </option>
@@ -342,7 +374,7 @@ const SettingsTab = () => {
               onChange={handleChange}
               className={styles.editSelect}
             >
-              {timezones.map((tz) => (
+              {TIMEZONES.map((tz) => (
                 <option key={tz.value} value={tz.value}>
                   {tz.label}
                 </option>
@@ -366,6 +398,7 @@ const SettingsTab = () => {
             <button
               onClick={() => handleToggle("emailNotifications")}
               className={styles.toggleBtn}
+              aria-label="Toggle email notifications"
             >
               {settings.emailNotifications ? (
                 <FiToggleRight size={24} />
@@ -382,6 +415,7 @@ const SettingsTab = () => {
             <button
               onClick={() => handleToggle("smsNotifications")}
               className={styles.toggleBtn}
+              aria-label="Toggle SMS notifications"
             >
               {settings.smsNotifications ? (
                 <FiToggleRight size={24} />
@@ -398,6 +432,7 @@ const SettingsTab = () => {
             <button
               onClick={() => handleToggle("pushNotifications")}
               className={styles.toggleBtn}
+              aria-label="Toggle push notifications"
             >
               {settings.pushNotifications ? (
                 <FiToggleRight size={24} />
@@ -414,6 +449,7 @@ const SettingsTab = () => {
             <button
               onClick={() => handleToggle("newsletter")}
               className={styles.toggleBtn}
+              aria-label="Toggle newsletter"
             >
               {settings.newsletter ? (
                 <FiToggleRight size={24} />
@@ -430,6 +466,7 @@ const SettingsTab = () => {
             <button
               onClick={() => handleToggle("marketingEmails")}
               className={styles.toggleBtn}
+              aria-label="Toggle marketing emails"
             >
               {settings.marketingEmails ? (
                 <FiToggleRight size={24} />
@@ -446,6 +483,7 @@ const SettingsTab = () => {
             <button
               onClick={() => handleToggle("orderUpdates")}
               className={styles.toggleBtn}
+              aria-label="Toggle order updates"
             >
               {settings.orderUpdates ? (
                 <FiToggleRight size={24} />
@@ -462,6 +500,7 @@ const SettingsTab = () => {
             <button
               onClick={() => handleToggle("promotionalSms")}
               className={styles.toggleBtn}
+              aria-label="Toggle promotional SMS"
             >
               {settings.promotionalSms ? (
                 <FiToggleRight size={24} />
@@ -495,6 +534,7 @@ const SettingsTab = () => {
               <input
                 type="password"
                 name="currentPassword"
+                autoComplete="current-password"
                 value={passwordData.currentPassword}
                 onChange={handlePasswordChange}
                 placeholder="Enter current password"
@@ -506,6 +546,7 @@ const SettingsTab = () => {
               <input
                 type="password"
                 name="newPassword"
+                autoComplete="new-password"
                 value={passwordData.newPassword}
                 onChange={handlePasswordChange}
                 placeholder="Enter new password (min 8 characters)"
@@ -517,6 +558,7 @@ const SettingsTab = () => {
               <input
                 type="password"
                 name="confirmPassword"
+                autoComplete="new-password"
                 value={passwordData.confirmPassword}
                 onChange={handlePasswordChange}
                 placeholder="Confirm new password"
@@ -526,9 +568,10 @@ const SettingsTab = () => {
             <button
               onClick={changePassword}
               className={styles.changePasswordBtn}
+              disabled={passwordSaving}
             >
               <FiLock size={16} />
-              Change Password
+              {passwordSaving ? "Changing..." : "Change Password"}
             </button>
           </div>
         </div>
@@ -546,6 +589,7 @@ const SettingsTab = () => {
             <button
               onClick={() => handleToggle("twoFactorAuth")}
               className={styles.toggleBtn}
+              aria-label="Toggle two-factor authentication"
             >
               {settings.twoFactorAuth ? (
                 <FiToggleRight size={24} />
@@ -565,6 +609,7 @@ const SettingsTab = () => {
             <button
               onClick={() => handleToggle("enableOTP")}
               className={styles.toggleBtn}
+              aria-label="Toggle OTP verification"
             >
               {settings.enableOTP ? (
                 <FiToggleRight size={24} />
@@ -584,7 +629,9 @@ const SettingsTab = () => {
                   <FiSmartphone size={18} />
                   <div>
                     <span className={styles.deviceName}>{device.device}</span>
-                    <span className={styles.deviceIP}>IP: {device.ip}</span>
+                    <span className={styles.deviceIP}>
+                      IP: {maskIP(device.ip)}
+                    </span>
                     <span className={styles.deviceLastActive}>
                       Last active:{" "}
                       {new Date(device.lastActive).toLocaleString()}
@@ -594,7 +641,10 @@ const SettingsTab = () => {
                 {device.current ? (
                   <span className={styles.currentDevice}>Current Device</span>
                 ) : (
-                  <button className={styles.revokeDeviceBtn}>
+                  <button
+                    className={styles.revokeDeviceBtn}
+                    onClick={() => handleRevokeDevice(index)}
+                  >
                     <FiLogOut size={14} /> Revoke
                   </button>
                 )}
@@ -623,7 +673,7 @@ const SettingsTab = () => {
               onChange={handleChange}
               className={styles.editSelect}
             >
-              {profileVisibilities.map((option) => (
+              {PROFILE_VISIBILITIES.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
@@ -637,6 +687,7 @@ const SettingsTab = () => {
             <button
               onClick={() => handleToggle("showEmail")}
               className={styles.toggleBtn}
+              aria-label="Toggle show email on profile"
             >
               {settings.showEmail ? (
                 <FiToggleRight size={24} />
@@ -652,6 +703,7 @@ const SettingsTab = () => {
             <button
               onClick={() => handleToggle("showPhone")}
               className={styles.toggleBtn}
+              aria-label="Toggle show phone on profile"
             >
               {settings.showPhone ? (
                 <FiToggleRight size={24} />
@@ -682,6 +734,7 @@ const SettingsTab = () => {
             <input
               type="email"
               name="newEmail"
+              autoComplete="off"
               value={emailData.newEmail}
               onChange={handleEmailChange}
               placeholder="Enter new email"
@@ -693,6 +746,7 @@ const SettingsTab = () => {
             <input
               type="email"
               name="confirmEmail"
+              autoComplete="off"
               value={emailData.confirmEmail}
               onChange={handleEmailChange}
               placeholder="Confirm new email"
@@ -704,15 +758,20 @@ const SettingsTab = () => {
             <input
               type="password"
               name="password"
+              autoComplete="current-password"
               value={emailData.password}
               onChange={handleEmailChange}
               placeholder="Enter your password to confirm"
               className={styles.editInput}
             />
           </div>
-          <button onClick={changeEmail} className={styles.changeEmailBtn}>
+          <button
+            onClick={changeEmail}
+            className={styles.changeEmailBtn}
+            disabled={emailSaving}
+          >
             <FiMail size={16} />
-            Change Email
+            {emailSaving ? "Changing..." : "Change Email"}
           </button>
         </div>
       </div>
@@ -766,6 +825,7 @@ const SettingsTab = () => {
               <button
                 onClick={() => setShowDeactivateModal(false)}
                 className={styles.closeModalBtn}
+                aria-label="Close"
               >
                 <FiX size={20} />
               </button>
@@ -788,8 +848,9 @@ const SettingsTab = () => {
               <button
                 onClick={handleDeactivateAccount}
                 className={styles.deactivateConfirmBtn}
+                disabled={deactivating}
               >
-                Yes, Deactivate
+                {deactivating ? "Deactivating..." : "Yes, Deactivate"}
               </button>
             </div>
           </div>
@@ -811,6 +872,7 @@ const SettingsTab = () => {
               <button
                 onClick={() => setShowDeleteModal(false)}
                 className={styles.closeModalBtn}
+                aria-label="Close"
               >
                 <FiX size={20} />
               </button>
@@ -836,9 +898,10 @@ const SettingsTab = () => {
               <button
                 onClick={handleDeleteAccount}
                 className={styles.deleteConfirmBtn}
+                disabled={deleting}
               >
                 <FiTrash2 size={16} />
-                Permanently Delete
+                {deleting ? "Deleting..." : "Permanently Delete"}
               </button>
             </div>
           </div>

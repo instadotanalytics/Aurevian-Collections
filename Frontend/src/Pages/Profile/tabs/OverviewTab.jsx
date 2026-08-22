@@ -1,6 +1,6 @@
 // src/Pages/Profile/tabs/OverviewTab.jsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   FiEdit2,
@@ -8,7 +8,6 @@ import {
   FiX,
   FiMail,
   FiPhone,
-  FiUser,
   FiCalendar,
   FiMapPin,
   FiGlobe,
@@ -25,21 +24,61 @@ import {
   FiUsers,
   FiTrendingUp,
   FiLoader,
-  FiCheck, // ✅ Added
+  FiCheck,
 } from "react-icons/fi";
 import { updateProfile } from "../../../redux/slices/profileSlice";
 import axios from "axios";
 import toast from "react-hot-toast";
 import styles from "../Profile.module.css";
 
+// ── Static reference data, hoisted so it isn't rebuilt on every render ──
+const LANGUAGES = [
+  { value: "en", label: "English" },
+  { value: "hi", label: "Hindi" },
+  { value: "es", label: "Spanish" },
+  { value: "fr", label: "French" },
+  { value: "de", label: "German" },
+  { value: "zh", label: "Chinese" },
+];
+
+const COUNTRIES = [
+  "India",
+  "USA",
+  "UK",
+  "Canada",
+  "Australia",
+  "Germany",
+  "France",
+  "Switzerland",
+];
+
+const CURRENCIES = [
+  { value: "USD", label: "USD ($)" },
+  { value: "EUR", label: "EUR (€)" },
+  { value: "GBP", label: "GBP (£)" },
+  { value: "INR", label: "INR (₹)" },
+];
+
+// ── Sensitive data protection: mask the read-only email shown on this tab ──
+const maskEmail = (email) => {
+  if (!email || !email.includes("@")) return email || "";
+  const [user, domain] = email.split("@");
+  if (user.length <= 2) return `${user[0] || ""}•••@${domain}`;
+  return `${user.slice(0, 2)}${"•".repeat(Math.min(user.length - 2, 6))}@${domain}`;
+};
+
 const OverviewTab = () => {
   const dispatch = useDispatch();
-  const { profile, loading } = useSelector((state) => state.profile);
+  const { profile } = useSelector((state) => state.profile);
   const [isEditing, setIsEditing] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [formErrors, setFormErrors] = useState({});
 
   // Referral state
+  // NOTE: this mirrors ReferralTab.jsx's own fetch of the same endpoints.
+  // Both views currently hit /api/referrals/my-code and /my-stats
+  // independently — worth consolidating into one source of truth
+  // (e.g. a shared referral slice) to avoid duplicate network calls.
   const [referralCode, setReferralCode] = useState("");
   const [referralStats, setReferralStats] = useState({
     totalReferrals: 0,
@@ -74,15 +113,7 @@ const OverviewTab = () => {
     },
   });
 
-  // Fetch referral data on mount
-  useEffect(() => {
-    if (profile?._id) {
-      fetchReferralData();
-    }
-  }, [profile?._id]);
-
-  // Fetch referral data
-  const fetchReferralData = async () => {
+  const fetchReferralData = useCallback(async () => {
     setLoadingReferral(true);
     try {
       const codeResponse = await axios.get("/api/referrals/my-code", {
@@ -101,75 +132,73 @@ const OverviewTab = () => {
         setReferralStats(statsResponse.data.data);
       }
     } catch (error) {
-      console.error("Error fetching referral data:", error);
       if (error.response?.status === 404) {
         setReferralCode("");
       }
     } finally {
       setLoadingReferral(false);
     }
-  };
+  }, []);
 
-  // Generate referral code
-  const generateReferralCode = async () => {
+  useEffect(() => {
+    if (profile?._id) {
+      fetchReferralData();
+    }
+  }, [profile?._id, fetchReferralData]);
+
+  const generateReferralCode = useCallback(async () => {
     setGenerating(true);
     try {
       const response = await axios.post(
         "/api/referrals/generate",
         {},
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true },
       );
 
       if (response.data.success) {
         setReferralCode(response.data.data.code);
-        toast.success("🎉 Referral code generated successfully!");
+        toast.success("Referral code generated successfully!");
         await fetchReferralData();
       }
     } catch (error) {
-      console.error("Error generating referral code:", error);
       toast.error(error.response?.data?.message || "Failed to generate referral code");
     } finally {
       setGenerating(false);
     }
-  };
+  }, [fetchReferralData]);
 
-  // Copy referral link
-  const copyReferralLink = () => {
+  const copyReferralLink = useCallback(() => {
     const referralLink = `${window.location.origin}/signup?ref=${referralCode}`;
     navigator.clipboard.writeText(referralLink);
     setCopied(true);
-    toast.success("📋 Referral link copied!");
+    toast.success("Referral link copied!");
     setTimeout(() => setCopied(false), 3000);
-  };
+  }, [referralCode]);
 
-  // Share referral link
-  const shareReferralLink = async () => {
+  const shareReferralLink = useCallback(async () => {
     const referralLink = `${window.location.origin}/signup?ref=${referralCode}`;
     const shareData = {
       title: "Join Aurevian Collections",
-      text: `🎉 Use my referral code ${referralCode} and get exciting discounts on your first order!`,
+      text: `Use my referral code ${referralCode} and get exciting discounts on your first order!`,
       url: referralLink,
     };
 
     try {
       if (navigator.share) {
         await navigator.share(shareData);
-        toast.success("✅ Shared successfully!");
+        toast.success("Shared successfully!");
       } else {
         copyReferralLink();
       }
     } catch (error) {
       if (error.name !== "AbortError") {
-        console.error("Error sharing:", error);
         toast.error("Failed to share");
       }
     }
-  };
+  }, [referralCode, copyReferralLink]);
 
-  // Calculate profile completion
-  const calculateCompletion = () => {
+  // Profile completion (recomputed only when the relevant profile fields change)
+  const completion = useMemo(() => {
     const fields = [
       profile?.firstName,
       profile?.lastName,
@@ -184,37 +213,22 @@ const OverviewTab = () => {
     ];
     const filled = fields.filter((f) => f && f !== "").length;
     return Math.round((filled / fields.length) * 100);
-  };
+  }, [
+    profile?.firstName,
+    profile?.lastName,
+    profile?.phone,
+    profile?.gender,
+    profile?.dateOfBirth,
+    profile?.address?.street,
+    profile?.address?.city,
+    profile?.address?.state,
+    profile?.address?.pincode,
+    profile?.anniversary,
+  ]);
 
-  const completion = calculateCompletion();
+  const maskedEmail = useMemo(() => maskEmail(profile?.email), [profile?.email]);
 
-  const languages = [
-    { value: "en", label: "English" },
-    { value: "hi", label: "Hindi" },
-    { value: "es", label: "Spanish" },
-    { value: "fr", label: "French" },
-    { value: "de", label: "German" },
-    { value: "zh", label: "Chinese" },
-  ];
-
-  const countries = [
-    "India",
-    "USA",
-    "UK",
-    "Canada",
-    "Australia",
-    "Germany",
-    "France",
-    "Switzerland",
-  ];
-  const currencies = [
-    { value: "USD", label: "USD ($)" },
-    { value: "EUR", label: "EUR (€)" },
-    { value: "GBP", label: "GBP (£)" },
-    { value: "INR", label: "INR (₹)" },
-  ];
-
-  const validate = () => {
+  const validate = useCallback(() => {
     const errors = {};
 
     if (!formData.firstName.trim()) {
@@ -265,28 +279,29 @@ const OverviewTab = () => {
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
-  };
+  }, [formData]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name.includes(".")) {
-      const [parent, child] = name.split(".");
-      setFormData((prev) => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: value,
-        },
-      }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
-    if (formErrors[name]) {
-      setFormErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-  };
+  const handleChange = useCallback(
+    (e) => {
+      const { name, value } = e.target;
+      if (name.includes(".")) {
+        const [parent, child] = name.split(".");
+        setFormData((prev) => ({
+          ...prev,
+          [parent]: {
+            ...prev[parent],
+            [child]: value,
+          },
+        }));
+      } else {
+        setFormData((prev) => ({ ...prev, [name]: value }));
+      }
+      setFormErrors((prev) => (prev[name] ? { ...prev, [name]: "" } : prev));
+    },
+    [],
+  );
 
-  const handleUpdateProfile = async () => {
+  const handleUpdateProfile = useCallback(async () => {
     if (!validate()) {
       toast.error("Please fix the errors in the form");
       return;
@@ -300,7 +315,7 @@ const OverviewTab = () => {
     } finally {
       setUpdateLoading(false);
     }
-  };
+  }, [dispatch, formData, validate]);
 
   if (!profile) {
     return <div>Loading...</div>;
@@ -373,12 +388,12 @@ const OverviewTab = () => {
 
         <p className={styles.referralSubtext}>
           Share your referral code and earn rewards when your friends make their
-          first purchase! 🎉
+          first purchase!
         </p>
 
         {loadingReferral ? (
           <div className={styles.loadingReferral}>
-            <FiLoader className={styles.spinner} />
+            <FiLoader className={styles.spinnerIcon} />
             Loading referral code...
           </div>
         ) : (
@@ -398,7 +413,7 @@ const OverviewTab = () => {
                   )}
                   {generating && (
                     <span className={styles.generatingText}>
-                      <FiLoader className={styles.spinnerSmall} /> Generating...
+                      <FiLoader className={styles.spinnerIcon} /> Generating...
                     </span>
                   )}
                 </div>
@@ -541,12 +556,12 @@ const OverviewTab = () => {
             )}
           </div>
 
-          {/* Email - Read Only */}
+          {/* Email - Read Only, masked for privacy */}
           <div className={styles.infoItem}>
             <span className={styles.infoLabel}>Email</span>
             <span className={styles.infoValue}>
               <FiMail className={styles.infoIcon} />
-              {profile?.email}
+              {maskedEmail}
               <span className={styles.readOnlyBadge}>Read Only</span>
             </span>
           </div>
@@ -672,7 +687,7 @@ const OverviewTab = () => {
                 onChange={handleChange}
                 className={styles.editSelect}
               >
-                {languages.map((lang) => (
+                {LANGUAGES.map((lang) => (
                   <option key={lang.value} value={lang.value}>
                     {lang.label}
                   </option>
@@ -681,7 +696,7 @@ const OverviewTab = () => {
             ) : (
               <span className={styles.infoValue}>
                 <FiGlobe className={styles.infoIcon} />
-                {languages.find((l) => l.value === profile?.language)?.label ||
+                {LANGUAGES.find((l) => l.value === profile?.language)?.label ||
                   "English"}
               </span>
             )}
@@ -697,7 +712,7 @@ const OverviewTab = () => {
                 onChange={handleChange}
                 className={styles.editSelect}
               >
-                {countries.map((country) => (
+                {COUNTRIES.map((country) => (
                   <option key={country} value={country}>
                     {country}
                   </option>
@@ -721,7 +736,7 @@ const OverviewTab = () => {
                 onChange={handleChange}
                 className={styles.editSelect}
               >
-                {currencies.map((curr) => (
+                {CURRENCIES.map((curr) => (
                   <option key={curr.value} value={curr.value}>
                     {curr.label}
                   </option>
@@ -730,7 +745,7 @@ const OverviewTab = () => {
             ) : (
               <span className={styles.infoValue}>
                 <FiDollarSign className={styles.infoIcon} />
-                {currencies.find((c) => c.value === profile?.preferredCurrency)
+                {CURRENCIES.find((c) => c.value === profile?.preferredCurrency)
                   ?.label || "INR (₹)"}
               </span>
             )}
@@ -830,7 +845,7 @@ const OverviewTab = () => {
                   onChange={handleChange}
                   className={styles.editSelect}
                 >
-                  {countries.map((country) => (
+                  {COUNTRIES.map((country) => (
                     <option key={country} value={country}>
                       {country}
                     </option>

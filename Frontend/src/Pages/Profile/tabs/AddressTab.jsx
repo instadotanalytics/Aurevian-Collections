@@ -1,6 +1,6 @@
 // src/Pages/Profile/tabs/AddressTab.jsx
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   FiMapPin,
@@ -13,6 +13,8 @@ import {
   FiSave,
   FiX,
   FiAlertCircle,
+  FiSmartphone,
+  FiFileText,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import {
@@ -23,110 +25,123 @@ import {
 } from "../../../redux/slices/profileSlice";
 import styles from "../Profile.module.css";
 
+// ── Static reference data, hoisted so it isn't rebuilt on every render ──
+const MAX_ADDRESSES = 10;
+
+const COUNTRIES = [
+  "India",
+  "USA",
+  "UK",
+  "Canada",
+  "Australia",
+  "Germany",
+  "France",
+  "Switzerland",
+];
+
+const STATES = {
+  India: [
+    "Andhra Pradesh",
+    "Karnataka",
+    "Tamil Nadu",
+    "Maharashtra",
+    "Delhi",
+    "Kerala",
+    "Telangana",
+    "Uttar Pradesh",
+    "Rajasthan",
+    "Gujarat",
+  ],
+  USA: [
+    "California",
+    "Texas",
+    "New York",
+    "Florida",
+    "Illinois",
+    "Pennsylvania",
+    "Ohio",
+    "Georgia",
+  ],
+  UK: ["England", "Scotland", "Wales", "Northern Ireland"],
+  Canada: ["Ontario", "British Columbia", "Quebec", "Alberta", "Manitoba"],
+  Australia: [
+    "New South Wales",
+    "Victoria",
+    "Queensland",
+    "Western Australia",
+    "South Australia",
+  ],
+  Germany: ["Bavaria", "Berlin", "Hesse", "North Rhine-Westphalia", "Saxony"],
+  France: [
+    "Île-de-France",
+    "Provence-Alpes-Côte d'Azur",
+    "Nouvelle-Aquitaine",
+    "Auvergne-Rhône-Alpes",
+  ],
+  Switzerland: ["Zurich", "Bern", "Geneva", "Basel", "Lausanne"],
+};
+
+const ADDRESS_TYPES = [
+  { value: "home", label: "Home", icon: FiHome },
+  { value: "work", label: "Work", icon: FiBriefcase },
+  { value: "other", label: "Other", icon: FiMoreHorizontal },
+];
+
+const EMPTY_ADDRESS = {
+  addressType: "home",
+  recipientName: "",
+  mobileNumber: "",
+  alternateMobile: "",
+  houseNumber: "",
+  apartment: "",
+  street: "",
+  landmark: "",
+  area: "",
+  city: "",
+  state: "",
+  country: "India",
+  pincode: "",
+  deliveryInstructions: "",
+  isDefault: false,
+};
+
+const validatePhone = (phone) => /^[0-9]{10}$/.test(phone);
+const validatePincode = (pincode) => /^[0-9]{6}$/.test(pincode);
+const validateName = (name) => /^[A-Za-z\s]{1,40}$/.test(name);
+
+const getAddressTypeIcon = (type) => {
+  const addressType = ADDRESS_TYPES.find((t) => t.value === type);
+  if (addressType) {
+    const Icon = addressType.icon;
+    return <Icon size={16} />;
+  }
+  return <FiMapPin size={16} />;
+};
+
+const getAddressTypeLabel = (type) => {
+  const addressType = ADDRESS_TYPES.find((t) => t.value === type);
+  return addressType ? addressType.label : "Other";
+};
+
+// ── Skeleton loading (same theme, transparent bg) ──
+const AddressSkeleton = () => (
+  <div className={styles.addressList}>
+    {Array.from({ length: 2 }).map((_, i) => (
+      <div key={i} className={`${styles.skeletonBox} ${styles.skeletonCard}`} />
+    ))}
+  </div>
+);
+
 const AddressTab = () => {
   const dispatch = useDispatch();
   const { addresses, loading } = useSelector((state) => state.profile);
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-
-  const [newAddress, setNewAddress] = useState({
-    addressType: "home",
-    recipientName: "",
-    mobileNumber: "",
-    alternateMobile: "",
-    houseNumber: "",
-    apartment: "",
-    street: "",
-    landmark: "",
-    area: "",
-    city: "",
-    state: "",
-    country: "India",
-    pincode: "",
-    deliveryInstructions: "",
-    isDefault: false,
-  });
-
+  const [newAddress, setNewAddress] = useState(EMPTY_ADDRESS);
   const [formErrors, setFormErrors] = useState({});
 
-  const MAX_ADDRESSES = 10;
-
-  const countries = [
-    "India",
-    "USA",
-    "UK",
-    "Canada",
-    "Australia",
-    "Germany",
-    "France",
-    "Switzerland",
-  ];
-
-  const states = {
-    India: [
-      "Andhra Pradesh",
-      "Karnataka",
-      "Tamil Nadu",
-      "Maharashtra",
-      "Delhi",
-      "Kerala",
-      "Telangana",
-      "Uttar Pradesh",
-      "Rajasthan",
-      "Gujarat",
-    ],
-    USA: [
-      "California",
-      "Texas",
-      "New York",
-      "Florida",
-      "Illinois",
-      "Pennsylvania",
-      "Ohio",
-      "Georgia",
-    ],
-    UK: ["England", "Scotland", "Wales", "Northern Ireland"],
-    Canada: ["Ontario", "British Columbia", "Quebec", "Alberta", "Manitoba"],
-    Australia: [
-      "New South Wales",
-      "Victoria",
-      "Queensland",
-      "Western Australia",
-      "South Australia",
-    ],
-    Germany: ["Bavaria", "Berlin", "Hesse", "North Rhine-Westphalia", "Saxony"],
-    France: [
-      "Île-de-France",
-      "Provence-Alpes-Côte d'Azur",
-      "Nouvelle-Aquitaine",
-      "Auvergne-Rhône-Alpes",
-    ],
-    Switzerland: ["Zurich", "Bern", "Geneva", "Basel", "Lausanne"],
-  };
-
-  const addressTypes = [
-    { value: "home", label: "Home", icon: FiHome },
-    { value: "work", label: "Work", icon: FiBriefcase },
-    { value: "other", label: "Other", icon: FiMoreHorizontal },
-  ];
-
-  const validatePhone = (phone) => {
-    const phoneRegex = /^[0-9]{10}$/;
-    return phoneRegex.test(phone);
-  };
-
-  const validatePincode = (pincode) => {
-    const pincodeRegex = /^[0-9]{6}$/;
-    return pincodeRegex.test(pincode);
-  };
-
-  const validateName = (name) => {
-    const nameRegex = /^[A-Za-z\s]{1,40}$/;
-    return nameRegex.test(name);
-  };
-
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     const errors = {};
 
     if (!newAddress.recipientName.trim()) {
@@ -181,45 +196,30 @@ const AddressTab = () => {
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
-  };
+  }, [newAddress]);
 
-  const handleAddressChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setNewAddress((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-    if (formErrors[name]) {
-      setFormErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-  };
+  const handleAddressChange = useCallback(
+    (e) => {
+      const { name, value, type, checked } = e.target;
+      setNewAddress((prev) => ({
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      }));
+      if (formErrors[name]) {
+        setFormErrors((prev) => ({ ...prev, [name]: "" }));
+      }
+    },
+    [formErrors],
+  );
 
-  const resetForm = () => {
-    setNewAddress({
-      addressType: "home",
-      recipientName: "",
-      mobileNumber: "",
-      alternateMobile: "",
-      houseNumber: "",
-      apartment: "",
-      street: "",
-      landmark: "",
-      area: "",
-      city: "",
-      state: "",
-      country: "India",
-      pincode: "",
-      deliveryInstructions: "",
-      isDefault: false,
-    });
+  const resetForm = useCallback(() => {
+    setNewAddress(EMPTY_ADDRESS);
     setFormErrors({});
     setEditingAddressId(null);
     setShowAddressForm(false);
-  };
+  }, []);
 
-  // In AddressTab.jsx - add this to handleAddAddress
-
-  const handleAddAddress = async () => {
+  const handleAddAddress = useCallback(async () => {
     if (!validateForm()) {
       toast.error("Please fix the errors in the form");
       return;
@@ -231,17 +231,14 @@ const AddressTab = () => {
     }
 
     try {
-      console.log("📦 Sending address data:", newAddress);
-      const result = await dispatch(addAddress(newAddress)).unwrap();
-      console.log("✅ Address added successfully:", result);
+      await dispatch(addAddress(newAddress)).unwrap();
       resetForm();
     } catch (error) {
-      console.error("❌ Failed to add address:", error);
-      // Error handled in slice
+      // Error handled in slice — avoid logging address PII to the console
     }
-  };
+  }, [dispatch, addresses, newAddress, validateForm, resetForm]);
 
-  const handleUpdateAddress = async () => {
+  const handleUpdateAddress = useCallback(async () => {
     if (!validateForm()) {
       toast.error("Please fix the errors in the form");
       return;
@@ -258,18 +255,21 @@ const AddressTab = () => {
     } catch (error) {
       // Error handled in slice
     }
-  };
+  }, [dispatch, editingAddressId, newAddress, validateForm, resetForm]);
 
-  const handleDeleteAddress = async (addressId) => {
-    try {
-      await dispatch(deleteAddress(addressId)).unwrap();
-      setDeleteConfirm(null);
-    } catch (error) {
-      // Error handled in slice
-    }
-  };
+  const handleDeleteAddress = useCallback(
+    async (addressId) => {
+      try {
+        await dispatch(deleteAddress(addressId)).unwrap();
+        setDeleteConfirm(null);
+      } catch (error) {
+        // Error handled in slice
+      }
+    },
+    [dispatch],
+  );
 
-  const handleEditAddress = (address) => {
+  const handleEditAddress = useCallback((address) => {
     setEditingAddressId(address._id);
     setNewAddress({
       addressType: address.addressType || "home",
@@ -289,29 +289,29 @@ const AddressTab = () => {
       isDefault: address.isDefault || false,
     });
     setShowAddressForm(true);
-  };
+  }, []);
 
-  const handleSetDefault = async (addressId) => {
-    try {
-      await dispatch(setDefaultAddress(addressId)).unwrap();
-    } catch (error) {
-      // Error handled in slice
-    }
-  };
+  const handleSetDefault = useCallback(
+    async (addressId) => {
+      try {
+        await dispatch(setDefaultAddress(addressId)).unwrap();
+      } catch (error) {
+        // Error handled in slice
+      }
+    },
+    [dispatch],
+  );
 
-  const getAddressTypeIcon = (type) => {
-    const addressType = addressTypes.find((t) => t.value === type);
-    if (addressType) {
-      const Icon = addressType.icon;
-      return <Icon size={16} />;
-    }
-    return <FiMapPin size={16} />;
-  };
-
-  const getAddressTypeLabel = (type) => {
-    const addressType = addressTypes.find((t) => t.value === type);
-    return addressType ? addressType.label : "Other";
-  };
+  if (loading && (!addresses || addresses.length === 0) && !showAddressForm) {
+    return (
+      <div className={styles.tabContent}>
+        <div className={styles.tabHeader}>
+          <h2>My Addresses</h2>
+        </div>
+        <AddressSkeleton />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.tabContent}>
@@ -343,16 +343,17 @@ const AddressTab = () => {
           <div className={styles.addressTypeSelector}>
             <label>Address Type</label>
             <div className={styles.addressTypeOptions}>
-              {addressTypes.map((type) => {
+              {ADDRESS_TYPES.map((type) => {
                 const Icon = type.icon;
                 return (
                   <button
                     key={type.value}
+                    type="button"
                     className={`${styles.addressTypeBtn} ${
                       newAddress.addressType === type.value ? styles.active : ""
                     }`}
                     onClick={() =>
-                      setNewAddress({ ...newAddress, addressType: type.value })
+                      setNewAddress((prev) => ({ ...prev, addressType: type.value }))
                     }
                   >
                     <Icon size={20} />
@@ -388,6 +389,7 @@ const AddressTab = () => {
                 value={newAddress.mobileNumber}
                 onChange={handleAddressChange}
                 placeholder="10-digit mobile number"
+                maxLength={10}
                 className={formErrors.mobileNumber ? styles.errorInput : ""}
               />
               {formErrors.mobileNumber && (
@@ -407,6 +409,7 @@ const AddressTab = () => {
                 value={newAddress.alternateMobile}
                 onChange={handleAddressChange}
                 placeholder="Optional"
+                maxLength={10}
                 className={formErrors.alternateMobile ? styles.errorInput : ""}
               />
               {formErrors.alternateMobile && (
@@ -520,7 +523,7 @@ const AddressTab = () => {
                 className={formErrors.state ? styles.errorInput : ""}
               >
                 <option value="">Select State</option>
-                {states[newAddress.country]?.map((state) => (
+                {STATES[newAddress.country]?.map((state) => (
                   <option key={state} value={state}>
                     {state}
                   </option>
@@ -543,7 +546,7 @@ const AddressTab = () => {
                 onChange={handleAddressChange}
                 className={formErrors.country ? styles.errorInput : ""}
               >
-                {countries.map((country) => (
+                {COUNTRIES.map((country) => (
                   <option key={country} value={country}>
                     {country}
                   </option>
@@ -563,6 +566,7 @@ const AddressTab = () => {
                 value={newAddress.pincode}
                 onChange={handleAddressChange}
                 placeholder="6-digit PIN code"
+                maxLength={6}
                 className={formErrors.pincode ? styles.errorInput : ""}
               />
               {formErrors.pincode && (
@@ -653,7 +657,7 @@ const AddressTab = () => {
                 </p>
                 <p className={styles.addressLine}>{address.country}</p>
                 <p className={styles.addressPhone}>
-                  <span>📱 {address.mobileNumber || address.phone}</span>
+                  <span><FiSmartphone size={13} /> {address.mobileNumber || address.phone}</span>
                   {address.alternateMobile && (
                     <span className={styles.alternatePhone}>
                       (Alt: {address.alternateMobile})
@@ -662,7 +666,7 @@ const AddressTab = () => {
                 </p>
                 {address.deliveryInstructions && (
                   <p className={styles.deliveryInstructions}>
-                    📝 {address.deliveryInstructions}
+                    <FiFileText size={13} /> {address.deliveryInstructions}
                   </p>
                 )}
               </div>
@@ -688,6 +692,7 @@ const AddressTab = () => {
                   className={styles.addressDeleteBtn}
                   onClick={() => setDeleteConfirm(address._id)}
                   disabled={loading}
+                  aria-label="Delete address"
                 >
                   <FiTrash2 size={14} />
                 </button>

@@ -1,6 +1,6 @@
 // src/Pages/Profile/tabs/OrdersTab.jsx
 
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   FiPackage,
@@ -20,70 +20,111 @@ import toast from "react-hot-toast";
 import { fetchOrders } from "../../../redux/slices/profileSlice";
 import styles from "../Profile.module.css";
 
+// ── Pure helpers, hoisted so they aren't recreated every render ──
+const getStatusIcon = (status) => {
+  switch (status?.toLowerCase()) {
+    case "delivered":
+      return <FiCheckCircle />;
+    case "processing":
+      return <FiClock />;
+    case "shipped":
+      return <FiTruck />;
+    case "cancelled":
+      return <FiAlertCircle />;
+    default:
+      return <FiPackage />;
+  }
+};
+
+const getStatusColor = (status) => {
+  switch (status?.toLowerCase()) {
+    case "delivered":
+      return styles.statusDelivered;
+    case "processing":
+      return styles.statusProcessing;
+    case "shipped":
+      return styles.statusShipped;
+    case "cancelled":
+      return styles.statusCancelled;
+    default:
+      return styles.statusPending;
+  }
+};
+
+const getPaymentStatusColor = (status) => {
+  switch (status?.toLowerCase()) {
+    case "paid":
+      return styles.paymentPaid;
+    case "pending":
+      return styles.paymentPending;
+    case "failed":
+      return styles.paymentFailed;
+    case "refunded":
+      return styles.paymentRefunded;
+    default:
+      return "";
+  }
+};
+
+const getOrderTimeline = (order) => {
+  const timeline = [];
+  if (order.createdAt) {
+    timeline.push({ status: "Order Placed", date: order.createdAt, icon: <FiPackage /> });
+  }
+  if (order.confirmedAt) {
+    timeline.push({ status: "Confirmed", date: order.confirmedAt, icon: <FiCheckCircle /> });
+  }
+  if (order.shippedAt) {
+    timeline.push({ status: "Shipped", date: order.shippedAt, icon: <FiTruck /> });
+  }
+  if (order.deliveredAt) {
+    timeline.push({ status: "Delivered", date: order.deliveredAt, icon: <FiCheckCircle /> });
+  }
+  return timeline;
+};
+
+// ── Skeleton loading (same theme, transparent bg, throttled) ──
+const OrdersSkeleton = () => (
+  <div className={styles.ordersList}>
+    {Array.from({ length: 3 }).map((_, i) => (
+      <div key={i} className={`${styles.skeletonBox} ${styles.skeletonCard}`} />
+    ))}
+  </div>
+);
+
 const OrdersTab = () => {
   const dispatch = useDispatch();
   const { orders, loading } = useSelector((state) => state.profile);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [processingId, setProcessingId] = useState(null);
 
-  const getStatusIcon = (status) => {
-    switch (status?.toLowerCase()) {
-      case "delivered":
-        return <FiCheckCircle />;
-      case "processing":
-        return <FiClock />;
-      case "shipped":
-        return <FiTruck />;
-      case "cancelled":
-        return <FiAlertCircle />;
-      default:
-        return <FiPackage />;
+  // ── Throttled skeleton so a fast load doesn't flicker ──
+  const [showSkeleton, setShowSkeleton] = useState(true);
+  useEffect(() => {
+    let timer;
+    if (loading) {
+      setShowSkeleton(true);
+    } else {
+      timer = setTimeout(() => setShowSkeleton(false), 500);
     }
-  };
+    return () => clearTimeout(timer);
+  }, [loading]);
 
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case "delivered":
-        return styles.statusDelivered;
-      case "processing":
-        return styles.statusProcessing;
-      case "shipped":
-        return styles.statusShipped;
-      case "cancelled":
-        return styles.statusCancelled;
-      default:
-        return styles.statusPending;
-    }
-  };
-
-  const getPaymentStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case "paid":
-        return styles.paymentPaid;
-      case "pending":
-        return styles.paymentPending;
-      case "failed":
-        return styles.paymentFailed;
-      case "refunded":
-        return styles.paymentRefunded;
-      default:
-        return "";
-    }
-  };
-
-  const handleViewOrder = (order) => {
+  const handleViewOrder = useCallback((order) => {
     setSelectedOrder(order);
     setShowOrderDetails(true);
-  };
+  }, []);
 
-  const handleCloseDetails = () => {
+  const handleCloseDetails = useCallback(() => {
     setShowOrderDetails(false);
     setSelectedOrder(null);
-  };
+  }, []);
 
-  const handleCancelOrder = async (orderId) => {
+  const handleCancelOrder = useCallback(async (orderId) => {
     if (!window.confirm("Are you sure you want to cancel this order?")) return;
 
+    setProcessingId(orderId);
     try {
       const response = await fetch(`/api/orders/${orderId}/cancel`, {
         method: "POST",
@@ -101,10 +142,13 @@ const OrdersTab = () => {
       }
     } catch (error) {
       toast.error("Failed to cancel order");
+    } finally {
+      setProcessingId(null);
     }
-  };
+  }, [dispatch]);
 
-  const handleReorder = async (order) => {
+  const handleReorder = useCallback(async (order) => {
+    setProcessingId(order._id);
     try {
       for (const item of order.items) {
         await fetch("/api/cart", {
@@ -122,57 +166,26 @@ const OrdersTab = () => {
       toast.success("Items added to cart!");
     } catch (error) {
       toast.error("Failed to add items to cart");
+    } finally {
+      setProcessingId(null);
     }
-  };
+  }, []);
 
-  const handleReturnOrder = async (orderId) => {
-    toast.info("Return feature coming soon");
-  };
+  const handleReturnOrder = useCallback(() => {
+    toast("Return feature coming soon");
+  }, []);
 
-  const handleDownloadInvoice = (orderId) => {
-    toast.info("Invoice download coming soon");
-  };
+  const handleDownloadInvoice = useCallback(() => {
+    toast("Invoice download coming soon");
+  }, []);
 
-  const getOrderTimeline = (order) => {
-    const timeline = [];
-    if (order.createdAt) {
-      timeline.push({
-        status: "Order Placed",
-        date: order.createdAt,
-        icon: <FiPackage />,
-      });
-    }
-    if (order.confirmedAt) {
-      timeline.push({
-        status: "Confirmed",
-        date: order.confirmedAt,
-        icon: <FiCheckCircle />,
-      });
-    }
-    if (order.shippedAt) {
-      timeline.push({
-        status: "Shipped",
-        date: order.shippedAt,
-        icon: <FiTruck />,
-      });
-    }
-    if (order.deliveredAt) {
-      timeline.push({
-        status: "Delivered",
-        date: order.deliveredAt,
-        icon: <FiCheckCircle />,
-      });
-    }
-    return timeline;
-  };
-
-  if (loading) {
+  if (showSkeleton || loading) {
     return (
       <div className={styles.tabContent}>
-        <div className={styles.loadingContainer}>
-          <div className={styles.spinner}></div>
-          <p>Loading orders...</p>
+        <div className={styles.tabHeader}>
+          <h2>My Orders</h2>
         </div>
+        <OrdersSkeleton />
       </div>
     );
   }
@@ -285,14 +298,17 @@ const OrdersTab = () => {
                 <button
                   className={styles.reorderBtn}
                   onClick={() => handleReorder(order)}
+                  disabled={processingId === order._id}
                 >
-                  <FiRotateCcw size={14} /> Reorder
+                  <FiRotateCcw size={14} />
+                  {processingId === order._id ? "Adding..." : "Reorder"}
                 </button>
                 {order.status?.toLowerCase() !== "cancelled" &&
                   order.status?.toLowerCase() !== "delivered" && (
                     <button
                       className={styles.cancelOrderBtn}
                       onClick={() => handleCancelOrder(order._id)}
+                      disabled={processingId === order._id}
                     >
                       <FiX size={14} /> Cancel
                     </button>
@@ -315,6 +331,7 @@ const OrdersTab = () => {
               <button
                 onClick={handleCloseDetails}
                 className={styles.closeModalBtn}
+                aria-label="Close"
               >
                 <FiX size={20} />
               </button>
@@ -440,14 +457,17 @@ const OrdersTab = () => {
                 <button
                   className={styles.reorderBtn}
                   onClick={() => handleReorder(selectedOrder)}
+                  disabled={processingId === selectedOrder._id}
                 >
-                  <FiRotateCcw size={16} /> Reorder
+                  <FiRotateCcw size={16} />
+                  {processingId === selectedOrder._id ? "Adding..." : "Reorder"}
                 </button>
                 {selectedOrder.status?.toLowerCase() !== "cancelled" &&
                   selectedOrder.status?.toLowerCase() !== "delivered" && (
                     <button
                       className={styles.cancelOrderBtn}
                       onClick={() => handleCancelOrder(selectedOrder._id)}
+                      disabled={processingId === selectedOrder._id}
                     >
                       <FiX size={16} /> Cancel Order
                     </button>

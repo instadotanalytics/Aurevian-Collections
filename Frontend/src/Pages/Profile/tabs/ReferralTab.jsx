@@ -1,15 +1,15 @@
 // src/Pages/Profile/tabs/ReferralTab.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { 
-  FiGift, 
-  FiCopy, 
-  FiShare2, 
-  FiCheck, 
-  FiUsers, 
-  FiDollarSign, 
-  FiClock, 
+import {
+  FiGift,
+  FiCopy,
+  FiShare2,
+  FiCheck,
+  FiUsers,
+  FiDollarSign,
+  FiClock,
   FiTrendingUp,
   FiMail,
   FiSend,
@@ -32,104 +32,99 @@ const ReferralTab = () => {
   const [copied, setCopied] = useState(false);
   const [generating, setGenerating] = useState(false);
 
-  useEffect(() => {
-    fetchReferralData();
+  const generateReferralCode = useCallback(async () => {
+    setGenerating(true);
+    try {
+      const response = await axios.post('/api/referrals/generate', {}, {
+        withCredentials: true
+      });
+
+      if (response.data.success) {
+        setReferralCode(response.data.data.code);
+        toast.success('Referral code generated!');
+      }
+    } catch (error) {
+      toast.error('Failed to generate referral code');
+    } finally {
+      setGenerating(false);
+    }
   }, []);
 
-  const fetchReferralData = async () => {
+  const fetchReferralData = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch referral code
       const codeResponse = await axios.get('/api/referrals/my-code', {
         withCredentials: true
       });
-      
+
       if (codeResponse.data.success) {
         setReferralCode(codeResponse.data.data.code);
       }
 
-      // Fetch referral stats
       const statsResponse = await axios.get('/api/referrals/my-stats', {
         withCredentials: true
       });
-      
+
       if (statsResponse.data.success) {
         setReferralStats(statsResponse.data.data);
       }
     } catch (error) {
-      console.error('Error fetching referral data:', error);
-      // If no referral code exists, generate one
       if (error.response?.status === 404) {
         await generateReferralCode();
       }
     } finally {
       setLoading(false);
     }
-  };
+  }, [generateReferralCode]);
 
-  const generateReferralCode = async () => {
-    setGenerating(true);
-    try {
-      const response = await axios.post('/api/referrals/generate', {}, {
-        withCredentials: true
-      });
-      
-      if (response.data.success) {
-        setReferralCode(response.data.data.code);
-        toast.success('🎉 Referral code generated!');
-      }
-    } catch (error) {
-      console.error('Error generating referral code:', error);
-      toast.error('Failed to generate referral code');
-    } finally {
-      setGenerating(false);
-    }
-  };
+  useEffect(() => {
+    fetchReferralData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const copyReferralLink = () => {
+  const copyReferralLink = useCallback(() => {
     const referralLink = `${window.location.origin}/signup?ref=${referralCode}`;
     navigator.clipboard.writeText(referralLink);
     setCopied(true);
-    toast.success('📋 Referral link copied!');
+    toast.success('Referral link copied!');
     setTimeout(() => setCopied(false), 3000);
-  };
+  }, [referralCode]);
 
-  const shareReferralLink = async () => {
+  const shareReferralLink = useCallback(async () => {
     const referralLink = `${window.location.origin}/signup?ref=${referralCode}`;
     const shareData = {
       title: 'Join Aurevian Collections',
-      text: `🎉 Use my referral code ${referralCode} and get exciting discounts on your first order!`,
+      text: `Use my referral code ${referralCode} and get exciting discounts on your first order!`,
       url: referralLink,
     };
 
     try {
       if (navigator.share) {
         await navigator.share(shareData);
-        toast.success('✅ Shared successfully!');
+        toast.success('Shared successfully!');
       } else {
         copyReferralLink();
       }
     } catch (error) {
       if (error.name !== 'AbortError') {
-        console.error('Error sharing:', error);
         toast.error('Failed to share');
       }
     }
-  };
+  }, [referralCode, copyReferralLink]);
 
-  const shareViaWhatsApp = () => {
+  const shareViaWhatsApp = useCallback(() => {
     const referralLink = `${window.location.origin}/signup?ref=${referralCode}`;
-    const message = `🎉 Join Aurevian Collections! Use my referral code ${referralCode} to get exciting discounts on your first order! 🛍️\n\n${referralLink}`;
+    const message = `Join Aurevian Collections! Use my referral code ${referralCode} to get exciting discounts on your first order!\n\n${referralLink}`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-  };
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  }, [referralCode]);
 
-  const shareViaEmail = () => {
+  const shareViaEmail = useCallback(() => {
     const referralLink = `${window.location.origin}/signup?ref=${referralCode}`;
     const subject = 'Join Aurevian Collections - Get Discounts!';
-    const body = `Hi,\n\nI'm using Aurevian Collections and I think you'll love it too!\n\nUse my referral code ${referralCode} to get exciting discounts on your first order.\n\nCheck it out here: ${referralLink}\n\nSee you there! 🎉`;
+    const body = `Hi,\n\nI'm using Aurevian Collections and I think you'll love it too!\n\nUse my referral code ${referralCode} to get exciting discounts on your first order.\n\nCheck it out here: ${referralLink}\n\nSee you there!`;
     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  };
+  }, [referralCode]);
 
   if (loading) {
     return (
@@ -145,7 +140,7 @@ const ReferralTab = () => {
       {/* Hero Section */}
       <div className={styles.referralHero}>
         <FiGift className={styles.heroIcon} />
-        <h2>Refer & Earn Rewards! 🎉</h2>
+        <h2>Refer & Earn Rewards!</h2>
         <p>
           Share your unique referral code with friends and family.
           When they make their first purchase, you both get rewarded!
@@ -156,19 +151,19 @@ const ReferralTab = () => {
         {/* Referral Code Section */}
         <div className={styles.referralCodeSection}>
           <h3>Your Referral Code</h3>
-          
+
           {!referralCode ? (
             <div className={styles.noCodeContainer}>
               <FiInfo className={styles.noCodeIcon} />
               <p>You don't have a referral code yet</p>
-              <button 
+              <button
                 className={styles.generateBtn}
                 onClick={generateReferralCode}
                 disabled={generating}
               >
                 {generating ? (
                   <>
-                    <FiLoader className={styles.spinner} /> Generating...
+                    <FiLoader className={styles.spinnerIcon} /> Generating...
                   </>
                 ) : (
                   'Generate Code'
@@ -182,35 +177,36 @@ const ReferralTab = () => {
               </div>
 
               <div className={styles.referralLinkBox}>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={`${window.location.origin}/signup?ref=${referralCode}`}
                   readOnly
                   className={styles.referralLinkInput}
                 />
-                <button 
+                <button
                   className={styles.copyLinkBtn}
                   onClick={copyReferralLink}
                   title="Copy link"
+                  aria-label="Copy referral link"
                 >
                   {copied ? <FiCheck /> : <FiCopy />}
                 </button>
               </div>
 
               <div className={styles.shareButtons}>
-                <button 
-                  className={styles.shareWhatsApp} 
+                <button
+                  className={styles.shareWhatsApp}
                   onClick={shareViaWhatsApp}
                 >
                   <FiSend /> Share on WhatsApp
                 </button>
-                <button 
-                  className={styles.shareEmail} 
+                <button
+                  className={styles.shareEmail}
                   onClick={shareViaEmail}
                 >
                   <FiMail /> Share via Email
                 </button>
-                <button 
+                <button
                   className={styles.shareLink}
                   onClick={shareReferralLink}
                 >
