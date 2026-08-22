@@ -133,7 +133,7 @@ const Cart = () => {
       <div className={styles.cartPage}>
         <section className={styles.heroSection}>
           <div className={styles.heroContent}>
-            <h1 className={styles.heroTitle}>Shopping Bag</h1>
+            <h1 className={styles.heroTitle}>My Cart</h1>
             <p className={styles.heroDescription}>
               Timeless elegance, crafted for you. Review your precious pieces.
             </p>
@@ -145,6 +145,7 @@ const Cart = () => {
             {cartItems.map((item) => (
               <div key={item.product} className={styles.cartCard}>
                 <div className={styles.cardContent}>
+                  {/* ---------- DESKTOP VIEW ---------- */}
                   <div className={styles.desktopView}>
                     <div className={styles.productCell}>
                       <div className={styles.imageWrapper}>
@@ -214,48 +215,33 @@ const Cart = () => {
                     </div>
                   </div>
 
+                  {/* ---------- MOBILE VIEW — compact: image | title / price / qty ---------- */}
                   <div className={styles.mobileView}>
-                    <div className={styles.mobileTopRow}>
-                      <div className={styles.productCell}>
-                        <div className={styles.imageWrapper}>
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className={styles.productImage}
-                            loading="lazy"
-                          />
-                        </div>
-                        <div className={styles.productInfo}>
+                    <div className={styles.mobileCard}>
+                      <div className={styles.mobileImageWrap}>
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className={styles.productImage}
+                          loading="lazy"
+                        />
+                      </div>
+
+                      <div className={styles.mobileInfo}>
+                        <div className={styles.mobileInfoHead}>
                           <h3 className={styles.productName}>{item.name}</h3>
+                          <button
+                            className={styles.removeButtonMobile}
+                            onClick={() => removeItem(item.product)}
+                            aria-label="Remove item"
+                          >
+                            <FiX />
+                          </button>
                         </div>
-                      </div>
-                      <div className={styles.mobileActions}>
-                        <button
-                          className={styles.removeButtonMobile}
-                          onClick={() => removeItem(item.product)}
-                        >
-                          <FiX />
-                        </button>
-                        <div className={styles.availabilityMobile}>
+
+                        <div className={styles.mobileStockQtyRow}>
                           <span className={styles.inStock}>✓ In Stock</span>
-                        </div>
-                      </div>
-                    </div>
 
-                    <div className={styles.mobileBottomRow}>
-                      <div className={styles.mobilePriceRow}>
-                        <div className={styles.priceCell}>
-                          <div className={styles.priceWrapper}>
-                            <span className={styles.currentPrice}>
-                              <FaRupeeSign className={styles.rupeeIconSmall} />
-                              {item.price.toLocaleString("en-IN")}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className={styles.mobileQuantityRow}>
-                        <div className={styles.quantityCell}>
                           <div className={styles.quantityControls}>
                             <button
                               className={styles.quantityButton}
@@ -279,14 +265,21 @@ const Cart = () => {
                             </button>
                           </div>
                         </div>
-                      </div>
 
-                      <div className={styles.mobileSubtotalRow}>
-                        <span className={styles.subtotalLabel}>Subtotal:</span>
-                        <span className={styles.subtotalPrice}>
-                          <FaRupeeSign className={styles.rupeeIconSmall} />
-                          {(item.price * item.quantity).toLocaleString("en-IN")}
-                        </span>
+                        <div className={styles.mobilePriceRow}>
+                          <span className={styles.currentPrice}>
+                            <FaRupeeSign className={styles.rupeeIconSmall} />
+                            {item.price.toLocaleString("en-IN")}
+                          </span>
+
+                          <span className={styles.mobileSubtotalInline}>
+                            <span className={styles.subtotalLabel}>Subtotal:</span>
+                            <span className={styles.subtotalPrice}>
+                              <FaRupeeSign className={styles.rupeeIconSmall} />
+                              {(item.price * item.quantity).toLocaleString("en-IN")}
+                            </span>
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -40,7 +40,6 @@
     BlinkMacSystemFont,
     sans-serif;
   min-height: 80vh;
-  /* background: #ffffff; */
   color: var(--dark);
 }
 
@@ -52,7 +51,6 @@
   padding: 40px 20px 32px;
   margin-bottom: 16px;
   position: relative;
-  /* background: #ffffff; */
 }
 
 .heroContent {
@@ -108,7 +106,7 @@
 
 .cartItemsSection {
   flex: 1;
-  background: #ffffff;
+  background: #ffffff00;
   border: 1px solid var(--border);
   overflow: hidden;
   box-shadow: var(--shadow);
@@ -152,7 +150,7 @@
 }
 
 /* ============================================
-   PRODUCT CELL
+   PRODUCT CELL (desktop)
    ============================================ */
 .productCell {
   display: flex;
@@ -237,7 +235,7 @@
 }
 
 /* ============================================
-   PRICE CELL
+   PRICE CELL (desktop)
    ============================================ */
 .priceCell {
   text-align: center;
@@ -274,7 +272,7 @@
 }
 
 /* ============================================
-   QUANTITY CELL
+   QUANTITY CELL / CONTROLS (shared)
    ============================================ */
 .quantityCell {
   display: flex;
@@ -288,6 +286,7 @@
   border: 1px solid var(--border);
   border-radius: 4px;
   overflow: hidden;
+  width: fit-content;
 }
 
 .quantityButton {
@@ -322,7 +321,7 @@
 }
 
 /* ============================================
-   SUBTOTAL CELL
+   SUBTOTAL CELL (desktop)
    ============================================ */
 .subtotalCell {
   text-align: center;
@@ -335,7 +334,7 @@
 }
 
 /* ============================================
-   ACTION CELL / REMOVE BUTTON
+   ACTION CELL / REMOVE BUTTON (desktop)
    ============================================ */
 .actionCell {
   text-align: center;
@@ -366,30 +365,6 @@
 }
 
 /* ============================================
-   MOBILE ACTIONS
-   ============================================ */
-.mobileActions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 38px;
-  flex-shrink: 0;
-}
-
-.availabilityMobile {
-  font-size: 12px;
-  font-weight: 400;
-}
-
-.availabilityMobile .inStock {
-  color: #2e7d32;
-}
-
-.availabilityMobile .outOfStock {
-  color: #c62828;
-}
-
-/* ============================================
    ORDER SUMMARY
    ============================================ */
 .orderSummary {
@@ -400,7 +375,7 @@
 }
 
 .summaryCard {
-  background: #ffffff;
+  background: #ffffff00;
   border: 1px solid var(--border);
   padding: 28px 32px;
   box-shadow: var(--shadow);
@@ -442,7 +417,6 @@
   color: var(--dark);
 }
 
-/* Removed extra divider - only keep before total */
 .totalRow {
   display: flex;
   justify-content: space-between;
@@ -704,7 +678,7 @@
 }
 
 /* ============================================
-   RESPONSIVE
+   RESPONSIVE — switch to compact mobile card
    ============================================ */
 @media (max-width: 1024px) {
   .cartContainer {
@@ -725,10 +699,48 @@
     display: block;
   }
 
+  /* ---- Compact mobile card: image | title / price / qty ---- */
+
+  .mobileCard {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .mobileImageWrap {
+    flex-shrink: 0;
+    width: 78px;
+    height: 78px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--gray-light);
+  }
+
+  .mobileInfo {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .mobileInfoHead {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .mobileInfoHead .productName {
+    font-size: 15px;
+    margin: 0;
+    flex: 1;
+  }
+
   .removeButtonMobile {
     display: flex;
-    width: 32px;
-    height: 32px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     border: 1px solid var(--border);
     background: transparent;
@@ -738,6 +750,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    font-size: 12px;
   }
 
   .removeButtonMobile:hover {
@@ -746,66 +759,50 @@
     background: #fce4ec;
   }
 
-  .mobileTopRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .mobileActions {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 38px;
-    flex-shrink: 0;
-  }
-
-  .mobileBottomRow {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
-    margin-top: 8px;
-  }
-
-  .mobilePriceRow .priceCell {
-    text-align: left;
-    width: 100%;
-  }
-
-  .mobilePriceRow .priceWrapper {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 6px;
-  }
-
-  .mobileQuantityRow .quantityCell {
-    justify-content: flex-start;
-  }
-
-  .mobileSubtotalRow {
+  .mobileStockQtyRow {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
-    padding-top: 8px;
-    border-top: 1px solid var(--border);
-    margin-top: 4px;
+    gap: 10px;
+  }
+
+  .mobileInfo .inStock {
+    font-size: 11px;
+  }
+
+  .mobileInfo .quantityControls {
+    margin: 0;
+  }
+
+  .mobilePriceRow {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--border);
+  }
+
+  .mobileInfo .currentPrice {
+    font-size: 16px;
+  }
+
+  .mobileSubtotalInline {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
   }
 
   .subtotalLabel {
-    font-size: 15px;
+    font-size: 11.5px;
     color: var(--gray);
     font-weight: 400;
   }
 
-  .mobileSubtotalRow .subtotalPrice {
-    font-size: 16px;
-    font-weight: 500;
-    color: var(--dark);
+  .mobileSubtotalInline .subtotalPrice {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gold-deep);
   }
 
   .whyContent {
@@ -839,7 +836,7 @@
 
 @media (max-width: 768px) {
   .cartPage {
-    padding: 100px 16px 40px;
+    padding: 105px 16px 40px;
   }
 
   .heroSection {
@@ -908,18 +905,27 @@
     font-size: 20px;
   }
 
-  .mobileActions {
-    gap: 36px;
+  .mobileImageWrap {
+    width: 70px;
+    height: 70px;
   }
 
-  .availabilityMobile {
-    font-size: 11px;
+  .mobileInfoHead .productName {
+    font-size: 14px;
+  }
+
+  .mobileInfo .currentPrice {
+    font-size: 15px;
+  }
+
+  .mobileSubtotalInline .subtotalPrice {
+    font-size: 13px;
   }
 }
 
 @media (max-width: 480px) {
   .cartPage {
-    padding: 130px 12px 30px;
+    padding: 150px 12px 30px;
   }
 
   .heroTitle {
@@ -970,8 +976,8 @@
     font-size: 13px;
   }
 
-  .mobileSubtotalRow .subtotalPrice {
-    font-size: 15px;
+  .mobileSubtotalInline .subtotalPrice {
+    font-size: 13px;
   }
 
   .summaryCard {
@@ -1007,17 +1013,22 @@
     height: 160px;
   }
 
+  .mobileImageWrap {
+    width: 64px;
+    height: 64px;
+  }
+
+  .mobileInfoHead .productName {
+    font-size: 13.5px;
+  }
+
+  .mobileInfo .currentPrice {
+    font-size: 14px;
+  }
+
   .removeButtonMobile {
-    width: 28px;
-    height: 28px;
-  }
-
-  .mobileActions {
-    gap: 30px;
-  }
-
-  .availabilityMobile {
-    font-size: 10px;
+    width: 24px;
+    height: 24px;
   }
 
   .trustCard {
@@ -1036,13 +1047,12 @@
     font-size: 13px;
   }
 
-  .mobileBottomRow {
-    gap: 6px;
-    padding-top: 8px;
+  .mobilePriceRow {
+    padding-top: 5px;
   }
 
-  .mobileSubtotalRow {
-    padding-top: 6px;
+  .mobileSubtotalInline .subtotalPrice {
+    font-size: 12.5px;
   }
 }
 
