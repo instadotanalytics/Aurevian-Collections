@@ -24,7 +24,7 @@ import {
 } from "react-icons/fi";
 import { LuSlidersHorizontal } from "react-icons/lu";
 import styles from "./Offers.module.css";
-import craftImage1 from "../../assets/offersimg.png";
+import craftImage1 from "../../assets/offersbanner.png";
 import Footer from "../../Pages/Layout/Footer/Footer.jsx";
 import Header from "../../Pages/Layout/Header/Header.jsx";
 import { fetchProductsByPlacement } from "../../redux/slices/storefrontProductSlice";
