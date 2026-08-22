@@ -477,7 +477,9 @@
   gap: 10px;
   padding: 6px 0;
   cursor: pointer;
-  transition: color 0.25s ease, transform 0.25s ease;
+  transition:
+    color 0.25s ease,
+    transform 0.25s ease;
   font-size: 14px;
   color: var(--ink-soft);
   font-weight: 400;
@@ -499,7 +501,9 @@
   cursor: pointer;
   flex-shrink: 0;
   position: relative;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .filterOption input[type="radio"]::after {
@@ -599,7 +603,9 @@
   cursor: pointer;
   padding: 10px 0 2px;
   font-family: "Jost", sans-serif;
-  transition: color 0.2s ease, letter-spacing 0.2s ease;
+  transition:
+    color 0.2s ease,
+    letter-spacing 0.2s ease;
   letter-spacing: 0.04em;
   margin-top: 6px;
   text-transform: uppercase;
@@ -686,7 +692,9 @@
   font-size: 14px;
   color: var(--ink);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .sidebarSortOption:hover {
@@ -803,7 +811,9 @@
   border: 1px solid var(--cream-line);
   border-radius: 0;
   overflow: hidden;
-  transition: box-shadow 0.25s, transform 0.25s;
+  transition:
+    box-shadow 0.25s,
+    transform 0.25s;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -1574,7 +1584,9 @@
   font-size: 14px;
   color: var(--ink);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .mobileSortOption:hover {
@@ -2289,5 +2301,82 @@
   .skeletonBtn {
     animation: none !important;
     background: var(--cream-line) !important;
+  }
+}
+
+/* APPEND TO: src/Components/Collections/Collections.module.css */
+
+.filterEmptyNote {
+  display: block;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 6px 0;
+}
+
+.emptyState {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: clamp(50px, 8vw, 80px) 20px;
+  background: var(--cream-card);
+  border: 1px solid var(--cream-line);
+  border-radius: 4px;
+  margin: 20px 0;
+}
+
+.emptyStateIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  line-height: 1;
+}
+
+.emptyState h3 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 10px;
+}
+
+.emptyState p {
+  font-size: 14px;
+  color: var(--text-muted);
+  max-width: 420px;
+  margin: 0 auto 22px;
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+.emptyStateButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 30px;
+  background: var(--gold);
+  color: #fff;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  transition:
+    background 0.25s ease,
+    transform 0.2s ease;
+}
+
+.emptyStateButton:hover {
+  background: var(--gold-deep);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 640px) {
+  .emptyState {
+    padding: 40px 16px;
+  }
+  .emptyStateIcon {
+    font-size: 38px;
+  }
+  .emptyState h3 {
+    font-size: 20px;
   }
 }

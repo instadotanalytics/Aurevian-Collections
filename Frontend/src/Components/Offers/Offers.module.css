@@ -39,7 +39,8 @@
   opacity: 0;
   transform: translateY(60px);
   filter: blur(12px);
-  transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1),
+  transition:
+    opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1),
     transform 1.4s cubic-bezier(0.16, 1, 0.3, 1),
     filter 1.4s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform, filter;
@@ -55,17 +56,30 @@
   opacity: 0;
   transform: translateY(40px);
   filter: blur(8px);
-  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+  transition:
+    opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
     transform 1.2s cubic-bezier(0.16, 1, 0.3, 1),
     filter 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.revealVisible.revealStagger > *:nth-child(1) { transition-delay: 0.05s; }
-.revealVisible.revealStagger > *:nth-child(2) { transition-delay: 0.10s; }
-.revealVisible.revealStagger > *:nth-child(3) { transition-delay: 0.15s; }
-.revealVisible.revealStagger > *:nth-child(4) { transition-delay: 0.20s; }
-.revealVisible.revealStagger > *:nth-child(5) { transition-delay: 0.25s; }
-.revealVisible.revealStagger > *:nth-child(6) { transition-delay: 0.30s; }
+.revealVisible.revealStagger > *:nth-child(1) {
+  transition-delay: 0.05s;
+}
+.revealVisible.revealStagger > *:nth-child(2) {
+  transition-delay: 0.1s;
+}
+.revealVisible.revealStagger > *:nth-child(3) {
+  transition-delay: 0.15s;
+}
+.revealVisible.revealStagger > *:nth-child(4) {
+  transition-delay: 0.2s;
+}
+.revealVisible.revealStagger > *:nth-child(5) {
+  transition-delay: 0.25s;
+}
+.revealVisible.revealStagger > *:nth-child(6) {
+  transition-delay: 0.3s;
+}
 
 .revealVisible.revealStagger > * {
   opacity: 1;
@@ -229,7 +243,12 @@
   width: 100%;
   height: 1px;
   margin: 12px 0 18px;
-  background: linear-gradient(to right, var(--gold-light), var(--cream-line) 60%, transparent);
+  background: linear-gradient(
+    to right,
+    var(--gold-light),
+    var(--cream-line) 60%,
+    transparent
+  );
   flex-shrink: 0;
 }
 
@@ -254,7 +273,9 @@
   gap: 10px;
   padding: 4px 0;
   cursor: pointer;
-  transition: color 0.25s ease, transform 0.25s ease;
+  transition:
+    color 0.25s ease,
+    transform 0.25s ease;
   font-size: 13px;
   color: var(--ink-soft);
   font-weight: 400;
@@ -275,7 +296,9 @@
   cursor: pointer;
   flex-shrink: 0;
   position: relative;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
   border-radius: 50%;
 }
 
@@ -308,7 +331,9 @@
   cursor: pointer;
   flex-shrink: 0;
   position: relative;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
   border-radius: 3px;
 }
 
@@ -353,7 +378,13 @@
   appearance: none;
   -webkit-appearance: none;
   cursor: pointer;
-  background: linear-gradient(to right, var(--gold) 0%, var(--gold) var(--_progress, 50%), var(--cream-line) var(--_progress, 50%), var(--cream-line) 100%);
+  background: linear-gradient(
+    to right,
+    var(--gold) 0%,
+    var(--gold) var(--_progress, 50%),
+    var(--cream-line) var(--_progress, 50%),
+    var(--cream-line) 100%
+  );
   height: 3px;
   border-radius: 2px;
   outline: none;
@@ -406,7 +437,9 @@
   cursor: pointer;
   padding: 8px 0 2px;
   font-family: "Jost", sans-serif;
-  transition: color 0.2s ease, letter-spacing 0.2s ease;
+  transition:
+    color 0.2s ease,
+    letter-spacing 0.2s ease;
   letter-spacing: 0.04em;
   margin-top: 4px;
   text-transform: uppercase;
@@ -573,7 +606,9 @@
   border: 1px solid var(--cream-line);
   border-radius: 0;
   overflow: hidden;
-  transition: box-shadow 0.25s, transform 0.25s;
+  transition:
+    box-shadow 0.25s,
+    transform 0.25s;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -666,7 +701,12 @@
   line-height: 1;
   cursor: pointer;
   color: var(--ink);
-  transition: transform 0.2s ease, font-size 0.2s ease, color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    font-size 0.2s ease,
+    color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .wishlistBtn:hover {
@@ -758,7 +798,11 @@
   background: var(--gold);
   border: 1px solid var(--gold);
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
   min-height: 40px;
   flex-shrink: 0;
   margin-top: auto;
@@ -1216,7 +1260,9 @@
   font-size: 14px;
   color: var(--ink);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .mobileSortOption:hover {
@@ -1894,5 +1940,95 @@
   .skeletonText,
   .skeletonBtn {
     background: var(--cream-line) !important;
+  }
+}
+
+/* APPEND TO: src/Components/Offers/Offers.module.css */
+
+.filterEmptyNote {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 4px 0;
+}
+
+/* Used when a filterSlug (e.g. "flash-sale") is present but not yet
+   backed by a real filterable field — see Offers.jsx PATCH F. Muted,
+   secondary line directly under the section title. */
+.sectionSubtitle {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 300;
+}
+
+.emptyState {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: clamp(50px, 8vw, 80px) 20px;
+  background: var(--cream-card);
+  border: 1px solid var(--cream-line);
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.emptyStateIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  line-height: 1;
+}
+
+.emptyState h3 {
+  font-family: "Playfair Display", serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--ink);
+  margin: 0 0 10px;
+}
+
+.emptyState p {
+  font-size: 14px;
+  color: var(--text-muted);
+  max-width: 420px;
+  margin: 0 auto 22px;
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+.emptyStateButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 30px;
+  background: var(--gold);
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background 0.25s ease,
+    transform 0.2s ease;
+  font-family: "Jost", sans-serif;
+}
+
+.emptyStateButton:hover {
+  background: var(--gold-deep);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 640px) {
+  .emptyState {
+    padding: 40px 16px;
+  }
+  .emptyStateIcon {
+    font-size: 38px;
+  }
+  .emptyState h3 {
+    font-size: 20px;
   }
 }

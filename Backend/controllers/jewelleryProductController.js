@@ -1089,7 +1089,8 @@ export const bulkUploadProducts = async (req, res) => {
 };
 
 // ============================================
-// ✅ NEW: GET PRODUCTS BY PLACEMENT (Public - Storefront Pages)
+// ✅ GET PRODUCTS BY PLACEMENT (Public - Storefront Pages)
+// Extended with collection & occasion filters
 // ============================================
 export const getProductsByPlacement = async (req, res) => {
   console.log(
@@ -1098,7 +1099,21 @@ export const getProductsByPlacement = async (req, res) => {
   );
   try {
     const { placement } = req.params;
-    const { page = 1, limit = 20, categoryId, sort } = req.query;
+    // ✅ NEW: `collection` and `occasion` — both reuse EXISTING indexed
+    // fields on JewelleryProduct (specifications.collection,
+    // specifications.occasion). No schema change. This is what lets
+    // header links like "Bridal Collection" (shopMegaMenu.byStyle /
+    // collectionsDropdown) and "Birthday" (giftGuideMegaMenu.byOccasion)
+    // actually filter real products instead of showing the unfiltered
+    // placement every time.
+    const {
+      page = 1,
+      limit = 20,
+      categoryId,
+      collection,
+      occasion,
+      sort,
+    } = req.query;
     const valid = ["shop", "collections", "gifts", "offers"];
 
     if (!valid.includes(placement)) {
@@ -1119,6 +1134,20 @@ export const getProductsByPlacement = async (req, res) => {
     if (categoryId) {
       query["category.categoryId"] = categoryId;
       console.log("📊 Filtering by category:", categoryId);
+    }
+
+    if (collection) {
+      // Escaped, case-insensitive EXACT match against the free-typed
+      // specifications.collection field (e.g. "Bridal Collection").
+      const escaped = collection.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      query["specifications.collection"] = new RegExp(`^${escaped}$`, "i");
+      console.log("📊 Filtering by collection:", collection);
+    }
+
+    if (occasion) {
+      const escaped = occasion.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      query["specifications.occasion"] = new RegExp(`^${escaped}$`, "i");
+      console.log("📊 Filtering by occasion:", occasion);
     }
 
     let sortOption = { createdAt: -1 };
@@ -1353,6 +1382,8 @@ console.log(
 );
 console.log("  - deleteProduct");
 console.log("  - bulkUploadProducts");
-console.log("  - getProductsByPlacement (✅ NEW: Public storefront API)");
+console.log(
+  "  - getProductsByPlacement (✅ Extended: collection + occasion filters)",
+);
 console.log("  - getPlacementCounts (✅ NEW: Seller dashboard API)");
 console.log("  - getRelevantProducts (✅ NEW: Public 'You May Also Like' API)");

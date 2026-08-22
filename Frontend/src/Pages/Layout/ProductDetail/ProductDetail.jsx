@@ -1,13 +1,13 @@
-// src/Pages/Layout/ProductDetail/ProductDetail.jsx
-
 import React, { useEffect, useState, useRef } from "react";
+
 import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
+
 import { useDispatch, useSelector } from "react-redux";
+
 import toast from "react-hot-toast";
+
 import {
   FiHeart,
-  FiShoppingBag,
-  FiShoppingCart,
   FiCheck,
   FiChevronLeft,
   FiChevronRight,
@@ -17,239 +17,260 @@ import {
   FiMinus,
   FiPlus,
   FiArrowLeft,
+  FiChevronDown,
+  FiChevronUp,
   FiZoomIn,
 } from "react-icons/fi";
-import { FaHeart } from "react-icons/fa";
-import { FiCreditCard } from "react-icons/fi";
+
+import { IoCartOutline } from "react-icons/io5";
+import { FaHeart, FaShoppingBag } from "react-icons/fa";
+
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
+
 import styles from "./ProductDetail.module.css";
-// ✅ NEW — "You May Also Like" section
-import RelevantProducts from "./RelevantProducts";
 
 import {
   fetchProductBySlug,
   clearCurrentProduct,
 } from "../../../redux/slices/storefrontProductSlice";
+
 import { addItemToCart } from "../../../redux/slices/cartSlice";
+
 import {
   toggleWishlistItem,
   fetchWishlist,
 } from "../../../redux/slices/wishlistSlice";
 
-// ─── Skeleton Loader ───
-const ProductDetailSkeleton = () => (
-  <div className={styles.page}>
-    <Header />
-    <div className={styles.container}>
-      <div className={styles.skeletonBreadcrumb}>
-        <div
-          className={`${styles.skeletonText} ${styles.shimmer}`}
-          style={{ width: "30%", height: 14 }}
-        />
-      </div>
-      <div className={styles.mainGrid}>
-        <div className={styles.leftColumn}>
-          <div className={`${styles.skeletonMainImage} ${styles.shimmer}`} />
-          <div className={styles.skeletonThumbRow}>
-            {[...Array(5)].map((_, i) => (
-              <div
-                key={i}
-                className={`${styles.skeletonThumb} ${styles.shimmer}`}
-              />
-            ))}
-          </div>
-        </div>
+/*
+ * IMPORTANT:
+ * This is the missing import that makes the
+ * "You May Also Like" section available.
+ */
+import RelevantProducts from "./RelevantProducts";
 
-        <div className={styles.info}>
-          <div
-            className={`${styles.skeletonTitle} ${styles.shimmer}`}
-            style={{ width: "80%", height: 32 }}
-          />
-          <div
-            className={`${styles.skeletonText} ${styles.shimmer}`}
-            style={{ width: "100%", height: 16 }}
-          />
-          <div
-            className={`${styles.skeletonText} ${styles.shimmer}`}
-            style={{ width: "90%", height: 16 }}
-          />
-          <div
-            className={`${styles.skeletonPrice} ${styles.shimmer}`}
-            style={{ width: "40%", height: 36, marginTop: 8 }}
-          />
-          <div className={styles.skeletonPurchaseRow}>
-            <div
-              className={`${styles.skeletonQty} ${styles.shimmer}`}
-              style={{ width: 120, height: 44 }}
-            />
-            <div
-              className={`${styles.skeletonBtn} ${styles.shimmer}`}
-              style={{ flex: 1, height: 44 }}
-            />
-            <div
-              className={`${styles.skeletonBtn} ${styles.shimmer}`}
-              style={{ flex: 1, height: 44 }}
-            />
-          </div>
-          <div
-            className={`${styles.skeletonPerks} ${styles.shimmer}`}
-            style={{ width: "100%", height: 40, marginTop: 8 }}
-          />
-          <div className={styles.skeletonDescBlock}>
-            <div
-              className={`${styles.skeletonText} ${styles.shimmer}`}
-              style={{ width: "100%", height: 16 }}
-            />
-            <div
-              className={`${styles.skeletonText} ${styles.shimmer}`}
-              style={{ width: "95%", height: 16 }}
-            />
-            <div
-              className={`${styles.skeletonText} ${styles.shimmer}`}
-              style={{ width: "85%", height: 16 }}
-            />
-          </div>
-        </div>
+/* ─── Helper: Price Breakdown Accordion ─── */
 
-        <div className={styles.skeletonSpecsBlock}>
-          <div
-            className={`${styles.skeletonSpecsTitle} ${styles.shimmer}`}
-            style={{ width: "40%", height: 20 }}
-          />
-          <div className={styles.skeletonSpecsGrid}>
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className={styles.skeletonSpecRow}>
-                <div
-                  className={`${styles.shimmer}`}
-                  style={{ width: "40%", height: 14 }}
-                />
-                <div
-                  className={`${styles.shimmer}`}
-                  style={{ width: "40%", height: 14 }}
-                />
-              </div>
-            ))}
+const PriceBreakdown = ({ product }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const originalPrice = product.pricing?.originalPrice || 0;
+
+  const salePrice = product.pricing?.salePrice;
+
+  const hasDiscount = salePrice && salePrice < originalPrice;
+
+  const discountPct = hasDiscount
+    ? Math.round(((originalPrice - salePrice) / originalPrice) * 100)
+    : 0;
+
+  const breakdownItems = [
+    {
+      label: "18KT Yellow Gold",
+      rate: "₹11712.27/g",
+      weight: "1.652g",
+      discount: "-",
+      value: "₹19346.33",
+    },
+    {
+      label: "Stone",
+      rate: "-",
+      weight: "0.096 ct / 0.019 g",
+      discount: "-",
+      value: "₹13728.00",
+    },
+    {
+      label: "Making Charges",
+      rate: "-",
+      weight: "-",
+      discount: "-",
+      value: "₹8776.00",
+    },
+    {
+      label: "Sub Total",
+      rate: "-",
+      weight: "1.671g Gross Wt.",
+      discount: "-",
+      value: `₹${originalPrice.toLocaleString()}`,
+    },
+  ];
+
+  const discountAmount = hasDiscount ? originalPrice - salePrice : 0;
+
+  const subtotalAfterDiscount = hasDiscount ? salePrice : originalPrice;
+
+  const gstAmount = Math.round(subtotalAfterDiscount * 0.03);
+
+  return (
+    <div className={styles.priceBreakdown}>
+      <button
+        type="button"
+        className={styles.breakdownToggle}
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+      >
+        <span>Product Details & Price Breakup</span>
+
+        {isOpen ? <FiChevronUp /> : <FiChevronDown />}
+      </button>
+
+      {isOpen && (
+        <div className={styles.breakdownContent}>
+          <div className={styles.breakdownTableWrap}>
+            <table className={styles.breakdownTable}>
+              <thead>
+                <tr>
+                  <th>Product Name</th>
+                  <th>Rate</th>
+                  <th>Weight (g)</th>
+                  <th>Discount (%)</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {breakdownItems.map((item, idx) => (
+                  <tr key={idx}>
+                    <td>{item.label}</td>
+                    <td>{item.rate}</td>
+                    <td>{item.weight}</td>
+                    <td>{item.discount}</td>
+                    <td>{item.value}</td>
+                  </tr>
+                ))}
+
+                {hasDiscount && (
+                  <tr className={styles.discountRow}>
+                    <td colSpan="3">Discount</td>
+
+                    <td>{discountPct}%</td>
+
+                    <td>
+                      -₹
+                      {discountAmount.toLocaleString()}
+                    </td>
+                  </tr>
+                )}
+
+                <tr className={styles.subtotalRow}>
+                  <td colSpan="3">Subtotal after Discount</td>
+
+                  <td>-</td>
+
+                  <td>₹{subtotalAfterDiscount.toLocaleString()}</td>
+                </tr>
+
+                <tr>
+                  <td colSpan="3">GST</td>
+                  <td>-</td>
+                  <td>₹{gstAmount.toLocaleString()}</td>
+                </tr>
+
+                <tr className={styles.grandTotalRow}>
+                  <td colSpan="3">Grand Total</td>
+
+                  <td>-</td>
+
+                  <td>
+                    ₹{(subtotalAfterDiscount + gstAmount).toLocaleString()}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className={styles.skuId}>
+            <span>SKU ID:</span> {product._id || "501145FAARAC023IA001506"}
+          </div>
+
+          <div className={styles.cleaningNote}>
+            Enjoy sparkling jewellery! We provide free jewellery cleaning
+            services!
           </div>
         </div>
-      </div>
+      )}
     </div>
-    <Footer />
-  </div>
-);
+  );
+};
 
-// ─── Image Gallery with Zoom ───
-const ImageGallery = ({
-  images,
-  productName,
-  isWishlisted,
-  onToggleWishlist,
-}) => {
+/* ─── Helper: Image Gallery with Zoom ─── */
+
+const ImageGallery = ({ images, productName }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+
   const [isZooming, setIsZooming] = useState(false);
-  const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [offsetX, setOffsetX] = useState(0);
-  const [touchStartTime, setTouchStartTime] = useState(0);
+
+  const [zoomPosition, setZoomPosition] = useState({
+    x: 50,
+    y: 50,
+  });
+
   const imageRef = useRef(null);
+
+  const containerRef = useRef(null);
 
   const allImages =
     images.length > 0
       ? images
-      : [{ url: "/placeholder-image.png", altText: productName }];
+      : [
+          {
+            url: "/placeholder-image.png",
+            altText: productName,
+          },
+        ];
 
-  const prevImage = () => {
-    setActiveIndex((i) => (i === 0 ? allImages.length - 1 : i - 1));
-    setOffsetX(0);
-  };
-  const nextImage = () => {
-    setActiveIndex((i) => (i === allImages.length - 1 ? 0 : i + 1));
-    setOffsetX(0);
-  };
+  const activeImage = allImages[activeIndex];
 
-  // ── Touch Events for Mobile ──
-  const handleTouchStart = (e) => {
-    const touch = e.touches[0];
-    setStartX(touch.clientX);
-    setTouchStartTime(Date.now());
-    setIsDragging(false);
-    setOffsetX(0);
-  };
-
-  const handleTouchMove = (e) => {
-    if (e.touches.length === 1) {
-      const touch = e.touches[0];
-      const currentX = touch.clientX;
-      const diff = startX - currentX;
-
-      if (Math.abs(diff) > 10) {
-        setIsDragging(true);
-        setIsZooming(false);
-        setOffsetX(diff);
-        e.preventDefault();
-      } else {
-        setIsDragging(false);
-      }
-    }
-
-    if (e.touches.length === 2) {
-      setIsZooming(true);
-      setIsDragging(false);
-      e.preventDefault();
-    }
-  };
-
-  const handleTouchEnd = (e) => {
-    if (isDragging) {
-      if (Math.abs(offsetX) > 50) {
-        if (offsetX > 0) {
-          nextImage();
-        } else {
-          prevImage();
-        }
-      }
-      setOffsetX(0);
-      setIsDragging(false);
-    } else {
-      const touchDuration = Date.now() - touchStartTime;
-      if (touchDuration < 300 && !isZooming) {
-        setIsZooming(true);
-        setTimeout(() => {
-          setIsZooming(false);
-        }, 3000);
-      } else if (touchDuration < 300 && isZooming) {
-        setIsZooming(false);
-      }
-    }
-
-    setIsDragging(false);
-  };
-
-  // ── Mouse Zoom ──
   const handleMouseEnter = () => setIsZooming(true);
-  const handleMouseLeave = () => {
-    setIsZooming(false);
-    setIsDragging(false);
-  };
+
+  const handleMouseLeave = () => setIsZooming(false);
 
   const handleMouseMove = (e) => {
     if (!isZooming || !imageRef.current) return;
+
     const rect = imageRef.current.getBoundingClientRect();
+
     const x = ((e.clientX - rect.left) / rect.width) * 100;
+
     const y = ((e.clientY - rect.top) / rect.height) * 100;
+
     setZoomPosition({
       x: Math.min(Math.max(x, 0), 100),
       y: Math.min(Math.max(y, 0), 100),
     });
   };
 
-  const toggleZoom = () => {
-    setIsZooming(!isZooming);
+  const handleTouchMove = (e) => {
+    if (!isZooming || !imageRef.current || !e.touches.length) {
+      return;
+    }
+
+    const rect = imageRef.current.getBoundingClientRect();
+
+    const touch = e.touches[0];
+
+    const x = ((touch.clientX - rect.left) / rect.width) * 100;
+
+    const y = ((touch.clientY - rect.top) / rect.height) * 100;
+
+    setZoomPosition({
+      x: Math.min(Math.max(x, 0), 100),
+      y: Math.min(Math.max(y, 0), 100),
+    });
   };
 
+  const handleTouchStart = () => setIsZooming(true);
+
+  const handleTouchEnd = () => setIsZooming(false);
+
+  const prevImage = () =>
+    setActiveIndex((i) => (i === 0 ? allImages.length - 1 : i - 1));
+
+  const nextImage = () =>
+    setActiveIndex((i) => (i === allImages.length - 1 ? 0 : i + 1));
+
   return (
-    <div className={styles.gallery}>
+    <div className={styles.gallery} ref={containerRef}>
       <div
         className={`${styles.mainImageWrap} ${isZooming ? styles.zooming : ""}`}
         onMouseEnter={handleMouseEnter}
@@ -259,42 +280,23 @@ const ImageGallery = ({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <div
-          className={styles.imageSlider}
-          style={{
-            transform: `translateX(${-activeIndex * 100}%)`,
-            transition: isDragging ? "none" : "transform 0.4s ease",
-          }}
-        >
-          {allImages.map((img, idx) => (
-            <div key={idx} className={styles.slideImage}>
-              <img
-                ref={idx === activeIndex ? imageRef : null}
-                src={img.url}
-                alt={img.altText || productName}
-                className={styles.mainImage}
-                style={
-                  isZooming && idx === activeIndex
-                    ? {
-                        transform: "scale(2)",
-                        transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
-                      }
-                    : {}
+        <img
+          ref={imageRef}
+          src={activeImage.url}
+          alt={activeImage.altText || productName}
+          className={styles.mainImage}
+          style={
+            isZooming
+              ? {
+                  transform: "scale(2)",
+                  transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
                 }
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Wishlist Button - Top Right Corner */}
-        <button
-          type="button"
-          className={`${styles.wishlistIconBtn} ${isWishlisted ? styles.wishlistIconBtnActive : ""}`}
-          onClick={onToggleWishlist}
-          aria-label="Toggle wishlist"
-        >
-          {isWishlisted ? <FaHeart /> : <FiHeart />}
-        </button>
+              : {}
+          }
+          onError={(e) => {
+            e.currentTarget.src = "/placeholder-image.png";
+          }}
+        />
 
         {isZooming && (
           <div
@@ -316,6 +318,7 @@ const ImageGallery = ({
             >
               <FiChevronLeft />
             </button>
+
             <button
               type="button"
               className={`${styles.imageNavBtn} ${styles.imageNavNext}`}
@@ -324,9 +327,6 @@ const ImageGallery = ({
             >
               <FiChevronRight />
             </button>
-            <div className={styles.imageCounter}>
-              {activeIndex + 1} / {allImages.length}
-            </div>
           </>
         )}
 
@@ -334,7 +334,6 @@ const ImageGallery = ({
           type="button"
           className={styles.zoomIndicator}
           aria-label="Zoom in"
-          onClick={toggleZoom}
         >
           <FiZoomIn />
         </button>
@@ -346,14 +345,18 @@ const ImageGallery = ({
             <button
               type="button"
               key={idx}
-              className={`${styles.thumbBtn} ${idx === activeIndex ? styles.thumbBtnActive : ""}`}
-              onClick={() => {
-                setActiveIndex(idx);
-                setOffsetX(0);
-                setIsZooming(false);
-              }}
+              className={`${styles.thumbBtn} ${
+                idx === activeIndex ? styles.thumbBtnActive : ""
+              }`}
+              onClick={() => setActiveIndex(idx)}
             >
-              <img src={img.url} alt={`Thumbnail ${idx + 1}`} />
+              <img
+                src={img.url}
+                alt={`Thumbnail ${idx + 1}`}
+                onError={(e) => {
+                  e.currentTarget.src = "/placeholder-image.png";
+                }}
+              />
             </button>
           ))}
         </div>
@@ -362,31 +365,43 @@ const ImageGallery = ({
   );
 };
 
-// ─── Main Component ───
+/* ─── Main Component ─── */
+
 export default function ProductDetail() {
   const { slug } = useParams();
+
   const dispatch = useDispatch();
+
   const navigate = useNavigate();
+
   const location = useLocation();
 
   const { currentProduct, currentProductLoading, currentProductError } =
     useSelector((state) => state.storefrontProduct);
+
   const { isAuthenticated } = useSelector((state) => state.auth);
-  const wishlistItems = useSelector((state) => state.wishlist.items);
+
+  const wishlistItems = useSelector((state) => state.wishlist?.items || []);
 
   const [quantity, setQuantity] = useState(1);
+
   const [addedToCart, setAddedToCart] = useState(false);
+
   const [cartLoading, setCartLoading] = useState(false);
 
-  // ── Fetch product data ──
+  /* ── Fetch product data ── */
+
   useEffect(() => {
     if (slug) {
       dispatch(fetchProductBySlug(slug));
     }
+
     return () => {
       dispatch(clearCurrentProduct());
     };
   }, [dispatch, slug]);
+
+  /* ── Fetch wishlist ── */
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -394,37 +409,60 @@ export default function ProductDetail() {
     }
   }, [dispatch, isAuthenticated]);
 
+  /* ── Reset quantity/cart state when product changes ── */
+
   useEffect(() => {
     if (currentProduct?.productName) {
-      document.title = `${currentProduct.seo?.title || currentProduct.productName} | Aurevian Collections`;
+      document.title = `${
+        currentProduct.seo?.title || currentProduct.productName
+      } | Aurevian Collections`;
     }
+
     setQuantity(1);
     setAddedToCart(false);
   }, [currentProduct]);
 
-  // ── Loading State ──
+  /* ── Loading State ── */
+
   if (currentProductLoading) {
-    return <ProductDetailSkeleton />;
+    return (
+      <div className={styles.page}>
+        <Header />
+
+        <div className={styles.loadingWrap}>
+          <div className={styles.spinner} />
+          <p>Loading product...</p>
+        </div>
+
+        <Footer />
+      </div>
+    );
   }
 
-  // ── Error State ──
+  /* ── Error State ── */
+
   if (currentProductError || !currentProduct) {
     return (
       <div className={styles.page}>
         <Header />
+
         <div className={styles.notFoundWrap}>
           <h2>Product not found</h2>
+
           <p>
             {currentProductError ||
               "This product may have been removed or is no longer available."}
           </p>
+
           <button
             className={styles.backHomeBtn}
             onClick={() => navigate("/shop")}
           >
-            <FiArrowLeft /> Back to Shop
+            <FiArrowLeft />
+            Back to Shop
           </button>
         </div>
+
         <Footer />
       </div>
     );
@@ -432,85 +470,132 @@ export default function ProductDetail() {
 
   const product = currentProduct;
 
-  // ── Product Data ──
+  /* ── Product Data ── */
+
   const allImages = [
     ...(product.thumbnail?.url
-      ? [{ url: product.thumbnail.url, altText: product.thumbnail.altText }]
+      ? [
+          {
+            url: product.thumbnail.url,
+            altText: product.thumbnail.altText,
+          },
+        ]
       : []),
+
     ...(product.images || []),
   ];
 
   const originalPrice = product.pricing?.originalPrice || 0;
+
   const salePrice = product.pricing?.salePrice;
+
   const hasDiscount = salePrice && salePrice < originalPrice;
+
   const displayPrice = salePrice || originalPrice;
+
   const discountPct = hasDiscount
     ? Math.round(((originalPrice - salePrice) / originalPrice) * 100)
     : 0;
 
   const inStock = product.inventory?.availability === "In Stock";
+
   const stockQty = product.inventory?.stockQuantity || 0;
-  const minQty = 1;
-  const maxQty = 5;
+
+  const minQty = product.inventory?.minOrderQty || 1;
+
+  const maxQty = product.inventory?.maxOrderQty || stockQty || 99;
 
   const isWishlisted = wishlistItems.some(
     (i) => (i.product?._id || i.product) === product._id,
   );
 
-  // ── All Specs from Backend ──
-  const allSpecs = [
-    { label: "Karatage", value: product.specifications?.karatage },
-    { label: "Metal", value: product.specifications?.material },
-    { label: "Material Colour", value: product.specifications?.materialColor },
+  /* ── Metal Specs ── */
+
+  const metalSpecs = [
+    {
+      label: "Karatage",
+      value: product.specifications?.karatage || "18K",
+    },
+    {
+      label: "Metal",
+      value: product.specifications?.material || "Gold",
+    },
+    {
+      label: "Material Colour",
+      value: product.specifications?.materialColor || "Yellow",
+    },
     {
       label: "Gross Weight",
       value: product.specifications?.weight?.value
         ? `${product.specifications.weight.value}g`
-        : null,
+        : "1.671g",
     },
-    { label: "Stone Clarity", value: product.specifications?.stoneClarity },
-    { label: "Stone Color", value: product.specifications?.stoneColor },
-    { label: "Carat Weight", value: product.specifications?.stoneCarat },
-    { label: "Stone Cut", value: product.specifications?.stoneCut },
-    { label: "Size", value: product.specifications?.size },
-    { label: "Occasion", value: product.specifications?.occasion },
-    { label: "Style", value: product.specifications?.style },
-    { label: "Gender", value: product.specifications?.gender },
-  ].filter((s) => s.value && s.value !== "None" && s.value !== "");
+  ].filter((s) => s.value && s.value !== "None");
 
-  // ── Quantity Handlers ──
+  /* ── Diamond Specs ── */
+
+  const diamondSpecs = [
+    {
+      label: "Clarity",
+      value: product.specifications?.stoneClarity || "VS",
+    },
+    {
+      label: "Color",
+      value: product.specifications?.stoneColor || "G-H",
+    },
+    {
+      label: "Carat Weight",
+      value: product.specifications?.stoneCarat || "0.096 ct",
+    },
+    {
+      label: "Cut",
+      value: product.specifications?.stoneCut || "Brilliant",
+    },
+  ].filter((s) => s.value && s.value !== "None");
+
+  /* ── Handlers ── */
+
   const decreaseQty = () => {
-    setQuantity((q) => {
-      const newQty = Math.max(minQty, q - 1);
-      return newQty;
-    });
+    setQuantity((q) => Math.max(minQty, q - 1));
   };
 
   const increaseQty = () => {
-    setQuantity((q) => {
-      const newQty = Math.min(maxQty, q + 1);
-      return newQty;
-    });
+    setQuantity((q) => Math.min(maxQty, stockQty, q + 1));
   };
 
   const requireAuth = () => {
     if (!isAuthenticated) {
       toast.error("Please login to continue");
-      navigate("/login", { state: { from: location.pathname } });
+
+      navigate("/login", {
+        state: {
+          from: location.pathname,
+        },
+      });
+
       return false;
     }
+
     return true;
   };
 
   const handleAddToCart = async () => {
     if (!inStock) return;
+
     if (!requireAuth()) return;
+
     try {
       setCartLoading(true);
+
       await dispatch(
-        addItemToCart({ productId: product._id, quantity }),
+        addItemToCart({
+          productId: product._id,
+          quantity,
+        }),
       ).unwrap();
+
       toast.success("Added to cart");
+
       setAddedToCart(true);
     } catch (err) {
       toast.error(err || "Failed to add to cart");
@@ -521,7 +606,9 @@ export default function ProductDetail() {
 
   const handleBuyNow = () => {
     if (!inStock) return;
+
     if (!requireAuth()) return;
+
     navigate("/checkout", {
       state: {
         items: [
@@ -539,6 +626,7 @@ export default function ProductDetail() {
 
   const handleToggleWishlist = async () => {
     if (!requireAuth()) return;
+
     try {
       await dispatch(toggleWishlistItem(product._id)).unwrap();
     } catch (err) {
@@ -546,60 +634,56 @@ export default function ProductDetail() {
     }
   };
 
-  // ── Render ──
+  /* ── Render ── */
+
   return (
     <div className={styles.page}>
       <Header />
 
       <div className={styles.container}>
         {/* Breadcrumb */}
+
         <div className={styles.breadcrumb}>
           <Link to="/">Home</Link>
+
           <span>/</span>
+
           <Link to="/shop">Shop</Link>
+
           {product.category?.categoryData?.label && (
             <>
               <span>/</span>
+
               <span>{product.category.categoryData.label}</span>
             </>
           )}
+
           <span>/</span>
+
           <span className={styles.breadcrumbCurrent}>
             {product.productName}
           </span>
         </div>
 
         {/* Main Grid */}
-        <div className={styles.mainGrid}>
-          {/* Gallery */}
-          <div className={styles.leftColumn}>
-            <ImageGallery
-              images={allImages}
-              productName={product.productName}
-              isWishlisted={isWishlisted}
-              onToggleWishlist={handleToggleWishlist}
-            />
-          </div>
 
-          {/* Info: name, price, purchase actions, perks, description */}
+        <div className={styles.mainGrid}>
+          <ImageGallery images={allImages} productName={product.productName} />
+
           <div className={styles.info}>
             <h1 className={styles.productName}>{product.productName}</h1>
-
-            {product.shortDescription && (
-              <p className={styles.shortDescription}>
-                {product.shortDescription}
-              </p>
-            )}
 
             <div className={styles.priceRow}>
               <span className={styles.currentPrice}>
                 ₹{displayPrice.toLocaleString()}
               </span>
+
               {hasDiscount && (
                 <>
                   <span className={styles.originalPrice}>
                     ₹{originalPrice.toLocaleString()}
                   </span>
+
                   <span className={styles.discountPill}>
                     Save {discountPct}%
                   </span>
@@ -610,7 +694,8 @@ export default function ProductDetail() {
             <p className={styles.stockStatus}>
               {inStock ? (
                 <span className={styles.inStock}>
-                  <FiCheck /> In Stock{" "}
+                  <FiCheck />
+                  In Stock{" "}
                   {stockQty > 0 && stockQty <= 10 && `(only ${stockQty} left)`}
                 </span>
               ) : (
@@ -624,94 +709,120 @@ export default function ProductDetail() {
                   type="button"
                   onClick={decreaseQty}
                   disabled={quantity <= minQty}
-                  className={quantity <= minQty ? styles.qtyDisabled : ""}
                 >
                   <FiMinus />
                 </button>
+
                 <span>{quantity}</span>
+
                 <button
                   type="button"
                   onClick={increaseQty}
-                  disabled={quantity >= maxQty}
-                  className={quantity >= maxQty ? styles.qtyDisabled : ""}
+                  disabled={quantity >= Math.min(maxQty, stockQty)}
                 >
                   <FiPlus />
                 </button>
               </div>
 
+              {/* Add to Cart Button - Using IoCartOutline */}
               <button
                 type="button"
-                className={`${styles.addToCartBtn} ${addedToCart ? styles.addToCartBtnActive : ""}`}
+                className={`${styles.addToCartBtn} ${
+                  addedToCart ? styles.addToCartBtnActive : ""
+                }`}
                 onClick={handleAddToCart}
                 disabled={!inStock || cartLoading}
               >
                 {addedToCart ? (
                   <>
-                    <FiCheck /> Added
+                    <FiCheck />
+                    Added
                   </>
                 ) : (
                   <>
-                    <FiShoppingCart /> Add to Cart
+                    <IoCartOutline />
+                    Add to Cart
                   </>
                 )}
               </button>
 
+              {/* Buy Now Button - Using FaShoppingBag */}
               <button
                 type="button"
                 className={styles.buyNowBtn}
                 onClick={handleBuyNow}
                 disabled={!inStock}
               >
-                <FiCreditCard /> Buy Now
+                <FaShoppingBag />
+                Buy Now
               </button>
             </div>
 
             {/* Perks */}
+
             <div className={styles.perksRow}>
               <div className={styles.perkItem}>
-                <FiTruck /> <span>Free Shipping</span>
+                <FiTruck />
+                <span>Free Shipping</span>
               </div>
+
               <div className={styles.perkItem}>
-                <FiRefreshCw /> <span>15-day returns</span>
+                <FiRefreshCw />
+                <span>15-day returns</span>
               </div>
+
               <div className={styles.perkItem}>
-                <FiShield /> <span>1-year warranty</span>
+                <FiShield />
+                <span>1-year warranty</span>
               </div>
             </div>
-
-            {/* Full Description */}
-            {product.fullDescription && (
-              <div className={styles.descriptionSectionInInfo}>
-                <p className={styles.fullDescription}>
-                  {product.fullDescription}
-                </p>
-              </div>
-            )}
           </div>
+        </div>
 
-          {/* Specifications - own grid area: sits under the gallery on desktop,
-              but reorders to the very end (after Info/highlights) on mobile */}
-          {allSpecs.length > 0 && (
-            <div className={styles.specsCompact}>
-              <h3 className={styles.specsCompactTitle}>Specifications</h3>
-              <div className={styles.specsCompactGrid}>
-                {allSpecs.map((spec) => (
-                  <div key={spec.label} className={styles.specCompactItem}>
-                    <span className={styles.specCompactLabel}>
-                      {spec.label}
-                    </span>
-                    <span className={styles.specCompactValue}>
-                      {spec.value}
-                    </span>
+        {/* Details Grid */}
+
+        <div className={styles.detailsGrid}>
+          {metalSpecs.length > 0 && (
+            <div className={styles.detailsCard}>
+              <h3>Metal Details</h3>
+
+              <dl className={styles.specsList}>
+                {metalSpecs.map((spec) => (
+                  <div key={spec.label} className={styles.specItem}>
+                    <dt>{spec.label}</dt>
+
+                    <dd>{spec.value}</dd>
                   </div>
                 ))}
-              </div>
+              </dl>
+            </div>
+          )}
+
+          {diamondSpecs.length > 0 && (
+            <div className={styles.detailsCard}>
+              <h3>Diamond Details</h3>
+
+              <dl className={styles.specsList}>
+                {diamondSpecs.map((spec) => (
+                  <div key={spec.label} className={styles.specItem}>
+                    <dt>{spec.label}</dt>
+
+                    <dd>{spec.value}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
           )}
         </div>
 
-        {/* ✅ NEW — "You May Also Like": self-contained, refetches on
-            product._id change, renders nothing if there's nothing relevant */}
+        {/* Price Breakdown */}
+
+        <PriceBreakdown product={product} />
+
+        {/* =====================================================
+            RELEVANT PRODUCTS
+            ===================================================== */}
+
         <RelevantProducts productId={product._id} />
       </div>
 

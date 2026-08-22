@@ -1,8 +1,15 @@
 // src/Pages/Gifts/Gifts.jsx
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 import toast from "react-hot-toast";
 import styles from "./gifts.module.css";
 import Header from "../../Pages/Layout/Header/Header";
@@ -28,25 +35,63 @@ import {
   fetchWishlist,
 } from "../../redux/slices/wishlistSlice";
 
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  "https://aurevian-collections.onrender.com/api";
+
 const jewelHighlights = [
   ["Brilliant Cut Quality", "Natural Color Grade"],
   ["High Clarity Rating", "Precise Carat Weight"],
   ["Elegant Setting Style", "Durable Metal Choice"],
 ];
 
-const FILTER_CATEGORIES = [
+// ✅ REMOVED — "Anniversary/Birthday/Wedding/..." here were duplicating
+// giftGuideMegaMenu.byOccasion (which already exists in HeaderConfig and
+// maps to the real `specifications.occasion` product field). Keeping two
+// separate, disconnected "occasion-ish" lists is exactly the kind of
+// duplicated/hardcoded logic you asked to avoid. This page now reads its
+// occasion filter from the URL (giftGuideMegaMenu link -> /gifts/:slug)
+// and from an in-page occasion selector built from the SAME product
+// field, see OCCASION_OPTIONS below.
+
+const OCCASION_OPTIONS = [
   "All",
+  "Wedding",
+  "Engagement",
   "Anniversary",
   "Birthday",
-  "Wedding",
-  "Valentine's Day",
+  "Casual",
+  "Party",
+  "Festive",
+  "Professional",
+  "Gift",
+  "Daily Wear",
+  "Valentine",
   "Mother's Day",
-  "Just Because",
-];
+  "Graduation",
+]; // mirrors specifications.occasion enum on JewelleryProduct — keep in
+// sync if that enum changes.
 
-const FILTER_RECIPIENTS = ["All", "For Her", "For Him", "For Couples", "For Kids"];
-const FILTER_BUDGETS = ["All", "Under ₹1,000", "₹1,000 – ₹3,000", "₹3,000 – ₹6,000", "Above ₹6,000"];
-const FILTER_PROMOTIONS = ["All", "Gift Wrapped", "Best Seller", "Trending", "Premium Gift"];
+// FILTER_RECIPIENTS maps to the real `specifications.gender` field
+// (Men/Women/Unisex/Kids) — closest existing product attribute to
+// "recipient". "For Couples" has no product-level equivalent; it's
+// excluded from actual filtering (falls through to "All") rather than
+// silently matching nothing.
+const FILTER_RECIPIENTS = ["All", "For Her", "For Him", "For Kids"];
+const RECIPIENT_TO_GENDER = {
+  "For Her": "Women",
+  "For Him": "Men",
+  "For Kids": "Kids",
+};
+
+const FILTER_BUDGETS = [
+  "All",
+  "Under ₹1,000",
+  "₹1,000 – ₹3,000",
+  "₹3,000 – ₹6,000",
+  "Above ₹6,000",
+];
+// ✅ FILTER_PROMOTIONS removed — no backing product field.
 const FILTER_AVAILABILITY = ["All", "In Stock", "Out of Stock"];
 
 const SORT_OPTIONS = [
@@ -56,15 +101,42 @@ const SORT_OPTIONS = [
 ];
 
 const testimonials = [
-  { name: "Ananya R.", initials: "AR", rating: 5, quote: "This necklace exceeded every expectation!" },
-  { name: "Kabir M.", initials: "KM", rating: 5, quote: "Finally found gifts that feel truly personal." },
-  { name: "Simran K.", initials: "SK", rating: 4, quote: "Elegant packaging, exactly as pictured." },
+  {
+    name: "Ananya R.",
+    initials: "AR",
+    rating: 5,
+    quote: "This necklace exceeded every expectation!",
+  },
+  {
+    name: "Kabir M.",
+    initials: "KM",
+    rating: 5,
+    quote: "Finally found gifts that feel truly personal.",
+  },
+  {
+    name: "Simran K.",
+    initials: "SK",
+    rating: 4,
+    quote: "Elegant packaging, exactly as pictured.",
+  },
 ];
 
 const perks = [
-  { icon: "🎁", title: "Free Gift Wrapping", text: "Every gift order wrapped at no extra cost" },
-  { icon: "💌", title: "Personalised Note", text: "Add a free handwritten message card" },
-  { icon: "🔄", title: "Easy Exchange", text: "Hassle-free exchange within 15 days" },
+  {
+    icon: "🎁",
+    title: "Free Gift Wrapping",
+    text: "Every gift order wrapped at no extra cost",
+  },
+  {
+    icon: "💌",
+    title: "Personalised Note",
+    text: "Add a free handwritten message card",
+  },
+  {
+    icon: "🔄",
+    title: "Easy Exchange",
+    text: "Hassle-free exchange within 15 days",
+  },
 ];
 
 const ITEMS_PER_BATCH = 10;
@@ -86,7 +158,10 @@ function SkeletonCard() {
 export default function Gifts() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { byPlacement, isLoading } = useSelector((state) => state.storefrontProduct);
+  const { filterSlug } = useParams(); // giftGuideMegaMenu.byOccasion link, e.g. "/gifts/birthday"
+  const { byPlacement, isLoading } = useSelector(
+    (state) => state.storefrontProduct,
+  );
   const { isAuthenticated } = useSelector((state) => state.auth);
   const cartItems = useSelector((state) => state.cart.items);
   const wishlistItems = useSelector((state) => state.wishlist.items);
@@ -96,11 +171,21 @@ export default function Gifts() {
     pagination: { page: 1, totalPages: 1, total: 0 },
   };
 
+  // ✅ NEW: real shop categories (seller-panel controlled)
+  const [categories, setCategories] = useState([]);
+
   // Filter states
   const [selectedCategory, setSelectedCategory] = useState("All");
+  // ✅ Occasion now seeded from the URL when a giftGuide link is clicked,
+  // and stays selectable in-page too.
+  const initialOccasion = filterSlug
+    ? OCCASION_OPTIONS.find(
+        (o) => o.toLowerCase().replace(/[^a-z0-9]+/g, "-") === filterSlug,
+      ) || "All"
+    : "All";
+  const [selectedOccasion, setSelectedOccasion] = useState(initialOccasion);
   const [selectedRecipient, setSelectedRecipient] = useState("All");
   const [selectedBudget, setSelectedBudget] = useState("All");
-  const [selectedPromotion, setSelectedPromotion] = useState("All");
   const [selectedAvailability, setSelectedAvailability] = useState("All");
   const [priceRange, setPriceRange] = useState([0, 8000]);
   const [sortBy, setSortBy] = useState("latest");
@@ -128,7 +213,30 @@ export default function Gifts() {
 
   const allProducts = giftsData.products || [];
   const visibleProducts = allProducts.slice(0, visibleCount);
-  const { total, totalPages } = giftsData.pagination || { total: 0, totalPages: 1 };
+  const { total, totalPages } = giftsData.pagination || {
+    total: 0,
+    totalPages: 1,
+  };
+
+  // Keep occasion in sync if the URL param changes without remount
+  useEffect(() => {
+    if (!filterSlug) return;
+    const match = OCCASION_OPTIONS.find(
+      (o) => o.toLowerCase().replace(/[^a-z0-9]+/g, "-") === filterSlug,
+    );
+    if (match) setSelectedOccasion(match);
+  }, [filterSlug]);
+
+  // ✅ NEW: fetch real categories, same endpoint as Shop.jsx
+  useEffect(() => {
+    axios
+      .get(`${API_BASE}/seller/products/categories`)
+      .then((res) => setCategories(res.data.data || []))
+      .catch((err) => {
+        console.error("Failed to fetch categories:", err);
+        setCategories([]);
+      });
+  }, []);
 
   // ── Fetch products ──
   useEffect(() => {
@@ -138,15 +246,16 @@ export default function Gifts() {
         page: currentPage,
         limit: itemsPerPage,
         categoryId: selectedCategory !== "All" ? selectedCategory : undefined,
+        occasion: selectedOccasion !== "All" ? selectedOccasion : undefined,
         sort: sortBy || undefined,
-      })
+      }),
     );
-  }, [dispatch, currentPage, selectedCategory, sortBy]);
+  }, [dispatch, currentPage, selectedCategory, selectedOccasion, sortBy]);
 
   // Reset visible count when products change
   useEffect(() => {
     setVisibleCount(ITEMS_PER_BATCH);
-  }, [selectedCategory, sortBy, currentPage]);
+  }, [selectedCategory, selectedOccasion, sortBy, currentPage]);
 
   useEffect(() => {
     if (isAuthenticated) dispatch(fetchWishlist());
@@ -155,7 +264,10 @@ export default function Gifts() {
   // ── Close sort dropdown on outside click ──
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (sortDropdownRef.current && !sortDropdownRef.current.contains(e.target)) {
+      if (
+        sortDropdownRef.current &&
+        !sortDropdownRef.current.contains(e.target)
+      ) {
         setIsSortDropdownOpen(false);
       }
     };
@@ -170,16 +282,22 @@ export default function Gifts() {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !isLoadingMore && visibleCount < allProducts.length) {
+        if (
+          entries[0].isIntersecting &&
+          !isLoadingMore &&
+          visibleCount < allProducts.length
+        ) {
           setIsLoadingMore(true);
           // Simulate throttled load (300ms delay)
           setTimeout(() => {
-            setVisibleCount((prev) => Math.min(prev + ITEMS_PER_BATCH, allProducts.length));
+            setVisibleCount((prev) =>
+              Math.min(prev + ITEMS_PER_BATCH, allProducts.length),
+            );
             setIsLoadingMore(false);
           }, 300);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     observer.observe(sentinel);
@@ -192,27 +310,30 @@ export default function Gifts() {
     return e.clientY;
   };
 
-  const onDragStart = useCallback((e) => {
-    // Only drag from the handle or header area
-    const target = e.target;
-    const isHandle =
-      target.classList.contains(styles.mobileFilterHandle) ||
-      target.closest(`.${styles.mobileFilterHeader}`);
+  const onDragStart = useCallback(
+    (e) => {
+      // Only drag from the handle or header area
+      const target = e.target;
+      const isHandle =
+        target.classList.contains(styles.mobileFilterHandle) ||
+        target.closest(`.${styles.mobileFilterHeader}`);
 
-    if (!isHandle) return;
+      if (!isHandle) return;
 
-    dragState.current = {
-      active: true,
-      startY: getDragY(e),
-      currentY: getDragY(e),
-      isDragging: false,
-    };
+      dragState.current = {
+        active: true,
+        startY: getDragY(e),
+        currentY: getDragY(e),
+        isDragging: false,
+      };
 
-    const sheet = sheetRef.current;
-    if (sheet) {
-      sheet.style.transition = "none";
-    }
-  }, [styles.mobileFilterHandle, styles.mobileFilterHeader]);
+      const sheet = sheetRef.current;
+      if (sheet) {
+        sheet.style.transition = "none";
+      }
+    },
+    [styles.mobileFilterHandle, styles.mobileFilterHeader],
+  );
 
   const onDragMove = useCallback((e) => {
     if (!dragState.current.active) return;
@@ -259,7 +380,12 @@ export default function Gifts() {
       }
     }
 
-    dragState.current = { active: false, startY: 0, currentY: 0, isDragging: false };
+    dragState.current = {
+      active: false,
+      startY: 0,
+      currentY: 0,
+      isDragging: false,
+    };
   }, []);
 
   // Attach drag listeners to the sheet
@@ -298,7 +424,8 @@ export default function Gifts() {
   };
 
   const isInCart = (id) => cartItems.some((i) => i.product === id);
-  const isInWishlist = (id) => wishlistItems.some((i) => (i.product?._id || i.product) === id);
+  const isInWishlist = (id) =>
+    wishlistItems.some((i) => (i.product?._id || i.product) === id);
 
   const toggleWishlist = (id) => {
     if (!requireAuth()) return;
@@ -320,13 +447,55 @@ export default function Gifts() {
 
   const clearAllFilters = () => {
     setSelectedCategory("All");
+    setSelectedOccasion("All");
     setSelectedRecipient("All");
     setSelectedBudget("All");
-    setSelectedPromotion("All");
     setSelectedAvailability("All");
     setPriceRange([0, 8000]);
     setCurrentPage(1);
+    if (filterSlug) navigate("/gifts");
   };
+
+  // ✅ NEW: recipient/budget now actually filter the visible list,
+  // client-side, same approach Shop.jsx already uses for its own
+  // budget/promotion filters. Previously these two setState calls had
+  // no reader anywhere in the file.
+  const clientFilteredProducts = useMemo(() => {
+    return visibleProducts.filter((p) => {
+      if (selectedRecipient !== "All") {
+        const wantGender = RECIPIENT_TO_GENDER[selectedRecipient];
+        if (wantGender && p.specifications?.gender !== wantGender) {
+          return false;
+        }
+      }
+      if (selectedBudget !== "All") {
+        const price = p.pricing?.salePrice || p.pricing?.originalPrice || 0;
+        if (selectedBudget === "Under ₹1,000" && price >= 1000) return false;
+        if (
+          selectedBudget === "₹1,000 – ₹3,000" &&
+          (price < 1000 || price > 3000)
+        )
+          return false;
+        if (
+          selectedBudget === "₹3,000 – ₹6,000" &&
+          (price < 3000 || price > 6000)
+        )
+          return false;
+        if (selectedBudget === "Above ₹6,000" && price <= 6000) return false;
+      }
+      if (selectedAvailability !== "All") {
+        const inStock = p.inventory?.availability === "In Stock";
+        if (selectedAvailability === "In Stock" && !inStock) return false;
+        if (selectedAvailability === "Out of Stock" && inStock) return false;
+      }
+      return true;
+    });
+  }, [
+    visibleProducts,
+    selectedRecipient,
+    selectedBudget,
+    selectedAvailability,
+  ]);
 
   const openMobileFilter = () => {
     setIsMobileFilterOpen(true);
@@ -366,7 +535,11 @@ export default function Gifts() {
     return option ? option.label : "Sort by latest";
   };
 
-  const duplicatedTestimonials = [...testimonials, ...testimonials, ...testimonials];
+  const duplicatedTestimonials = [
+    ...testimonials,
+    ...testimonials,
+    ...testimonials,
+  ];
 
   return (
     <>
@@ -402,25 +575,60 @@ export default function Gifts() {
               <h3 className={styles.filtersHeading}>Filter</h3>
 
               <div className={styles.filterGroup}>
-                <span className={styles.filterGroupLabel}>Category</span>
-                {FILTER_CATEGORIES.map((cat) => (
-                  <label key={cat} className={styles.filterOption}>
+                <span className={styles.filterGroupLabel}>Occasion</span>
+                {OCCASION_OPTIONS.map((occ) => (
+                  <label key={occ} className={styles.filterOption}>
                     <input
                       type="radio"
-                      name="category"
-                      checked={selectedCategory === cat}
-                      onChange={() => setSelectedCategory(cat)}
+                      name="occasion"
+                      checked={selectedOccasion === occ}
+                      onChange={() => setSelectedOccasion(occ)}
                     />
-                    {cat}
+                    {occ}
                   </label>
                 ))}
+              </div>
+
+              <div className={styles.filterGroup}>
+                <span className={styles.filterGroupLabel}>Category</span>
+                <label className={styles.filterOption}>
+                  <input
+                    type="radio"
+                    name="category"
+                    checked={selectedCategory === "All"}
+                    onChange={() => setSelectedCategory("All")}
+                  />
+                  All
+                </label>
+                {categories.length === 0 ? (
+                  <span className={styles.filterEmptyNote}>
+                    No categories configured yet
+                  </span>
+                ) : (
+                  categories.map((c) => (
+                    <label key={c.id} className={styles.filterOption}>
+                      <input
+                        type="radio"
+                        name="category"
+                        checked={selectedCategory === c.id}
+                        onChange={() => setSelectedCategory(c.id)}
+                      />
+                      {c.label}
+                    </label>
+                  ))
+                )}
               </div>
 
               <div className={styles.filterGroup}>
                 <span className={styles.filterGroupLabel}>Recipient</span>
                 {FILTER_RECIPIENTS.map((r) => (
                   <label key={r} className={styles.filterOption}>
-                    <input type="radio" name="recipient" checked={selectedRecipient === r} onChange={() => setSelectedRecipient(r)} />
+                    <input
+                      type="radio"
+                      name="recipient"
+                      checked={selectedRecipient === r}
+                      onChange={() => setSelectedRecipient(r)}
+                    />
                     {r}
                   </label>
                 ))}
@@ -430,7 +638,12 @@ export default function Gifts() {
                 <span className={styles.filterGroupLabel}>Budget</span>
                 {FILTER_BUDGETS.map((b) => (
                   <label key={b} className={styles.filterOption}>
-                    <input type="radio" name="budget" checked={selectedBudget === b} onChange={() => setSelectedBudget(b)} />
+                    <input
+                      type="radio"
+                      name="budget"
+                      checked={selectedBudget === b}
+                      onChange={() => setSelectedBudget(b)}
+                    />
                     {b}
                   </label>
                 ))}
@@ -455,26 +668,24 @@ export default function Gifts() {
               </div>
 
               <div className={styles.filterGroup}>
-                <span className={styles.filterGroupLabel}>Promotions</span>
-                {FILTER_PROMOTIONS.map((p) => (
-                  <label key={p} className={styles.filterOption}>
-                    <input type="radio" name="promotion" checked={selectedPromotion === p} onChange={() => setSelectedPromotion(p)} />
-                    {p}
-                  </label>
-                ))}
-              </div>
-
-              <div className={styles.filterGroup}>
                 <span className={styles.filterGroupLabel}>Availability</span>
                 {FILTER_AVAILABILITY.map((a) => (
                   <label key={a} className={styles.filterOption}>
-                    <input type="radio" name="availability" checked={selectedAvailability === a} onChange={() => setSelectedAvailability(a)} />
+                    <input
+                      type="radio"
+                      name="availability"
+                      checked={selectedAvailability === a}
+                      onChange={() => setSelectedAvailability(a)}
+                    />
                     {a}
                   </label>
                 ))}
               </div>
 
-              <button className={styles.filterClearBtn} onClick={clearAllFilters}>
+              <button
+                className={styles.filterClearBtn}
+                onClick={clearAllFilters}
+              >
                 Clear All Filters
               </button>
             </aside>
@@ -495,7 +706,9 @@ export default function Gifts() {
                     aria-expanded={isSortDropdownOpen}
                   >
                     <span>{getSortLabel()}</span>
-                    <FiChevronDown className={`${styles.sortChevron} ${isSortDropdownOpen ? styles.sortChevronOpen : ""}`} />
+                    <FiChevronDown
+                      className={`${styles.sortChevron} ${isSortDropdownOpen ? styles.sortChevronOpen : ""}`}
+                    />
                   </button>
 
                   {isSortDropdownOpen && (
@@ -520,86 +733,130 @@ export default function Gifts() {
                   ? Array.from({ length: ITEMS_PER_BATCH }).map((_, i) => (
                       <SkeletonCard key={i} />
                     ))
-                  : visibleProducts.map((p) => {
-                      const discount =
-                        p.pricing?.salePrice && p.pricing?.originalPrice
-                          ? Math.round(
-                              ((p.pricing.originalPrice - p.pricing.salePrice) /
-                                p.pricing.originalPrice) *
-                                100
-                            )
-                          : 0;
-                      const inCart = isInCart(p._id);
-                      const inWishlist = isInWishlist(p._id);
-                      const addingToCart = cartLoadingId === p._id;
+                  : clientFilteredProducts.length === 0
+                    ? null /* empty state rendered below the grid */
+                    : clientFilteredProducts.map((p) => {
+                        const discount =
+                          p.pricing?.salePrice && p.pricing?.originalPrice
+                            ? Math.round(
+                                ((p.pricing.originalPrice -
+                                  p.pricing.salePrice) /
+                                  p.pricing.originalPrice) *
+                                  100,
+                              )
+                            : 0;
+                        const inCart = isInCart(p._id);
+                        const inWishlist = isInWishlist(p._id);
+                        const addingToCart = cartLoadingId === p._id;
 
-                      return (
-                        <div className={styles.productCard} key={p._id}>
-                          <Link to={`/product/${p.productSlug}`} className={styles.productMedia}>
-                            {discount > 0 && (
-                              <span className={styles.badge}>{discount}% off</span>
-                            )}
-                            <span className={styles.productCatOverlay}>
-                              {p.category?.categoryData?.label || "Gift"}
-                            </span>
-                            <div className={styles.wishlistActions}>
-                              <button
-                                type="button"
-                                className={`${styles.wishlistBtn} ${inWishlist ? styles.wishlistBtnActive : ""}`}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  toggleWishlist(p._id);
-                                }}
-                                aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
-                              >
-                                {inWishlist ? <FaHeart /> : <FiHeart />}
-                              </button>
-                            </div>
-                            {p.thumbnail?.url ? (
-                              <img
-                                src={p.thumbnail.url}
-                                alt={p.productName}
-                                className={styles.productImage}
-                              />
-                            ) : (
-                              <span className={styles.placeholderLabel}>Product Image</span>
-                            )}
-                          </Link>
-                          <div className={styles.productInfo}>
-                            <Link to={`/product/${p.productSlug}`} className={styles.productName}>
-                              {p.productName}
-                            </Link>
-                            <div className={styles.productPrice}>
-                              <span className={styles.priceNow}>
-                                ₹{(p.pricing?.salePrice || p.pricing?.originalPrice)?.toLocaleString() || "0"}
-                              </span>
-                              {p.pricing?.salePrice && p.pricing?.originalPrice && (
-                                <span className={styles.priceOld}>
-                                  ₹{p.pricing.originalPrice.toLocaleString()}
+                        return (
+                          <div className={styles.productCard} key={p._id}>
+                            <Link
+                              to={`/product/${p.productSlug}`}
+                              className={styles.productMedia}
+                            >
+                              {discount > 0 && (
+                                <span className={styles.badge}>
+                                  {discount}% off
                                 </span>
                               )}
-                            </div>
-                            <button
-                              type="button"
-                              className={`${styles.addToCartBtn} ${inCart ? styles.addToCartBtnActive : ""}`}
-                              onClick={() => addToCart(p._id)}
-                              disabled={inCart || addingToCart}
-                            >
-                              {inCart ? (
-                                <><FiCheck /> Added to Cart</>
+                              <span className={styles.productCatOverlay}>
+                                {p.category?.categoryData?.label || "Gift"}
+                              </span>
+                              <div className={styles.wishlistActions}>
+                                <button
+                                  type="button"
+                                  className={`${styles.wishlistBtn} ${inWishlist ? styles.wishlistBtnActive : ""}`}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    toggleWishlist(p._id);
+                                  }}
+                                  aria-label={
+                                    inWishlist
+                                      ? "Remove from wishlist"
+                                      : "Add to wishlist"
+                                  }
+                                >
+                                  {inWishlist ? <FaHeart /> : <FiHeart />}
+                                </button>
+                              </div>
+                              {p.thumbnail?.url ? (
+                                <img
+                                  src={p.thumbnail.url}
+                                  alt={p.productName}
+                                  className={styles.productImage}
+                                />
                               ) : (
-                                <><FiShoppingBag /> {addingToCart ? "Adding..." : "Add to Cart"}</>
+                                <span className={styles.placeholderLabel}>
+                                  Product Image
+                                </span>
                               )}
-                            </button>
+                            </Link>
+                            <div className={styles.productInfo}>
+                              <Link
+                                to={`/product/${p.productSlug}`}
+                                className={styles.productName}
+                              >
+                                {p.productName}
+                              </Link>
+                              <div className={styles.productPrice}>
+                                <span className={styles.priceNow}>
+                                  ₹
+                                  {(
+                                    p.pricing?.salePrice ||
+                                    p.pricing?.originalPrice
+                                  )?.toLocaleString() || "0"}
+                                </span>
+                                {p.pricing?.salePrice &&
+                                  p.pricing?.originalPrice && (
+                                    <span className={styles.priceOld}>
+                                      ₹
+                                      {p.pricing.originalPrice.toLocaleString()}
+                                    </span>
+                                  )}
+                              </div>
+                              <button
+                                type="button"
+                                className={`${styles.addToCartBtn} ${inCart ? styles.addToCartBtnActive : ""}`}
+                                onClick={() => addToCart(p._id)}
+                                disabled={inCart || addingToCart}
+                              >
+                                {inCart ? (
+                                  <>
+                                    <FiCheck /> Added to Cart
+                                  </>
+                                ) : (
+                                  <>
+                                    <FiShoppingBag />{" "}
+                                    {addingToCart ? "Adding..." : "Add to Cart"}
+                                  </>
+                                )}
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
               </div>
 
+              {/* Empty state */}
+              {!isLoading && clientFilteredProducts.length === 0 && (
+                <div className={styles.emptyState}>
+                  <div className={styles.emptyStateIcon}>🎁</div>
+                  <h3>No gifts match these filters</h3>
+                  <p>Try a different occasion, recipient, or budget.</p>
+                  <button
+                    type="button"
+                    className={styles.emptyStateButton}
+                    onClick={clearAllFilters}
+                  >
+                    Clear All Filters
+                  </button>
+                </div>
+              )}
+
               {/* ── Infinite Scroll Sentinel ── */}
-              {!isLoading && (
+              {!isLoading && clientFilteredProducts.length > 0 && (
                 <div ref={sentinelRef} className={styles.sentinel}>
                   {isLoadingMore && (
                     <div className={styles.skeletonLoadMoreGrid}>
@@ -612,40 +869,51 @@ export default function Gifts() {
               )}
 
               {/* Pagination (still kept for edge cases) */}
-              {!isLoading && totalPages > 1 && visibleCount >= allProducts.length && (
-                <div className={styles.pagination}>
-                  <button
-                    className={styles.paginationBtn}
-                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                  >
-                    ‹
-                  </button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+              {!isLoading &&
+                totalPages > 1 &&
+                visibleCount >= allProducts.length &&
+                clientFilteredProducts.length > 0 && (
+                  <div className={styles.pagination}>
                     <button
-                      key={n}
-                      className={`${styles.pageBtn} ${n === currentPage ? styles.activePage : ""}`}
-                      onClick={() => setCurrentPage(n)}
+                      className={styles.paginationBtn}
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                      }
+                      disabled={currentPage === 1}
                     >
-                      {n}
+                      ‹
                     </button>
-                  ))}
-                  <button
-                    className={styles.paginationBtn}
-                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                  >
-                    ›
-                  </button>
-                </div>
-              )}
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (n) => (
+                        <button
+                          key={n}
+                          className={`${styles.pageBtn} ${n === currentPage ? styles.activePage : ""}`}
+                          onClick={() => setCurrentPage(n)}
+                        >
+                          {n}
+                        </button>
+                      ),
+                    )}
+                    <button
+                      className={styles.paginationBtn}
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                      }
+                      disabled={currentPage === totalPages}
+                    >
+                      ›
+                    </button>
+                  </div>
+                )}
             </main>
           </div>
 
           {/* ================= TESTIMONIALS ================= */}
           <section className={styles.testimonials}>
             <div className={styles.testimonialsHeading}>
-              <span className={styles.testimonialsKicker}>Love From Our Customers</span>
+              <span className={styles.testimonialsKicker}>
+                Love From Our Customers
+              </span>
             </div>
 
             <div className={styles.testimonialsGrid}>
@@ -655,7 +923,12 @@ export default function Gifts() {
                   <div className={styles.testimonialBody}>
                     <div className={styles.stars}>
                       {Array.from({ length: 5 }).map((_, i) => (
-                        <FiStar key={i} className={i < t.rating ? styles.starFilled : styles.starEmpty} />
+                        <FiStar
+                          key={i}
+                          className={
+                            i < t.rating ? styles.starFilled : styles.starEmpty
+                          }
+                        />
                       ))}
                     </div>
                     <p className={styles.testimonialQuote}>"{t.quote}"</p>
@@ -668,12 +941,22 @@ export default function Gifts() {
             <div className={styles.testimonialsCarousel}>
               <div className={styles.testimonialsTrack}>
                 {duplicatedTestimonials.map((t, idx) => (
-                  <div className={styles.testimonialCardMobile} key={`${t.name}-${idx}`}>
+                  <div
+                    className={styles.testimonialCardMobile}
+                    key={`${t.name}-${idx}`}
+                  >
                     <span className={styles.avatar}>{t.initials}</span>
                     <div className={styles.testimonialBody}>
                       <div className={styles.stars}>
                         {Array.from({ length: 5 }).map((_, i) => (
-                          <FiStar key={i} className={i < t.rating ? styles.starFilled : styles.starEmpty} />
+                          <FiStar
+                            key={i}
+                            className={
+                              i < t.rating
+                                ? styles.starFilled
+                                : styles.starEmpty
+                            }
+                          />
                         ))}
                       </div>
                       <p className={styles.testimonialQuote}>"{t.quote}"</p>
@@ -689,36 +972,49 @@ export default function Gifts() {
           <section className={styles.commitment}>
             <div className={styles.commitmentGrid}>
               <div className={styles.commitmentText}>
-                <span className={styles.commitmentKicker}>Jewels As Unique As You</span>
+                <span className={styles.commitmentKicker}>
+                  Jewels As Unique As You
+                </span>
                 <h2 className={styles.commitmentTitle}>
                   Commitment, Forever, In Every Sparkling Jewel
                 </h2>
                 <p className={styles.commitmentDesc}>
-                  Every piece we craft is built on precision and care, from the first cut to the
-                  final polish. We pair timeless design with honest quality, so what you gift carries
-                  meaning that lasts well beyond the moment it's opened.
+                  Every piece we craft is built on precision and care, from the
+                  first cut to the final polish. We pair timeless design with
+                  honest quality, so what you gift carries meaning that lasts
+                  well beyond the moment it's opened.
                 </p>
 
                 <div className={styles.featureList}>
                   {jewelHighlights.map((pair, idx) => (
                     <React.Fragment key={idx}>
                       <div className={styles.featureItem}>
-                        <span className={styles.featureIcon}><FiCheck /></span>
+                        <span className={styles.featureIcon}>
+                          <FiCheck />
+                        </span>
                         {pair[0]}
                       </div>
                       <div className={styles.featureItem}>
-                        <span className={styles.featureIcon}><FiCheck /></span>
+                        <span className={styles.featureIcon}>
+                          <FiCheck />
+                        </span>
                         {pair[1]}
                       </div>
                     </React.Fragment>
                   ))}
                 </div>
 
-                <a href="#shopSection" className={styles.knowMoreBtn}>Shop</a>
+                <a href="#shopSection" className={styles.knowMoreBtn}>
+                  Shop
+                </a>
               </div>
 
               <div className={styles.commitmentMedia}>
-                <img src={giftMiddle} alt="Model wearing layered gold jewellery" className={styles.commitmentImage} />
+                <img
+                  src={giftMiddle}
+                  alt="Model wearing layered gold jewellery"
+                  className={styles.commitmentImage}
+                />
               </div>
             </div>
           </section>
@@ -752,7 +1048,12 @@ export default function Gifts() {
 
           <div className={styles.mobileFilterHeader}>
             <h3 className={styles.mobileFilterTitle}>Filter</h3>
-            <button className={styles.mobileFilterClose} onClick={closeMobileFilter}>✕</button>
+            <button
+              className={styles.mobileFilterClose}
+              onClick={closeMobileFilter}
+            >
+              ✕
+            </button>
           </div>
 
           <div className={styles.mobileFilterContent}>
@@ -766,7 +1067,9 @@ export default function Gifts() {
                   aria-expanded={isSortDropdownOpen}
                 >
                   <span>{getSortLabel()}</span>
-                  <FiChevronDown className={`${styles.mobileSortChevron} ${isSortDropdownOpen ? styles.mobileSortChevronOpen : ""}`} />
+                  <FiChevronDown
+                    className={`${styles.mobileSortChevron} ${isSortDropdownOpen ? styles.mobileSortChevronOpen : ""}`}
+                  />
                 </button>
 
                 {isSortDropdownOpen && (
@@ -775,7 +1078,10 @@ export default function Gifts() {
                       <button
                         key={option.value}
                         className={`${styles.mobileSortOption} ${sortBy === option.value ? styles.mobileSortOptionActive : ""}`}
-                        onClick={() => { handleSortSelect(option.value); setIsSortDropdownOpen(false); }}
+                        onClick={() => {
+                          handleSortSelect(option.value);
+                          setIsSortDropdownOpen(false);
+                        }}
                       >
                         {option.label}
                       </button>
@@ -785,16 +1091,54 @@ export default function Gifts() {
               </div>
             </div>
 
+            {/* Occasion */}
+            <div className={styles.mobileFilterGroup}>
+              <span className={styles.mobileFilterGroupLabel}>Occasion</span>
+              <div className={styles.mobileFilterGrid}>
+                {OCCASION_OPTIONS.map((occ) => (
+                  <label key={occ} className={styles.mobileFilterOption}>
+                    <input
+                      type="radio"
+                      name="mobile_occasion"
+                      checked={selectedOccasion === occ}
+                      onChange={() => setSelectedOccasion(occ)}
+                    />
+                    {occ}
+                  </label>
+                ))}
+              </div>
+            </div>
+
             {/* Category */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Category</span>
               <div className={styles.mobileFilterGrid}>
-                {FILTER_CATEGORIES.map((cat) => (
-                  <label key={cat} className={styles.mobileFilterOption}>
-                    <input type="radio" name="mobile_category" checked={selectedCategory === cat} onChange={() => setSelectedCategory(cat)} />
-                    {cat}
-                  </label>
-                ))}
+                <label className={styles.mobileFilterOption}>
+                  <input
+                    type="radio"
+                    name="mobile_category"
+                    checked={selectedCategory === "All"}
+                    onChange={() => setSelectedCategory("All")}
+                  />
+                  All
+                </label>
+                {categories.length === 0 ? (
+                  <span className={styles.filterEmptyNote}>
+                    No categories configured yet
+                  </span>
+                ) : (
+                  categories.map((c) => (
+                    <label key={c.id} className={styles.mobileFilterOption}>
+                      <input
+                        type="radio"
+                        name="mobile_category"
+                        checked={selectedCategory === c.id}
+                        onChange={() => setSelectedCategory(c.id)}
+                      />
+                      {c.label}
+                    </label>
+                  ))
+                )}
               </div>
             </div>
 
@@ -804,7 +1148,12 @@ export default function Gifts() {
               <div className={styles.mobileFilterGrid}>
                 {FILTER_RECIPIENTS.map((r) => (
                   <label key={r} className={styles.mobileFilterOption}>
-                    <input type="radio" name="mobile_recipient" checked={selectedRecipient === r} onChange={() => setSelectedRecipient(r)} />
+                    <input
+                      type="radio"
+                      name="mobile_recipient"
+                      checked={selectedRecipient === r}
+                      onChange={() => setSelectedRecipient(r)}
+                    />
                     {r}
                   </label>
                 ))}
@@ -817,21 +1166,13 @@ export default function Gifts() {
               <div className={styles.mobileFilterGrid}>
                 {FILTER_BUDGETS.map((b) => (
                   <label key={b} className={styles.mobileFilterOption}>
-                    <input type="radio" name="mobile_budget" checked={selectedBudget === b} onChange={() => setSelectedBudget(b)} />
+                    <input
+                      type="radio"
+                      name="mobile_budget"
+                      checked={selectedBudget === b}
+                      onChange={() => setSelectedBudget(b)}
+                    />
                     {b}
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Promotions */}
-            <div className={styles.mobileFilterGroup}>
-              <span className={styles.mobileFilterGroupLabel}>Promotions</span>
-              <div className={styles.mobileFilterGrid}>
-                {FILTER_PROMOTIONS.map((p) => (
-                  <label key={p} className={styles.mobileFilterOption}>
-                    <input type="radio" name="mobile_promotion" checked={selectedPromotion === p} onChange={() => setSelectedPromotion(p)} />
-                    {p}
                   </label>
                 ))}
               </div>
@@ -839,11 +1180,18 @@ export default function Gifts() {
 
             {/* Availability */}
             <div className={styles.mobileFilterGroup}>
-              <span className={styles.mobileFilterGroupLabel}>Availability</span>
+              <span className={styles.mobileFilterGroupLabel}>
+                Availability
+              </span>
               <div className={styles.mobileFilterGrid}>
                 {FILTER_AVAILABILITY.map((a) => (
                   <label key={a} className={styles.mobileFilterOption}>
-                    <input type="radio" name="mobile_availability" checked={selectedAvailability === a} onChange={() => setSelectedAvailability(a)} />
+                    <input
+                      type="radio"
+                      name="mobile_availability"
+                      checked={selectedAvailability === a}
+                      onChange={() => setSelectedAvailability(a)}
+                    />
                     {a}
                   </label>
                 ))}
@@ -869,7 +1217,10 @@ export default function Gifts() {
               </div>
             </div>
 
-            <button className={styles.mobileFilterApply} onClick={closeMobileFilter}>
+            <button
+              className={styles.mobileFilterApply}
+              onClick={closeMobileFilter}
+            >
               Apply Filters
             </button>
           </div>

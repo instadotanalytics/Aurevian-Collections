@@ -48,6 +48,19 @@ const generateSlugFromLabel = (label) => {
     .replace(/^-+|-+$/g, "");
 };
 
+// Collections/gift-guide items store a free-typed `path` in HeaderConfig
+// that doesn't reliably match a real route. Deriving the link from the
+// LABEL — same pattern already used for shop categories — guarantees
+// every header link lands on a route that exists AND a filter slug the
+// destination page (Collections.jsx / Gifts.jsx / Offers.jsx) knows how
+// to read. See App.jsx's new "/collections/:filterSlug",
+// "/gifts/:filterSlug", "/offers/:filterSlug" routes.
+const collectionPathFromLabel = (label) =>
+  `/collections/${generateSlugFromLabel(label)}`;
+const giftOccasionPathFromLabel = (label) =>
+  `/gifts/${generateSlugFromLabel(label)}`;
+const offerPathFromLabel = (label) => `/offers/${generateSlugFromLabel(label)}`;
+
 const defaultRecentSearches = [
   "Bridal lehenga",
   "Gold earrings",
@@ -396,24 +409,42 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
                             })}
                           </ul>
                         </div>
+                        {/* PATCH B — desktop "Shop by Style" column */}
                         <div className={styles.megaCol}>
                           <h4>Shop by Style</h4>
                           <ul>
-                            {shopByStyle.map((c) => (
-                              <li key={c.id}>
-                                <Link to={c.path}>{c.label}</Link>
+                            {shopByStyle.length === 0 ? (
+                              <li className={styles.megaColEmpty}>
+                                Coming soon
                               </li>
-                            ))}
+                            ) : (
+                              shopByStyle.map((c) => (
+                                <li key={c.id}>
+                                  <Link to={collectionPathFromLabel(c.label)}>
+                                    {c.label}
+                                  </Link>
+                                </li>
+                              ))
+                            )}
                           </ul>
                         </div>
+                        {/* PATCH C — desktop "Fashion Items" column */}
                         <div className={styles.megaCol}>
                           <h4>Fashion Items</h4>
                           <ul>
-                            {fashionItems.map((f) => (
-                              <li key={f.id}>
-                                <Link to={f.path}>{f.label}</Link>
+                            {fashionItems.length === 0 ? (
+                              <li className={styles.megaColEmpty}>
+                                Coming soon
                               </li>
-                            ))}
+                            ) : (
+                              fashionItems.map((f) => (
+                                <li key={f.id}>
+                                  <Link to={collectionPathFromLabel(f.label)}>
+                                    {f.label}
+                                  </Link>
+                                </li>
+                              ))
+                            )}
                           </ul>
                         </div>
                         <div className={styles.megaBanner}>
@@ -429,58 +460,100 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
                       </div>
                     </div>
                   )}
+                  {/* PATCH D — desktop "Collections" simple dropdown */}
                   {item.id === "collections" && (
                     <div className={styles.dropdown}>
-                      {collectionsDropdown.map((c) => (
-                        <Link key={c.id} to={c.path}>
-                          {c.label}
-                        </Link>
-                      ))}
+                      {collectionsDropdown.length === 0 ? (
+                        <span className={styles.dropdownEmpty}>
+                          No collections yet
+                        </span>
+                      ) : (
+                        collectionsDropdown.map((c) => (
+                          <Link
+                            key={c.id}
+                            to={collectionPathFromLabel(c.label)}
+                          >
+                            {c.label}
+                          </Link>
+                        ))
+                      )}
                     </div>
                   )}
+                  {/* PATCH E — desktop "Gift Guide" mega menu */}
                   {item.id === "gift-guide" && (
                     <div className={styles.megaMenu}>
                       <div className={styles.megaMenuFlex}>
                         <div className={styles.megaCol}>
-                          <h4>By Recipient</h4>
+                          <h4>By Occasion</h4>
                           <ul>
-                            {giftGuide.byRecipient.map((g) => (
-                              <li key={g.id}>
-                                <Link to={g.path}>{g.label}</Link>
+                            {giftGuide.byOccasion.length === 0 ? (
+                              <li className={styles.megaColEmpty}>
+                                Coming soon
                               </li>
-                            ))}
+                            ) : (
+                              giftGuide.byOccasion.map((g) => (
+                                <li key={g.id}>
+                                  <Link to={giftOccasionPathFromLabel(g.label)}>
+                                    {g.label}
+                                  </Link>
+                                </li>
+                              ))
+                            )}
                           </ul>
                         </div>
                         <div className={styles.megaCol}>
-                          <h4>By Occasion</h4>
+                          <h4>By Recipient</h4>
                           <ul>
-                            {giftGuide.byOccasion.map((g) => (
-                              <li key={g.id}>
-                                <Link to={g.path}>{g.label}</Link>
+                            {giftGuide.byRecipient.length === 0 ? (
+                              <li className={styles.megaColEmpty}>
+                                Coming soon
                               </li>
-                            ))}
+                            ) : (
+                              giftGuide.byRecipient.map((g) => (
+                                <li key={g.id}>
+                                  {/* Recipient is a client-side filter inside
+                                      Gifts.jsx (specifications.gender), not a
+                                      URL slug, so this links to the base page
+                                      where the Recipient filter is visible. */}
+                                  <Link to="/gifts">{g.label}</Link>
+                                </li>
+                              ))
+                            )}
                           </ul>
                         </div>
                         <div className={styles.megaCol}>
                           <h4>By Budget</h4>
                           <ul>
-                            {giftGuide.byBudget.map((g) => (
-                              <li key={g.id}>
-                                <Link to={g.path}>{g.label}</Link>
+                            {giftGuide.byBudget.length === 0 ? (
+                              <li className={styles.megaColEmpty}>
+                                Coming soon
                               </li>
-                            ))}
+                            ) : (
+                              giftGuide.byBudget.map((g) => (
+                                <li key={g.id}>
+                                  <Link to="/gifts">{g.label}</Link>
+                                </li>
+                              ))
+                            )}
                           </ul>
                         </div>
                       </div>
                     </div>
                   )}
+                  {/* PATCH F — desktop "Offers" simple dropdown */}
                   {item.id === "offers" && (
                     <div className={styles.dropdown}>
-                      {offersDropdown.map((o) => (
-                        <Link key={o.id} to={o.path}>
-                          {o.label}
-                        </Link>
-                      ))}
+                      {offersDropdown.length === 0 ? (
+                        <span className={styles.dropdownEmpty}>
+                          No offers yet
+                        </span>
+                      ) : (
+                        offersDropdown.map((o) => (
+                          <Link key={o.id} to={offerPathFromLabel(o.label)}>
+                            {o.label}
+                          </Link>
+                        ))
+                      )}
                     </div>
                   )}
                   {item.id === "about" && (
@@ -720,36 +793,60 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
                             />
                           </span>
                         </button>
+                        {/* PATCH G — mobile drawer "Shop by Style" + "Fashion Items" columns */}
                         {mobileShopSubOpen === col.id && (
                           <div className={styles.drawerSubItems}>
-                            {col.items.map((it) => {
-                              const slug = generateSlugFromLabel(it.label);
-                              return (
-                                <Link
-                                  key={it.id}
-                                  to={`/shop/${slug}`}
-                                  onClick={closeMobileMenu}
-                                >
-                                  {it.label}
-                                </Link>
-                              );
-                            })}
+                            {col.items.length === 0 ? (
+                              <span className={styles.drawerSubEmpty}>
+                                Coming soon
+                              </span>
+                            ) : (
+                              col.items.map((it) => {
+                                const isCategoryColumn =
+                                  col.id === "category" ||
+                                  col.id === "quicklinks";
+                                const slug = generateSlugFromLabel(it.label);
+                                const to = isCategoryColumn
+                                  ? `/shop/${slug}`
+                                  : collectionPathFromLabel(it.label);
+                                return (
+                                  <Link
+                                    key={it.id}
+                                    to={to}
+                                    onClick={closeMobileMenu}
+                                  >
+                                    {it.label}
+                                  </Link>
+                                );
+                              })
+                            )}
                           </div>
                         )}
                       </div>
                     ))}
                   </div>
                 )}
+                {/* PATCH G — mobile drawer "Collections" accordion */}
                 {item.id === "collections" && (
                   <div
                     className={`${styles.drawerSubPanel} ${expanded ? styles.expanded : ""}`}
                   >
                     <div className={styles.drawerSubGroup}>
-                      {collectionsDropdown.map((c) => (
-                        <Link key={c.id} to={c.path} onClick={closeMobileMenu}>
-                          {c.label}
-                        </Link>
-                      ))}
+                      {collectionsDropdown.length === 0 ? (
+                        <span className={styles.drawerSubEmpty}>
+                          No collections yet
+                        </span>
+                      ) : (
+                        collectionsDropdown.map((c) => (
+                          <Link
+                            key={c.id}
+                            to={collectionPathFromLabel(c.label)}
+                            onClick={closeMobileMenu}
+                          >
+                            {c.label}
+                          </Link>
+                        ))
+                      )}
                     </div>
                   </div>
                 )}
@@ -774,15 +871,21 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
                         </button>
                         {mobileGiftSubOpen === col.id && (
                           <div className={styles.drawerSubItems}>
-                            {col.items.map((it) => (
-                              <Link
-                                key={it.id}
-                                to={it.path}
-                                onClick={closeMobileMenu}
-                              >
-                                {it.label}
-                              </Link>
-                            ))}
+                            {col.items.map((it) => {
+                              const isOccasionColumn = col.id === "occasion";
+                              const to = isOccasionColumn
+                                ? giftOccasionPathFromLabel(it.label)
+                                : "/gifts";
+                              return (
+                                <Link
+                                  key={it.id}
+                                  to={to}
+                                  onClick={closeMobileMenu}
+                                >
+                                  {it.label}
+                                </Link>
+                              );
+                            })}
                           </div>
                         )}
                       </div>
@@ -794,11 +897,21 @@ const Header = ({ onSearchSubmit, logoHref = "/" }) => {
                     className={`${styles.drawerSubPanel} ${expanded ? styles.expanded : ""}`}
                   >
                     <div className={styles.drawerSubGroup}>
-                      {offersDropdown.map((o) => (
-                        <Link key={o.id} to={o.path} onClick={closeMobileMenu}>
-                          {o.label}
-                        </Link>
-                      ))}
+                      {offersDropdown.length === 0 ? (
+                        <span className={styles.drawerSubEmpty}>
+                          No offers yet
+                        </span>
+                      ) : (
+                        offersDropdown.map((o) => (
+                          <Link
+                            key={o.id}
+                            to={offerPathFromLabel(o.label)}
+                            onClick={closeMobileMenu}
+                          >
+                            {o.label}
+                          </Link>
+                        ))
+                      )}
                     </div>
                   </div>
                 )}
