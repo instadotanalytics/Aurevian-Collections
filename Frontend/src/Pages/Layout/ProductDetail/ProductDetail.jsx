@@ -1,11 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
-
 import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
-
 import { useDispatch, useSelector } from "react-redux";
-
 import toast from "react-hot-toast";
-
 import {
   FiHeart,
   FiCheck,
@@ -21,45 +17,32 @@ import {
   FiChevronUp,
   FiZoomIn,
 } from "react-icons/fi";
-
 import { IoCartOutline } from "react-icons/io5";
 import { FaHeart, FaShoppingBag } from "react-icons/fa";
 
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
-
 import styles from "./ProductDetail.module.css";
 
 import {
   fetchProductBySlug,
   clearCurrentProduct,
 } from "../../../redux/slices/storefrontProductSlice";
-
 import { addItemToCart } from "../../../redux/slices/cartSlice";
-
 import {
   toggleWishlistItem,
   fetchWishlist,
 } from "../../../redux/slices/wishlistSlice";
 
-/*
- * IMPORTANT:
- * This is the missing import that makes the
- * "You May Also Like" section available.
- */
 import RelevantProducts from "./RelevantProducts";
 
 /* ─── Helper: Price Breakdown Accordion ─── */
-
 const PriceBreakdown = ({ product }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const originalPrice = product.pricing?.originalPrice || 0;
-
   const salePrice = product.pricing?.salePrice;
-
   const hasDiscount = salePrice && salePrice < originalPrice;
-
   const discountPct = hasDiscount
     ? Math.round(((originalPrice - salePrice) / originalPrice) * 100)
     : 0;
@@ -96,9 +79,7 @@ const PriceBreakdown = ({ product }) => {
   ];
 
   const discountAmount = hasDiscount ? originalPrice - salePrice : 0;
-
   const subtotalAfterDiscount = hasDiscount ? salePrice : originalPrice;
-
   const gstAmount = Math.round(subtotalAfterDiscount * 0.03);
 
   return (
@@ -110,7 +91,6 @@ const PriceBreakdown = ({ product }) => {
         aria-expanded={isOpen}
       >
         <span>Product Details & Price Breakup</span>
-
         {isOpen ? <FiChevronUp /> : <FiChevronDown />}
       </button>
 
@@ -127,7 +107,6 @@ const PriceBreakdown = ({ product }) => {
                   <th>Value</th>
                 </tr>
               </thead>
-
               <tbody>
                 {breakdownItems.map((item, idx) => (
                   <tr key={idx}>
@@ -138,54 +117,36 @@ const PriceBreakdown = ({ product }) => {
                     <td>{item.value}</td>
                   </tr>
                 ))}
-
                 {hasDiscount && (
                   <tr className={styles.discountRow}>
                     <td colSpan="3">Discount</td>
-
                     <td>{discountPct}%</td>
-
-                    <td>
-                      -₹
-                      {discountAmount.toLocaleString()}
-                    </td>
+                    <td>-₹{discountAmount.toLocaleString()}</td>
                   </tr>
                 )}
-
                 <tr className={styles.subtotalRow}>
                   <td colSpan="3">Subtotal after Discount</td>
-
                   <td>-</td>
-
                   <td>₹{subtotalAfterDiscount.toLocaleString()}</td>
                 </tr>
-
                 <tr>
                   <td colSpan="3">GST</td>
                   <td>-</td>
                   <td>₹{gstAmount.toLocaleString()}</td>
                 </tr>
-
                 <tr className={styles.grandTotalRow}>
                   <td colSpan="3">Grand Total</td>
-
                   <td>-</td>
-
-                  <td>
-                    ₹{(subtotalAfterDiscount + gstAmount).toLocaleString()}
-                  </td>
+                  <td>₹{(subtotalAfterDiscount + gstAmount).toLocaleString()}</td>
                 </tr>
               </tbody>
             </table>
           </div>
-
           <div className={styles.skuId}>
             <span>SKU ID:</span> {product._id || "501145FAARAC023IA001506"}
           </div>
-
           <div className={styles.cleaningNote}>
-            Enjoy sparkling jewellery! We provide free jewellery cleaning
-            services!
+            Enjoy sparkling jewellery! We provide free jewellery cleaning services!
           </div>
         </div>
       )}
@@ -194,46 +155,27 @@ const PriceBreakdown = ({ product }) => {
 };
 
 /* ─── Helper: Image Gallery with Zoom ─── */
-
 const ImageGallery = ({ images, productName }) => {
   const [activeIndex, setActiveIndex] = useState(0);
-
   const [isZooming, setIsZooming] = useState(false);
-
-  const [zoomPosition, setZoomPosition] = useState({
-    x: 50,
-    y: 50,
-  });
-
+  const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
   const imageRef = useRef(null);
-
-  const containerRef = useRef(null);
 
   const allImages =
     images.length > 0
       ? images
-      : [
-          {
-            url: "/placeholder-image.png",
-            altText: productName,
-          },
-        ];
+      : [{ url: "/placeholder-image.png", altText: productName }];
 
   const activeImage = allImages[activeIndex];
 
   const handleMouseEnter = () => setIsZooming(true);
-
   const handleMouseLeave = () => setIsZooming(false);
 
   const handleMouseMove = (e) => {
     if (!isZooming || !imageRef.current) return;
-
     const rect = imageRef.current.getBoundingClientRect();
-
     const x = ((e.clientX - rect.left) / rect.width) * 100;
-
     const y = ((e.clientY - rect.top) / rect.height) * 100;
-
     setZoomPosition({
       x: Math.min(Math.max(x, 0), 100),
       y: Math.min(Math.max(y, 0), 100),
@@ -241,18 +183,11 @@ const ImageGallery = ({ images, productName }) => {
   };
 
   const handleTouchMove = (e) => {
-    if (!isZooming || !imageRef.current || !e.touches.length) {
-      return;
-    }
-
+    if (!isZooming || !imageRef.current || !e.touches.length) return;
     const rect = imageRef.current.getBoundingClientRect();
-
     const touch = e.touches[0];
-
     const x = ((touch.clientX - rect.left) / rect.width) * 100;
-
     const y = ((touch.clientY - rect.top) / rect.height) * 100;
-
     setZoomPosition({
       x: Math.min(Math.max(x, 0), 100),
       y: Math.min(Math.max(y, 0), 100),
@@ -260,17 +195,15 @@ const ImageGallery = ({ images, productName }) => {
   };
 
   const handleTouchStart = () => setIsZooming(true);
-
   const handleTouchEnd = () => setIsZooming(false);
 
   const prevImage = () =>
     setActiveIndex((i) => (i === 0 ? allImages.length - 1 : i - 1));
-
   const nextImage = () =>
     setActiveIndex((i) => (i === allImages.length - 1 ? 0 : i + 1));
 
   return (
-    <div className={styles.gallery} ref={containerRef}>
+    <div className={styles.gallery}>
       <div
         className={`${styles.mainImageWrap} ${isZooming ? styles.zooming : ""}`}
         onMouseEnter={handleMouseEnter}
@@ -288,7 +221,7 @@ const ImageGallery = ({ images, productName }) => {
           style={
             isZooming
               ? {
-                  transform: "scale(2)",
+                  transform: "scale(2.5)",
                   transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
                 }
               : {}
@@ -297,17 +230,15 @@ const ImageGallery = ({ images, productName }) => {
             e.currentTarget.src = "/placeholder-image.png";
           }}
         />
-
         {isZooming && (
           <div
             className={styles.zoomLens}
             style={{
-              left: `${zoomPosition.x - 7}%`,
-              top: `${zoomPosition.y - 7}%`,
+              left: `${zoomPosition.x}%`,
+              top: `${zoomPosition.y}%`,
             }}
           />
         )}
-
         {allImages.length > 1 && (
           <>
             <button
@@ -318,7 +249,6 @@ const ImageGallery = ({ images, productName }) => {
             >
               <FiChevronLeft />
             </button>
-
             <button
               type="button"
               className={`${styles.imageNavBtn} ${styles.imageNavNext}`}
@@ -329,7 +259,6 @@ const ImageGallery = ({ images, productName }) => {
             </button>
           </>
         )}
-
         <button
           type="button"
           className={styles.zoomIndicator}
@@ -338,7 +267,6 @@ const ImageGallery = ({ images, productName }) => {
           <FiZoomIn />
         </button>
       </div>
-
       {allImages.length > 1 && (
         <div className={styles.thumbRow}>
           {allImages.map((img, idx) => (
@@ -365,44 +293,60 @@ const ImageGallery = ({ images, productName }) => {
   );
 };
 
-/* ─── Main Component ─── */
+/* ─── Helper: Product Description Component ─── */
+const ProductDescription = ({ product }) => {
+  // Get descriptions from product - matching schema fields
+  const shortDescription = product.shortDescription || "";
+  const fullDescription = product.fullDescription || "";
+  const seoDescription = product.seo?.description || "";
 
+  // Determine which description to show - prefer full, then short, then seo
+  let displayDescription = "";
+  
+  if (fullDescription) {
+    displayDescription = fullDescription;
+  } else if (shortDescription) {
+    displayDescription = shortDescription;
+  } else if (seoDescription) {
+    displayDescription = seoDescription;
+  } else {
+    displayDescription = `Experience the elegance of our exquisite ${product.productName}. Crafted with precision and care, this piece embodies luxury and timeless beauty. Perfect for special occasions or everyday sophistication.`;
+  }
+
+  return (
+    <div className={styles.descriptionSection}>
+      <p className={styles.descriptionText}>{displayDescription}</p>
+    </div>
+  );
+};
+
+/* ─── Main Component ─── */
 export default function ProductDetail() {
   const { slug } = useParams();
-
   const dispatch = useDispatch();
-
   const navigate = useNavigate();
-
   const location = useLocation();
 
   const { currentProduct, currentProductLoading, currentProductError } =
     useSelector((state) => state.storefrontProduct);
-
   const { isAuthenticated } = useSelector((state) => state.auth);
-
   const wishlistItems = useSelector((state) => state.wishlist?.items || []);
 
   const [quantity, setQuantity] = useState(1);
-
   const [addedToCart, setAddedToCart] = useState(false);
-
   const [cartLoading, setCartLoading] = useState(false);
 
   /* ── Fetch product data ── */
-
   useEffect(() => {
     if (slug) {
       dispatch(fetchProductBySlug(slug));
     }
-
     return () => {
       dispatch(clearCurrentProduct());
     };
   }, [dispatch, slug]);
 
   /* ── Fetch wishlist ── */
-
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(fetchWishlist());
@@ -410,50 +354,41 @@ export default function ProductDetail() {
   }, [dispatch, isAuthenticated]);
 
   /* ── Reset quantity/cart state when product changes ── */
-
   useEffect(() => {
     if (currentProduct?.productName) {
       document.title = `${
         currentProduct.seo?.title || currentProduct.productName
       } | Aurevian Collections`;
     }
-
     setQuantity(1);
     setAddedToCart(false);
   }, [currentProduct]);
 
   /* ── Loading State ── */
-
   if (currentProductLoading) {
     return (
       <div className={styles.page}>
         <Header />
-
         <div className={styles.loadingWrap}>
           <div className={styles.spinner} />
           <p>Loading product...</p>
         </div>
-
         <Footer />
       </div>
     );
   }
 
   /* ── Error State ── */
-
   if (currentProductError || !currentProduct) {
     return (
       <div className={styles.page}>
         <Header />
-
         <div className={styles.notFoundWrap}>
           <h2>Product not found</h2>
-
           <p>
             {currentProductError ||
               "This product may have been removed or is no longer available."}
           </p>
-
           <button
             className={styles.backHomeBtn}
             onClick={() => navigate("/shop")}
@@ -462,7 +397,6 @@ export default function ProductDetail() {
             Back to Shop
           </button>
         </div>
-
         <Footer />
       </div>
     );
@@ -471,55 +405,32 @@ export default function ProductDetail() {
   const product = currentProduct;
 
   /* ── Product Data ── */
-
   const allImages = [
     ...(product.thumbnail?.url
-      ? [
-          {
-            url: product.thumbnail.url,
-            altText: product.thumbnail.altText,
-          },
-        ]
+      ? [{ url: product.thumbnail.url, altText: product.thumbnail.altText }]
       : []),
-
     ...(product.images || []),
   ];
 
   const originalPrice = product.pricing?.originalPrice || 0;
-
   const salePrice = product.pricing?.salePrice;
-
   const hasDiscount = salePrice && salePrice < originalPrice;
-
   const displayPrice = salePrice || originalPrice;
-
   const discountPct = hasDiscount
     ? Math.round(((originalPrice - salePrice) / originalPrice) * 100)
     : 0;
-
   const inStock = product.inventory?.availability === "In Stock";
-
   const stockQty = product.inventory?.stockQuantity || 0;
-
   const minQty = product.inventory?.minOrderQty || 1;
-
   const maxQty = product.inventory?.maxOrderQty || stockQty || 99;
-
   const isWishlisted = wishlistItems.some(
-    (i) => (i.product?._id || i.product) === product._id,
+    (i) => (i.product?._id || i.product) === product._id
   );
 
   /* ── Metal Specs ── */
-
   const metalSpecs = [
-    {
-      label: "Karatage",
-      value: product.specifications?.karatage || "18K",
-    },
-    {
-      label: "Metal",
-      value: product.specifications?.material || "Gold",
-    },
+    { label: "Karatage", value: product.specifications?.karatage || "18K" },
+    { label: "Metal", value: product.specifications?.material || "Gold" },
     {
       label: "Material Colour",
       value: product.specifications?.materialColor || "Yellow",
@@ -533,28 +444,17 @@ export default function ProductDetail() {
   ].filter((s) => s.value && s.value !== "None");
 
   /* ── Diamond Specs ── */
-
   const diamondSpecs = [
-    {
-      label: "Clarity",
-      value: product.specifications?.stoneClarity || "VS",
-    },
-    {
-      label: "Color",
-      value: product.specifications?.stoneColor || "G-H",
-    },
+    { label: "Clarity", value: product.specifications?.stoneClarity || "VS" },
+    { label: "Color", value: product.specifications?.stoneColor || "G-H" },
     {
       label: "Carat Weight",
       value: product.specifications?.stoneCarat || "0.096 ct",
     },
-    {
-      label: "Cut",
-      value: product.specifications?.stoneCut || "Brilliant",
-    },
+    { label: "Cut", value: product.specifications?.stoneCut || "Brilliant" },
   ].filter((s) => s.value && s.value !== "None");
 
   /* ── Handlers ── */
-
   const decreaseQty = () => {
     setQuantity((q) => Math.max(minQty, q - 1));
   };
@@ -566,36 +466,25 @@ export default function ProductDetail() {
   const requireAuth = () => {
     if (!isAuthenticated) {
       toast.error("Please login to continue");
-
-      navigate("/login", {
-        state: {
-          from: location.pathname,
-        },
-      });
-
+      navigate("/login", { state: { from: location.pathname } });
       return false;
     }
-
     return true;
   };
 
   const handleAddToCart = async () => {
     if (!inStock) return;
-
     if (!requireAuth()) return;
 
     try {
       setCartLoading(true);
-
       await dispatch(
         addItemToCart({
           productId: product._id,
           quantity,
-        }),
+        })
       ).unwrap();
-
       toast.success("Added to cart");
-
       setAddedToCart(true);
     } catch (err) {
       toast.error(err || "Failed to add to cart");
@@ -606,7 +495,6 @@ export default function ProductDetail() {
 
   const handleBuyNow = () => {
     if (!inStock) return;
-
     if (!requireAuth()) return;
 
     navigate("/checkout", {
@@ -620,13 +508,13 @@ export default function ProductDetail() {
             quantity,
           },
         ],
+        buyNow: true,
       },
     });
   };
 
   const handleToggleWishlist = async () => {
     if (!requireAuth()) return;
-
     try {
       await dispatch(toggleWishlistItem(product._id)).unwrap();
     } catch (err) {
@@ -635,38 +523,28 @@ export default function ProductDetail() {
   };
 
   /* ── Render ── */
-
   return (
     <div className={styles.page}>
       <Header />
-
       <div className={styles.container}>
         {/* Breadcrumb */}
-
         <div className={styles.breadcrumb}>
           <Link to="/">Home</Link>
-
           <span>/</span>
-
           <Link to="/shop">Shop</Link>
-
           {product.category?.categoryData?.label && (
             <>
               <span>/</span>
-
               <span>{product.category.categoryData.label}</span>
             </>
           )}
-
           <span>/</span>
-
           <span className={styles.breadcrumbCurrent}>
             {product.productName}
           </span>
         </div>
 
         {/* Main Grid */}
-
         <div className={styles.mainGrid}>
           <ImageGallery images={allImages} productName={product.productName} />
 
@@ -677,13 +555,11 @@ export default function ProductDetail() {
               <span className={styles.currentPrice}>
                 ₹{displayPrice.toLocaleString()}
               </span>
-
               {hasDiscount && (
                 <>
                   <span className={styles.originalPrice}>
                     ₹{originalPrice.toLocaleString()}
                   </span>
-
                   <span className={styles.discountPill}>
                     Save {discountPct}%
                   </span>
@@ -703,6 +579,9 @@ export default function ProductDetail() {
               )}
             </p>
 
+            {/* Product Description - Full without Read More */}
+            <ProductDescription product={product} />
+
             <div className={styles.purchaseRow}>
               <div className={styles.qtySelector}>
                 <button
@@ -712,9 +591,7 @@ export default function ProductDetail() {
                 >
                   <FiMinus />
                 </button>
-
                 <span>{quantity}</span>
-
                 <button
                   type="button"
                   onClick={increaseQty}
@@ -724,7 +601,6 @@ export default function ProductDetail() {
                 </button>
               </div>
 
-              {/* Add to Cart Button - Using IoCartOutline */}
               <button
                 type="button"
                 className={`${styles.addToCartBtn} ${
@@ -746,7 +622,6 @@ export default function ProductDetail() {
                 )}
               </button>
 
-              {/* Buy Now Button - Using FaShoppingBag */}
               <button
                 type="button"
                 className={styles.buyNowBtn}
@@ -756,57 +631,68 @@ export default function ProductDetail() {
                 <FaShoppingBag />
                 Buy Now
               </button>
+
+              <button
+                type="button"
+                className={`${styles.wishlistBtn} ${
+                  isWishlisted ? styles.wishlistBtnActive : ""
+                }`}
+                onClick={handleToggleWishlist}
+                aria-label="Add to wishlist"
+              >
+                {isWishlisted ? <FaHeart /> : <FiHeart />}
+              </button>
             </div>
 
             {/* Perks */}
-
             <div className={styles.perksRow}>
               <div className={styles.perkItem}>
                 <FiTruck />
-                <span>Free Shipping</span>
+                <div>
+                  <span className={styles.perkTitle}>Free Delivery</span>
+                  <span className={styles.perkDesc}>Free delivery service provided on purchase</span>
+                </div>
               </div>
-
-              <div className={styles.perkItem}>
-                <FiRefreshCw />
-                <span>15-day returns</span>
-              </div>
-
               <div className={styles.perkItem}>
                 <FiShield />
-                <span>1-year warranty</span>
+                <div>
+                  <span className={styles.perkTitle}>Secure Payments</span>
+                  <span className={styles.perkDesc}>Top Secure payments services available</span>
+                </div>
+              </div>
+              <div className={styles.perkItem}>
+                <FiRefreshCw />
+                <div>
+                  <span className={styles.perkTitle}>24/7 Support</span>
+                  <span className={styles.perkDesc}>Our Customer support center available for help</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Details Grid */}
-
         <div className={styles.detailsGrid}>
           {metalSpecs.length > 0 && (
             <div className={styles.detailsCard}>
               <h3>Metal Details</h3>
-
               <dl className={styles.specsList}>
                 {metalSpecs.map((spec) => (
                   <div key={spec.label} className={styles.specItem}>
                     <dt>{spec.label}</dt>
-
                     <dd>{spec.value}</dd>
                   </div>
                 ))}
               </dl>
             </div>
           )}
-
           {diamondSpecs.length > 0 && (
             <div className={styles.detailsCard}>
               <h3>Diamond Details</h3>
-
               <dl className={styles.specsList}>
                 {diamondSpecs.map((spec) => (
                   <div key={spec.label} className={styles.specItem}>
                     <dt>{spec.label}</dt>
-
                     <dd>{spec.value}</dd>
                   </div>
                 ))}
@@ -816,16 +702,10 @@ export default function ProductDetail() {
         </div>
 
         {/* Price Breakdown */}
-
         <PriceBreakdown product={product} />
-
-        {/* =====================================================
-            RELEVANT PRODUCTS
-            ===================================================== */}
 
         <RelevantProducts productId={product._id} />
       </div>
-
       <Footer />
     </div>
   );
