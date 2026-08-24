@@ -19,6 +19,8 @@ import { toggleWishlistItem } from "../../redux/slices/wishlistSlice";
 
 const SECTION = "specially-made";
 const ACCENTS = ["ink", "ivory", "emerald"];
+const SKELETON_COUNT = 4;
+const LOADING_THROTTLE_MS = 800;
 
 function StarRating({ rating }) {
   const stars = [1, 2, 3, 4, 5];
@@ -64,6 +66,7 @@ function SkeletonCard() {
         </div>
         <div className={styles.info}>
           <div className={styles.skeletonLine} />
+          <div className={styles.skeletonLine} />
           <div className={`${styles.skeletonLine} ${styles.skeletonLineShort}`} />
           <div className={styles.skeletonBtn} />
         </div>
@@ -87,7 +90,6 @@ function ProductCard({
   const hasDiscount =
     product.pricing?.salePrice &&
     product.pricing?.salePrice < product.pricing?.originalPrice;
-  const badge = getBadgeLabel(product.labels);
   const discount = getDiscount(product);
   const hasReviews = (product.reviews?.totalReviews || 0) > 0;
   const categoryLabel = product.category?.categoryData?.label || "";
@@ -211,6 +213,19 @@ export default function Offers() {
   );
 
   const [cartLoadingId, setCartLoadingId] = useState(null);
+  const [showSkeleton, setShowSkeleton] = useState(true);
+
+  // Throttled loading - show skeleton for minimum duration
+  useEffect(() => {
+    if (!isLoading) {
+      const timer = setTimeout(() => {
+        setShowSkeleton(false);
+      }, LOADING_THROTTLE_MS);
+      return () => clearTimeout(timer);
+    } else {
+      setShowSkeleton(true);
+    }
+  }, [isLoading]);
 
   useEffect(() => {
     dispatch(fetchFeaturedProducts(SECTION));
@@ -309,13 +324,16 @@ export default function Offers() {
     }
   };
 
-  if (!isLoading && (error || products.length === 0)) {
+  // Show nothing if error or no products
+  if (!isLoading && !showSkeleton && (error || products.length === 0)) {
     return null;
   }
 
-  const items = isLoading
-    ? Array.from({ length: 4 }, (_, i) => ({ _skeletonId: i }))
-    : products;
+  // Show skeleton while loading or during throttle
+  const shouldShowSkeleton = isLoading || showSkeleton;
+  const skeletonItems = Array.from({ length: SKELETON_COUNT }, (_, i) => ({
+    _skeletonId: i,
+  }));
 
   return (
     <section className={styles.section} aria-labelledby="offers-heading">
@@ -364,9 +382,9 @@ export default function Offers() {
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
         >
-          {isLoading
-            ? items.map((item) => <SkeletonCard key={item._skeletonId} />)
-            : items.map((product, index) => (
+          {shouldShowSkeleton
+            ? skeletonItems.map((item) => <SkeletonCard key={item._skeletonId} />)
+            : products.map((product, index) => (
                 <ProductCard
                   key={product._id}
                   product={product}
