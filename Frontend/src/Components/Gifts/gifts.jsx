@@ -45,15 +45,6 @@ const jewelHighlights = [
   ["Elegant Setting Style", "Durable Metal Choice"],
 ];
 
-// ✅ REMOVED — "Anniversary/Birthday/Wedding/..." here were duplicating
-// giftGuideMegaMenu.byOccasion (which already exists in HeaderConfig and
-// maps to the real `specifications.occasion` product field). Keeping two
-// separate, disconnected "occasion-ish" lists is exactly the kind of
-// duplicated/hardcoded logic you asked to avoid. This page now reads its
-// occasion filter from the URL (giftGuideMegaMenu link -> /gifts/:slug)
-// and from an in-page occasion selector built from the SAME product
-// field, see OCCASION_OPTIONS below.
-
 const OCCASION_OPTIONS = [
   "All",
   "Wedding",
@@ -69,14 +60,8 @@ const OCCASION_OPTIONS = [
   "Valentine",
   "Mother's Day",
   "Graduation",
-]; // mirrors specifications.occasion enum on JewelleryProduct — keep in
-// sync if that enum changes.
+];
 
-// FILTER_RECIPIENTS maps to the real `specifications.gender` field
-// (Men/Women/Unisex/Kids) — closest existing product attribute to
-// "recipient". "For Couples" has no product-level equivalent; it's
-// excluded from actual filtering (falls through to "All") rather than
-// silently matching nothing.
 const FILTER_RECIPIENTS = ["All", "For Her", "For Him", "For Kids"];
 const RECIPIENT_TO_GENDER = {
   "For Her": "Women",
@@ -91,7 +76,7 @@ const FILTER_BUDGETS = [
   "₹3,000 – ₹6,000",
   "Above ₹6,000",
 ];
-// ✅ FILTER_PROMOTIONS removed — no backing product field.
+
 const FILTER_AVAILABILITY = ["All", "In Stock", "Out of Stock"];
 
 const SORT_OPTIONS = [
@@ -139,16 +124,14 @@ const perks = [
   },
 ];
 
-const ITEMS_PER_BATCH = 10;
-
 /* ─── Skeleton Card ─── */
 function SkeletonCard() {
   return (
     <div className={styles.skeletonCard}>
-      <div className={styles.skeletonMedia} />
-      <div className={styles.skeletonInfo}>
-        <div className={styles.skeletonLine} style={{ width: "70%" }} />
-        <div className={styles.skeletonLine} style={{ width: "45%" }} />
+      <div className={styles.skeletonImage} />
+      <div className={styles.skeletonBody}>
+        <div className={styles.skeletonText} style={{ width: "80%" }} />
+        <div className={styles.skeletonText} style={{ width: "40%" }} />
         <div className={styles.skeletonBtn} />
       </div>
     </div>
@@ -158,26 +141,14 @@ function SkeletonCard() {
 export default function Gifts() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { filterSlug } = useParams(); // giftGuideMegaMenu.byOccasion link, e.g. "/gifts/birthday"
-  const { byPlacement, isLoading } = useSelector(
-    (state) => state.storefrontProduct,
-  );
+  const { filterSlug } = useParams();
   const { isAuthenticated } = useSelector((state) => state.auth);
   const cartItems = useSelector((state) => state.cart.items);
   const wishlistItems = useSelector((state) => state.wishlist.items);
 
-  const giftsData = byPlacement.gifts || {
-    products: [],
-    pagination: { page: 1, totalPages: 1, total: 0 },
-  };
-
-  // ✅ NEW: real shop categories (seller-panel controlled)
+  // Categories
   const [categories, setCategories] = useState([]);
-
-  // Filter states
   const [selectedCategory, setSelectedCategory] = useState("All");
-  // ✅ Occasion now seeded from the URL when a giftGuide link is clicked,
-  // and stays selectable in-page too.
   const initialOccasion = filterSlug
     ? OCCASION_OPTIONS.find(
         (o) => o.toLowerCase().replace(/[^a-z0-9]+/g, "-") === filterSlug,
@@ -189,36 +160,33 @@ export default function Gifts() {
   const [selectedAvailability, setSelectedAvailability] = useState("All");
   const [priceRange, setPriceRange] = useState([0, 8000]);
   const [sortBy, setSortBy] = useState("latest");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
-
   const [cartLoadingId, setCartLoadingId] = useState(null);
+
+  // Infinite scroll state - like Shop
+  const [page, setPage] = useState(1);
+  const [allProducts, setAllProducts] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [categoryError, setCategoryError] = useState(null);
+  const loaderRef = useRef(null);
+
+  // Mobile filter sheet
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const sheetRef = useRef(null);
+  const dragState = useRef({ startY: 0, currentY: 0 });
+  const [isDraggingSheet, setIsDraggingSheet] = useState(false);
+
+  // Mobile sort dropdown
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const sortDropdownRef = useRef(null);
 
-  // ── Infinite scroll state ──
-  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_BATCH);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const sentinelRef = useRef(null);
+  // Desktop sidebar sort dropdown
+  const [isSidebarSortOpen, setIsSidebarSortOpen] = useState(false);
+  const sidebarSortRef = useRef(null);
 
-  // ── Drag-to-close state ──
-  const sheetRef = useRef(null);
-  const dragState = useRef({
-    active: false,
-    startY: 0,
-    currentY: 0,
-    isDragging: false,
-  });
-
-  const allProducts = giftsData.products || [];
-  const visibleProducts = allProducts.slice(0, visibleCount);
-  const { total, totalPages } = giftsData.pagination || {
-    total: 0,
-    totalPages: 1,
-  };
-
-  // Keep occasion in sync if the URL param changes without remount
+  // Keep occasion in sync with URL
   useEffect(() => {
     if (!filterSlug) return;
     const match = OCCASION_OPTIONS.find(
@@ -227,7 +195,7 @@ export default function Gifts() {
     if (match) setSelectedOccasion(match);
   }, [filterSlug]);
 
-  // ✅ NEW: fetch real categories, same endpoint as Shop.jsx
+  // Fetch categories
   useEffect(() => {
     axios
       .get(`${API_BASE}/seller/products/categories`)
@@ -238,35 +206,91 @@ export default function Gifts() {
       });
   }, []);
 
-  // ── Fetch products ──
+  // Fetch products with infinite scroll - like Shop
   useEffect(() => {
-    dispatch(
-      fetchProductsByPlacement({
-        placement: "gifts",
-        page: currentPage,
-        limit: itemsPerPage,
-        categoryId: selectedCategory !== "All" ? selectedCategory : undefined,
-        occasion: selectedOccasion !== "All" ? selectedOccasion : undefined,
-        sort: sortBy || undefined,
-      }),
-    );
-  }, [dispatch, currentPage, selectedCategory, selectedOccasion, sortBy]);
+    const load = async () => {
+      const isFirst = page === 1;
+      if (isFirst) {
+        setIsInitialLoading(true);
+      } else {
+        setIsLoadingMore(true);
+      }
 
-  // Reset visible count when products change
+      const start = Date.now();
+      try {
+        setCategoryError(null);
+        const result = await dispatch(
+          fetchProductsByPlacement({
+            placement: "gifts",
+            page,
+            limit: 10,
+            categoryId: selectedCategory !== "All" ? selectedCategory : undefined,
+            occasion: selectedOccasion !== "All" ? selectedOccasion : undefined,
+            sort: sortBy || undefined,
+          }),
+        ).unwrap();
+
+        const fetched = result.products || [];
+        setAllProducts((prev) => (isFirst ? fetched : [...prev, ...fetched]));
+        setHasMore(page < (result.pagination?.totalPages || 1));
+      } catch (err) {
+        console.error(err);
+        setCategoryError("Failed to load products. Please try again.");
+        toast.error("Failed to load products");
+      } finally {
+        const elapsed = Date.now() - start;
+        const remaining = Math.max(0, 1000 - elapsed);
+        setTimeout(() => {
+          if (isFirst) setIsInitialLoading(false);
+          else setIsLoadingMore(false);
+        }, remaining);
+      }
+    };
+
+    load();
+  }, [page, refreshKey, dispatch, selectedCategory, selectedOccasion, sortBy]);
+
+  // Reset on filter change
   useEffect(() => {
-    setVisibleCount(ITEMS_PER_BATCH);
-  }, [selectedCategory, selectedOccasion, sortBy, currentPage]);
+    setPage(1);
+    setAllProducts([]);
+    setHasMore(true);
+    setRefreshKey((k) => k + 1);
+  }, [selectedCategory, selectedOccasion, sortBy]);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    if (!loaderRef.current || !hasMore || isLoadingMore || isInitialLoading)
+      return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          hasMore &&
+          !isLoadingMore &&
+          !isInitialLoading
+        ) {
+          setPage((p) => p + 1);
+        }
+      },
+      { rootMargin: "200px" },
+    );
+
+    observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, isLoadingMore, isInitialLoading]);
 
   useEffect(() => {
     if (isAuthenticated) dispatch(fetchWishlist());
   }, [dispatch, isAuthenticated]);
 
-  // ── Close sort dropdown on outside click ──
+  // Close mobile sort dropdown on outside click
   useEffect(() => {
-    const handleClickOutside = (e) => {
+    const handleClickOutside = (event) => {
       if (
         sortDropdownRef.current &&
-        !sortDropdownRef.current.contains(e.target)
+        !sortDropdownRef.current.contains(event.target)
       ) {
         setIsSortDropdownOpen(false);
       }
@@ -275,145 +299,73 @@ export default function Gifts() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ── Infinite Scroll via IntersectionObserver ──
+  // Close desktop sidebar sort dropdown on outside click
   useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (
-          entries[0].isIntersecting &&
-          !isLoadingMore &&
-          visibleCount < allProducts.length
-        ) {
-          setIsLoadingMore(true);
-          // Simulate throttled load (300ms delay)
-          setTimeout(() => {
-            setVisibleCount((prev) =>
-              Math.min(prev + ITEMS_PER_BATCH, allProducts.length),
-            );
-            setIsLoadingMore(false);
-          }, 300);
-        }
-      },
-      { threshold: 0.1 },
-    );
-
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [visibleCount, allProducts.length, isLoadingMore]);
-
-  // ── Drag-to-close sheet handlers ──
-  const getDragY = (e) => {
-    if (e.touches) return e.touches[0].clientY;
-    return e.clientY;
-  };
-
-  const onDragStart = useCallback(
-    (e) => {
-      // Only drag from the handle or header area
-      const target = e.target;
-      const isHandle =
-        target.classList.contains(styles.mobileFilterHandle) ||
-        target.closest(`.${styles.mobileFilterHeader}`);
-
-      if (!isHandle) return;
-
-      dragState.current = {
-        active: true,
-        startY: getDragY(e),
-        currentY: getDragY(e),
-        isDragging: false,
-      };
-
-      const sheet = sheetRef.current;
-      if (sheet) {
-        sheet.style.transition = "none";
+    const handleClickOutside = (event) => {
+      if (
+        sidebarSortRef.current &&
+        !sidebarSortRef.current.contains(event.target)
+      ) {
+        setIsSidebarSortOpen(false);
       }
-    },
-    [styles.mobileFilterHandle, styles.mobileFilterHeader],
-  );
-
-  const onDragMove = useCallback((e) => {
-    if (!dragState.current.active) return;
-
-    const y = getDragY(e);
-    const deltaY = y - dragState.current.startY;
-
-    if (Math.abs(deltaY) > 5) {
-      dragState.current.isDragging = true;
-    }
-
-    if (!dragState.current.isDragging) return;
-
-    dragState.current.currentY = y;
-
-    // Only allow dragging downward
-    const translateY = Math.max(0, deltaY);
-    const sheet = sheetRef.current;
-    if (sheet) {
-      sheet.style.transform = `translateY(${translateY}px)`;
-    }
-
-    // Prevent scroll while dragging
-    if (e.cancelable) e.preventDefault();
-  }, []);
-
-  const onDragEnd = useCallback(() => {
-    if (!dragState.current.active) return;
-
-    const deltaY = dragState.current.currentY - dragState.current.startY;
-    const sheet = sheetRef.current;
-
-    if (sheet) {
-      sheet.style.transition = "";
-    }
-
-    // Close if dragged down more than 80px
-    if (dragState.current.isDragging && deltaY > 80) {
-      closeMobileFilter();
-    } else {
-      // Snap back
-      if (sheet) {
-        sheet.style.transform = "";
-      }
-    }
-
-    dragState.current = {
-      active: false,
-      startY: 0,
-      currentY: 0,
-      isDragging: false,
     };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Attach drag listeners to the sheet
+  // Drag to close sheet
   useEffect(() => {
-    const sheet = sheetRef.current;
-    if (!sheet) return;
+    if (!isDraggingSheet) return;
 
-    // Touch events
-    sheet.addEventListener("touchstart", onDragStart, { passive: true });
-    sheet.addEventListener("touchmove", onDragMove, { passive: false });
-    sheet.addEventListener("touchend", onDragEnd, { passive: true });
+    const onMove = (e) => {
+      const clientY = e.clientY ?? e.touches?.[0]?.clientY;
+      const delta = clientY - dragState.current.startY;
+      if (delta < 0) return;
+      dragState.current.currentY = delta;
+      if (sheetRef.current) {
+        sheetRef.current.style.transform = `translateY(${delta}px)`;
+      }
+    };
 
-    // Mouse events
-    sheet.addEventListener("mousedown", onDragStart);
-    window.addEventListener("mousemove", onDragMove);
-    window.addEventListener("mouseup", onDragEnd);
+    const onUp = () => {
+      setIsDraggingSheet(false);
+      const delta = dragState.current.currentY;
+      if (sheetRef.current) {
+        sheetRef.current.style.transition = "transform 0.35s ease";
+        if (delta > 100) {
+          sheetRef.current.style.transform = "translateY(100%)";
+          setTimeout(() => {
+            closeMobileFilter();
+            if (sheetRef.current) {
+              sheetRef.current.style.transform = "";
+              sheetRef.current.style.transition = "";
+            }
+          }, 350);
+        } else {
+          sheetRef.current.style.transform = "translateY(0)";
+          setTimeout(() => {
+            if (sheetRef.current) {
+              sheetRef.current.style.transform = "";
+              sheetRef.current.style.transition = "";
+            }
+          }, 350);
+        }
+      }
+    };
+
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+    document.addEventListener("touchmove", onMove, { passive: false });
+    document.addEventListener("touchend", onUp);
 
     return () => {
-      sheet.removeEventListener("touchstart", onDragStart);
-      sheet.removeEventListener("touchmove", onDragMove);
-      sheet.removeEventListener("touchend", onDragEnd);
-      sheet.removeEventListener("mousedown", onDragStart);
-      window.removeEventListener("mousemove", onDragMove);
-      window.removeEventListener("mouseup", onDragEnd);
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      document.removeEventListener("touchmove", onMove);
+      document.removeEventListener("touchend", onUp);
     };
-  }, [onDragStart, onDragMove, onDragEnd]);
+  }, [isDraggingSheet]);
 
-  // ── Auth guard ──
   const requireAuth = () => {
     if (!isAuthenticated) {
       toast.error("Please login to continue");
@@ -452,16 +404,15 @@ export default function Gifts() {
     setSelectedBudget("All");
     setSelectedAvailability("All");
     setPriceRange([0, 8000]);
-    setCurrentPage(1);
+    setPage(1);
+    setAllProducts([]);
+    setHasMore(true);
+    setRefreshKey((k) => k + 1);
     if (filterSlug) navigate("/gifts");
   };
 
-  // ✅ NEW: recipient/budget now actually filter the visible list,
-  // client-side, same approach Shop.jsx already uses for its own
-  // budget/promotion filters. Previously these two setState calls had
-  // no reader anywhere in the file.
   const clientFilteredProducts = useMemo(() => {
-    return visibleProducts.filter((p) => {
+    return allProducts.filter((p) => {
       if (selectedRecipient !== "All") {
         const wantGender = RECIPIENT_TO_GENDER[selectedRecipient];
         if (wantGender && p.specifications?.gender !== wantGender) {
@@ -490,12 +441,7 @@ export default function Gifts() {
       }
       return true;
     });
-  }, [
-    visibleProducts,
-    selectedRecipient,
-    selectedBudget,
-    selectedAvailability,
-  ]);
+  }, [allProducts, selectedRecipient, selectedBudget, selectedAvailability]);
 
   const openMobileFilter = () => {
     setIsMobileFilterOpen(true);
@@ -512,14 +458,6 @@ export default function Gifts() {
     document.body.style.position = "";
     document.body.style.width = "";
     document.body.style.top = "";
-
-    // Reset sheet position
-    const sheet = sheetRef.current;
-    if (sheet) {
-      sheet.style.transform = "";
-      sheet.style.transition = "";
-    }
-
     if (scrollY) {
       window.scrollTo(0, parseInt(scrollY || "0", 10) * -1);
     }
@@ -534,6 +472,14 @@ export default function Gifts() {
     const option = SORT_OPTIONS.find((opt) => opt.value === sortBy);
     return option ? option.label : "Sort by latest";
   };
+
+  const getCategoryName = () => {
+    if (!selectedCategory || selectedCategory === "All") return "All Products";
+    const category = categories.find((c) => c.id === selectedCategory);
+    return category ? category.label : "Category";
+  };
+
+  const skeletonItems = Array.from({ length: 10 }, (_, i) => i);
 
   const duplicatedTestimonials = [
     ...testimonials,
@@ -573,6 +519,45 @@ export default function Gifts() {
             {/* Desktop Sidebar */}
             <aside className={styles.filters}>
               <h3 className={styles.filtersHeading}>Filter</h3>
+
+              {/* Sort By - Desktop Sidebar */}
+              <div className={styles.filterGroup}>
+                <span className={styles.filterGroupLabel}>Sort By</span>
+                <div className={styles.sidebarSortWrapper} ref={sidebarSortRef}>
+                  <button
+                    className={styles.sidebarSortButton}
+                    onClick={() => setIsSidebarSortOpen(!isSidebarSortOpen)}
+                    aria-expanded={isSidebarSortOpen}
+                  >
+                    <span>{getSortLabel()}</span>
+                    <FiChevronDown
+                      className={`${styles.sidebarSortChevron} ${
+                        isSidebarSortOpen ? styles.sidebarSortChevronOpen : ""
+                      }`}
+                    />
+                  </button>
+                  {isSidebarSortOpen && (
+                    <div className={styles.sidebarSortDropdown}>
+                      {SORT_OPTIONS.map((option) => (
+                        <button
+                          key={option.value}
+                          className={`${styles.sidebarSortOption} ${
+                            sortBy === option.value
+                              ? styles.sidebarSortOptionActive
+                              : ""
+                          }`}
+                          onClick={() => {
+                            setSortBy(option.value);
+                            setIsSidebarSortOpen(false);
+                          }}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
 
               <div className={styles.filterGroup}>
                 <span className={styles.filterGroupLabel}>Occasion</span>
@@ -692,50 +677,66 @@ export default function Gifts() {
 
             {/* Product Listing */}
             <main className={styles.productsWrapper}>
-              <div className={styles.toolbar}>
-                <span className={styles.resultsCount}>
-                  {isLoading
+              <div className={styles.productsHeader}>
+                <span className={styles.productsCount}>
+                  {isInitialLoading
                     ? "Loading..."
-                    : `Showing ${Math.min(visibleCount, allProducts.length)} of ${total} products`}
+                    : `Showing ${clientFilteredProducts.length} results for ${getCategoryName()}`}
                 </span>
-
-                <div className={styles.sortWrapper} ref={sortDropdownRef}>
-                  <button
-                    className={styles.sortButton}
-                    onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-                    aria-expanded={isSortDropdownOpen}
-                  >
-                    <span>{getSortLabel()}</span>
-                    <FiChevronDown
-                      className={`${styles.sortChevron} ${isSortDropdownOpen ? styles.sortChevronOpen : ""}`}
-                    />
-                  </button>
-
-                  {isSortDropdownOpen && (
-                    <div className={styles.sortDropdown}>
-                      {SORT_OPTIONS.map((option) => (
-                        <button
-                          key={option.value}
-                          className={`${styles.sortOption} ${sortBy === option.value ? styles.sortOptionActive : ""}`}
-                          onClick={() => handleSortSelect(option.value)}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
               </div>
 
-              {/* ── Product Grid ── */}
-              <div className={styles.productGrid}>
-                {isLoading
-                  ? Array.from({ length: ITEMS_PER_BATCH }).map((_, i) => (
-                      <SkeletonCard key={i} />
-                    ))
-                  : clientFilteredProducts.length === 0
-                    ? null /* empty state rendered below the grid */
-                    : clientFilteredProducts.map((p) => {
+              {/* Skeleton Loading */}
+              {isInitialLoading && (
+                <div className={styles.skeletonGrid}>
+                  {skeletonItems.map((i) => (
+                    <div className={styles.skeletonCard} key={i}>
+                      <div className={styles.skeletonImage} />
+                      <div className={styles.skeletonText} />
+                      <div
+                        className={`${styles.skeletonText} ${styles.skeletonTextShort}`}
+                      />
+                      <div className={styles.skeletonBtn} />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Error State */}
+              {categoryError && !isInitialLoading && (
+                <div className={styles.errorState}>
+                  <div className={styles.errorStateIcon}>⚠️</div>
+                  <h3>Something went wrong</h3>
+                  <p>{categoryError}</p>
+                  <button
+                    className={styles.errorStateButton}
+                    onClick={() => setRefreshKey((k) => k + 1)}
+                  >
+                    Try Again
+                  </button>
+                </div>
+              )}
+
+              {/* Products */}
+              {!isInitialLoading && !categoryError && (
+                <>
+                  {clientFilteredProducts.length === 0 && (
+                    <div className={styles.emptyState}>
+                      <div className={styles.emptyStateIcon}>🎁</div>
+                      <h3>No gifts match these filters</h3>
+                      <p>Try a different occasion, recipient, or budget.</p>
+                      <button
+                        type="button"
+                        className={styles.emptyStateButton}
+                        onClick={clearAllFilters}
+                      >
+                        Clear All Filters
+                      </button>
+                    </div>
+                  )}
+
+                  {clientFilteredProducts.length > 0 && (
+                    <div className={styles.productGrid}>
+                      {clientFilteredProducts.map((p) => {
                         const discount =
                           p.pricing?.salePrice && p.pricing?.originalPrice
                             ? Math.round(
@@ -766,7 +767,9 @@ export default function Gifts() {
                               <div className={styles.wishlistActions}>
                                 <button
                                   type="button"
-                                  className={`${styles.wishlistBtn} ${inWishlist ? styles.wishlistBtnActive : ""}`}
+                                  className={`${styles.wishlistBtn} ${
+                                    inWishlist ? styles.wishlistBtnActive : ""
+                                  }`}
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
@@ -797,6 +800,7 @@ export default function Gifts() {
                               <Link
                                 to={`/product/${p.productSlug}`}
                                 className={styles.productName}
+                                title={p.productName}
                               >
                                 {p.productName}
                               </Link>
@@ -818,7 +822,9 @@ export default function Gifts() {
                               </div>
                               <button
                                 type="button"
-                                className={`${styles.addToCartBtn} ${inCart ? styles.addToCartBtnActive : ""}`}
+                                className={`${styles.addToCartBtn} ${
+                                  inCart ? styles.addToCartBtnActive : ""
+                                }`}
                                 onClick={() => addToCart(p._id)}
                                 disabled={inCart || addingToCart}
                               >
@@ -837,74 +843,34 @@ export default function Gifts() {
                           </div>
                         );
                       })}
-              </div>
-
-              {/* Empty state */}
-              {!isLoading && clientFilteredProducts.length === 0 && (
-                <div className={styles.emptyState}>
-                  <div className={styles.emptyStateIcon}>🎁</div>
-                  <h3>No gifts match these filters</h3>
-                  <p>Try a different occasion, recipient, or budget.</p>
-                  <button
-                    type="button"
-                    className={styles.emptyStateButton}
-                    onClick={clearAllFilters}
-                  >
-                    Clear All Filters
-                  </button>
-                </div>
+                    </div>
+                  )}
+                </>
               )}
 
-              {/* ── Infinite Scroll Sentinel ── */}
-              {!isLoading && clientFilteredProducts.length > 0 && (
-                <div ref={sentinelRef} className={styles.sentinel}>
+              {/* Infinite scroll loader */}
+              {!isInitialLoading && !categoryError && hasMore && (
+                <div ref={loaderRef} className={styles.infiniteLoader}>
                   {isLoadingMore && (
-                    <div className={styles.skeletonLoadMoreGrid}>
-                      {Array.from({ length: 2 }).map((_, i) => (
-                        <SkeletonCard key={i} />
+                    <div className={styles.skeletonGrid}>
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <div className={styles.skeletonCard} key={`more-${i}`}>
+                          <div className={styles.skeletonImage} />
+                          <div className={styles.skeletonText} />
+                          <div
+                            className={`${styles.skeletonText} ${styles.skeletonTextShort}`}
+                          />
+                          <div className={styles.skeletonBtn} />
+                        </div>
                       ))}
                     </div>
                   )}
                 </div>
               )}
 
-              {/* Pagination (still kept for edge cases) */}
-              {!isLoading &&
-                totalPages > 1 &&
-                visibleCount >= allProducts.length &&
-                clientFilteredProducts.length > 0 && (
-                  <div className={styles.pagination}>
-                    <button
-                      className={styles.paginationBtn}
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.max(prev - 1, 1))
-                      }
-                      disabled={currentPage === 1}
-                    >
-                      ‹
-                    </button>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                      (n) => (
-                        <button
-                          key={n}
-                          className={`${styles.pageBtn} ${n === currentPage ? styles.activePage : ""}`}
-                          onClick={() => setCurrentPage(n)}
-                        >
-                          {n}
-                        </button>
-                      ),
-                    )}
-                    <button
-                      className={styles.paginationBtn}
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                      }
-                      disabled={currentPage === totalPages}
-                    >
-                      ›
-                    </button>
-                  </div>
-                )}
+              {!isInitialLoading && !hasMore && clientFilteredProducts.length > 0 && (
+                <div className={styles.endMessage}>No more products</div>
+              )}
             </main>
           </div>
 
@@ -1041,10 +1007,23 @@ export default function Gifts() {
         {/* ── Mobile Bottom Sheet ── */}
         <div
           ref={sheetRef}
-          className={`${styles.mobileFilterSheet} ${isMobileFilterOpen ? styles.mobileFilterSheetActive : ""}`}
+          className={`${styles.mobileFilterSheet} ${
+            isMobileFilterOpen ? styles.mobileFilterSheetActive : ""
+          }`}
         >
-          {/* Drag handle */}
-          <div className={styles.mobileFilterHandle} />
+          <div
+            className={styles.mobileFilterHandle}
+            onMouseDown={(e) => {
+              dragState.current.startY = e.clientY;
+              dragState.current.currentY = 0;
+              setIsDraggingSheet(true);
+            }}
+            onTouchStart={(e) => {
+              dragState.current.startY = e.touches[0].clientY;
+              dragState.current.currentY = 0;
+              setIsDraggingSheet(true);
+            }}
+          />
 
           <div className={styles.mobileFilterHeader}>
             <h3 className={styles.mobileFilterTitle}>Filter</h3>
@@ -1068,16 +1047,21 @@ export default function Gifts() {
                 >
                   <span>{getSortLabel()}</span>
                   <FiChevronDown
-                    className={`${styles.mobileSortChevron} ${isSortDropdownOpen ? styles.mobileSortChevronOpen : ""}`}
+                    className={`${styles.mobileSortChevron} ${
+                      isSortDropdownOpen ? styles.mobileSortChevronOpen : ""
+                    }`}
                   />
                 </button>
-
                 {isSortDropdownOpen && (
                   <div className={styles.mobileSortDropdown}>
                     {SORT_OPTIONS.map((option) => (
                       <button
                         key={option.value}
-                        className={`${styles.mobileSortOption} ${sortBy === option.value ? styles.mobileSortOptionActive : ""}`}
+                        className={`${styles.mobileSortOption} ${
+                          sortBy === option.value
+                            ? styles.mobileSortOptionActive
+                            : ""
+                        }`}
                         onClick={() => {
                           handleSortSelect(option.value);
                           setIsSortDropdownOpen(false);
