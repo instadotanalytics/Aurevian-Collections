@@ -1201,12 +1201,16 @@ export default function Gifts() {
               </div>
             </div>
 
-            <button
-              className={styles.mobileFilterApply}
-              onClick={closeMobileFilter}
-            >
-              Apply Filters
-            </button>
+
+             <button className={styles.filterClearBtn} onClick={clearAllFilters}>
+                          Clear All Filters
+                        </button>
+                        <button
+                          className={styles.mobileFilterApply}
+                          onClick={closeMobileFilter}
+                        >
+                          Apply Filters
+                        </button>
           </div>
         </div>
 
