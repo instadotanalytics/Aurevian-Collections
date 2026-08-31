@@ -22,8 +22,11 @@ import { LuSlidersHorizontal } from "react-icons/lu";
 import { FiHeart } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 import { FiPackage, FiCreditCard, FiPhoneCall } from "react-icons/fi";
-import { FiShoppingBag, FiCheck, FiChevronDown } from "react-icons/fi";
-import { fetchProductsByPlacement } from "../../redux/slices/storefrontProductSlice";
+import { FiShoppingBag, FiCheck, FiChevronDown, FiX } from "react-icons/fi";
+import {
+  fetchProductsByPlacement,
+  searchProducts,
+} from "../../redux/slices/storefrontProductSlice";
 import { addItemToCart } from "../../redux/slices/cartSlice";
 import {
   toggleWishlistItem,
@@ -102,6 +105,13 @@ export default function Shop() {
   const [searchParams] = useSearchParams();
   const { categorySlug } = useParams();
 
+  // ✅ NEW: search mode — driven entirely by the ?search= query param so
+  // typing in the header, hitting Enter/the search icon, refreshing the
+  // page, and browser back/forward all resolve to the same state.
+  const rawSearchQuery = searchParams.get("search") || "";
+  const searchQuery = rawSearchQuery.trim().replace(/\s+/g, " ");
+  const isSearchMode = searchQuery.length > 0;
+
   const [categories, setCategories] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [isResolvingSlug, setIsResolvingSlug] = useState(true);
@@ -122,6 +132,13 @@ export default function Shop() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [categoryError, setCategoryError] = useState(null);
   const loaderRef = useRef(null);
+
+  // ✅ NEW: race-condition guard — every load() call stamps a fresh id
+  // here; if a newer load() has started by the time an older one's
+  // request resolves, the older one's result is discarded instead of
+  // clobbering state. Covers rapid search-query changes as well as
+  // rapid category/sort/filter changes.
+  const requestIdRef = useRef(0);
 
   // Mobile filter sheet
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -185,9 +202,12 @@ export default function Shop() {
     }
   }, [categories, categorySlug, searchParams, isResolvingSlug]);
 
-  // Fetch products (infinite scroll)
+  // Fetch products (infinite scroll) — branches between the normal
+  // placement-based browse flow and the ✅ NEW search flow depending
+  // on whether ?search= is present in the URL.
   useEffect(() => {
     const load = async () => {
+      const requestId = ++requestIdRef.current;
       const isFirst = page === 1;
       if (isFirst) {
         setIsInitialLoading(true);
@@ -198,27 +218,51 @@ export default function Shop() {
       const start = Date.now();
       try {
         setCategoryError(null);
-        const result = await dispatch(
-          fetchProductsByPlacement({
-            placement: "shop",
-            page,
-            limit: 10,
-            categoryId: selectedCategoryId || undefined,
-            sort: sort || undefined,
-          }),
-        ).unwrap();
+        let result;
+
+        if (isSearchMode) {
+          result = await dispatch(
+            searchProducts({
+              q: searchQuery,
+              page,
+              limit: 10,
+              categoryId: selectedCategoryId || undefined,
+              sort: sort || undefined,
+            }),
+          ).unwrap();
+        } else {
+          result = await dispatch(
+            fetchProductsByPlacement({
+              placement: "shop",
+              page,
+              limit: 10,
+              categoryId: selectedCategoryId || undefined,
+              sort: sort || undefined,
+            }),
+          ).unwrap();
+        }
+
+        // A newer request has already started — ignore this stale result.
+        if (requestId !== requestIdRef.current) return;
 
         const fetched = result.products || [];
         setAllProducts((prev) => (isFirst ? fetched : [...prev, ...fetched]));
         setHasMore(page < (result.pagination?.totalPages || 1));
       } catch (err) {
+        if (requestId !== requestIdRef.current) return;
         console.error(err);
-        setCategoryError("Failed to load products. Please try again.");
-        toast.error("Failed to load products");
+        setCategoryError(
+          isSearchMode
+            ? "Failed to search products. Please try again."
+            : "Failed to load products. Please try again.",
+        );
+        toast.error(isSearchMode ? "Search failed" : "Failed to load products");
       } finally {
+        if (requestId !== requestIdRef.current) return;
         const elapsed = Date.now() - start;
         const remaining = Math.max(0, 1000 - elapsed);
         setTimeout(() => {
+          if (requestId !== requestIdRef.current) return;
           if (isFirst) setIsInitialLoading(false);
           else setIsLoadingMore(false);
         }, remaining);
@@ -228,15 +272,25 @@ export default function Shop() {
     if (!isResolvingSlug) {
       load();
     }
-  }, [page, refreshKey, dispatch, selectedCategoryId, sort, isResolvingSlug]);
+  }, [
+    page,
+    refreshKey,
+    dispatch,
+    selectedCategoryId,
+    sort,
+    isResolvingSlug,
+    isSearchMode,
+    searchQuery,
+  ]);
 
-  // Reset on filter change
+  // Reset on filter change (✅ NEW: also resets when the search query changes,
+  // including when it's cleared — e.g. navigating back to /shop)
   useEffect(() => {
     setPage(1);
     setAllProducts([]);
     setHasMore(true);
     setRefreshKey((k) => k + 1);
-  }, [selectedCategoryId, sort, budgetFilter, promotionFilter]);
+  }, [selectedCategoryId, sort, budgetFilter, promotionFilter, searchQuery]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -385,7 +439,13 @@ export default function Shop() {
     setSort("");
     setBudgetFilter("all");
     setPromotionFilter("all");
-    // Navigate to base shop page when clearing filters
+    // Navigate to base shop page when clearing filters (also clears ?search=)
+    navigate("/shop");
+  };
+
+  // ✅ NEW: dedicated "clear search" action — restores normal shop
+  // browsing without resetting the other filters the user may have set.
+  const clearSearch = () => {
     navigate("/shop");
   };
 
@@ -538,7 +598,7 @@ export default function Shop() {
                   checked={selectedCategoryId === ""}
                   onChange={() => {
                     setSelectedCategoryId("");
-                    navigate("/shop");
+                    if (!isSearchMode) navigate("/shop");
                   }}
                 />
                 All
@@ -551,8 +611,13 @@ export default function Shop() {
                     checked={selectedCategoryId === c.id}
                     onChange={() => {
                       setSelectedCategoryId(c.id);
-                      const slug = generateSlugFromLabel(c.label);
-                      navigate(`/shop/${slug}`);
+                      // Only rewrite the URL to a category slug when not
+                      // searching — while searching we keep ?search= and
+                      // just apply categoryId as an in-place filter.
+                      if (!isSearchMode) {
+                        const slug = generateSlugFromLabel(c.label);
+                        navigate(`/shop/${slug}`);
+                      }
                     }}
                   />
                   {c.label}
@@ -620,8 +685,34 @@ export default function Shop() {
               <span className={styles.resultsCount}>
                 {isInitialLoading
                   ? "Loading..."
-                  : `Showing ${filteredProducts.length} results for ${getCategoryName()}`}
+                  : isSearchMode
+                    ? `Showing ${filteredProducts.length} result${
+                        filteredProducts.length === 1 ? "" : "s"
+                      } for "${searchQuery}"`
+                    : `Showing ${filteredProducts.length} results for ${getCategoryName()}`}
               </span>
+              {isSearchMode && !isInitialLoading && (
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  style={{
+                    marginLeft: 12,
+                    background: "none",
+                    border: "none",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 4,
+                    cursor: "pointer",
+                    color: "inherit",
+                    textDecoration: "underline",
+                    fontSize: "0.9em",
+                    opacity: 0.8,
+                  }}
+                >
+                  <FiX size={14} />
+                  Clear search
+                </button>
+              )}
             </div>
 
             {/* Skeleton Loading */}
@@ -658,13 +749,14 @@ export default function Shop() {
             {/* Products */}
             {!isInitialLoading && !categoryError && (
               <>
-                {filteredProducts.length === 0 && selectedCategoryId && (
+                {/* ✅ NEW: No-results state specific to an active search */}
+                {filteredProducts.length === 0 && isSearchMode && (
                   <div className={styles.emptyState}>
                     <div className={styles.emptyStateIcon}>🔍</div>
-                    <h3>No Products Found</h3>
+                    <h3>No products found</h3>
                     <p>
-                      We couldn't find any products in "{getCategoryName()}".
-                      Try browsing our other collections!
+                      We couldn't find any products matching "{searchQuery}".
+                      Try a different keyword or browse our collections instead!
                     </p>
                     <Link to="/shop" className={styles.emptyStateButton}>
                       Browse All Products
@@ -672,16 +764,34 @@ export default function Shop() {
                   </div>
                 )}
 
-                {filteredProducts.length === 0 && !selectedCategoryId && (
-                  <div className={styles.emptyState}>
-                    <div className={styles.emptyStateIcon}>🛍️</div>
-                    <h3>No Products Available</h3>
-                    <p>
-                      We're currently updating our collection. Please check back
-                      later!
-                    </p>
-                  </div>
-                )}
+                {filteredProducts.length === 0 &&
+                  !isSearchMode &&
+                  selectedCategoryId && (
+                    <div className={styles.emptyState}>
+                      <div className={styles.emptyStateIcon}>🔍</div>
+                      <h3>No Products Found</h3>
+                      <p>
+                        We couldn't find any products in "{getCategoryName()}".
+                        Try browsing our other collections!
+                      </p>
+                      <Link to="/shop" className={styles.emptyStateButton}>
+                        Browse All Products
+                      </Link>
+                    </div>
+                  )}
+
+                {filteredProducts.length === 0 &&
+                  !isSearchMode &&
+                  !selectedCategoryId && (
+                    <div className={styles.emptyState}>
+                      <div className={styles.emptyStateIcon}>🛍️</div>
+                      <h3>No Products Available</h3>
+                      <p>
+                        We're currently updating our collection. Please check
+                        back later!
+                      </p>
+                    </div>
+                  )}
 
                 {filteredProducts.length > 0 && (
                   <div className={styles.productGrid}>
@@ -917,7 +1027,7 @@ export default function Shop() {
                     checked={selectedCategoryId === ""}
                     onChange={() => {
                       setSelectedCategoryId("");
-                      navigate("/shop");
+                      if (!isSearchMode) navigate("/shop");
                     }}
                   />
                   All
@@ -930,8 +1040,10 @@ export default function Shop() {
                       checked={selectedCategoryId === c.id}
                       onChange={() => {
                         setSelectedCategoryId(c.id);
-                        const slug = generateSlugFromLabel(c.label);
-                        navigate(`/shop/${slug}`);
+                        if (!isSearchMode) {
+                          const slug = generateSlugFromLabel(c.label);
+                          navigate(`/shop/${slug}`);
+                        }
                       }}
                     />
                     {c.label}

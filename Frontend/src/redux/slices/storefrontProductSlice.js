@@ -79,8 +79,52 @@ export const fetchRelevantProducts = createAsyncThunk(
 );
 
 // ============================================
+// ✅ NEW: SEARCH PRODUCTS (Public — header search bar + /shop?search=)
+// Same "guard against stale response" pattern as fetchRelevantProducts:
+// pending stamps the in-flight query onto state.searchResults.forQuery,
+// fulfilled/rejected only apply if their query is still the latest one
+// requested — this is what stops a slow response for an earlier
+// keystroke/query from clobbering a faster response to a later one.
+// ============================================
+export const searchProducts = createAsyncThunk(
+  "storefrontProducts/search",
+  async (
+    { q, page = 1, limit = 20, categoryId, sort },
+    { rejectWithValue },
+  ) => {
+    try {
+      const params = new URLSearchParams();
+      params.append("q", q);
+      params.append("page", page);
+      params.append("limit", limit);
+      if (categoryId) params.append("categoryId", categoryId);
+      if (sort) params.append("sort", sort);
+
+      const { data } = await axios.get(
+        `${API_URL}/seller/products/search?${params.toString()}`,
+      );
+      return { query: data.data?.query ?? q, ...data.data };
+    } catch (error) {
+      return rejectWithValue({
+        query: q,
+        message: error.response?.data?.message || "Search failed",
+      });
+    }
+  },
+);
+
+// ============================================
 // SLICE
 // ============================================
+const initialSearchResultsState = {
+  products: [],
+  pagination: { page: 1, limit: 20, total: 0, totalPages: 0 },
+  isLoading: false,
+  error: null,
+  query: "",
+  forQuery: null, // internal guard against stale/out-of-order responses
+};
+
 const storefrontProductSlice = createSlice({
   name: "storefrontProducts",
   initialState: {
@@ -115,6 +159,8 @@ const storefrontProductSlice = createSlice({
       error: null,
       forProductId: null, // guards against stale responses on fast navigation
     },
+    // ✅ NEW: search results state (header search + /shop?search=)
+    searchResults: { ...initialSearchResultsState },
   },
   reducers: {
     clearStorefrontError: (state) => {
@@ -163,6 +209,10 @@ const storefrontProductSlice = createSlice({
         error: null,
         forProductId: null,
       };
+    },
+    // ✅ NEW: Clear search results (e.g. when the ?search= param is removed)
+    clearSearchResults: (state) => {
+      state.searchResults = { ...initialSearchResultsState };
     },
   },
   extraReducers: (builder) => {
@@ -235,6 +285,36 @@ const storefrontProductSlice = createSlice({
         state.relevantProducts.isLoading = false;
         state.relevantProducts.error =
           action.payload?.message || "Failed to fetch relevant products";
+      })
+
+      // ✅ NEW: search products
+      .addCase(searchProducts.pending, (state, action) => {
+        state.searchResults.isLoading = true;
+        state.searchResults.error = null;
+        state.searchResults.forQuery = action.meta.arg.q;
+      })
+      .addCase(searchProducts.fulfilled, (state, action) => {
+        // Ignore a response superseded by a newer search request.
+        if (action.payload.query !== state.searchResults.forQuery) {
+          return;
+        }
+        state.searchResults.isLoading = false;
+        state.searchResults.products = action.payload.products || [];
+        state.searchResults.pagination = action.payload.pagination || {
+          page: 1,
+          limit: 20,
+          total: 0,
+          totalPages: 0,
+        };
+        state.searchResults.query = action.payload.query;
+      })
+      .addCase(searchProducts.rejected, (state, action) => {
+        const failedQuery = action.payload?.query;
+        if (failedQuery && failedQuery !== state.searchResults.forQuery) {
+          return;
+        }
+        state.searchResults.isLoading = false;
+        state.searchResults.error = action.payload?.message || "Search failed";
       });
   },
 });
@@ -245,6 +325,7 @@ export const {
   clearAllPlacements,
   clearCurrentProduct, // ✅ NEW: Export the new action
   clearRelevantProducts, // ✅ NEW: Export the new action
+  clearSearchResults, // ✅ NEW: Export the new action
 } = storefrontProductSlice.actions;
 
 export default storefrontProductSlice.reducer;

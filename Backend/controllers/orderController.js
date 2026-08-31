@@ -87,19 +87,19 @@ const buildOrderItemsAndTotals = async (items) => {
   return { orderItems, itemsTotal, totalWeightKg };
 };
 
-const assertSingleSeller = (orderItems) => {
+// ✅ UPDATED — orders are no longer restricted to a single seller. Every
+// item already carries its own `seller` (items[].seller), which is what
+// per-seller views (getSellerOrders, sellerConfirmOrder, dashboards, etc.)
+// filter on — none of that depends on this value.
+//
+// `order.seller` on the top-level document is kept only as a convenience
+// "primary seller" reference for the common single-seller-cart case; for
+// multi-seller carts it's left null rather than picking one seller
+// arbitrarily. Nothing here blocks or requires splitting the checkout.
+const resolvePrimarySeller = (orderItems) => {
   const sellerIds = new Set(
     orderItems.map((i) => i.seller && i.seller.toString()).filter(Boolean),
   );
-  if (sellerIds.size > 1) {
-    const err = new Error(
-      "Your cart contains items from multiple sellers. Please check out " +
-        "items from one seller at a time — this helps us keep order " +
-        "tracking accurate.",
-    );
-    err.status = 400;
-    throw err;
-  }
   return sellerIds.size === 1 ? [...sellerIds][0] : null;
 };
 
@@ -256,14 +256,8 @@ export const createRazorpayOrder = async (req, res) => {
         .json({ success: false, message: e.message });
     }
 
-    let sellerId;
-    try {
-      sellerId = assertSingleSeller(orderItems);
-    } catch (e) {
-      return res
-        .status(e.status || 400)
-        .json({ success: false, message: e.message });
-    }
+    // ✅ Carts/orders may span any number of sellers — no restriction here.
+    const sellerId = resolvePrimarySeller(orderItems);
 
     let shippingFee;
     try {
@@ -516,14 +510,8 @@ export const createCODOrder = async (req, res) => {
         .json({ success: false, message: e.message });
     }
 
-    let sellerId;
-    try {
-      sellerId = assertSingleSeller(orderItems);
-    } catch (e) {
-      return res
-        .status(e.status || 400)
-        .json({ success: false, message: e.message });
-    }
+    // ✅ Carts/orders may span any number of sellers — no restriction here.
+    const sellerId = resolvePrimarySeller(orderItems);
 
     let shippingFee;
     try {

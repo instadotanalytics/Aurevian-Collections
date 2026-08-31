@@ -13,6 +13,7 @@ import {
   getProductsByPlacement,
   getPlacementCounts,
   getRelevantProducts,
+  searchProducts,
   // ❌ REMOVE these - they were removed from the controller
   // getProductsByCollection,
   // getProductsByCategory,
@@ -36,6 +37,7 @@ router.get("/test", (req, res) => {
     routes: {
       test: "/test",
       categories: "/categories",
+      search: "/search?q=",
       products: "/",
       limitStatus: "/limit-status",
       bulkUpload: "/bulk-upload",
@@ -66,6 +68,24 @@ router.get(
   getProductCategories,
 );
 console.log("  📌 /categories route registered ✅");
+
+// ============================================
+// ✅ NEW: PUBLIC ROUTE - Product Search
+// Two-segment-safe: "/search" is a literal single-segment path, so it
+// must (and does) sit before the "/:slug" catch-all below, exactly
+// like "/categories". Query params: q (required), page, limit,
+// categoryId (optional), sort (optional — same values as
+// /placements/:placement: price-low, price-high, newest, popular).
+// ============================================
+router.get(
+  "/search",
+  (req, res, next) => {
+    console.log("🔍 /search route called with query:", req.query);
+    next();
+  },
+  searchProducts,
+);
+console.log("  📌 /search route registered ✅ (public)");
 
 // ============================================
 // PUBLIC ROUTES - Storefront Pages
@@ -237,9 +257,9 @@ console.log("  📌 DELETE /:id route registered ✅");
 // ============================================
 // PUBLIC ROUTES - Catch-all (MUST BE LAST!)
 // No protectSeller here — this is the customer-facing storefront route.
-// It's registered after /limit-status, /placements/counts, etc. so those
-// exact-path routes are matched first; only unmatched single-segment
-// GETs fall through to this one.
+// It's registered after /limit-status, /placements/counts, /search,
+// etc. so those exact-path routes are matched first; only unmatched
+// single-segment GETs fall through to this one.
 // ============================================
 router.get(
   "/:slug",
@@ -255,6 +275,7 @@ console.log("✅ jewelleryProductRoutes fully configured");
 console.log("📌 Available routes in this router (in order):");
 console.log("  ✅ GET  /test (public)");
 console.log("  ✅ GET  /categories (public)");
+console.log("  ✅ GET  /search?q= (public)");
 console.log("  ✅ GET  /placements/:placement (public)");
 console.log("  ✅ GET  /:productId/relevant (public)");
 console.log("  🔒 GET  /limit-status (protected)");

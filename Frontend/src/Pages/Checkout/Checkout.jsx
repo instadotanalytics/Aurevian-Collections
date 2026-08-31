@@ -1,7 +1,7 @@
 // src/Pages/Checkout/Checkout.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import {
   FiLock,
@@ -12,6 +12,7 @@ import {
   FiPackage,
   FiCheck,
   FiZap,
+  FiMapPin,
 } from "react-icons/fi";
 import { FaRupeeSign } from "react-icons/fa";
 import Header from "../Layout/Header/Header";
@@ -21,6 +22,7 @@ import pmStyles from "./PaymentMethod.module.css";
 import * as orderApi from "../../api/orderApi.js";
 import * as cartApi from "../../api/cartApi.js";
 import * as paymentSettingsApi from "../../api/paymentSettingsApi.js";
+import { fetchProfile } from "../../redux/slices/profileSlice.js";
 
 const loadRazorpayScript = () =>
   new Promise((resolve) => {
@@ -56,10 +58,34 @@ const generateClientRequestId = () => {
   return `crid_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
 };
 
+// ✅ NEW — maps a saved profile address (Backend/models/User.js addressSchema
+// shape: recipientName/phone/house/apartment/street/landmark/area/city/
+// state/country/pincode) onto the shippingAddress shape this page/Order
+// schema already uses (fullName/phone/addressLine1/addressLine2/city/
+// state/pincode). Pure/local — never sent anywhere on its own.
+const mapSavedAddressToShipping = (addr) => ({
+  fullName: addr.recipientName || "",
+  phone: addr.phone || "",
+  addressLine1: [addr.house, addr.apartment].filter(Boolean).join(", "),
+  addressLine2: [addr.street, addr.landmark, addr.area]
+    .filter(Boolean)
+    .join(", "),
+  city: addr.city || "",
+  state: addr.state || "",
+  pincode: addr.pincode || "",
+});
+
 const Checkout = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
+
+  // ✅ NEW — same persisted addresses the Profile → Address tab reads/writes
+  // (state.profile.addresses), so Profile, Overview, and Checkout are all
+  // looking at one source of truth instead of three separate ones.
+  const savedAddresses = useSelector((state) => state.profile.addresses) || [];
+  const profileState = useSelector((state) => state.profile.profile);
 
   const items = location.state?.items || [];
 
@@ -72,6 +98,11 @@ const Checkout = () => {
     state: "",
     pincode: "",
   });
+
+  // ✅ NEW — which saved address (if any) is currently selected. Null means
+  // the person is entering an address manually / hasn't picked one yet.
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const autoSelectedRef = useRef(false);
 
   // "online" | "cod"
   const [paymentMethod, setPaymentMethod] = useState("online");
@@ -105,6 +136,40 @@ const Checkout = () => {
       navigate("/cart");
     }
   }, [items, navigate]);
+
+  // ✅ NEW — always refresh saved addresses on mount so edits/deletes made
+  // in Profile → Address are reflected here even if this page was already
+  // loaded, or if the person navigates straight to /checkout without
+  // visiting Profile first in this session.
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(fetchProfile());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
+
+  // ✅ NEW — auto-select the default saved address (or the only one, if
+  // there's exactly one) the first time addresses become available. Only
+  // runs once per mount so it never fights with a manual selection or
+  // overwrites in-progress manual edits.
+  useEffect(() => {
+    if (autoSelectedRef.current) return;
+    if (!savedAddresses.length) return;
+
+    autoSelectedRef.current = true;
+    const preferred =
+      savedAddresses.find((a) => a.isDefault) || savedAddresses[0];
+    setSelectedAddressId(preferred._id);
+    setAddress((prev) => ({
+      ...prev,
+      ...mapSavedAddressToShipping(preferred),
+    }));
+  }, [savedAddresses]);
+
+  const handleSelectSavedAddress = (addr) => {
+    setSelectedAddressId(addr._id);
+    setAddress((prev) => ({ ...prev, ...mapSavedAddressToShipping(addr) }));
+  };
 
   // ✅ Fetch COD availability — backend is the single source of truth.
   // COD is never shown just because we assume it's available.
@@ -228,7 +293,13 @@ const Checkout = () => {
     (paymentMethod === "cod" ? codAvailable && codWithinRange : true);
 
   const handleChange = (e) => {
-    setAddress((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    // Manually editing any address field means the person has deviated
+    // from the saved address they picked (or is entering a fresh one) —
+    // stop treating a saved-address card as "selected" so the UI doesn't
+    // show it highlighted while the fields no longer match it.
+    setSelectedAddressId(null);
+    setAddress((prev) => ({ ...prev, [name]: value }));
   };
 
   const renderShippingLine = () => {
@@ -536,6 +607,70 @@ const Checkout = () => {
             <h3>
               <FiTruck /> Shipping Address
             </h3>
+
+            {/* ============================================
+                SAVED ADDRESSES — ✅ NEW
+                Same persisted addresses as Profile → Address / Overview.
+                Selecting one fills the fields below; the person can still
+                edit those fields afterward, and whatever is in `address`
+                at submit time is what's sent to the order API.
+                ============================================ */}
+            {savedAddresses.length > 0 && (
+              <div className={styles.savedAddressSection}>
+                <p className={styles.savedAddressHeading}>
+                  <FiMapPin size={14} /> Use a saved address
+                </p>
+                <div className={styles.savedAddressList}>
+                  {savedAddresses.map((addr) => (
+                    <label
+                      key={addr._id}
+                      className={`${styles.savedAddressCard} ${
+                        selectedAddressId === addr._id
+                          ? styles.savedAddressCardActive
+                          : ""
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="savedAddress"
+                        checked={selectedAddressId === addr._id}
+                        onChange={() => handleSelectSavedAddress(addr)}
+                      />
+                      <span className={styles.savedAddressBody}>
+                        <span className={styles.savedAddressTop}>
+                          <strong>{addr.recipientName}</strong>
+                          {addr.isDefault && (
+                            <span className={styles.savedAddressDefaultBadge}>
+                              Default
+                            </span>
+                          )}
+                        </span>
+                        <span className={styles.savedAddressText}>
+                          {addr.house}
+                          {addr.apartment ? `, ${addr.apartment}` : ""}
+                          {addr.street ? `, ${addr.street}` : ""}
+                          {addr.area ? `, ${addr.area}` : ""}, {addr.city},{" "}
+                          {addr.state} - {addr.pincode}
+                        </span>
+                        <span className={styles.savedAddressPhone}>
+                          {addr.phone}
+                        </span>
+                      </span>
+                      {selectedAddressId === addr._id && (
+                        <FiCheck
+                          size={14}
+                          className={styles.savedAddressCheck}
+                        />
+                      )}
+                    </label>
+                  ))}
+                </div>
+                <p className={styles.savedAddressHint}>
+                  Selecting a saved address fills in the fields below — you can
+                  still edit them before placing your order.
+                </p>
+              </div>
+            )}
 
             <div className={styles.formRow}>
               <input
