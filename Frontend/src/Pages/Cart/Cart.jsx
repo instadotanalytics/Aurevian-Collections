@@ -114,7 +114,7 @@ const Cart = () => {
             <div className={styles.emptyIconWrapper}>
               <FiShoppingBag className={styles.emptyIcon} />
             </div>
-            <h2 className={styles.emptyTitle}>Your Shopping Bag is Empty</h2>
+            <h2 className={styles.emptyTitle}>There are no items in your cart</h2>
             <p className={styles.emptyDescription}>
               Discover our curated collection of fine jewellery
             </p>

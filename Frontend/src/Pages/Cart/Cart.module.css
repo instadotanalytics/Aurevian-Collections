@@ -621,9 +621,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 80px 40px;
-  background: #ffffff;
-  border: 1px solid var(--border);
+  padding: 80px;
   text-align: center;
 }
 
@@ -631,11 +629,9 @@
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: var(--cream);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 24px;
 }
 
 .emptyIcon {
