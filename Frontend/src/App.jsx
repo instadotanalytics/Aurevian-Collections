@@ -5,7 +5,7 @@
 
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { HelmetProvider } from "react-helmet-async";
 import { fetchCurrentUser } from "./redux/slices/authSlice.js";
@@ -18,7 +18,6 @@ import SuperAdminRoute from "./Components/common/SuperAdminRoute.jsx";
 import SellerRoute from "./Components/common/SellerRoute.jsx";
 import Navbar from "./Pages/Layout/Header/Navbar.jsx";
 import LoadingScreen from "./Components/common/LoadingScreen.jsx";
-import HomePageSkeleton from "./Components/common/HomePageSkeleton/HomePageSkeleton.jsx";
 
 // ============================================
 // SELLER AUTH PROVIDER
@@ -164,7 +163,6 @@ const LayoutWithoutHeader = ({ children }) => <>{children}</>;
 
 const App = () => {
   const dispatch = useDispatch();
-  const location = useLocation();
   const { isLoading, isAuthenticated } = useSelector((state) => state.auth);
   const { isLoading: superAdminLoading, isAuthenticated: isSuperAdmin } =
     useSelector((state) => state.superAdmin);
@@ -198,17 +196,7 @@ const App = () => {
     superAdminLoading ||
     (sellerLoading && localStorage.getItem("sellerAccessToken"))
   ) {
-    // ✅ Home Page gets its own layout-matching skeleton instead of the
-    // generic spinner, since this gate is what was blocking Home with
-    // "Loading..." on first paint. Every other route is unaffected.
-    if (location.pathname === "/") {
-      return <HomePageSkeleton />;
-    }
-    // ✅ FIXED: LoadingScreen's prop is `message`, not `text` — the old
-    // call passed `text` here, which the component silently ignored,
-    // always falling back to its own default "Loading..." regardless
-    // of what was passed in.
-    return <LoadingScreen message="Loading your account..." />;
+    return <LoadingScreen text="Loading your account..." />;
   }
 
   return (
