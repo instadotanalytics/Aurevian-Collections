@@ -529,7 +529,7 @@
 }
 
 /* ==========================================================
-   PRODUCT CARD
+   PRODUCT CARD - MATCHING COLLECTIONS
    ========================================================== */
 .productCard {
   background: var(--cream-card);
@@ -578,19 +578,21 @@
   transform: scale(1.05);
 }
 
-/* ---------- Discount Badge ---------- */
+/* Discount Badge - White background, dark text */
 .badge {
   position: absolute;
   top: 12px;
   left: 12px;
   background: #ffffff;
-  color: #000000;
+  color: var(--sale);
   font-size: 11px;
   letter-spacing: 1px;
   padding: 5px 10px;
   border-radius: 20px;
   z-index: 2;
+  text-transform: lowercase;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .productCatOverlay {
@@ -598,14 +600,15 @@
   bottom: 12px;
   left: 12px;
   z-index: 2;
-  font-size: 10.5px;
-  letter-spacing: 1.5px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--sale);
+  color: var(--gold-deep);
   background: rgba(255, 255, 255, 0.85);
-  padding: 5px 10px;
+  padding: 4px 10px;
   border-radius: 20px;
   backdrop-filter: blur(2px);
+  font-weight: 600;
 }
 
 .wishlistActions {
@@ -657,7 +660,7 @@
 }
 
 /* ==========================================================
-   PRODUCT INFO
+   PRODUCT INFO - MATCHING COLLECTIONS
    ========================================================== */
 .productInfo {
   position: relative;
@@ -665,17 +668,18 @@
   flex-direction: column;
   flex: 1;
   justify-content: space-between;
+  padding: 0;
 }
 
 /* ==========================================================
    PRODUCT NAME - SINGLE LINE WITH ELLIPSIS
    ========================================================== */
 .productName {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
   font-family: "Jost", sans-serif;
   color: var(--ink);
-  padding: 10px 15px 5px;
+  padding: 10px 12px 5px;
   /* Single line with ellipsis */
   display: block;
   white-space: nowrap;
@@ -684,17 +688,24 @@
   max-width: 100%;
 }
 
+.productName:hover {
+  text-decoration: none;
+  color: var(--gold-deep);
+}
+
 .productPrice {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 14px;
+  font-size: 13px;
+  flex-wrap: wrap;
   padding: 0 15px 6px;
 }
 
 .priceNow {
   color: var(--sale);
   font-weight: 600;
+  font-size: 15px;
 }
 
 .priceOld {
@@ -704,7 +715,7 @@
 }
 
 /* ==========================================================
-   ADD TO CART BUTTON
+   ADD TO CART BUTTON - MATCHING COLLECTIONS
    ========================================================== */
 .addToCartBtn {
   display: flex;
@@ -1074,7 +1085,7 @@
 }
 
 /* ==========================================================
-   RESPONSIVE
+   RESPONSIVE - MATCHING COLLECTIONS
    ========================================================== */
 @media (max-width: 1024px) {
   .filterSidebar {
@@ -1161,19 +1172,16 @@
     border-radius: 0;
   }
   .productCatOverlay {
-    font-size: 8.5px;
-    letter-spacing: 1px;
-    padding: 4px 8px;
-    bottom: 8px;
-    left: 8px;
+    font-size: 9px;
+    padding: 3px 8px;
+    bottom: 10px;
+    left: 10px;
   }
   
-  /* Mobile Product Name - Single line with ellipsis */
+  /* Mobile Product Name - Matching Collections */
   .productName {
-    font-size: 12px;
-    margin: 0;
-    line-height: 1.3;
-    padding: 8px 10px 2px;
+    font-size: 13px;
+    padding: 8px 12px 2px;
     display: block;
     white-space: nowrap;
     overflow: hidden;
@@ -1182,39 +1190,42 @@
   }
   
   .productPrice {
-    gap: 6px;
+    gap: 8px;
     font-size: 12px;
     flex-wrap: wrap;
-    padding: 0 10px;
+    padding: 0 12px 4px;
   }
   .priceNow {
-    font-size: 12px;
+    font-size: 13px;
   }
   .priceOld {
-    font-size: 10px;
+    font-size: 11px;
   }
+  
   .badge {
-    top: 8px;
-    left: 8px;
-    font-size: 9px;
-    padding: 3px 8px;
-    background-color: var(--sale);
-    color: white;
+    top: 10px;
+    left: 10px;
+    font-size: 10px;
+    padding: 4px 8px;
   }
   .wishlistActions {
-    top: 8px;
-    right: 8px;
-    gap: 6px;
-    opacity: 1;
-    transform: none;
+    top: 10px;
+    right: 10px;
   }
   .wishlistActions button {
-    width: 26px;
-    height: 26px;
-    font-size: 12px;
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
   }
-  .wishlistActions button:hover {
-    font-size: 15px;
+  .addToCartBtn {
+    font-size: 10px;
+    min-height: 36px;
+    padding: 9px 0;
+    width: calc(100% + 24px);
+    margin: 8px -12px -4px;
+  }
+  .addToCartBtn svg {
+    font-size: 13px;
   }
   .toolbar {
     margin-bottom: 18px;
@@ -1284,10 +1295,10 @@
     font-size: 14px;
   }
   
-  /* Smaller Mobile Product Name - Single line with ellipsis */
+  /* Smaller Mobile Product Name - Matching Collections */
   .productName {
     font-size: 12px;
-    padding: 6px 10px 2px;
+    padding: 6px 12px 2px;
     display: block;
     white-space: nowrap;
     overflow: hidden;
@@ -1297,8 +1308,8 @@
   
   .productPrice {
     font-size: 12px;
-    gap: 4px;
-    padding: 0 10px;
+    gap: 8px;
+    padding: 0 12px 4px;
   }
   .priceNow {
     font-size: 12px;
@@ -1306,10 +1317,30 @@
   .priceOld {
     font-size: 10px;
   }
+  
+  .badge {
+    top: 8px;
+    left: 8px;
+    font-size: 9px;
+    padding: 3px 7px;
+    background-color: var(--sale);
+    color: white;
+  }
+  .productCatOverlay {
+    font-size: 8px;
+    padding: 2px 7px;
+    bottom: 8px;
+    left: 8px;
+  }
+  .wishlistActions button {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
   .addToCartBtn {
     font-size: 10px;
     min-height: 32px;
-    padding: 8px 0px;
+    padding: 10px 0px 12px;
     width: calc(100% + 20px);
     margin: 6px -10px -4px;
   }
@@ -1322,14 +1353,19 @@
   .addToCartBtn {
     font-size: 10px;
     min-height: 28px;
-    padding: 8px 0;
+    padding: 5px 0;
     width: calc(100% + 16px);
     margin: 4px -8px -4px;
   }
-  
   .productName {
     font-size: 12px;
     padding: 4px 8px 2px;
+  }
+  .priceNow {
+    font-size: 12px;
+  }
+  .priceOld {
+    font-size: 10px;
   }
 }
 

@@ -1466,7 +1466,7 @@
   .productAddBtn {
     font-size: 10px;
     min-height: 36px;
-    padding: 9px 0;
+    padding: 8px 0; /* Changed from 9px to 8px */
     width: calc(100% + 24px);
     margin: 8px -12px -4px;
   }
@@ -1614,9 +1614,9 @@
   }
 
   .productAddBtn {
-    font-size: 9px;
+    font-size: 10px;
     min-height: 32px;
-    padding: 7px 0;
+    padding: 8px 0px; /* Changed from 7px to 8px */
     width: calc(100% + 20px);
     margin: 6px -10px -4px;
   }
@@ -1714,22 +1714,22 @@
   }
 
   .productName {
-    font-size: 11px;
+    font-size: 12px;
     padding: 4px 8px 2px;
   }
 
   .productCurrentPrice {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .productOriginalPrice {
-    font-size: 9px;
+    font-size: 10px;
   }
 
   .productAddBtn {
-    font-size: 8px;
+    font-size: 10px;
     min-height: 28px;
-    padding: 5px 0;
+    padding: 8px 0; /* Changed from 5px to 8px */
     width: calc(100% + 16px);
     margin: 4px -8px -4px;
   }

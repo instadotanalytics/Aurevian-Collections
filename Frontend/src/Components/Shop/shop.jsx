@@ -780,18 +780,7 @@ export default function Shop() {
                     </div>
                   )}
 
-                {filteredProducts.length === 0 &&
-                  !isSearchMode &&
-                  !selectedCategoryId && (
-                    <div className={styles.emptyState}>
-                      <div className={styles.emptyStateIcon}>🛍️</div>
-                      <h3>No Products Available</h3>
-                      <p>
-                        We're currently updating our collection. Please check
-                        back later!
-                      </p>
-                    </div>
-                  )}
+                
 
                 {filteredProducts.length > 0 && (
                   <div className={styles.productGrid}>
