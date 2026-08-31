@@ -105,6 +105,7 @@ const ROUTES = {
   HOME: "/",
   ABOUT: "/about",
   SHOP: "/shop",
+  SEARCH: "/search",
   EARRINGS: "/shop/earrings",
   GIFTS: "/gifts",
   COLLECTIONS: "/collections",
@@ -275,6 +276,16 @@ const App = () => {
   ============================================ */}
             <Route path="/shop" element={<Shop />} />
             <Route path="/shop/:categorySlug" element={<Shop />} />
+
+            {/* ============================================
+                  ✅ NEW: DEDICATED SEARCH RESULTS ROUTE - WITH HEADER
+                  URL: /search?q=<query>
+                  Reuses the Shop component — it already fully implements
+                  search mode (results grid, filters, sorting, pagination,
+                  empty state, and the "You Might Also Like" section), so
+                  this is a pure routing addition, no duplicate page.
+                  ============================================ */}
+            <Route path={ROUTES.SEARCH} element={<Shop />} />
 
             {/* ============================================
                   GIFTS ROUTE - WITH HEADER

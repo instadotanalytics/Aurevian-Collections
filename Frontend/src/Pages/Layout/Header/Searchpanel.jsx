@@ -26,36 +26,53 @@ const API_URL =
  * One implementation shared by:
  *   - the desktop icon-triggered dropdown  (variant="dropdown")
  *   - the mobile drawer's inline search     (variant="inline")
+ *   - the persistent inline search bar on the /search results page
+ *     (variant="inline", pre-filled via `initialQuery`)
  *
  * It owns all search behaviour (history, live suggestions, keyboard
- * nav, highlighting) so Header.jsx only has to render <SearchPanel />
- * in each spot and stays focused on layout/nav — nothing about the
- * existing header markup, icon, or animations changes.
+ * nav, highlighting) so callers only render <SearchPanel /> and stay
+ * focused on layout — nothing about the existing header markup,
+ * icon, or animations changes.
  *
- * ✅ LIVE SEARCH is now wired to the real backend:
+ * ✅ LIVE SEARCH is wired to the real backend:
  *   GET /api/seller/products/search?q=<query>&limit=8
- * instead of filtering the local `searchableProducts` array. Requests
- * are debounced (300ms), cancelled via AbortController on every new
- * keystroke so a slow older response can never overwrite a newer one,
- * and skipped entirely for an empty/whitespace-only query.
+ * Requests are debounced (300ms), cancelled via AbortController on
+ * every new keystroke so a slow older response can never overwrite a
+ * newer one, and skipped entirely for an empty/whitespace-only query.
+ *
+ * ✅ ENTER-KEY SEMANTICS (important, matches standard e-commerce UX):
+ *   - Enter with NO suggestion highlighted (the normal case — user
+ *     just typed and pressed Enter) => commits a full-text SEARCH,
+ *     never opens a single product. The typed text is treated purely
+ *     as a query string, never as a product id/slug.
+ *   - Enter while a suggestion IS highlighted (via ArrowUp/ArrowDown,
+ *     an explicit selection) or a suggestion is clicked with the
+ *     mouse => opens that ONE product's detail page. This is the only
+ *     path that can navigate to /product/:slug.
  *
  * Props
  * ------
- * styles         CSS module object from Header.module.css (reused so
- *                every visual token — gold, ivory, radii, shadows —
- *                stays identical to the rest of the header).
- * isOpen         Whether this panel is currently visible. Used to
- *                reset transient state and (re)load history.
- * onClose        Called on Escape / after a successful search.
- * onSearchSubmit Optional override for what happens on a full-text
- *                search commit (Enter / search icon / chip click).
- *                If not provided, SearchPanel navigates to
- *                /shop?search=<query> itself using the existing Shop
- *                page, which now understands that query param.
+ * styles         CSS module object (Header.module.css, reused so
+ *                every visual token stays identical wherever this is
+ *                embedded — header dropdown, mobile drawer, or the
+ *                search results page).
+ * isOpen         Whether this panel is currently visible/active. Used
+ *                to (re)load history and reset transient state.
+ * onClose        Called on Escape / after a successful search (no-op
+ *                is fine for a permanently-visible inline bar).
+ * onSearchSubmit Called with the committed query string on a full-text
+ *                search (Enter with nothing highlighted, the search
+ *                icon/submit button, or clicking a history/popular/
+ *                trending chip). If not provided, SearchPanel
+ *                navigates to /search?q=<query> itself.
  * variant        "dropdown" | "inline" — toggles a couple of layout
  *                classes; all behaviour is identical either way.
  * autoFocus      Whether the <input> should grab focus when opened.
  * inputId        Optional id, for label/aria association.
+ * initialQuery   Optional starting value for the input — used so the
+ *                search bar on the /search results page shows the
+ *                term the person actually searched for, instead of
+ *                starting empty.
  * ------------------------------------------------------------------
  */
 const SearchPanel = ({
@@ -66,9 +83,10 @@ const SearchPanel = ({
   variant = "dropdown",
   autoFocus = false,
   inputId = "aurevian-search-input",
+  initialQuery = "",
 }) => {
   const navigate = useNavigate();
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
   const [history, setHistory] = useState([]);
   const inputRef = useRef(null);
 
@@ -180,30 +198,34 @@ const SearchPanel = ({
 
   // ✅ Full-text search commit — Enter with nothing highlighted, the
   // search icon/submit button, or clicking a history/popular/trending
-  // chip. Opens the existing Shop listing page filtered by ?search=.
+  // chip. This is the ONLY path used when the person just types a
+  // query and hits Enter: it always goes to the dedicated search
+  // results page with the raw query string, and NEVER treats that
+  // text as a product id/slug.
   const commitTextSearch = (term) => {
     const trimmed = (term || "").trim().replace(/\s+/g, " ");
     if (!trimmed) return;
     setHistory(addSearchHistory(trimmed));
-    setQuery("");
+    setQuery(trimmed);
     reset();
     if (onSearchSubmit) {
       onSearchSubmit(trimmed);
     } else {
-      navigate(`/shop?search=${encodeURIComponent(trimmed)}`);
+      navigate(`/search?q=${encodeURIComponent(trimmed)}`);
     }
     onClose && onClose();
   };
 
   // ✅ Opening one specific live-suggestion product — goes straight to
   // its existing product detail page instead of the listing page.
+  // Only reachable via an explicit selection: mouse click, or Enter
+  // while a suggestion is keyboard-highlighted.
   const openProduct = (product) => {
     if (!product?.productSlug) return;
     const trimmed = query.trim();
     if (trimmed) {
       setHistory(addSearchHistory(trimmed));
     }
-    setQuery("");
     reset();
     navigate(`/product/${product.productSlug}`);
     onClose && onClose();
@@ -211,6 +233,9 @@ const SearchPanel = ({
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
+    // Only an EXPLICITLY highlighted suggestion (via ArrowUp/ArrowDown)
+    // opens a single product on Enter. Plain typing + Enter (the
+    // default, activeIndex === -1) always commits a full-text search.
     if (activeIndex >= 0 && navigableList[activeIndex]) {
       const active = navigableList[activeIndex];
       if (isTyping) {

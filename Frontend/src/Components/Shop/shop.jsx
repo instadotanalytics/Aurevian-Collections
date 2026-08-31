@@ -22,16 +22,33 @@ import { LuSlidersHorizontal } from "react-icons/lu";
 import { FiHeart } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 import { FiPackage, FiCreditCard, FiPhoneCall } from "react-icons/fi";
-import { FiShoppingBag, FiCheck, FiChevronDown, FiX } from "react-icons/fi";
+import {
+  FiShoppingBag,
+  FiCheck,
+  FiChevronDown,
+  FiX,
+  FiSearch,
+} from "react-icons/fi";
 import {
   fetchProductsByPlacement,
   searchProducts,
+  fetchRelevantProducts,
 } from "../../redux/slices/storefrontProductSlice";
 import { addItemToCart } from "../../redux/slices/cartSlice";
 import {
   toggleWishlistItem,
   fetchWishlist,
 } from "../../redux/slices/wishlistSlice";
+// ✅ Reused (not duplicated) — same Header.module.css classes the
+// header's own search bar uses, so the plain search input on the
+// results page matches Aurevian styling exactly. NOTE: SearchPanel
+// itself is intentionally NOT rendered here anymore — that component
+// always shows its autocomplete/suggestions list, which was pushing
+// the actual product grid below the fold on the /search page. The
+// results page now uses a plain form (below) that only submits a
+// query; autocomplete suggestions remain exactly as before everywhere
+// else (header dropdown + mobile drawer).
+import headerStyles from "../../Pages/Layout/Header/Header.module.css";
 
 const API_URL =
   import.meta.env.VITE_API_URL ||
@@ -105,10 +122,14 @@ export default function Shop() {
   const [searchParams] = useSearchParams();
   const { categorySlug } = useParams();
 
-  // ✅ NEW: search mode — driven entirely by the ?search= query param so
-  // typing in the header, hitting Enter/the search icon, refreshing the
-  // page, and browser back/forward all resolve to the same state.
-  const rawSearchQuery = searchParams.get("search") || "";
+  // ✅ search mode — driven entirely by the ?q= query param (this is
+  // the canonical param for the dedicated /search?q=<query> route;
+  // ?search= is still read as a fallback so any previously-shared
+  // /shop?search= links keep working) so typing in the header,
+  // hitting Enter/the search icon, refreshing the page, and browser
+  // back/forward all resolve to the same state.
+  const rawSearchQuery =
+    searchParams.get("q") || searchParams.get("search") || "";
   const searchQuery = rawSearchQuery.trim().replace(/\s+/g, " ");
   const isSearchMode = searchQuery.length > 0;
 
@@ -133,12 +154,32 @@ export default function Shop() {
   const [categoryError, setCategoryError] = useState(null);
   const loaderRef = useRef(null);
 
-  // ✅ NEW: race-condition guard — every load() call stamps a fresh id
+  // ✅ race-condition guard — every load() call stamps a fresh id
   // here; if a newer load() has started by the time an older one's
   // request resolves, the older one's result is discarded instead of
   // clobbering state. Covers rapid search-query changes as well as
   // rapid category/sort/filter changes.
   const requestIdRef = useRef(0);
+
+  // ✅ "You Might Also Like" recommendations for the search results
+  // page. Reuses the existing public getRelevantProducts endpoint/thunk
+  // (the same one that powers the product-detail-page "You May Also
+  // Like" section) — seeded from the first search result, so the
+  // recommendation stays contextually related to what the user
+  // searched for, with zero new backend surface area.
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
+  const [isLoadingRecommendations, setIsLoadingRecommendations] =
+    useState(false);
+  const recommendationRequestIdRef = useRef(0);
+
+  // ✅ NEW: plain (non-suggestion) search input for the persistent bar
+  // at the top of the /search results page — kept in sync with the
+  // URL's query so it always reflects what's actually being searched,
+  // including when navigating from one search term straight to another.
+  const [resultsSearchInput, setResultsSearchInput] = useState(searchQuery);
+  useEffect(() => {
+    setResultsSearchInput(searchQuery);
+  }, [searchQuery]);
 
   // Mobile filter sheet
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -203,8 +244,8 @@ export default function Shop() {
   }, [categories, categorySlug, searchParams, isResolvingSlug]);
 
   // Fetch products (infinite scroll) — branches between the normal
-  // placement-based browse flow and the ✅ NEW search flow depending
-  // on whether ?search= is present in the URL.
+  // placement-based browse flow and the search flow depending
+  // on whether ?q= (or legacy ?search=) is present in the URL.
   useEffect(() => {
     const load = async () => {
       const requestId = ++requestIdRef.current;
@@ -283,7 +324,7 @@ export default function Shop() {
     searchQuery,
   ]);
 
-  // Reset on filter change (✅ NEW: also resets when the search query changes,
+  // Reset on filter change (also resets when the search query changes,
   // including when it's cleared — e.g. navigating back to /shop)
   useEffect(() => {
     setPage(1);
@@ -439,14 +480,24 @@ export default function Shop() {
     setSort("");
     setBudgetFilter("all");
     setPromotionFilter("all");
-    // Navigate to base shop page when clearing filters (also clears ?search=)
+    // Navigate to base shop page when clearing filters (also clears the search)
     navigate("/shop");
   };
 
-  // ✅ NEW: dedicated "clear search" action — restores normal shop
+  // ✅ dedicated "clear search" action — restores normal shop
   // browsing without resetting the other filters the user may have set.
   const clearSearch = () => {
     navigate("/shop");
+  };
+
+  // ✅ NEW: submit handler for the plain top-of-results search bar —
+  // navigates to a (possibly new) /search?q= query. No suggestions,
+  // no product-detail navigation — always the search results page.
+  const handleResultsSearchSubmit = (e) => {
+    e.preventDefault();
+    const trimmed = resultsSearchInput.trim().replace(/\s+/g, " ");
+    if (!trimmed) return;
+    navigate(`/search?q=${encodeURIComponent(trimmed)}`);
   };
 
   const openMobileFilter = () => {
@@ -510,6 +561,49 @@ export default function Shop() {
     });
   }, [allProducts, budgetFilter, promotionFilter]);
 
+  // ✅ Seed product for the recommendation section — the first result
+  // of the current search. Stable across additional infinite-scroll
+  // pages since new results are appended after it, never prepended,
+  // so this only changes when the search itself (or its first
+  // result) changes — not on every scroll-load.
+  const searchSeedProductId = useMemo(() => {
+    if (!isSearchMode || filteredProducts.length === 0) return null;
+    return filteredProducts[0]._id;
+  }, [isSearchMode, filteredProducts]);
+
+  // ✅ Fetch "You Might Also Like" recommendations whenever the search
+  // seed product changes. Skipped entirely outside search mode or
+  // when there's no seed (no search results) — no data, no attempted
+  // recommendation, matching the requirement to only recommend
+  // "whenever the available data allows it".
+  useEffect(() => {
+    if (!searchSeedProductId) {
+      setRecommendedProducts([]);
+      setIsLoadingRecommendations(false);
+      return;
+    }
+
+    const requestId = ++recommendationRequestIdRef.current;
+    setIsLoadingRecommendations(true);
+
+    dispatch(
+      fetchRelevantProducts({ productId: searchSeedProductId, limit: 4 }),
+    )
+      .unwrap()
+      .then((result) => {
+        if (requestId !== recommendationRequestIdRef.current) return;
+        setRecommendedProducts(result.products || []);
+      })
+      .catch(() => {
+        if (requestId !== recommendationRequestIdRef.current) return;
+        setRecommendedProducts([]);
+      })
+      .finally(() => {
+        if (requestId !== recommendationRequestIdRef.current) return;
+        setIsLoadingRecommendations(false);
+      });
+  }, [searchSeedProductId, dispatch]);
+
   const skeletonItems = Array.from({ length: 10 }, (_, i) => i);
 
   // Get the category name for display
@@ -519,18 +613,156 @@ export default function Shop() {
     return category ? category.label : "Category";
   };
 
+  // ✅ Shared product card renderer — used by both the main results
+  // grid and the "You Might Also Like" recommendations section below,
+  // so the card markup, wishlist/cart behaviour, and styling exist in
+  // exactly one place instead of being duplicated.
+  const renderProductCard = (p) => {
+    const inCart = isInCart(p._id);
+    const inWishlist = isInWishlist(p._id);
+    const addingToCart = cartLoadingId === p._id;
+    const displayName = truncateName(p.productName);
+
+    return (
+      <div className={styles.productCard} key={p._id}>
+        <Link to={`/product/${p.productSlug}`} className={styles.productMedia}>
+          {p.pricing?.salePrice && p.pricing?.originalPrice && (
+            <span className={styles.badge}>
+              {Math.round(
+                ((p.pricing.originalPrice - p.pricing.salePrice) /
+                  p.pricing.originalPrice) *
+                  100,
+              )}
+              % off
+            </span>
+          )}
+          <span className={styles.productCatOverlay}>
+            {p.category?.categoryData?.label || "Uncategorized"}
+          </span>
+          <div className={styles.wishlistActions}>
+            <button
+              type="button"
+              className={`${styles.wishlistBtn} ${
+                inWishlist ? styles.wishlistBtnActive : ""
+              }`}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleToggleWishlist(p._id);
+              }}
+              aria-label={
+                inWishlist ? "Remove from wishlist" : "Add to wishlist"
+              }
+            >
+              {inWishlist ? <FaHeart /> : <FiHeart />}
+            </button>
+          </div>
+          <img
+            src={p.thumbnail?.url || "/placeholder-image.jpg"}
+            alt={p.productName}
+            className={styles.productImage}
+            onError={(e) => {
+              e.target.src = "/placeholder-image.jpg";
+            }}
+          />
+        </Link>
+        <div className={styles.productInfo}>
+          <Link
+            to={`/product/${p.productSlug}`}
+            className={styles.productName}
+            title={p.productName}
+          >
+            {displayName}
+          </Link>
+          <div className={styles.productPrice}>
+            <span className={styles.priceNow}>
+              ₹
+              {(
+                p.pricing?.salePrice || p.pricing?.originalPrice
+              )?.toLocaleString() || "0"}
+            </span>
+            {p.pricing?.salePrice && p.pricing?.originalPrice && (
+              <span className={styles.priceOld}>
+                ₹{p.pricing.originalPrice.toLocaleString()}
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            className={`${styles.addToCartBtn} ${
+              inCart ? styles.addToCartBtnActive : ""
+            }`}
+            onClick={() => handleAddToCart(p._id)}
+            disabled={inCart || addingToCart}
+          >
+            {inCart ? (
+              <>
+                <FiCheck /> Added to Cart
+              </>
+            ) : (
+              <>
+                <FiShoppingBag /> {addingToCart ? "Adding..." : "Add to Cart"}
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className={styles.page}>
       <Header />
       <div className={styles.mainContent}>
-        {/* Hero Section */}
-        <section className={styles.pageTitle}>
-          <img
-            src={shopHero}
-            alt="Shop Collection"
-            className={styles.heroImage}
-          />
-        </section>
+        {/* ✅ FIXED: Top-of-page area for search mode. This now renders
+            ONLY a plain, non-suggestion search input (no dropdown/
+            autocomplete list, no "Search results for..." heading) so
+            the actual product grid appears immediately below it —
+            nothing pushes the results down or requires scrolling.
+            Autocomplete/suggestions behavior is completely unchanged
+            everywhere else (header search icon + mobile drawer still
+            use SearchPanel exactly as before). */}
+        {isSearchMode ? (
+          <section
+            className={styles.pageTitle}
+            style={{ padding: "24px 24px 16px" }}
+          >
+            <form
+              className={headerStyles.searchForm}
+              role="search"
+              onSubmit={handleResultsSearchSubmit}
+              style={{ maxWidth: 480 }}
+            >
+              <FiSearch
+                className={headerStyles.searchFormLeadIcon}
+                aria-hidden="true"
+              />
+              <input
+                type="text"
+                value={resultsSearchInput}
+                onChange={(e) => setResultsSearchInput(e.target.value)}
+                placeholder="Search for earrings, necklaces, rings..."
+                aria-label="Search products"
+                autoComplete="off"
+              />
+              <button
+                type="submit"
+                className={headerStyles.searchIconBtn}
+                aria-label="Submit search"
+              >
+                <FiSearch />
+              </button>
+            </form>
+          </section>
+        ) : (
+          <section className={styles.pageTitle}>
+            <img
+              src={shopHero}
+              alt="Shop Collection"
+              className={styles.heroImage}
+            />
+          </section>
+        )}
 
         {/* Shop Content */}
         <div className={styles.shopWrap}>
@@ -612,7 +844,7 @@ export default function Shop() {
                     onChange={() => {
                       setSelectedCategoryId(c.id);
                       // Only rewrite the URL to a category slug when not
-                      // searching — while searching we keep ?search= and
+                      // searching — while searching we keep ?q= and
                       // just apply categoryId as an in-place filter.
                       if (!isSearchMode) {
                         const slug = generateSlugFromLabel(c.label);
@@ -749,7 +981,7 @@ export default function Shop() {
             {/* Products */}
             {!isInitialLoading && !categoryError && (
               <>
-                {/* ✅ NEW: No-results state specific to an active search */}
+                {/* No-results state specific to an active search */}
                 {filteredProducts.length === 0 && isSearchMode && (
                   <div className={styles.emptyState}>
                     <div className={styles.emptyStateIcon}>🔍</div>
@@ -784,109 +1016,7 @@ export default function Shop() {
 
                 {filteredProducts.length > 0 && (
                   <div className={styles.productGrid}>
-                    {filteredProducts.map((p) => {
-                      const inCart = isInCart(p._id);
-                      const inWishlist = isInWishlist(p._id);
-                      const addingToCart = cartLoadingId === p._id;
-                      const displayName = truncateName(p.productName);
-
-                      return (
-                        <div className={styles.productCard} key={p._id}>
-                          <Link
-                            to={`/product/${p.productSlug}`}
-                            className={styles.productMedia}
-                          >
-                            {p.pricing?.salePrice &&
-                              p.pricing?.originalPrice && (
-                                <span className={styles.badge}>
-                                  {Math.round(
-                                    ((p.pricing.originalPrice -
-                                      p.pricing.salePrice) /
-                                      p.pricing.originalPrice) *
-                                      100,
-                                  )}
-                                  % off
-                                </span>
-                              )}
-                            <span className={styles.productCatOverlay}>
-                              {p.category?.categoryData?.label ||
-                                "Uncategorized"}
-                            </span>
-                            <div className={styles.wishlistActions}>
-                              <button
-                                type="button"
-                                className={`${styles.wishlistBtn} ${
-                                  inWishlist ? styles.wishlistBtnActive : ""
-                                }`}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  handleToggleWishlist(p._id);
-                                }}
-                                aria-label={
-                                  inWishlist
-                                    ? "Remove from wishlist"
-                                    : "Add to wishlist"
-                                }
-                              >
-                                {inWishlist ? <FaHeart /> : <FiHeart />}
-                              </button>
-                            </div>
-                            <img
-                              src={p.thumbnail?.url || "/placeholder-image.jpg"}
-                              alt={p.productName}
-                              className={styles.productImage}
-                              onError={(e) => {
-                                e.target.src = "/placeholder-image.jpg";
-                              }}
-                            />
-                          </Link>
-                          <div className={styles.productInfo}>
-                            <Link
-                              to={`/product/${p.productSlug}`}
-                              className={styles.productName}
-                              title={p.productName}
-                            >
-                              {displayName}
-                            </Link>
-                            <div className={styles.productPrice}>
-                              <span className={styles.priceNow}>
-                                ₹
-                                {(
-                                  p.pricing?.salePrice ||
-                                  p.pricing?.originalPrice
-                                )?.toLocaleString() || "0"}
-                              </span>
-                              {p.pricing?.salePrice &&
-                                p.pricing?.originalPrice && (
-                                  <span className={styles.priceOld}>
-                                    ₹{p.pricing.originalPrice.toLocaleString()}
-                                  </span>
-                                )}
-                            </div>
-                            <button
-                              type="button"
-                              className={`${styles.addToCartBtn} ${
-                                inCart ? styles.addToCartBtnActive : ""
-                              }`}
-                              onClick={() => handleAddToCart(p._id)}
-                              disabled={inCart || addingToCart}
-                            >
-                              {inCart ? (
-                                <>
-                                  <FiCheck /> Added to Cart
-                                </>
-                              ) : (
-                                <>
-                                  <FiShoppingBag />{" "}
-                                  {addingToCart ? "Adding..." : "Add to Cart"}
-                                </>
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
+                    {filteredProducts.map((p) => renderProductCard(p))}
                   </div>
                 )}
               </>
@@ -917,6 +1047,52 @@ export default function Shop() {
             )}
           </main>
         </div>
+
+        {/* ✅ "You Might Also Like" — contextual recommendation shown at
+            the bottom of the search results page. Only rendered in
+            search mode, once the main results have finished loading,
+            and only when there's a seed result to base it on. Reuses
+            the same product card markup/styles and product grid
+            layout as the main results above; the underlying data
+            comes from the existing public getRelevantProducts
+            endpoint. */}
+        {isSearchMode &&
+          !isInitialLoading &&
+          !categoryError &&
+          (isLoadingRecommendations || recommendedProducts.length > 0) && (
+            <section style={{ padding: "0 24px 40px" }}>
+              <h2
+                style={{
+                  fontSize: "1.4rem",
+                  fontWeight: 600,
+                  margin: "8px 0 20px",
+                }}
+              >
+                You Might Also Like
+              </h2>
+              {isLoadingRecommendations ? (
+                <div className={styles.skeletonGrid}>
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div
+                      className={styles.skeletonCard}
+                      key={`rec-skeleton-${i}`}
+                    >
+                      <div className={styles.skeletonImage} />
+                      <div className={styles.skeletonText} />
+                      <div
+                        className={`${styles.skeletonText} ${styles.skeletonTextShort}`}
+                      />
+                      <div className={styles.skeletonBtn} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.productGrid}>
+                  {recommendedProducts.map((p) => renderProductCard(p))}
+                </div>
+              )}
+            </section>
+          )}
 
         {/* Perks Section */}
         <section className={styles.perks}>
