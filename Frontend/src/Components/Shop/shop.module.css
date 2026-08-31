@@ -1154,7 +1154,7 @@
   .addToCartBtn {
     font-size: 10px;
     min-height: 36px;
-    padding: 9px 0;
+    padding: 8px 0;
     width: calc(100% + 24px);
     margin: 8px -12px -4px;
   }
@@ -1192,7 +1192,7 @@
   }
 
   .productName {
-    font-size: 12.5px;
+    font-size: 12px;
     margin: 4px 0 6px;
     line-height: 1.3;
     display: -webkit-box;
@@ -1209,8 +1209,12 @@
     padding: 0 10px;
   }
 
+  .priceNow {
+    font-size: 12px;
+  }
+
   .priceOld {
-    font-size: 10.5px;
+    font-size: 10px;
   }
 
   .badge {
@@ -1250,7 +1254,7 @@
   }
 
   .productPrice {
-    font-size: 11px;
+    font-size: 12px;
     gap: 6px;
     margin-bottom: 4px;
   }
@@ -1352,28 +1356,28 @@
   }
 
   .productName {
-    font-size: 11px;
+    font-size: 12px;
     padding: 6px 10px 2px;
   }
 
   .productPrice {
-    font-size: 10px;
+    font-size: 12px;
     gap: 4px;
     padding: 0 10px;
   }
 
   .priceNow {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .priceOld {
-    font-size: 9px;
+    font-size: 10px;
   }
 
   .addToCartBtn {
-    font-size: 9px;
+    font-size: 10px;
     min-height: 32px;
-    padding: 10px 0px 12px;
+    padding: 8px 0px;
     width: calc(100% + 20px);
     margin: 6px -10px -4px;
   }
@@ -1385,9 +1389,9 @@
 
 @media (max-width: 380px) {
   .addToCartBtn {
-    font-size: 8px;
+    font-size: 10px;
     min-height: 28px;
-    padding: 5px 0;
+    padding: 8px 0;
     width: calc(100% + 16px);
     margin: 4px -8px -4px;
   }
