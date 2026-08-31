@@ -835,6 +835,18 @@ jewelleryProductSchema.index({ "labels.featured": 1, "labels.trending": 1 });
 jewelleryProductSchema.index({ createdAt: -1 });
 jewelleryProductSchema.index({ "reviews.averageRating": -1 });
 jewelleryProductSchema.index({ "seller.sellerId": 1, status: 1 });
+// ✅ NEW: Compound index to support the public search endpoint's base
+// filter (status: "Published", isActive: true) — this is applied
+// FIRST in every search query, before the regex field matching, so
+// Mongo can use this index to prune down to only public/live products
+// before doing the (necessarily unindexed) substring regex scan.
+// Note: a true partial-substring, match-from-anywhere search (e.g.
+// "cot" matching "Cotton", a bare single letter matching many
+// products) cannot be served by a MongoDB $text index — $text tokenizes
+// into whole (stemmed) words and cannot match a substring inside a
+// word. Regex is the correct tool for this requirement; this compound
+// index is what keeps it from scanning archived/inactive/draft products.
+jewelleryProductSchema.index({ status: 1, isActive: 1 });
 
 // ============================================
 // ✅ FIXED: MIDDLEWARE - PRE-VALIDATE HOOK
