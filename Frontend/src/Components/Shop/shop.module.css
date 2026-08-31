@@ -1353,7 +1353,7 @@
   .addToCartBtn {
     font-size: 10px;
     min-height: 28px;
-    padding: 5px 0;
+    padding: 8px 0;
     width: calc(100% + 16px);
     margin: 4px -8px -4px;
   }
