@@ -134,7 +134,7 @@
   height: 40px;
   border-radius: 50%;
   border: 1px solid #d4c9b8;
-  /* background: #ffffff; */
+  background: transparent;
   color: var(--ink);
   display: flex;
   align-items: center;
