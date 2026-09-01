@@ -165,8 +165,8 @@ const Contact = () => {
 
   <motion.h1 variants={fadeUp} className={styles.heroTitle}>
     Let’s Start
-A {" "}
-  <span className={styles.heroTitleAccent}>Conversation</span>
+A Conversation
+  {/* <span className={styles.heroTitleAccent}>Conversation</span> */}
   </motion.h1>
 
   <motion.p variants={fadeUp} className={styles.heroSub}>
