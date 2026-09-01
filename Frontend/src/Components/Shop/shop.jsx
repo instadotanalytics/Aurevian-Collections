@@ -39,15 +39,6 @@ import {
   toggleWishlistItem,
   fetchWishlist,
 } from "../../redux/slices/wishlistSlice";
-// ✅ Reused (not duplicated) — same Header.module.css classes the
-// header's own search bar uses, so the plain search input on the
-// results page matches Aurevian styling exactly. NOTE: SearchPanel
-// itself is intentionally NOT rendered here anymore — that component
-// always shows its autocomplete/suggestions list, which was pushing
-// the actual product grid below the fold on the /search page. The
-// results page now uses a plain form (below) that only submits a
-// query; autocomplete suggestions remain exactly as before everywhere
-// else (header dropdown + mobile drawer).
 import headerStyles from "../../Pages/Layout/Header/Header.module.css";
 
 const API_URL =
@@ -122,12 +113,7 @@ export default function Shop() {
   const [searchParams] = useSearchParams();
   const { categorySlug } = useParams();
 
-  // ✅ search mode — driven entirely by the ?q= query param (this is
-  // the canonical param for the dedicated /search?q=<query> route;
-  // ?search= is still read as a fallback so any previously-shared
-  // /shop?search= links keep working) so typing in the header,
-  // hitting Enter/the search icon, refreshing the page, and browser
-  // back/forward all resolve to the same state.
+  // ✅ search mode — driven entirely by the ?q= query param
   const rawSearchQuery =
     searchParams.get("q") || searchParams.get("search") || "";
   const searchQuery = rawSearchQuery.trim().replace(/\s+/g, " ");
@@ -154,28 +140,16 @@ export default function Shop() {
   const [categoryError, setCategoryError] = useState(null);
   const loaderRef = useRef(null);
 
-  // ✅ race-condition guard — every load() call stamps a fresh id
-  // here; if a newer load() has started by the time an older one's
-  // request resolves, the older one's result is discarded instead of
-  // clobbering state. Covers rapid search-query changes as well as
-  // rapid category/sort/filter changes.
+  // ✅ race-condition guard
   const requestIdRef = useRef(0);
 
-  // ✅ "You Might Also Like" recommendations for the search results
-  // page. Reuses the existing public getRelevantProducts endpoint/thunk
-  // (the same one that powers the product-detail-page "You May Also
-  // Like" section) — seeded from the first search result, so the
-  // recommendation stays contextually related to what the user
-  // searched for, with zero new backend surface area.
+  // ✅ "You Might Also Like" recommendations
   const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [isLoadingRecommendations, setIsLoadingRecommendations] =
     useState(false);
   const recommendationRequestIdRef = useRef(0);
 
-  // ✅ NEW: plain (non-suggestion) search input for the persistent bar
-  // at the top of the /search results page — kept in sync with the
-  // URL's query so it always reflects what's actually being searched,
-  // including when navigating from one search term straight to another.
+  // ✅ plain search input for the persistent bar
   const [resultsSearchInput, setResultsSearchInput] = useState(searchQuery);
   useEffect(() => {
     setResultsSearchInput(searchQuery);
@@ -215,7 +189,6 @@ export default function Shop() {
   useEffect(() => {
     if (isResolvingSlug || categories.length === 0) return;
 
-    // First check if we have a query parameter
     const queryCategoryId = searchParams.get("category");
 
     if (queryCategoryId) {
@@ -223,9 +196,7 @@ export default function Shop() {
       return;
     }
 
-    // If we have a slug in the URL (e.g., /shop/earrings)
     if (categorySlug) {
-      // Find the category by matching slug with the label
       const matchingCategory = categories.find((c) => {
         const categorySlugFromLabel = generateSlugFromLabel(c.label);
         return categorySlugFromLabel === categorySlug;
@@ -234,7 +205,6 @@ export default function Shop() {
       if (matchingCategory) {
         setSelectedCategoryId(matchingCategory.id);
       } else {
-        // If no matching category found, try to find by ID (for backward compatibility)
         const idMatch = categories.find((c) => c.id === categorySlug);
         if (idMatch) {
           setSelectedCategoryId(idMatch.id);
@@ -243,9 +213,7 @@ export default function Shop() {
     }
   }, [categories, categorySlug, searchParams, isResolvingSlug]);
 
-  // Fetch products (infinite scroll) — branches between the normal
-  // placement-based browse flow and the search flow depending
-  // on whether ?q= (or legacy ?search=) is present in the URL.
+  // Fetch products (infinite scroll)
   useEffect(() => {
     const load = async () => {
       const requestId = ++requestIdRef.current;
@@ -283,7 +251,6 @@ export default function Shop() {
           ).unwrap();
         }
 
-        // A newer request has already started — ignore this stale result.
         if (requestId !== requestIdRef.current) return;
 
         const fetched = result.products || [];
@@ -324,8 +291,7 @@ export default function Shop() {
     searchQuery,
   ]);
 
-  // Reset on filter change (also resets when the search query changes,
-  // including when it's cleared — e.g. navigating back to /shop)
+  // Reset on filter change
   useEffect(() => {
     setPage(1);
     setAllProducts([]);
@@ -362,7 +328,7 @@ export default function Shop() {
     }
   }, [dispatch, isAuthenticated]);
 
-  /* Close mobile sort dropdown on outside click */
+  // Close mobile sort dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -376,7 +342,7 @@ export default function Shop() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  /* Close desktop sidebar sort dropdown on outside click */
+  // Close desktop sidebar sort dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -480,19 +446,13 @@ export default function Shop() {
     setSort("");
     setBudgetFilter("all");
     setPromotionFilter("all");
-    // Navigate to base shop page when clearing filters (also clears the search)
     navigate("/shop");
   };
 
-  // ✅ dedicated "clear search" action — restores normal shop
-  // browsing without resetting the other filters the user may have set.
   const clearSearch = () => {
     navigate("/shop");
   };
 
-  // ✅ NEW: submit handler for the plain top-of-results search bar —
-  // navigates to a (possibly new) /search?q= query. No suggestions,
-  // no product-detail navigation — always the search results page.
   const handleResultsSearchSubmit = (e) => {
     e.preventDefault();
     const trimmed = resultsSearchInput.trim().replace(/\s+/g, " ");
@@ -561,21 +521,13 @@ export default function Shop() {
     });
   }, [allProducts, budgetFilter, promotionFilter]);
 
-  // ✅ Seed product for the recommendation section — the first result
-  // of the current search. Stable across additional infinite-scroll
-  // pages since new results are appended after it, never prepended,
-  // so this only changes when the search itself (or its first
-  // result) changes — not on every scroll-load.
+  // ✅ Seed product for the recommendation section
   const searchSeedProductId = useMemo(() => {
     if (!isSearchMode || filteredProducts.length === 0) return null;
     return filteredProducts[0]._id;
   }, [isSearchMode, filteredProducts]);
 
-  // ✅ Fetch "You Might Also Like" recommendations whenever the search
-  // seed product changes. Skipped entirely outside search mode or
-  // when there's no seed (no search results) — no data, no attempted
-  // recommendation, matching the requirement to only recommend
-  // "whenever the available data allows it".
+  // ✅ Fetch "You Might Also Like" recommendations
   useEffect(() => {
     if (!searchSeedProductId) {
       setRecommendedProducts([]);
@@ -613,10 +565,7 @@ export default function Shop() {
     return category ? category.label : "Category";
   };
 
-  // ✅ Shared product card renderer — used by both the main results
-  // grid and the "You Might Also Like" recommendations section below,
-  // so the card markup, wishlist/cart behaviour, and styling exist in
-  // exactly one place instead of being duplicated.
+  // ✅ Shared product card renderer
   const renderProductCard = (p) => {
     const inCart = isInCart(p._id);
     const inWishlist = isInWishlist(p._id);
@@ -714,56 +663,6 @@ export default function Shop() {
     <div className={styles.page}>
       <Header />
       <div className={styles.mainContent}>
-        {/* ✅ FIXED: Top-of-page area for search mode. This now renders
-            ONLY a plain, non-suggestion search input (no dropdown/
-            autocomplete list, no "Search results for..." heading) so
-            the actual product grid appears immediately below it —
-            nothing pushes the results down or requires scrolling.
-            Autocomplete/suggestions behavior is completely unchanged
-            everywhere else (header search icon + mobile drawer still
-            use SearchPanel exactly as before). */}
-        {isSearchMode ? (
-          <section
-            className={styles.pageTitle}
-            style={{ padding: "24px 24px 16px" }}
-          >
-            <form
-              className={headerStyles.searchForm}
-              role="search"
-              onSubmit={handleResultsSearchSubmit}
-              style={{ maxWidth: 480 }}
-            >
-              <FiSearch
-                className={headerStyles.searchFormLeadIcon}
-                aria-hidden="true"
-              />
-              <input
-                type="text"
-                value={resultsSearchInput}
-                onChange={(e) => setResultsSearchInput(e.target.value)}
-                placeholder="Search for earrings, necklaces, rings..."
-                aria-label="Search products"
-                autoComplete="off"
-              />
-              <button
-                type="submit"
-                className={headerStyles.searchIconBtn}
-                aria-label="Submit search"
-              >
-                <FiSearch />
-              </button>
-            </form>
-          </section>
-        ) : (
-          <section className={styles.pageTitle}>
-            <img
-              src={shopHero}
-              alt="Shop Collection"
-              className={styles.heroImage}
-            />
-          </section>
-        )}
-
         {/* Shop Content */}
         <div className={styles.shopWrap}>
           {/* Mobile Filter Toggle Button */}
@@ -843,9 +742,6 @@ export default function Shop() {
                     checked={selectedCategoryId === c.id}
                     onChange={() => {
                       setSelectedCategoryId(c.id);
-                      // Only rewrite the URL to a category slug when not
-                      // searching — while searching we keep ?q= and
-                      // just apply categoryId as an in-place filter.
                       if (!isSearchMode) {
                         const slug = generateSlugFromLabel(c.label);
                         navigate(`/shop/${slug}`);
@@ -918,10 +814,10 @@ export default function Shop() {
                 {isInitialLoading
                   ? "Loading..."
                   : isSearchMode
-                    ? `Showing ${filteredProducts.length} result${
-                        filteredProducts.length === 1 ? "" : "s"
-                      } for "${searchQuery}"`
-                    : `Showing ${filteredProducts.length} results for ${getCategoryName()}`}
+                  ? `Showing ${filteredProducts.length} result${
+                      filteredProducts.length === 1 ? "" : "s"
+                    } for "${searchQuery}"`
+                  : `Showing ${filteredProducts.length} results for ${getCategoryName()}`}
               </span>
               {isSearchMode && !isInitialLoading && (
                 <button
@@ -981,7 +877,6 @@ export default function Shop() {
             {/* Products */}
             {!isInitialLoading && !categoryError && (
               <>
-                {/* No-results state specific to an active search */}
                 {filteredProducts.length === 0 && isSearchMode && (
                   <div className={styles.emptyState}>
                     <div className={styles.emptyStateIcon}>🔍</div>
@@ -1011,8 +906,6 @@ export default function Shop() {
                       </Link>
                     </div>
                   )}
-
-                
 
                 {filteredProducts.length > 0 && (
                   <div className={styles.productGrid}>
@@ -1048,35 +941,21 @@ export default function Shop() {
           </main>
         </div>
 
-        {/* ✅ "You Might Also Like" — contextual recommendation shown at
-            the bottom of the search results page. Only rendered in
-            search mode, once the main results have finished loading,
-            and only when there's a seed result to base it on. Reuses
-            the same product card markup/styles and product grid
-            layout as the main results above; the underlying data
-            comes from the existing public getRelevantProducts
-            endpoint. */}
+        {/* ✅ "You Might Also Like" — Fixed with proper styling */}
         {isSearchMode &&
           !isInitialLoading &&
           !categoryError &&
           (isLoadingRecommendations || recommendedProducts.length > 0) && (
-            <section style={{ padding: "0 24px 40px" }}>
-              <h2
-                style={{
-                  fontSize: "1.4rem",
-                  fontWeight: 600,
-                  margin: "8px 0 20px",
-                }}
-              >
-                You Might Also Like
-              </h2>
+            <section className={styles.recommendationSection}>
+              <div className={styles.recommendationHeader}>
+                <h2 className={styles.recommendationTitle}>
+                  You Might Also Like
+                </h2>
+              </div>
               {isLoadingRecommendations ? (
-                <div className={styles.skeletonGrid}>
+                <div className={styles.recommendationGrid}>
                   {Array.from({ length: 4 }).map((_, i) => (
-                    <div
-                      className={styles.skeletonCard}
-                      key={`rec-skeleton-${i}`}
-                    >
+                    <div className={styles.skeletonCard} key={`rec-skeleton-${i}`}>
                       <div className={styles.skeletonImage} />
                       <div className={styles.skeletonText} />
                       <div
@@ -1087,7 +966,7 @@ export default function Shop() {
                   ))}
                 </div>
               ) : (
-                <div className={styles.productGrid}>
+                <div className={styles.recommendationGrid}>
                   {recommendedProducts.map((p) => renderProductCard(p))}
                 </div>
               )}

@@ -42,15 +42,6 @@
 }
 
 /* Hero */
-.pageTitle {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  border-bottom: 1px solid var(--line);
-  animation: titleFadeUp 0.6s ease both;
-  background: #efe7d4;
-}
-
 .heroImage {
   display: block;
   width: 100%;
@@ -68,12 +59,6 @@
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pageTitle {
-    animation: none;
   }
 }
 
@@ -1085,6 +1070,44 @@
 }
 
 /* ==========================================================
+   RECOMMENDATION SECTION - "You Might Also Like"
+   ========================================================== */
+.recommendationSection {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 40px 40px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.recommendationHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--cream-line);
+}
+
+.recommendationTitle {
+  font-family: "Playfair Display", serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+}
+
+.recommendationGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.recommendationGrid .productCard {
+  min-height: 310px;
+}
+
+/* ==========================================================
    RESPONSIVE - MATCHING COLLECTIONS
    ========================================================== */
 @media (max-width: 1024px) {
@@ -1104,6 +1127,14 @@
   .addToCartBtn {
     width: calc(100% + 32px);
     margin: 10px -16px -4px;
+  }
+  
+  .recommendationSection {
+    padding: 0 20px 32px;
+  }
+  .recommendationGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
   }
 }
 
@@ -1141,6 +1172,14 @@
     width: calc(100% + 28px);
     margin: 10px -14px -4px;
   }
+  
+  .recommendationGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .recommendationTitle {
+    font-size: 20px;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1150,6 +1189,20 @@
     padding: 8px 0;
     width: calc(100% + 24px);
     margin: 8px -12px -4px;
+  }
+  
+  .recommendationSection {
+    padding: 0 14px 24px;
+  }
+  .recommendationGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .recommendationTitle {
+    font-size: 18px;
+  }
+  .recommendationGrid .productCard {
+    min-height: 260px;
   }
 }
 
@@ -1347,6 +1400,13 @@
   .addToCartBtn svg {
     font-size: 13px;
   }
+  
+  .recommendationGrid {
+    gap: 10px;
+  }
+  .recommendationGrid .productCard {
+    min-height: 240px;
+  }
 }
 
 @media (max-width: 380px) {
@@ -1366,6 +1426,13 @@
   }
   .priceOld {
     font-size: 10px;
+  }
+  
+  .recommendationGrid {
+    gap: 8px;
+  }
+  .recommendationGrid .productCard {
+    min-height: 220px;
   }
 }
 
