@@ -1,12 +1,15 @@
+// backend/controllers/shippingController.js
+
 import Order from "../models/Order.js";
 import Cart from "../models/Cart.js";
 import JewelleryProduct from "../models/JewelleryProduct.js";
+import Seller from "../models/Seller.js"; // ✅ NEW
 import shiprocketService, {
   ShiprocketError,
 } from "../services/shiprocketService.js";
 
 // ============================================
-// SOCKET.IO IMPORTS (ADDED)
+// SOCKET.IO IMPORTS
 // ============================================
 import { emitShippingUpdated } from "../socket/orderEvents.js";
 
@@ -14,9 +17,6 @@ const UNIT_TO_KG = { g: 0.001, kg: 1, oz: 0.0283495, lb: 0.453592 };
 
 // ============================================
 // STATUS MAPPING
-// Shiprocket's current_status text isn't a fixed enum in practice, so this
-// matches on keywords rather than exact strings. Extend this if you see
-// statuses in production that fall through to "processing".
 // ============================================
 const TERMINAL_ORDER_STATUSES = ["delivered", "cancelled", "returned"];
 
@@ -57,52 +57,104 @@ function isOwnerOrAdmin(order, req) {
 }
 
 // ============================================
-// ✅ NEW: PICKUP LOCATION VALIDATION
-// Shiprocket's Create Order API silently "succeeds" (HTTP 200, no
-// order_id/shipment_id) when pickup_location doesn't match a nickname
-// registered in Settings > Pickup Addresses. This catches that BEFORE
-// wasting a create call, and tells you exactly what's registered.
+// ✅ NEW: RESOLVE THE SELLER THAT OWNS AN ORDER'S ITEMS
+// Shipment creation is one Shiprocket shipment per Aurevian order, which
+// only works if every item in that order belongs to the same seller (this
+// was already implicitly assumed by the old single-global-address code —
+// it summed every item's weight into one payload). We now make that
+// assumption explicit and fail loudly instead of silently picking one
+// seller's address for a mixed-seller order.
 // ============================================
-let pickupLocationCache = { names: null, fetchedAt: 0 };
+async function resolveOrderSeller(order) {
+  const sellerIds = [
+    ...new Set(
+      (order.items || []).map((i) => i.seller?.toString()).filter(Boolean),
+    ),
+  ];
+
+  if (sellerIds.length === 0) {
+    const err = new Error(
+      "Order has no seller assigned to its items — cannot determine a pickup address",
+    );
+    err.status = 400;
+    throw err;
+  }
+
+  if (sellerIds.length > 1) {
+    const err = new Error(
+      "This order contains items from multiple sellers. Multi-seller shipment splitting is not supported yet — split this order by seller before shipping it.",
+    );
+    err.status = 400;
+    throw err;
+  }
+
+  const seller = await Seller.findById(sellerIds[0]).select(
+    "pickupAddress storeInfo email",
+  );
+  if (!seller) {
+    const err = new Error("Seller not found for this order's items");
+    err.status = 404;
+    throw err;
+  }
+
+  return seller;
+}
+
+// ============================================
+// ✅ NEW: PICKUP LOCATION VALIDATION (PER SELLER)
+// Confirms the seller's saved pickup address was actually registered with
+// Shiprocket (isRegisteredWithShiprocket + a nickname on the seller doc),
+// and — where possible — cross-checks that nickname still exists on the
+// Shiprocket account. Replaces the old single env-var check.
+// ============================================
+let pickupLocationsCache = { names: null, fetchedAt: 0 };
 const PICKUP_CACHE_TTL_MS = 10 * 60 * 1000;
 
-async function assertPickupLocationExists(pickupLocation) {
+async function getRegisteredPickupLocationNames() {
   const now = Date.now();
   const cacheStale =
-    !pickupLocationCache.names ||
-    now - pickupLocationCache.fetchedAt > PICKUP_CACHE_TTL_MS;
+    !pickupLocationsCache.names ||
+    now - pickupLocationsCache.fetchedAt > PICKUP_CACHE_TTL_MS;
 
   if (cacheStale) {
     try {
       const result = await shiprocketService.getPickupLocations();
       const addresses = result?.data?.shipping_address || [];
-      pickupLocationCache = {
+      pickupLocationsCache = {
         names: addresses.map((a) => a.pickup_location),
         fetchedAt: now,
       };
     } catch (err) {
-      // If we can't even fetch pickup locations (auth/network issue),
-      // don't block the flow on this check — let the actual create call
-      // surface the real error as before. This is a fast-fail optimization,
-      // not the only line of defense.
+      // Can't verify right now (network/auth issue) — don't block the
+      // flow on this check. The real create call will surface the real
+      // error if the nickname truly doesn't exist.
       console.error(
         "⚠️ Could not fetch Shiprocket pickup locations for validation:",
         err.message,
       );
-      return;
+      return null;
     }
   }
 
-  if (
-    pickupLocationCache.names &&
-    !pickupLocationCache.names.includes(pickupLocation)
-  ) {
+  return pickupLocationsCache.names;
+}
+
+async function assertSellerPickupLocationRegistered(seller) {
+  const nickname = seller.pickupAddress?.shiprocketPickupLocationName;
+
+  if (!seller.pickupAddress?.isRegisteredWithShiprocket || !nickname) {
     const err = new Error(
-      `SHIPROCKET_PICKUP_LOCATION "${pickupLocation}" does not match any pickup ` +
-        `location nickname registered in Shiprocket. This is a config value, not ` +
-        `a street address. Registered pickup locations on this account: ` +
-        `${pickupLocationCache.names.length ? pickupLocationCache.names.join(", ") : "(none found — add one in Shiprocket > Settings > Pickup Addresses)"}. ` +
-        `Update SHIPROCKET_PICKUP_LOCATION in .env to match one exactly.`,
+      "This seller has not set up a pickup address yet. Ask the seller to add one in Seller Dashboard > Pickup Address before shipping their orders.",
+    );
+    err.status = 400;
+    throw err;
+  }
+
+  const names = await getRegisteredPickupLocationNames();
+  if (names && !names.includes(nickname)) {
+    const err = new Error(
+      `SELLER_PICKUP_LOCATION "${nickname}" is not registered with Shiprocket (it may have been removed from the Shiprocket dashboard). ` +
+        `Ask the seller to re-save their pickup address in Seller Dashboard > Pickup Address so it can be re-registered.`,
     );
     err.status = 500;
     throw err;
@@ -110,10 +162,7 @@ async function assertPickupLocationExists(pickupLocation) {
 }
 
 // ============================================
-// ✅ NEW: WEIGHT HELPER — single source of truth for "how much does this
-// product weigh, in kg, per unit". Shared by shipment creation and rate
-// quoting so the two never drift apart. Falls back to 50g/unit only for
-// legacy documents saved before `shipping.weight` was a required field.
+// WEIGHT HELPER
 // ============================================
 export function getItemWeightKg(product) {
   const weightVal = product?.shipping?.weight?.value;
@@ -123,8 +172,7 @@ export function getItemWeightKg(product) {
 }
 
 // ============================================
-// ✅ NEW: PINCODE VALIDATION
-// Required, numeric, exactly 6 digits. Nothing else passes.
+// PINCODE VALIDATION
 // ============================================
 export function isValidIndianPincode(pincode) {
   const str = String(pincode ?? "").trim();
@@ -132,9 +180,7 @@ export function isValidIndianPincode(pincode) {
 }
 
 // ============================================
-// ✅ NEW: typed error for "Shiprocket has no courier for this pincode" —
-// distinct from a network/API failure so callers can show the right
-// message ("delivery unavailable" vs "try again").
+// SHIPPING UNAVAILABLE ERROR
 // ============================================
 export class ShippingUnavailableError extends Error {
   constructor(
@@ -147,13 +193,15 @@ export class ShippingUnavailableError extends Error {
 }
 
 // ============================================
-// ✅ NEW: CALCULATE SHIPPING RATE
-// The ONLY place a shipping charge is ever produced. No random numbers,
-// no fixed tiers. Called by the live checkout quote AND by order creation
-// (which always recomputes here — it never trusts a client-supplied fee).
+// CALCULATE SHIPPING RATE
+// ✅ CHANGED — pickupPincode is now a REQUIRED parameter supplied by the
+// caller from the relevant seller's saved pickup address. There is no
+// env-var fallback: if the caller can't determine a seller pickup pincode,
+// it must not call this function.
 // ============================================
 export async function calculateShippingRate({
   deliveryPincode,
+  pickupPincode,
   weightKg,
   paymentMethod, // "cod" | "prepaid"
 }) {
@@ -163,10 +211,11 @@ export async function calculateShippingRate({
     throw err;
   }
 
-  const pickupPincode = process.env.SHIPROCKET_PICKUP_PINCODE;
-  if (!pickupPincode) {
-    const err = new Error("Shipping service is not fully configured");
-    err.status = 500;
+  if (!isValidIndianPincode(pickupPincode)) {
+    const err = new Error(
+      "A valid seller pickup pincode is required to calculate shipping",
+    );
+    err.status = 400;
     throw err;
   }
 
@@ -190,8 +239,6 @@ export async function calculateShippingRate({
     ? couriers.find((c) => c.courier_company_id === recommendedId)
     : null;
 
-  // Fall back to the cheapest available courier if there's no recommendation
-  // or it doesn't appear in the filtered (cod-aware) list.
   if (!chosen) {
     chosen = couriers.reduce(
       (min, c) => (Number(c.rate) < Number(min.rate) ? c : min),
@@ -209,13 +256,7 @@ export async function calculateShippingRate({
 }
 
 // ============================================
-// ✅ NEW: INTERNAL HELPER — ASSIGN AWB FOR AN ORDER
-// Extracted so it can be called two ways: (1) automatically, right after
-// createShipmentForOrder succeeds, so the full pipeline (order -> shipment
-// -> courier -> AWB) completes without a manual admin step, and (2) from
-// the POST /api/shipping/assign-awb endpoint, for retries if step (1)
-// failed or an admin wants to force a specific courier. Idempotent: a no-op
-// if an AWB already exists on the order.
+// INTERNAL HELPER — ASSIGN AWB FOR AN ORDER
 // ============================================
 async function assignAWBForOrder(order, courierId) {
   if (order.shipping?.awbCode) {
@@ -232,8 +273,6 @@ async function assignAWBForOrder(order, courierId) {
   const awbData = result?.response?.data;
 
   if (!awbData?.awb_code) {
-    // Same "200 OK but no actual data" failure mode as order creation —
-    // don't treat this as success just because the HTTP call didn't throw.
     const reason =
       awbData?.message ||
       result?.message ||
@@ -255,18 +294,19 @@ async function assignAWBForOrder(order, courierId) {
   order.shipping.lastSyncedAt = new Date();
   await order.save();
 
-  // ✅ SOCKET.IO
   emitShippingUpdated(order);
 
   return { alreadyAssigned: false, awbCode: awbData.awb_code };
 }
 
 // ============================================
-// INTERNAL HELPER — CREATE SHIPROCKET SHIPMENT FOR AN AUREVIAN ORDER
-// Called from orderController after a Razorpay payment is verified, or
-// immediately after a COD order is placed. Idempotent: if the order already
-// has a shiprocketOrderId, it returns the existing data instead of creating
-// a duplicate shipment.
+// CREATE SHIPROCKET SHIPMENT FOR AN AUREVIAN ORDER
+// ✅ CHANGED — idempotent AND resumable:
+//  - If a shipment already exists, never recreate it (unchanged
+//    behavior) — but if AWB assignment didn't complete last time,
+//    finish that step now instead of silently no-op'ing forever.
+//  - Tracks order.shipping.syncStatus/syncError/lastSyncAttemptAt/
+//    syncedAt throughout, independent of fulfillmentStatus.
 // ============================================
 export async function createShipmentForOrder(orderId) {
   const order = await Order.findById(orderId);
@@ -274,26 +314,39 @@ export async function createShipmentForOrder(orderId) {
     throw new Error("Order not found");
   }
 
-  // Duplicate-shipment protection (rule: never create two shipments for one order)
+  // ✅ Idempotent: never create a second Shiprocket order for the same
+  // Aurevian order. Resume AWB assignment if it's the only thing missing.
   if (order.shipping?.shiprocketOrderId) {
+    if (!order.shipping.awbCode) {
+      try {
+        await assignAWBForOrder(order);
+        order.shipping.syncStatus = "synced";
+        order.shipping.syncError = undefined;
+        order.shipping.syncedAt = new Date();
+        await order.save();
+      } catch (awbErr) {
+        order.shipping.syncStatus = "failed";
+        order.shipping.syncError = awbErr.message;
+        order.shipping.lastSyncAttemptAt = new Date();
+        await order.save();
+      }
+    }
     return { alreadyExists: true, order };
   }
 
-  // Never ship an unpaid prepaid order. COD orders ship without upfront payment.
   if (order.paymentMethod !== "cod" && order.paymentStatus !== "paid") {
     throw new Error("Cannot create a shipment for an unpaid prepaid order");
   }
 
-  const pickupLocation = process.env.SHIPROCKET_PICKUP_LOCATION;
-  if (!pickupLocation) {
-    throw new Error("SHIPROCKET_PICKUP_LOCATION is not configured");
-  }
+  order.shipping = order.shipping || {};
+  order.shipping.syncStatus = "pending";
+  order.shipping.lastSyncAttemptAt = new Date();
+  await order.save();
 
-  // ✅ NEW — fail fast with a real reason instead of a silent 200-with-no-IDs
-  await assertPickupLocationExists(pickupLocation);
+  const seller = await resolveOrderSeller(order);
+  await assertSellerPickupLocationRegistered(seller);
+  const pickupLocation = seller.pickupAddress.shiprocketPickupLocationName;
 
-  // Gather live weight/dimensions/SKU per item — these aren't stored on the
-  // Order snapshot, so we look them up on JewelleryProduct at ship time.
   let totalWeightKg = 0;
   let maxLength = 0;
   let maxWidth = 0;
@@ -305,8 +358,6 @@ export async function createShipmentForOrder(orderId) {
       "shipping sku productName",
     );
 
-    // ✅ FIXED: uses the shared weight helper instead of duplicating the
-    // conversion logic — keeps this in sync with calculateShippingRate.
     totalWeightKg += getItemWeightKg(product) * item.quantity;
 
     const dims = product?.shipping?.dimensions;
@@ -327,7 +378,6 @@ export async function createShipmentForOrder(orderId) {
     });
   }
 
-  // Safe minimums so Shiprocket never rejects the payload for zero dimensions
   const weight = Math.max(Number(totalWeightKg.toFixed(3)), 0.1);
   const length = Math.max(maxLength, 10);
   const breadth = Math.max(maxWidth, 10);
@@ -371,11 +421,14 @@ export async function createShipmentForOrder(orderId) {
     weight,
   };
 
-  // ✅ TEMP DEV LOGGING — safe: this payload never contains Shiprocket
-  // credentials, tokens, JWTs, or Razorpay secrets. It's exactly what's
-  // being sent to Shiprocket's Create Order API for this order.
   console.log("========== SHIPROCKET CREATE ORDER REQUEST ==========");
   console.log("Aurevian Order:", order.orderNumber);
+  console.log(
+    "Seller:",
+    seller._id.toString(),
+    "pickup_location:",
+    pickupLocation,
+  );
   console.log("Payload:", JSON.stringify(payload, null, 2));
   console.log("=======================================================");
 
@@ -383,9 +436,6 @@ export async function createShipmentForOrder(orderId) {
   try {
     result = await shiprocketService.createOrder(payload);
   } catch (err) {
-    // Covers thrown 4xx/5xx from Shiprocket (shiprocketRequest() throws a
-    // ShiprocketError with the real HTTP status in err.statusCode and the
-    // real Shiprocket response body in err.details).
     console.error(
       "========== SHIPROCKET CREATE ORDER FAILED (HTTP ERROR) ==========",
     );
@@ -400,35 +450,23 @@ export async function createShipmentForOrder(orderId) {
     order.shipping = order.shipping || {};
     order.shipping.provider = "shiprocket";
     order.shipping.status = "CREATE_FAILED";
-    order.shipping.lastError = err.message; // ✅ NEW: store the reason
+    order.shipping.syncStatus = "failed";
+    order.shipping.syncError = err.message;
+    order.shipping.lastError = err.message;
     order.shipping.lastSyncedAt = new Date();
     await order.save();
 
-    // ✅ SOCKET.IO — surface shipment-creation failure live
     emitShippingUpdated(order);
 
     throw err;
   }
 
-  // ✅ TEMP DEV LOGGING — the request succeeded at the HTTP level (200).
-  // Whether it's a REAL success is checked right below.
   console.log("========== SHIPROCKET CREATE ORDER RESPONSE ==========");
   console.log("Aurevian Order:", order.orderNumber);
   console.log("HTTP Status: 200 (request completed)");
   console.log("Response body:", JSON.stringify(result, null, 2));
   console.log("========================================================");
 
-  // ✅ FIXED — this is the actual bug: Shiprocket's /orders/create/adhoc
-  // endpoint frequently responds with HTTP 200 even when the order was
-  // REJECTED (e.g. pickup_location nickname doesn't match anything
-  // registered in the Shiprocket account, invalid SKU, etc.) — the failure
-  // only shows up as a missing order_id/shipment_id plus a message/errors
-  // field in the body. The previous code trusted a 200 response as success
-  // unconditionally, which is why orders were saving locally with
-  // status "NEW" and full dimensions/weight, but shiprocketOrderId and
-  // shipmentId were silently undefined, and nothing ever appeared in the
-  // Shiprocket dashboard. Now we explicitly check for both IDs and treat
-  // their absence as a real failure.
   if (!result?.order_id || !result?.shipment_id) {
     const reason =
       result?.message ||
@@ -449,11 +487,12 @@ export async function createShipmentForOrder(orderId) {
     order.shipping = order.shipping || {};
     order.shipping.provider = "shiprocket";
     order.shipping.status = "CREATE_FAILED";
-    order.shipping.lastError = reason; // ✅ NEW: store the reason
+    order.shipping.syncStatus = "failed";
+    order.shipping.syncError = reason;
+    order.shipping.lastError = reason;
     order.shipping.lastSyncedAt = new Date();
     await order.save();
 
-    // ✅ SOCKET.IO — surface shipment-creation failure live
     emitShippingUpdated(order);
 
     throw new ShiprocketError(
@@ -468,7 +507,10 @@ export async function createShipmentForOrder(orderId) {
   order.shipping.shiprocketOrderId = String(result.order_id);
   order.shipping.shipmentId = String(result.shipment_id);
   order.shipping.status = result.status || "NEW";
-  order.shipping.lastError = undefined; // ✅ NEW — clear any stale failure reason
+  order.shipping.syncStatus = "synced";
+  order.shipping.syncError = undefined;
+  order.shipping.syncedAt = new Date();
+  order.shipping.lastError = undefined;
   if (result.status_code != null) {
     order.shipping.statusCode = String(result.status_code);
   }
@@ -479,12 +521,6 @@ export async function createShipmentForOrder(orderId) {
 
   await order.save();
 
-  // ✅ NEW: auto-assign AWB immediately, so the pipeline required by the
-  // product spec (order -> shipment -> courier/AWB -> tracking) completes
-  // in one pass instead of needing a separate manual admin action. The
-  // order+shipment creation above already succeeded on Shiprocket's side at
-  // this point, so an AWB failure here must NOT unwind that — it's logged
-  // and can be retried via POST /api/shipping/assign-awb.
   try {
     await assignAWBForOrder(order);
   } catch (awbErr) {
@@ -492,11 +528,9 @@ export async function createShipmentForOrder(orderId) {
       `⚠️ Auto AWB assignment failed for order ${order.orderNumber}:`,
       awbErr.message,
     );
-    // Store the AWB error in lastError so admins can see what went wrong
     order.shipping.lastError = awbErr.message;
     await order.save();
 
-    // ✅ SOCKET.IO
     emitShippingUpdated(order);
   }
 
@@ -504,10 +538,10 @@ export async function createShipmentForOrder(orderId) {
 }
 
 // ============================================
-// ✅ NEW: POST /api/shipping/calculate-rate
-// Live checkout quote. Uses the authenticated customer's own cart (never
-// client-supplied item data) so the number shown before payment is
-// trustworthy and matches what order creation will actually charge.
+// POST /api/shipping/calculate-rate
+// ✅ CHANGED — pickup pincode now comes from the seller who owns the
+// cart's products, not SHIPROCKET_PICKUP_PINCODE. If the cart mixes
+// sellers, we reject the quote rather than guessing whose address to use.
 // ============================================
 export const getShippingQuote = async (req, res) => {
   try {
@@ -532,42 +566,71 @@ export const getShippingQuote = async (req, res) => {
 
     let itemsTotal = 0;
     let totalWeightKg = 0;
+    const sellerIdsInCart = new Set();
 
     for (const item of cart.items) {
       const product = await JewelleryProduct.findOne({
         _id: item.product,
         status: "Published",
         isActive: true,
-      }).select("pricing shipping");
+      }).select("pricing shipping seller.sellerId");
 
-      // A stale cart entry (product since unpublished/deleted) is skipped
-      // here — order creation re-validates every item and will reject it
-      // properly at that point instead of blocking the quote.
       if (!product) continue;
 
       const livePrice =
         product.pricing?.salePrice || product.pricing?.originalPrice || 0;
       itemsTotal += livePrice * item.quantity;
       totalWeightKg += getItemWeightKg(product) * item.quantity;
+
+      if (product.seller?.sellerId) {
+        sellerIdsInCart.add(product.seller.sellerId.toString());
+      }
+    }
+
+    if (sellerIdsInCart.size === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Unable to determine the seller for the items in your cart",
+      });
+    }
+
+    if (sellerIdsInCart.size > 1) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Your cart contains products from multiple sellers. Please check out with products from one seller at a time so shipping can be calculated correctly.",
+      });
+    }
+
+    const seller = await Seller.findById([...sellerIdsInCart][0]).select(
+      "pickupAddress",
+    );
+    const pickupPincode = seller?.pickupAddress?.pincode;
+
+    if (!pickupPincode) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Delivery is temporarily unavailable — this seller has not configured a pickup address yet.",
+      });
     }
 
     let rate;
     try {
       rate = await calculateShippingRate({
         deliveryPincode: pincode,
+        pickupPincode,
         weightKg: totalWeightKg,
         paymentMethod: normalizedPaymentMethod,
       });
     } catch (err) {
       if (err instanceof ShippingUnavailableError) {
-        // Not an error — a legitimate "we can't deliver here" business result.
         return res.status(200).json({
           success: false,
           serviceable: false,
           message: err.message,
         });
       }
-      // ✅ TEMP DEV LOGGING — remove once shipping is confirmed stable.
       console.error(
         "Shiprocket rate calculation error:",
         err?.details || err?.message || err,
@@ -599,33 +662,41 @@ export const getShippingQuote = async (req, res) => {
       );
     }
     console.error("❌ Get shipping quote error:", error.message);
-    return res.status(500).json({
+    return res.status(error.status || 500).json({
       success: false,
-      message: "Unable to calculate shipping right now. Please try again.",
+      message:
+        error.status === 400
+          ? error.message
+          : "Unable to calculate shipping right now. Please try again.",
     });
   }
 };
 
 // ============================================
 // GET /api/shipping/serviceability
-// Public — returns courier options only, no credentials/tokens exposed.
-// Kept for standalone pincode checks (e.g. a PDP "check delivery" widget);
-// the checkout quote flow uses /calculate-rate above instead.
+// ✅ CHANGED — requires a `sellerId` query param now (pickup pincode is
+// per-seller). No env fallback.
 // ============================================
 export const checkServiceability = async (req, res) => {
   try {
-    const { deliveryPincode, weight, cod } = req.query;
+    const { deliveryPincode, weight, cod, sellerId } = req.query;
     if (!deliveryPincode) {
       return res
         .status(400)
         .json({ success: false, message: "deliveryPincode is required" });
     }
+    if (!sellerId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "sellerId is required" });
+    }
 
-    const pickupPincode = process.env.SHIPROCKET_PICKUP_PINCODE;
+    const seller = await Seller.findById(sellerId).select("pickupAddress");
+    const pickupPincode = seller?.pickupAddress?.pincode;
     if (!pickupPincode) {
-      return res.status(500).json({
+      return res.status(400).json({
         success: false,
-        message: "Shipping service is not fully configured",
+        message: "This seller has not configured a pickup address yet",
       });
     }
 
@@ -659,8 +730,6 @@ export const checkServiceability = async (req, res) => {
 
 // ============================================
 // POST /api/shipping/create
-// Manual/backup trigger — normally shipment creation happens automatically
-// after payment verification or COD order placement.
 // ============================================
 export const createShipment = async (req, res) => {
   try {
@@ -709,16 +778,14 @@ export const createShipment = async (req, res) => {
       );
     }
     console.error("❌ Create shipment error:", error.message);
-    return res.status(400).json({ success: false, message: error.message });
+    return res
+      .status(error.status || 400)
+      .json({ success: false, message: error.message });
   }
 };
 
 // ============================================
 // POST /api/shipping/assign-awb  (admin only)
-// Manual/retry trigger — normally AWB assignment happens automatically
-// right after createShipmentForOrder(). Use this if auto-assignment failed
-// (see server logs for "Auto AWB assignment failed"), or to force a
-// specific courier via courierId.
 // ============================================
 export const assignAWB = async (req, res) => {
   try {
@@ -796,7 +863,6 @@ export const schedulePickup = async (req, res) => {
     }
     await order.save();
 
-    // ✅ SOCKET.IO
     emitShippingUpdated(order);
 
     return res.status(200).json({
@@ -846,7 +912,6 @@ export const generateLabel = async (req, res) => {
     order.shipping.lastSyncedAt = new Date();
     await order.save();
 
-    // ✅ SOCKET.IO
     emitShippingUpdated(order);
 
     return res
@@ -890,7 +955,6 @@ export const generateManifest = async (req, res) => {
       order.shipping.lastSyncedAt = new Date();
       await order.save();
 
-      // ✅ SOCKET.IO
       emitShippingUpdated(order);
     }
 
@@ -998,8 +1062,6 @@ export const cancelShipment = async (req, res) => {
           Number(order.shipping.shiprocketOrderId),
         ]);
       } catch (shiprocketErr) {
-        // Shiprocket may reject cancellation post-pickup — proceed with local
-        // cancellation regardless so the customer/admin isn't blocked, but log it.
         console.error(
           "⚠️ Shiprocket cancel call failed, proceeding with local order cancellation:",
           shiprocketErr.message,
@@ -1014,7 +1076,6 @@ export const cancelShipment = async (req, res) => {
     }
     await order.save();
 
-    // ✅ SOCKET.IO
     emitShippingUpdated(order);
 
     return res
@@ -1030,7 +1091,8 @@ export const cancelShipment = async (req, res) => {
 
 // ============================================
 // POST /api/shipping/return  (admin only)
-// Partial implementation — see plan notes on the missing return workflow.
+// ✅ CHANGED — pickup/destination address now comes from the seller who
+// owns the order's items instead of SHIPROCKET_PICKUP_LOCATION.
 // ============================================
 export const createReturn = async (req, res) => {
   try {
@@ -1054,8 +1116,18 @@ export const createReturn = async (req, res) => {
       });
     }
 
+    let seller;
+    try {
+      seller = await resolveOrderSeller(order);
+      await assertSellerPickupLocationRegistered(seller);
+    } catch (sellerErr) {
+      return res
+        .status(sellerErr.status || 400)
+        .json({ success: false, message: sellerErr.message });
+    }
+
     const addr = order.shippingAddress;
-    const pickupLocation = process.env.SHIPROCKET_PICKUP_LOCATION;
+    const pickup = seller.pickupAddress;
 
     const payload = {
       order_id: order.orderNumber,
@@ -1068,8 +1140,16 @@ export const createReturn = async (req, res) => {
       pickup_pincode: addr.pincode,
       pickup_email: order.customerEmail,
       pickup_phone: order.customerPhone,
-      shipping_customer_name: pickupLocation,
-      shipping_country: "India",
+      shipping_customer_name:
+        pickup.contactName || seller.storeInfo?.storeName || "Seller",
+      shipping_address: pickup.addressLine1,
+      shipping_address_2: pickup.addressLine2 || "",
+      shipping_city: pickup.city,
+      shipping_state: pickup.state,
+      shipping_country: pickup.country || "India",
+      shipping_pincode: pickup.pincode,
+      shipping_email: pickup.contactEmail || seller.email,
+      shipping_phone: (pickup.contactPhone || "").replace(/\D/g, "").slice(-10),
       order_items: order.items.map((i) => ({
         name: i.name,
         sku: i.slug || i.product.toString(),
@@ -1109,9 +1189,6 @@ export const createReturn = async (req, res) => {
 
 // ============================================
 // POST /api/shipping/webhook
-// Public endpoint — secured via a shared token header (set the same value
-// in Shiprocket's webhook settings and in SHIPROCKET_WEBHOOK_TOKEN).
-// Idempotent: re-delivered webhooks with an unchanged status are no-ops.
 // ============================================
 export const shiprocketWebhook = async (req, res) => {
   try {
@@ -1193,8 +1270,6 @@ export const shiprocketWebhook = async (req, res) => {
 
     await order.save();
 
-    // ✅ SOCKET.IO — this is the one that makes AWB/courier/tracking
-    // changes show up live on the customer's Order Detail page
     emitShippingUpdated(order);
 
     return res

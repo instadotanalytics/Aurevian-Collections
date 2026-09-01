@@ -141,3 +141,13 @@ export const getOrderHistoryDetail = async (orderId) => {
   );
   return response.data;
 };
+
+// ✅ NEW — Retry Shiprocket synchronization for an order
+export const retryOrderShiprocketSync = async (orderId) => {
+  const response = await axios.post(
+    `${API_URL}/orders/${orderId}/retry-shiprocket-sync`,
+    {},
+    { headers: adminAuthHeader() },
+  );
+  return response.data;
+};

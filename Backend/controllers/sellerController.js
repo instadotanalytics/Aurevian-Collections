@@ -16,6 +16,10 @@ import cloudinaryService from "../services/cloudinaryService.js";
 // ✅ NEW — Add this import for phone normalization
 import { normalizePhoneNumber } from "../utils/phoneUtils.js";
 
+// ✅ NEW — Add these imports for Shiprocket pickup address
+import shiprocketService from "../services/shiprocketService.js";
+import { isValidIndianPincode } from "./shippingController.js";
+
 // ✅ NEW — Resend cooldown — prevents SMS/email spam via the resend endpoint.
 const RESEND_COOLDOWN_MS = 60 * 1000; // 60s
 
@@ -32,6 +36,39 @@ import {
 const REFUNDED_ORDER_STATUSES = ["cancelled", "returned", "rto"];
 const LOW_STOCK_DEFAULT_THRESHOLD = 5;
 const toObjectId = (id) => new mongoose.Types.ObjectId(id);
+
+// ✅ CHANGED — deterministic per (seller, revision), NOT timestamp-based.
+// Retries on an unchanged address always resolve to the same nickname,
+// so Shiprocket never gets a duplicate pickup location for a plain retry.
+// The revision only bumps when the seller actually edits the address.
+function buildPickupLocationNickname(seller, revision) {
+  const base = (
+    seller.storeInfo?.storeSlug ||
+    seller.storeInfo?.storeName ||
+    "seller"
+  )
+    .toString()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 20);
+  const shortId = seller._id.toString().slice(-8);
+  return `${base || "seller"}_${shortId}_v${revision || 1}`;
+}
+
+// ✅ NEW — Shiprocket's addpickup API errors if a pickup_location name
+// already exists. Since retries intentionally reuse the same nickname,
+// that specific error means "already registered", not "failed" — we
+// reconcile instead of surfacing it as a failure.
+function isAlreadyExistsError(err) {
+  const text =
+    `${err?.message || ""} ${JSON.stringify(err?.details || {})}`.toLowerCase();
+  return (
+    text.includes("already exist") ||
+    text.includes("already registered") ||
+    text.includes("duplicate")
+  );
+}
 
 // ============================================
 // GENERATE TOKENS
@@ -1679,3 +1716,263 @@ export const sellerResetPassword = async (req, res) => {
     });
   }
 };
+
+// ============================================
+// 17. UPDATE SELLER PICKUP ADDRESS — ✅ REWRITTEN
+//
+// Two-phase, per the required architecture:
+//   Phase A: validate + save locally. This ALWAYS succeeds or fails on
+//            its own terms (validation / DB error) — Shiprocket cannot
+//            touch this phase.
+//   Phase B: attempt Shiprocket sync. Failure here is recorded on the
+//            seller doc (shiprocketSyncStatus/shiprocketSyncError) but
+//            NEVER rolls back or blocks Phase A, and the HTTP response
+//            is still 200/success:true — the address WAS saved.
+// ============================================
+export const updateSellerPickupAddress = async (req, res) => {
+  try {
+    const sellerId = req.seller._id;
+    const {
+      contactName,
+      contactPhone,
+      contactEmail,
+      addressLine1,
+      addressLine2,
+      city,
+      state,
+      pincode,
+      country,
+    } = req.body;
+
+    // ---- PHASE A.1: VALIDATE ----
+    if (
+      !contactName ||
+      !contactPhone ||
+      !addressLine1 ||
+      !city ||
+      !state ||
+      !pincode
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Contact name, phone, address line 1, city, state and pincode are all required",
+      });
+    }
+    if (!isValidIndianPincode(pincode)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid 6-digit pickup pincode",
+      });
+    }
+    const phoneCheck = normalizePhoneNumber(contactPhone);
+    if (!phoneCheck.valid) {
+      return res.status(400).json({
+        success: false,
+        message:
+          phoneCheck.reason || "Please enter a valid contact phone number",
+      });
+    }
+
+    const seller = await Seller.findById(sellerId);
+    if (!seller) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
+    }
+
+    // ---- PHASE A.2: DETECT REAL CONTENT CHANGE (drives nickname revision) ----
+    const prev =
+      seller.pickupAddress?.toObject?.() || seller.pickupAddress || {};
+    const normalizedNew = {
+      contactName: contactName.trim(),
+      contactPhone: phoneCheck.e164,
+      contactEmail: (contactEmail || "").trim(),
+      addressLine1: addressLine1.trim(),
+      addressLine2: (addressLine2 || "").trim(),
+      city: city.trim(),
+      state: state.trim(),
+      pincode: pincode.trim(),
+      country: (country || "India").trim(),
+    };
+    const addressChanged =
+      prev.addressLine1 !== normalizedNew.addressLine1 ||
+      prev.addressLine2 !== normalizedNew.addressLine2 ||
+      prev.city !== normalizedNew.city ||
+      prev.state !== normalizedNew.state ||
+      prev.pincode !== normalizedNew.pincode ||
+      prev.country !== normalizedNew.country ||
+      prev.contactPhone !== normalizedNew.contactPhone;
+
+    const prevRevision = prev.pickupLocationRevision || 0;
+    const nextRevision =
+      addressChanged || !prev.shiprocketPickupLocationName
+        ? prevRevision + 1
+        : prevRevision;
+
+    // ---- PHASE A.3: SAVE LOCALLY — THIS IS THE SOURCE OF TRUTH ----
+    seller.pickupAddress = {
+      ...normalizedNew,
+      shiprocketPickupLocationName: addressChanged
+        ? null
+        : prev.shiprocketPickupLocationName || null,
+      isRegisteredWithShiprocket: addressChanged
+        ? false
+        : !!prev.isRegisteredWithShiprocket,
+      shiprocketSyncStatus: addressChanged
+        ? "not_synced"
+        : prev.shiprocketSyncStatus || "not_synced",
+      shiprocketSyncError: addressChanged
+        ? null
+        : prev.shiprocketSyncError || null,
+      pickupLocationRevision: nextRevision,
+      lastSyncAttemptAt: prev.lastSyncAttemptAt || null,
+      lastSyncedAt: addressChanged ? null : prev.lastSyncedAt || null,
+    };
+
+    await seller.save();
+    console.log(
+      "✅ Pickup address saved locally for seller:",
+      seller._id.toString(),
+    );
+
+    // ---- PHASE B: ATTEMPT SHIPROCKET SYNC — FAILURE HERE NEVER UNDOES PHASE A ----
+    const syncResult = await syncSellerPickupWithShiprocket(seller);
+
+    return res.status(200).json({
+      success: true,
+      message: syncResult.success
+        ? "Pickup address saved and synced with Shiprocket."
+        : "Pickup address saved successfully. Shiprocket synchronization failed — you can retry anytime from this page.",
+      data: {
+        pickupAddress: seller.pickupAddress,
+        shiprocketSync: syncResult,
+      },
+    });
+  } catch (error) {
+    // Only genuine local failures (validation already handled above, so
+    // this is really DB/unexpected errors) land here.
+    console.error("❌ Update pickup address error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to save pickup address",
+      error: error.message,
+    });
+  }
+};
+
+// ✅ NEW — retry Shiprocket sync using whatever is already saved locally.
+// The seller never has to retype the address to retry.
+export const retrySellerPickupSync = async (req, res) => {
+  try {
+    const seller = await Seller.findById(req.seller._id);
+    if (!seller) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
+    }
+    if (!seller.pickupAddress?.addressLine1) {
+      return res.status(400).json({
+        success: false,
+        message: "No pickup address saved yet. Please add one first.",
+      });
+    }
+
+    const syncResult = await syncSellerPickupWithShiprocket(seller);
+
+    return res.status(200).json({
+      success: true,
+      message: syncResult.success
+        ? "Pickup address synced with Shiprocket."
+        : "Shiprocket synchronization failed again. You can retry later.",
+      data: {
+        pickupAddress: seller.pickupAddress,
+        shiprocketSync: syncResult,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Retry pickup sync error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to retry Shiprocket synchronization",
+      error: error.message,
+    });
+  }
+};
+
+// ✅ NEW — shared by save + retry. Mutates and persists `seller`.
+// Idempotent by design: reuses the existing nickname (tied to
+// pickupLocationRevision) so repeated calls never create duplicate
+// Shiprocket pickup locations. An "already exists" response from
+// Shiprocket for that nickname is treated as a successful registration.
+async function syncSellerPickupWithShiprocket(seller) {
+  const addr = seller.pickupAddress;
+  seller.pickupAddress.shiprocketSyncStatus = "pending";
+  seller.pickupAddress.lastSyncAttemptAt = new Date();
+  await seller.save();
+
+  const nickname =
+    addr.shiprocketPickupLocationName ||
+    buildPickupLocationNickname(seller, addr.pickupLocationRevision || 1);
+  const shiprocketPhone = (addr.contactPhone || "")
+    .replace(/\D/g, "")
+    .slice(-10);
+
+  try {
+    await shiprocketService.addPickupLocation({
+      pickup_location: nickname,
+      name: addr.contactName,
+      email: addr.contactEmail || seller.email || "",
+      phone: shiprocketPhone,
+      address: addr.addressLine1,
+      address_2: addr.addressLine2 || "",
+      city: addr.city,
+      state: addr.state,
+      country: addr.country || "India",
+      pin_code: addr.pincode,
+    });
+
+    seller.pickupAddress.shiprocketPickupLocationName = nickname;
+    seller.pickupAddress.isRegisteredWithShiprocket = true;
+    seller.pickupAddress.shiprocketSyncStatus = "synced";
+    seller.pickupAddress.shiprocketSyncError = null;
+    seller.pickupAddress.lastSyncedAt = new Date();
+    await seller.save();
+
+    console.log(
+      "✅ Shiprocket pickup location synced for seller:",
+      seller._id.toString(),
+      nickname,
+    );
+    return { success: true, pickupLocationName: nickname };
+  } catch (shiprocketErr) {
+    console.error(
+      "❌ Shiprocket addPickupLocation failed:",
+      shiprocketErr.message,
+      shiprocketErr.details || "",
+    );
+
+    if (isAlreadyExistsError(shiprocketErr)) {
+      seller.pickupAddress.shiprocketPickupLocationName = nickname;
+      seller.pickupAddress.isRegisteredWithShiprocket = true;
+      seller.pickupAddress.shiprocketSyncStatus = "synced";
+      seller.pickupAddress.shiprocketSyncError = null;
+      seller.pickupAddress.lastSyncedAt = new Date();
+      await seller.save();
+      console.log(
+        "✅ Shiprocket pickup location already existed — reconciled as synced:",
+        nickname,
+      );
+      return { success: true, pickupLocationName: nickname, reconciled: true };
+    }
+
+    seller.pickupAddress.shiprocketSyncStatus = "failed";
+    seller.pickupAddress.shiprocketSyncError =
+      shiprocketErr.message ||
+      "Could not register this address with Shiprocket";
+    seller.pickupAddress.isRegisteredWithShiprocket = false;
+    await seller.save();
+
+    return { success: false, error: seller.pickupAddress.shiprocketSyncError };
+  }
+}

@@ -3,7 +3,7 @@
 import express from "express";
 import multer from "multer";
 import fs from "fs";
-import rateLimit from "express-rate-limit"; // ✅ NEW — route-level throttle for OTP endpoints
+import rateLimit from "express-rate-limit";
 import {
   registerSeller,
   verifyEmailOTP,
@@ -12,6 +12,8 @@ import {
   sellerLogin,
   getCurrentSeller,
   updateSellerProfile,
+  updateSellerPickupAddress,
+  retrySellerPickupSync, // ✅ NEW
   sellerLogout,
   refreshSellerToken,
   getSellerDashboard,
@@ -24,21 +26,15 @@ import {
 } from "../controllers/sellerController.js";
 import { protectSeller } from "../middleware/sellerAuth.js";
 
-// ============================================
-// EARNINGS CONTROLLER IMPORTS
-// ============================================
 import {
   getEarningsSummary,
   getEarningsChart,
   getEarningsTransactions,
   requestPayout,
   getPayoutHistory,
-  getDashboardPerformance, // ✅ NEW
+  getDashboardPerformance,
 } from "../controllers/sellerEarningsController.js";
 
-// ============================================
-// CUSTOMERS CONTROLLER IMPORTS (ADDED)
-// ============================================
 import {
   getCustomersSummary,
   getCustomers,
@@ -47,9 +43,6 @@ import {
 
 const router = express.Router();
 
-// ============================================
-// MULTER CONFIGURATION
-// ============================================
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const dir = "uploads/";
@@ -86,12 +79,9 @@ const upload = multer({
   fileFilter,
 });
 
-// ============================================
-// OTP RATE LIMITER — ✅ NEW: specific anti-spam for OTP endpoints
-// ============================================
 const otpLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 5, // 5 requests per 10 minutes
+  windowMs: 10 * 60 * 1000,
+  max: 5,
   message: {
     success: false,
     message: "Too many OTP requests. Please try again later.",
@@ -102,57 +92,42 @@ const otpLimiter = rateLimit({
 
 console.log("🔧 Setting up seller routes...");
 
-// ============================================
-// PUBLIC ROUTES - No authentication required
-// ============================================
-router.post("/register", otpLimiter, registerSeller); // ✅ NEW — rate limited
+router.post("/register", otpLimiter, registerSeller);
 router.post("/verify-email", verifyEmailOTP);
 router.post("/verify-phone", verifyPhoneOTP);
-router.post("/resend-otp", otpLimiter, resendOTP); // ✅ NEW — rate limited
+router.post("/resend-otp", otpLimiter, resendOTP);
 router.post("/login", sellerLogin);
 router.post("/refresh", refreshSellerToken);
 router.post("/logout", sellerLogout);
 
-// ✅ ADD THESE ROUTES
 router.post("/forgot-password", sellerForgotPassword);
 router.post("/reset-password/:token", sellerResetPassword);
 
-// ============================================
-// PROTECTED ROUTES - Authentication required
-// ============================================
 router.use(protectSeller);
 
 router.get("/me", getCurrentSeller);
 router.put("/profile", updateSellerProfile);
 
+// ✅ NEW — seller's own Shiprocket pickup/warehouse address
+router.put("/pickup-address", updateSellerPickupAddress);
+router.post("/pickup-address/retry-sync", retrySellerPickupSync); // ✅ NEW
+
 router.get("/dashboard", getSellerDashboard);
-router.get("/dashboard/performance", getDashboardPerformance); // ✅ NEW
+router.get("/dashboard/performance", getDashboardPerformance);
 router.get("/orders/recent", getRecentOrders);
 router.get("/activities/recent", getRecentActivities);
 router.get("/verification-status", getVerificationStatus);
 
-// ============================================
-// EARNINGS ROUTES
-// ============================================
 router.get("/earnings/summary", getEarningsSummary);
 router.get("/earnings/chart", getEarningsChart);
 router.get("/earnings/transactions", getEarningsTransactions);
 router.post("/earnings/payout/request", requestPayout);
 router.get("/earnings/payout/history", getPayoutHistory);
 
-// ============================================
-// CUSTOMERS ROUTES (ADDED)
-// NOTE: order matters — /customers/summary must be registered before
-// /customers/:userId, otherwise Express would match "summary" as a
-// :userId param and getCustomerDetail's ObjectId validation would 400 it.
-// ============================================
 router.get("/customers/summary", getCustomersSummary);
 router.get("/customers", getCustomers);
 router.get("/customers/:userId", getCustomerDetail);
 
-// ============================================
-// DOCUMENT UPLOAD ROUTES
-// ============================================
 router.post(
   "/upload-documents",
   upload.fields([
@@ -179,6 +154,8 @@ console.log("  📌 POST   /api/seller/login");
 console.log("  📌 POST   /api/seller/forgot-password");
 console.log("  📌 POST   /api/seller/reset-password/:token");
 console.log("  📌 GET    /api/seller/me");
+console.log("  📌 PUT    /api/seller/pickup-address");
+console.log("  📌 POST   /api/seller/pickup-address/retry-sync");
 console.log("  📌 GET    /api/seller/dashboard");
 console.log("  📌 GET    /api/seller/dashboard/performance");
 console.log("  📌 POST   /api/seller/upload-documents");

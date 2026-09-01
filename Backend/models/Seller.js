@@ -119,6 +119,51 @@ const sellerSchema = new mongoose.Schema(
     },
 
     // ============================================
+    // ✅ UPDATED — PICKUP ADDRESS (SHIPROCKET)
+    // The seller's own warehouse/pickup address. Replaces the old
+    // platform-wide SHIPROCKET_PICKUP_LOCATION / SHIPROCKET_PICKUP_PINCODE
+    // env values. `shiprocketPickupLocationName` is the nickname Shiprocket
+    // assigns this address to once it's registered via the
+    // /settings/company/addpickup API (see sellerController.updateSellerPickupAddress
+    // and shiprocketService.addPickupLocation) — every Shiprocket order/
+    // shipment/return payload for this seller references that nickname.
+    // `isRegisteredWithShiprocket` gates shipment creation: if false, the
+    // seller must (re)save their pickup address before any order of theirs
+    // can be shipped. There is no fallback to any other address.
+    // ============================================
+    pickupAddress: {
+      contactName: { type: String, trim: true, default: "" },
+      contactPhone: { type: String, trim: true, default: "" },
+      contactEmail: { type: String, trim: true, default: "" },
+      addressLine1: { type: String, trim: true, default: "" },
+      addressLine2: { type: String, trim: true, default: "" },
+      city: { type: String, trim: true, default: "" },
+      state: { type: String, trim: true, default: "" },
+      pincode: { type: String, trim: true, default: "" },
+      country: { type: String, trim: true, default: "India" },
+      shiprocketPickupLocationName: { type: String, trim: true, default: null },
+      // Kept for back-compat with any code still reading this boolean —
+      // it's now derived from shiprocketSyncStatus === "synced".
+      isRegisteredWithShiprocket: { type: Boolean, default: false },
+      // ✅ NEW — explicit sync state machine, independent of the fact
+      // that the local address itself is ALWAYS saved once this
+      // sub-document is set.
+      shiprocketSyncStatus: {
+        type: String,
+        enum: ["not_synced", "pending", "synced", "failed"],
+        default: "not_synced",
+      },
+      shiprocketSyncError: { type: String, trim: true, default: null },
+      // ✅ NEW — bumped only when the address CONTENT changes, not on
+      // every retry. This is what makes the Shiprocket nickname stable
+      // across retries, so retries reuse the same pickup location
+      // instead of registering a new one every time.
+      pickupLocationRevision: { type: Number, default: 0 },
+      lastSyncAttemptAt: { type: Date, default: null },
+      lastSyncedAt: { type: Date, default: null },
+    },
+
+    // ============================================
     // DOCUMENTS
     // ============================================
     documents: {
@@ -302,7 +347,6 @@ const sellerSchema = new mongoose.Schema(
       default: null,
     },
 
-    // ✅ NEW: exact plan tracking (drives the Upgrade page's "current plan" state)
     subscriptionPlanId: {
       type: String,
       default: "free",
@@ -335,7 +379,6 @@ const sellerSchema = new mongoose.Schema(
       default: null,
     },
 
-    // ✅ NEW: scheduled (end-of-period) cancellation instead of instant downgrade
     cancelAtPeriodEnd: {
       type: Boolean,
       default: false,
@@ -419,11 +462,6 @@ const sellerSchema = new mongoose.Schema(
 // ============================================
 // INDEXES
 // ============================================
-// NOTE: email, phone, storeInfo.storeName, and storeInfo.storeSlug all already
-// declare `unique: true` on their field definitions above, which auto-creates
-// their indexes. The old explicit index calls for those four fields have been
-// removed to stop the duplicate-index warnings. Only non-unique compound/
-// lookup indexes remain below.
 sellerSchema.index({ status: 1, isActive: 1 });
 sellerSchema.index({ "kyc.status": 1 });
 sellerSchema.index({ "documents.panNumber": 1 });
@@ -479,7 +517,7 @@ sellerSchema.methods.setEmailOTP = function (otpCode, expiryMinutes = 10) {
   this.otp.email.code = otpCode;
   this.otp.email.expiresAt = new Date(Date.now() + expiryMinutes * 60 * 1000);
   this.otp.email.verified = false;
-  this.otp.email.lastSentAt = new Date(); // ✅ NEW — track when OTP was sent
+  this.otp.email.lastSentAt = new Date();
   return this.save();
 };
 
@@ -487,7 +525,7 @@ sellerSchema.methods.setPhoneOTP = function (otpCode, expiryMinutes = 10) {
   this.otp.phone.code = otpCode;
   this.otp.phone.expiresAt = new Date(Date.now() + expiryMinutes * 60 * 1000);
   this.otp.phone.verified = false;
-  this.otp.phone.lastSentAt = new Date(); // ✅ NEW — track when OTP was sent
+  this.otp.phone.lastSentAt = new Date();
   return this.save();
 };
 
@@ -499,7 +537,7 @@ sellerSchema.methods.verifyEmailOTP = function (otpCode) {
   this.emailVerified = true;
   this.otp.email.code = undefined;
   this.otp.email.expiresAt = undefined;
-  this.otp.email.lastSentAt = undefined; // ✅ NEW — clear tracking on verification
+  this.otp.email.lastSentAt = undefined;
   return true;
 };
 
@@ -511,7 +549,7 @@ sellerSchema.methods.verifyPhoneOTP = function (otpCode) {
   this.phoneVerified = true;
   this.otp.phone.code = undefined;
   this.otp.phone.expiresAt = undefined;
-  this.otp.phone.lastSentAt = undefined; // ✅ NEW — clear tracking on verification
+  this.otp.phone.lastSentAt = undefined;
   return true;
 };
 

@@ -17,6 +17,7 @@ import {
   sellerRejectOrder,
   adminApproveOrder,
   adminRejectOrder,
+  retryOrderShiprocketSync, // ✅ NEW
 } from "../controllers/orderController.js";
 
 const router = express.Router();
@@ -35,6 +36,12 @@ router.get("/admin/history", protect, admin, getOrderHistory);
 router.get("/admin/history/:id", protect, admin, getOrderHistoryDetail);
 router.get("/admin/all", protect, admin, getAdminOrders);
 router.post("/:orderId/admin-approve", protect, admin, adminApproveOrder);
+router.post(
+  "/:orderId/retry-shiprocket-sync",
+  protect,
+  admin,
+  retryOrderShiprocketSync,
+); // ✅ NEW
 router.post("/:orderId/admin-reject", protect, admin, adminRejectOrder);
 
 router.get("/:id", protect, getOrderById);

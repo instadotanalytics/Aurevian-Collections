@@ -66,6 +66,7 @@ export const store = configureStore({
           "seller/updateProfile/fulfilled",
           "seller/uploadDocuments/fulfilled",
           "seller/fetchDashboard/fulfilled",
+          "seller/updatePickupAddress/fulfilled", // ✅ NEW
 
           // Banner actions
           "banners/fetchActive/fulfilled",
@@ -237,6 +238,7 @@ export const store = configureStore({
           "payload.publishedAt",
           "payload.subscriptionStartedAt",
           "payload.subscriptionExpiresAt",
+          "payload.lastSyncedAt", // ✅ NEW — Seller pickupAddress.lastSyncedAt
           "payload.plan.startDate",
           "payload.plan.endDate",
           "payload.lastOrder.createdAt",
@@ -280,6 +282,7 @@ export const store = configureStore({
           "seller.seller.approvedAt",
           "seller.seller.rejectedAt",
           "seller.seller.suspendedAt",
+          "seller.seller.pickupAddress.lastSyncedAt", // ✅ NEW
           "seller.dashboardStats",
           "seller.recentOrders",
           "seller.recentActivities",

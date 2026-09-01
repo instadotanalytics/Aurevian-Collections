@@ -18,8 +18,6 @@ if (!isConfigured) {
 
 // ============================================
 // CUSTOM ERROR TYPE
-// Lets controllers distinguish "client mistake" (4xx, safe to relay)
-// from "Shiprocket/network problem" (5xx, never relay raw details)
 // ============================================
 export class ShiprocketError extends Error {
   constructor(message, statusCode = 500, details = null) {
@@ -32,8 +30,6 @@ export class ShiprocketError extends Error {
 
 // ============================================
 // TOKEN CACHE
-// Shiprocket tokens are documented as valid for ~240 hours (10 days).
-// We cache for 9 days and refresh early, plus force-refresh once on any 401.
 // ============================================
 const TOKEN_LIFETIME_MS = 9 * 24 * 60 * 60 * 1000;
 const TOKEN_SAFETY_MARGIN_MS = 6 * 60 * 60 * 1000;
@@ -66,8 +62,6 @@ export async function generateToken() {
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok || !data.token) {
-    // ✅ Safe: logs status + Shiprocket's own message, never the
-    // email/password that were sent or any token.
     console.error(
       "❌ Shiprocket authentication FAILED — HTTP",
       res.status,
@@ -82,7 +76,6 @@ export async function generateToken() {
   }
 
   tokenCache = { token: data.token, expiresAt: Date.now() + TOKEN_LIFETIME_MS };
-  // ✅ NEW: confirms auth succeeded without ever printing the token itself.
   console.log("✅ Shiprocket authentication: SUCCESS (new token cached)");
   return data.token;
 }
@@ -99,7 +92,6 @@ async function getValidToken() {
 
 // ============================================
 // GENERIC AUTHENTICATED REQUEST
-// Retries once on 401 by forcing a fresh token (handles unexpected expiry)
 // ============================================
 async function shiprocketRequest(
   path,
@@ -183,8 +175,6 @@ export async function createOrder(payload) {
 
 // ============================================
 // AWB ASSIGNMENT
-// body: { shipment_id, courier_id? } — omit courier_id to let Shiprocket
-// auto-assign its recommended courier for that shipment.
 // ============================================
 export async function assignAWB(body) {
   return shiprocketRequest("/courier/assign/awb", { method: "POST", body });
@@ -212,9 +202,6 @@ export async function generateLabel(shipmentIds) {
 
 // ============================================
 // MANIFEST GENERATION
-// NOTE: verify the exact response field name (manifest_url vs. a nested
-// path) against your Shiprocket Postman collection before depending on it —
-// this has been inconsistently documented across sources.
 // ============================================
 export async function generateManifest(shipmentIds) {
   return shiprocketRequest("/manifests/generate", {
@@ -238,7 +225,6 @@ export async function trackByShipmentId(shipmentId) {
 
 // ============================================
 // CANCELLATION
-// orderIds = array of numeric Shiprocket order IDs (not Aurevian order IDs)
 // ============================================
 export async function cancelOrder(orderIds) {
   return shiprocketRequest("/orders/cancel", {
@@ -249,10 +235,6 @@ export async function cancelOrder(orderIds) {
 
 // ============================================
 // RETURN / REVERSE PICKUP
-// NOTE: return-order payload fields are less consistently documented than
-// the forward-order ones. Test this against a real Shiprocket sandbox/
-// account before relying on it — field names (e.g. qc fields) may need
-// adjustment based on what your account's dashboard actually expects.
 // ============================================
 export async function createReturnOrder(payload) {
   return shiprocketRequest("/orders/create/return", {
@@ -262,12 +244,26 @@ export async function createReturnOrder(payload) {
 }
 
 // ============================================
-// ✅ NEW: PICKUP LOCATIONS
-// Used to validate SHIPROCKET_PICKUP_LOCATION against what's actually
-// registered on the account, BEFORE attempting order creation.
+// PICKUP LOCATIONS
 // ============================================
 export async function getPickupLocations() {
   return shiprocketRequest("/settings/company/pickup");
+}
+
+// ============================================
+// ✅ NEW: ADD PICKUP LOCATION
+// Registers a seller's pickup/warehouse address with Shiprocket under a
+// unique nickname (pickup_location). That nickname is what every
+// subsequent order-create/return-create payload for that seller
+// references — Shiprocket resolves the full address server-side from it.
+// Called from sellerController.updateSellerPickupAddress whenever a
+// seller saves/changes their pickup address.
+// ============================================
+export async function addPickupLocation(payload) {
+  return shiprocketRequest("/settings/company/addpickup", {
+    method: "POST",
+    body: payload,
+  });
 }
 
 export default {
@@ -283,6 +279,7 @@ export default {
   trackByShipmentId,
   cancelOrder,
   createReturnOrder,
-  getPickupLocations, // ✅ NEW
+  getPickupLocations,
+  addPickupLocation, // ✅ NEW
   ShiprocketError,
 };

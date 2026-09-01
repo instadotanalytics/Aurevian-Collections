@@ -211,6 +211,68 @@ export const updateSellerProfile = createAsyncThunk(
   },
 );
 
+// Update Seller Pickup Address (Shiprocket)
+export const updateSellerPickupAddress = createAsyncThunk(
+  "seller/updatePickupAddress",
+  async (pickupAddressData, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("sellerAccessToken");
+      const response = await axios.put(
+        `${API_URL}/seller/pickup-address`,
+        pickupAddressData,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      if (response.data.success) {
+        const { pickupAddress, shiprocketSync } = response.data.data;
+        if (shiprocketSync?.success) {
+          toast.success("Pickup address saved and synced with Shiprocket!");
+        } else {
+          toast.success("Pickup address saved.");
+          toast.error(
+            shiprocketSync?.error ||
+              "Shiprocket synchronization failed — you can retry from this page.",
+          );
+        }
+        return pickupAddress;
+      }
+    } catch (error) {
+      const message =
+        error.response?.data?.message || "Failed to save pickup address";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  },
+);
+
+// ✅ NEW — Retry Shiprocket sync for pickup address
+export const retrySellerPickupSync = createAsyncThunk(
+  "seller/retryPickupSync",
+  async (_, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("sellerAccessToken");
+      const response = await axios.post(
+        `${API_URL}/seller/pickup-address/retry-sync`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      if (response.data.success) {
+        const { pickupAddress, shiprocketSync } = response.data.data;
+        if (shiprocketSync?.success) {
+          toast.success("Synced with Shiprocket!");
+        } else {
+          toast.error(shiprocketSync?.error || "Shiprocket sync failed again.");
+        }
+        return pickupAddress;
+      }
+    } catch (error) {
+      const message =
+        error.response?.data?.message || "Failed to retry synchronization";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  },
+);
+
 // Upload Documents (KYC)
 export const uploadSellerDocuments = createAsyncThunk(
   "seller/uploadDocuments",
@@ -534,6 +596,40 @@ const sellerSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
         state.status = "failed";
+      })
+
+      // ============================================
+      // ✅ UPDATED: UPDATE PICKUP ADDRESS (SHIPROCKET)
+      // ============================================
+      .addCase(updateSellerPickupAddress.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(updateSellerPickupAddress.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (state.seller) {
+          state.seller.pickupAddress = action.payload;
+        }
+      })
+      .addCase(updateSellerPickupAddress.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+
+      // ============================================
+      // ✅ NEW: RETRY PICKUP SYNC
+      // ============================================
+      .addCase(retrySellerPickupSync.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(retrySellerPickupSync.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (state.seller) {
+          state.seller.pickupAddress = action.payload;
+        }
+      })
+      .addCase(retrySellerPickupSync.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
       })
 
       // ============================================

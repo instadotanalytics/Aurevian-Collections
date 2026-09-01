@@ -2,8 +2,9 @@
 import Order, { FULFILLMENT_STATUS } from "../models/Order.js";
 import Cart from "../models/Cart.js";
 import JewelleryProduct from "../models/JewelleryProduct.js";
+import Seller from "../models/Seller.js"; // ✅ NEW — needed to look up the seller's pickup pincode
 import razorpayService from "../services/razorpayService.js";
-import PaymentSettings from "../models/PaymentSettings.js"; // ✅ NEW
+import PaymentSettings from "../models/PaymentSettings.js";
 import {
   createShipmentForOrder,
   calculateShippingRate,
@@ -87,15 +88,28 @@ const buildOrderItemsAndTotals = async (items) => {
   return { orderItems, itemsTotal, totalWeightKg };
 };
 
-// ✅ UPDATED — orders are no longer restricted to a single seller. Every
-// item already carries its own `seller` (items[].seller), which is what
-// per-seller views (getSellerOrders, sellerConfirmOrder, dashboards, etc.)
-// filter on — none of that depends on this value.
+// Every item already carries its own `seller` (items[].seller), which is
+// what per-seller views (getSellerOrders, sellerConfirmOrder, dashboards,
+// etc.) filter on — none of that depends on this value.
 //
 // `order.seller` on the top-level document is kept only as a convenience
 // "primary seller" reference for the common single-seller-cart case; for
 // multi-seller carts it's left null rather than picking one seller
-// arbitrarily. Nothing here blocks or requires splitting the checkout.
+// arbitrarily.
+//
+// ⚠️ CHANGED CONSEQUENCE: shipping now requires exactly ONE seller's
+// pickup address per checkout (see resolveShippingFee below and
+// shippingController's resolveOrderSeller/getShippingQuote). A null
+// sellerId here now blocks checkout entirely instead of silently
+// proceeding with order.seller = null — see the sellerId check added to
+// createRazorpayOrder/createCODOrder. This is a direct, unavoidable
+// consequence of pickup addresses moving from one global env value to
+// one-per-seller: there is no longer a single pincode to quote/ship a
+// mixed-seller cart from, and there is no fallback address to fall back
+// on. Splitting a multi-seller cart into one order per seller at checkout
+// time would resolve this properly, but that's a checkout-flow change
+// beyond the scope of "use the seller's saved pickup address" — flagging
+// it here rather than papering over it.
 const resolvePrimarySeller = (orderItems) => {
   const sellerIds = new Set(
     orderItems.map((i) => i.seller && i.seller.toString()).filter(Boolean),
@@ -103,10 +117,51 @@ const resolvePrimarySeller = (orderItems) => {
   return sellerIds.size === 1 ? [...sellerIds][0] : null;
 };
 
-const resolveShippingFee = async ({ pincode, weightKg, paymentMethod }) => {
+// ✅ NEW — looks up the seller's saved, Shiprocket-registered pickup
+// address and returns its pincode. Throws a clear 400 if the cart has no
+// single seller, the seller doesn't exist, or the seller hasn't set up
+// (and successfully registered) a pickup address yet. No fallback to any
+// other pincode.
+const resolveSellerPickupPincode = async (sellerId) => {
+  if (!sellerId) {
+    const err = new Error(
+      "Your cart contains products from multiple sellers. Please check out with products from one seller at a time so shipping can be calculated correctly.",
+    );
+    err.status = 400;
+    throw err;
+  }
+
+  const seller = await Seller.findById(sellerId).select("pickupAddress");
+  if (!seller) {
+    const err = new Error("Seller not found for the items in your cart");
+    err.status = 400;
+    throw err;
+  }
+
+  if (
+    !seller.pickupAddress?.isRegisteredWithShiprocket ||
+    !seller.pickupAddress?.pincode
+  ) {
+    const err = new Error(
+      "Delivery is temporarily unavailable — this seller has not configured a pickup address yet.",
+    );
+    err.status = 400;
+    throw err;
+  }
+
+  return seller.pickupAddress.pincode;
+};
+
+const resolveShippingFee = async ({
+  pincode,
+  pickupPincode,
+  weightKg,
+  paymentMethod,
+}) => {
   try {
     const rate = await calculateShippingRate({
       deliveryPincode: pincode,
+      pickupPincode,
       weightKg,
       paymentMethod,
     });
@@ -172,9 +227,6 @@ const validateShippingAddress = (shippingAddress) => {
   );
 };
 
-// ✅ NEW — normalizes an optional client-supplied idempotency key. Empty
-// string / non-string input is treated as "no key" rather than an error,
-// since idempotency is a best-effort convenience, not a required field.
 const normalizeClientRequestId = (value) => {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
@@ -182,8 +234,6 @@ const normalizeClientRequestId = (value) => {
   return trimmed;
 };
 
-// ✅ NEW — shared "already created this exact order?" lookup, used by both
-// payment flows before doing any product/shipping work.
 const findExistingOrderByIdempotencyKey = async (userId, clientRequestId) => {
   if (!clientRequestId) return null;
   return Order.findOne({ user: userId, idempotencyKey: clientRequestId });
@@ -212,9 +262,6 @@ export const createRazorpayOrder = async (req, res) => {
       });
     }
 
-    // ✅ NEW — idempotent replay: same checkout attempt clicked again
-    // (double-click, network retry) returns the SAME order instead of
-    // creating a second one.
     const existing = await findExistingOrderByIdempotencyKey(
       userId,
       clientRequestId,
@@ -256,13 +303,24 @@ export const createRazorpayOrder = async (req, res) => {
         .json({ success: false, message: e.message });
     }
 
-    // ✅ Carts/orders may span any number of sellers — no restriction here.
     const sellerId = resolvePrimarySeller(orderItems);
+
+    // ✅ NEW — resolve the seller's saved, registered pickup pincode.
+    // No fallback: if this fails, checkout stops here with a clear reason.
+    let pickupPincode;
+    try {
+      pickupPincode = await resolveSellerPickupPincode(sellerId);
+    } catch (e) {
+      return res
+        .status(e.status || 400)
+        .json({ success: false, message: e.message });
+    }
 
     let shippingFee;
     try {
       shippingFee = await resolveShippingFee({
         pincode: shippingAddress.pincode,
+        pickupPincode,
         weightKg: totalWeightKg,
         paymentMethod: "prepaid",
       });
@@ -297,9 +355,6 @@ export const createRazorpayOrder = async (req, res) => {
         orderStatus: "placed",
       });
     } catch (createErr) {
-      // ✅ NEW — race condition: two near-simultaneous requests with the
-      // same clientRequestId. The unique index rejects the second insert;
-      // fetch and return the one that actually landed instead of erroring.
       if (createErr.code === 11000 && clientRequestId) {
         const raced = await findExistingOrderByIdempotencyKey(
           userId,
@@ -390,9 +445,6 @@ export const verifyRazorpayPayment = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Order not found" });
 
-    // ✅ NEW — idempotent: if this order was already verified (e.g. the
-    // client retried after a network hiccup on the first success), don't
-    // re-run stock decrement / cart cleanup / emit a second event.
     if (order.paymentStatus === "paid") {
       return res.status(200).json({
         success: true,
@@ -431,8 +483,6 @@ export const verifyRazorpayPayment = async (req, res) => {
     };
     await order.save();
 
-    // Cart is only cleared once payment is actually verified — a failed,
-    // cancelled, or abandoned payment leaves the cart untouched.
     await finalizeInventoryAndCart(order, userId);
 
     emitOrderCreated(order);
@@ -475,7 +525,6 @@ export const createCODOrder = async (req, res) => {
       });
     }
 
-    // ✅ NEW — idempotent replay for COD too (double-click on "Place Order").
     const existing = await findExistingOrderByIdempotencyKey(
       userId,
       clientRequestId,
@@ -488,9 +537,6 @@ export const createCODOrder = async (req, res) => {
       });
     }
 
-    // ✅ NEW — backend is the single source of truth for COD availability.
-    // The frontend hides the option when disabled, but this check is what
-    // actually enforces it.
     const paymentSettings = await PaymentSettings.getSingleton();
     if (!paymentSettings.codEnabled) {
       return res.status(400).json({
@@ -510,13 +556,24 @@ export const createCODOrder = async (req, res) => {
         .json({ success: false, message: e.message });
     }
 
-    // ✅ Carts/orders may span any number of sellers — no restriction here.
     const sellerId = resolvePrimarySeller(orderItems);
+
+    // ✅ NEW — resolve the seller's saved, registered pickup pincode.
+    // No fallback: if this fails, checkout stops here with a clear reason.
+    let pickupPincode;
+    try {
+      pickupPincode = await resolveSellerPickupPincode(sellerId);
+    } catch (e) {
+      return res
+        .status(e.status || 400)
+        .json({ success: false, message: e.message });
+    }
 
     let shippingFee;
     try {
       shippingFee = await resolveShippingFee({
         pincode: shippingAddress.pincode,
+        pickupPincode,
         weightKg: totalWeightKg,
         paymentMethod: "cod",
       });
@@ -528,7 +585,6 @@ export const createCODOrder = async (req, res) => {
 
     const totalAmount = itemsTotal + shippingFee;
 
-    // ✅ NEW — min/max order value gating for COD, configurable by admin.
     if (
       paymentSettings.codMinOrderAmount > 0 &&
       totalAmount < paymentSettings.codMinOrderAmount
@@ -596,8 +652,6 @@ export const createCODOrder = async (req, res) => {
       throw createErr;
     }
 
-    // COD is "successfully created" the moment the order exists — there is
-    // no online transaction to wait for, so the cart clears immediately.
     await finalizeInventoryAndCart(order, userId);
 
     emitOrderCreated(order);
@@ -684,8 +738,6 @@ export const getSellerOrders = async (req, res) => {
         items: sellerItems,
         sellerSubtotal,
         totalAmount: order.totalAmount,
-        // ✅ NEW — payment method + reference, visible to the seller so
-        // they know upfront whether they're collecting cash on delivery.
         paymentMethod: order.paymentMethod,
         paymentStatus: order.paymentStatus,
         paymentReference:
@@ -841,8 +893,6 @@ export const sellerConfirmOrder = async (req, res) => {
         .json({ success: false, message: "Not authorized for this order" });
     }
 
-    // COD orders are payment-pending by design until delivery, so seller
-    // confirmation for COD does not require paymentStatus === "paid".
     if (order.paymentMethod !== "cod" && order.paymentStatus !== "paid") {
       return res.status(400).json({
         success: false,
@@ -984,9 +1034,11 @@ export const adminApproveOrder = async (req, res) => {
         success: true,
         message: "Order was already approved and forwarded to Shiprocket",
         data: order,
+        shiprocketSync: { success: true },
       });
     }
 
+    // ---- COMMIT THE APPROVAL ITSELF — INDEPENDENT OF SHIPROCKET ----
     order.fulfillmentStatus = FULFILLMENT_STATUS.ADMIN_APPROVED;
     order.adminApprovedAt = new Date();
     order.adminApprovedBy = req.user._id || req.user.id;
@@ -998,6 +1050,7 @@ export const adminApproveOrder = async (req, res) => {
     });
     await order.save();
 
+    // ---- ATTEMPT SHIPROCKET SYNC — FAILURE HERE MUST NOT UNDO THE APPROVAL ----
     try {
       const { order: updatedOrder } = await createShipmentForOrder(order._id);
 
@@ -1018,13 +1071,18 @@ export const adminApproveOrder = async (req, res) => {
 
       emitAdminApproved(updatedOrder);
 
+      // ✅ Always 200 — the approval itself succeeded regardless of Shiprocket.
       return res.status(200).json({
         success: true,
         message: "Order approved and forwarded to Shiprocket",
         data: updatedOrder,
+        shiprocketSync: { success: true },
       });
     } catch (shipErr) {
       order.fulfillmentStatus = FULFILLMENT_STATUS.SHIPROCKET_FAILED;
+      order.shipping = order.shipping || {};
+      order.shipping.syncStatus = "failed";
+      order.shipping.syncError = shipErr.message;
       order.statusHistory.push({
         status: FULFILLMENT_STATUS.SHIPROCKET_FAILED,
         role: "system",
@@ -1035,11 +1093,14 @@ export const adminApproveOrder = async (req, res) => {
 
       emitAdminApproved(order);
 
-      return res.status(502).json({
-        success: false,
-        message: "Order approved, but Shiprocket order creation failed",
-        error: shipErr.message,
+      // ✅ 200, not 502 — the DB approval succeeded. Only Shiprocket
+      // failed, and that's now retryable without redoing the approval.
+      return res.status(200).json({
+        success: true,
+        message:
+          "Order approved successfully, but Shiprocket synchronization failed. You can retry synchronization.",
         data: order,
+        shiprocketSync: { success: false, error: shipErr.message },
       });
     }
   } catch (error) {
@@ -1047,6 +1108,95 @@ export const adminApproveOrder = async (req, res) => {
     return res
       .status(500)
       .json({ success: false, message: "Failed to approve order" });
+  }
+};
+
+// ✅ NEW — retry Shiprocket sync for an order whose admin approval already
+// succeeded but whose Shiprocket sync failed or is incomplete (shipment
+// created but AWB missing). Never re-runs seller/admin approval, and
+// relies on createShipmentForOrder's own idempotency to avoid duplicates.
+export const retryOrderShiprocketSync = async (req, res) => {
+  try {
+    if (req.user.role !== "admin" && req.user.role !== "super_admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized" });
+    }
+
+    const { orderId } = req.params;
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    const RETRYABLE_STATUSES = [
+      FULFILLMENT_STATUS.ADMIN_APPROVED,
+      FULFILLMENT_STATUS.SHIPROCKET_FAILED,
+      FULFILLMENT_STATUS.AWB_PENDING,
+    ];
+    if (!RETRYABLE_STATUSES.includes(order.fulfillmentStatus)) {
+      return res.status(409).json({
+        success: false,
+        message: `Cannot retry Shiprocket sync for an order in state "${order.fulfillmentStatus}".`,
+      });
+    }
+
+    try {
+      const { order: updatedOrder } = await createShipmentForOrder(order._id);
+
+      if (updatedOrder.shipping?.shipmentId) {
+        updatedOrder.fulfillmentStatus = updatedOrder.shipping.awbCode
+          ? FULFILLMENT_STATUS.AWB_ASSIGNED
+          : FULFILLMENT_STATUS.AWB_PENDING;
+      } else {
+        updatedOrder.fulfillmentStatus = FULFILLMENT_STATUS.SHIPROCKET_FAILED;
+      }
+      updatedOrder.statusHistory.push({
+        status: updatedOrder.fulfillmentStatus,
+        role: "system",
+        reason: updatedOrder.shipping?.lastError || null,
+        timestamp: new Date(),
+      });
+      await updatedOrder.save();
+      emitAdminApproved(updatedOrder);
+
+      return res.status(200).json({
+        success: true,
+        message: updatedOrder.shipping?.shiprocketOrderId
+          ? "Shiprocket synchronization successful"
+          : "Retry attempted, but Shiprocket synchronization is still failing",
+        data: updatedOrder,
+        shiprocketSync: { success: !!updatedOrder.shipping?.shiprocketOrderId },
+      });
+    } catch (shipErr) {
+      order.fulfillmentStatus = FULFILLMENT_STATUS.SHIPROCKET_FAILED;
+      order.shipping = order.shipping || {};
+      order.shipping.syncStatus = "failed";
+      order.shipping.syncError = shipErr.message;
+      order.statusHistory.push({
+        status: FULFILLMENT_STATUS.SHIPROCKET_FAILED,
+        role: "system",
+        reason: shipErr.message,
+        timestamp: new Date(),
+      });
+      await order.save();
+      emitAdminApproved(order);
+
+      return res.status(200).json({
+        success: true,
+        message:
+          "Retry attempted, but Shiprocket synchronization failed again.",
+        data: order,
+        shiprocketSync: { success: false, error: shipErr.message },
+      });
+    }
+  } catch (error) {
+    console.error("❌ Retry Shiprocket sync error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to retry synchronization" });
   }
 };
 

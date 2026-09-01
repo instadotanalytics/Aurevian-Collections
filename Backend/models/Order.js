@@ -44,6 +44,18 @@ const shippingSchema = new mongoose.Schema(
     returnStatus: String,
     lastError: String,
     lastSyncedAt: Date,
+    // ✅ NEW — explicit Shiprocket sync state, kept separate from the
+    // order's approval lifecycle (fulfillmentStatus). This is what lets
+    // "the order was approved" and "Shiprocket sync failed" coexist
+    // without one field having to represent both facts.
+    syncStatus: {
+      type: String,
+      enum: ["not_synced", "pending", "synced", "failed"],
+      default: "not_synced",
+    },
+    syncError: String,
+    lastSyncAttemptAt: Date,
+    syncedAt: Date,
   },
   { _id: false },
 );

@@ -82,19 +82,40 @@ const OrdersManagement = () => {
     setActioningId(orderId);
     try {
       const res = await orderApi.adminApproveOrder(orderId);
-      if (res.success) {
+      if (res.shiprocketSync?.success === false) {
+        toast.error(
+          res.message ||
+            "Order approved, but Shiprocket synchronization failed. You can retry.",
+        );
+      } else {
         toast.success(
           res.message || "Order approved and forwarded to Shiprocket",
         );
-      } else {
-        // Approved but Shiprocket failed — surfaced clearly, not hidden behind a generic success toast
-        toast.error(res.message || "Order approved, but Shiprocket failed");
       }
-      loadOrders(activeTab);
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to approve order");
     } finally {
       setActioningId(null);
+      loadOrders(activeTab); // ✅ always refresh now, even on failure
+    }
+  };
+
+  const handleRetrySync = async (orderId) => {
+    setActioningId(orderId);
+    try {
+      const res = await orderApi.retryOrderShiprocketSync(orderId);
+      if (res.shiprocketSync?.success === false) {
+        toast.error(res.message || "Shiprocket sync failed again");
+      } else {
+        toast.success(res.message || "Shiprocket synchronization successful");
+      }
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Failed to retry synchronization",
+      );
+    } finally {
+      setActioningId(null);
+      loadOrders(activeTab);
     }
   };
 
@@ -307,6 +328,22 @@ const OrdersManagement = () => {
                 >
                   <FiX size={14} />
                   Reject
+                </button>
+              </div>
+            )}
+
+            {(order.fulfillmentStatus === "SHIPROCKET_FAILED" ||
+              order.fulfillmentStatus === "AWB_PENDING") && (
+              <div className={styles.actionRow}>
+                <button
+                  className={styles.approveBtn}
+                  disabled={actioningId === order._id}
+                  onClick={() => handleRetrySync(order._id)}
+                >
+                  <FiRefreshCw size={14} />
+                  {actioningId === order._id
+                    ? "Retrying..."
+                    : "Retry Shiprocket Sync"}
                 </button>
               </div>
             )}

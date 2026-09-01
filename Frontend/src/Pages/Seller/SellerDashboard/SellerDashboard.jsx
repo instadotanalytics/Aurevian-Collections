@@ -19,7 +19,8 @@ import {
   FiStar,
   FiGift,
   FiAward,
-  FiSunrise, // ✅ NEW — icon for New Collections
+  FiSunrise,
+  FiMapPin, // ✅ NEW — icon for Pickup Address
 } from "react-icons/fi";
 
 import { useSelector, useDispatch } from "react-redux";
@@ -49,6 +50,7 @@ import Earnings from "./components/Earnings";
 import Customers from "./components/Customers";
 import Settings from "./components/Settings";
 import SellerKYC from "../SellerKYC/SellerKYC.jsx";
+import PickupAddressSettings from "./components/PickupAddressSettings"; // ✅ NEW
 
 import useSellerNotifications from "../../../hooks/useSellerNotifications.js";
 import NotificationCenter from "../../../Components/common/NotificationCenter/NotificationCenter.jsx";
@@ -93,18 +95,19 @@ const PLAN_THEME = {
 
 const getPlanTheme = (planId) => PLAN_THEME[planId] || PLAN_THEME.free;
 
-// ✅ Updated menuItems with New Collections
+// ✅ Updated menuItems with New Collections and Pickup Address
 const menuItems = [
   { id: "", label: "Dashboard", icon: FiHome },
   { id: "products", label: "Products", icon: FiPackage },
   { id: "featured-offers", label: "Offers Section", icon: FiStar },
   { id: "curated-for-you", label: "Curated For You", icon: FiGift },
   { id: "trending-picks", label: "Trending Picks", icon: FiAward },
-  { id: "new-collections", label: "New Collections", icon: FiSunrise }, // ✅ NEW
+  { id: "new-collections", label: "New Collections", icon: FiSunrise },
   { id: "orders", label: "Orders", icon: FiShoppingBag },
   { id: "earnings", label: "Earnings", icon: FiDollarSign },
   { id: "customers", label: "Customers", icon: FiUsers },
   { id: "settings", label: "Settings", icon: FiSettings },
+  { id: "pickup-address", label: "Pickup Address", icon: FiMapPin }, // ✅ NEW
   { id: "upgrade", label: "Upgrade", icon: FiTrendingUp },
 ];
 
@@ -485,6 +488,10 @@ const SellerDashboard = () => {
               <Route path="earnings" element={<Earnings />} />
               <Route path="customers" element={<Customers />} />
               <Route path="settings" element={<Settings />} />
+              <Route
+                path="pickup-address"
+                element={<PickupAddressSettings />}
+              />
               <Route path="upgrade" element={<Upgrade />} />
               <Route path="kyc" element={<SellerKYC />} />
               <Route path="*" element={<Navigate to={basePath} replace />} />
