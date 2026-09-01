@@ -4,13 +4,32 @@ const BASE_URL =
   process.env.SHIPROCKET_API_BASE_URL ||
   "https://apiv2.shiprocket.in/v1/external";
 
-const isConfigured = !!(
-  process.env.SHIPROCKET_EMAIL && process.env.SHIPROCKET_PASSWORD
-);
+// ✅ CHANGED — was a `const` evaluated once at module import time, which
+// meant a process that booted before these vars were populated (or that
+// had them injected slightly differently in production) would report
+// "not configured" for its entire lifetime, even after the vars were
+// confirmed present. This is now a live check, re-evaluated on every
+// call, with defensive trimming in case a hosting dashboard's env var
+// UI preserved stray whitespace/newlines around a pasted value.
+function isShiprocketConfigured() {
+  return !!(
+    process.env.SHIPROCKET_EMAIL?.trim() &&
+    process.env.SHIPROCKET_PASSWORD?.trim()
+  );
+}
 
-if (!isConfigured) {
+// Kept as a live getter (not a frozen boolean) so `shiprocketService.isConfigured`
+// still works exactly as before for any existing callers, but now reflects
+// the CURRENT process.env state rather than a snapshot taken at import time.
+const shiprocketServiceConfig = {
+  get isConfigured() {
+    return isShiprocketConfigured();
+  },
+};
+
+if (!shiprocketServiceConfig.isConfigured) {
   console.log(
-    "⚠️  Shiprocket credentials not configured — shipping features will fail until SHIPROCKET_EMAIL and SHIPROCKET_PASSWORD are set in .env",
+    "⚠️  Shiprocket credentials not detected at startup — SHIPROCKET_EMAIL and SHIPROCKET_PASSWORD will be re-checked on each request. If they are added later without a full server restart, some platforms will still pick them up; if not, restart the service.",
   );
 } else {
   console.log("✅ Shiprocket service initialized");
@@ -37,7 +56,12 @@ const TOKEN_SAFETY_MARGIN_MS = 6 * 60 * 60 * 1000;
 let tokenCache = { token: null, expiresAt: 0 };
 
 export async function generateToken() {
-  if (!isConfigured) {
+  // ✅ CHANGED — live check instead of the stale module-level const.
+  if (!isShiprocketConfigured()) {
+    console.error(
+      "❌ Shiprocket auth failed: SHIPROCKET_EMAIL / SHIPROCKET_PASSWORD not found in process.env at request time. " +
+        `Present: email=${!!process.env.SHIPROCKET_EMAIL} password=${!!process.env.SHIPROCKET_PASSWORD}`,
+    );
     throw new ShiprocketError(
       "Shiprocket is not configured on this server",
       500,
@@ -50,8 +74,8 @@ export async function generateToken() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: process.env.SHIPROCKET_EMAIL,
-        password: process.env.SHIPROCKET_PASSWORD,
+        email: process.env.SHIPROCKET_EMAIL.trim(),
+        password: process.env.SHIPROCKET_PASSWORD.trim(),
       }),
     });
   } catch (networkErr) {
@@ -267,7 +291,7 @@ export async function addPickupLocation(payload) {
 }
 
 export default {
-  isConfigured,
+  ...shiprocketServiceConfig, // ✅ CHANGED — spreads the live getter
   generateToken,
   checkServiceability,
   createOrder,
@@ -280,6 +304,6 @@ export default {
   cancelOrder,
   createReturnOrder,
   getPickupLocations,
-  addPickupLocation, // ✅ NEW
+  addPickupLocation,
   ShiprocketError,
 };
