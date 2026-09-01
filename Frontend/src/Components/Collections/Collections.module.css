@@ -797,7 +797,7 @@
 }
 
 /* ==========================================================
-   Product Card
+   PRODUCT CARD - MATCHING SHOP COMPONENT
    ========================================================== */
 .productsGrid {
   display: grid;
@@ -811,13 +811,10 @@
   border: 1px solid var(--cream-line);
   border-radius: 0;
   overflow: hidden;
-  transition:
-    box-shadow 0.25s,
-    transform 0.25s;
+  transition: box-shadow 0.25s, transform 0.25s;
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 330px;
 }
 
 .productCard:hover {
@@ -854,7 +851,7 @@
   transform: scale(1.05);
 }
 
-/* Discount Badge - Top Left */
+/* Discount Badge - Top Left (white background, dark text) */
 .productDiscount {
   position: absolute;
   top: 12px;
@@ -949,22 +946,27 @@
   justify-content: space-between;
 }
 
+/* ==========================================================
+   PRODUCT NAME - SINGLE LINE WITH ELLIPSIS (MATCHING SHOP)
+   ========================================================== */
 .productName {
   font-family: "Jost", "Helvetica Neue", Arial, sans-serif;
   font-size: 15px;
   font-weight: 500;
   color: var(--ink);
-  line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
   text-decoration: none;
   padding: 10px 12px 5px;
+  /* Single line with ellipsis */
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .productName:hover {
   text-decoration: none;
+  color: var(--gold-deep);
 }
 
 .productPriceRow {
@@ -979,6 +981,7 @@
 .productCurrentPrice {
   color: var(--sale);
   font-weight: 600;
+  font-size: 15px;
 }
 
 .productOriginalPrice {
@@ -1885,13 +1888,21 @@
     min-height: 260px;
   }
 
+  /* Mobile Product Name - Single line with ellipsis */
   .productName {
     font-size: 13px;
+    padding: 8px 12px 2px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
   }
 
   .productPriceRow {
     font-size: 11px;
     gap: 8px;
+    padding: 0 12px 4px;
   }
 
   .productCurrentPrice {
@@ -1905,7 +1916,7 @@
   .productAddBtn {
     font-size: 10px;
     min-height: 36px;
-    padding: 9px 0;
+    padding: 8px 0; /* Changed from 9px to 8px */
     width: calc(100% + 24px);
     margin: 8px -12px -4px;
   }
@@ -2064,6 +2075,11 @@
   .productName {
     font-size: 12px;
     padding: 6px 12px 2px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
   }
 
   .productCurrentPrice {
@@ -2077,7 +2093,7 @@
   .productAddBtn {
     font-size: 9px;
     min-height: 32px;
-    padding: 10px 0px 12px;
+    padding: 8px 0px; /* Changed from 10px/12px to 8px */
     width: calc(100% + 20px);
     margin: 6px -10px -4px;
   }
@@ -2137,8 +2153,8 @@
   }
 
   .mobileFilterContent {
-    padding: 0 14px 14px;
-    margin-bottom: 60px;
+    padding: 0 14px 18px;
+    /* margin-bottom: 60px; */
   }
 
   .mobileFilterGroup {
@@ -2155,7 +2171,6 @@
 
   .mobileFilterApply {
     padding: 10px;
-    /* margin-bottom: 50px; */
     font-size: 14px;
   }
 
@@ -2192,21 +2207,26 @@
 
   .productName {
     font-size: 12px;
-    text-decoration: none;
+    padding: 4px 8px 2px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
   }
 
   .productCurrentPrice {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .productOriginalPrice {
-    font-size: 9px;
+    font-size: 10px;
   }
 
   .productAddBtn {
-    font-size: 8px;
+    font-size: 10px;
     min-height: 28px;
-    padding: 5px 0;
+    padding: 8px 0; /* Changed from 5px to 8px */
     width: calc(100% + 16px);
     margin: 4px -8px -4px;
   }

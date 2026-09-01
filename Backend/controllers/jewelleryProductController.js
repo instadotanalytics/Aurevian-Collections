@@ -1368,6 +1368,139 @@ export const getRelevantProducts = async (req, res) => {
   }
 };
 
+// ============================================
+// ✅ NEW: SEARCH PRODUCTS (Public - Header search bar + /shop?search=)
+//
+// Why regex, not $text:
+// MongoDB's $text index tokenizes into whole (stemmed) words and can
+// only match whole tokens — it CANNOT match a substring inside a word
+// (e.g. "cot" would never match "Cotton", a bare single letter would
+// never match anything). The product brief explicitly requires
+// substring / partial-word / single-character matching from anywhere
+// in the name, so a case-insensitive regex across the searchable
+// fields is the correct tool here, not the existing text index.
+//
+// Query is split on whitespace; every word must match at least one
+// searchable field ($and of per-word $or) so multi-word queries like
+// "premium cotton" require both words to appear somewhere on the
+// product, in any order, across any of the fields — this is what
+// lets "Premium Cotton", "cotton oversized", "premium cotton
+// oversized t-shirt" etc. all resolve to the same product.
+//
+// Performance: the compound {status:1, isActive:1} index (see model)
+// prunes to public/live products before the regex scan runs — this
+// keeps the (unavoidably unindexed) regex matching scoped to the
+// storefront-visible catalog rather than the entire collection,
+// including seller drafts/archived/rejected products.
+// ============================================
+export const searchProducts = async (req, res) => {
+  console.log("✅ searchProducts called with query:", req.query);
+  try {
+    const rawQuery = (req.query.q ?? req.query.search ?? "").toString();
+    // Trim + collapse internal multiple spaces into one
+    const query = rawQuery.trim().replace(/\s+/g, " ");
+
+    const { page = 1, limit = 20, categoryId, sort } = req.query;
+    const parsedLimit = Math.min(Math.max(parseInt(limit) || 20, 1), 50);
+    const parsedPage = Math.max(parseInt(page) || 1, 1);
+
+    // ✅ Never hit the database for an empty query
+    if (!query) {
+      console.log("⚠️ Empty search query — returning empty result set");
+      return res.status(200).json({
+        success: true,
+        data: {
+          products: [],
+          pagination: {
+            page: 1,
+            limit: parsedLimit,
+            total: 0,
+            totalPages: 0,
+          },
+          query: "",
+        },
+      });
+    }
+
+    const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const words = query.split(" ").filter(Boolean);
+
+    const wordCondition = (word) => {
+      const regex = new RegExp(escapeRegex(word), "i"); // case-insensitive, substring, anywhere
+      return {
+        $or: [
+          { productName: regex },
+          { brand: regex },
+          { shortDescription: regex },
+          { fullDescription: regex },
+          { "category.categoryData.label": regex },
+          { "category.subCategoryData.label": regex },
+          { tags: regex },
+          { "specifications.collection": regex },
+          { "specifications.occasion": regex },
+          { "specifications.style": regex },
+          { "specifications.material": regex },
+          { "specifications.stoneType": regex },
+        ],
+      };
+    };
+
+    const mongoQuery = {
+      // Base filter uses the {status:1, isActive:1} compound index —
+      // only ever search products that are actually live on the storefront.
+      status: "Published",
+      isActive: true,
+      $and: words.map(wordCondition),
+    };
+
+    if (categoryId) {
+      mongoQuery["category.categoryId"] = categoryId;
+      console.log("📊 Restricting search to category:", categoryId);
+    }
+
+    let sortOption = { createdAt: -1 };
+    if (sort === "price-low") sortOption = { "pricing.originalPrice": 1 };
+    if (sort === "price-high") sortOption = { "pricing.originalPrice": -1 };
+    if (sort === "newest") sortOption = { createdAt: -1 };
+    if (sort === "popular") sortOption = { "reviews.totalSold": -1 };
+
+    console.log("🔍 Search Mongo query:", JSON.stringify(mongoQuery));
+
+    const skip = (parsedPage - 1) * parsedLimit;
+
+    const [products, total] = await Promise.all([
+      JewelleryProduct.find(mongoQuery)
+        .sort(sortOption)
+        .skip(skip)
+        .limit(parsedLimit)
+        .select("-pricing.costPrice -__v"),
+      JewelleryProduct.countDocuments(mongoQuery),
+    ]);
+
+    console.log(`📊 Search "${query}" matched ${total} product(s)`);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        products,
+        pagination: {
+          page: parsedPage,
+          limit: parsedLimit,
+          total,
+          totalPages: Math.ceil(total / parsedLimit),
+        },
+        query,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Search products error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Search failed",
+    });
+  }
+};
+
 console.log("✅ jewelleryProductController fully loaded");
 console.log("📌 Exported functions:");
 console.log("  - getProductCategories");
@@ -1387,3 +1520,6 @@ console.log(
 );
 console.log("  - getPlacementCounts (✅ NEW: Seller dashboard API)");
 console.log("  - getRelevantProducts (✅ NEW: Public 'You May Also Like' API)");
+console.log(
+  "  - searchProducts (✅ NEW: Public multi-field partial/case-insensitive product search)",
+);

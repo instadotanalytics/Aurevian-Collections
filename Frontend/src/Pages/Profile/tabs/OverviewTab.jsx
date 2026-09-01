@@ -69,7 +69,11 @@ const maskEmail = (email) => {
 
 const OverviewTab = () => {
   const dispatch = useDispatch();
-  const { profile } = useSelector((state) => state.profile);
+  // ✅ FIXED — `addresses` was never pulled from the profile slice here,
+  // so this tab had no way to render the user's saved addresses even
+  // though the slice already held them (populated by fetchProfile /
+  // addAddress / updateAddress / deleteAddress in profileSlice.js).
+  const { profile, addresses } = useSelector((state) => state.profile);
   const [isEditing, setIsEditing] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [formErrors, setFormErrors] = useState({});
@@ -161,7 +165,9 @@ const OverviewTab = () => {
         await fetchReferralData();
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to generate referral code");
+      toast.error(
+        error.response?.data?.message || "Failed to generate referral code",
+      );
     } finally {
       setGenerating(false);
     }
@@ -226,7 +232,10 @@ const OverviewTab = () => {
     profile?.anniversary,
   ]);
 
-  const maskedEmail = useMemo(() => maskEmail(profile?.email), [profile?.email]);
+  const maskedEmail = useMemo(
+    () => maskEmail(profile?.email),
+    [profile?.email],
+  );
 
   const validate = useCallback(() => {
     const errors = {};
@@ -281,25 +290,22 @@ const OverviewTab = () => {
     return Object.keys(errors).length === 0;
   }, [formData]);
 
-  const handleChange = useCallback(
-    (e) => {
-      const { name, value } = e.target;
-      if (name.includes(".")) {
-        const [parent, child] = name.split(".");
-        setFormData((prev) => ({
-          ...prev,
-          [parent]: {
-            ...prev[parent],
-            [child]: value,
-          },
-        }));
-      } else {
-        setFormData((prev) => ({ ...prev, [name]: value }));
-      }
-      setFormErrors((prev) => (prev[name] ? { ...prev, [name]: "" } : prev));
-    },
-    [],
-  );
+  const handleChange = useCallback((e) => {
+    const { name, value } = e.target;
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".");
+      setFormData((prev) => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent],
+          [child]: value,
+        },
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+    setFormErrors((prev) => (prev[name] ? { ...prev, [name]: "" } : prev));
+  }, []);
 
   const handleUpdateProfile = useCallback(async () => {
     if (!validate()) {
@@ -375,6 +381,60 @@ const OverviewTab = () => {
       </div>
 
       {/* ============================================
+          SAVED ADDRESSES — ✅ NEW
+          Reads directly from the same profile slice AddressTab writes to
+          (state.profile.addresses), populated on login/refresh via
+          fetchProfile and kept in sync by addAddress/updateAddress/
+          deleteAddress/setDefaultAddress. No separate fetch needed here —
+          this is the same persisted data, just rendered on this tab too.
+          ============================================ */}
+      <div className={styles.infoCard}>
+        <div className={styles.cardHeader}>
+          <h3>Saved Addresses</h3>
+        </div>
+        {addresses && addresses.length > 0 ? (
+          <div className={styles.addressList}>
+            {addresses.map((addr) => (
+              <div key={addr._id} className={styles.addressCard}>
+                <div className={styles.addressTypeBadge}>
+                  <FiMapPin size={16} />
+                  <span>{addr.addressType || "Home"}</span>
+                  {addr.isDefault && (
+                    <span className={styles.addressDefault}>Default</span>
+                  )}
+                </div>
+                <div className={styles.addressDetails}>
+                  <div className={styles.addressHeader}>
+                    <span className={styles.addressName}>
+                      {addr.recipientName}
+                    </span>
+                  </div>
+                  <p className={styles.addressLine}>
+                    {addr.house}
+                    {addr.apartment ? `, ${addr.apartment}` : ""}
+                    {addr.street ? `, ${addr.street}` : ""}
+                  </p>
+                  <p className={styles.addressLine}>
+                    {addr.area ? `${addr.area}, ` : ""}
+                    {addr.city}, {addr.state} - {addr.pincode}
+                  </p>
+                  <p className={styles.addressLine}>{addr.country}</p>
+                  <p className={styles.addressPhone}>
+                    <FiPhone size={13} /> {addr.phone}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className={styles.addressText}>
+            No saved addresses yet. Add one from the Address tab for faster
+            checkout.
+          </p>
+        )}
+      </div>
+
+      {/* ============================================
           REFERRAL SECTION
           ============================================ */}
       <div className={styles.referralCard}>
@@ -421,10 +481,7 @@ const OverviewTab = () => {
 
               {referralCode && (
                 <div className={styles.referralActions}>
-                  <button
-                    className={styles.copyBtn}
-                    onClick={copyReferralLink}
-                  >
+                  <button className={styles.copyBtn} onClick={copyReferralLink}>
                     {copied ? <FiCheck /> : <FiCopy />}
                     {copied ? "Copied!" : "Copy"}
                   </button>

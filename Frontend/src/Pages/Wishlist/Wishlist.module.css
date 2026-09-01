@@ -1,150 +1,218 @@
-/* Wishlist.module.css */
+
+/* src/Pages/Wishlist/Wishlist.module.css - Complete updated file */
 
 /* ============================================
-   VARIABLES
+   VARIABLES - Aurevian Premium Theme
+   Copied verbatim from Cart.module.css so both pages share one visual
+   system. If you tune these in Cart, mirror the change here too (or better,
+   move this block into a shared tokens.css both files import).
    ============================================ */
 :root {
   --gold: #d4af37;
   --gold-light: #f5f0e8;
   --gold-dark: #b8962e;
-  --gold-gradient: linear-gradient(135deg, #d4af37 0%, #c9a84c 50%, #b8962e 100%);
+  --gold-deep: #9c7a2e;
+  --gold-gradient: linear-gradient(
+    135deg,
+    #d4af37 0%,
+    #c9a84c 50%,
+    #b8962e 100%
+  );
   --cream: #fcf9f5;
-  --dark: #1a1a1a;
-  --gray: #6b6b6b;
-  --light-gray: #f5f5f5;
+  --cream-light: #fdfaf5;
+  --dark: #1a1714;
+  --dark-soft: #3d352e;
+  --gray: #6b635a;
+  --gray-light: #e8e3dc;
   --border: #e8e3dc;
-  --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  --shadow-hover: 0 4px 24px rgba(0, 0, 0, 0.1);
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow: 0 2px 16px rgba(26, 23, 20, 0.04);
+  --shadow-hover: 0 8px 32px rgba(26, 23, 20, 0.08);
+  --transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ============================================
-   CONTAINER
+   WISHLIST PAGE
    ============================================ */
-.wishlistContainer {
+.wishlistPage {
   width: 100%;
-  max-width: 1170px;
-  margin: 130px auto;
-  padding: 0;
-  background: #faf8f6;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  overflow: hidden;
-}
-
-/* ============================================
-   SHIPPING BANNER
-   ============================================ */
-.shippingBanner {
-  background: var(--gold-gradient);
-  color: white;
-  text-align: center;
-  padding: 1rem;
-  font-size: 0.8rem;
-  font-weight: 500;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  /* margin: 1rem auto; */
-}
-
-/* ============================================
-   HEADER
-   ============================================ */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem 2rem;
-  background: white;
-  border-bottom: 1px solid var(--border);
-}
-
-.headerLeft {
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
-}
-
-.headerTitleWrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-}
-
-.headerIcon {
-  color: var(--gold);
-  font-size: 1.6rem;
-}
-
-.headerTitle {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.8rem;
-  font-weight: 700;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 140px 0 40px;
+  font-family:
+    "Jost",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  min-height: 80vh;
   color: var(--dark);
+}
+
+/* ============================================
+   HERO SECTION
+   ============================================ */
+.heroSection {
+  text-align: center;
+  padding: 40px 20px 32px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.heroContent {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.heroTitle {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(35px, 4.5vw, 48px);
+  font-weight: 500;
+  color: var(--dark);
+  margin: 8px 0 12px;
+  letter-spacing: -0.01em;
+}
+
+.heroDescription {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  color: var(--gray);
+  font-size: 16px;
+  font-weight: 300;
   margin: 0;
 }
 
-.itemCount {
-  font-size: 0.9rem;
-  color: var(--gray);
-  background: var(--light-gray);
-  padding: 0.3rem 1rem;
-  border-radius: 20px;
+/* ============================================
+   CONTROLS BAR (item count + search)
+   ============================================ */
+.controlsBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 4px 16px;
+  flex-wrap: wrap;
 }
 
-.selectAllBtn {
-  padding: 0.5rem 1.5rem;
-  background: transparent;
-  border: 1px solid var(--gold);
-  color: var(--gold);
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
+.itemCount {
+  font-size: 14px;
+  color: var(--gray);
+  font-weight: 300;
+  white-space: nowrap;
+}
+
+.searchWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 220px;
+  max-width: 320px;
+  margin-left: auto;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 14px;
+  color: var(--gray);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  font-family: "Jost", sans-serif;
+  font-size: 14px;
+  color: var(--dark);
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 14px 10px 38px;
   transition: var(--transition);
 }
 
-.selectAllBtn:hover {
-  background: var(--gold);
-  color: white;
+.searchInput::placeholder {
+  color: var(--gray);
+}
+
+.searchInput:hover {
+  border-color: var(--gold-dark);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--gold-deep);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
 }
 
 /* ============================================
-   WISHLIST ITEMS
+   ITEMS SECTION
    ============================================ */
-.wishlistItems {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  background: white;
+.wishlistItemsSection {
+  background: #ffffff00;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: var(--shadow);
 }
 
 /* ============================================
    WISHLIST CARD
    ============================================ */
 .wishlistCard {
-  display: flex;
-  align-items: stretch;
-  padding: 1.5rem 2rem;
   border-bottom: 1px solid var(--border);
   transition: var(--transition);
-  gap: 1.5rem;
-}
-
-.wishlistCard:hover {
-  background: #fdfcfb;
 }
 
 .wishlistCard:last-child {
   border-bottom: none;
 }
 
-/* Image */
+.wishlistCard:hover {
+  background: var(--cream);
+}
+
+.cardContent {
+  padding: 20px 24px;
+}
+
+/* ============================================
+   DESKTOP VIEW
+   ============================================ */
+.desktopView {
+  display: grid;
+  grid-template-columns: 1fr 140px 170px 50px;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ============================================
+   MOBILE VIEW
+   ============================================ */
+.mobileView {
+  display: none;
+}
+
+/* ============================================
+   PRODUCT CELL (desktop)
+   ============================================ */
+.productCell {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.productCell:hover .productName {
+  color: var(--gold-deep);
+}
+
 .imageWrapper {
+  position: relative;
   flex-shrink: 0;
-  width: 120px;
-  height: 120px;
-  background: var(--light-gray);
- 
+  width: 110px;
+  height: 110px;
+  background: var(--gray-light);
+  border-radius: 4px;
   overflow: hidden;
 }
 
@@ -152,27 +220,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: var(--transition);
-}
-
-.wishlistCard:hover .productImage {
-  transform: scale(1.05);
-}
-
-/* Product Details */
-.productDetails {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-width: 0;
-}
-
-.productHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
 }
 
 .productInfo {
@@ -181,689 +228,717 @@
 }
 
 .productName {
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--dark);
-  margin: 0 0 0.2rem 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.productCategory {
-  font-size: 0.85rem;
-  color: var(--gray);
-  margin: 0 0 0.3rem 0;
-}
-
-.ratingContainer {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.ratingStars {
-  display: flex;
-  gap: 0.1rem;
-}
-
-.starFilled {
-  color: #ffa41c;
-  font-size: 0.85rem;
-}
-
-.starEmpty {
-  color: #ddd;
-  font-size: 0.85rem;
-}
-
-.ratingCount {
-  font-size: 0.8rem;
-  color: var(--gray);
-}
-
-.removeBtn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--gray);
-  cursor: pointer;
-  transition: var(--transition);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.removeBtn:hover {
-  border-color: #c62828;
-  color: #c62828;
-  background: #fce4ec;
-  transform: rotate(90deg);
-}
-
-/* Product Bottom */
-.productBottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  /* flex-wrap: wrap; */
-  margin-top: 0.5rem;
-  gap: 0.8rem;
-}
-
-.priceStockContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.priceContainer {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-}
-
-.currentPrice {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--dark);
-}
-
-.oldPrice {
-  font-size: 0.9rem;
-  color: var(--gray);
-  text-decoration: line-through;
-}
-
-.stockContainer {
-  display: flex;
-  align-items: center;
-}
-
-.stockStatus {
-  padding: 0.2rem 0.8rem;
-  border-radius: 20px;
-  font-size: 0.7rem;
+  font-family: "Playfair Display", serif;
+  font-size: 17px;
   font-weight: 500;
-  width: fit-content;
+  color: var(--dark);
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+  transition: var(--transition);
+}
+
+.productDescription {
+  font-size: 13px;
+  color: var(--gray);
+  font-weight: 300;
+  line-height: 1.5;
+  margin: 4px 0 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 46ch;
+}
+
+.availability {
+  margin-top: 4px;
 }
 
 .inStock {
-  background: #e8f5e9;
+  font-size: 13px;
   color: #2e7d32;
+  font-weight: 400;
+  letter-spacing: 0.02em;
 }
 
-.outOfStock {
-  background: #fce4ec;
+/* ============================================
+   PRICE CELL (desktop)
+   ============================================ */
+.priceCell {
+  text-align: center;
+}
+
+.currentPrice {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--dark);
+  display: inline-flex;
+  align-items: center;
+}
+
+.rupeeIconSmall {
+  font-size: 12px;
+  margin-right: 1px;
+}
+
+/* ============================================
+   ACTION CELL — Add to Cart (desktop)
+   ============================================ */
+.actionCell {
+  display: flex;
+  justify-content: center;
+}
+
+.moveToCartButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: var(--gold-deep);
+  color: white;
+  border: none;
+  font-family: "Jost", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.moveToCartButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.3);
+}
+
+.moveToCartButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.moveToCartButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
+}
+
+.moveToCartButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ============================================
+   REMOVE CELL / BUTTON (desktop)
+   ============================================ */
+.removeCell {
+  text-align: center;
+}
+
+.removeButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--gray);
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.removeButton:hover {
+  border-color: #c62828;
   color: #c62828;
+  background: #fce4ec;
 }
 
-.bottomRow {
+.removeButton:active {
+  transform: scale(0.92);
+}
+
+.removeButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.2);
+}
+
+.removeButtonMobile {
+  display: none;
+}
+
+/* ============================================
+   LOAD MORE / INFINITE SCROLL
+   ============================================ */
+.loadMoreRow {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  justify-content: center;
+  padding: 28px;
 }
 
-.checkboxWrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
+.loadMoreBtn {
+  padding: 12px 32px;
+  background: transparent;
+  color: var(--dark);
+  border: 1px solid var(--border);
+  font-family: "Jost", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   cursor: pointer;
+  transition: var(--transition);
 }
 
-.checkbox {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  accent-color: var(--gold);
-  border: 2px solid var(--border);
+.loadMoreBtn:hover {
+  border-color: var(--gold-deep);
+  color: var(--gold-deep);
+}
+
+.loadMoreBtn:active {
+  transform: scale(0.97);
+}
+
+.loadMoreBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.25);
+}
+
+/* ============================================
+   SKELETON LOADING
+   ============================================ */
+.skeletonBlock,
+.skeletonLine {
+  position: relative;
+  background: var(--gray-light);
+  overflow: hidden;
   border-radius: 4px;
 }
 
-.checkboxLabel {
-  font-size: 0.75rem;
-  color: var(--gray);
-  font-weight: 500;
+.skeletonBlock::after,
+.skeletonLine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.7),
+    transparent
+  );
+  animation: shimmer 1.4s infinite;
 }
 
-.quantityActions {
-  display: flex;
-  align-items: center;
+.skeletonLine {
+  height: 14px;
 }
 
-.quantityControl {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
+.skeletonTitle {
+  width: 55%;
+  height: 18px;
+  margin-bottom: 8px;
 }
 
-.qtyBtn {
+.skeletonDesc {
+  width: 85%;
+}
+
+.skeletonPrice {
+  width: 60px;
+  height: 18px;
+  justify-self: center;
+}
+
+.skeletonBtn {
+  width: 120px;
+  height: 38px;
+  justify-self: center;
+}
+
+.skeletonRemove {
   width: 32px;
   height: 32px;
-  border: none;
-  background: transparent;
-  color: var(--dark);
-  cursor: pointer;
-  transition: var(--transition);
+  border-radius: 50%;
+  justify-self: center;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ============================================
+   EMPTY / NO-RESULTS STATE
+   ============================================ */
+.emptyContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px;
+  text-align: center;
+}
+
+.noResults {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+}
+
+.emptyIconWrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.qtyBtn:hover {
-  background: var(--light-gray);
-}
-
-.qtyValue {
-  min-width: 30px;
-  text-align: center;
-  font-weight: 500;
-  font-size: 0.95rem;
-  color: var(--dark);
-}
-
-/* ============================================
-   BOTTOM ACTIONS
-   ============================================ */
-.bottomActions {
-  display: flex;
-  justify-content: end;
-  align-items: center;
-  padding: 1rem 2rem;
-  background: white;
-  border-top: 1px solid var(--border);
-  margin-top: 0;
-  gap: 1rem;
-}
-
-.selectedInfo {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-}
-
-.selectedInfo span {
-  font-size: 0.9rem;
-  color: var(--gray);
-}
-
-.moveToCartSelected {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.7rem 1.5rem;
-  background: var(--gold-gradient);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.moveToCartSelected:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3);
-}
-
-.removeSelected {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.7rem 1.5rem;
-  background: transparent;
-  color: #c62828;
-  border: 1px solid #c62828;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.removeSelected:hover {
-  background: #fce4ec;
-}
-
-/* ============================================
-   EMPTY WISHLIST
-   ============================================ */
-.emptyWishlist {
-  text-align: center;
-  padding: 4rem 2rem;
-  background: white;
-  /* margin-top: 100px; */
-}
-
-.emptyHeart {
-  font-size: 4rem;
+.emptyIcon {
+  font-size: 32px;
   color: var(--gold);
-  margin-bottom: 1rem;
+  margin-bottom: 12px;
 }
 
-.emptyWishlist h2 {
-  font-size: 1.5rem;
+.emptyTitle {
+  font-family: "Playfair Display", serif;
+  font-size: 28px;
+  font-weight: 500;
   color: var(--dark);
-  margin-bottom: 2rem;
+  margin-bottom: 8px;
 }
 
-.emptyWishlist p {
+.emptyDescription {
   color: var(--gray);
-  margin-bottom: 1.5rem;
+  margin-bottom: 24px;
+  font-weight: 300;
 }
 
-.exploreBtn {
-  padding: 0.8rem 2.5rem;
+.exploreButton {
+  padding: 12px 32px;
   background: var(--gold-gradient);
   color: white;
   border: none;
-  /* border-radius: 6px; */
-  font-size: 1rem;
+  font-family: "Jost", sans-serif;
+  font-size: 13px;
   font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   cursor: pointer;
   transition: var(--transition);
   text-decoration: none;
+  display: inline-block;
 }
 
-.exploreBtn:hover {
+.exploreButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.3);
+}
+
+.exploreButton:active {
+  transform: translateY(0);
+}
+
+.exploreButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
 }
 
 /* ============================================
-   TRUST SECTION
+   WHY AUREVIAN - Premium Editorial
+   Copied from Cart for cross-page visual consistency.
    ============================================ */
-.trustSection {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  padding: 2rem;
-  background: white;
-  border-top: 1px solid var(--border);
-  margin: 25px 0;
+.whyAurevian {
+  margin-top: 60px;
+  padding: 60px 40px;
+  background: transparent;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  position: relative;
 }
 
-.trustCard {
+.whyContent {
   display: flex;
+  gap: 60px;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  border-radius: 12px;
-  transition: var(--transition);
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
-.trustCard:hover {
-  background: var(--light-gray);
-  transform: translateY(-2px);
+.whyLeft {
+  flex: 1;
 }
 
-.trustIconWrapper {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--gold-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+.whyBadge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  margin-bottom: 12px;
+  font-family: "Playfair Display", serif;
+  font-style: italic;
 }
 
-.trustIcon {
-  font-size: 1.4rem;
-  color: var(--gold);
-}
-
-.trustInfo h4 {
-  font-size: 0.95rem;
-  font-weight: 600;
+.whyTitle {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(28px, 3.5vw, 40px);
+  font-weight: 500;
   color: var(--dark);
-  margin: 0 0 0.2rem 0;
+  margin: 0 0 16px 0;
+  line-height: 1.15;
 }
 
-.trustInfo p {
-  font-size: 0.8rem;
+.whyDesc {
+  font-size: 15px;
+  line-height: 1.8;
   color: var(--gray);
   margin: 0;
+  font-weight: 300;
+  font-family: "Playfair Display", serif;
+  font-style: italic;
 }
 
 /* ============================================
-   BOTTOM BANNER
+   RESPONSIVE — switch to compact mobile card
    ============================================ */
-.bottomBanner {
-  padding: 3rem 2rem;
-  background: linear-gradient(135deg, var(--dark) 0%, #2d1f14 100%);
-  border-top: 1px solid var(--gold);
-  position: relative;
-  overflow: hidden;
-  margin: 30px 0 0;
-}
-
-.bottomBanner::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at 70% 30%, rgba(212, 175, 55, 0.03) 0%, transparent 70%);
-}
-
-.bannerContent {
-  text-align: center;
-  max-width: 600px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 1;
-}
-
-.bannerHeart {
-  font-size: 2.5rem;
-  color: var(--gold);
-  margin-bottom: 1rem;
-}
-
-.bannerTitle {
-  font-family: 'Playfair Display', serif;
-  font-size: 2rem;
-  font-weight: 700;
-  color: white;
-  margin-bottom: 0.5rem;
-}
-
-.bannerDesc {
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 1.5rem;
-  line-height: 1.6;
-}
-
-.bannerBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.8rem 2.5rem;
-  background: var(--gold-gradient);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.bannerBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
-}
-
-/* ============================================
-   RESPONSIVE - MOBILE FIRST
-   ============================================ */
-@media (max-width: 768px) {
-  .wishlistCard {
-    flex-direction: row;
-    padding: 1rem;
-    gap: 1rem;
-    align-items: stretch;
+@media (max-width: 1024px) {
+  .desktopView {
+    display: none;
   }
 
-  .imageWrapper {
-    width: 100px;
-    height: auto;
-    min-height: 100px;
+  .mobileView {
+    display: block;
+  }
+
+  /* ---- Compact mobile card: image | title / stock+price / add-to-cart ---- */
+
+  .mobileCard {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .mobileImageWrap {
+    display: block;
     flex-shrink: 0;
-    align-self: stretch;
+    width: 78px;
+    height: 78px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--gray-light);
+    text-decoration: none;
+    cursor: pointer;
   }
 
-  .productImage {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .productDetails {
+  .mobileInfo {
     flex: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    gap: 6px;
   }
 
-  .productHeader {
-    flex-direction: row;
+  .mobileInfoHead {
+    display: flex;
     align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
   }
 
-  .productName {
-    font-size: 0.9rem;
-    white-space: normal;
+  .mobileInfoHead .productName {
+    font-size: 15px;
+    margin: 0;
+    flex: 1;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    display: block;
+  }
+
+  .mobileInfoHead a.productName:hover {
+    color: var(--gold-deep);
+  }
+
+  .removeButtonMobile {
+    display: flex;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--gray);
+    cursor: pointer;
+    transition: var(--transition);
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 12px;
+  }
+
+  .removeButtonMobile:hover {
+    border-color: #c62828;
+    color: #c62828;
+    background: #fce4ec;
+  }
+
+  .removeButtonMobile:active {
+    transform: scale(0.92);
+  }
+
+  .productDescriptionMobile {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--gray);
+    font-weight: 300;
+    text-decoration: none;
+    cursor: pointer;
+    margin: -2px 0 0;
   }
 
-  .removeBtn {
-    width: 28px;
-    height: 28px;
-    flex-shrink: 0;
+  .productDescriptionMobile:hover {
+    color: var(--dark-soft);
   }
 
-  .productBottom {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 0.5rem;
-    margin-top: 0.3rem;
+  .mobileStockRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-top: 4px;
+    border-top: 1px dashed var(--border);
   }
 
-  .priceStockContainer {
+  .mobileInfo .inStock {
+    font-size: 11px;
+  }
+
+  .mobileInfo .currentPrice {
+    font-size: 16px;
+  }
+
+  .moveToCartButtonMobile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     width: 100%;
+    padding: 10px;
+    background: var(--gold-deep);
+    color: white;
+    border: none;
+    font-family: "Jost", sans-serif;
+    font-size: 12.5px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: var(--transition);
   }
 
-  .priceContainer {
-    gap: 0.5rem;
+  .moveToCartButtonMobile:hover:not(:disabled) {
+    box-shadow: 0 6px 18px rgba(212, 175, 55, 0.3);
+  }
+
+  .moveToCartButtonMobile:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  .moveToCartButtonMobile:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
+  }
+
+  .moveToCartButtonMobile:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* Skeleton mobile shape */
+  .mobileView .skeletonTitle {
+    width: 65%;
+  }
+
+  .mobileView .skeletonDesc {
+    width: 90%;
+  }
+
+  .mobileView .skeletonBtn {
+    width: 100%;
+    height: 36px;
+    margin-top: 4px;
+  }
+
+  .wishlistPage {
+    padding: 120px 20px 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .wishlistPage {
+    padding: 105px 16px 40px;
+  }
+
+  .heroSection {
+    padding: 0px 16px 20px;
+  }
+
+  .heroTitle {
+    font-size: 28px;
+  }
+
+  .heroDescription {
+    font-size: 14px;
+  }
+
+  .controlsBar {
+    padding: 0 4px 12px;
+  }
+
+  .searchWrapper {
+    max-width: none;
+    width: 100%;
+    flex-basis: 100%;
+  }
+
+  .cardContent {
+    padding: 16px;
+  }
+
+  .productName {
+    font-size: 15px;
+  }
+
+  .imageWrapper {
+    width: 90px;
+    height: 90px;
   }
 
   .currentPrice {
-    font-size: 1rem;
+    font-size: 17px;
   }
 
-  .oldPrice {
-    font-size: 0.8rem;
+  .whyAurevian {
+    padding: 40px 24px;
+    margin-top: 40px;
   }
 
-  .bottomRow {
-    width: 60%;
-    justify-content: space-between;
-    gap: 0.5rem;
-    margin-top: 10px;
+  .whyTitle {
+    font-size: 26px;
   }
 
-  .checkboxWrapper {
-    gap: 0.3rem;
+  .whyDesc {
+    font-size: 14px;
   }
 
-  .checkbox {
-    width: 16px;
-    height: 16px;
+  .mobileImageWrap {
+    width: 70px;
+    height: 70px;
   }
 
-  .checkboxLabel {
-    font-size: 0.7rem;
+  .mobileInfoHead .productName {
+    font-size: 14px;
   }
 
-  .quantityActions {
-    gap: 0.5rem;
-  }
-
-  .qtyBtn {
-    width: 28px;
-    height: 28px;
-  }
-
-  .qtyValue {
-    min-width: 24px;
-    font-size: 0.85rem;
-  }
-
-  .header {
-    padding: 1rem;
-    flex-wrap: wrap;
-    gap: 0.8rem;
-  }
-
-  .headerLeft {
-    flex-wrap: wrap;
-    gap: 0.8rem;
-  }
-
-  .headerTitle {
-    font-size: 1.4rem;
-  }
-
-  .bottomActions {
-    flex-direction: column;
-    gap: 0.8rem;
-    padding: 2rem;
-    align-items: stretch;
-  }
-
-  .selectedInfo {
-    /* flex-wrap: wrap; */
-    justify-content: center;
-  }
-
-  .trustSection {
-    grid-template-columns: 1fr;
-    padding: 1rem;
-    gap: 0.8rem;
-  }
-
-  .trustCard {
-    padding: 0.8rem;
-  }
-
-  .bottomBanner {
-    padding: 2rem 1rem;
-  }
-
-  .bannerTitle {
-    font-size: 1.5rem;
-  }
-
-  .bannerDesc {
-    font-size: 0.9rem;
-  }
-
-  .shippingBanner {
-    font-size: 0.65rem;
-    padding: 0.4rem 0.8rem;
-    letter-spacing: 1px;
+  .mobileInfo .currentPrice {
+    font-size: 15px;
   }
 }
 
 @media (max-width: 480px) {
-  .wishlistCard {
-    padding: 0.8rem;
-    gap: 0.8rem;
-    align-items: stretch;
+  .wishlistPage {
+    padding: 150px 12px 30px;
+  }
+
+  .heroTitle {
+    font-size: 24px;
   }
 
   .imageWrapper {
     width: 80px;
-    min-height: 80px;
+    height: 80px;
   }
 
   .productName {
-    font-size: 0.8rem;
-    -webkit-line-clamp: 2;
-  }
-
-  .productCategory {
-    font-size: 0.7rem;
-  }
-
-  .ratingStars .starFilled,
-  .ratingStars .starEmpty {
-    font-size: 0.7rem;
-  }
-
-  .ratingCount {
-    font-size: 0.7rem;
+    font-size: 14px;
   }
 
   .currentPrice {
-    font-size: 0.9rem;
+    font-size: 15px;
   }
 
-  .oldPrice {
-    font-size: 0.7rem;
+  .whyAurevian {
+    padding: 32px 16px;
   }
 
-  .stockStatus {
-    font-size: 0.6rem;
-    padding: 0.15rem 0.6rem;
+  .whyTitle {
+    font-size: 22px;
   }
 
-  .qtyBtn {
+  .whyDesc {
+    font-size: 13px;
+  }
+
+  .mobileImageWrap {
+    width: 64px;
+    height: 64px;
+  }
+
+  .mobileInfoHead .productName {
+    font-size: 13.5px;
+  }
+
+  .mobileInfo .currentPrice {
+    font-size: 14px;
+  }
+
+  .removeButtonMobile {
     width: 24px;
     height: 24px;
-    font-size: 0.7rem;
   }
 
-  .qtyValue {
-    min-width: 20px;
-    font-size: 0.8rem;
+  .productDescriptionMobile {
+    font-size: 11.5px;
   }
 
-  .checkbox {
-    width: 14px;
-    height: 14px;
+  .emptyContainer,
+  .noResults {
+    padding: 48px 16px;
   }
 
-  .checkboxLabel {
-    font-size: 0.65rem;
+  .emptyTitle {
+    font-size: 22px;
   }
 
-  .headerTitle {
-    font-size: 1.2rem;
+  .loadMoreRow {
+    padding: 16px;
   }
+}
 
-  .headerIcon {
-    font-size: 1.2rem;
-  }
-
-  .itemCount {
-    font-size: 0.75rem;
-    padding: 0.2rem 0.8rem;
-  }
-
-  .selectAllBtn {
-    font-size: 0.75rem;
-    padding: 0.3rem 1rem;
-  }
-
-  .moveToCartSelected,
-  .removeSelected {
-    font-size: 0.80rem;
-    padding: 0.7rem 1rem;
-    justify-content: center;
-  }
-
-  .bannerTitle {
-    font-size: 1.2rem;
-  }
-
-  .bannerHeart {
-    font-size: 2rem;
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  .wishlistCard,
+  .removeButton,
+  .removeButtonMobile,
+  .moveToCartButton,
+  .moveToCartButtonMobile,
+  .exploreButton,
+  .loadMoreBtn,
+  .skeletonBlock::after,
+  .skeletonLine::after {
+    transition: none !important;
+    animation: none !important;
   }
 }

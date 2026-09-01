@@ -25,6 +25,13 @@ import {
   removeItemFromCart,
 } from "../../redux/slices/cartSlice";
 
+// Cart items store the product's slug at add-to-cart time (see
+// cartController's getProductSnapshot). If an item predates that field
+// (added before this change), we fall back to the productId — ProductDetail
+// will resolve it to its existing, already-handled "Product not found"
+// state rather than breaking navigation. Nothing here ever falls back to "/".
+const productUrl = (item) => `/product/${item.slug || item.product}`;
+
 const Cart = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -42,12 +49,6 @@ const Cart = () => {
     0,
   );
 
-  // ✅ FIXED: this used to be
-  //   const shipping = subtotal > 5000 || subtotal === 0 ? 0 : 49;
-  // — a fake fee shown before any address existed. The cart page has no
-  // delivery pincode to give Shiprocket, so it has no basis for a shipping
-  // number at all. Shipping is calculated for real at checkout, once a
-  // pincode exists. This page shows items-only total and says so.
   const total = subtotal;
 
   const updateQuantity = (productId, newQuantity) => {
@@ -113,7 +114,7 @@ const Cart = () => {
             <div className={styles.emptyIconWrapper}>
               <FiShoppingBag className={styles.emptyIcon} />
             </div>
-            <h2 className={styles.emptyTitle}>Your Shopping Bag is Empty</h2>
+            <h2 className={styles.emptyTitle}>There are no items in your cart</h2>
             <p className={styles.emptyDescription}>
               Discover our curated collection of fine jewellery
             </p>
@@ -133,7 +134,7 @@ const Cart = () => {
       <div className={styles.cartPage}>
         <section className={styles.heroSection}>
           <div className={styles.heroContent}>
-            <h1 className={styles.heroTitle}>Shopping Bag</h1>
+            <h1 className={styles.heroTitle}>My Cart</h1>
             <p className={styles.heroDescription}>
               Timeless elegance, crafted for you. Review your precious pieces.
             </p>
@@ -145,8 +146,12 @@ const Cart = () => {
             {cartItems.map((item) => (
               <div key={item.product} className={styles.cartCard}>
                 <div className={styles.cardContent}>
+                  {/* ---------- DESKTOP VIEW ---------- */}
                   <div className={styles.desktopView}>
-                    <div className={styles.productCell}>
+                    {/* Clickable region: image + name + description + stock.
+                        Quantity/price/remove live in sibling cells outside
+                        this Link, so they keep their own click behavior. */}
+                    <Link to={productUrl(item)} className={styles.productCell}>
                       <div className={styles.imageWrapper}>
                         <img
                           src={item.image}
@@ -157,11 +162,16 @@ const Cart = () => {
                       </div>
                       <div className={styles.productInfo}>
                         <h3 className={styles.productName}>{item.name}</h3>
+                        {item.shortDescription && (
+                          <p className={styles.productDescription}>
+                            {item.shortDescription}
+                          </p>
+                        )}
                         <div className={styles.availability}>
                           <span className={styles.inStock}>✓ In Stock</span>
                         </div>
                       </div>
-                    </div>
+                    </Link>
 
                     <div className={styles.priceCell}>
                       <div className={styles.priceWrapper}>
@@ -214,48 +224,50 @@ const Cart = () => {
                     </div>
                   </div>
 
+                  {/* ---------- MOBILE VIEW — compact: image | title / price / qty ---------- */}
                   <div className={styles.mobileView}>
-                    <div className={styles.mobileTopRow}>
-                      <div className={styles.productCell}>
-                        <div className={styles.imageWrapper}>
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className={styles.productImage}
-                            loading="lazy"
-                          />
+                    <div className={styles.mobileCard}>
+                      <Link
+                        to={productUrl(item)}
+                        className={styles.mobileImageWrap}
+                      >
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className={styles.productImage}
+                          loading="lazy"
+                        />
+                      </Link>
+
+                      <div className={styles.mobileInfo}>
+                        <div className={styles.mobileInfoHead}>
+                          <Link
+                            to={productUrl(item)}
+                            className={styles.productName}
+                          >
+                            {item.name}
+                          </Link>
+                          <button
+                            className={styles.removeButtonMobile}
+                            onClick={() => removeItem(item.product)}
+                            aria-label="Remove item"
+                          >
+                            <FiX />
+                          </button>
                         </div>
-                        <div className={styles.productInfo}>
-                          <h3 className={styles.productName}>{item.name}</h3>
-                        </div>
-                      </div>
-                      <div className={styles.mobileActions}>
-                        <button
-                          className={styles.removeButtonMobile}
-                          onClick={() => removeItem(item.product)}
-                        >
-                          <FiX />
-                        </button>
-                        <div className={styles.availabilityMobile}>
+
+                        {item.shortDescription && (
+                          <Link
+                            to={productUrl(item)}
+                            className={styles.productDescriptionMobile}
+                          >
+                            {item.shortDescription}
+                          </Link>
+                        )}
+
+                        <div className={styles.mobileStockQtyRow}>
                           <span className={styles.inStock}>✓ In Stock</span>
-                        </div>
-                      </div>
-                    </div>
 
-                    <div className={styles.mobileBottomRow}>
-                      <div className={styles.mobilePriceRow}>
-                        <div className={styles.priceCell}>
-                          <div className={styles.priceWrapper}>
-                            <span className={styles.currentPrice}>
-                              <FaRupeeSign className={styles.rupeeIconSmall} />
-                              {item.price.toLocaleString("en-IN")}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className={styles.mobileQuantityRow}>
-                        <div className={styles.quantityCell}>
                           <div className={styles.quantityControls}>
                             <button
                               className={styles.quantityButton}
@@ -279,14 +291,25 @@ const Cart = () => {
                             </button>
                           </div>
                         </div>
-                      </div>
 
-                      <div className={styles.mobileSubtotalRow}>
-                        <span className={styles.subtotalLabel}>Subtotal:</span>
-                        <span className={styles.subtotalPrice}>
-                          <FaRupeeSign className={styles.rupeeIconSmall} />
-                          {(item.price * item.quantity).toLocaleString("en-IN")}
-                        </span>
+                        <div className={styles.mobilePriceRow}>
+                          <span className={styles.currentPrice}>
+                            <FaRupeeSign className={styles.rupeeIconSmall} />
+                            {item.price.toLocaleString("en-IN")}
+                          </span>
+
+                          <span className={styles.mobileSubtotalInline}>
+                            <span className={styles.subtotalLabel}>
+                              Subtotal:
+                            </span>
+                            <span className={styles.subtotalPrice}>
+                              <FaRupeeSign className={styles.rupeeIconSmall} />
+                              {(item.price * item.quantity).toLocaleString(
+                                "en-IN",
+                              )}
+                            </span>
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -313,9 +336,6 @@ const Cart = () => {
                 </span>
               </div>
 
-              {/* ✅ FIXED: no fee shown here — the cart has no delivery
-                  pincode, so there is nothing real to show. Shiprocket
-                  quotes shipping at checkout once an address exists. */}
               <div className={styles.summaryRow}>
                 <span>Shipping</span>
                 <span className={styles.shippingAtCheckout}>
@@ -345,10 +365,6 @@ const Cart = () => {
                 <div className={styles.trustCard}>
                   <FiTruck className={styles.trustIcon} />
                   <div className={styles.trustInfo}>
-                    {/* ✅ FIXED: the old copy ("Free shipping above ₹5000")
-                        promised a threshold the backend no longer honors —
-                        shipping now comes from live courier rates, not order
-                        value. Left this accurate instead of overpromising. */}
                     <h4>Reliable Delivery</h4>
                     <p>Shipping calculated for your exact location</p>
                   </div>
@@ -387,15 +403,7 @@ const Cart = () => {
                 with confidence.
               </p>
             </div>
-            <div className={styles.whyRight}>
-              <div className={styles.whyImage}>
-                <img
-                  src={logo}
-                  alt="Aurevian Logo"
-                  className={styles.whyImageLogo}
-                />
-              </div>
-            </div>
+           
           </div>
         </section>
       </div>

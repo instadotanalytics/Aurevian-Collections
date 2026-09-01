@@ -44,6 +44,18 @@ const shippingSchema = new mongoose.Schema(
     returnStatus: String,
     lastError: String,
     lastSyncedAt: Date,
+    // ✅ NEW — explicit Shiprocket sync state, kept separate from the
+    // order's approval lifecycle (fulfillmentStatus). This is what lets
+    // "the order was approved" and "Shiprocket sync failed" coexist
+    // without one field having to represent both facts.
+    syncStatus: {
+      type: String,
+      enum: ["not_synced", "pending", "synced", "failed"],
+      default: "not_synced",
+    },
+    syncError: String,
+    lastSyncAttemptAt: Date,
+    syncedAt: Date,
   },
   { _id: false },
 );
@@ -87,6 +99,10 @@ const FULFILLMENT_STATUSES = [
 const orderSchema = new mongoose.Schema(
   {
     orderNumber: { type: String, unique: true, required: true },
+    // ✅ NEW — dedupe key for the create-order request itself (one per
+    // checkout attempt on the client). Sparse+unique per-user so legacy
+    // orders (no key) are completely unaffected.
+    idempotencyKey: { type: String },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     customerName: String,
     customerEmail: String,
@@ -106,6 +122,7 @@ const orderSchema = new mongoose.Schema(
     itemsTotal: { type: Number, required: true },
     shippingFee: { type: Number, default: 0 },
     totalAmount: { type: Number, required: true },
+    // Existing convention preserved: "razorpay" | "cod"
     paymentMethod: { type: String, default: "razorpay" },
     paymentStatus: {
       type: String,
@@ -163,6 +180,12 @@ orderSchema.index({ seller: 1, fulfillmentStatus: 1, createdAt: -1 });
 orderSchema.index({ fulfillmentStatus: 1, createdAt: -1 });
 orderSchema.index({ "shipping.awbCode": 1 });
 orderSchema.index({ "shipping.shiprocketOrderId": 1 });
+// ✅ NEW — sparse+unique so only orders that actually set a key are
+// constrained; legacy documents (idempotencyKey undefined) never collide.
+orderSchema.index(
+  { user: 1, idempotencyKey: 1 },
+  { unique: true, sparse: true },
+);
 
 export const FULFILLMENT_STATUS = Object.fromEntries(
   FULFILLMENT_STATUSES.map((s) => [s, s]),

@@ -6,7 +6,7 @@
 // ============================================
 // API Configuration
 // ============================================
-export const API_URL = import.meta.env.VITE_API_URL || "https://aurevian-collections.onrender.com/api";
+export const API_URL = import.meta.env.VITE_API_URL || "https://aurevian-collections-ng4w.onrender.com/api";
 
 // ============================================
 // Firebase Configuration (from environment variables)

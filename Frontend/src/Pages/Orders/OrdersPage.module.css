@@ -1,12 +1,12 @@
 
 /* src/Pages/Orders/OrdersPage.module.css */
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Jost:wght@400;500;600&display=swap");
 
 .pageWrapper {
   --gold: #b98a4c;
   --gold-dark: #7c5c33;
   --gold-pale: #f3e7d0;
-   --gold-deep: #9c7a2e;
+  --gold-deep: #9c7a2e;
   --ivory: #faf6f0;
   --surface: #ffffff;
   --surface-alt: #f7f2ea;
@@ -21,13 +21,27 @@
   --warning-pale: #f6ecd9;
   --blue: #3b6ea5;
   --blue-pale: #dfe9f5;
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 18px;
+
+  /* Flat design: no rounded corners anywhere in this system. */
+  --radius: 0;
+
   --shadow-sm: 0 1px 2px rgba(43, 36, 32, 0.06);
   --shadow-md: 0 10px 28px rgba(43, 36, 32, 0.09);
   --sidebar-w: 300px;
   --sidebar-gap: 24px;
+
+  /* Spacing scale — build all padding/margin/gap from this, shared in
+     spirit with Cart/Wishlist's --space-* tokens. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  --content-max-width: 1200px;
 
   font-family: "Jost", sans-serif;
   background: var(--ivory);
@@ -44,53 +58,26 @@
 }
 
 .container {
-  max-width: 1185px;
+  max-width: var(--content-max-width);
   margin: 0 auto;
 }
 
-/* Page top */
-
-
 /* ---------------------------------------------------
-   Orders Page Heading
-   Same visual style as Checkout heading
+   Orders Page Heading — centered, no eyebrow label
 --------------------------------------------------- */
-
 .pageTop {
   margin-bottom: 44px;
-}
-
-.eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-
-  color: var(--gold-deep);
-  margin-bottom: 5px;
-  padding-left: 8px;
-}
-
-.eyebrow::before {
-  width: 26px;
-  height: 1px;
-  background: var(--gold-deep);
+  text-align: center;
 }
 
 .pageTitle {
-  font-family: "Cormorant Garamond", Georgia, serif;
+  font-family: "Playfair Display", Georgia, serif;
   font-weight: 600;
   font-size: 44px;
   letter-spacing: 0.01em;
   line-height: 1.1;
-
   color: var(--ink);
-
-  margin: 0 0 6px;
+  margin: 15px 0 8px;
   padding: 0;
 }
 
@@ -99,11 +86,10 @@
   font-size: 13.5px;
   font-weight: 400;
   line-height: 1.5;
-
   color: var(--ink-muted);
-
-  margin: 0;
+  margin: 0 auto;
   letter-spacing: 0.01em;
+  max-width: 480px;
 }
 
 /* Layout wrapper: main list + summary sidebar */
@@ -114,24 +100,34 @@
   gap: var(--sidebar-gap);
 }
 
-/* Main panel */
 .mainPanel {
   min-width: 0;
 }
 
-/* Filter tabs */
+/* ---------------------------------------------------
+   Controls row: filter tabs + search
+--------------------------------------------------- */
+.controlsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-5);
+}
+
 .filterTabs {
   display: flex;
   gap: 26px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 22px;
   overflow-x: auto;
 }
 
 .filterTab {
-  padding: 0 0 14px;
+  padding: 0 0 var(--space-3);
   border: none;
   background: none;
+  font-family: "Jost", sans-serif;
   font-size: 0.88rem;
   color: var(--ink-muted);
   cursor: pointer;
@@ -142,6 +138,15 @@
 
 .filterTab:hover {
   color: var(--ink);
+}
+
+.filterTab:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(154, 122, 46, 0.25);
+}
+
+.filterTab:active {
+  transform: translateY(1px);
 }
 
 .filterTabActive {
@@ -157,6 +162,51 @@
   width: 100%;
   height: 2px;
   background: var(--gold);
+}
+
+/* Search */
+.searchWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 220px;
+  max-width: 300px;
+  margin-bottom: var(--space-3);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 14px;
+  color: var(--ink-muted);
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  font-family: "Jost", sans-serif;
+  font-size: 13.5px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 12px 9px 36px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.searchInput::placeholder {
+  color: var(--ink-muted);
+}
+
+.searchInput:hover {
+  border-color: var(--gold-deep);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--gold-deep);
+  box-shadow: 0 0 0 3px rgba(154, 122, 46, 0.15);
 }
 
 /* Orders table */
@@ -192,7 +242,7 @@
   grid-template-columns: minmax(220px, 2fr) 90px 60px 120px 190px 128px;
   gap: 5px;
   align-items: center;
-  padding: 16px 20px;
+  padding: var(--space-4) 20px;
   border-bottom: 1px solid var(--border);
   transition: background 0.2s ease;
 }
@@ -218,6 +268,7 @@
   overflow: hidden;
   background: var(--surface-alt);
   border: 1px solid var(--border);
+  border-radius: var(--radius);
   flex-shrink: 0;
 }
 
@@ -294,6 +345,11 @@
   flex-shrink: 0;
 }
 
+.viewDetailsMobile:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(154, 122, 46, 0.25);
+}
+
 .orderPrice {
   display: flex;
   align-items: center;
@@ -329,7 +385,7 @@
   align-items: center;
   gap: 6px;
   padding: 5px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius);
   font-size: 0.74rem;
   font-weight: 600;
   white-space: nowrap;
@@ -368,13 +424,14 @@
   gap: 6px;
   padding: 8px 14px;
   border: 1px solid var(--gold-deep);
+  border-radius: var(--radius);
   color: var(--gold-deep);
   background: var(--surface);
   font-size: 0.78rem;
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
 }
 
 .viewDetailsBtn:hover {
@@ -382,7 +439,16 @@
   color: #fff;
 }
 
-/* No more orders */
+.viewDetailsBtn:active {
+  transform: scale(0.97);
+}
+
+.viewDetailsBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(154, 122, 46, 0.3);
+}
+
+/* No more orders / Load more */
 .noMoreOrders {
   display: flex;
   align-items: center;
@@ -394,8 +460,104 @@
   border-top: 1px solid var(--border);
 }
 
+.loadMoreRow {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-6) 0;
+  border-top: 1px solid var(--border);
+}
+
+.loadMoreBtn {
+  padding: 10px 28px;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: "Jost", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.loadMoreBtn:hover {
+  border-color: var(--gold-deep);
+  color: var(--gold-deep);
+}
+
+.loadMoreBtn:active {
+  transform: scale(0.97);
+}
+
+.loadMoreBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(154, 122, 46, 0.25);
+}
+
+/* ============ Skeleton loading ============ */
+.skeletonBlock,
+.skeletonLine {
+  position: relative;
+  background: var(--surface-alt);
+  overflow: hidden;
+  border-radius: var(--radius);
+}
+
+.skeletonBlock::after,
+.skeletonLine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.8),
+    transparent
+  );
+  animation: shimmer 1.4s infinite;
+}
+
+.skeletonLine {
+  height: 12px;
+}
+
+.skeletonTitle {
+  width: 65%;
+  height: 14px;
+  margin-bottom: 6px;
+}
+
+.skeletonSub {
+  width: 40%;
+}
+
+.skeletonPrice,
+.skeletonQty,
+.skeletonDate {
+  width: 70%;
+}
+
+.skeletonBadge {
+  width: 90px;
+  height: 22px;
+}
+
+.skeletonAction {
+  width: 100px;
+  height: 30px;
+  margin-left: auto;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 /* ============ Order summary sidebar ============ */
-/* Mobile-first default: sits in normal flow, full width, below the list */
 .sidebar {
   margin-top: 24px;
 }
@@ -403,6 +565,7 @@
 .summaryCard {
   background: var(--surface);
   border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 24px 22px;
   box-shadow: var(--shadow-sm);
 }
@@ -419,8 +582,8 @@
 }
 
 .summaryHeader h2 {
-  font-family: "Cormorant Garamond", serif;
-  font-weight: 700;
+  font-family: "Playfair Display", serif;
+  font-weight: 600;
   font-size: 1.3rem;
   margin: 0;
   color: var(--ink);
@@ -475,6 +638,7 @@
   text-align: center;
   padding: 13px 18px;
   background: var(--gold-deep);
+  border-radius: var(--radius);
   color: #fff;
   font-size: 0.82rem;
   font-weight: 600;
@@ -488,30 +652,13 @@
   transform: translateY(-1px);
 }
 
-/* Loading */
-.loadingState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  padding: 80px 20px;
-  color: var(--ink-muted);
-  font-size: 0.9rem;
+.summaryCta:active {
+  transform: translateY(0);
 }
 
-.spinner {
-  width: 34px;
-  height: 34px;
-  border: 3px solid var(--gold-pale);
-  border-top-color: var(--gold);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+.summaryCta:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(154, 122, 46, 0.3);
 }
 
 /* Empty state */
@@ -522,7 +669,7 @@
   gap: 6px;
   padding: 70px 20px;
   background: var(--surface);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius);
   color: var(--ink-muted);
   box-shadow: var(--shadow-sm);
   text-align: center;
@@ -535,7 +682,7 @@
 }
 
 .emptyState h3 {
-  font-family: "Cormorant Garamond", serif;
+  font-family: "Playfair Display", serif;
   font-size: 1.3rem;
   color: var(--ink);
   margin: 0;
@@ -549,12 +696,13 @@
 .shopBtn {
   margin-top: 8px;
   padding: 12px 32px;
-  border-radius: 999px;
+  border-radius: var(--radius);
   background: var(--ink);
   color: #fff;
   font-weight: 500;
   font-size: 0.88rem;
   text-decoration: none;
+  display: inline-block;
   transition: background 0.2s ease, transform 0.15s ease;
 }
 
@@ -563,10 +711,17 @@
   transform: translateY(-1px);
 }
 
+.shopBtn:active {
+  transform: translateY(0);
+}
+
+.shopBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(154, 122, 46, 0.3);
+}
+
 /* ============ Desktop (>=1024px): full table + sticky sidebar ============ */
 @media (min-width: 1024px) {
-  /* True grid column, not an overlay: the sidebar's height is bound to
-     layoutGrid, so it can never slide past the footer. */
   .layoutGrid {
     grid-template-columns: 1fr var(--sidebar-w);
   }
@@ -576,12 +731,12 @@
   }
 
   .sidebar {
-  
+    position: sticky;
     top: 130px;
     align-self: start;
     max-height: calc(100vh - 160px);
     overflow-y: auto;
-    margin-top: 53px;
+    margin-top: 8px;
   }
 }
 
@@ -589,10 +744,6 @@
 @media (max-width: 1023px) {
   .layoutGrid {
     grid-template-columns: 1fr;
-  }
-
-  .ordersTable {
-  
   }
 
   .tableHead {
@@ -650,12 +801,20 @@
     position: static;
     margin-top: 20px;
   }
+
+  .controlsRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchWrapper {
+    max-width: none;
+  }
 }
 
 @media (max-width: 480px) {
-
   .ordersPage {
-    padding: 15px 14px 60px;
+    padding: 100px 14px 60px;
   }
 
   .pageTop {
@@ -672,17 +831,6 @@
     line-height: 1.5;
   }
 
-  .eyebrow {
-    font-size: 10px;
-    letter-spacing: 0.24em;
-    margin-bottom: 12px;
-  }
-
-  .eyebrow::before {
-    width: 20px;
-  }
-
-  /* keep your existing styles below */
   .orderImage {
     width: 46px;
     height: 50px;
@@ -703,12 +851,9 @@
   .summaryCard {
     padding: 20px 18px;
   }
-  .pageTop{
-    margin-top: 100px;
-  }
+}
 
-
-  @media (max-width: 380px) {
+@media (max-width: 380px) {
   .ordersPage {
     padding: 88px 12px 56px;
   }
@@ -720,12 +865,19 @@
   .pageSubtitle {
     font-size: 12.5px;
   }
+}
 
-  .eyebrow {
-    font-size: 9px;
-    letter-spacing: 0.22em;
+/* ============ Reduced motion ============ */
+@media (prefers-reduced-motion: reduce) {
+  .orderRow,
+  .filterTab,
+  .viewDetailsBtn,
+  .loadMoreBtn,
+  .summaryCta,
+  .shopBtn,
+  .skeletonBlock::after,
+  .skeletonLine::after {
+    transition: none !important;
+    animation: none !important;
   }
 }
-  }
-
-

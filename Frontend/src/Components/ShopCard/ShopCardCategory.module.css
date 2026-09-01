@@ -134,7 +134,7 @@
   height: 40px;
   border-radius: 50%;
   border: 1px solid #d4c9b8;
-  background: #ffffff;
+  background: transparent;
   color: var(--ink);
   display: flex;
   align-items: center;
@@ -447,14 +447,14 @@
 }
 
 .price {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--ink);
   letter-spacing: -0.2px;
 }
 
 .oldPrice {
-  font-size: 13px;
+  font-size: 12px;
   color: #999;
   text-decoration: line-through;
 }
@@ -536,11 +536,11 @@
   }
 
   .price {
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .oldPrice {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .scrollContainer {
@@ -608,7 +608,7 @@
   }
 
   .category {
-    font-size: 12px;
+    font-size: 10px;
   }
 
   .title {
@@ -616,11 +616,11 @@
   }
 
   .price {
-    font-size: 16px;
+    font-size: 13px;
   }
 
   .oldPrice {
-    font-size: 13px;
+    font-size: 11px;
   }
 
   .scrollContainer {
@@ -672,11 +672,11 @@
   }
 
   .price {
-    font-size: 16px;
+    font-size: 13px;
   }
 
   .oldPrice {
-    font-size: 14px;
+    font-size: 11px;
   }
 
   .viewAllBtn span {

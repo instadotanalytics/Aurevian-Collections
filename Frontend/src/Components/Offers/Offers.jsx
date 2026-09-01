@@ -22,6 +22,7 @@ import {
   FiCheck,
   FiChevronDown,
 } from "react-icons/fi";
+import { FaHeart } from "react-icons/fa";
 import { LuSlidersHorizontal } from "react-icons/lu";
 import styles from "./Offers.module.css";
 import craftImage1 from "../../assets/offersbanner.png";
@@ -65,11 +66,6 @@ const BOTTOM_FEATURES = [
   },
 ];
 
-// ✅ REMOVED hardcoded FILTER_CATEGORIES — same bug as Collections.jsx:
-// it sent the LABEL as categoryId, which never matches a real category
-// id, so every non-"All" filter silently returned zero products.
-// Categories are now fetched live below, same endpoint Shop.jsx uses.
-
 const SORT_OPTIONS = [
   { value: "newest", label: "Default Sorting" },
   { value: "price-asc", label: "Price: Low to High" },
@@ -81,12 +77,20 @@ const SORT_OPTIONS = [
 
 const ITEMS_PER_BATCH = 10;
 
+// Helper function to generate slug from label
+const generateSlugFromLabel = (label) => {
+  return label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+};
+
 /* ----------------------------------------------------------------
-   Skeleton Card
+   Skeleton Card - Matching Shop component
 ------------------------------------------------------------------- */
 function SkeletonCard() {
   return (
-    <div className={styles.skeletonCard} aria-hidden="true">
+    <div className={styles.skeletonCard}>
       <div className={styles.skeletonImage} />
       <div className={styles.skeletonBody}>
         <div className={styles.skeletonText} style={{ width: "80%" }} />
@@ -153,72 +157,46 @@ export default function Offers() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { filterSlug } = useParams();
-  const { byPlacement } = useSelector((state) => state.storefrontProduct);
   const { isAuthenticated } = useSelector((state) => state.auth);
   const cartItems = useSelector((state) => state.cart.items);
   const wishlistItems = useSelector((state) => state.wishlist.items);
 
-  const offersData = byPlacement.offers || {
-    products: [],
-    pagination: { page: 1, totalPages: 1, total: 0 },
-  };
-
-  // ✅ NEW: real, seller-panel-controlled categories (same source as Shop)
+  // Categories
   const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [priceRange, setPriceRange] = useState([0, 7000]);
+  const [sortBy, setSortBy] = useState("newest");
+  const [cartLoadingId, setCartLoadingId] = useState(null);
 
-  // ✅ HONEST HANDLING of offersDropdown slugs (flash-sale, combo-edit,
-  // refer-and-earn, loyalty-rewards, first-order-privilege, seasonal-edit,
-  // corporate-gifting): unlike "collection" (specifications.collection)
-  // or "occasion" (specifications.occasion), there is currently no
-  // product-level field these correspond to — they're marketing
-  // programs, not a product attribute. Faking a filter here would
-  // silently show wrong/empty results and look "dynamic" without being
-  // truthful, which is exactly what you asked me not to ship. Instead:
-  // the route resolves (no more homepage redirect), the page renders
-  // normally, and the slug is only used for a heading — not a filter —
-  // until a real backend concept for offer programs exists.
+  // Infinite scroll state - like Shop component
+  const [page, setPage] = useState(1);
+  const [allProducts, setAllProducts] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [categoryError, setCategoryError] = useState(null);
+  const loaderRef = useRef(null);
+
+  // Mobile filter sheet
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const sheetRef = useRef(null);
+  const dragState = useRef({ startY: 0, currentY: 0 });
+  const [isDraggingSheet, setIsDraggingSheet] = useState(false);
+
+  // Mobile sort dropdown
+  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+  const sortDropdownRef = useRef(null);
+
+  // Desktop sidebar sort dropdown
+  const [isSidebarSortOpen, setIsSidebarSortOpen] = useState(false);
+  const sidebarSortRef = useRef(null);
+
   const offerLabelFromSlug = filterSlug
     ? filterSlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
     : null;
 
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [priceRange, setPriceRange] = useState([0, 7000]);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [cartLoadingId, setCartLoadingId] = useState(null);
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [sortBy, setSortBy] = useState("newest");
-  const [localLoading, setLocalLoading] = useState(false);
-  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
-  const itemsPerPage = 9;
-
-  // ── Infinite scroll state ──
-  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_BATCH);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const sentinelRef = useRef(null);
-
-  // ── Drag-to-close state ──
-  const sheetRef = useRef(null);
-  const dragState = useRef({
-    active: false,
-    startY: 0,
-    currentY: 0,
-    isDragging: false,
-  });
-
-  const products = offersData.products || [];
-  const { total, totalPages } = offersData.pagination || {
-    total: 0,
-    totalPages: 1,
-  };
-
-  const visibleProducts = products.slice(0, visibleCount);
-
-  const getSortLabel = () => {
-    const option = SORT_OPTIONS.find((opt) => opt.value === sortBy);
-    return option ? option.label : "Default Sorting";
-  };
-
-  // ✅ NEW: fetch real categories
+  // Fetch categories
   useEffect(() => {
     axios
       .get(`${API_BASE}/seller/products/categories`)
@@ -229,103 +207,166 @@ export default function Offers() {
       });
   }, []);
 
-  // Throttled fetch — minimum 1000 ms skeleton
+  // Fetch products with infinite scroll - like Shop
   useEffect(() => {
-    setLocalLoading(true);
-    const start = Date.now();
-    let timeoutId;
+    const load = async () => {
+      const isFirst = page === 1;
+      if (isFirst) {
+        setIsInitialLoading(true);
+      } else {
+        setIsLoadingMore(true);
+      }
 
-    dispatch(
-      fetchProductsByPlacement({
-        placement: "offers",
-        page: currentPage + 1,
-        limit: itemsPerPage,
-        categoryId: selectedCategory !== "All" ? selectedCategory : undefined,
-      }),
-    )
-      .unwrap()
-      .catch(() => {})
-      .finally(() => {
+      const start = Date.now();
+      try {
+        setCategoryError(null);
+        const result = await dispatch(
+          fetchProductsByPlacement({
+            placement: "offers",
+            page,
+            limit: 10,
+            categoryId: selectedCategory !== "All" ? selectedCategory : undefined,
+            sort: sortBy || undefined,
+          }),
+        ).unwrap();
+
+        const fetched = result.products || [];
+        setAllProducts((prev) => (isFirst ? fetched : [...prev, ...fetched]));
+        setHasMore(page < (result.pagination?.totalPages || 1));
+      } catch (err) {
+        console.error(err);
+        setCategoryError("Failed to load products. Please try again.");
+        toast.error("Failed to load products");
+      } finally {
         const elapsed = Date.now() - start;
         const remaining = Math.max(0, 1000 - elapsed);
-        timeoutId = setTimeout(() => setLocalLoading(false), remaining);
-      });
+        setTimeout(() => {
+          if (isFirst) setIsInitialLoading(false);
+          else setIsLoadingMore(false);
+        }, remaining);
+      }
+    };
 
-    return () => clearTimeout(timeoutId);
-  }, [dispatch, currentPage, selectedCategory]);
+    load();
+  }, [page, refreshKey, dispatch, selectedCategory, sortBy]);
 
-  // Reset visible count when products change
+  // Reset on filter change
   useEffect(() => {
-    setVisibleCount(ITEMS_PER_BATCH);
-  }, [selectedCategory, sortBy, currentPage]);
+    setPage(1);
+    setAllProducts([]);
+    setHasMore(true);
+    setRefreshKey((k) => k + 1);
+  }, [selectedCategory, sortBy]);
 
+  // Intersection Observer for infinite scroll
   useEffect(() => {
-    if (isAuthenticated) dispatch(fetchWishlist());
-  }, [dispatch, isAuthenticated]);
-
-  const sortedProducts = useMemo(() => {
-    const list = [...visibleProducts];
-    switch (sortBy) {
-      case "price-asc":
-        return list.sort(
-          (a, b) =>
-            (a.pricing?.salePrice || a.pricing?.originalPrice || 0) -
-            (b.pricing?.salePrice || b.pricing?.originalPrice || 0),
-        );
-      case "price-desc":
-        return list.sort(
-          (a, b) =>
-            (b.pricing?.salePrice || b.pricing?.originalPrice || 0) -
-            (a.pricing?.salePrice || a.pricing?.originalPrice || 0),
-        );
-      case "name-asc":
-        return list.sort((a, b) => a.productName.localeCompare(b.productName));
-      case "name-desc":
-        return list.sort((a, b) => b.productName.localeCompare(a.productName));
-      case "discount-desc":
-        return list.sort((a, b) => {
-          const discA =
-            a.pricing?.originalPrice && a.pricing?.salePrice
-              ? a.pricing.originalPrice - a.pricing.salePrice
-              : 0;
-          const discB =
-            b.pricing?.originalPrice && b.pricing?.salePrice
-              ? b.pricing.originalPrice - b.pricing.salePrice
-              : 0;
-          return discB - discA;
-        });
-      default:
-        return list;
-    }
-  }, [visibleProducts, sortBy]);
-
-  // ── Infinite Scroll via IntersectionObserver ──
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
+    if (!loaderRef.current || !hasMore || isLoadingMore || isInitialLoading)
+      return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         if (
           entries[0].isIntersecting &&
+          hasMore &&
           !isLoadingMore &&
-          visibleCount < products.length
+          !isInitialLoading
         ) {
-          setIsLoadingMore(true);
-          setTimeout(() => {
-            setVisibleCount((prev) =>
-              Math.min(prev + ITEMS_PER_BATCH, products.length),
-            );
-            setIsLoadingMore(false);
-          }, 300);
+          setPage((p) => p + 1);
         }
       },
-      { threshold: 0.1 },
+      { rootMargin: "200px" },
     );
 
-    observer.observe(sentinel);
+    observer.observe(loaderRef.current);
     return () => observer.disconnect();
-  }, [visibleCount, products.length, isLoadingMore]);
+  }, [hasMore, isLoadingMore, isInitialLoading]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(fetchWishlist());
+    }
+  }, [dispatch, isAuthenticated]);
+
+  // Close mobile sort dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        sortDropdownRef.current &&
+        !sortDropdownRef.current.contains(event.target)
+      ) {
+        setIsSortDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Close desktop sidebar sort dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        sidebarSortRef.current &&
+        !sidebarSortRef.current.contains(event.target)
+      ) {
+        setIsSidebarSortOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Drag to close sheet
+  useEffect(() => {
+    if (!isDraggingSheet) return;
+
+    const onMove = (e) => {
+      const clientY = e.clientY ?? e.touches?.[0]?.clientY;
+      const delta = clientY - dragState.current.startY;
+      if (delta < 0) return;
+      dragState.current.currentY = delta;
+      if (sheetRef.current) {
+        sheetRef.current.style.transform = `translateY(${delta}px)`;
+      }
+    };
+
+    const onUp = () => {
+      setIsDraggingSheet(false);
+      const delta = dragState.current.currentY;
+      if (sheetRef.current) {
+        sheetRef.current.style.transition = "transform 0.35s ease";
+        if (delta > 100) {
+          sheetRef.current.style.transform = "translateY(100%)";
+          setTimeout(() => {
+            closeMobileFilter();
+            if (sheetRef.current) {
+              sheetRef.current.style.transform = "";
+              sheetRef.current.style.transition = "";
+            }
+          }, 350);
+        } else {
+          sheetRef.current.style.transform = "translateY(0)";
+          setTimeout(() => {
+            if (sheetRef.current) {
+              sheetRef.current.style.transform = "";
+              sheetRef.current.style.transition = "";
+            }
+          }, 350);
+        }
+      }
+    };
+
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+    document.addEventListener("touchmove", onMove, { passive: false });
+    document.addEventListener("touchend", onUp);
+
+    return () => {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      document.removeEventListener("touchmove", onMove);
+      document.removeEventListener("touchend", onUp);
+    };
+  }, [isDraggingSheet]);
 
   const scrollToOffers = () => {
     const el = document.getElementById("offers-section");
@@ -370,139 +411,50 @@ export default function Offers() {
     setSelectedCategory("All");
     setPriceRange([0, 7000]);
     setSortBy("newest");
-    setCurrentPage(0);
+    setPage(1);
+    setAllProducts([]);
+    setHasMore(true);
+    setRefreshKey((k) => k + 1);
   };
 
-  const openFilters = () => {
-    setFiltersOpen(true);
+  const openMobileFilter = () => {
+    setIsMobileFilterOpen(true);
     document.body.style.overflow = "hidden";
     document.body.style.position = "fixed";
     document.body.style.width = "100%";
     document.body.style.top = `-${window.scrollY}px`;
   };
 
-  const closeFilters = () => {
+  const closeMobileFilter = () => {
     const scrollY = document.body.style.top;
-    setFiltersOpen(false);
+    setIsMobileFilterOpen(false);
     document.body.style.overflow = "";
     document.body.style.position = "";
     document.body.style.width = "";
     document.body.style.top = "";
-
-    // Reset sheet position
-    const sheet = sheetRef.current;
-    if (sheet) {
-      sheet.style.transform = "";
-      sheet.style.transition = "";
+    if (scrollY) {
+      window.scrollTo(0, parseInt(scrollY || "0", 10) * -1);
     }
-
-    if (scrollY) window.scrollTo(0, parseInt(scrollY || "0", 10) * -1);
   };
 
-  // ── Drag-to-close sheet handlers ──
-  const getDragY = (e) => {
-    if (e.touches) return e.touches[0].clientY;
-    return e.clientY;
+  const handleSortSelect = (value) => {
+    setSortBy(value);
+    setIsSortDropdownOpen(false);
   };
 
-  const onDragStart = useCallback((e) => {
-    // Only drag from the handle or header area
-    const target = e.target;
-    const isHandle =
-      target.classList.contains(styles.mobileFilterHandle) ||
-      target.closest(`.${styles.mobileFilterSheetHeader}`);
+  const getSortLabel = () => {
+    const option = SORT_OPTIONS.find((opt) => opt.value === sortBy);
+    return option ? option.label : "Default Sorting";
+  };
 
-    if (!isHandle) return;
+  const skeletonItems = Array.from({ length: 10 }, (_, i) => i);
 
-    dragState.current = {
-      active: true,
-      startY: getDragY(e),
-      currentY: getDragY(e),
-      isDragging: false,
-    };
-
-    const sheet = sheetRef.current;
-    if (sheet) {
-      sheet.style.transition = "none";
-    }
-  }, []);
-
-  const onDragMove = useCallback((e) => {
-    if (!dragState.current.active) return;
-
-    const y = getDragY(e);
-    const deltaY = y - dragState.current.startY;
-
-    if (Math.abs(deltaY) > 5) {
-      dragState.current.isDragging = true;
-    }
-
-    if (!dragState.current.isDragging) return;
-
-    dragState.current.currentY = y;
-
-    // Only allow dragging downward
-    const translateY = Math.max(0, deltaY);
-    const sheet = sheetRef.current;
-    if (sheet) {
-      sheet.style.transform = `translateY(${translateY}px)`;
-    }
-
-    if (e.cancelable) e.preventDefault();
-  }, []);
-
-  const onDragEnd = useCallback(() => {
-    if (!dragState.current.active) return;
-
-    const deltaY = dragState.current.currentY - dragState.current.startY;
-    const sheet = sheetRef.current;
-
-    if (sheet) {
-      sheet.style.transition = "";
-    }
-
-    // Close if dragged down more than 80px
-    if (dragState.current.isDragging && deltaY > 80) {
-      closeFilters();
-    } else {
-      // Snap back
-      if (sheet) {
-        sheet.style.transform = "";
-      }
-    }
-
-    dragState.current = {
-      active: false,
-      startY: 0,
-      currentY: 0,
-      isDragging: false,
-    };
-  }, []);
-
-  // Attach drag listeners to the sheet
-  useEffect(() => {
-    const sheet = sheetRef.current;
-    if (!sheet) return;
-
-    // Touch events
-    sheet.addEventListener("touchstart", onDragStart, { passive: true });
-    sheet.addEventListener("touchmove", onDragMove, { passive: false });
-    sheet.addEventListener("touchend", onDragEnd, { passive: true });
-
-    // Mouse events
-    sheet.addEventListener("mousedown", onDragStart);
-    window.addEventListener("mousemove", onDragMove);
-    window.addEventListener("mouseup", onDragEnd);
-
-    return () => {
-      sheet.removeEventListener("touchstart", onDragStart);
-      sheet.removeEventListener("touchmove", onDragMove);
-      sheet.removeEventListener("touchend", onDragEnd);
-      sheet.removeEventListener("mousedown", onDragStart);
-      window.removeEventListener("mousemove", onDragMove);
-      window.removeEventListener("mouseup", onDragEnd);
-    };
-  }, [onDragStart, onDragMove, onDragEnd]);
+  // Get the category name for display
+  const getCategoryName = () => {
+    if (!selectedCategory || selectedCategory === "All") return "All Products";
+    const category = categories.find((c) => c.id === selectedCategory);
+    return category ? category.label : "Category";
+  };
 
   return (
     <>
@@ -528,11 +480,12 @@ export default function Offers() {
               )}
             </div>
 
+            {/* Mobile Filter Toggle Button */}
             <button
               type="button"
               className={styles.filterToggle}
-              onClick={openFilters}
-              aria-expanded={filtersOpen}
+              onClick={openMobileFilter}
+              aria-expanded={isMobileFilterOpen}
             >
               <span className={styles.filterToggleText}>Filter Options</span>
               <span className={styles.filterToggleIcon}>
@@ -541,10 +494,50 @@ export default function Offers() {
             </button>
 
             <div className={styles.shopLayout}>
-              {/* Desktop Sidebar */}
+              {/* Desktop Filter Sidebar */}
               <aside className={styles.filterSidebar}>
                 <h3 className={styles.filterTitle}>Filter</h3>
 
+                {/* Sort By — Desktop Sidebar */}
+                <div className={styles.filterGroup}>
+                  <span className={styles.filterGroupLabel}>Sort By</span>
+                  <div className={styles.sidebarSortWrapper} ref={sidebarSortRef}>
+                    <button
+                      className={styles.sidebarSortButton}
+                      onClick={() => setIsSidebarSortOpen(!isSidebarSortOpen)}
+                      aria-expanded={isSidebarSortOpen}
+                    >
+                      <span>{getSortLabel()}</span>
+                      <FiChevronDown
+                        className={`${styles.sidebarSortChevron} ${
+                          isSidebarSortOpen ? styles.sidebarSortChevronOpen : ""
+                        }`}
+                      />
+                    </button>
+                    {isSidebarSortOpen && (
+                      <div className={styles.sidebarSortDropdown}>
+                        {SORT_OPTIONS.map((option) => (
+                          <button
+                            key={option.value}
+                            className={`${styles.sidebarSortOption} ${
+                              sortBy === option.value
+                                ? styles.sidebarSortOptionActive
+                                : ""
+                            }`}
+                            onClick={() => {
+                              setSortBy(option.value);
+                              setIsSidebarSortOpen(false);
+                            }}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Category */}
                 <div className={styles.filterGroup}>
                   <span className={styles.filterGroupLabel}>Category</span>
                   <label className={styles.filterOption}>
@@ -552,11 +545,7 @@ export default function Offers() {
                       type="radio"
                       name="category"
                       checked={selectedCategory === "All"}
-                      onChange={() => {
-                        setSelectedCategory("All");
-                        setCurrentPage(0);
-                        setTimeout(scrollToOffers, 100);
-                      }}
+                      onChange={() => setSelectedCategory("All")}
                     />
                     All
                   </label>
@@ -571,11 +560,7 @@ export default function Offers() {
                           type="radio"
                           name="category"
                           checked={selectedCategory === c.id}
-                          onChange={() => {
-                            setSelectedCategory(c.id);
-                            setCurrentPage(0);
-                            setTimeout(scrollToOffers, 100);
-                          }}
+                          onChange={() => setSelectedCategory(c.id)}
                         />
                         {c.label}
                       </label>
@@ -583,21 +568,7 @@ export default function Offers() {
                   )}
                 </div>
 
-                <div className={styles.filterGroup}>
-                  <span className={styles.filterGroupLabel}>Sort By</span>
-                  {SORT_OPTIONS.map((opt) => (
-                    <label key={opt.value} className={styles.filterOption}>
-                      <input
-                        type="radio"
-                        name="sort"
-                        checked={sortBy === opt.value}
-                        onChange={() => setSortBy(opt.value)}
-                      />
-                      {opt.label}
-                    </label>
-                  ))}
-                </div>
-
+                {/* Price Range */}
                 <div className={styles.filterGroup}>
                   <span className={styles.filterGroupLabel}>Price Range</span>
                   <input
@@ -629,203 +600,197 @@ export default function Offers() {
               {/* Products */}
               <div className={styles.productsWrapper}>
                 <div className={styles.productsHeader}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                    }}
-                  >
-                    <span className={styles.productsCount}>
-                      {localLoading
-                        ? "Loading..."
-                        : `Showing ${Math.min(visibleCount, products.length)} of ${total} products`}
-                    </span>
-                  </div>
+                  <span className={styles.productsCount}>
+                    {isInitialLoading
+                      ? "Loading..."
+                      : `Showing ${allProducts.length} results for ${getCategoryName()}`}
+                  </span>
                 </div>
 
-                {localLoading ? (
-                  <div
-                    className={styles.productsGrid}
-                    aria-busy="true"
-                    aria-label="Loading products"
-                  >
-                    {Array.from({ length: itemsPerPage }).map((_, i) => (
-                      <SkeletonCard key={i} />
+                {/* Skeleton Loading */}
+                {isInitialLoading && (
+                  <div className={styles.skeletonGrid}>
+                    {skeletonItems.map((i) => (
+                      <div className={styles.skeletonCard} key={i}>
+                        <div className={styles.skeletonImage} />
+                        <div className={styles.skeletonText} />
+                        <div
+                          className={`${styles.skeletonText} ${styles.skeletonTextShort}`}
+                        />
+                        <div className={styles.skeletonBtn} />
+                      </div>
                     ))}
                   </div>
-                ) : (
-                  <>
-                    <div className={styles.productsGrid}>
-                      {sortedProducts.map((product, i) => {
-                        const inCart = isInCart(product._id);
-                        const inWishlist = isInWishlist(product._id);
-                        const addingToCart = cartLoadingId === product._id;
-                        const discount =
-                          product.pricing?.salePrice &&
-                          product.pricing?.originalPrice
-                            ? Math.round(
-                                ((product.pricing.originalPrice -
-                                  product.pricing.salePrice) /
-                                  product.pricing.originalPrice) *
-                                  100,
-                              )
-                            : 0;
-                        return (
-                          <Reveal
-                            as="div"
-                            key={product._id}
-                            delay={i * 50}
-                            className={styles.productCard}
-                          >
-                            <Link
-                              to={`/product/${product.productSlug}`}
-                              className={styles.productImageWrap}
-                            >
-                              <img
-                                className={styles.productImage}
-                                src={product.thumbnail?.url}
-                                alt={product.productName}
-                                loading="lazy"
-                              />
-                              {discount > 0 && (
-                                <span className={styles.productDiscount}>
-                                  {discount}% OFF
-                                </span>
-                              )}
-                              <span className={styles.productCategoryOverlay}>
-                                {product.category?.categoryData?.label ||
-                                  "Uncategorized"}
-                              </span>
-                              <div className={styles.wishlistActions}>
-                                <button
-                                  type="button"
-                                  className={`${styles.wishlistBtn} ${
-                                    inWishlist ? styles.wishlistBtnActive : ""
-                                  }`}
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    toggleWishlist(product._id);
-                                  }}
-                                  aria-label={
-                                    inWishlist
-                                      ? "Remove from wishlist"
-                                      : "Add to wishlist"
-                                  }
-                                >
-                                  {inWishlist ? (
-                                    <FiHeart fill="currentColor" />
-                                  ) : (
-                                    <FiHeart />
-                                  )}
-                                </button>
-                              </div>
-                            </Link>
-                            <div className={styles.productBody}>
-                              <Link
-                                to={`/product/${product.productSlug}`}
-                                className={styles.productName}
-                              >
-                                {product.productName}
-                              </Link>
-                              <div className={styles.productPriceRow}>
-                                <span className={styles.productCurrentPrice}>
-                                  ₹
-                                  {(
-                                    product.pricing?.salePrice ||
-                                    product.pricing?.originalPrice
-                                  )?.toLocaleString() || "0"}
-                                </span>
-                                {product.pricing?.salePrice &&
-                                  product.pricing?.originalPrice && (
-                                    <span
-                                      className={styles.productOriginalPrice}
-                                    >
-                                      ₹
-                                      {product.pricing.originalPrice.toLocaleString()}
-                                    </span>
-                                  )}
-                              </div>
-                              <button
-                                type="button"
-                                className={`${styles.productAddBtn} ${
-                                  inCart ? styles.productAddBtnActive : ""
-                                }`}
-                                onClick={() => handleAddToCart(product._id)}
-                                disabled={inCart || addingToCart}
-                              >
-                                {inCart ? (
-                                  <>
-                                    <FiCheck /> Added to Cart
-                                  </>
-                                ) : (
-                                  <>
-                                    <FiShoppingBag />{" "}
-                                    {addingToCart ? "Adding..." : "Add to Cart"}
-                                  </>
-                                )}
-                              </button>
-                            </div>
-                          </Reveal>
-                        );
-                      })}
-                    </div>
+                )}
 
-                    {/* ── Infinite Scroll Sentinel ── */}
-                    {!localLoading && (
-                      <div ref={sentinelRef} className={styles.sentinel}>
-                        {isLoadingMore && (
-                          <div className={styles.skeletonLoadMoreGrid}>
-                            {Array.from({ length: 4 }).map((_, i) => (
-                              <SkeletonCard key={i} />
-                            ))}
-                          </div>
-                        )}
+                {/* Error State */}
+                {categoryError && !isInitialLoading && (
+                  <div className={styles.errorState}>
+                    <div className={styles.errorStateIcon}>⚠️</div>
+                    <h3>Something went wrong</h3>
+                    <p>{categoryError}</p>
+                    <button
+                      className={styles.errorStateButton}
+                      onClick={() => setRefreshKey((k) => k + 1)}
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                )}
+
+                {/* Products */}
+                {!isInitialLoading && !categoryError && (
+                  <>
+                    {allProducts.length === 0 && (
+                      <div className={styles.emptyState}>
+                        <div className={styles.emptyStateIcon}>🛍️</div>
+                        <h3>No Products Available</h3>
+                        <p>
+                          We're currently updating our offers. Please check back
+                          later!
+                        </p>
                       </div>
                     )}
 
-                    {/* Pagination (fallback) */}
-                    {!localLoading &&
-                      totalPages > 1 &&
-                      visibleCount >= products.length && (
-                        <div className={styles.pagination}>
-                          <button
-                            className={`${styles.paginationBtn} ${
-                              currentPage === 0 ? styles.paginationDisabled : ""
-                            }`}
-                            onClick={() => {
-                              if (currentPage > 0) {
-                                setCurrentPage((p) => p - 1);
-                                setTimeout(scrollToOffers, 100);
-                              }
-                            }}
-                            disabled={currentPage === 0}
-                          >
-                            <FiChevronLeft /> Prev
-                          </button>
-                          <span className={styles.paginationInfo}>
-                            Page {currentPage + 1} of {totalPages}
-                          </span>
-                          <button
-                            className={`${styles.paginationBtn} ${
-                              currentPage === totalPages - 1
-                                ? styles.paginationDisabled
-                                : ""
-                            }`}
-                            onClick={() => {
-                              if (currentPage < totalPages - 1) {
-                                setCurrentPage((p) => p + 1);
-                                setTimeout(scrollToOffers, 100);
-                              }
-                            }}
-                            disabled={currentPage === totalPages - 1}
-                          >
-                            Next <FiChevronRight />
-                          </button>
-                        </div>
-                      )}
+                    {allProducts.length > 0 && (
+                      <div className={styles.productsGrid}>
+                        {allProducts.map((p) => {
+                          const inCart = isInCart(p._id);
+                          const inWishlist = isInWishlist(p._id);
+                          const addingToCart = cartLoadingId === p._id;
+                          const discount =
+                            p.pricing?.salePrice &&
+                            p.pricing?.originalPrice
+                              ? Math.round(
+                                  ((p.pricing.originalPrice -
+                                    p.pricing.salePrice) /
+                                    p.pricing.originalPrice) *
+                                    100,
+                                )
+                              : 0;
+
+                          return (
+                            <div className={styles.productCard} key={p._id}>
+                              <Link
+                                to={`/product/${p.productSlug}`}
+                                className={styles.productImageWrap}
+                              >
+                                <img
+                                  className={styles.productImage}
+                                  src={p.thumbnail?.url}
+                                  alt={p.productName}
+                                  loading="lazy"
+                                />
+                                {discount > 0 && (
+                                  <span className={styles.productDiscount}>
+                                    {discount}% off
+                                  </span>
+                                )}
+                                <span className={styles.productCategoryOverlay}>
+                                  {p.category?.categoryData?.label ||
+                                    "Uncategorized"}
+                                </span>
+                                <div className={styles.wishlistActions}>
+                                  <button
+                                    type="button"
+                                    className={`${styles.wishlistBtn} ${
+                                      inWishlist ? styles.wishlistBtnActive : ""
+                                    }`}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      toggleWishlist(p._id);
+                                    }}
+                                    aria-label={
+                                      inWishlist
+                                        ? "Remove from wishlist"
+                                        : "Add to wishlist"
+                                    }
+                                  >
+                                    {inWishlist ? (
+                                      <FaHeart />
+                                    ) : (
+                                      <FiHeart />
+                                    )}
+                                  </button>
+                                </div>
+                              </Link>
+                              <div className={styles.productBody}>
+                                <Link
+                                  to={`/product/${p.productSlug}`}
+                                  className={styles.productName}
+                                  title={p.productName}
+                                >
+                                  {p.productName}
+                                </Link>
+                                <div className={styles.productPriceRow}>
+                                  <span className={styles.productCurrentPrice}>
+                                    ₹
+                                    {(
+                                      p.pricing?.salePrice ||
+                                      p.pricing?.originalPrice
+                                    )?.toLocaleString() || "0"}
+                                  </span>
+                                  {p.pricing?.salePrice &&
+                                    p.pricing?.originalPrice && (
+                                      <span
+                                        className={styles.productOriginalPrice}
+                                      >
+                                        ₹
+                                        {p.pricing.originalPrice.toLocaleString()}
+                                      </span>
+                                    )}
+                                </div>
+                                <button
+                                  type="button"
+                                  className={`${styles.productAddBtn} ${
+                                    inCart ? styles.productAddBtnActive : ""
+                                  }`}
+                                  onClick={() => handleAddToCart(p._id)}
+                                  disabled={inCart || addingToCart}
+                                >
+                                  {inCart ? (
+                                    <>
+                                      <FiCheck /> Added to Cart
+                                    </>
+                                  ) : (
+                                    <>
+                                      <FiShoppingBag />{" "}
+                                      {addingToCart ? "Adding..." : "Add to Cart"}
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </>
+                )}
+
+                {/* Infinite scroll loader */}
+                {!isInitialLoading && !categoryError && hasMore && (
+                  <div ref={loaderRef} className={styles.infiniteLoader}>
+                    {isLoadingMore && (
+                      <div className={styles.skeletonGrid}>
+                        {Array.from({ length: 3 }).map((_, i) => (
+                          <div className={styles.skeletonCard} key={`more-${i}`}>
+                            <div className={styles.skeletonImage} />
+                            <div className={styles.skeletonText} />
+                            <div
+                              className={`${styles.skeletonText} ${styles.skeletonTextShort}`}
+                            />
+                            <div className={styles.skeletonBtn} />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {!isInitialLoading && !hasMore && allProducts.length > 0 && (
+                  <div className={styles.endMessage}>No more products</div>
                 )}
               </div>
             </div>
@@ -874,37 +839,47 @@ export default function Offers() {
         </div>
 
         {/* Mobile Filter Overlay */}
-        {filtersOpen && (
-          <div className={styles.filterOverlay} onClick={closeFilters} />
+        {isMobileFilterOpen && (
+          <div className={styles.filterOverlay} onClick={closeMobileFilter} />
         )}
 
         {/* Mobile Filter Sheet */}
         <div
           ref={sheetRef}
           className={`${styles.mobileFilterSheet} ${
-            filtersOpen ? styles.mobileFilterSheetOpen : ""
+            isMobileFilterOpen ? styles.mobileFilterSheetOpen : ""
           }`}
         >
-          {/* Drag handle */}
-          <div className={styles.mobileFilterHandle} />
+          <div
+            className={styles.mobileFilterHandle}
+            onMouseDown={(e) => {
+              dragState.current.startY = e.clientY;
+              dragState.current.currentY = 0;
+              setIsDraggingSheet(true);
+            }}
+            onTouchStart={(e) => {
+              dragState.current.startY = e.touches[0].clientY;
+              dragState.current.currentY = 0;
+              setIsDraggingSheet(true);
+            }}
+          />
 
           <div className={styles.mobileFilterSheetHeader}>
             <h3 className={styles.mobileFilterTitle}>Filter</h3>
             <button
               type="button"
               className={styles.mobileFilterClose}
-              onClick={closeFilters}
-              aria-label="Close filters"
+              onClick={closeMobileFilter}
             >
               ✕
             </button>
           </div>
 
           <div className={styles.mobileFilterInner}>
-            {/* Mobile Sort By — Custom Dropdown */}
-            <div className={styles.filterGroup}>
-              <span className={styles.filterGroupLabel}>Sort By</span>
-              <div className={styles.mobileSortWrapper}>
+            {/* Sort By */}
+            <div className={styles.mobileFilterGroup}>
+              <span className={styles.mobileFilterGroupLabel}>Sort By</span>
+              <div className={styles.mobileSortWrapper} ref={sortDropdownRef}>
                 <button
                   className={styles.mobileSortButton}
                   onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
@@ -912,20 +887,22 @@ export default function Offers() {
                 >
                   <span>{getSortLabel()}</span>
                   <FiChevronDown
-                    className={`${styles.mobileSortChevron} ${isSortDropdownOpen ? styles.mobileSortChevronOpen : ""}`}
+                    className={`${styles.mobileSortChevron} ${
+                      isSortDropdownOpen ? styles.mobileSortChevronOpen : ""
+                    }`}
                   />
                 </button>
-
                 {isSortDropdownOpen && (
                   <div className={styles.mobileSortDropdown}>
                     {SORT_OPTIONS.map((option) => (
                       <button
                         key={option.value}
-                        className={`${styles.mobileSortOption} ${sortBy === option.value ? styles.mobileSortOptionActive : ""}`}
-                        onClick={() => {
-                          setSortBy(option.value);
-                          setIsSortDropdownOpen(false);
-                        }}
+                        className={`${styles.mobileSortOption} ${
+                          sortBy === option.value
+                            ? styles.mobileSortOptionActive
+                            : ""
+                        }`}
+                        onClick={() => handleSortSelect(option.value)}
                       >
                         {option.label}
                       </button>
@@ -935,19 +912,16 @@ export default function Offers() {
               </div>
             </div>
 
-            {/* Mobile Category — Two column grid with real categories */}
-            <div className={styles.filterGroup}>
-              <span className={styles.filterGroupLabel}>Category</span>
+            {/* Category */}
+            <div className={styles.mobileFilterGroup}>
+              <span className={styles.mobileFilterGroupLabel}>Category</span>
               <div className={styles.mobileFilterGrid}>
                 <label className={styles.mobileFilterOption}>
                   <input
                     type="radio"
                     name="mobile_category"
                     checked={selectedCategory === "All"}
-                    onChange={() => {
-                      setSelectedCategory("All");
-                      setCurrentPage(0);
-                    }}
+                    onChange={() => setSelectedCategory("All")}
                   />
                   All
                 </label>
@@ -962,10 +936,7 @@ export default function Offers() {
                         type="radio"
                         name="mobile_category"
                         checked={selectedCategory === c.id}
-                        onChange={() => {
-                          setSelectedCategory(c.id);
-                          setCurrentPage(0);
-                        }}
+                        onChange={() => setSelectedCategory(c.id)}
                       />
                       {c.label}
                     </label>
@@ -974,8 +945,9 @@ export default function Offers() {
               </div>
             </div>
 
-            <div className={styles.filterGroup}>
-              <span className={styles.filterGroupLabel}>Price Range</span>
+            {/* Price Range */}
+            <div className={styles.mobileFilterGroup}>
+              <span className={styles.mobileFilterGroupLabel}>Price Range</span>
               <input
                 type="range"
                 min="0"
@@ -994,12 +966,12 @@ export default function Offers() {
               </div>
             </div>
 
+            <button className={styles.filterClearBtn} onClick={clearAllFilters}>
+              Clear All Filters
+            </button>
             <button
               className={styles.mobileFilterApply}
-              onClick={() => {
-                closeFilters();
-                setTimeout(scrollToOffers, 100);
-              }}
+              onClick={closeMobileFilter}
             >
               Apply Filters
             </button>

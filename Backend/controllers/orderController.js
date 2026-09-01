@@ -1,7 +1,10 @@
+// backend/controllers/orderController.js
 import Order, { FULFILLMENT_STATUS } from "../models/Order.js";
 import Cart from "../models/Cart.js";
 import JewelleryProduct from "../models/JewelleryProduct.js";
+import Seller from "../models/Seller.js"; // ✅ NEW — needed to look up the seller's pickup pincode
 import razorpayService from "../services/razorpayService.js";
+import PaymentSettings from "../models/PaymentSettings.js";
 import {
   createShipmentForOrder,
   calculateShippingRate,
@@ -11,7 +14,7 @@ import {
 } from "./shippingController.js";
 
 // ============================================
-// SOCKET.IO IMPORTS (ADDED)
+// SOCKET.IO IMPORTS
 // ============================================
 import {
   emitOrderCreated,
@@ -85,26 +88,80 @@ const buildOrderItemsAndTotals = async (items) => {
   return { orderItems, itemsTotal, totalWeightKg };
 };
 
-const assertSingleSeller = (orderItems) => {
+// Every item already carries its own `seller` (items[].seller), which is
+// what per-seller views (getSellerOrders, sellerConfirmOrder, dashboards,
+// etc.) filter on — none of that depends on this value.
+//
+// `order.seller` on the top-level document is kept only as a convenience
+// "primary seller" reference for the common single-seller-cart case; for
+// multi-seller carts it's left null rather than picking one seller
+// arbitrarily.
+//
+// ⚠️ CHANGED CONSEQUENCE: shipping now requires exactly ONE seller's
+// pickup address per checkout (see resolveShippingFee below and
+// shippingController's resolveOrderSeller/getShippingQuote). A null
+// sellerId here now blocks checkout entirely instead of silently
+// proceeding with order.seller = null — see the sellerId check added to
+// createRazorpayOrder/createCODOrder. This is a direct, unavoidable
+// consequence of pickup addresses moving from one global env value to
+// one-per-seller: there is no longer a single pincode to quote/ship a
+// mixed-seller cart from, and there is no fallback address to fall back
+// on. Splitting a multi-seller cart into one order per seller at checkout
+// time would resolve this properly, but that's a checkout-flow change
+// beyond the scope of "use the seller's saved pickup address" — flagging
+// it here rather than papering over it.
+const resolvePrimarySeller = (orderItems) => {
   const sellerIds = new Set(
     orderItems.map((i) => i.seller && i.seller.toString()).filter(Boolean),
   );
-  if (sellerIds.size > 1) {
+  return sellerIds.size === 1 ? [...sellerIds][0] : null;
+};
+
+// ✅ NEW — looks up the seller's saved, Shiprocket-registered pickup
+// address and returns its pincode. Throws a clear 400 if the cart has no
+// single seller, the seller doesn't exist, or the seller hasn't set up
+// (and successfully registered) a pickup address yet. No fallback to any
+// other pincode.
+const resolveSellerPickupPincode = async (sellerId) => {
+  if (!sellerId) {
     const err = new Error(
-      "Your cart contains items from multiple sellers. Please check out " +
-        "items from one seller at a time — this helps us keep order " +
-        "tracking accurate.",
+      "Your cart contains products from multiple sellers. Please check out with products from one seller at a time so shipping can be calculated correctly.",
     );
     err.status = 400;
     throw err;
   }
-  return sellerIds.size === 1 ? [...sellerIds][0] : null;
+
+  const seller = await Seller.findById(sellerId).select("pickupAddress");
+  if (!seller) {
+    const err = new Error("Seller not found for the items in your cart");
+    err.status = 400;
+    throw err;
+  }
+
+  if (
+    !seller.pickupAddress?.isRegisteredWithShiprocket ||
+    !seller.pickupAddress?.pincode
+  ) {
+    const err = new Error(
+      "Delivery is temporarily unavailable — this seller has not configured a pickup address yet.",
+    );
+    err.status = 400;
+    throw err;
+  }
+
+  return seller.pickupAddress.pincode;
 };
 
-const resolveShippingFee = async ({ pincode, weightKg, paymentMethod }) => {
+const resolveShippingFee = async ({
+  pincode,
+  pickupPincode,
+  weightKg,
+  paymentMethod,
+}) => {
   try {
     const rate = await calculateShippingRate({
       deliveryPincode: pincode,
+      pickupPincode,
       weightKg,
       paymentMethod,
     });
@@ -170,10 +227,27 @@ const validateShippingAddress = (shippingAddress) => {
   );
 };
 
+const normalizeClientRequestId = (value) => {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.length > 100) return null;
+  return trimmed;
+};
+
+const findExistingOrderByIdempotencyKey = async (userId, clientRequestId) => {
+  if (!clientRequestId) return null;
+  return Order.findOne({ user: userId, idempotencyKey: clientRequestId });
+};
+
 export const createRazorpayOrder = async (req, res) => {
   try {
     const userId = req.user._id || req.user.id;
-    const { items, shippingAddress } = req.body;
+    const {
+      items,
+      shippingAddress,
+      clientRequestId: rawClientRequestId,
+    } = req.body;
+    const clientRequestId = normalizeClientRequestId(rawClientRequestId);
 
     if (!items || !items.length) {
       return res
@@ -188,6 +262,37 @@ export const createRazorpayOrder = async (req, res) => {
       });
     }
 
+    const existing = await findExistingOrderByIdempotencyKey(
+      userId,
+      clientRequestId,
+    );
+    if (existing) {
+      return res.status(200).json({
+        success: true,
+        message: "Order already created",
+        data: {
+          orderId: existing._id,
+          orderNumber: existing.orderNumber,
+          razorpayOrderId: existing.razorpay?.orderId,
+          amount: Math.round(existing.totalAmount * 100),
+          currency: "INR",
+          mock: !razorpayService.isConfigured,
+          itemsTotal: existing.itemsTotal,
+          shippingFee: existing.shippingFee,
+          totalAmount: existing.totalAmount,
+        },
+      });
+    }
+
+    const paymentSettings = await PaymentSettings.getSingleton();
+    if (!paymentSettings.onlinePaymentEnabled) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Online payment is currently unavailable. Please try Cash on Delivery.",
+      });
+    }
+
     let orderItems, itemsTotal, totalWeightKg;
     try {
       ({ orderItems, itemsTotal, totalWeightKg } =
@@ -198,9 +303,13 @@ export const createRazorpayOrder = async (req, res) => {
         .json({ success: false, message: e.message });
     }
 
-    let sellerId;
+    const sellerId = resolvePrimarySeller(orderItems);
+
+    // ✅ NEW — resolve the seller's saved, registered pickup pincode.
+    // No fallback: if this fails, checkout stops here with a clear reason.
+    let pickupPincode;
     try {
-      sellerId = assertSingleSeller(orderItems);
+      pickupPincode = await resolveSellerPickupPincode(sellerId);
     } catch (e) {
       return res
         .status(e.status || 400)
@@ -211,6 +320,7 @@ export const createRazorpayOrder = async (req, res) => {
     try {
       shippingFee = await resolveShippingFee({
         pincode: shippingAddress.pincode,
+        pickupPincode,
         weightKg: totalWeightKg,
         paymentMethod: "prepaid",
       });
@@ -222,25 +332,54 @@ export const createRazorpayOrder = async (req, res) => {
 
     const totalAmount = itemsTotal + shippingFee;
 
-    const order = await Order.create({
-      orderNumber: generateOrderNumber(),
-      user: userId,
-      seller: sellerId,
-      customerName:
-        req.user.fullName ||
-        `${req.user.firstName || ""} ${req.user.lastName || ""}`.trim() ||
-        shippingAddress.fullName,
-      customerEmail: req.user.email,
-      customerPhone: req.user.phone || shippingAddress.phone,
-      items: orderItems,
-      shippingAddress,
-      itemsTotal,
-      shippingFee,
-      totalAmount,
-      paymentMethod: "razorpay",
-      paymentStatus: "pending",
-      orderStatus: "placed",
-    });
+    let order;
+    try {
+      order = await Order.create({
+        orderNumber: generateOrderNumber(),
+        idempotencyKey: clientRequestId || undefined,
+        user: userId,
+        seller: sellerId,
+        customerName:
+          req.user.fullName ||
+          `${req.user.firstName || ""} ${req.user.lastName || ""}`.trim() ||
+          shippingAddress.fullName,
+        customerEmail: req.user.email,
+        customerPhone: req.user.phone || shippingAddress.phone,
+        items: orderItems,
+        shippingAddress,
+        itemsTotal,
+        shippingFee,
+        totalAmount,
+        paymentMethod: "razorpay",
+        paymentStatus: "pending",
+        orderStatus: "placed",
+      });
+    } catch (createErr) {
+      if (createErr.code === 11000 && clientRequestId) {
+        const raced = await findExistingOrderByIdempotencyKey(
+          userId,
+          clientRequestId,
+        );
+        if (raced) {
+          return res.status(200).json({
+            success: true,
+            message: "Order already created",
+            data: {
+              orderId: raced._id,
+              orderNumber: raced.orderNumber,
+              razorpayOrderId: raced.razorpay?.orderId,
+              amount: Math.round(raced.totalAmount * 100),
+              currency: "INR",
+              mock: !razorpayService.isConfigured,
+              itemsTotal: raced.itemsTotal,
+              shippingFee: raced.shippingFee,
+              totalAmount: raced.totalAmount,
+            },
+          });
+        }
+      }
+      throw createErr;
+    }
 
     const rzpResult = await razorpayService.createOrder({
       amount: Math.round(totalAmount * 100),
@@ -306,6 +445,14 @@ export const verifyRazorpayPayment = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Order not found" });
 
+    if (order.paymentStatus === "paid") {
+      return res.status(200).json({
+        success: true,
+        message: "Payment already verified",
+        data: order,
+      });
+    }
+
     const isValid = razorpayService.verifySignature({
       orderId: razorpay_order_id || order.razorpay?.orderId,
       paymentId: razorpay_payment_id,
@@ -338,7 +485,6 @@ export const verifyRazorpayPayment = async (req, res) => {
 
     await finalizeInventoryAndCart(order, userId);
 
-    // ✅ SOCKET.IO — notify the seller in real time
     emitOrderCreated(order);
 
     return res.status(200).json({
@@ -359,7 +505,12 @@ export const verifyRazorpayPayment = async (req, res) => {
 export const createCODOrder = async (req, res) => {
   try {
     const userId = req.user._id || req.user.id;
-    const { items, shippingAddress } = req.body;
+    const {
+      items,
+      shippingAddress,
+      clientRequestId: rawClientRequestId,
+    } = req.body;
+    const clientRequestId = normalizeClientRequestId(rawClientRequestId);
 
     if (!items || !items.length) {
       return res
@@ -374,6 +525,27 @@ export const createCODOrder = async (req, res) => {
       });
     }
 
+    const existing = await findExistingOrderByIdempotencyKey(
+      userId,
+      clientRequestId,
+    );
+    if (existing) {
+      return res.status(200).json({
+        success: true,
+        message: "Order placed (Cash on Delivery)",
+        data: existing,
+      });
+    }
+
+    const paymentSettings = await PaymentSettings.getSingleton();
+    if (!paymentSettings.codEnabled) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Cash on Delivery is currently unavailable. Please choose an online payment method.",
+      });
+    }
+
     let orderItems, itemsTotal, totalWeightKg;
     try {
       ({ orderItems, itemsTotal, totalWeightKg } =
@@ -384,9 +556,13 @@ export const createCODOrder = async (req, res) => {
         .json({ success: false, message: e.message });
     }
 
-    let sellerId;
+    const sellerId = resolvePrimarySeller(orderItems);
+
+    // ✅ NEW — resolve the seller's saved, registered pickup pincode.
+    // No fallback: if this fails, checkout stops here with a clear reason.
+    let pickupPincode;
     try {
-      sellerId = assertSingleSeller(orderItems);
+      pickupPincode = await resolveSellerPickupPincode(sellerId);
     } catch (e) {
       return res
         .status(e.status || 400)
@@ -397,6 +573,7 @@ export const createCODOrder = async (req, res) => {
     try {
       shippingFee = await resolveShippingFee({
         pincode: shippingAddress.pincode,
+        pickupPincode,
         weightKg: totalWeightKg,
         paymentMethod: "cod",
       });
@@ -408,38 +585,75 @@ export const createCODOrder = async (req, res) => {
 
     const totalAmount = itemsTotal + shippingFee;
 
-    const order = await Order.create({
-      orderNumber: generateOrderNumber(),
-      user: userId,
-      seller: sellerId,
-      customerName:
-        req.user.fullName ||
-        `${req.user.firstName || ""} ${req.user.lastName || ""}`.trim() ||
-        shippingAddress.fullName,
-      customerEmail: req.user.email,
-      customerPhone: req.user.phone || shippingAddress.phone,
-      items: orderItems,
-      shippingAddress,
-      itemsTotal,
-      shippingFee,
-      totalAmount,
-      paymentMethod: "cod",
-      paymentStatus: "pending",
-      orderStatus: "processing",
-      fulfillmentStatus: FULFILLMENT_STATUS.PENDING_SELLER_CONFIRMATION,
-      statusHistory: [
-        {
-          status: FULFILLMENT_STATUS.PENDING_SELLER_CONFIRMATION,
-          role: "system",
-          timestamp: new Date(),
-        },
-      ],
-      placedAt: new Date(),
-    });
+    if (
+      paymentSettings.codMinOrderAmount > 0 &&
+      totalAmount < paymentSettings.codMinOrderAmount
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: `Cash on Delivery is only available for orders above ₹${paymentSettings.codMinOrderAmount.toLocaleString("en-IN")}`,
+      });
+    }
+    if (
+      paymentSettings.codMaxOrderAmount > 0 &&
+      totalAmount > paymentSettings.codMaxOrderAmount
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: `Cash on Delivery is only available for orders up to ₹${paymentSettings.codMaxOrderAmount.toLocaleString("en-IN")}`,
+      });
+    }
+
+    let order;
+    try {
+      order = await Order.create({
+        orderNumber: generateOrderNumber(),
+        idempotencyKey: clientRequestId || undefined,
+        user: userId,
+        seller: sellerId,
+        customerName:
+          req.user.fullName ||
+          `${req.user.firstName || ""} ${req.user.lastName || ""}`.trim() ||
+          shippingAddress.fullName,
+        customerEmail: req.user.email,
+        customerPhone: req.user.phone || shippingAddress.phone,
+        items: orderItems,
+        shippingAddress,
+        itemsTotal,
+        shippingFee,
+        totalAmount,
+        paymentMethod: "cod",
+        paymentStatus: "pending",
+        orderStatus: "processing",
+        fulfillmentStatus: FULFILLMENT_STATUS.PENDING_SELLER_CONFIRMATION,
+        statusHistory: [
+          {
+            status: FULFILLMENT_STATUS.PENDING_SELLER_CONFIRMATION,
+            role: "system",
+            timestamp: new Date(),
+          },
+        ],
+        placedAt: new Date(),
+      });
+    } catch (createErr) {
+      if (createErr.code === 11000 && clientRequestId) {
+        const raced = await findExistingOrderByIdempotencyKey(
+          userId,
+          clientRequestId,
+        );
+        if (raced) {
+          return res.status(200).json({
+            success: true,
+            message: "Order placed (Cash on Delivery)",
+            data: raced,
+          });
+        }
+      }
+      throw createErr;
+    }
 
     await finalizeInventoryAndCart(order, userId);
 
-    // ✅ SOCKET.IO — notify the seller in real time
     emitOrderCreated(order);
 
     return res.status(201).json({
@@ -523,7 +737,13 @@ export const getSellerOrders = async (req, res) => {
         },
         items: sellerItems,
         sellerSubtotal,
+        totalAmount: order.totalAmount,
+        paymentMethod: order.paymentMethod,
         paymentStatus: order.paymentStatus,
+        paymentReference:
+          order.paymentMethod === "cod"
+            ? null
+            : order.razorpay?.paymentId || null,
         orderStatus: order.orderStatus,
         fulfillmentStatus: order.fulfillmentStatus,
         sellerConfirmedAt: order.sellerConfirmedAt,
@@ -545,7 +765,6 @@ export const getSellerOrders = async (req, res) => {
   }
 };
 
-// ✅ NEW: SUPER ADMIN — GET /orders/admin/all?fulfillmentStatus=SELLER_CONFIRMED
 export const getAdminOrders = async (req, res) => {
   try {
     if (req.user.role !== "admin" && req.user.role !== "super_admin") {
@@ -559,8 +778,6 @@ export const getAdminOrders = async (req, res) => {
     if (fulfillmentStatus) {
       filter.fulfillmentStatus = fulfillmentStatus;
     } else {
-      // Default: everything relevant to admin action/monitoring, excludes
-      // orders still waiting on the seller (nothing for admin to do there yet).
       filter.fulfillmentStatus = {
         $ne: FULFILLMENT_STATUS.PENDING_SELLER_CONFIRMATION,
       };
@@ -635,7 +852,6 @@ export const updateOrderStatus = async (req, res) => {
     order.orderStatus = status;
     await order.save();
 
-    // ✅ SOCKET.IO
     emitOrderStatusUpdated(order);
 
     return res
@@ -677,7 +893,7 @@ export const sellerConfirmOrder = async (req, res) => {
         .json({ success: false, message: "Not authorized for this order" });
     }
 
-    if (order.paymentStatus !== "paid") {
+    if (order.paymentMethod !== "cod" && order.paymentStatus !== "paid") {
       return res.status(400).json({
         success: false,
         message: "Cannot confirm an order that has not been paid for",
@@ -704,7 +920,6 @@ export const sellerConfirmOrder = async (req, res) => {
     });
     await order.save();
 
-    // ✅ SOCKET.IO — customer + super admin
     emitSellerConfirmed(order);
 
     return res
@@ -773,7 +988,6 @@ export const sellerRejectOrder = async (req, res) => {
     });
     await order.save();
 
-    // ✅ SOCKET.IO — customer + super admin
     emitSellerRejected(order);
 
     return res
@@ -803,7 +1017,7 @@ export const adminApproveOrder = async (req, res) => {
         .json({ success: false, message: "Order not found" });
     }
 
-    if (order.paymentStatus !== "paid") {
+    if (order.paymentMethod !== "cod" && order.paymentStatus !== "paid") {
       return res
         .status(400)
         .json({ success: false, message: "Order has not been paid for" });
@@ -820,9 +1034,11 @@ export const adminApproveOrder = async (req, res) => {
         success: true,
         message: "Order was already approved and forwarded to Shiprocket",
         data: order,
+        shiprocketSync: { success: true },
       });
     }
 
+    // ---- COMMIT THE APPROVAL ITSELF — INDEPENDENT OF SHIPROCKET ----
     order.fulfillmentStatus = FULFILLMENT_STATUS.ADMIN_APPROVED;
     order.adminApprovedAt = new Date();
     order.adminApprovedBy = req.user._id || req.user.id;
@@ -834,6 +1050,7 @@ export const adminApproveOrder = async (req, res) => {
     });
     await order.save();
 
+    // ---- ATTEMPT SHIPROCKET SYNC — FAILURE HERE MUST NOT UNDO THE APPROVAL ----
     try {
       const { order: updatedOrder } = await createShipmentForOrder(order._id);
 
@@ -852,16 +1069,20 @@ export const adminApproveOrder = async (req, res) => {
       });
       await updatedOrder.save();
 
-      // ✅ SOCKET.IO — customer + seller + order room
       emitAdminApproved(updatedOrder);
 
+      // ✅ Always 200 — the approval itself succeeded regardless of Shiprocket.
       return res.status(200).json({
         success: true,
         message: "Order approved and forwarded to Shiprocket",
         data: updatedOrder,
+        shiprocketSync: { success: true },
       });
     } catch (shipErr) {
       order.fulfillmentStatus = FULFILLMENT_STATUS.SHIPROCKET_FAILED;
+      order.shipping = order.shipping || {};
+      order.shipping.syncStatus = "failed";
+      order.shipping.syncError = shipErr.message;
       order.statusHistory.push({
         status: FULFILLMENT_STATUS.SHIPROCKET_FAILED,
         role: "system",
@@ -870,14 +1091,16 @@ export const adminApproveOrder = async (req, res) => {
       });
       await order.save();
 
-      // ✅ SOCKET.IO — surface the failure live too, not just on refresh
       emitAdminApproved(order);
 
-      return res.status(502).json({
-        success: false,
-        message: "Order approved, but Shiprocket order creation failed",
-        error: shipErr.message,
+      // ✅ 200, not 502 — the DB approval succeeded. Only Shiprocket
+      // failed, and that's now retryable without redoing the approval.
+      return res.status(200).json({
+        success: true,
+        message:
+          "Order approved successfully, but Shiprocket synchronization failed. You can retry synchronization.",
         data: order,
+        shiprocketSync: { success: false, error: shipErr.message },
       });
     }
   } catch (error) {
@@ -885,6 +1108,95 @@ export const adminApproveOrder = async (req, res) => {
     return res
       .status(500)
       .json({ success: false, message: "Failed to approve order" });
+  }
+};
+
+// ✅ NEW — retry Shiprocket sync for an order whose admin approval already
+// succeeded but whose Shiprocket sync failed or is incomplete (shipment
+// created but AWB missing). Never re-runs seller/admin approval, and
+// relies on createShipmentForOrder's own idempotency to avoid duplicates.
+export const retryOrderShiprocketSync = async (req, res) => {
+  try {
+    if (req.user.role !== "admin" && req.user.role !== "super_admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized" });
+    }
+
+    const { orderId } = req.params;
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    const RETRYABLE_STATUSES = [
+      FULFILLMENT_STATUS.ADMIN_APPROVED,
+      FULFILLMENT_STATUS.SHIPROCKET_FAILED,
+      FULFILLMENT_STATUS.AWB_PENDING,
+    ];
+    if (!RETRYABLE_STATUSES.includes(order.fulfillmentStatus)) {
+      return res.status(409).json({
+        success: false,
+        message: `Cannot retry Shiprocket sync for an order in state "${order.fulfillmentStatus}".`,
+      });
+    }
+
+    try {
+      const { order: updatedOrder } = await createShipmentForOrder(order._id);
+
+      if (updatedOrder.shipping?.shipmentId) {
+        updatedOrder.fulfillmentStatus = updatedOrder.shipping.awbCode
+          ? FULFILLMENT_STATUS.AWB_ASSIGNED
+          : FULFILLMENT_STATUS.AWB_PENDING;
+      } else {
+        updatedOrder.fulfillmentStatus = FULFILLMENT_STATUS.SHIPROCKET_FAILED;
+      }
+      updatedOrder.statusHistory.push({
+        status: updatedOrder.fulfillmentStatus,
+        role: "system",
+        reason: updatedOrder.shipping?.lastError || null,
+        timestamp: new Date(),
+      });
+      await updatedOrder.save();
+      emitAdminApproved(updatedOrder);
+
+      return res.status(200).json({
+        success: true,
+        message: updatedOrder.shipping?.shiprocketOrderId
+          ? "Shiprocket synchronization successful"
+          : "Retry attempted, but Shiprocket synchronization is still failing",
+        data: updatedOrder,
+        shiprocketSync: { success: !!updatedOrder.shipping?.shiprocketOrderId },
+      });
+    } catch (shipErr) {
+      order.fulfillmentStatus = FULFILLMENT_STATUS.SHIPROCKET_FAILED;
+      order.shipping = order.shipping || {};
+      order.shipping.syncStatus = "failed";
+      order.shipping.syncError = shipErr.message;
+      order.statusHistory.push({
+        status: FULFILLMENT_STATUS.SHIPROCKET_FAILED,
+        role: "system",
+        reason: shipErr.message,
+        timestamp: new Date(),
+      });
+      await order.save();
+      emitAdminApproved(order);
+
+      return res.status(200).json({
+        success: true,
+        message:
+          "Retry attempted, but Shiprocket synchronization failed again.",
+        data: order,
+        shiprocketSync: { success: false, error: shipErr.message },
+      });
+    }
+  } catch (error) {
+    console.error("❌ Retry Shiprocket sync error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to retry synchronization" });
   }
 };
 
@@ -931,7 +1243,6 @@ export const adminRejectOrder = async (req, res) => {
     });
     await order.save();
 
-    // ✅ SOCKET.IO — customer + seller + order room
     emitAdminRejected(order);
 
     return res
@@ -945,11 +1256,6 @@ export const adminRejectOrder = async (req, res) => {
   }
 };
 
-// ============================================
-// SUPER ADMIN: GET /orders/admin/history
-// Full paginated, filtered, searchable order history. Never deletes or
-// hides anything based on status — this is the permanent audit view.
-// ============================================
 const DATE_RANGE_TO_START = {
   today: () => {
     const d = new Date();
@@ -960,13 +1266,6 @@ const DATE_RANGE_TO_START = {
   "30d": () => new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
 };
 
-// Maps the frontend's requested status filter labels to actual queries.
-// Some labels map to `fulfillmentStatus` (seller/admin lifecycle stages,
-// which the app itself writes) and some map to the legacy `orderStatus`
-// field (shipment-progress stages, which only the Shiprocket webhook
-// writes — fulfillmentStatus is never updated for these today).
-// "SELLER_CONFIRMED" also covers what the UI calls "Pending Admin
-// Approval" — they are the same stored value, not two different ones.
 const buildStatusFilter = (statusKey) => {
   switch (statusKey) {
     case "PENDING_SELLER_CONFIRMATION":
@@ -1004,9 +1303,6 @@ const buildStatusFilter = (statusKey) => {
   }
 };
 
-// "refunded" has no corresponding value in the current paymentStatus enum
-// (pending/paid/failed) — passing it returns zero results rather than
-// silently matching everything or crashing.
 const buildShiprocketFilter = (key) => {
   switch (key) {
     case "NOT_CREATED":
@@ -1127,11 +1423,6 @@ export const getOrderHistory = async (req, res) => {
   }
 };
 
-// ============================================
-// SUPER ADMIN: GET /orders/admin/history/:id
-// Full single-order detail for the history modal — returns the complete
-// stored document, nothing synthesized.
-// ============================================
 export const getOrderHistoryDetail = async (req, res) => {
   try {
     if (req.user.role !== "admin" && req.user.role !== "super_admin") {

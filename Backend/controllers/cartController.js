@@ -11,7 +11,9 @@ const getProductSnapshot = (product) => {
   const seller = product.seller?.sellerId || null;
   const stock = product.inventory?.stockQuantity ?? 0;
   const inStock = product.inventory?.availability === "In Stock";
-  return { name, image, price, slug, seller, stock, inStock };
+  // ✅ NEW — reuses the existing shortDescription field on JewelleryProduct.
+  const shortDescription = product.shortDescription || "";
+  return { name, image, price, slug, seller, stock, inStock, shortDescription };
 };
 
 export const getCart = async (req, res) => {
@@ -22,13 +24,11 @@ export const getCart = async (req, res) => {
     return res.status(200).json({ success: true, data: cart });
   } catch (error) {
     console.error("❌ Get cart error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to fetch cart",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch cart",
+      error: error.message,
+    });
   }
 };
 
@@ -71,12 +71,16 @@ export const addToCart = async (req, res) => {
         existing.quantity + Number(quantity),
         snap.stock || 99,
       );
+      // ✅ NEW — refresh the snapshot fields on repeat add, same as the
+      // rest of the snapshot already implicitly assumes on first add.
+      existing.shortDescription = snap.shortDescription;
     } else {
       cart.items.push({
         product: product._id,
         name: snap.name,
         image: snap.image,
         slug: snap.slug,
+        shortDescription: snap.shortDescription, // ✅ NEW
         price: snap.price,
         quantity: Math.max(1, Number(quantity)),
         seller: snap.seller,
@@ -89,13 +93,11 @@ export const addToCart = async (req, res) => {
       .json({ success: true, message: "Added to cart", data: cart });
   } catch (error) {
     console.error("❌ Add to cart error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to add to cart",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to add to cart",
+      error: error.message,
+    });
   }
 };
 
@@ -105,12 +107,10 @@ export const updateCartItem = async (req, res) => {
     const { productId, quantity } = req.body;
 
     if (!productId || quantity === undefined) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "productId and quantity are required",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "productId and quantity are required",
+      });
     }
 
     const cart = await Cart.findOne({ user: userId });
@@ -137,13 +137,11 @@ export const updateCartItem = async (req, res) => {
       .json({ success: true, message: "Cart updated", data: cart });
   } catch (error) {
     console.error("❌ Update cart error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to update cart",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update cart",
+      error: error.message,
+    });
   }
 };
 
@@ -166,13 +164,11 @@ export const removeFromCart = async (req, res) => {
       .json({ success: true, message: "Item removed", data: cart });
   } catch (error) {
     console.error("❌ Remove from cart error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to remove item",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to remove item",
+      error: error.message,
+    });
   }
 };
 
@@ -184,21 +180,17 @@ export const clearCart = async (req, res) => {
       cart.items = [];
       await cart.save();
     }
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Cart cleared",
-        data: cart || { items: [] },
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Cart cleared",
+      data: cart || { items: [] },
+    });
   } catch (error) {
     console.error("❌ Clear cart error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to clear cart",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to clear cart",
+      error: error.message,
+    });
   }
 };

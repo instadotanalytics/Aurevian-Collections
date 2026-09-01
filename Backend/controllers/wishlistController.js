@@ -8,7 +8,9 @@ const getProductSnapshot = (product) => {
   const price =
     product.pricing?.salePrice || product.pricing?.originalPrice || 0;
   const slug = product.productSlug || "";
-  return { name, image, price, slug };
+  // ✅ NEW — reuses the existing shortDescription field on JewelleryProduct.
+  const shortDescription = product.shortDescription || "";
+  return { name, image, price, slug, shortDescription };
 };
 
 export const getWishlist = async (req, res) => {
@@ -20,13 +22,11 @@ export const getWishlist = async (req, res) => {
     return res.status(200).json({ success: true, data: wishlist });
   } catch (error) {
     console.error("❌ Get wishlist error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to fetch wishlist",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch wishlist",
+      error: error.message,
+    });
   }
 };
 
@@ -51,14 +51,12 @@ export const toggleWishlist = async (req, res) => {
     if (existingIndex > -1) {
       wishlist.items.splice(existingIndex, 1);
       await wishlist.save();
-      return res
-        .status(200)
-        .json({
-          success: true,
-          message: "Removed from wishlist",
-          data: wishlist,
-          inWishlist: false,
-        });
+      return res.status(200).json({
+        success: true,
+        message: "Removed from wishlist",
+        data: wishlist,
+        inWishlist: false,
+      });
     }
 
     const product = await JewelleryProduct.findOne({
@@ -78,28 +76,25 @@ export const toggleWishlist = async (req, res) => {
       name: snap.name,
       image: snap.image,
       slug: snap.slug,
+      shortDescription: snap.shortDescription, // ✅ NEW
       price: snap.price,
       addedAt: new Date(),
     });
 
     await wishlist.save();
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Added to wishlist",
-        data: wishlist,
-        inWishlist: true,
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Added to wishlist",
+      data: wishlist,
+      inWishlist: true,
+    });
   } catch (error) {
     console.error("❌ Toggle wishlist error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to update wishlist",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update wishlist",
+      error: error.message,
+    });
   }
 };
 
@@ -119,21 +114,17 @@ export const removeFromWishlist = async (req, res) => {
     );
     await wishlist.save();
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Removed from wishlist",
-        data: wishlist,
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Removed from wishlist",
+      data: wishlist,
+    });
   } catch (error) {
     console.error("❌ Remove from wishlist error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to remove item",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to remove item",
+      error: error.message,
+    });
   }
 };

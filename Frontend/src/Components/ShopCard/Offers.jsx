@@ -1,10 +1,4 @@
 // src/Components/Offers/Offers.jsx
-//
-// Products come from FeaturedProduct entries (section: "specially-made"),
-// fetched via fetchFeaturedProducts. No hardcoded product data — image,
-// name, price, rating, and badge all come from the referenced
-// JewelleryProduct document. Cart/wishlist reuse the exact same Redux
-// actions and requireAuth pattern already used on the Shop page.
 
 import React, { useRef, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -25,6 +19,8 @@ import { toggleWishlistItem } from "../../redux/slices/wishlistSlice";
 
 const SECTION = "specially-made";
 const ACCENTS = ["ink", "ivory", "emerald"];
+const SKELETON_COUNT = 4;
+const LOADING_THROTTLE_MS = 800;
 
 function StarRating({ rating }) {
   const stars = [1, 2, 3, 4, 5];
@@ -52,6 +48,15 @@ const getBadgeLabel = (labels) => {
   return null;
 };
 
+const getDiscount = (product) => {
+  const original = product.pricing?.originalPrice;
+  const sale = product.pricing?.salePrice;
+  if (sale && original && sale < original) {
+    return Math.round(((original - sale) / original) * 100);
+  }
+  return 0;
+};
+
 function SkeletonCard() {
   return (
     <div className={styles.cardWrapper}>
@@ -61,9 +66,9 @@ function SkeletonCard() {
         </div>
         <div className={styles.info}>
           <div className={styles.skeletonLine} />
-          <div
-            className={`${styles.skeletonLine} ${styles.skeletonLineShort}`}
-          />
+          <div className={styles.skeletonLine} />
+          <div className={`${styles.skeletonLine} ${styles.skeletonLineShort}`} />
+          <div className={styles.skeletonBtn} />
         </div>
       </div>
     </div>
@@ -85,8 +90,9 @@ function ProductCard({
   const hasDiscount =
     product.pricing?.salePrice &&
     product.pricing?.salePrice < product.pricing?.originalPrice;
-  const badge = getBadgeLabel(product.labels);
+  const discount = getDiscount(product);
   const hasReviews = (product.reviews?.totalReviews || 0) > 0;
+  const categoryLabel = product.category?.categoryData?.label || "";
 
   return (
     <div className={styles.cardWrapper}>
@@ -97,8 +103,12 @@ function ProductCard({
         onClickCapture={onClickCapture}
         draggable="false"
       >
-        {badge && <span className={styles.badge}>{badge}</span>}
+        {/* Discount Badge - Top Left */}
+        {discount > 0 && (
+          <span className={styles.badge}>{discount}% off</span>
+        )}
 
+        {/* Wishlist Button - Top Right */}
         <button
           type="button"
           className={`${styles.wishlistBtn} ${isInWishlist ? styles.wishlistBtnActive : ""}`}
@@ -128,11 +138,21 @@ function ProductCard({
           ) : (
             <div className={styles.imagePlaceholder} aria-hidden="true" />
           )}
+
+          {/* Category Overlay - Bottom Left */}
+          {categoryLabel && (
+            <span className={styles.categoryOverlay}>{categoryLabel}</span>
+          )}
         </div>
 
         <div className={styles.info}>
-          <p className={styles.eyebrow}>Aurevian Collections</p>
-          <h3 className={styles.title}>{product.productName}</h3>
+          <Link
+            to={`/product/${product.productSlug}`}
+            className={styles.productName}
+            title={product.productName}
+          >
+            {product.productName}
+          </Link>
 
           {hasReviews && (
             <div className={styles.ratingRow}>
@@ -170,6 +190,7 @@ function ProductCard({
           disabled={isInCart || cartLoading}
         >
           <FiShoppingBag />
+          Add to Cart
         </button>
       </Link>
     </div>
@@ -192,6 +213,19 @@ export default function Offers() {
   );
 
   const [cartLoadingId, setCartLoadingId] = useState(null);
+  const [showSkeleton, setShowSkeleton] = useState(true);
+
+  // Throttled loading - show skeleton for minimum duration
+  useEffect(() => {
+    if (!isLoading) {
+      const timer = setTimeout(() => {
+        setShowSkeleton(false);
+      }, LOADING_THROTTLE_MS);
+      return () => clearTimeout(timer);
+    } else {
+      setShowSkeleton(true);
+    }
+  }, [isLoading]);
 
   useEffect(() => {
     dispatch(fetchFeaturedProducts(SECTION));
@@ -290,16 +324,16 @@ export default function Offers() {
     }
   };
 
-  // Empty (no products configured) or hard failure — hide the section
-  // rather than render broken cards. Home.jsx just stacks sections, so
-  // returning null here is a clean no-op in the page layout.
-  if (!isLoading && (error || products.length === 0)) {
+  // Show nothing if error or no products
+  if (!isLoading && !showSkeleton && (error || products.length === 0)) {
     return null;
   }
 
-  const items = isLoading
-    ? Array.from({ length: 4 }, (_, i) => ({ _skeletonId: i }))
-    : products;
+  // Show skeleton while loading or during throttle
+  const shouldShowSkeleton = isLoading || showSkeleton;
+  const skeletonItems = Array.from({ length: SKELETON_COUNT }, (_, i) => ({
+    _skeletonId: i,
+  }));
 
   return (
     <section className={styles.section} aria-labelledby="offers-heading">
@@ -348,9 +382,9 @@ export default function Offers() {
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
         >
-          {isLoading
-            ? items.map((item) => <SkeletonCard key={item._skeletonId} />)
-            : items.map((product, index) => (
+          {shouldShowSkeleton
+            ? skeletonItems.map((item) => <SkeletonCard key={item._skeletonId} />)
+            : products.map((product, index) => (
                 <ProductCard
                   key={product._id}
                   product={product}

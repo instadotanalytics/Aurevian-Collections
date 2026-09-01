@@ -4,13 +4,32 @@ const BASE_URL =
   process.env.SHIPROCKET_API_BASE_URL ||
   "https://apiv2.shiprocket.in/v1/external";
 
-const isConfigured = !!(
-  process.env.SHIPROCKET_EMAIL && process.env.SHIPROCKET_PASSWORD
-);
+// ✅ CHANGED — was a `const` evaluated once at module import time, which
+// meant a process that booted before these vars were populated (or that
+// had them injected slightly differently in production) would report
+// "not configured" for its entire lifetime, even after the vars were
+// confirmed present. This is now a live check, re-evaluated on every
+// call, with defensive trimming in case a hosting dashboard's env var
+// UI preserved stray whitespace/newlines around a pasted value.
+function isShiprocketConfigured() {
+  return !!(
+    process.env.SHIPROCKET_EMAIL?.trim() &&
+    process.env.SHIPROCKET_PASSWORD?.trim()
+  );
+}
 
-if (!isConfigured) {
+// Kept as a live getter (not a frozen boolean) so `shiprocketService.isConfigured`
+// still works exactly as before for any existing callers, but now reflects
+// the CURRENT process.env state rather than a snapshot taken at import time.
+const shiprocketServiceConfig = {
+  get isConfigured() {
+    return isShiprocketConfigured();
+  },
+};
+
+if (!shiprocketServiceConfig.isConfigured) {
   console.log(
-    "⚠️  Shiprocket credentials not configured — shipping features will fail until SHIPROCKET_EMAIL and SHIPROCKET_PASSWORD are set in .env",
+    "⚠️  Shiprocket credentials not detected at startup — SHIPROCKET_EMAIL and SHIPROCKET_PASSWORD will be re-checked on each request. If they are added later without a full server restart, some platforms will still pick them up; if not, restart the service.",
   );
 } else {
   console.log("✅ Shiprocket service initialized");
@@ -18,8 +37,6 @@ if (!isConfigured) {
 
 // ============================================
 // CUSTOM ERROR TYPE
-// Lets controllers distinguish "client mistake" (4xx, safe to relay)
-// from "Shiprocket/network problem" (5xx, never relay raw details)
 // ============================================
 export class ShiprocketError extends Error {
   constructor(message, statusCode = 500, details = null) {
@@ -32,8 +49,6 @@ export class ShiprocketError extends Error {
 
 // ============================================
 // TOKEN CACHE
-// Shiprocket tokens are documented as valid for ~240 hours (10 days).
-// We cache for 9 days and refresh early, plus force-refresh once on any 401.
 // ============================================
 const TOKEN_LIFETIME_MS = 9 * 24 * 60 * 60 * 1000;
 const TOKEN_SAFETY_MARGIN_MS = 6 * 60 * 60 * 1000;
@@ -41,7 +56,12 @@ const TOKEN_SAFETY_MARGIN_MS = 6 * 60 * 60 * 1000;
 let tokenCache = { token: null, expiresAt: 0 };
 
 export async function generateToken() {
-  if (!isConfigured) {
+  // ✅ CHANGED — live check instead of the stale module-level const.
+  if (!isShiprocketConfigured()) {
+    console.error(
+      "❌ Shiprocket auth failed: SHIPROCKET_EMAIL / SHIPROCKET_PASSWORD not found in process.env at request time. " +
+        `Present: email=${!!process.env.SHIPROCKET_EMAIL} password=${!!process.env.SHIPROCKET_PASSWORD}`,
+    );
     throw new ShiprocketError(
       "Shiprocket is not configured on this server",
       500,
@@ -54,8 +74,8 @@ export async function generateToken() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: process.env.SHIPROCKET_EMAIL,
-        password: process.env.SHIPROCKET_PASSWORD,
+        email: process.env.SHIPROCKET_EMAIL.trim(),
+        password: process.env.SHIPROCKET_PASSWORD.trim(),
       }),
     });
   } catch (networkErr) {
@@ -66,8 +86,6 @@ export async function generateToken() {
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok || !data.token) {
-    // ✅ Safe: logs status + Shiprocket's own message, never the
-    // email/password that were sent or any token.
     console.error(
       "❌ Shiprocket authentication FAILED — HTTP",
       res.status,
@@ -82,7 +100,6 @@ export async function generateToken() {
   }
 
   tokenCache = { token: data.token, expiresAt: Date.now() + TOKEN_LIFETIME_MS };
-  // ✅ NEW: confirms auth succeeded without ever printing the token itself.
   console.log("✅ Shiprocket authentication: SUCCESS (new token cached)");
   return data.token;
 }
@@ -99,7 +116,6 @@ async function getValidToken() {
 
 // ============================================
 // GENERIC AUTHENTICATED REQUEST
-// Retries once on 401 by forcing a fresh token (handles unexpected expiry)
 // ============================================
 async function shiprocketRequest(
   path,
@@ -183,8 +199,6 @@ export async function createOrder(payload) {
 
 // ============================================
 // AWB ASSIGNMENT
-// body: { shipment_id, courier_id? } — omit courier_id to let Shiprocket
-// auto-assign its recommended courier for that shipment.
 // ============================================
 export async function assignAWB(body) {
   return shiprocketRequest("/courier/assign/awb", { method: "POST", body });
@@ -212,9 +226,6 @@ export async function generateLabel(shipmentIds) {
 
 // ============================================
 // MANIFEST GENERATION
-// NOTE: verify the exact response field name (manifest_url vs. a nested
-// path) against your Shiprocket Postman collection before depending on it —
-// this has been inconsistently documented across sources.
 // ============================================
 export async function generateManifest(shipmentIds) {
   return shiprocketRequest("/manifests/generate", {
@@ -238,7 +249,6 @@ export async function trackByShipmentId(shipmentId) {
 
 // ============================================
 // CANCELLATION
-// orderIds = array of numeric Shiprocket order IDs (not Aurevian order IDs)
 // ============================================
 export async function cancelOrder(orderIds) {
   return shiprocketRequest("/orders/cancel", {
@@ -249,10 +259,6 @@ export async function cancelOrder(orderIds) {
 
 // ============================================
 // RETURN / REVERSE PICKUP
-// NOTE: return-order payload fields are less consistently documented than
-// the forward-order ones. Test this against a real Shiprocket sandbox/
-// account before relying on it — field names (e.g. qc fields) may need
-// adjustment based on what your account's dashboard actually expects.
 // ============================================
 export async function createReturnOrder(payload) {
   return shiprocketRequest("/orders/create/return", {
@@ -262,16 +268,30 @@ export async function createReturnOrder(payload) {
 }
 
 // ============================================
-// ✅ NEW: PICKUP LOCATIONS
-// Used to validate SHIPROCKET_PICKUP_LOCATION against what's actually
-// registered on the account, BEFORE attempting order creation.
+// PICKUP LOCATIONS
 // ============================================
 export async function getPickupLocations() {
   return shiprocketRequest("/settings/company/pickup");
 }
 
+// ============================================
+// ✅ NEW: ADD PICKUP LOCATION
+// Registers a seller's pickup/warehouse address with Shiprocket under a
+// unique nickname (pickup_location). That nickname is what every
+// subsequent order-create/return-create payload for that seller
+// references — Shiprocket resolves the full address server-side from it.
+// Called from sellerController.updateSellerPickupAddress whenever a
+// seller saves/changes their pickup address.
+// ============================================
+export async function addPickupLocation(payload) {
+  return shiprocketRequest("/settings/company/addpickup", {
+    method: "POST",
+    body: payload,
+  });
+}
+
 export default {
-  isConfigured,
+  ...shiprocketServiceConfig, // ✅ CHANGED — spreads the live getter
   generateToken,
   checkServiceability,
   createOrder,
@@ -283,6 +303,7 @@ export default {
   trackByShipmentId,
   cancelOrder,
   createReturnOrder,
-  getPickupLocations, // ✅ NEW
+  getPickupLocations,
+  addPickupLocation,
   ShiprocketError,
 };

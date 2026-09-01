@@ -11,6 +11,7 @@ import {
   FiUser,
   FiSearch,
   FiEye,
+  FiDollarSign,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import styles from "./Orders.module.css";
@@ -20,7 +21,6 @@ import {
 } from "../../../../redux/slices/orderSlice";
 import * as orderApi from "../../../../api/orderApi.js";
 
-// ✅ SOCKET.IO — real-time order updates for sellers
 import useOrderSocketEvents from "../../../../hooks/useOrderSocketEvents.js";
 
 const STATUS_OPTIONS = [
@@ -87,6 +87,29 @@ const FULFILLMENT_COLORS = {
   SHIPROCKET_FAILED: { bg: "#fee2e2", text: "#991b1b" },
 };
 
+// ✅ NEW — payment method + status labels/colors, shown distinctly from
+// fulfillment/order status so sellers can see at a glance whether they're
+// collecting cash on delivery or the payment has already cleared online.
+const PAYMENT_METHOD_LABEL = {
+  cod: "Cash on Delivery",
+  razorpay: "Prepaid (Online)",
+};
+
+const PAYMENT_STATUS_COLORS = {
+  paid: { bg: "#dcfce7", text: "#16a34a" },
+  pending: { bg: "#fef3c7", text: "#92400e" },
+  failed: { bg: "#fee2e2", text: "#991b1b" },
+};
+
+const paymentStatusLabel = (order) => {
+  if (order.paymentMethod === "cod" && order.paymentStatus === "pending") {
+    return "Unpaid (COD)";
+  }
+  if (order.paymentStatus === "paid") return "Paid";
+  if (order.paymentStatus === "failed") return "Failed";
+  return "Pending";
+};
+
 // Debounce utility
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -126,6 +149,7 @@ const TableHeader = () => (
     <span className={styles.colTotal}>Total</span>
     <span className={styles.colStatus}>Status</span>
     <span className={styles.colFulfillment}>Fulfillment</span>
+    <span className={styles.colPayment || styles.colFulfillment}>Payment</span>
     <span className={styles.colActions}>Actions</span>
   </div>
 );
@@ -144,8 +168,14 @@ const SkeletonLoader = ({ count = 8 }) => {
             <div className={styles.skelThumb} />
           </div>
           <div className={styles.colOrder}>
-            <div className={styles.skelText} style={{ width: 110, height: 13 }} />
-            <div className={styles.skelText} style={{ width: 70, height: 10, marginTop: 4 }} />
+            <div
+              className={styles.skelText}
+              style={{ width: 110, height: 13 }}
+            />
+            <div
+              className={styles.skelText}
+              style={{ width: 70, height: 10, marginTop: 4 }}
+            />
           </div>
           <div className={styles.colCustomer}>
             <div className={styles.skelText} style={{ width: 90 }} />
@@ -157,6 +187,9 @@ const SkeletonLoader = ({ count = 8 }) => {
             <div className={styles.skelText} style={{ width: 60 }} />
           </div>
           <div className={styles.colStatus}>
+            <div className={styles.skelPill} />
+          </div>
+          <div className={styles.colFulfillment}>
             <div className={styles.skelPill} />
           </div>
           <div className={styles.colFulfillment}>
@@ -199,10 +232,6 @@ const Orders = () => {
     setAllOrdersLoaded(false);
   }, [debouncedSearchTerm, debouncedStatusFilter, debouncedSortBy]);
 
-  // ✅ SOCKET.IO — a brand-new order shows up here the instant it's paid
-  // for, and any admin action on an already-visible order refreshes the
-  // list too. Every branch just re-pulls from REST — no client-side order
-  // synthesis, so there's no risk of shape drift or duplicate rows.
   useOrderSocketEvents({
     onOrderCreated: () => dispatch(fetchSellerOrders()),
     onAdminConfirmed: () => dispatch(fetchSellerOrders()),
@@ -274,6 +303,16 @@ const Orders = () => {
     return FULFILLMENT_COLORS[status] || { bg: "#f3f4f6", text: "#6b7280" };
   };
 
+  const getPaymentStyle = (order) => {
+    if (order.paymentMethod === "cod" && order.paymentStatus === "pending") {
+      return PAYMENT_STATUS_COLORS.pending;
+    }
+    return (
+      PAYMENT_STATUS_COLORS[order.paymentStatus] ||
+      PAYMENT_STATUS_COLORS.pending
+    );
+  };
+
   const getFilteredOrders = () => {
     let filtered = [...sellerOrders];
 
@@ -316,7 +355,6 @@ const Orders = () => {
   const filteredOrders = getFilteredOrders();
   const visibleOrders = filteredOrders.slice(0, visibleCount);
 
-  // Load more orders with throttling - 10 cards in first 1 second
   const loadMoreOrders = useCallback(() => {
     if (
       isLoadingMore ||
@@ -333,7 +371,7 @@ const Orders = () => {
     let currentCount = visibleCount;
     const maxCount = Math.min(visibleCount + 10, filteredOrders.length);
     const batchSize = 10;
-    const delayPerBatch = 1000; // 1 second for 10 cards
+    const delayPerBatch = 1000;
 
     const loadNextBatch = () => {
       const nextCount = Math.min(currentCount + batchSize, maxCount);
@@ -353,7 +391,6 @@ const Orders = () => {
     setTimeout(loadNextBatch, 200);
   }, [visibleCount, filteredOrders.length, isLoadingMore, allOrdersLoaded]);
 
-  // Intersection Observer for infinite scroll
   useEffect(() => {
     if (visibleOrders.length === 0 || allOrdersLoaded) return;
 
@@ -449,6 +486,7 @@ const Orders = () => {
             const fulfillmentStyle = getFulfillmentStyle(
               order.fulfillmentStatus,
             );
+            const paymentStyle = getPaymentStyle(order);
             const isActionRequired =
               order.fulfillmentStatus === "PENDING_SELLER_CONFIRMATION";
             const customer = order?.customer || {};
@@ -539,6 +577,22 @@ const Orders = () => {
                   </span>
                 </div>
 
+                {/* ✅ NEW — dedicated payment column: method + real status,
+                    distinct from fulfillment/order status. */}
+                <div className={styles.colFulfillment}>
+                  <span
+                    className={styles.fulfillmentBadge}
+                    style={{
+                      backgroundColor: paymentStyle.bg,
+                      color: paymentStyle.text,
+                    }}
+                    title={PAYMENT_METHOD_LABEL[order.paymentMethod] || ""}
+                  >
+                    {order.paymentMethod === "cod" ? "COD" : "Online"} ·{" "}
+                    {paymentStatusLabel(order)}
+                  </span>
+                </div>
+
                 <div className={styles.colActions}>
                   <button
                     type="button"
@@ -607,6 +661,16 @@ const Orders = () => {
                       selectedOrder.fulfillmentStatus ||
                       "N/A"}
                   </span>
+                  <span
+                    className={styles.popupFulfillmentBadge}
+                    style={{
+                      backgroundColor: getPaymentStyle(selectedOrder).bg,
+                      color: getPaymentStyle(selectedOrder).text,
+                    }}
+                  >
+                    {selectedOrder.paymentMethod === "cod" ? "COD" : "Online"} ·{" "}
+                    {paymentStatusLabel(selectedOrder)}
+                  </span>
                 </div>
               </div>
 
@@ -643,6 +707,53 @@ const Orders = () => {
                       </span>
                     </div>
                   </div>
+                </div>
+
+                {/* ✅ NEW — dedicated payment details section in the popup */}
+                <div className={styles.popupSection}>
+                  <h4>
+                    <FiDollarSign className={styles.popupSectionIcon} /> Payment
+                  </h4>
+                  <div className={styles.popupCompactGrid}>
+                    <div className={styles.popupCompactItem}>
+                      <span className={styles.popupLabel}>Method</span>
+                      <span className={styles.popupValue}>
+                        {PAYMENT_METHOD_LABEL[selectedOrder.paymentMethod] ||
+                          selectedOrder.paymentMethod ||
+                          "N/A"}
+                      </span>
+                    </div>
+                    <div className={styles.popupCompactItem}>
+                      <span className={styles.popupLabel}>Status</span>
+                      <span className={styles.popupValue}>
+                        {paymentStatusLabel(selectedOrder)}
+                      </span>
+                    </div>
+                    <div className={styles.popupCompactItem}>
+                      <span className={styles.popupLabel}>
+                        Transaction Reference
+                      </span>
+                      <span className={styles.popupValue}>
+                        {selectedOrder.paymentReference || "—"}
+                      </span>
+                    </div>
+                    <div className={styles.popupCompactItem}>
+                      <span className={styles.popupLabel}>Order Amount</span>
+                      <span className={styles.popupValue}>
+                        {formatCurrency(selectedOrder.totalAmount)}
+                      </span>
+                    </div>
+                  </div>
+                  {selectedOrder.paymentMethod === "cod" &&
+                    selectedOrder.paymentStatus === "pending" && (
+                      <p className={styles.popupCompactShippingItem}>
+                        Collect ₹
+                        {Number(selectedOrder.totalAmount || 0).toLocaleString(
+                          "en-IN",
+                        )}{" "}
+                        in cash from the customer upon delivery.
+                      </p>
+                    )}
                 </div>
 
                 <div className={styles.popupSection}>
@@ -763,7 +874,7 @@ const Orders = () => {
                   <span
                     className={`${styles.popupPaymentStatus} ${styles[selectedOrder.paymentStatus || ""]}`}
                   >
-                    {selectedOrder.paymentStatus || "N/A"}
+                    {paymentStatusLabel(selectedOrder)}
                   </span>
                   <select
                     className={styles.popupStatusSelect}

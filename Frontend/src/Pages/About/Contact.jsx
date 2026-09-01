@@ -1,23 +1,21 @@
 // src/Pages/Contact/Contact.jsx
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { Heart, Gem, Sparkles } from "lucide-react";
 import {
   FiMapPin,
   FiPhone,
   FiMail,
   FiStar,
-  FiShield,
   FiCheckCircle,
   FiArrowRight,
-  FiHeart,
 } from "react-icons/fi";
-import { FaGem } from "react-icons/fa";
 import styles from "./Contact.module.css";
 import Header from "../Layout/Header/Header";
 import Footer from "../Layout/Footer/Footer";
 
-const CONTACT_IMAGE_URL =
-  "https://i.pinimg.com/1200x/dd/00/8a/dd008ab532e9e0b616fd21f83c621256.jpg";
+import CONTACT_IMAGE_URL from "../../assets/contactpage.png";
+
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -71,9 +69,18 @@ const socialProof = [
 ];
 
 const features = [
-  { icon: FiShield, label: "Lifetime Warranty" },
-  { icon: FaGem, label: "Certified Diamonds" },
-  { icon: FiHeart, label: "Expert Support" },
+  {
+    icon: Heart,
+    label: "Discover",
+  },
+  {
+    icon: Gem,
+    label: "Ask",
+  },
+  {
+    icon: Sparkles,
+    label: "Connect",
+  },
 ];
 
 const faqs = [
@@ -144,35 +151,41 @@ const Contact = () => {
       <main className={styles.container}>
         {/* ================= HERO ================= */}
         <section className={styles.hero}>
-          <motion.div
-            className={styles.heroText}
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-          >
-            <motion.span variants={fadeUp} className={styles.eyebrow}>
-              Let's Create
-            </motion.span>
-            <motion.hr variants={fadeUp} className={styles.hairline} />
-          <motion.h1 variants={fadeUp} className={styles.heroTitle}>
-              Something{" "}
-              <span className={styles.heroTitleAccent}>Beautiful</span>
-            </motion.h1>
+         <motion.div
+  className={styles.heroText}
+  variants={staggerContainer}
+  initial="hidden"
+  animate="visible"
+>
+  <motion.span variants={fadeUp} className={styles.eyebrow}>
+    AUREVIAN COLLECTIONS
+  </motion.span>
 
-            <motion.p variants={fadeUp} className={styles.heroSub}>
-              Whether you have a question about our collections, need assistance
-              with an order, or want to book a private consultation, we're here
-              to help with elegance and care.
-            </motion.p>
-            <motion.div variants={fadeUp} className={styles.featureList}>
-              {features.map(({ icon: Icon, label }) => (
-                <span className={styles.feature} key={label}>
-                  <Icon className={styles.featureIcon} />
-                  {label}
-                </span>
-              ))}
-            </motion.div>
-          </motion.div>
+  <motion.hr variants={fadeUp} className={styles.hairline} />
+
+  <motion.h1 variants={fadeUp} className={styles.heroTitle}>
+    Let’s Start
+A Conversation
+  {/* <span className={styles.heroTitleAccent}>Conversation</span> */}
+  </motion.h1>
+
+  <motion.p variants={fadeUp} className={styles.heroSub}>
+    Have a question or need assistance? Our team is here to help you find
+    the right piece and make your Aurevian experience truly special.
+  </motion.p>
+
+  <motion.div
+    variants={fadeUp}
+    className={styles.featureList}
+  >
+    {features.map(({ icon: Icon, label }) => (
+      <span className={styles.feature} key={label}>
+        <Icon className={styles.featureIcon} />
+        {label}
+      </span>
+    ))}
+  </motion.div>
+</motion.div>
 
           <motion.div
             className={styles.heroMedia}
@@ -259,9 +272,8 @@ const Contact = () => {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Your name"
-                  className={`${styles.formInput} ${
-                    errors.name ? styles.inputError : ""
-                  }`}
+                  className={`${styles.formInput} ${errors.name ? styles.inputError : ""
+                    }`}
                 />
                 {errors.name && (
                   <span className={styles.errorMessage}>{errors.name}</span>
@@ -276,9 +288,8 @@ const Contact = () => {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="you@example.com"
-                  className={`${styles.formInput} ${
-                    errors.email ? styles.inputError : ""
-                  }`}
+                  className={`${styles.formInput} ${errors.email ? styles.inputError : ""
+                    }`}
                 />
                 {errors.email && (
                   <span className={styles.errorMessage}>{errors.email}</span>
@@ -306,9 +317,8 @@ const Contact = () => {
                   value={formData.message}
                   onChange={handleChange}
                   placeholder="How can we help you?"
-                  className={`${styles.formInput} ${styles.textarea} ${
-                    errors.message ? styles.inputError : ""
-                  }`}
+                  className={`${styles.formInput} ${styles.textarea} ${errors.message ? styles.inputError : ""
+                    }`}
                   rows="4"
                 />
                 {errors.message && (

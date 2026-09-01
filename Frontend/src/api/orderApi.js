@@ -1,17 +1,16 @@
+// src/api/orderApi.js
 import axiosInstance from "./axiosConfig.js";
 import axios from "axios";
 
 const API_URL =
   import.meta.env.VITE_API_URL ||
-  "https://aurevian-collections.onrender.com/api";
+  "https://aurevian-collections-ng4w.onrender.com/api";
 
 const sellerAuthHeader = () => {
   const token = localStorage.getItem("sellerAccessToken");
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-// Mirrors the fallback SuperAdminDashboard.jsx already uses when reading
-// the token out of localStorage.
 const adminAuthHeader = () => {
   const token =
     localStorage.getItem("superAdminToken") ||
@@ -19,16 +18,35 @@ const adminAuthHeader = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-export const createRazorpayOrder = async (items, shippingAddress) => {
+export const createRazorpayOrder = async (
+  items,
+  shippingAddress,
+  clientRequestId,
+) => {
   const response = await axiosInstance.post("/orders/razorpay/create", {
     items,
     shippingAddress,
+    clientRequestId,
   });
   return response.data;
 };
 
 export const verifyRazorpayPayment = async (payload) => {
   const response = await axiosInstance.post("/orders/razorpay/verify", payload);
+  return response.data;
+};
+
+// ✅ NEW — Cash on Delivery order creation.
+export const createCODOrder = async (
+  items,
+  shippingAddress,
+  clientRequestId,
+) => {
+  const response = await axiosInstance.post("/orders/cod/create", {
+    items,
+    shippingAddress,
+    clientRequestId,
+  });
   return response.data;
 };
 
@@ -119,6 +137,16 @@ export const getOrderHistory = async (params = {}) => {
 export const getOrderHistoryDetail = async (orderId) => {
   const response = await axios.get(
     `${API_URL}/orders/admin/history/${orderId}`,
+    { headers: adminAuthHeader() },
+  );
+  return response.data;
+};
+
+// ✅ NEW — Retry Shiprocket synchronization for an order
+export const retryOrderShiprocketSync = async (orderId) => {
+  const response = await axios.post(
+    `${API_URL}/orders/${orderId}/retry-shiprocket-sync`,
+    {},
     { headers: adminAuthHeader() },
   );
   return response.data;

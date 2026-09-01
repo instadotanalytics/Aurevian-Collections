@@ -11,6 +11,12 @@ const cartItemSchema = new mongoose.Schema(
     name: { type: String, required: true },
     image: { type: String },
     slug: { type: String },
+    // ✅ NEW — snapshotted from JewelleryProduct.shortDescription at
+    // add-to-cart time, same pattern already used for name/image/price/slug.
+    // Not re-fetched live; if the seller edits the description later, the
+    // cart keeps showing what was true when the item was added — consistent
+    // with how price/name already behave here.
+    shortDescription: { type: String, default: "" },
     price: { type: Number, required: true },
     quantity: { type: Number, required: true, min: 1, default: 1 },
     seller: { type: mongoose.Schema.Types.ObjectId },

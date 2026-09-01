@@ -1,0 +1,643 @@
+/* src/Components/common/HomePageSkeleton/HomePageSkeleton.module.css */
+
+/* ==========================================================
+   TOKENS — same ivory/gold palette used across Aurevian's
+   section CSS (ShopCardCategory, GiftGuide, Offers, etc.)
+   ========================================================== */
+.page {
+  --ivory: #faf3e9;
+  --cream: #f6ecdd;
+  --champagne: #eaddc4;
+  --gold: #b3873f;
+  --gold-deep: #97702f;
+  --shimmer-a: #e8e0d6;
+  --shimmer-b: #f2ece2;
+
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  background: #fcfaf7;
+  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==========================================================
+   SHARED SHIMMER PRIMITIVE
+   ========================================================== */
+.shimmer {
+  display: block;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--shimmer-a) 25%,
+    var(--shimmer-b) 50%,
+    var(--shimmer-a) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmerSweep 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmerSweep {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none !important;
+    background: var(--shimmer-a);
+  }
+}
+
+/* ==========================================================
+   HEADER BAR — matches Header.module.css's real .topRow height
+   (70px) and its 992px desktop→hamburger breakpoint. A thin
+   announcement-bar placeholder sits above it since AnnouncementBar
+   renders above .topRow in the real header; its exact height
+   isn't available so this is an estimate, not a measured value.
+   ========================================================== */
+.announcementBar {
+  width: 100%;
+  height: 34px;
+  background: rgba(179, 135, 63, 0.1);
+}
+
+.headerBar {
+  width: 100%;
+  height: 70px;
+  background: rgba(238, 215, 191, 0.6);
+  border-bottom: 1px solid #e8e2d5;
+  display: flex;
+  align-items: center;
+}
+
+.headerInner {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.headerLogo {
+  width: 140px;
+  height: 28px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.headerNavGroup {
+  display: flex;
+  gap: 24px;
+  flex: 1;
+  justify-content: center;
+}
+
+.headerNavItem {
+  width: 64px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.headerIconGroup {
+  display: flex;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.headerIcon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+
+/* Real header swaps to hamburger + bottom nav at 992px, not 768px */
+@media (max-width: 992px) {
+  .headerNavGroup {
+    display: none;
+  }
+  .headerIconGroup {
+    gap: 10px;
+  }
+  .headerInner {
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerIconGroup {
+    gap: 6px;
+  }
+  .headerIcon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* ==========================================================
+   HERO — height steps mirror HomeBanner.module.css exactly
+   (400 → 380 → 360 → 320 → 300 → 280 → 250)
+   ========================================================== */
+.hero {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  padding: 0 8%;
+  box-sizing: border-box;
+  background: #f4f9f6;
+}
+
+.heroContent {
+  max-width: 46%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.heroTag {
+  width: 40%;
+  height: 12px;
+}
+
+.heroTitle {
+  width: 85%;
+  height: 40px;
+  border-radius: 6px;
+}
+
+.heroSubtitle {
+  width: 55%;
+  height: 16px;
+}
+
+.heroOffer {
+  width: 50%;
+  height: 46px;
+  border-radius: 6px;
+}
+
+.heroSubtext {
+  width: 45%;
+  height: 14px;
+}
+
+.heroBtn {
+  width: 38%;
+  height: 44px;
+  border-radius: 4px;
+  margin-top: 6px;
+}
+
+.heroDots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+}
+
+.heroDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(16, 107, 71, 0.18);
+}
+
+@media (max-width: 1179px) {
+  .hero {
+    height: 380px;
+  }
+}
+@media (max-width: 992px) {
+  .hero {
+    height: 360px;
+  }
+  .heroContent {
+    max-width: 58%;
+  }
+}
+@media (max-width: 768px) {
+  .hero {
+    height: 320px;
+    padding: 0 20px;
+  }
+  .heroContent {
+    max-width: 65%;
+    gap: 10px;
+  }
+  .heroTitle {
+    height: 30px;
+  }
+  .heroOffer {
+    height: 34px;
+  }
+}
+@media (max-width: 640px) {
+  .hero {
+    height: 300px;
+  }
+}
+@media (max-width: 480px) {
+  .hero {
+    height: 280px;
+    padding: 0 14px;
+  }
+  .heroContent {
+    max-width: 75%;
+    gap: 8px;
+  }
+  .heroTag {
+    display: none;
+  }
+}
+@media (max-width: 360px) {
+  .hero {
+    height: 250px;
+  }
+}
+
+/* ==========================================================
+   GENERIC SECTION WRAPPER
+   ========================================================== */
+.section {
+  max-width: 1130px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 28px 16px;
+  }
+}
+
+/* ==========================================================
+   SECTION TITLE
+   ========================================================== */
+.sectionTitle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.titleLeft {
+  align-items: flex-start;
+}
+
+.titleTag {
+  width: 160px;
+  height: 12px;
+}
+
+.titleHeading {
+  width: 280px;
+  height: 32px;
+  border-radius: 6px;
+}
+
+.titleDivider {
+  width: 100px;
+  height: 2px;
+  margin-top: 4px;
+}
+
+@media (max-width: 480px) {
+  .titleHeading {
+    width: 200px;
+    height: 24px;
+  }
+}
+
+/* ==========================================================
+   PROMO BANNERS (Offers/GiftGuide/NewArrivals banners) —
+   height steps mirror their shared 480 → 380 → 280 pattern
+   ========================================================== */
+.bannerWrap {
+  max-width: 1200px;
+  margin: 24px auto;
+  padding: 0 20px;
+}
+
+.bannerBlock {
+  width: 100%;
+  height: 480px;
+  border-radius: 12px;
+}
+
+@media (max-width: 768px) {
+  .bannerBlock {
+    height: 380px;
+    border-radius: 8px;
+  }
+}
+@media (max-width: 480px) {
+  .bannerBlock {
+    height: 280px;
+    border-radius: 6px;
+  }
+}
+
+/* ==========================================================
+   HORIZONTAL CARD ROW — overflow hidden (no scrollbar needed
+   for a static loading state), CSS shrinks card width per
+   breakpoint so fewer cards are visible, same as the real
+   horizontal-scroll sections
+   ========================================================== */
+.cardRow {
+  display: flex;
+  gap: 18px;
+  overflow: hidden;
+  padding: 4px 2px 8px;
+}
+
+/* ---------- Category (circle) row — ShopByCategory ---------- */
+.categoryCard {
+  flex: 0 0 auto;
+  width: 128px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.categoryCircle {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+}
+
+.categoryLabel {
+  width: 70%;
+  height: 12px;
+}
+
+@media (max-width: 992px) {
+  .categoryCard {
+    width: 104px;
+  }
+}
+@media (max-width: 640px) {
+  .categoryCard {
+    width: 84px;
+  }
+  .cardRow {
+    gap: 12px;
+  }
+}
+@media (max-width: 480px) {
+  .categoryCard {
+    width: 76px;
+  }
+}
+
+/* ---------- Product card base (rect/arch/medallion/shield) ---------- */
+.productCard {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.productImage {
+  width: 100%;
+}
+
+.productLines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.productLineWide {
+  width: 80%;
+  height: 12px;
+}
+
+.productLineNarrow {
+  width: 45%;
+  height: 12px;
+}
+
+/* rect — ShopCardCategory / "Trending Picks" */
+.cardRect {
+  width: 250px;
+}
+.cardRect .productImage {
+  aspect-ratio: 1 / 0.92;
+  border-radius: 2px;
+}
+
+@media (max-width: 992px) {
+  .cardRect {
+    width: 170px;
+  }
+}
+@media (max-width: 768px) {
+  .cardRect {
+    width: 40vw;
+    min-width: 150px;
+    max-width: 200px;
+  }
+}
+@media (max-width: 480px) {
+  .cardRect {
+    width: 42vw;
+    min-width: 130px;
+  }
+}
+
+/* arch — GiftGuide / "Curated For You" */
+.cardArch {
+  width: 240px;
+}
+.cardArch .productImage {
+  height: 230px;
+  border-radius: 120px 120px 0 0;
+}
+
+@media (max-width: 992px) {
+  .cardArch {
+    width: 210px;
+  }
+  .cardArch .productImage {
+    height: 200px;
+    border-radius: 105px 105px 0 0;
+  }
+}
+@media (max-width: 640px) {
+  .cardArch {
+    width: 50vw;
+    min-width: 165px;
+    max-width: 210px;
+  }
+  .cardArch .productImage {
+    height: 165px;
+    border-radius: 90px 90px 0 0;
+  }
+}
+
+/* medallion — NewCollections */
+.cardMedallion {
+  width: 220px;
+  padding-top: 12px;
+}
+.cardMedallion .productImage {
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  margin: 0 auto;
+  width: 85%;
+}
+
+@media (max-width: 1023px) {
+  .cardMedallion {
+    width: 200px;
+  }
+}
+@media (max-width: 768px) {
+  .cardMedallion {
+    width: 48vw;
+    min-width: 155px;
+    max-width: 190px;
+  }
+}
+@media (max-width: 480px) {
+  .cardMedallion {
+    width: 58vw;
+    min-width: 150px;
+  }
+}
+
+/* shield — Offers / "Specially Made" (same clip-path as the real card,
+   so the loading shape genuinely matches instead of approximating) */
+.cardShield {
+  width: 250px;
+}
+.cardShield .productImage {
+  aspect-ratio: 1 / 1.12;
+  clip-path: polygon(0% 5%, 5% 0%, 95% 0%, 100% 5%, 100% 84%, 50% 100%, 0% 84%);
+  border-radius: 0;
+}
+
+@media (max-width: 992px) {
+  .cardShield {
+    width: 220px;
+  }
+}
+@media (max-width: 640px) {
+  .cardShield {
+    width: 62vw;
+    min-width: 190px;
+    max-width: 230px;
+  }
+}
+
+/* ---------- Reel row — ShopTheLook ---------- */
+.reelCard {
+  flex: 0 0 auto;
+  width: calc(25% - 15px);
+  min-width: 200px;
+  max-width: 260px;
+}
+
+.reelBlock {
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  border-radius: 16px;
+}
+
+@media (max-width: 992px) {
+  .reelCard {
+    width: calc(33.333% - 14px);
+    min-width: 170px;
+  }
+}
+@media (max-width: 640px) {
+  .reelCard {
+    width: calc(50% - 8px);
+    min-width: 140px;
+  }
+  .reelBlock {
+    border-radius: 14px;
+  }
+}
+
+/* ==========================================================
+   FOOTER
+   ========================================================== */
+.footer {
+  max-width: 1130px;
+  margin: 0 auto;
+  padding: 40px 24px 32px;
+}
+
+.footerColumns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  margin-bottom: 24px;
+}
+
+.footerColumn {
+  flex: 1 1 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footerHeading {
+  width: 60%;
+  height: 14px;
+  margin-bottom: 4px;
+}
+
+.footerLine {
+  width: 85%;
+  height: 11px;
+}
+
+.footerLineShort {
+  width: 55%;
+  height: 11px;
+}
+
+.footerRule {
+  width: 100%;
+  height: 1px;
+  border-radius: 0;
+}
+
+@media (max-width: 640px) {
+  .footerColumns {
+    gap: 20px;
+  }
+  .footerColumn {
+    flex: 1 1 45%;
+  }
+}

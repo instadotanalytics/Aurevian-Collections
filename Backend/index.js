@@ -1,15 +1,9 @@
-// ============================================
-// DNS CONFIGURATION - FORCE IPv4 (Fix for Render)
-// ============================================
+// backend/server.js
 import dns from "node:dns";
 
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
-
 dns.setDefaultResultOrder("ipv4first");
 
-// ============================================
-// IMPORTS
-// ============================================
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
@@ -26,9 +20,6 @@ import configurePassport from "./config/passport.js";
 import blogRoutes from "./routes/blogRoutes.js";
 import supportRoutes from "./routes/supportRoutes.js";
 
-// ============================================
-// ROUTE IMPORTS
-// ============================================
 import authRoutes from "./routes/authRoutes.js";
 import superAdminRoutes from "./routes/superAdminRoutes.js";
 import sellerRoutes from "./routes/sellerRoutes.js";
@@ -42,31 +33,21 @@ import headerConfigRoutes from "./routes/headerConfigRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
-import shippingRoutes from "./routes/shippingRoutes.js"; // ✅ NEW
-// ✅ NEW — Offers Worth The Splurge / other admin-curated homepage sections
+import shippingRoutes from "./routes/shippingRoutes.js";
 import featuredProductRoutes from "./routes/featuredProductRoutes.js";
+import paymentSettingsRoutes from "./routes/paymentSettingsRoutes.js"; // ✅ NEW
 
-// ✅ IMPORT PRODUCT ROUTES
 console.log("🔧 Importing jewelleryProductRoutes...");
 import jewelleryProductRoutes from "./routes/jewelleryProductRoutes.js";
 console.log("✅ jewelleryProductRoutes imported successfully");
 
-// ============================================
-// SERVICE IMPORTS
-// ============================================
 import superAdminService from "./services/superAdminService.js";
 import { initializeDefaultPlans } from "./services/subscriptionPlanService.js";
 import { initializeHeaderConfig } from "./services/headerConfigService.js";
 
-// ============================================
-// SOCKET.IO IMPORTS (NEW)
-// ============================================
 import { createServer } from "http";
 import { initSocket } from "./socket/socketService.js";
 
-// ============================================
-// INITIALIZE SERVICES ON STARTUP
-// ============================================
 (async () => {
   try {
     console.log("🔧 Initializing Super Admin...");
@@ -85,24 +66,12 @@ import { initSocket } from "./socket/socketService.js";
   }
 })();
 
-// ============================================
-// CONNECT TO DATABASE
-// ============================================
 await connectDB();
 
-// ============================================
-// CREATE EXPRESS APP
-// ============================================
 const app = express();
 
-// ============================================
-// TRUST PROXY (For Render/Rate Limiting)
-// ============================================
 app.set("trust proxy", 1);
 
-// ============================================
-// SECURITY MIDDLEWARE
-// ============================================
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
@@ -111,14 +80,8 @@ app.use(
   }),
 );
 
-// ============================================
-// CORS MIDDLEWARE
-// ============================================
 app.use(cors(corsOptions));
 
-// ============================================
-// RATE LIMITING
-// ============================================
 const limiter = rateLimit({
   windowMs: (process.env.RATE_LIMIT_WINDOW || 15) * 60 * 1000,
   max: process.env.RATE_LIMIT_MAX || 1000,
@@ -131,16 +94,10 @@ const limiter = rateLimit({
 });
 app.use("/api", limiter);
 
-// ============================================
-// BODY PARSING MIDDLEWARE
-// ============================================
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
-// ============================================
-// SESSION CONFIGURATION (for Passport)
-// ============================================
 const sessionConfig = {
   secret: process.env.COOKIE_SECRET || "default-secret-key",
   resave: false,
@@ -160,23 +117,14 @@ const sessionConfig = {
 
 app.use(session(sessionConfig));
 
-// ============================================
-// PASSPORT MIDDLEWARE
-// ============================================
 app.use(passport.initialize());
 app.use(passport.session());
 configurePassport();
 
-// ============================================
-// LOGGING MIDDLEWARE
-// ============================================
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-// ============================================
-// HEALTH CHECK ENDPOINT
-// ============================================
 app.get("/health", (req, res) => {
   res.status(200).json({
     success: true,
@@ -188,9 +136,6 @@ app.get("/health", (req, res) => {
   });
 });
 
-// ============================================
-// API INFO ENDPOINT
-// ============================================
 app.get("/api", (req, res) => {
   res.status(200).json({
     success: true,
@@ -212,17 +157,15 @@ app.get("/api", (req, res) => {
       cart: "/api/cart",
       wishlist: "/api/wishlist",
       orders: "/api/orders",
-      shipping: "/api/shipping", // ✅ NEW
-      featuredProducts: "/api/featured-products", // ✅ NEW
+      shipping: "/api/shipping",
+      featuredProducts: "/api/featured-products",
+      paymentSettings: "/api/payment-settings", // ✅ NEW
       health: "/health",
     },
     documentation: "Contact support for API documentation",
   });
 });
 
-// ============================================
-// ✅ API ROUTES - FULL DEBUG VERSION
-// ============================================
 console.log("\n" + "=".repeat(60));
 console.log("🔗 REGISTERING ROUTES");
 console.log("=".repeat(60));
@@ -264,18 +207,17 @@ app.use("/api/wishlist", wishlistRoutes);
 console.log("  ✅ /api/wishlist");
 app.use("/api/orders", orderRoutes);
 console.log("  ✅ /api/orders");
-app.use("/api/shipping", shippingRoutes); // ✅ NEW
+app.use("/api/shipping", shippingRoutes);
 console.log("  ✅ /api/shipping");
-app.use("/api/featured-products", featuredProductRoutes); // ✅ NEW
+app.use("/api/featured-products", featuredProductRoutes);
 console.log("  ✅ /api/featured-products");
+app.use("/api/payment-settings", paymentSettingsRoutes); // ✅ NEW
+console.log("  ✅ /api/payment-settings");
 
 console.log("\n" + "=".repeat(60));
 console.log("✅ ALL ROUTES REGISTERED");
 console.log("=".repeat(60));
 
-// ============================================
-// 404 NOT FOUND HANDLER
-// ============================================
 app.use((req, res) => {
   console.log(`❌ 404 Not Found: ${req.method} ${req.originalUrl}`);
   res.status(404).json({
@@ -285,9 +227,6 @@ app.use((req, res) => {
   });
 });
 
-// ============================================
-// GLOBAL ERROR HANDLER
-// ============================================
 app.use((err, req, res, next) => {
   console.error("❌ Global Error:", err.message);
   console.error("Stack:", err.stack);
@@ -366,13 +305,8 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ============================================
-// START SERVER (UPDATED WITH SOCKET.IO)
-// ============================================
 const PORT = process.env.PORT || 5000;
 
-// ✅ SOCKET.IO — wrap Express in a raw HTTP server so Socket.IO can attach
-// to the SAME port, then hand that server to initSocket() before listening.
 const httpServer = createServer(app);
 initSocket(httpServer);
 
@@ -429,14 +363,12 @@ const server = httpServer.listen(PORT, () => {
   console.log("  🔹 /api/orders - Orders");
   console.log("  🔹 /api/shipping - Shipping (Shiprocket)");
   console.log("  🔹 /api/featured-products - Featured Product Sections");
+  console.log("  🔹 /api/payment-settings - Payment Settings (COD toggle)");
   console.log("  🔹 /health - Health Check");
   console.log("  🔹 /api - API Info");
   console.log("=".repeat(60));
 });
 
-// ============================================
-// GRACEFUL SHUTDOWN
-// ============================================
 process.on("unhandledRejection", (err) => {
   console.error("❌ Unhandled Rejection:", err);
   server.close(() => {
