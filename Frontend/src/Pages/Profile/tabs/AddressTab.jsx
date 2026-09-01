@@ -141,6 +141,13 @@ const AddressTab = () => {
   const [newAddress, setNewAddress] = useState(EMPTY_ADDRESS);
   const [formErrors, setFormErrors] = useState({});
 
+  // ── Scroll the page back to top after a successful add/update ──
+  // (form collapses on success, which otherwise leaves the scroll
+  // position sitting wherever the footer now happens to be)
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
   const validateForm = useCallback(() => {
     const errors = {};
 
@@ -233,10 +240,11 @@ const AddressTab = () => {
     try {
       await dispatch(addAddress(newAddress)).unwrap();
       resetForm();
+      scrollToTop();
     } catch (error) {
       // Error handled in slice — avoid logging address PII to the console
     }
-  }, [dispatch, addresses, newAddress, validateForm, resetForm]);
+  }, [dispatch, addresses, newAddress, validateForm, resetForm, scrollToTop]);
 
   const handleUpdateAddress = useCallback(async () => {
     if (!validateForm()) {
@@ -252,10 +260,18 @@ const AddressTab = () => {
         }),
       ).unwrap();
       resetForm();
+      scrollToTop();
     } catch (error) {
       // Error handled in slice
     }
-  }, [dispatch, editingAddressId, newAddress, validateForm, resetForm]);
+  }, [
+    dispatch,
+    editingAddressId,
+    newAddress,
+    validateForm,
+    resetForm,
+    scrollToTop,
+  ]);
 
   const handleDeleteAddress = useCallback(
     async (addressId) => {
@@ -276,7 +292,11 @@ const AddressTab = () => {
       recipientName: address.recipientName || address.name || "",
       mobileNumber: address.mobileNumber || address.phone || "",
       alternateMobile: address.alternateMobile || "",
-      houseNumber: address.houseNumber || "",
+      // Fallback to alternate key names in case the API ever returns
+      // this field under a different key — prevents the field from
+      // silently going blank when opening the edit form.
+      houseNumber:
+        address.houseNumber || address.houseNo || address.house || "",
       apartment: address.apartment || "",
       street: address.street || "",
       landmark: address.landmark || "",

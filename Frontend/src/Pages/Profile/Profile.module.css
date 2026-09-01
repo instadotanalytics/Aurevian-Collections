@@ -65,7 +65,7 @@
   font-family: inherit;
   cursor: pointer;
   border: none;
-  background: none;
+  /* background: none; */
   transition:
     filter 0.15s ease,
     background 0.2s ease,
@@ -203,6 +203,18 @@
   z-index: 1;
 }
 
+/* New: keeps the avatar image and the "Save Photo" button stacked
+   in a single column, so Save Photo always renders directly under
+   the avatar — on both mobile and desktop — instead of floating in
+   the row next to the name/email block. */
+.avatarColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .avatarWrapper {
   position: relative;
   width: 84px;
@@ -270,7 +282,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-top: 8px;
+  margin-top: 0;
   padding: 6px 14px;
   font-size: 0.78rem;
   background: var(--success);

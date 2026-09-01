@@ -274,46 +274,51 @@ const Profile = () => {
           {/* Profile Header */}
           <div className={styles.profileHeader}>
             <div className={styles.avatarSection}>
-              <div className={styles.avatarWrapper}>
-                {avatarSrc ? (
-                  <img
-                    src={avatarSrc}
-                    alt={profile.fullName || "Profile"}
-                    className={styles.avatar}
-                    key={avatarKey}
-                  />
-                ) : (
-                  <div className={styles.avatarPlaceholder}>{initials}</div>
-                )}
-                <button
-                  type="button"
-                  className={styles.avatarUploadBtn}
-                  aria-label="Change profile photo"
-                  title="Change profile photo"
-                >
-                  <label htmlFor="avatar-upload">
-                    <FiCamera size={16} />
-                    <input
-                      id="avatar-upload"
-                      type="file"
-                      accept="image/png, image/jpeg, image/webp"
-                      onChange={handleImageChange}
-                      style={{ display: "none" }}
+              {/* Avatar + Save Photo stacked in one column so the button
+                  always sits directly under the image, on mobile and
+                  desktop alike */}
+              <div className={styles.avatarColumn}>
+                <div className={styles.avatarWrapper}>
+                  {avatarSrc ? (
+                    <img
+                      src={avatarSrc}
+                      alt={profile.fullName || "Profile"}
+                      className={styles.avatar}
+                      key={avatarKey}
                     />
-                  </label>
-                </button>
-              </div>
+                  ) : (
+                    <div className={styles.avatarPlaceholder}>{initials}</div>
+                  )}
+                  <button
+                    type="button"
+                    className={styles.avatarUploadBtn}
+                    aria-label="Change profile photo"
+                    title="Change profile photo"
+                  >
+                    <label htmlFor="avatar-upload">
+                      <FiCamera size={16} />
+                      <input
+                        id="avatar-upload"
+                        type="file"
+                        accept="image/png, image/jpeg, image/webp"
+                        onChange={handleImageChange}
+                        style={{ display: "none" }}
+                      />
+                    </label>
+                  </button>
+                </div>
 
-              {profileImage && (
-                <button
-                  type="button"
-                  className={styles.uploadConfirmBtn}
-                  onClick={handleImageUpload}
-                  disabled={profileLoading}
-                >
-                  <FiCheck size={16} /> Save Photo
-                </button>
-              )}
+                {profileImage && (
+                  <button
+                    type="button"
+                    className={styles.uploadConfirmBtn}
+                    onClick={handleImageUpload}
+                    disabled={profileLoading}
+                  >
+                    <FiCheck size={16} /> Save Photo
+                  </button>
+                )}
+              </div>
 
               <div className={styles.userInfo}>
                 <h1 className={styles.userName}>
