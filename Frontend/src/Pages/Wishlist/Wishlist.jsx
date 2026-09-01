@@ -11,8 +11,10 @@ import React, {
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
-import { FaHeart, FaShoppingBag, FaTimes, FaSearch } from "react-icons/fa";
+import { FaHeart, FaRupeeSign, FaSearch } from "react-icons/fa";
+import { FiX, FiShoppingBag } from "react-icons/fi";
 import styles from "./Wishlist.module.css";
+import Header from "../Layout/Header/Header";
 import Footer from "../Layout/Footer/Footer";
 
 import {
@@ -20,7 +22,6 @@ import {
   removeWishlistItem,
 } from "../../redux/slices/wishlistSlice";
 import { addItemToCart } from "../../redux/slices/cartSlice";
-import Header from "../Layout/Header/Header";
 
 // ------------------------------------------------------------------
 // Config
@@ -34,12 +35,6 @@ const FALLBACK_IMAGE = "/images/placeholder-product.png";
 // snapshot existed fall back to the productId, which ProductDetail already
 // resolves gracefully ("Product not found") rather than breaking navigation.
 const productUrl = (item) => `/product/${item.slug || item.product}`;
-
-const truncateText = (text, maxLength = 100) => {
-  if (!text) return "";
-  if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength).trim() + "...";
-};
 
 // ------------------------------------------------------------------
 // Validation — guard the UI against malformed/incomplete records
@@ -88,23 +83,35 @@ function useThrottledCallback(callback, limit) {
 }
 
 // ------------------------------------------------------------------
-// Skeleton placeholder — shown while the wishlist is loading so the
-// layout doesn't jump once real data arrives.
+// Skeleton placeholder — mirrors the real card's desktop/mobile grid so
+// the layout doesn't jump once real data arrives.
 // ------------------------------------------------------------------
 const WishlistCardSkeleton = memo(function WishlistCardSkeleton() {
   return (
     <div className={styles.wishlistCard} aria-hidden="true">
-      <div className={`${styles.imageWrapper} ${styles.skeletonBlock}`} />
-      <div className={styles.productDetails}>
-        <div className={styles.productHeader}>
-          <div className={styles.productInfo}>
-            <div className={`${styles.skeletonLine} ${styles.skeletonTitle}`} />
-            <div className={`${styles.skeletonLine} ${styles.skeletonDesc}`} />
+      <div className={styles.cardContent}>
+        <div className={styles.desktopView}>
+          <div className={styles.productCell}>
+            <div className={`${styles.imageWrapper} ${styles.skeletonBlock}`} />
+            <div className={styles.productInfo}>
+              <div className={`${styles.skeletonLine} ${styles.skeletonTitle}`} />
+              <div className={`${styles.skeletonLine} ${styles.skeletonDesc}`} />
+            </div>
           </div>
-        </div>
-        <div className={styles.productBottom}>
           <div className={`${styles.skeletonLine} ${styles.skeletonPrice}`} />
           <div className={`${styles.skeletonLine} ${styles.skeletonBtn}`} />
+          <div className={`${styles.skeletonLine} ${styles.skeletonRemove}`} />
+        </div>
+
+        <div className={styles.mobileView}>
+          <div className={styles.mobileCard}>
+            <div className={`${styles.mobileImageWrap} ${styles.skeletonBlock}`} />
+            <div className={styles.mobileInfo}>
+              <div className={`${styles.skeletonLine} ${styles.skeletonTitle}`} />
+              <div className={`${styles.skeletonLine} ${styles.skeletonDesc}`} />
+              <div className={`${styles.skeletonLine} ${styles.skeletonBtn}`} />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -112,7 +119,7 @@ const WishlistCardSkeleton = memo(function WishlistCardSkeleton() {
 });
 
 // ------------------------------------------------------------------
-// A single wishlist card. Memoized so a remove/add on one card never
+// A single wishlist card. Memoized so removing/moving one card never
 // re-renders every other card in the list.
 // ------------------------------------------------------------------
 const WishlistCard = memo(function WishlistCard({ item, onRemove, onMoveToCart }) {
@@ -138,60 +145,120 @@ const WishlistCard = memo(function WishlistCard({ item, onRemove, onMoveToCart }
 
   return (
     <div className={styles.wishlistCard}>
-      <Link
-        to={productUrl(item)}
-        className={styles.imageWrapper}
-        aria-label={`View ${item.name}`}
-      >
-        <img
-          src={imgSrc}
-          alt={item.name}
-          className={styles.productImage}
-          loading="lazy"
-          onError={handleImgError}
-        />
-      </Link>
-
-      <div className={styles.productDetails}>
-        <div className={styles.productHeader}>
-          <Link to={productUrl(item)} className={styles.productInfo}>
-            <h3 className={styles.productName}>{item.name}</h3>
-            {item.shortDescription && (
-              <p className={styles.productDescription}>
-                {truncateText(item.shortDescription, 100)}
-              </p>
-            )}
-          </Link>
-          <button
-            type="button"
-            className={styles.removeBtn}
-            onClick={handleRemove}
-            aria-label={`Remove ${item.name} from wishlist`}
-          >
-            <FaTimes />
-          </button>
-        </div>
-
-        <div className={styles.productBottom}>
-          <div className={styles.priceStockContainer}>
-            <div className={styles.priceContainer}>
-              <span className={styles.currentPrice}>
-                ₹{Number(item.price).toLocaleString("en-IN")}
-              </span>
+      <div className={styles.cardContent}>
+        {/* ---------- DESKTOP VIEW ---------- */}
+        <div className={styles.desktopView}>
+          <Link to={productUrl(item)} className={styles.productCell}>
+            <div className={styles.imageWrapper}>
+              <img
+                src={imgSrc}
+                alt={item.name}
+                className={styles.productImage}
+                loading="lazy"
+                onError={handleImgError}
+              />
             </div>
+            <div className={styles.productInfo}>
+              <h3 className={styles.productName}>{item.name}</h3>
+              {item.shortDescription && (
+                <p className={styles.productDescription}>
+                  {item.shortDescription}
+                </p>
+              )}
+              <div className={styles.availability}>
+                <span className={styles.inStock}>✓ In Stock</span>
+              </div>
+            </div>
+          </Link>
+
+          <div className={styles.priceCell}>
+            <span className={styles.currentPrice}>
+              <FaRupeeSign className={styles.rupeeIconSmall} />
+              {Number(item.price).toLocaleString("en-IN")}
+            </span>
           </div>
 
-          <div className={styles.bottomRow}>
+          <div className={styles.actionCell}>
             <button
               type="button"
-              className={styles.moveToCartSelected}
+              className={styles.moveToCartButton}
               onClick={handleMoveToCart}
               disabled={isMoving}
               aria-busy={isMoving}
             >
-              <FaShoppingBag />
+              <FiShoppingBag />
               {isMoving ? "Adding..." : "Add to Cart"}
             </button>
+          </div>
+
+          <div className={styles.removeCell}>
+            <button
+              type="button"
+              className={styles.removeButton}
+              onClick={handleRemove}
+              aria-label={`Remove ${item.name} from wishlist`}
+            >
+              <FiX />
+            </button>
+          </div>
+        </div>
+
+        {/* ---------- MOBILE VIEW ---------- */}
+        <div className={styles.mobileView}>
+          <div className={styles.mobileCard}>
+            <Link to={productUrl(item)} className={styles.mobileImageWrap}>
+              <img
+                src={imgSrc}
+                alt={item.name}
+                className={styles.productImage}
+                loading="lazy"
+                onError={handleImgError}
+              />
+            </Link>
+
+            <div className={styles.mobileInfo}>
+              <div className={styles.mobileInfoHead}>
+                <Link to={productUrl(item)} className={styles.productName}>
+                  {item.name}
+                </Link>
+                <button
+                  type="button"
+                  className={styles.removeButtonMobile}
+                  onClick={handleRemove}
+                  aria-label={`Remove ${item.name} from wishlist`}
+                >
+                  <FiX />
+                </button>
+              </div>
+
+              {item.shortDescription && (
+                <Link
+                  to={productUrl(item)}
+                  className={styles.productDescriptionMobile}
+                >
+                  {item.shortDescription}
+                </Link>
+              )}
+
+              <div className={styles.mobileStockRow}>
+                <span className={styles.inStock}>✓ In Stock</span>
+                <span className={styles.currentPrice}>
+                  <FaRupeeSign className={styles.rupeeIconSmall} />
+                  {Number(item.price).toLocaleString("en-IN")}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                className={styles.moveToCartButtonMobile}
+                onClick={handleMoveToCart}
+                disabled={isMoving}
+                aria-busy={isMoving}
+              >
+                <FiShoppingBag />
+                {isMoving ? "Adding..." : "Add to Cart"}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -313,16 +380,44 @@ const Wishlist = () => {
     return (
       <>
         <Header />
-        <div className={styles.wishlistContainer}>
-          <div className={styles.emptyWishlist}>
-            <FaHeart className={styles.emptyHeart} />
-            <h2>Please login to view your wishlist</h2>
-            <Link to="/login" className={styles.exploreBtn}>
+        <div className={styles.wishlistPage}>
+          <div className={styles.emptyContainer}>
+            <div className={styles.emptyIconWrapper}>
+              <FaHeart className={styles.emptyIcon} />
+            </div>
+            <h2 className={styles.emptyTitle}>Please Login to View Your Wishlist</h2>
+            <p className={styles.emptyDescription}>
+              Sign in to see the pieces you've saved
+            </p>
+            <Link to="/login" className={styles.exploreButton}>
               Login
             </Link>
           </div>
-          <Footer />
         </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (!isLoading && validItems.length === 0) {
+    return (
+      <>
+        <Header />
+        <div className={styles.wishlistPage}>
+          <div className={styles.emptyContainer}>
+            <div className={styles.emptyIconWrapper}>
+              <FaHeart className={styles.emptyIcon} />
+            </div>
+            <h2 className={styles.emptyTitle}>Your wishlist is empty</h2>
+            <p className={styles.emptyDescription}>
+              Start adding your favourite jewellery pieces
+            </p>
+            <Link to="/" className={styles.exploreButton}>
+              Explore Collection
+            </Link>
+          </div>
+        </div>
+        <Footer />
       </>
     );
   }
@@ -330,53 +425,45 @@ const Wishlist = () => {
   return (
     <>
       <Header />
-      <div className={styles.wishlistContainer}>
-        <div className={styles.header}>
-          <div className={styles.headerLeft}>
-            <div className={styles.headerTitleWrapper}>
-              <FaHeart className={styles.headerIcon} />
-              <h1 className={styles.headerTitle}>My Wishlist</h1>
-            </div>
-            <span className={styles.itemCount}>
-              {validItems.length} {validItems.length === 1 ? "item" : "items"}
-            </span>
+      <div className={styles.wishlistPage}>
+        <section className={styles.heroSection}>
+          <div className={styles.heroContent}>
+            <h1 className={styles.heroTitle}>My Wishlist</h1>
+            <p className={styles.heroDescription}>
+              Your handpicked favourites, saved and ready whenever you are.
+            </p>
           </div>
+        </section>
 
-          {validItems.length > 0 && (
-            <div className={styles.searchWrapper}>
-              <FaSearch className={styles.searchIcon} />
-              <input
-                type="text"
-                className={styles.searchInput}
-                placeholder="Search your wishlist"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                aria-label="Search your wishlist"
-                maxLength={100}
-              />
-            </div>
-          )}
+        <div className={styles.controlsBar}>
+          <span className={styles.itemCount}>
+            {validItems.length} {validItems.length === 1 ? "item" : "items"} saved
+          </span>
+
+          <div className={styles.searchWrapper}>
+            <FaSearch className={styles.searchIcon} />
+            <input
+              type="text"
+              className={styles.searchInput}
+              placeholder="Search your wishlist"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              aria-label="Search your wishlist"
+              maxLength={100}
+            />
+          </div>
         </div>
 
-        <div className={styles.wishlistItems}>
+        <div className={styles.wishlistItemsSection}>
           {isLoading ? (
             Array.from({ length: 4 }).map((_, i) => (
               <WishlistCardSkeleton key={`skeleton-${i}`} />
             ))
-          ) : validItems.length === 0 ? (
-            <div className={styles.emptyWishlist}>
-              <FaHeart className={styles.emptyHeart} />
-              <h2>Your wishlist is empty!</h2>
-              <p>Start adding your favourite jewellery pieces</p>
-              <Link to="/" className={styles.exploreBtn}>
-                Continue Shopping
-              </Link>
-            </div>
           ) : filteredItems.length === 0 ? (
-            <div className={styles.emptyWishlist}>
-              <FaSearch className={styles.emptyHeart} />
-              <h2>No matches for "{debouncedSearch}"</h2>
-              <p>Try a different search term</p>
+            <div className={styles.noResults}>
+              <FaSearch className={styles.emptyIcon} />
+              <h2 className={styles.emptyTitle}>No matches for "{debouncedSearch}"</h2>
+              <p className={styles.emptyDescription}>Try a different search term</p>
             </div>
           ) : (
             <>
@@ -403,8 +490,11 @@ const Wishlist = () => {
             </>
           )}
         </div>
-        <Footer />
+
+       
+       
       </div>
+      <Footer />
     </>
   );
 };
