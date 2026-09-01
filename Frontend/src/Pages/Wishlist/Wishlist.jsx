@@ -76,9 +76,7 @@ const Wishlist = () => {
     <>
       <Header />
       <div className={styles.wishlistContainer}>
-        <div className={styles.shippingBanner}>
-          <span>✦ FREE SHIPPING ON ALL ORDERS ABOVE ₹1999 ✦</span>
-        </div>
+      
 
         <div className={styles.header}>
           <div className={styles.headerLeft}>
@@ -94,10 +92,10 @@ const Wishlist = () => {
           {!isLoading && wishlist.length === 0 ? (
             <div className={styles.emptyWishlist}>
               <FaHeart className={styles.emptyHeart} />
-              <h2>Your wishlist is empty</h2>
+              <h2>Your wishlist is Empty !</h2>
               <p>Start adding your favourite jewellery pieces</p>
               <Link to="/" className={styles.exploreBtn}>
-                Explore Collection
+                Continue Shopping
               </Link>
             </div>
           ) : (
@@ -151,21 +149,6 @@ const Wishlist = () => {
               </div>
             ))
           )}
-        </div>
-
-        
-
-        <div className={styles.bottomBanner}>
-          <div className={styles.bannerContent}>
-            <FaHeart className={styles.bannerHeart} />
-            <h2 className={styles.bannerTitle}>
-              Luxury Never Leaves Your Heart
-            </h2>
-            <p className={styles.bannerDesc}>
-              Every Aurevian piece is designed to become part of your story.
-              Save it today and own it tomorrow.
-            </p>
-          </div>
         </div>
         <Footer />
       </div>
