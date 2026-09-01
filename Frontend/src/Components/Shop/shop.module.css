@@ -1211,7 +1211,7 @@
     padding-top: 80px;
   }
   .shopWrap {
-    padding: 20px 14px 48px;
+    padding: 48px 14px ;
   }
   .productGrid {
     grid-template-columns: repeat(2, 1fr);
