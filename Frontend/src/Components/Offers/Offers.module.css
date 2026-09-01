@@ -1451,8 +1451,9 @@
 
   .productPriceRow {
     font-size: 11px;
-    gap: 8px;
-    padding: 0 12px 4px;
+    gap: 0;
+    padding: 0;
+    align-items:first baseline;
   }
 
   .productCurrentPrice {
@@ -1751,7 +1752,7 @@
   .productCurrentPrice {
     font-size: 12px;
     gap:8px;
-    padding:0 12px 4px;
+    padding:0 8px 4px 12px;
   }
 
   .productOriginalPrice {
