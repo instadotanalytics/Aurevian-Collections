@@ -1,7 +1,12 @@
+
 /* Wishlist.module.css */
 
 /* ============================================
-   VARIABLES
+   DESIGN TOKENS
+   These same values should be reused verbatim (or pulled from a shared
+   tokens/global.css) across every other component — Cart, ProductDetail,
+   Header, etc — so the site reads as one system rather than a page-by-page
+   patchwork.
    ============================================ */
 :root {
   --gold: #d4af37;
@@ -21,6 +26,29 @@
   --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   --shadow-hover: 0 4px 24px rgba(0, 0, 0, 0.1);
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Typography — one family, used everywhere. */
+  --font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-display: "Playfair Display", serif;
+
+  /* Spacing scale — build all padding/margin/gap from this. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* Layout */
+  --content-max-width: 1200px;
+
+  /* Flat design: no rounded corners anywhere in this system. */
+  --radius: 0;
+
+  /* Focus ring, shared by every interactive element for a11y consistency */
+  --focus-ring: 0 0 0 2px var(--cream), 0 0 0 4px var(--gold-dark);
 }
 
 /* ============================================
@@ -28,30 +56,12 @@
    ============================================ */
 .wishlistContainer {
   width: 100%;
-  max-width: 1170px;
+  max-width: var(--content-max-width);
   margin: 130px auto;
-  padding: 0;
-  background:transparent;
-  font-family:
-    "Inter",
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
-  overflow: hidden;
-}
-
-/* ============================================
-   SHIPPING BANNER
-   ============================================ */
-.shippingBanner {
+  padding: 0 var(--space-6);
   background: transparent;
-  color: white;
-  text-align: center;
-  padding: 1rem;
-  font-size: 0.8rem;
-  font-weight: 500;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
+  font-family: var(--font-family);
+  overflow: hidden;
 }
 
 /* ============================================
@@ -59,32 +69,35 @@
    ============================================ */
 .header {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 2rem;
-  background: rgba(255, 255, 255, 0);
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  background: transparent;
   border-bottom: 1px solid var(--border);
 }
 
 .headerLeft {
   display: flex;
   align-items: center;
-  gap: 1.2rem;
+  gap: var(--space-4);
 }
 
 .headerTitleWrapper {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: var(--space-3);
 }
 
 .headerIcon {
   color: var(--gold);
   font-size: 1.6rem;
+  flex-shrink: 0;
 }
 
 .headerTitle {
-  font-family: "Playfair Display", serif;
+  font-family: var(--font-family-display);
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--dark);
@@ -95,8 +108,55 @@
   font-size: 0.9rem;
   color: var(--gray);
   background: var(--light-gray);
-  padding: 0.3rem 1rem;
-;
+  padding: var(--space-1) var(--space-4);
+  border-radius: var(--radius);
+  white-space: nowrap;
+}
+
+/* ============================================
+   SEARCH
+   ============================================ */
+.searchWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 220px;
+  flex: 1;
+  max-width: 320px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: var(--space-3);
+  color: var(--gray);
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  font-family: var(--font-family);
+  font-size: 0.9rem;
+  color: var(--dark);
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-7);
+  transition: var(--transition);
+}
+
+.searchInput::placeholder {
+  color: var(--gray);
+}
+
+.searchInput:hover {
+  border-color: var(--gold-dark);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--gold-dark);
+  box-shadow: var(--focus-ring);
 }
 
 /* ============================================
@@ -106,7 +166,7 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  background: rgba(255, 255, 255, 0);
+  background: transparent;
 }
 
 /* ============================================
@@ -115,10 +175,10 @@
 .wishlistCard {
   display: flex;
   align-items: stretch;
-  padding: 1.5rem 2rem;
+  padding: var(--space-5) var(--space-6);
   border-bottom: 1px solid var(--border);
   transition: var(--transition);
-  gap: 1.5rem;
+  gap: var(--space-5);
 }
 
 .wishlistCard:hover {
@@ -135,11 +195,18 @@
   width: 120px;
   height: 120px;
   background: var(--light-gray);
-
+  border-radius: var(--radius);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.imageWrapper:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .productImage {
@@ -166,29 +233,44 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .productInfo {
   flex: 1;
   min-width: 0;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  display: block;
+  border-radius: var(--radius);
+}
+
+.productInfo:hover .productName {
+  color: var(--gold-dark);
+}
+
+.productInfo:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .productName {
   font-size: 1.05rem;
   font-weight: 600;
   color: var(--dark);
-  margin: 0 0 0.2rem 0;
+  margin: 0 0 var(--space-1) 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: var(--transition);
 }
 
 /* Product Description */
 .productDescription {
   font-size: 0.85rem;
   color: var(--gray);
-  margin: 0.3rem 0 0 0;
+  margin: var(--space-2) 0 0 0;
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -198,42 +280,10 @@
   max-height: 2.6rem;
 }
 
-.productCategory {
-  font-size: 0.85rem;
-  color: var(--gray);
-  margin: 0 0 0.3rem 0;
-}
-
-.ratingContainer {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.ratingStars {
-  display: flex;
-  gap: 0.1rem;
-}
-
-.starFilled {
-  color: #ffa41c;
-  font-size: 0.85rem;
-}
-
-.starEmpty {
-  color: #ddd;
-  font-size: 0.85rem;
-}
-
-.ratingCount {
-  font-size: 0.8rem;
-  color: var(--gray);
-}
-
 .removeBtn {
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: var(--radius);
   border: 1px solid var(--border);
   background: transparent;
   color: var(--gray);
@@ -249,7 +299,15 @@
   border-color: #c62828;
   color: #c62828;
   background: #fce4ec;
-  transform: rotate(90deg);
+}
+
+.removeBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.removeBtn:active {
+  transform: scale(0.92);
 }
 
 /* Product Bottom */
@@ -257,20 +315,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 0.5rem;
-  gap: 0.8rem;
+  margin-top: var(--space-2);
+  gap: var(--space-3);
 }
 
 .priceStockContainer {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: var(--space-1);
 }
 
 .priceContainer {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: var(--space-3);
 }
 
 .currentPrice {
@@ -279,73 +337,139 @@
   color: var(--dark);
 }
 
-.oldPrice {
-  font-size: 0.9rem;
-  color: var(--gray);
-  text-decoration: line-through;
-}
-
-.stockContainer {
-  display: flex;
-  align-items: center;
-}
-
-.stockStatus {
-  padding: 0.2rem 0.8rem;
-
-  font-size: 0.7rem;
-  font-weight: 500;
-  width: fit-content;
-}
-
-.inStock {
-  background: #e8f5e9;
-  color: #2e7d32;
-}
-
-.outOfStock {
-  background: #fce4ec;
-  color: #c62828;
-}
-
 .bottomRow {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .moveToCartSelected {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.7rem 1.5rem;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
   background: var(--gold-gradient);
   color: white;
   border: none;
-
+  border-radius: var(--radius);
+  font-family: var(--font-family);
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
   transition: var(--transition);
 }
 
-.moveToCartSelected:hover {
+.moveToCartSelected:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3);
 }
 
+.moveToCartSelected:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.moveToCartSelected:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.moveToCartSelected:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* ============================================
-   BOTTOM ACTIONS
+   LOAD MORE / INFINITE SCROLL
    ============================================ */
-.bottomActions {
+.loadMoreRow {
   display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 1rem 2rem;
-  background: rgba(255, 255, 255, 0);
-  border-top: 1px solid var(--border);
-  margin-top: 0;
-  gap: 1rem;
+  justify-content: center;
+  padding: var(--space-6);
+}
+
+.loadMoreBtn {
+  padding: var(--space-3) var(--space-6);
+  background: transparent;
+  color: var(--dark);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-family);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.loadMoreBtn:hover {
+  border-color: var(--gold-dark);
+  color: var(--gold-dark);
+}
+
+.loadMoreBtn:active {
+  transform: scale(0.97);
+}
+
+.loadMoreBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ============================================
+   SKELETON LOADING
+   ============================================ */
+.skeletonBlock,
+.skeletonLine {
+  position: relative;
+  background: var(--light-gray);
+  overflow: hidden;
+  border-radius: var(--radius);
+}
+
+.skeletonBlock::after,
+.skeletonLine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
+  animation: shimmer 1.4s infinite;
+}
+
+.skeletonLine {
+  height: 0.9rem;
+}
+
+.skeletonTitle {
+  width: 55%;
+  height: 1.1rem;
+  margin-bottom: var(--space-2);
+}
+
+.skeletonDesc {
+  width: 85%;
+}
+
+.skeletonPrice {
+  width: 70px;
+  height: 1.2rem;
+}
+
+.skeletonBtn {
+  width: 130px;
+  height: 2.4rem;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 /* ============================================
@@ -353,37 +477,40 @@
    ============================================ */
 .emptyWishlist {
   text-align: center;
-  padding: 4rem 2rem;
+  padding: var(--space-8) var(--space-6);
   background: transparent;
 }
 
 .emptyHeart {
   font-size: 4rem;
   color: var(--gold);
-  margin-bottom: 1rem;
 }
 
 .emptyWishlist h2 {
   font-size: 1.5rem;
   color: var(--dark);
+  margin: 0 0 var(--space-6);
 }
 
 .emptyWishlist p {
   color: var(--gray);
-  margin-bottom: 3.5rem;
+  
 }
 
 .exploreBtn {
-  padding: 0.8rem 2.5rem;
+  display: inline-block;
+  padding: var(--space-4) var(--space-6);
   background: var(--gold-gradient);
   color: white;
   border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-family);
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
   transition: var(--transition);
   text-decoration: none;
- 
+  margin-top: var(--space-2);
 }
 
 .exploreBtn:hover {
@@ -391,59 +518,13 @@
   box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3);
 }
 
-/* ============================================
-   BOTTOM BANNER
-   ============================================ */
-.bottomBanner {
-  padding: 3rem 2rem;
-  background: linear-gradient(135deg, var(--dark) 0%, #b85001 100%);
-  border-top: 1px solid var(--gold);
-  position: relative;
-  overflow: hidden;
-  margin: 30px 0 0;
+.exploreBtn:active {
+  transform: translateY(0);
 }
 
-.bottomBanner::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  right: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(
-    circle at 70% 30%,
-    rgba(212, 175, 55, 0.03) 0%,
-    transparent 70%
-  );
-}
-
-.bannerContent {
-  text-align: center;
-  max-width: 600px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 1;
-}
-
-.bannerHeart {
-  font-size: 2.5rem;
-  color: rgb(255, 123, 0);
-  margin-bottom: 1rem;
-}
-
-.bannerTitle {
-  font-family: "Playfair Display", serif;
-  font-size: 2rem;
-  font-weight: 700;
-  color: white;
-  margin-bottom: 0.5rem;
-}
-
-.bannerDesc {
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 1.5rem;
-  line-height: 1.6;
+.exploreBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 /* ============================================
@@ -451,13 +532,49 @@
    ============================================ */
 @media (max-width: 768px) {
   .wishlistContainer {
-    margin: 100px auto;
+    /* Clears the fixed site header (logo row + icon row) so page content
+       never starts underneath it. Raise this further if your Header
+       component is taller than ~110px on mobile. */
+    margin: 110px auto 40px;
+    padding: 0 var(--space-4);
+  }
+
+  .header {
+    padding: var(--space-4);
+    flex-wrap: wrap;
+    row-gap: var(--space-2);
+    column-gap: var(--space-3);
+  }
+
+  .headerLeft {
+    flex-wrap: wrap;
+    row-gap: var(--space-1);
+    column-gap: var(--space-3);
+    width: 100%;
+  }
+
+  .headerTitleWrapper {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .headerTitle {
+    font-size: 1.4rem;
+  }
+
+  .itemCount {
+    flex-shrink: 0;
+  }
+
+  .searchWrapper {
+    max-width: none;
+    width: 100%;
   }
 
   .wishlistCard {
     flex-direction: row;
-    padding: 1rem;
-    gap: 1rem;
+    padding: var(--space-4);
+    gap: var(--space-4);
     align-items: stretch;
   }
 
@@ -465,12 +582,6 @@
     width: 100px;
     height: 100px;
     flex-shrink: 0;
-  }
-
-  .productImage {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
   }
 
   .productDetails {
@@ -510,66 +621,30 @@
   .productBottom {
     flex-direction: row;
     align-items: flex-start;
-    gap: 0.5rem;
-    margin-top: 0.3rem;
+    gap: var(--space-2);
+    margin-top: var(--space-1);
   }
 
   .priceStockContainer {
     width: 100%;
   }
 
-  .priceContainer {
-    gap: 0.5rem;
-  }
-
   .currentPrice {
     font-size: 1rem;
-  }
-
-  .oldPrice {
-    font-size: 0.8rem;
   }
 
   .bottomRow {
     width: 60%;
     justify-content: space-between;
-    gap: 0.5rem;
+    gap: var(--space-2);
     margin-top: 10px;
   }
 
   .moveToCartSelected {
     font-size: 0.75rem;
-    padding: 0.5rem 1rem;
+    padding: var(--space-2) var(--space-4);
     width: 100%;
     justify-content: center;
-  }
-
-  .header {
-    padding: 1rem;
-    flex-wrap: wrap;
-    gap: 0.8rem;
-  }
-
-  .headerLeft {
-    flex-wrap: wrap;
-    gap: 0.8rem;
-  }
-
-  .headerTitle {
-    font-size: 1.4rem;
-  }
-
-  .bottomActions {
-    flex-direction: column;
-    gap: 0.8rem;
-    padding: 1rem;
-    align-items: stretch;
-  }
-
-  .shippingBanner {
-    font-size: 0.65rem;
-    padding: 0.4rem 0.8rem;
-    letter-spacing: 1px;
   }
 }
 
@@ -578,25 +653,18 @@
    ============================================ */
 @media (max-width: 480px) {
   .wishlistContainer {
-    margin: 80px auto;
+    margin: 100px auto 32px;
   }
 
   .wishlistCard {
-    padding: 0.8rem;
-    gap: 0.8rem;
+    padding: var(--space-3);
+    gap: var(--space-3);
     align-items: stretch;
   }
 
   .imageWrapper {
     width: 80px;
     height: 80px;
- 
-  }
-
-  .productImage {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
   }
 
   .productName {
@@ -608,33 +676,11 @@
     font-size: 0.7rem;
     -webkit-line-clamp: 2;
     max-height: 2.2rem;
-    margin-top: 0.2rem;
-  }
-
-  .productCategory {
-    font-size: 0.7rem;
-  }
-
-  .ratingStars .starFilled,
-  .ratingStars .starEmpty {
-    font-size: 0.7rem;
-  }
-
-  .ratingCount {
-    font-size: 0.7rem;
+    margin-top: var(--space-1);
   }
 
   .currentPrice {
     font-size: 0.9rem;
-  }
-
-  .oldPrice {
-    font-size: 0.7rem;
-  }
-
-  .stockStatus {
-    font-size: 0.6rem;
-    padding: 0.15rem 0.6rem;
   }
 
   .headerTitle {
@@ -647,28 +693,12 @@
 
   .itemCount {
     font-size: 0.75rem;
-    padding: 0.2rem 0.8rem;
+    padding: var(--space-1) var(--space-4);
   }
 
   .moveToCartSelected {
     font-size: 0.7rem;
-    padding: 0.4rem 0.8rem;
-  }
-
-  .bannerTitle {
-    font-size: 1.2rem;
-  }
-
-  .bannerHeart {
-    font-size: 2rem;
-  }
-
-  .bannerDesc {
-    font-size: 0.85rem;
-  }
-
-  .bottomRow {
-    width: 100%;
+    padding: var(--space-2) var(--space-3);
   }
 
   .removeBtn {
@@ -678,7 +708,7 @@
   }
 
   .emptyWishlist {
-    padding: 2rem 1rem;
+    padding: var(--space-6) var(--space-4);
   }
 
   .emptyHeart {
@@ -690,19 +720,12 @@
   }
 
   .exploreBtn {
-    padding: 0.6rem 1.5rem;
+    padding: var(--space-3) var(--space-5);
     font-size: 0.85rem;
   }
 
-  .bottomBanner {
-    padding: 2rem 1rem;
-    margin: 20px 0 0;
-  }
-
-  .shippingBanner {
-    font-size: 0.55rem;
-    padding: 0.3rem 0.5rem;
-    letter-spacing: 0.5px;
+  .loadMoreRow {
+    padding: var(--space-4);
   }
 }
 
@@ -711,23 +734,17 @@
    ============================================ */
 @media (max-width: 360px) {
   .wishlistContainer {
-    margin: 70px auto;
+    margin: 90px auto 28px;
   }
 
   .wishlistCard {
-    padding: 0.6rem;
-    gap: 0.6rem;
+    padding: var(--space-2);
+    gap: var(--space-2);
   }
 
   .imageWrapper {
     width: 65px;
     height: 65px;
-  }
-
-  .productImage {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
   }
 
   .productName {
@@ -746,7 +763,7 @@
 
   .moveToCartSelected {
     font-size: 0.65rem;
-    padding: 0.3rem 0.6rem;
+    padding: var(--space-1) var(--space-2);
   }
 
   .removeBtn {
@@ -765,23 +782,7 @@
 
   .itemCount {
     font-size: 0.65rem;
-    padding: 0.15rem 0.6rem;
-  }
-
-  .bottomBanner {
-    padding: 1.5rem 0.8rem;
-  }
-
-  .bannerTitle {
-    font-size: 1rem;
-  }
-
-  .bannerDesc {
-    font-size: 0.75rem;
-  }
-
-  .bannerHeart {
-    font-size: 1.5rem;
+    padding: var(--space-1) var(--space-3);
   }
 }
 
@@ -793,7 +794,10 @@
   .productImage,
   .removeBtn,
   .moveToCartSelected,
-  .exploreBtn {
+  .exploreBtn,
+  .loadMoreBtn,
+  .skeletonBlock::after,
+  .skeletonLine::after {
     transition: none !important;
     animation: none !important;
   }
@@ -801,31 +805,4 @@
   .wishlistCard:hover .productImage {
     transform: none !important;
   }
-}
-
-/* APPEND TO: src/Pages/Wishlist/Wishlist.module.css */
-
-/* ============================================
-   PRODUCT CLICK-THROUGH (Link resets)
-   ============================================
-   .imageWrapper and .productInfo are now react-router <Link>s instead of
-   plain <div>s, so the whole image and the name+description block are
-   clickable. removeBtn and moveToCartSelected stay outside these Links
-   entirely (siblings), so they keep working independently with no
-   stopPropagation needed. */
-
-.imageWrapper {
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.productInfo {
-  text-decoration: none;
-  color: inherit;
-  cursor: pointer;
-  display: block;
-}
-
-.productInfo:hover .productName {
-  color: var(--gold-dark);
 }
