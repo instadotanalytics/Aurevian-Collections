@@ -20,6 +20,20 @@ const API_URL =
   import.meta.env.VITE_API_URL ||
   "https://aurevian-collections.onrender.com/api";
 
+// ✅ Dynamic placeholder phrases
+const PLACEHOLDER_PHRASES = [
+  "Search for earrings...",
+  "Search for necklaces...",
+  "Search for rings...",
+  "Search for bracelets...",
+  "Search for pendants...",
+  "Search for anklets...",
+  "Search for bangles...",
+  "Search for maang tikka...",
+  "Search for nose pins...",
+  "Search for chains...",
+];
+
 /**
  * SearchPanel
  * ------------------------------------------------------------------
@@ -90,6 +104,13 @@ const SearchPanel = ({
   const [history, setHistory] = useState([]);
   const inputRef = useRef(null);
 
+  // ✅ Dynamic placeholder state
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [placeholderText, setPlaceholderText] = useState(PLACEHOLDER_PHRASES[0]);
+  const [isTypingPlaceholder, setIsTypingPlaceholder] = useState(true);
+  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
+  const placeholderIntervalRef = useRef(null);
+
   // ✅ Live suggestion state (backend-driven)
   const [suggestions, setSuggestions] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -117,6 +138,73 @@ const SearchPanel = ({
   const navigableList = isTyping ? suggestions : browseList;
   const { activeIndex, moveDown, moveUp, reset, setActiveIndex } =
     useActiveIndex(navigableList.length);
+
+  // ✅ Dynamic placeholder animation
+  useEffect(() => {
+    // Only run animation when panel is open and query is empty
+    if (!isOpen || query.length > 0) {
+      if (placeholderIntervalRef.current) {
+        clearInterval(placeholderIntervalRef.current);
+        placeholderIntervalRef.current = null;
+      }
+      return;
+    }
+
+    let charIndex = 0;
+    let currentPhraseIdx = 0;
+    let isDeleting = false;
+    let currentDisplayText = "";
+
+    const animatePlaceholder = () => {
+      const currentPhrase = PLACEHOLDER_PHRASES[currentPhraseIdx];
+
+      if (!isDeleting) {
+        // Typing
+        if (charIndex < currentPhrase.length) {
+          currentDisplayText = currentPhrase.substring(0, charIndex + 1);
+          setPlaceholderText(currentDisplayText);
+          charIndex++;
+        } else {
+          // Pause at full text
+          isDeleting = true;
+          setTimeout(() => {
+            // Start deleting after pause
+          }, 1500);
+        }
+      } else {
+        // Deleting
+        if (charIndex > 0) {
+          currentDisplayText = currentPhrase.substring(0, charIndex - 1);
+          setPlaceholderText(currentDisplayText);
+          charIndex--;
+        } else {
+          // Move to next phrase
+          isDeleting = false;
+          currentPhraseIdx = (currentPhraseIdx + 1) % PLACEHOLDER_PHRASES.length;
+          charIndex = 0;
+        }
+      }
+    };
+
+    // Start animation with interval
+    placeholderIntervalRef.current = setInterval(animatePlaceholder, 60);
+
+    return () => {
+      if (placeholderIntervalRef.current) {
+        clearInterval(placeholderIntervalRef.current);
+        placeholderIntervalRef.current = null;
+      }
+    };
+  }, [isOpen, query]);
+
+  // Reset placeholder when panel opens
+  useEffect(() => {
+    if (isOpen) {
+      setPlaceholderText(PLACEHOLDER_PHRASES[0]);
+      setCurrentPhraseIndex(0);
+      setPlaceholderIndex(0);
+    }
+  }, [isOpen]);
 
   // Reload history + clear transient state every time the panel opens.
   useEffect(() => {
@@ -285,7 +373,7 @@ const SearchPanel = ({
           id={inputId}
           ref={inputRef}
           type="text"
-          placeholder="Search for earrings, necklaces, rings..."
+          placeholder={placeholderText}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
