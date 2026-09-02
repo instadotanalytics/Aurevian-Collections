@@ -1,6 +1,6 @@
 // src/Components/Collections/Collections.jsx
 
-import { useRef, useEffect, useState, useMemo } from "react";
+import { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
@@ -123,13 +123,6 @@ const CLOSING_IMAGES = [
   "https://i.pinimg.com/1200x/b4/7e/e8/b47ee8ae94d4253ef2da698538ac5c81.jpg",
 ];
 
-// ✅ REMOVED the hardcoded FILTER_CATEGORIES array. It sent the display
-// LABEL ("Rings") as `categoryId` to the API, which matches against real
-// ids like "rings" — so every non-"All" selection silently returned zero
-// products. Categories are now fetched live from the same seller-panel
-// -controlled endpoint Shop.jsx already uses (see the new effect below),
-// and the real `.id` is sent, not the label.
-
 const SORT_OPTIONS = [
   { value: "latest", label: "Sort by latest" },
   { value: "price-low", label: "Price: Low to High" },
@@ -210,7 +203,7 @@ function Reveal({
 export default function Collections() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { filterSlug } = useParams(); // e.g. "/collections/bridal-collection"
+  const { filterSlug } = useParams();
   const { byPlacement } = useSelector((state) => state.storefrontProduct);
   const { isAuthenticated } = useSelector((state) => state.auth);
   const cartItems = useSelector((state) => state.cart.items);
@@ -219,16 +212,11 @@ export default function Collections() {
   const heroRef = useRef(null);
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // ✅ NEW: real, seller-panel-controlled shop categories — same source
-  // Shop.jsx uses. selectedCategory now stores a real category `id`
-  // ("rings"), never a display label.
+  // ✅ Real, seller-panel-controlled shop categories
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
 
-  // ✅ NEW: the "style/collection" filter driven by the URL — this is
-  // what "Bridal Collection", "Party Wear" etc. from the header's
-  // Shop-by-Style column and Collections dropdown resolve to. It maps to
-  // specifications.collection on the product (see backend patch).
+  // ✅ Collection/style filter driven by URL
   const [activeCollectionSlug, setActiveCollectionSlug] = useState(
     filterSlug || null,
   );
@@ -268,8 +256,7 @@ export default function Collections() {
   const [refreshKey, setRefreshKey] = useState(0);
   const loaderRef = useRef(null);
 
-  // ✅ NEW: fetch real categories (seller-panel controlled via
-  // HeaderConfig -> shopMegaMenu.categories), same endpoint Shop.jsx uses.
+  // ✅ Fetch real categories (seller-panel controlled)
   useEffect(() => {
     axios
       .get(`${API_URL}/seller/products/categories`)
@@ -280,10 +267,7 @@ export default function Collections() {
       });
   }, []);
 
-  // ✅ NEW: keep the "collection/style" filter in sync if the user
-  // navigates between header links without a full page reload
-  // (e.g. clicking a different Shop-by-Style item while already on
-  // /collections/:filterSlug).
+  // ✅ Keep collection/style filter in sync with URL
   useEffect(() => {
     setActiveCollectionSlug(filterSlug || null);
     setActiveCollectionLabel(
@@ -292,6 +276,31 @@ export default function Collections() {
         : null,
     );
   }, [filterSlug]);
+
+  // ✅ Apply client-side sorting as fallback
+  const getSortedProducts = useCallback((products) => {
+    if (!products || products.length === 0) return products;
+
+    const sorted = [...products];
+
+    switch (sortBy) {
+      case "price-low":
+        return sorted.sort((a, b) => {
+          const priceA = a.pricing?.salePrice || a.pricing?.originalPrice || 0;
+          const priceB = b.pricing?.salePrice || b.pricing?.originalPrice || 0;
+          return priceA - priceB;
+        });
+      case "price-high":
+        return sorted.sort((a, b) => {
+          const priceA = a.pricing?.salePrice || a.pricing?.originalPrice || 0;
+          const priceB = b.pricing?.salePrice || b.pricing?.originalPrice || 0;
+          return priceB - priceA;
+        });
+      case "latest":
+      default:
+        return sorted;
+    }
+  }, [sortBy]);
 
   // Fetch products (infinite scroll)
   useEffect(() => {
@@ -303,6 +312,12 @@ export default function Collections() {
       const start = Date.now();
 
       try {
+        // ✅ Convert sort value to backend format
+        let sortParam = sortBy;
+        if (sortBy === "price-low") sortParam = "price-asc";
+        else if (sortBy === "price-high") sortParam = "price-desc";
+        else if (sortBy === "latest") sortParam = "latest";
+
         const result = await dispatch(
           fetchProductsByPlacement({
             placement: "collections",
@@ -313,7 +328,7 @@ export default function Collections() {
             collection: activeCollectionSlug
               ? activeCollectionSlug.replace(/-/g, " ")
               : undefined,
-            sort: sortBy || undefined,
+            sort: sortParam || undefined,
           }),
         ).unwrap();
 
@@ -385,7 +400,7 @@ export default function Collections() {
     }
   }, [dispatch, isAuthenticated]);
 
-  /* Close mobile sort dropdown on outside click */
+  // Close mobile sort dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -399,7 +414,7 @@ export default function Collections() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  /* Close desktop sidebar sort dropdown on outside click */
+  // Close desktop sidebar sort dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -583,8 +598,9 @@ export default function Collections() {
     }
   };
 
+  // ✅ Apply client-side filters (budget and promotion) AND sorting
   const filteredProducts = useMemo(() => {
-    return allProducts.filter((p) => {
+    let filtered = allProducts.filter((p) => {
       const price = p.pricing?.salePrice || p.pricing?.originalPrice || 0;
 
       if (budgetFilter === "under-1000" && price >= 1000) return false;
@@ -616,7 +632,10 @@ export default function Collections() {
 
       return true;
     });
-  }, [allProducts, budgetFilter, promotionFilter]);
+
+    // ✅ Apply client-side sorting as fallback
+    return getSortedProducts(filtered);
+  }, [allProducts, budgetFilter, promotionFilter, getSortedProducts]);
 
   const skeletonItems = Array.from({ length: 10 }, (_, i) => i);
 
@@ -750,7 +769,7 @@ export default function Collections() {
                 </div>
               </div>
 
-              {/* Category — ✅ now real, seller-panel data */}
+              {/* Category — ✅ real, seller-panel data */}
               <div className={styles.filterGroup}>
                 <span className={styles.filterGroupLabel}>Category</span>
                 <label className={styles.filterOption}>
@@ -1229,7 +1248,7 @@ export default function Collections() {
               </div>
             </div>
 
-            {/* Category — ✅ now real, seller-panel data */}
+            {/* Category — ✅ real, seller-panel data */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Category</span>
               <div className={styles.mobileFilterGrid}>
