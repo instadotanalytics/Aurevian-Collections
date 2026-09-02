@@ -1,3 +1,4 @@
+
 // src/Components/GiftGuide/GiftGuide.jsx
 //
 // Products come from FeaturedProduct entries (section: "curated-for-you"),
@@ -185,7 +186,7 @@ export default function GiftGuide() {
 
           <div className={styles.header}>
             <div className={styles.headingWrapper}>
-              <span className={styles.subHeading}>Curated for you</span>
+              
               <h2 id="gift-guide-heading" className={styles.heading}>
                 You May Also Like
               </h2>

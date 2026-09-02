@@ -10,19 +10,19 @@ import homeVideo from "../../assets/videoforhomescreen.MP4";
 const REELS = [
   {
     id: "r1",
-    name: "Zircon Drop Earrings",
+    name: "Zircon Drop Rings",
     price: 1499,
     video: "/IMG_1581.MP4",
   },
   {
     id: "r2",
-    name: "Kundan Choker Necklace",
+    name: "Kundan Choker Earrings",
     price: 3299,
     video: "/IMG_1582.MP4",
   },
   {
     id: "r3",
-    name: "Rose Gold Band Ring",
+    name: "Rose Gold Pendant",
     price: 999,
     video: "/IMG_1583.MP4",
   },
@@ -34,7 +34,7 @@ const REELS = [
   },
   {
     id: "r5",
-    name: "Aurevian Collection",
+    name: "Rings",
     price: 1999,
     video: homeVideo,
   },
@@ -160,7 +160,6 @@ export default function ShopTheLook() {
     >
       <div className={styles.container}>
         <div className={styles.header}>
-          <p className={styles.topText}>✦ SHOP THE LOOK ✦</p>
           <h2 id="shop-the-look-heading" className={styles.heading}>
             Watch & Shop
           </h2>

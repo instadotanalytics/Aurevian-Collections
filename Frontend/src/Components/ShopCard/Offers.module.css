@@ -1,3 +1,4 @@
+
 /* src/Components/Offers/Offers.module.css */
 
 /* ==========================================================
@@ -332,22 +333,25 @@
   min-height: 0;
 }
 
+/* ==========================================================
+   ✅ PRODUCT NAME — now matches shop.module.css's .productName
+   exactly (single line, ellipsis-truncated) instead of the old
+   2-line clamp with a fixed 46px box. Same font-size, weight,
+   padding and truncation behavior as the Shop page; only the
+   color/font-family tokens are Offers' own (equivalent values).
+   ========================================================== */
 .productName {
-  font-family: "Jost", "Helvetica Neue", Arial, sans-serif;
   font-size: 15px;
   font-weight: 500;
-  color: #1c1917;
-  line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  font-family: "Jost", sans-serif;
+  color: var(--ink);
+  padding: 10px 12px 5px;
+  display: block;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
   text-decoration: none;
-  padding: 10px 12px 4px;
-  margin: 0;
-  height: 46px;
-  max-height: 46px;
-  word-break: break-word;
 }
 
 .productName:hover {
@@ -478,13 +482,6 @@
     height: 330px;
     max-height: 330px;
   }
-
-  .productName {
-    height: 42px;
-    max-height: 42px;
-    font-size: 14px;
-    padding: 8px 12px 3px;
-  }
 }
 
 @media (max-width: 640px) {
@@ -573,12 +570,15 @@
     left: 10px;
   }
 
+  /* ✅ Matches shop.module.css's @media (max-width: 560px) .productName */
   .productName {
     font-size: 13px;
     padding: 8px 12px 2px;
-    height: 38px;
-    max-height: 38px;
-    line-height: 1.3;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
   }
 
   .ratingRow {
@@ -626,11 +626,15 @@
     max-height: 290px;
   }
 
+  /* ✅ Matches shop.module.css's @media (max-width: 480px) .productName */
   .productName {
     font-size: 12px;
     padding: 6px 12px 2px;
-    height: 34px;
-    max-height: 34px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
   }
 
   .price {
@@ -646,6 +650,14 @@
     height: 32px;
     min-height: 32px;
     padding: 7px 0;
+  }
+}
+
+/* ✅ Matches shop.module.css's @media (max-width: 380px) .productName */
+@media (max-width: 380px) {
+  .productName {
+    font-size: 12px;
+    padding: 4px 8px 2px;
   }
 }
 

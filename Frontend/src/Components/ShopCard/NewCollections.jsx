@@ -1,3 +1,4 @@
+
 // src/Components/NewCollections/NewCollections.jsx
 //
 // Products come from FeaturedProduct entries (section: "new-collections"),
@@ -6,6 +7,13 @@
 // and scroll behavior are unchanged from the static version. wishlistBtn
 // and bagBtn remain static (no onClick/state) — that matches the original
 // file, which never wired them up either.
+//
+// ✅ UPDATED: product title now matches the Shop page's product-name
+// treatment exactly — same font (Jost, 500), same size/color, and the
+// same single-line ellipsis truncation (via the shared truncateName
+// helper, copied from Shop) instead of letting long names wrap to two
+// lines. The star-rating row (stars + "0.0 (0)") has been removed
+// entirely, since ratings aren't wired up to real data yet.
 
 import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,28 +23,26 @@ import {
   FiHeart,
   FiShoppingBag,
 } from "react-icons/fi";
-import { FaStar, FaRegStar } from "react-icons/fa";
 import styles from "./NewCollections.module.css";
 
 import { fetchFeaturedProducts } from "../../redux/slices/featuredProductSlice";
 
 const SECTION = "new-collections";
 
-function Stars({ rating }) {
-  const stars = [];
-  for (let i = 1; i <= 5; i++) {
-    stars.push(
-      i <= Math.round(rating) ? (
-        <FaStar key={i} className={styles.starIcon} />
-      ) : (
-        <FaRegStar key={i} className={styles.starIconEmpty} />
-      ),
-    );
+// ✅ Same truncation rule as Shop's product cards — keep to 3 words max,
+// full name still available via the title attribute for accessibility/hover.
+const truncateName = (name) => {
+  if (!name) return "";
+  const words = name.trim().split(/\s+/);
+  if (words.length > 3) {
+    return words.slice(0, 3).join(" ") + "...";
   }
-  return <div className={styles.stars}>{stars}</div>;
-}
+  return name;
+};
 
 function ProductCard({ product }) {
+  const displayName = truncateName(product.name);
+
   return (
     <div className={styles.card}>
       <span className={styles.newBadge}>NEW</span>
@@ -72,14 +78,9 @@ function ProductCard({ product }) {
 
         <div className={styles.body}>
           <p className={styles.collectionTag}>{product.collection}</p>
-          <h3 className={styles.title}>{product.name}</h3>
-
-          <div className={styles.metaRow}>
-            <Stars rating={product.rating} />
-            <span className={styles.ratingValue}>
-              {product.rating.toFixed(1)} ({product.reviewCount})
-            </span>
-          </div>
+          <h3 className={styles.title} title={product.name}>
+            {displayName}
+          </h3>
 
           <div className={styles.priceRow}>
             <span className={styles.price}>
@@ -124,14 +125,6 @@ function SkeletonCard() {
         >
           &nbsp;
         </h3>
-        <div className={styles.metaRow}>
-          <span
-            className={`${styles.skeletonPulse} ${styles.skeletonText}`}
-            style={{ width: "60%", margin: "0 auto" }}
-          >
-            &nbsp;
-          </span>
-        </div>
         <div className={styles.priceRow}>
           <span
             className={`${styles.price} ${styles.skeletonPulse} ${styles.skeletonText}`}
@@ -161,8 +154,6 @@ const toCardProduct = (product) => {
     name: product.productName,
     price: displayPrice || 0,
     oldPrice: hasDiscount ? product.pricing.originalPrice : null,
-    rating: product.reviews?.averageRating || 0,
-    reviewCount: product.reviews?.totalReviews || 0,
     collection: product.specifications?.collection || "Aurevian Collections",
     image: product.thumbnail?.url || null,
   };
