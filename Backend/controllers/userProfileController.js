@@ -23,23 +23,32 @@ export const getUserProfile = async (req, res) => {
     res.status(200).json({ success: true, userProfile });
   } catch (error) {
     console.error("❌ Error fetching profile:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error fetching profile",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching profile",
+      error: error.message,
+    });
   }
 };
 
 // ============================================
 // 2. PUT - Update own profile
+//
+// ✅ FIXED — removed the `address` block that previously built
+// `updateData.address = { street, city, state, pincode, country }` and
+// merged it into the $set. The User schema (Backend/models/User.js) has
+// no top-level `address` path — only the `addresses` ARRAY, managed via
+// addUserAddress/updateUserAddress/deleteUserAddress below. Mongoose's
+// default strict mode silently drops unrecognized paths on $set, so that
+// block never persisted anything; it only produced a false "success"
+// response. The frontend form that submitted it (OverviewTab.jsx's old
+// "Address" section) has been removed to match — the real, working
+// address system is entirely the `addresses` array. This endpoint now
+// only ever touches fields that actually exist on the schema.
 // ============================================
 export const updateUserProfile = async (req, res) => {
   try {
-    const { firstName, lastName, phone, gender, dateOfBirth, address } =
-      req.body;
+    const { firstName, lastName, phone, gender, dateOfBirth } = req.body;
 
     const errors = {};
     if (firstName !== undefined && !firstName.trim())
@@ -62,15 +71,6 @@ export const updateUserProfile = async (req, res) => {
 
     const updateData = { firstName, lastName, phone, gender: gender || "" };
     if (dateOfBirth) updateData.dateOfBirth = new Date(dateOfBirth);
-    if (address) {
-      updateData.address = {
-        street: address.street || "",
-        city: address.city || "",
-        state: address.state || "",
-        pincode: address.pincode || "",
-        country: address.country || "India",
-      };
-    }
     Object.keys(updateData).forEach(
       (k) => updateData[k] === undefined && delete updateData[k],
     );
@@ -81,22 +81,18 @@ export const updateUserProfile = async (req, res) => {
       { new: true, runValidators: true },
     ).select("-password -refreshTokens -__v -otp -loginHistory -notifications");
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Profile updated successfully",
-        userProfile,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      userProfile,
+    });
   } catch (error) {
     console.error("❌ Error updating profile:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error updating profile",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error updating profile",
+      error: error.message,
+    });
   }
 };
 
@@ -107,13 +103,11 @@ export const uploadProfileAvatar = async (req, res) => {
   try {
     const file = req.files?.avatar?.[0] || req.files?.profileImage?.[0];
     if (!file) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message:
-            'Please upload an image. Field name should be "avatar" or "profileImage"',
-        });
+      return res.status(400).json({
+        success: false,
+        message:
+          'Please upload an image. Field name should be "avatar" or "profileImage"',
+      });
     }
 
     const user = req.user;
@@ -144,13 +138,11 @@ export const uploadProfileAvatar = async (req, res) => {
     });
 
     if (!uploadResult.success) {
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: "Failed to upload avatar",
-          error: uploadResult.error,
-        });
+      return res.status(500).json({
+        success: false,
+        message: "Failed to upload avatar",
+        error: uploadResult.error,
+      });
     }
 
     const imageData = {
@@ -172,13 +164,11 @@ export const uploadProfileAvatar = async (req, res) => {
   } catch (error) {
     if (req.file) fs.unlink(req.file.path, () => {});
     console.error("❌ Error uploading avatar:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error uploading avatar",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error uploading avatar",
+      error: error.message,
+    });
   }
 };
 
@@ -211,13 +201,11 @@ export const deleteProfileAvatar = async (req, res) => {
       .json({ success: true, message: "Avatar deleted successfully" });
   } catch (error) {
     console.error("❌ Error deleting avatar:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error deleting avatar",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error deleting avatar",
+      error: error.message,
+    });
   }
 };
 
@@ -241,13 +229,11 @@ export const deleteUserAccount = async (req, res) => {
       .json({ success: true, message: "Account deleted successfully" });
   } catch (error) {
     console.error("❌ Error deleting account:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error deleting account",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error deleting account",
+      error: error.message,
+    });
   }
 };
 
@@ -262,13 +248,11 @@ export const getUserOrders = async (req, res) => {
     res.status(200).json({ success: true, orders });
   } catch (error) {
     console.error("❌ Error fetching orders:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error fetching orders",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching orders",
+      error: error.message,
+    });
   }
 };
 
@@ -284,13 +268,11 @@ export const getUserWishlist = async (req, res) => {
     res.status(200).json({ success: true, wishlist: user.wishlist });
   } catch (error) {
     console.error("❌ Error fetching wishlist:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error fetching wishlist",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching wishlist",
+      error: error.message,
+    });
   }
 };
 
@@ -312,6 +294,8 @@ const mapAddressBody = (body) => {
   if (!body.street?.trim()) errors.street = "Street is required";
   if (!body.area?.trim()) errors.area = "Area is required";
   if (!body.city?.trim()) errors.city = "City is required";
+  // ✅ State validated only for presence — never checked against a fixed
+  // list. Matches the frontend, which now sends free-text state.
   if (!body.state?.trim()) errors.state = "State is required";
   if (!body.pincode) errors.pincode = "PIN code is required";
   else if (!PINCODE_REGEX.test(body.pincode))
@@ -348,12 +332,10 @@ export const addUserAddress = async (req, res) => {
       "-password -refreshTokens -__v -otp -loginHistory -notifications",
     );
     if (user.addresses.length >= MAX_ADDRESSES) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: `Maximum ${MAX_ADDRESSES} addresses allowed`,
-        });
+      return res.status(400).json({
+        success: false,
+        message: `Maximum ${MAX_ADDRESSES} addresses allowed`,
+      });
     }
 
     const { errors, mapped } = mapAddressBody(req.body);
@@ -371,23 +353,19 @@ export const addUserAddress = async (req, res) => {
     user.addresses.push(mapped);
     await user.save();
 
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "Address added successfully",
-        userProfile: user,
-        addresses: user.addresses,
-      });
+    res.status(201).json({
+      success: true,
+      message: "Address added successfully",
+      userProfile: user,
+      addresses: user.addresses,
+    });
   } catch (error) {
     console.error("❌ Error adding address:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error adding address",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error adding address",
+      error: error.message,
+    });
   }
 };
 
@@ -433,23 +411,19 @@ export const updateUserAddress = async (req, res) => {
     }
 
     await user.save();
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Address updated successfully",
-        userProfile: user,
-        addresses: user.addresses,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Address updated successfully",
+      userProfile: user,
+      addresses: user.addresses,
+    });
   } catch (error) {
     console.error("❌ Error updating address:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error updating address",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error updating address",
+      error: error.message,
+    });
   }
 };
 
@@ -471,23 +445,19 @@ export const deleteUserAddress = async (req, res) => {
     }
 
     await user.save();
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Address deleted successfully",
-        userProfile: user,
-        addresses: user.addresses,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Address deleted successfully",
+      userProfile: user,
+      addresses: user.addresses,
+    });
   } catch (error) {
     console.error("❌ Error deleting address:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error deleting address",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error deleting address",
+      error: error.message,
+    });
   }
 };
 
@@ -519,23 +489,19 @@ export const updateUserPreferences = async (req, res) => {
       { new: true, runValidators: true },
     ).select("-password -refreshTokens -__v -otp -loginHistory -notifications");
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Preferences updated successfully",
-        preferences: userProfile.preferences,
-        userProfile,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Preferences updated successfully",
+      preferences: userProfile.preferences,
+      userProfile,
+    });
   } catch (error) {
     console.error("❌ Error updating preferences:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error updating preferences",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error updating preferences",
+      error: error.message,
+    });
   }
 };
 
@@ -546,30 +512,24 @@ export const changeUserPassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
     if (!currentPassword || !newPassword) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Please provide current and new password",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Please provide current and new password",
+      });
     }
     if (newPassword.length < 8) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "New password must be at least 8 characters",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "New password must be at least 8 characters",
+      });
     }
 
     const user = await User.findById(req.user._id).select("+password");
     if (!user.password) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "No password set for this account. Use forgot password.",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "No password set for this account. Use forgot password.",
+      });
     }
 
     const bcrypt = (await import("bcryptjs")).default;
@@ -589,12 +549,10 @@ export const changeUserPassword = async (req, res) => {
       .json({ success: true, message: "Password changed successfully" });
   } catch (error) {
     console.error("❌ Error changing password:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error changing password",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error changing password",
+      error: error.message,
+    });
   }
 };

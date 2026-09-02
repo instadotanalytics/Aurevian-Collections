@@ -69,10 +69,9 @@ const maskEmail = (email) => {
 
 const OverviewTab = () => {
   const dispatch = useDispatch();
-  // ✅ FIXED — `addresses` was never pulled from the profile slice here,
-  // so this tab had no way to render the user's saved addresses even
-  // though the slice already held them (populated by fetchProfile /
-  // addAddress / updateAddress / deleteAddress in profileSlice.js).
+  // `addresses` comes from the SAME profile slice AddressTab writes to
+  // (state.profile.addresses) — this is the one, real, persisted address
+  // system. The "Saved Addresses" block below reuses it directly.
   const { profile, addresses } = useSelector((state) => state.profile);
   const [isEditing, setIsEditing] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
@@ -93,6 +92,23 @@ const OverviewTab = () => {
   const [copied, setCopied] = useState(false);
   const [generating, setGenerating] = useState(false);
 
+  // ✅ REMOVED — `address: profile?.address || {...}` used to seed this
+  // form with a top-level "address" object that the User schema never
+  // actually defines (Backend/models/User.js only has the `addresses`
+  // ARRAY, populated via addressSchema). Submitting this form called
+  // `updateProfile` -> PUT /user-profile, whose controller builds
+  // `updateData.address = {...}` and does `findByIdAndUpdate(..., {$set:
+  // updateData})` in Mongoose's default strict mode — an unrecognized
+  // top-level path is silently dropped, so nothing was ever persisted.
+  // The UI still showed "Profile updated successfully!" (the toast fires
+  // unconditionally on a 200 response), which is exactly the
+  // "successful toast while database save actually fails" failure mode.
+  // The real, working address system is the `addresses` array — already
+  // shown just below in "Saved Addresses" and fully editable on the
+  // Address tab — so this dead, duplicate form is removed rather than
+  // wired up to a field that doesn't exist anywhere else in the address
+  // flow (order snapshot, Shiprocket payload, etc. all key off
+  // `addresses[]`/`Order.shippingAddress`, never a top-level user address).
   const [formData, setFormData] = useState({
     firstName: profile?.firstName || "",
     lastName: profile?.lastName || "",
@@ -108,13 +124,6 @@ const OverviewTab = () => {
     language: profile?.language || "en",
     country: profile?.country || "India",
     preferredCurrency: profile?.preferredCurrency || "INR",
-    address: profile?.address || {
-      street: "",
-      city: "",
-      state: "",
-      pincode: "",
-      country: "India",
-    },
   });
 
   const fetchReferralData = useCallback(async () => {
@@ -203,7 +212,11 @@ const OverviewTab = () => {
     }
   }, [referralCode, copyReferralLink]);
 
-  // Profile completion (recomputed only when the relevant profile fields change)
+  // Profile completion (recomputed only when the relevant profile fields change).
+  // ✅ CHANGED — the old field list checked profile?.address?.street/city/
+  // state/pincode, which (see note above) never actually persists. Swapped
+  // for a signal on the real address system: whether the user has at
+  // least one saved address in `addresses[]`.
   const completion = useMemo(() => {
     const fields = [
       profile?.firstName,
@@ -211,11 +224,8 @@ const OverviewTab = () => {
       profile?.phone,
       profile?.gender,
       profile?.dateOfBirth,
-      profile?.address?.street,
-      profile?.address?.city,
-      profile?.address?.state,
-      profile?.address?.pincode,
       profile?.anniversary,
+      addresses && addresses.length > 0 ? "yes" : "",
     ];
     const filled = fields.filter((f) => f && f !== "").length;
     return Math.round((filled / fields.length) * 100);
@@ -225,11 +235,8 @@ const OverviewTab = () => {
     profile?.phone,
     profile?.gender,
     profile?.dateOfBirth,
-    profile?.address?.street,
-    profile?.address?.city,
-    profile?.address?.state,
-    profile?.address?.pincode,
     profile?.anniversary,
+    addresses,
   ]);
 
   const maskedEmail = useMemo(
@@ -292,18 +299,7 @@ const OverviewTab = () => {
 
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
-    if (name.includes(".")) {
-      const [parent, child] = name.split(".");
-      setFormData((prev) => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: value,
-        },
-      }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
     setFormErrors((prev) => (prev[name] ? { ...prev, [name]: "" } : prev));
   }, []);
 
@@ -381,12 +377,15 @@ const OverviewTab = () => {
       </div>
 
       {/* ============================================
-          SAVED ADDRESSES — ✅ NEW
+          SAVED ADDRESSES
           Reads directly from the same profile slice AddressTab writes to
           (state.profile.addresses), populated on login/refresh via
           fetchProfile and kept in sync by addAddress/updateAddress/
           deleteAddress/setDefaultAddress. No separate fetch needed here —
           this is the same persisted data, just rendered on this tab too.
+          This is the ONLY address block on this tab now — the previous
+          duplicate/broken "Address" form under Personal Information has
+          been removed (see note above formData for why it never saved).
           ============================================ */}
       <div className={styles.infoCard}>
         <div className={styles.cardHeader}>
@@ -858,71 +857,6 @@ const OverviewTab = () => {
               <span className={styles.readOnlyBadge}>Read Only</span>
             </span>
           </div>
-        </div>
-
-        {/* Address Section */}
-        <div className={styles.addressSection}>
-          <h4>Address</h4>
-          {isEditing ? (
-            <div className={styles.addressForm}>
-              <input
-                name="address.street"
-                value={formData.address.street}
-                onChange={handleChange}
-                className={styles.editInput}
-                placeholder="Street Address"
-              />
-              <div className={styles.addressRow}>
-                <input
-                  name="address.city"
-                  value={formData.address.city}
-                  onChange={handleChange}
-                  className={styles.editInput}
-                  placeholder="City"
-                />
-                <input
-                  name="address.state"
-                  value={formData.address.state}
-                  onChange={handleChange}
-                  className={styles.editInput}
-                  placeholder="State"
-                />
-              </div>
-              <div className={styles.addressRow}>
-                <input
-                  name="address.pincode"
-                  value={formData.address.pincode}
-                  onChange={handleChange}
-                  className={styles.editInput}
-                  placeholder="Pincode"
-                />
-                <select
-                  name="address.country"
-                  value={formData.address.country}
-                  onChange={handleChange}
-                  className={styles.editSelect}
-                >
-                  {COUNTRIES.map((country) => (
-                    <option key={country} value={country}>
-                      {country}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          ) : (
-            <p className={styles.addressText}>
-              {profile?.address?.street && (
-                <>
-                  {profile.address.street}, {profile.address.city},{" "}
-                  {profile.address.state} - {profile.address.pincode}
-                  <br />
-                  {profile.address.country}
-                </>
-              )}
-              {!profile?.address?.street && "No address added yet"}
-            </p>
-          )}
         </div>
 
         {isEditing && (
