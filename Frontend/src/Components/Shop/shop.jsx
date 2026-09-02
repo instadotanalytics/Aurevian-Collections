@@ -46,7 +46,7 @@ const API_URL =
   "https://aurevian-collections.onrender.com/api";
 
 const SORT_OPTIONS = [
-  { value: "", label: "Default Sorting" },
+  { value: "latest", label: "Sort by latest" },
   { value: "price-low", label: "Price: Low to High" },
   { value: "price-high", label: "Price: High to Low" },
 ];
@@ -123,7 +123,7 @@ export default function Shop() {
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [isResolvingSlug, setIsResolvingSlug] = useState(true);
   const [priceRange, setPriceRange] = useState([0, 7000]);
-  const [sort, setSort] = useState("");
+  const [sort, setSort] = useState("latest");
   const [cartLoadingId, setCartLoadingId] = useState(null);
 
   // Filters
@@ -213,6 +213,14 @@ export default function Shop() {
     }
   }, [categories, categorySlug, searchParams, isResolvingSlug]);
 
+  // ✅ RESET PAGE WHEN FILTERS CHANGE - Critical for sorting to work
+  useEffect(() => {
+    setPage(1);
+    setAllProducts([]);
+    setHasMore(true);
+    setRefreshKey((k) => k + 1);
+  }, [sort, selectedCategoryId, budgetFilter, promotionFilter, searchQuery]);
+
   // Fetch products (infinite scroll)
   useEffect(() => {
     const load = async () => {
@@ -229,6 +237,12 @@ export default function Shop() {
         setCategoryError(null);
         let result;
 
+        // ✅ Map sort values to API expected values
+        let sortParam = sort;
+        if (sort === "price-low") sortParam = "price-asc";
+        else if (sort === "price-high") sortParam = "price-desc";
+        else if (sort === "latest") sortParam = "latest";
+
         if (isSearchMode) {
           result = await dispatch(
             searchProducts({
@@ -236,7 +250,7 @@ export default function Shop() {
               page,
               limit: 10,
               categoryId: selectedCategoryId || undefined,
-              sort: sort || undefined,
+              sort: sortParam || undefined,
             }),
           ).unwrap();
         } else {
@@ -246,7 +260,7 @@ export default function Shop() {
               page,
               limit: 10,
               categoryId: selectedCategoryId || undefined,
-              sort: sort || undefined,
+              sort: sortParam || undefined,
             }),
           ).unwrap();
         }
@@ -290,14 +304,6 @@ export default function Shop() {
     isSearchMode,
     searchQuery,
   ]);
-
-  // Reset on filter change
-  useEffect(() => {
-    setPage(1);
-    setAllProducts([]);
-    setHasMore(true);
-    setRefreshKey((k) => k + 1);
-  }, [selectedCategoryId, sort, budgetFilter, promotionFilter, searchQuery]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -443,7 +449,7 @@ export default function Shop() {
   const clearAllFilters = () => {
     setSelectedCategoryId("");
     setPriceRange([0, 7000]);
-    setSort("");
+    setSort("latest");
     setBudgetFilter("all");
     setPromotionFilter("all");
     navigate("/shop");
@@ -487,11 +493,38 @@ export default function Shop() {
 
   const getSortLabel = () => {
     const option = SORT_OPTIONS.find((opt) => opt.value === sort);
-    return option ? option.label : "Default Sorting";
+    return option ? option.label : "Sort by latest";
   };
 
+  // ✅ Apply client-side sorting as fallback
+  const getSortedProducts = useCallback((products) => {
+    if (!products || products.length === 0) return products;
+
+    const sorted = [...products];
+
+    switch (sort) {
+      case "price-low":
+        return sorted.sort((a, b) => {
+          const priceA = a.pricing?.salePrice || a.pricing?.originalPrice || 0;
+          const priceB = b.pricing?.salePrice || b.pricing?.originalPrice || 0;
+          return priceA - priceB;
+        });
+      case "price-high":
+        return sorted.sort((a, b) => {
+          const priceA = a.pricing?.salePrice || a.pricing?.originalPrice || 0;
+          const priceB = b.pricing?.salePrice || b.pricing?.originalPrice || 0;
+          return priceB - priceA;
+        });
+      case "latest":
+      default:
+        return sorted;
+    }
+  }, [sort]);
+
+  // ✅ Apply client-side filters (budget and promotion) AND sorting
   const filteredProducts = useMemo(() => {
-    return allProducts.filter((p) => {
+    // First, apply budget and promotion filters
+    let filtered = allProducts.filter((p) => {
       const price = p.pricing?.salePrice || p.pricing?.originalPrice || 0;
       if (budgetFilter === "under-1000" && price >= 1000) return false;
       if (budgetFilter === "1000-3000" && (price < 1000 || price > 3000))
@@ -519,7 +552,10 @@ export default function Shop() {
       }
       return true;
     });
-  }, [allProducts, budgetFilter, promotionFilter]);
+
+    // Then apply client-side sorting (as fallback)
+    return getSortedProducts(filtered);
+  }, [allProducts, budgetFilter, promotionFilter, getSortedProducts]);
 
   // ✅ Seed product for the recommendation section
   const searchSeedProductId = useMemo(() => {
