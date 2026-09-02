@@ -262,6 +262,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  padding: 0;
   transition:
     background 0.25s ease,
     color 0.25s ease,
@@ -269,8 +270,23 @@
 }
 
 .wishlistBtn:hover {
-  background: var(--ink);
-  color: #fff;
+   background: #ffffff;
+}
+
+.wishlistBtn:active {
+  transform: scale(0.9);
+}
+
+/* ✅ NEW — active/wishlisted state, same red-heart treatment as
+   GiftGuide's .wishlistBtnActive so both sections match exactly. */
+.wishlistBtnActive {
+  background: #ffffff;
+  color: #d6455f;
+}
+
+.wishlistBtnActive:hover {
+  background: #ffffff;
+  color: #d6455f;
   transform: translateY(-2px);
 }
 
@@ -396,6 +412,22 @@
 .bagBtn:hover {
   transform: translateY(-2px) scale(1.05);
   box-shadow: 0 10px 22px rgba(169, 132, 63, 0.45);
+}
+
+/* ✅ NEW — disabled/"already in cart" state, same dimmed treatment as
+   GiftGuide's .addToCartBtn:disabled so both sections match exactly. */
+.bagBtn:disabled,
+.bagBtnActive {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 8px 18px rgba(169, 132, 63, 0.35);
+}
+
+.bagBtn:disabled:hover,
+.bagBtnActive:hover {
+  transform: none;
+  box-shadow: 0 8px 18px rgba(169, 132, 63, 0.35);
 }
 
 /* ==========================================================
@@ -687,5 +719,10 @@
 @media (prefers-reduced-motion: reduce) {
   .skeletonPulse {
     animation: none !important;
+  }
+
+  .wishlistBtn,
+  .wishlistBtnActive {
+    transition: none !important;
   }
 }
