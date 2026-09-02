@@ -105,10 +105,7 @@ const SearchPanel = ({
   const inputRef = useRef(null);
 
   // ✅ Dynamic placeholder state
-  const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [placeholderText, setPlaceholderText] = useState(PLACEHOLDER_PHRASES[0]);
-  const [isTypingPlaceholder, setIsTypingPlaceholder] = useState(true);
-  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
   const placeholderIntervalRef = useRef(null);
 
   // ✅ Live suggestion state (backend-driven)
@@ -201,8 +198,6 @@ const SearchPanel = ({
   useEffect(() => {
     if (isOpen) {
       setPlaceholderText(PLACEHOLDER_PHRASES[0]);
-      setCurrentPhraseIndex(0);
-      setPlaceholderIndex(0);
     }
   }, [isOpen]);
 
@@ -284,24 +279,22 @@ const SearchPanel = ({
     };
   }, [debouncedQuery, isTyping]);
 
-  // ✅ Full-text search commit — Enter with nothing highlighted, the
-  // search icon/submit button, or clicking a history/popular/trending
-  // chip. This is the ONLY path used when the person just types a
-  // query and hits Enter: it always goes to the dedicated search
-  // results page with the raw query string, and NEVER treats that
-  // text as a product id/slug.
+  // ✅ Full-text search commit — Navigates to /search?q= with the query
   const commitTextSearch = (term) => {
     const trimmed = (term || "").trim().replace(/\s+/g, " ");
     if (!trimmed) return;
+    
+    // Add to search history
     setHistory(addSearchHistory(trimmed));
     setQuery(trimmed);
     reset();
-    if (onSearchSubmit) {
-      onSearchSubmit(trimmed);
-    } else {
-      navigate(`/search?q=${encodeURIComponent(trimmed)}`);
-    }
+    
+    // Close the search panel
     onClose && onClose();
+    
+    // ✅ Navigate to search results page with the query
+    // Use navigate with replace: false to allow browser back button
+    navigate(`/search?q=${encodeURIComponent(trimmed)}`);
   };
 
   // ✅ Opening one specific live-suggestion product — goes straight to
@@ -315,8 +308,8 @@ const SearchPanel = ({
       setHistory(addSearchHistory(trimmed));
     }
     reset();
-    navigate(`/product/${product.productSlug}`);
     onClose && onClose();
+    navigate(`/product/${product.productSlug}`);
   };
 
   const handleFormSubmit = (e) => {
