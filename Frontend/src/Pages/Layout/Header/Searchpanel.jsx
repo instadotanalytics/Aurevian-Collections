@@ -20,75 +20,20 @@ const API_URL =
   import.meta.env.VITE_API_URL ||
   "https://aurevian-collections.onrender.com/api";
 
-// ✅ Dynamic placeholder phrases
-const PLACEHOLDER_PHRASES = [
-  "Search for earrings...",
-  "Search for necklaces...",
-  "Search for rings...",
-  "Search for bracelets...",
-  "Search for pendants...",
-  "Search for anklets...",
-  "Search for bangles...",
-  "Search for maang tikka...",
-  "Search for nose pins...",
-  "Search for chains...",
+// ✅ Dynamic category list for placeholder animation
+const CATEGORY_PHRASES = [
+  "earrings",
+  "necklaces",
+  "rings",
+  "bracelets",
+  "pendants",
+  "anklets",
+  "bangles",
+  "maang tikka",
+  "nose pins",
+  "chains",
 ];
 
-/**
- * SearchPanel
- * ------------------------------------------------------------------
- * One implementation shared by:
- *   - the desktop icon-triggered dropdown  (variant="dropdown")
- *   - the mobile drawer's inline search     (variant="inline")
- *   - the persistent inline search bar on the /search results page
- *     (variant="inline", pre-filled via `initialQuery`)
- *
- * It owns all search behaviour (history, live suggestions, keyboard
- * nav, highlighting) so callers only render <SearchPanel /> and stay
- * focused on layout — nothing about the existing header markup,
- * icon, or animations changes.
- *
- * ✅ LIVE SEARCH is wired to the real backend:
- *   GET /api/seller/products/search?q=<query>&limit=8
- * Requests are debounced (300ms), cancelled via AbortController on
- * every new keystroke so a slow older response can never overwrite a
- * newer one, and skipped entirely for an empty/whitespace-only query.
- *
- * ✅ ENTER-KEY SEMANTICS (important, matches standard e-commerce UX):
- *   - Enter with NO suggestion highlighted (the normal case — user
- *     just typed and pressed Enter) => commits a full-text SEARCH,
- *     never opens a single product. The typed text is treated purely
- *     as a query string, never as a product id/slug.
- *   - Enter while a suggestion IS highlighted (via ArrowUp/ArrowDown,
- *     an explicit selection) or a suggestion is clicked with the
- *     mouse => opens that ONE product's detail page. This is the only
- *     path that can navigate to /product/:slug.
- *
- * Props
- * ------
- * styles         CSS module object (Header.module.css, reused so
- *                every visual token stays identical wherever this is
- *                embedded — header dropdown, mobile drawer, or the
- *                search results page).
- * isOpen         Whether this panel is currently visible/active. Used
- *                to (re)load history and reset transient state.
- * onClose        Called on Escape / after a successful search (no-op
- *                is fine for a permanently-visible inline bar).
- * onSearchSubmit Called with the committed query string on a full-text
- *                search (Enter with nothing highlighted, the search
- *                icon/submit button, or clicking a history/popular/
- *                trending chip). If not provided, SearchPanel
- *                navigates to /search?q=<query> itself.
- * variant        "dropdown" | "inline" — toggles a couple of layout
- *                classes; all behaviour is identical either way.
- * autoFocus      Whether the <input> should grab focus when opened.
- * inputId        Optional id, for label/aria association.
- * initialQuery   Optional starting value for the input — used so the
- *                search bar on the /search results page shows the
- *                term the person actually searched for, instead of
- *                starting empty.
- * ------------------------------------------------------------------
- */
 const SearchPanel = ({
   styles,
   isOpen,
@@ -105,8 +50,10 @@ const SearchPanel = ({
   const inputRef = useRef(null);
 
   // ✅ Dynamic placeholder state
-  const [placeholderText, setPlaceholderText] = useState(PLACEHOLDER_PHRASES[0]);
+  const [placeholderCategory, setPlaceholderCategory] = useState(CATEGORY_PHRASES[0]);
+  const [placeholderPrefix] = useState("Search for ");
   const placeholderIntervalRef = useRef(null);
+  const animationTimeoutRef = useRef(null);
 
   // ✅ Live suggestion state (backend-driven)
   const [suggestions, setSuggestions] = useState([]);
@@ -136,7 +83,8 @@ const SearchPanel = ({
   const { activeIndex, moveDown, moveUp, reset, setActiveIndex } =
     useActiveIndex(navigableList.length);
 
-  // ✅ Dynamic placeholder animation
+  // ✅ Dynamic placeholder animation - "Search for " prefix + rotating category
+  // Categories appear from top to bottom slowly
   useEffect(() => {
     // Only run animation when panel is open and query is empty
     if (!isOpen || query.length > 0) {
@@ -144,52 +92,67 @@ const SearchPanel = ({
         clearInterval(placeholderIntervalRef.current);
         placeholderIntervalRef.current = null;
       }
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+        animationTimeoutRef.current = null;
+      }
       return;
     }
 
-    let charIndex = 0;
     let currentPhraseIdx = 0;
+    let charIndex = 0;
     let isDeleting = false;
-    let currentDisplayText = "";
+    let isPaused = false;
 
     const animatePlaceholder = () => {
-      const currentPhrase = PLACEHOLDER_PHRASES[currentPhraseIdx];
+      const currentPhrase = CATEGORY_PHRASES[currentPhraseIdx];
 
-      if (!isDeleting) {
-        // Typing
+      if (!isDeleting && !isPaused) {
+        // ✅ Typing - characters appear from top to bottom (left to right)
         if (charIndex < currentPhrase.length) {
-          currentDisplayText = currentPhrase.substring(0, charIndex + 1);
-          setPlaceholderText(currentDisplayText);
+          const currentDisplayText = currentPhrase.substring(0, charIndex + 1);
+          setPlaceholderCategory(currentDisplayText);
           charIndex++;
         } else {
-          // Pause at full text
-          isDeleting = true;
-          setTimeout(() => {
-            // Start deleting after pause
+          // ✅ Full word is typed - pause before deleting
+          isPaused = true;
+          animationTimeoutRef.current = setTimeout(() => {
+            isPaused = false;
+            isDeleting = true;
+            animationTimeoutRef.current = null;
           }, 1500);
         }
-      } else {
-        // Deleting
+      } else if (isDeleting) {
+        // ✅ Deleting - characters disappear one by one
         if (charIndex > 0) {
-          currentDisplayText = currentPhrase.substring(0, charIndex - 1);
-          setPlaceholderText(currentDisplayText);
+          const currentDisplayText = currentPhrase.substring(0, charIndex - 1);
+          setPlaceholderCategory(currentDisplayText);
           charIndex--;
         } else {
-          // Move to next phrase
+          // ✅ Completely deleted - move to next category
           isDeleting = false;
-          currentPhraseIdx = (currentPhraseIdx + 1) % PLACEHOLDER_PHRASES.length;
+          currentPhraseIdx = (currentPhraseIdx + 1) % CATEGORY_PHRASES.length;
           charIndex = 0;
+          // Small pause before starting next category
+          animationTimeoutRef.current = setTimeout(() => {
+            animationTimeoutRef.current = null;
+            // Start typing next category
+          }, 300);
         }
       }
     };
 
-    // Start animation with interval
-    placeholderIntervalRef.current = setInterval(animatePlaceholder, 60);
+    // Start animation with interval (slower speed for smooth effect)
+    placeholderIntervalRef.current = setInterval(animatePlaceholder, 80);
 
     return () => {
       if (placeholderIntervalRef.current) {
         clearInterval(placeholderIntervalRef.current);
         placeholderIntervalRef.current = null;
+      }
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+        animationTimeoutRef.current = null;
       }
     };
   }, [isOpen, query]);
@@ -197,7 +160,7 @@ const SearchPanel = ({
   // Reset placeholder when panel opens
   useEffect(() => {
     if (isOpen) {
-      setPlaceholderText(PLACEHOLDER_PHRASES[0]);
+      setPlaceholderCategory(CATEGORY_PHRASES[0]);
     }
   }, [isOpen]);
 
@@ -366,7 +329,7 @@ const SearchPanel = ({
           id={inputId}
           ref={inputRef}
           type="text"
-          placeholder={placeholderText}
+          placeholder={`${placeholderPrefix}${placeholderCategory}`}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
