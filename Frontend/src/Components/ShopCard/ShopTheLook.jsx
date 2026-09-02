@@ -7,45 +7,55 @@ import styles from "./ShopTheLook.module.css";
 // Import asset video
 import homeVideo from "../../assets/videoforhomescreen.MP4";
 
+// 👉 Adjust `link` to match your actual route structure.
 const REELS = [
   {
     id: "r1",
     name: "Zircon Drop Rings",
     price: 1499,
     video: "/IMG_1581.MP4",
+    category: "Rings",
+    link: "/shop/rings",
   },
   {
     id: "r2",
     name: "Kundan Choker Earrings",
     price: 3299,
     video: "/IMG_1582.MP4",
+    category: "Earrings",
+    link: "/shop/earrings",
   },
   {
     id: "r3",
     name: "Rose Gold Pendant",
     price: 999,
     video: "/IMG_1583.MP4",
+    category: "Pendants",
+    link: "/shop/pendants",
   },
   {
     id: "r4",
     name: "Pearl Charm Bracelet",
     price: 1799,
     video: "/IMG_1584.MP4",
+    category: "Bracelets",
+    link: "/shop/bracelets",
   },
   {
     id: "r5",
     name: "Rings",
     price: 1999,
     video: homeVideo,
+    category: "Rings",
+    link: "/shop/rings",
   },
- 
- 
 ];
 
 function ReelCard({ reel, isMuted, onToggleMute, videoRef }) {
   return (
     <div className={styles.card}>
-      <div className={styles.mediaWrap}>
+      {/* Whole card is now clickable and navigates to the product's category */}
+      <Link to={reel.link} className={styles.mediaWrap}>
         <video
           ref={videoRef}
           className={styles.video}
@@ -61,6 +71,7 @@ function ReelCard({ reel, isMuted, onToggleMute, videoRef }) {
           type="button"
           className={styles.muteBtn}
           onClick={(e) => {
+            e.preventDefault();
             e.stopPropagation();
             onToggleMute(reel.id);
           }}
@@ -70,16 +81,14 @@ function ReelCard({ reel, isMuted, onToggleMute, videoRef }) {
 
         <div className={styles.bottomGradient} />
 
-        <Link
-          to={`/product/${reel.id}`}
-          className={styles.productTag}
-          onClick={(e) => e.stopPropagation()}
-        >
+        {/* Not a <Link> anymore — nesting a link inside a link is invalid HTML.
+            The whole card already navigates, this is just visual. */}
+        <div className={styles.productTag}>
           <span className={styles.productName}>{reel.name}</span>
           <span className={styles.productPrice}>
             ₹{reel.price.toLocaleString("en-IN")}
           </span>
-        </Link>
+        </div>
 
         <div className={styles.shopBadge}>
           <span>Shop Now</span>
@@ -87,7 +96,7 @@ function ReelCard({ reel, isMuted, onToggleMute, videoRef }) {
             <path d="M5 12h14M12 5l7 7-7 7"/>
           </svg>
         </div>
-      </div>
+      </Link>
     </div>
   );
 }
@@ -121,7 +130,6 @@ export default function ShopTheLook() {
     }));
   };
 
-  // Handle scroll arrows visibility
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -154,10 +162,7 @@ export default function ShopTheLook() {
   };
 
   return (
-    <section
-      className={styles.section}
-      aria-labelledby="shop-the-look-heading"
-    >
+    <section className={styles.section} aria-labelledby="shop-the-look-heading">
       <div className={styles.container}>
         <div className={styles.header}>
           <h2 id="shop-the-look-heading" className={styles.heading}>
@@ -169,9 +174,8 @@ export default function ShopTheLook() {
         </div>
 
         <div className={styles.scrollWrapper}>
-          {/* Left Arrow */}
           {showLeftArrow && (
-            <button 
+            <button
               className={`${styles.scrollArrow} ${styles.scrollArrowLeft}`}
               onClick={() => scroll("left")}
               aria-label="Scroll left"
@@ -182,9 +186,8 @@ export default function ShopTheLook() {
             </button>
           )}
 
-          {/* Right Arrow */}
           {showRightArrow && (
-            <button 
+            <button
               className={`${styles.scrollArrow} ${styles.scrollArrowRight}`}
               onClick={() => scroll("right")}
               aria-label="Scroll right"
@@ -195,10 +198,7 @@ export default function ShopTheLook() {
             </button>
           )}
 
-          <div 
-            className={styles.grid} 
-            ref={scrollContainerRef}
-          >
+          <div className={styles.grid} ref={scrollContainerRef}>
             {REELS.map((reel) => (
               <ReelCard
                 key={reel.id}
@@ -215,7 +215,6 @@ export default function ShopTheLook() {
           </div>
         </div>
 
-        {/* Scroll Progress Indicator */}
         <div className={styles.scrollProgress}>
           <div className={styles.progressBar} />
         </div>

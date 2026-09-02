@@ -110,6 +110,7 @@
 }
 
 .mediaWrap {
+  display: block;
   position: relative;
   width: 100%;
   aspect-ratio: 9 / 16;
