@@ -1,0 +1,250 @@
+/* src/Components/OrderDetailView/ReturnRequestModal.module.css */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(23, 19, 16, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  background: var(--card, #fffcf6);
+  border-radius: 10px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 26px;
+  box-shadow: 0 20px 50px -14px rgba(23, 19, 16, 0.4);
+  font-family: "Manrope", sans-serif;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.header h3 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink, #171310);
+  margin: 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted, #857a68);
+  padding: 4px;
+  display: flex;
+}
+
+.closeBtn:hover {
+  color: var(--ink, #171310);
+}
+
+.productLine {
+  font-size: 13px;
+  color: var(--muted, #857a68);
+  margin: 0 0 20px;
+  font-weight: 500;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gold-deep, #8a6425);
+}
+
+.typeToggle {
+  display: flex;
+  gap: 8px;
+}
+
+.typeBtn {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid var(--hairline-strong, #d6c39a);
+  background: #fff;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink, #171310);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.typeBtnActive {
+  background: var(--ink, #171310);
+  border-color: var(--ink, #171310);
+  color: #fdfaf2;
+}
+
+.select,
+.textarea {
+  border: 1px solid var(--hairline-strong, #d6c39a);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  font-family: inherit;
+  color: var(--ink, #171310);
+  background: #fff;
+  resize: vertical;
+}
+
+.select:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--gold, #b8863c);
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 8px 14px;
+  border: 1px dashed var(--hairline-strong, #d6c39a);
+  background: var(--parchment, #f6efe0);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft, #372f26);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.uploadBtn:hover:not(:disabled) {
+  border-color: var(--gold, #b8863c);
+}
+
+.uploadBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.imagePreviewRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.imagePreview {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--hairline-strong, #d6c39a);
+}
+
+.imagePreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.removeImageBtn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(23, 19, 16, 0.75);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.cancelActionBtn {
+  flex: 1;
+  padding: 11px;
+  background: none;
+  border: 1px solid var(--hairline-strong, #d6c39a);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink, #171310);
+  cursor: pointer;
+}
+
+.cancelActionBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.submitBtn {
+  flex: 1;
+  padding: 11px;
+  background: var(--ink, #171310);
+  border: 1px solid var(--ink, #171310);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fdfaf2;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: var(--gold-deep, #8a6425);
+  border-color: var(--gold-deep, #8a6425);
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .modal {
+    padding: 20px;
+  }
+}

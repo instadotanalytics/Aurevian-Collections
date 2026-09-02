@@ -152,11 +152,15 @@ const resolveSellerPickupPincode = async (sellerId) => {
   return seller.pickupAddress.pincode;
 };
 
+// ✅ CHANGED — accepts `itemsTotal` and passes it through to
+// calculateShippingRate so the ₹999 free-shipping threshold is honored at
+// order-creation time exactly the same way it is for the cart quote.
 const resolveShippingFee = async ({
   pincode,
   pickupPincode,
   weightKg,
   paymentMethod,
+  itemsTotal,
 }) => {
   try {
     const rate = await calculateShippingRate({
@@ -164,6 +168,7 @@ const resolveShippingFee = async ({
       pickupPincode,
       weightKg,
       paymentMethod,
+      itemsTotal,
     });
     return rate.shippingFee;
   } catch (err) {
@@ -305,7 +310,7 @@ export const createRazorpayOrder = async (req, res) => {
 
     const sellerId = resolvePrimarySeller(orderItems);
 
-    // ✅ NEW — resolve the seller's saved, registered pickup pincode.
+    // ✅ resolve the seller's saved, registered pickup pincode.
     // No fallback: if this fails, checkout stops here with a clear reason.
     let pickupPincode;
     try {
@@ -323,6 +328,7 @@ export const createRazorpayOrder = async (req, res) => {
         pickupPincode,
         weightKg: totalWeightKg,
         paymentMethod: "prepaid",
+        itemsTotal,
       });
     } catch (e) {
       return res
@@ -558,7 +564,7 @@ export const createCODOrder = async (req, res) => {
 
     const sellerId = resolvePrimarySeller(orderItems);
 
-    // ✅ NEW — resolve the seller's saved, registered pickup pincode.
+    // ✅ resolve the seller's saved, registered pickup pincode.
     // No fallback: if this fails, checkout stops here with a clear reason.
     let pickupPincode;
     try {
@@ -576,6 +582,7 @@ export const createCODOrder = async (req, res) => {
         pickupPincode,
         weightKg: totalWeightKg,
         paymentMethod: "cod",
+        itemsTotal,
       });
     } catch (e) {
       return res
@@ -850,6 +857,23 @@ export const updateOrderStatus = async (req, res) => {
     }
 
     order.orderStatus = status;
+
+    // ✅ FIX — the return-eligibility window (see returnController's
+    // getItemEligibility) is calculated from order.shipping.deliveredAt,
+    // not from order creation date, which is correct per the return
+    // policy. That field was previously only ever set by the Shiprocket
+    // webhook (shiprocketWebhook in shippingController.js). If an admin
+    // marks an order "delivered" manually through this endpoint instead,
+    // deliveredAt was never recorded — silently breaking return
+    // eligibility forever for that order ("Delivery date has not been
+    // recorded yet"). This makes the manual path set it too, exactly
+    // once, without overwriting a webhook-recorded timestamp that may
+    // already be more accurate.
+    if (status === "delivered" && !order.shipping?.deliveredAt) {
+      order.shipping = order.shipping || {};
+      order.shipping.deliveredAt = new Date();
+    }
+
     await order.save();
 
     emitOrderStatusUpdated(order);
@@ -1111,7 +1135,7 @@ export const adminApproveOrder = async (req, res) => {
   }
 };
 
-// ✅ NEW — retry Shiprocket sync for an order whose admin approval already
+// ✅ retry Shiprocket sync for an order whose admin approval already
 // succeeded but whose Shiprocket sync failed or is incomplete (shipment
 // created but AWB missing). Never re-runs seller/admin approval, and
 // relies on createShipmentForOrder's own idempotency to avoid duplicates.

@@ -14,6 +14,7 @@ import {
   FiArrowRight,
 } from "react-icons/fi";
 import OrderStatusTimeline from "../OrderStatusTimeline/OrderStatusTimeline";
+import ReturnSection from "./ReturnSection.jsx";
 import styles from "./OrderDetailView.module.css";
 
 const PAYMENT_METHOD_LABEL = {
@@ -166,6 +167,9 @@ const OrderDetailView = ({ order, justPlaced = true }) => {
             })}
           </div>
         </section>
+
+        {/* RETURN / EXCHANGE — full width, only renders when relevant */}
+        <ReturnSection order={order} />
 
         {/* ADDRESS + PAYMENT — paired row */}
         <div className={styles.splitRow}>

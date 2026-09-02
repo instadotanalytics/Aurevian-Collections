@@ -16,6 +16,7 @@ import {
   FiChevronDown,
   FiChevronUp,
   FiZoomIn,
+  FiShieldOff,
 } from "react-icons/fi";
 import { IoCartOutline } from "react-icons/io5";
 import { FaHeart, FaShoppingBag } from "react-icons/fa";
@@ -23,6 +24,7 @@ import { FaHeart, FaShoppingBag } from "react-icons/fa";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import styles from "./ProductDetail.module.css";
+import rpStyles from "./ReturnPolicyInfo.module.css";
 
 import {
   fetchProductBySlug,
@@ -137,7 +139,9 @@ const PriceBreakdown = ({ product }) => {
                 <tr className={styles.grandTotalRow}>
                   <td colSpan="3">Grand Total</td>
                   <td>-</td>
-                  <td>₹{(subtotalAfterDiscount + gstAmount).toLocaleString()}</td>
+                  <td>
+                    ₹{(subtotalAfterDiscount + gstAmount).toLocaleString()}
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -146,9 +150,74 @@ const PriceBreakdown = ({ product }) => {
             <span>SKU ID:</span> {product._id || "501145FAARAC023IA001506"}
           </div>
           <div className={styles.cleaningNote}>
-            Enjoy sparkling jewellery! We provide free jewellery cleaning services!
+            Enjoy sparkling jewellery! We provide free jewellery cleaning
+            services!
           </div>
         </div>
+      )}
+    </div>
+  );
+};
+
+/* ─── Helper: Return & Exchange Policy ───
+   Reads directly from the product's own returnPolicy (see
+   backend/models/JewelleryProduct.js — returnPolicy.returnAvailable,
+   returnPolicy.returnDays, returnPolicy.warrantyAvailable,
+   returnPolicy.warrantyDuration). getProductBySlug returns the full
+   product document, so these fields are already present on `product`
+   with no extra fetch needed. Nothing here is hard-coded per-product;
+   only the generic policy wording (packaging/tags/condition) is fixed
+   text, same as printed on any storefront's policy panel — the actual
+   eligibility (days, available or not) always comes from the product. ─── */
+const ReturnPolicyInfo = ({ product }) => {
+  const policy = product?.returnPolicy || {};
+  // Default to available/7-days only if the field is genuinely absent
+  // (older product docs saved before this schema field existed) — never
+  // overrides an explicit false.
+  const returnAvailable = policy.returnAvailable !== false;
+  const returnDays = policy.returnDays || 7;
+
+  if (!returnAvailable) {
+    return (
+      <div className={rpStyles.card}>
+        <div className={rpStyles.header}>
+          <FiShieldOff className={rpStyles.icon} size={17} />
+          <span className={rpStyles.title}>
+            Return & Exchange Not Available
+          </span>
+        </div>
+        <p className={rpStyles.note}>
+          This product is not eligible for return or exchange. Please review the
+          product details carefully before purchase.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={rpStyles.card}>
+      <div className={rpStyles.header}>
+        <FiRefreshCw className={rpStyles.icon} size={17} />
+        <span className={rpStyles.title}>
+          {returnDays} Days Return &amp; Exchange
+        </span>
+      </div>
+      <ul className={rpStyles.list}>
+        <li>
+          Eligible for return or exchange within {returnDays} days of delivery.
+        </li>
+        <li>Product should be unused/unworn and in original condition.</li>
+        <li>
+          Original packaging, tags, accessories and invoice should be retained
+          where applicable.
+        </li>
+        <li>Certain products or categories may not be eligible.</li>
+      </ul>
+      {policy.warrantyAvailable && (
+        <span className={rpStyles.warrantyBadge}>
+          <FiShield size={12} />
+          {policy.warrantyDuration || "1 Year"} Warranty Included
+        </span>
       )}
     </div>
   );
@@ -302,7 +371,7 @@ const ProductDescription = ({ product }) => {
 
   // Determine which description to show - prefer full, then short, then seo
   let displayDescription = "";
-  
+
   if (fullDescription) {
     displayDescription = fullDescription;
   } else if (shortDescription) {
@@ -424,7 +493,7 @@ export default function ProductDetail() {
   const minQty = product.inventory?.minOrderQty || 1;
   const maxQty = product.inventory?.maxOrderQty || stockQty || 99;
   const isWishlisted = wishlistItems.some(
-    (i) => (i.product?._id || i.product) === product._id
+    (i) => (i.product?._id || i.product) === product._id,
   );
 
   /* ── Metal Specs ── */
@@ -482,7 +551,7 @@ export default function ProductDetail() {
         addItemToCart({
           productId: product._id,
           quantity,
-        })
+        }),
       ).unwrap();
       toast.success("Added to cart");
       setAddedToCart(true);
@@ -644,27 +713,37 @@ export default function ProductDetail() {
               </button>
             </div>
 
+            {/* ✅ NEW — Return & Exchange policy, sourced from
+                product.returnPolicy (backend JewelleryProduct schema) */}
+            <ReturnPolicyInfo product={product} />
+
             {/* Perks */}
             <div className={styles.perksRow}>
               <div className={styles.perkItem}>
                 <FiTruck />
                 <div>
                   <span className={styles.perkTitle}>Free Delivery</span>
-                  <span className={styles.perkDesc}>Free delivery service provided on purchase</span>
+                  <span className={styles.perkDesc}>
+                    Free delivery service provided on purchase
+                  </span>
                 </div>
               </div>
               <div className={styles.perkItem}>
                 <FiShield />
                 <div>
                   <span className={styles.perkTitle}>Secure Payments</span>
-                  <span className={styles.perkDesc}>Top Secure payments services available</span>
+                  <span className={styles.perkDesc}>
+                    Top Secure payments services available
+                  </span>
                 </div>
               </div>
               <div className={styles.perkItem}>
                 <FiRefreshCw />
                 <div>
                   <span className={styles.perkTitle}>24/7 Support</span>
-                  <span className={styles.perkDesc}>Our Customer support center available for help</span>
+                  <span className={styles.perkDesc}>
+                    Our Customer support center available for help
+                  </span>
                 </div>
               </div>
             </div>

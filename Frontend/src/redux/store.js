@@ -20,6 +20,9 @@ import cartReducer from "./slices/cartSlice.js";
 import wishlistReducer from "./slices/wishlistSlice.js";
 import orderReducer from "./slices/orderSlice.js";
 
+// ✅ NEW — Return/Exchange requests reducer
+import returnReducer from "./slices/returnSlice.js";
+
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -41,6 +44,9 @@ export const store = configureStore({
     cart: cartReducer,
     wishlist: wishlistReducer,
     orders: orderReducer,
+
+    // ✅ NEW
+    returns: returnReducer,
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -217,6 +223,13 @@ export const store = configureStore({
           "orders/fetchMine/fulfilled",
           "orders/fetchSeller/fulfilled",
           "orders/updateSellerStatus/fulfilled",
+
+          // ✅ NEW — Return actions
+          "returns/fetchSeller/fulfilled",
+          "returns/approve/fulfilled",
+          "returns/reject/fulfilled",
+          "returns/retrySync/fulfilled",
+          "returns/updateStatus/fulfilled",
         ],
 
         // ============================================
@@ -267,6 +280,16 @@ export const store = configureStore({
 
           // Order paths
           "payload.placedAt",
+
+          // ✅ NEW — Return paths
+          "payload.orderPlacedAt",
+          "payload.orderDeliveredAt",
+          "payload.eligibleUntil",
+          "payload.sellerDecisionAt",
+          "payload.cancelledAt",
+          "payload.shiprocketReturn.lastSyncAttemptAt",
+          "payload.shiprocketReturn.syncedAt",
+          "payload.statusHistory",
         ],
 
         // ============================================
@@ -365,6 +388,9 @@ export const store = configureStore({
           // Order paths
           "orders.myOrders",
           "orders.sellerOrders",
+
+          // ✅ NEW — Return paths
+          "returns.sellerReturns",
         ],
       },
     }),
