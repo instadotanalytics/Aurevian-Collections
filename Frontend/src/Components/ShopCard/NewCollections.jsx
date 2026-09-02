@@ -4,28 +4,41 @@
 // Products come from FeaturedProduct entries (section: "new-collections"),
 // fetched via fetchFeaturedProducts — same pattern as ShopCardCategory.jsx /
 // GiftGuide.jsx. No hardcoded product data. Layout, card markup/classes,
-// and scroll behavior are unchanged from the static version. wishlistBtn
-// and bagBtn remain static (no onClick/state) — that matches the original
-// file, which never wired them up either.
+// and scroll behavior are unchanged from the static version.
 //
-// ✅ UPDATED: product title now matches the Shop page's product-name
-// treatment exactly — same font (Jost, 500), same size/color, and the
-// same single-line ellipsis truncation (via the shared truncateName
-// helper, copied from Shop) instead of letting long names wrap to two
-// lines. The star-rating row (stars + "0.0 (0)") has been removed
-// entirely, since ratings aren't wired up to real data yet.
+// ✅ UPDATED: both wishlistBtn and bagBtn are now wired to redux exactly
+// like GiftGuide.jsx —
+//   wishlist: toggleWishlistItem, requireAuth() + toast + navigate to
+//             /login, FaHeart/FiHeart swap with .wishlistBtnActive when
+//             the product is already on the wishlist.
+//   cart:     addItemToCart, requireAuth() + toast + navigate to /login,
+//             disabled + "already in cart" state once added, loading
+//             guard so a second click can't fire while the request is
+//             in flight.
+//
+// Product title still matches the Shop page's product-name treatment
+// exactly — same font (Jost, 500), same size/color, and the same
+// single-line ellipsis truncation (via the shared truncateName helper,
+// copied from Shop) instead of letting long names wrap to two lines. The
+// star-rating row (stars + "0.0 (0)") remains removed, since ratings
+// aren't wired up to real data yet.
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
   FiArrowRight,
   FiArrowLeft,
   FiHeart,
   FiShoppingBag,
 } from "react-icons/fi";
+import { FaHeart } from "react-icons/fa";
+import toast from "react-hot-toast";
 import styles from "./NewCollections.module.css";
 
 import { fetchFeaturedProducts } from "../../redux/slices/featuredProductSlice";
+import { addItemToCart } from "../../redux/slices/cartSlice";
+import { toggleWishlistItem } from "../../redux/slices/wishlistSlice";
 
 const SECTION = "new-collections";
 
@@ -40,8 +53,27 @@ const truncateName = (name) => {
   return name;
 };
 
-function ProductCard({ product }) {
+function ProductCard({
+  product,
+  isInWishlist,
+  isInCart,
+  cartLoading,
+  onToggleWishlist,
+  onAddToCart,
+}) {
   const displayName = truncateName(product.name);
+
+  const handleWishlistClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onToggleWishlist(product.id);
+  };
+
+  const handleAddToCartClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onAddToCart(product.id);
+  };
 
   return (
     <div className={styles.card}>
@@ -49,10 +81,16 @@ function ProductCard({ product }) {
 
       <button
         type="button"
-        className={styles.wishlistBtn}
-        aria-label="Add to wishlist"
+        className={`${styles.wishlistBtn} ${isInWishlist ? styles.wishlistBtnActive : ""}`}
+        onClick={handleWishlistClick}
+        aria-pressed={isInWishlist}
+        aria-label={
+          isInWishlist
+            ? `Remove ${product.name} from wishlist`
+            : `Add ${product.name} to wishlist`
+        }
       >
-        <FiHeart size={16} />
+        {isInWishlist ? <FaHeart size={16} /> : <FiHeart size={16} />}
       </button>
 
       <a
@@ -95,7 +133,13 @@ function ProductCard({ product }) {
         </div>
       </a>
 
-      <button type="button" className={styles.bagBtn} aria-label="Add to bag">
+      <button
+        type="button"
+        className={`${styles.bagBtn} ${isInCart ? styles.bagBtnActive : ""}`}
+        onClick={handleAddToCartClick}
+        aria-label={isInCart ? "Already in cart" : `Add ${product.name} to bag`}
+        disabled={isInCart || cartLoading}
+      >
         <FiShoppingBag size={17} />
       </button>
     </div>
@@ -161,7 +205,12 @@ const toCardProduct = (product) => {
 
 export default function NewCollections() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const scrollContainerRef = useRef(null);
+
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const cartItems = useSelector((state) => state.cart.items);
+  const wishlistItems = useSelector((state) => state.wishlist.items);
 
   const { products, isLoading, error } = useSelector(
     (state) =>
@@ -171,6 +220,8 @@ export default function NewCollections() {
         error: null,
       },
   );
+
+  const [cartLoadingId, setCartLoadingId] = useState(null);
 
   useEffect(() => {
     dispatch(fetchFeaturedProducts(SECTION));
@@ -187,6 +238,37 @@ export default function NewCollections() {
 
   const scrollLeft = () => scrollByPage(-1);
   const scrollRight = () => scrollByPage(1);
+
+  const requireAuth = () => {
+    if (!isAuthenticated) {
+      toast.error("Please login to continue");
+      navigate("/login", { state: { from: "/" } });
+      return false;
+    }
+    return true;
+  };
+
+  const isInCart = (id) => cartItems.some((i) => i.product === id);
+  const isInWishlist = (id) =>
+    wishlistItems.some((i) => (i.product?._id || i.product) === id);
+
+  const handleToggleWishlist = (id) => {
+    if (!requireAuth()) return;
+    dispatch(toggleWishlistItem(id)).catch(() => {});
+  };
+
+  const handleAddToCart = async (id) => {
+    if (!requireAuth()) return;
+    try {
+      setCartLoadingId(id);
+      await dispatch(addItemToCart({ productId: id, quantity: 1 })).unwrap();
+      toast.success("Added to cart");
+    } catch (err) {
+      toast.error(err || "Failed to add to cart");
+    } finally {
+      setCartLoadingId(null);
+    }
+  };
 
   return (
     <section
@@ -246,7 +328,15 @@ export default function NewCollections() {
             {isLoading
               ? Array.from({ length: 4 }, (_, i) => <SkeletonCard key={i} />)
               : cardProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    isInWishlist={isInWishlist(product.id)}
+                    isInCart={isInCart(product.id)}
+                    cartLoading={cartLoadingId === product.id}
+                    onToggleWishlist={handleToggleWishlist}
+                    onAddToCart={handleAddToCart}
+                  />
                 ))}
           </div>
         )}
