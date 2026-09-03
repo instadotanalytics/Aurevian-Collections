@@ -32,9 +32,10 @@ export const submitFranchise = async (req, res) => {
       });
     }
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      return res
-        .status(400)
-        .json({ success: false, message: "A valid email is required" });
+      return res.status(400).json({
+        success: false,
+        message: "A valid email is required",
+      });
     }
     if (!city || !city.trim()) {
       return res
@@ -117,23 +118,38 @@ export const getAllFranchises = async (req, res) => {
     ]);
 
     const stats = {
-      total: await Franchise.countDocuments({ isDeleted: false }),
-      new: await Franchise.countDocuments({ isDeleted: false, status: "new" }),
+      total: await Franchise.countDocuments({
+        isDeleted: false,
+      }),
+
+      new: await Franchise.countDocuments({
+        isDeleted: false,
+        status: "new",
+      }),
+
       contacted: await Franchise.countDocuments({
         isDeleted: false,
         status: "contacted",
       }),
-      inDiscussion: await Franchise.countDocuments({
+
+      qualified: await Franchise.countDocuments({
         isDeleted: false,
-        status: "in-discussion",
+        status: "qualified",
       }),
-      approved: await Franchise.countDocuments({
+
+      converted: await Franchise.countDocuments({
         isDeleted: false,
-        status: "approved",
+        status: "converted",
       }),
+
       rejected: await Franchise.countDocuments({
         isDeleted: false,
         status: "rejected",
+      }),
+
+      archived: await Franchise.countDocuments({
+        isDeleted: false,
+        status: "archived",
       }),
     };
 
@@ -190,47 +206,68 @@ export const updateFranchiseStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status, adminNotes } = req.body;
+
+    // Statuses supported by Franchise Management UI
     const validStatuses = [
       "new",
       "contacted",
-      "in-discussion",
-      "approved",
+      "qualified",
+      "converted",
       "rejected",
+      "archived",
     ];
 
-    if (status && !validStatuses.includes(status)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid status" });
+    // Validate status only when status is provided
+    if (status !== undefined) {
+      const normalizedStatus = String(status).trim().toLowerCase();
+
+      if (!validStatuses.includes(normalizedStatus)) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid status. Allowed statuses: ${validStatuses.join(
+            ", ",
+          )}`,
+        });
+      }
     }
 
     const franchise = await Franchise.findById(id);
+
     if (!franchise) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Franchise enquiry not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Franchise enquiry not found",
+      });
     }
 
-    if (status) {
-      franchise.status = status;
-      if (status === "contacted" && !franchise.contactedAt) {
-        franchise.contactedBy = req.admin.id;
+    // Update status
+    if (status !== undefined) {
+      const normalizedStatus = String(status).trim().toLowerCase();
+
+      franchise.status = normalizedStatus;
+
+      // Track first contact
+      if (normalizedStatus === "contacted" && !franchise.contactedAt) {
+        franchise.contactedBy = req.admin?._id || req.admin?.id;
         franchise.contactedAt = new Date();
       }
     }
+
+    // Update admin notes
     if (typeof adminNotes === "string") {
-      franchise.adminNotes = adminNotes;
+      franchise.adminNotes = adminNotes.trim();
     }
 
     await franchise.save();
 
     return res.status(200).json({
       success: true,
-      message: "Franchise enquiry updated",
+      message: "Franchise enquiry updated successfully",
       data: franchise,
     });
   } catch (error) {
     console.error("❌ Update franchise status error:", error);
+
     return res.status(500).json({
       success: false,
       message: "Failed to update franchise enquiry",

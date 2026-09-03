@@ -57,7 +57,14 @@ const franchiseSchema = new mongoose.Schema(
     // Franchise sales pipeline workflow
     status: {
       type: String,
-      enum: ["new", "contacted", "in-discussion", "approved", "rejected"],
+      enum: [
+        "new",
+        "contacted",
+        "qualified",
+        "converted",
+        "rejected",
+        "archived",
+      ],
       default: "new",
     },
     adminNotes: {
