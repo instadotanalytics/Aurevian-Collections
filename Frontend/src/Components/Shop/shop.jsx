@@ -130,10 +130,6 @@ export default function Shop() {
   const [budgetFilter, setBudgetFilter] = useState("all");
   const [promotionFilter, setPromotionFilter] = useState("all");
 
-  // ✅ Auto-category mapping for search
-  const [autoSelectedCategoryId, setAutoSelectedCategoryId] = useState("");
-  const [isManualFilterChange, setIsManualFilterChange] = useState(false);
-
   // Infinite scroll
   const [page, setPage] = useState(1);
   const [allProducts, setAllProducts] = useState([]);
@@ -185,15 +181,16 @@ export default function Shop() {
       });
   }, []);
 
-  // ✅ Auto-detect category from search query - EXACT MATCH ONLY
-  useEffect(() => {
-    if (!isSearchMode || categories.length === 0) {
-      setAutoSelectedCategoryId("");
-      return;
-    }
+  // ✅ Synchronously derive the auto-matched category for the current search
+  // query (EXACT MATCH ONLY, plus simple singular/plural variants).
+  // This is computed with useMemo (not state + effect) so there is never
+  // an in-between render where the category hasn't "caught up" yet —
+  // that gap was what caused the "No product found" flash.
+  const autoMatchedCategoryId = useMemo(() => {
+    if (!isSearchMode || categories.length === 0) return "";
 
     const searchLower = searchQuery.toLowerCase().trim();
-    
+
     let matchingCategory = categories.find(
       (c) => c.label.toLowerCase() === searchLower
     );
@@ -211,25 +208,24 @@ export default function Shop() {
       });
     }
 
-    if (matchingCategory && !isManualFilterChange) {
-      setAutoSelectedCategoryId(matchingCategory.id);
-      setSelectedCategoryId(matchingCategory.id);
-    } else if (!isManualFilterChange) {
-      setAutoSelectedCategoryId("");
-      setSelectedCategoryId("");
-    }
-  }, [searchQuery, categories, isSearchMode, isManualFilterChange]);
+    return matchingCategory ? matchingCategory.id : "";
+  }, [isSearchMode, categories, searchQuery]);
+
+  // ✅ The category actually used for fetching/filtering/display.
+  // In search mode it's always the auto-matched one (kept in sync with
+  // the query); outside search mode it's whatever the user picked.
+  const effectiveCategoryId = isSearchMode
+    ? autoMatchedCategoryId
+    : selectedCategoryId;
 
   // ✅ When user manually changes category, clear search mode
   const handleCategoryChange = (categoryId) => {
-    setIsManualFilterChange(true);
     setSelectedCategoryId(categoryId);
-    setAutoSelectedCategoryId("");
-    
+
     // Clear recommendations when changing category
     setHasLoadedRecommendations(false);
     setRecommendedProducts([]);
-    
+
     if (isSearchMode) {
       navigate(`/shop${categoryId ? `?category=${categoryId}` : ''}`);
     } else {
@@ -243,19 +239,13 @@ export default function Shop() {
         navigate("/shop");
       }
     }
-    
-    setTimeout(() => {
-      setIsManualFilterChange(false);
-    }, 500);
   };
 
   // Resolve category from slug or query param after categories load
+  // (only relevant outside search mode — search mode uses autoMatchedCategoryId)
   useEffect(() => {
     if (isResolvingSlug || categories.length === 0) return;
-
-    if (isSearchMode && autoSelectedCategoryId) {
-      return;
-    }
+    if (isSearchMode) return;
 
     const queryCategoryId = searchParams.get("category");
 
@@ -279,7 +269,7 @@ export default function Shop() {
         }
       }
     }
-  }, [categories, categorySlug, searchParams, isResolvingSlug, isSearchMode, autoSelectedCategoryId]);
+  }, [categories, categorySlug, searchParams, isResolvingSlug, isSearchMode]);
 
   // ✅ RESET PAGE WHEN FILTERS CHANGE
   useEffect(() => {
@@ -287,7 +277,7 @@ export default function Shop() {
     setAllProducts([]);
     setHasMore(true);
     setRefreshKey((k) => k + 1);
-  }, [sort, selectedCategoryId, budgetFilter, promotionFilter, searchQuery]);
+  }, [sort, effectiveCategoryId, budgetFilter, promotionFilter, searchQuery]);
 
   // Fetch products (infinite scroll)
   useEffect(() => {
@@ -310,7 +300,7 @@ export default function Shop() {
         else if (sort === "price-high") sortParam = "price-desc";
         else if (sort === "latest") sortParam = "latest";
 
-        const categoryId = selectedCategoryId || undefined;
+        const categoryId = effectiveCategoryId || undefined;
 
         if (isSearchMode) {
           result = await dispatch(
@@ -367,7 +357,7 @@ export default function Shop() {
     page,
     refreshKey,
     dispatch,
-    selectedCategoryId,
+    effectiveCategoryId,
     sort,
     isResolvingSlug,
     isSearchMode,
@@ -521,7 +511,6 @@ export default function Shop() {
     setSort("latest");
     setBudgetFilter("all");
     setPromotionFilter("all");
-    setAutoSelectedCategoryId("");
     setHasLoadedRecommendations(false);
     setRecommendedProducts([]);
     navigate("/shop");
@@ -623,13 +612,17 @@ export default function Shop() {
     return getSortedProducts(filtered);
   }, [allProducts, budgetFilter, promotionFilter, getSortedProducts]);
 
-  // ✅ Seed product for the recommendation section
+  // ✅ Seed product for the recommendation section.
+  // Uses the raw fetched list (not the client-filtered one) so budget /
+  // promotion filters can never wipe out the recommendation seed.
   const searchSeedProductId = useMemo(() => {
-    if (!isSearchMode || filteredProducts.length === 0) return null;
-    return filteredProducts[0]._id;
-  }, [isSearchMode, filteredProducts]);
+    if (!isSearchMode || allProducts.length === 0) return null;
+    return allProducts[0]._id;
+  }, [isSearchMode, allProducts]);
 
-  // ✅ Fetch "You Might Also Like" recommendations - ONLY on search query change
+  // ✅ Fetch "You Might Also Like" recommendations - ALWAYS from different categories
+  // When the current category has no products or we're in search mode,
+  // fetch recommendations from ALL categories (excluding the current one if possible)
   useEffect(() => {
     // Reset recommendations when search query changes
     if (searchQuery !== recommendationSearchQuery) {
@@ -638,28 +631,59 @@ export default function Shop() {
       setRecommendationSearchQuery(searchQuery);
     }
 
-    if (!searchSeedProductId) {
-      setRecommendedProducts([]);
-      setIsLoadingRecommendations(false);
-      setHasLoadedRecommendations(false);
-      return;
-    }
-
-    // Only fetch if we haven't loaded recommendations for this search query yet
-    if (hasLoadedRecommendations && searchQuery === recommendationSearchQuery) {
-      return;
-    }
-
+    // ✅ If we have products and they're from the same category, we can still show recommendations
+    // from OTHER categories. The key is to always show recommendations regardless of current results.
+    
+    // Always fetch recommendations when in search mode, even if no products found
+    // We'll use a fallback approach: fetch general recommendations
+    
     const requestId = ++recommendationRequestIdRef.current;
     setIsLoadingRecommendations(true);
 
-    dispatch(
-      fetchRelevantProducts({ productId: searchSeedProductId, limit: 4 }),
-    )
-      .unwrap()
+    // ✅ If we have a seed product, get recommendations based on it
+    // Otherwise, fetch general recommendations (from any category)
+    let fetchPromise;
+    
+    if (searchSeedProductId) {
+      // Get recommendations based on the first product
+      fetchPromise = dispatch(
+        fetchRelevantProducts({ productId: searchSeedProductId, limit: 4 })
+      ).unwrap();
+    } else {
+      // No products found - fetch general recommendations from all categories
+      // We'll use fetchProductsByPlacement to get random products
+      fetchPromise = dispatch(
+        fetchProductsByPlacement({
+          placement: "shop",
+          page: 1,
+          limit: 4,
+          sort: "latest",
+        })
+      ).unwrap();
+    }
+
+    fetchPromise
       .then((result) => {
         if (requestId !== recommendationRequestIdRef.current) return;
-        setRecommendedProducts(result.products || []);
+        
+        let products = result.products || [];
+        
+        // ✅ If the current category has products, filter out products from the same category
+        // to show variety
+        if (effectiveCategoryId && products.length > 0) {
+          // Filter out products from the same category
+          const filteredRecommendations = products.filter(
+            p => p.category?.categoryData?.id !== effectiveCategoryId
+          );
+          
+          // If we have at least 2 products from other categories, use them
+          // Otherwise, use all products (including same category) as fallback
+          if (filteredRecommendations.length >= 2) {
+            products = filteredRecommendations;
+          }
+        }
+        
+        setRecommendedProducts(products);
         setHasLoadedRecommendations(true);
         setRecommendationSearchQuery(searchQuery);
       })
@@ -672,38 +696,25 @@ export default function Shop() {
         if (requestId !== recommendationRequestIdRef.current) return;
         setIsLoadingRecommendations(false);
       });
-  }, [searchSeedProductId, dispatch, searchQuery, recommendationSearchQuery, hasLoadedRecommendations]);
+  }, [searchSeedProductId, dispatch, searchQuery, recommendationSearchQuery, hasLoadedRecommendations, effectiveCategoryId]);
 
   const skeletonItems = Array.from({ length: 10 }, (_, i) => i);
 
   // Get the display name for results
   const getDisplayCategoryName = () => {
-    if (isSearchMode && !selectedCategoryId) {
+    if (isSearchMode && !effectiveCategoryId) {
       return `"${searchQuery}"`;
     }
-    if (!selectedCategoryId) return "All Products";
-    const category = categories.find((c) => c.id === selectedCategoryId);
+    if (!effectiveCategoryId) return "All Products";
+    const category = categories.find((c) => c.id === effectiveCategoryId);
     return category ? category.label : "Category";
   };
 
-  // ✅ Show "You Might Also Like" - ONLY when in search mode AND no category filter
-  const shouldShowRecommendations = useMemo(() => {
-    return (
-      isSearchMode &&
-      !selectedCategoryId &&
-      !categoryError &&
-      filteredProducts.length > 0 &&
-      (isLoadingRecommendations || hasLoadedRecommendations || recommendedProducts.length > 0)
-    );
-  }, [
-    isSearchMode,
-    selectedCategoryId,
-    categoryError,
-    filteredProducts.length,
-    isLoadingRecommendations,
-    hasLoadedRecommendations,
-    recommendedProducts.length,
-  ]);
+  // ✅ Show "You Might Also Like" any time we're in search mode (and the
+  // main list didn't hard-error). It stays visible through skeleton
+  // loading, results, and the "no products found" state so the section
+  // never pops in/out unexpectedly.
+  const shouldShowRecommendations = isSearchMode && !categoryError;
 
   // ✅ Shared product card renderer
   const renderProductCard = (p) => {
@@ -803,26 +814,6 @@ export default function Shop() {
     <div className={styles.page}>
       <Header />
       <div className={styles.mainContent}>
-        {/* ✅ Search Header - Only show when coming from search, NOT from category filter */}
-        {isSearchMode && !selectedCategoryId && (
-          <div className={styles.searchHeader}>
-            <div className={styles.searchHeaderContent}>
-              <FiSearch className={styles.searchHeaderIcon} />
-              <span className={styles.searchHeaderText}>
-                Showing results for <strong>"{searchQuery}"</strong>
-              </span>
-              <button
-                type="button"
-                onClick={clearSearch}
-                className={styles.searchHeaderClear}
-              >
-                <FiX />
-                Clear search
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Shop Content */}
         <div className={styles.shopWrap}>
           {/* Mobile Filter Toggle Button */}
@@ -886,7 +877,7 @@ export default function Shop() {
                 <input
                   type="radio"
                   name="category"
-                  checked={selectedCategoryId === ""}
+                  checked={effectiveCategoryId === ""}
                   onChange={() => handleCategoryChange("")}
                 />
                 All
@@ -896,7 +887,7 @@ export default function Shop() {
                   <input
                     type="radio"
                     name="category"
-                    checked={selectedCategoryId === c.id}
+                    checked={effectiveCategoryId === c.id}
                     onChange={() => handleCategoryChange(c.id)}
                   />
                   {c.label}
@@ -964,13 +955,13 @@ export default function Shop() {
               <span className={styles.resultsCount}>
                 {isInitialLoading
                   ? "Loading..."
-                  : isSearchMode && !selectedCategoryId
+                  : isSearchMode
                   ? `Showing ${filteredProducts.length} result${
                       filteredProducts.length === 1 ? "" : "s"
                     } for "${searchQuery}"`
                   : `Showing ${filteredProducts.length} results for ${getDisplayCategoryName()}`}
               </span>
-              {isSearchMode && !selectedCategoryId && !isInitialLoading && (
+              {isSearchMode && !isInitialLoading && (
                 <button
                   type="button"
                   onClick={clearSearch}
@@ -1013,38 +1004,31 @@ export default function Shop() {
               </div>
             )}
 
-            {/* Products */}
+            {/* ✅ Products - Empty state only shows when NOT loading and NO products */}
             {!isInitialLoading && !categoryError && (
               <>
-                {filteredProducts.length === 0 && isSearchMode && (
+                {filteredProducts.length === 0 && (
                   <div className={styles.emptyState}>
                     <div className={styles.emptyStateIcon}>🔍</div>
-                    <h3>No products found</h3>
+                    <h3>
+                      {isSearchMode 
+                        ? 'No products found' 
+                        : effectiveCategoryId 
+                          ? 'No Products Found' 
+                          : 'No products available'}
+                    </h3>
                     <p>
-                      We couldn't find any products matching "{searchQuery}".
-                      Try a different keyword or browse our collections instead!
+                      {isSearchMode 
+                        ? `We couldn't find any products matching "${searchQuery}". Try a different keyword or browse our collections instead!`
+                        : effectiveCategoryId
+                          ? `We couldn't find any products in "${getDisplayCategoryName()}". Try browsing our other collections!`
+                          : 'We\'re currently updating our inventory. Please check back soon!'}
                     </p>
                     <Link to="/shop" className={styles.emptyStateButton}>
                       Browse All Products
                     </Link>
                   </div>
                 )}
-
-                {filteredProducts.length === 0 &&
-                  !isSearchMode &&
-                  selectedCategoryId && (
-                    <div className={styles.emptyState}>
-                      <div className={styles.emptyStateIcon}>🔍</div>
-                      <h3>No Products Found</h3>
-                      <p>
-                        We couldn't find any products in "{getDisplayCategoryName()}".
-                        Try browsing our other collections!
-                      </p>
-                      <Link to="/shop" className={styles.emptyStateButton}>
-                        Browse All Products
-                      </Link>
-                    </div>
-                  )}
 
                 {filteredProducts.length > 0 && (
                   <div className={styles.productGrid}>
@@ -1080,15 +1064,22 @@ export default function Shop() {
           </main>
         </div>
 
-        {/* ✅ "You Might Also Like" - NOW BEFORE PERKS SECTION */}
+        {/* ✅ "You Might Also Like" - always visible during search mode:
+             through skeleton loading, results, and no-results states.
+             Shows recommendations from OTHER categories. */}
         {shouldShowRecommendations && (
           <section className={styles.recommendationSection}>
             <div className={styles.recommendationHeader}>
               <h2 className={styles.recommendationTitle}>
                 You Might Also Like
               </h2>
+              {effectiveCategoryId && filteredProducts.length === 0 && (
+                <p className={styles.recommendationSubtitle}>
+                  No products found in this category. Here are some suggestions from other collections.
+                </p>
+              )}
             </div>
-            {isLoadingRecommendations ? (
+            {isInitialLoading || isLoadingRecommendations ? (
               <div className={styles.recommendationGrid}>
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div className={styles.skeletonCard} key={`rec-skeleton-${i}`}>
@@ -1101,10 +1092,14 @@ export default function Shop() {
                   </div>
                 ))}
               </div>
-            ) : (
+            ) : recommendedProducts.length > 0 ? (
               <div className={styles.recommendationGrid}>
                 {recommendedProducts.map((p) => renderProductCard(p))}
               </div>
+            ) : (
+              <p className={styles.endMessage}>
+                No related picks available right now.
+              </p>
             )}
           </section>
         )}
@@ -1204,7 +1199,7 @@ export default function Shop() {
                   <input
                     type="radio"
                     name="mobile_category"
-                    checked={selectedCategoryId === ""}
+                    checked={effectiveCategoryId === ""}
                     onChange={() => handleCategoryChange("")}
                   />
                   All
@@ -1214,7 +1209,7 @@ export default function Shop() {
                     <input
                       type="radio"
                       name="mobile_category"
-                      checked={selectedCategoryId === c.id}
+                      checked={effectiveCategoryId === c.id}
                       onChange={() => handleCategoryChange(c.id)}
                     />
                     {c.label}
