@@ -34,6 +34,64 @@ const CATEGORY_PHRASES = [
   "chains",
 ];
 
+// ✅ Updated popular searches with required categories (20+)
+const POPULAR_SEARCHES = [
+  // Jewelry Types
+  "Earrings",
+  "Glasses",
+  "Rings",
+  "Bangles",
+  "Bracelets",
+  "Anklets",
+  "Maang Tikka",
+  "Nose Pins",
+  "Pendants",
+  "Chains",
+  "Premium Set",
+  // Additional Categories
+  "Necklaces",
+  "Necklace Sets",
+  "Earring Sets",
+  "Bracelet Sets",
+  "Ring Sets",
+  "Pendant Sets",
+  "Choker Necklaces",
+  "Chain Necklaces",
+  "Stud Earrings",
+  "Dangle Earrings",
+  "Hoop Earrings",
+  "Cuff Bracelets",
+  "Bangle Bracelets",
+  "Tennis Bracelets",
+  "Engagement Rings",
+  "Wedding Bands",
+  "Promise Rings",
+  "Gold Jewelry",
+  "Silver Jewelry",
+  "Diamond Jewelry",
+  "Pearl Jewelry",
+  "Gemstone Jewelry",
+  "Wedding Jewelry",
+  "Bridal Jewelry",
+  "Party Wear Jewelry",
+  "Daily Wear Jewelry",
+  "Traditional Jewelry",
+  "Modern Jewelry",
+  "Handmade Jewelry",
+  "Customized Jewelry",
+  "Gift Sets",
+  "Anniversary Gifts",
+  "Birthday Gifts",
+  "Mother's Day Gifts",
+  "Valentine's Day Gifts",
+  "Festive Collections",
+  "Luxury Jewelry",
+  "Affordable Jewelry",
+  "Kids Jewelry",
+  "Men's Jewelry",
+  "Women's Jewelry",
+];
+
 const SearchPanel = ({
   styles,
   isOpen,
@@ -65,15 +123,13 @@ const SearchPanel = ({
   const debouncedQuery = useDebouncedValue(query, 300);
   const isTyping = debouncedQuery.trim().length > 0;
 
-  // The "browse" list shown when the input is empty: history +
-  // popular + trending, flattened into one array so keyboard
-  // navigation can move through all of them in visual order.
+  // The "browse" list shown when the input is empty: history + popular
+  // (trending removed)
   const browseList = useMemo(() => {
     if (isTyping) return [];
     return [
       ...history.map((term) => ({ type: "history", label: term })),
-      ...popularSearches.map((term) => ({ type: "popular", label: term })),
-      ...trendingSearches.map((term) => ({ type: "trending", label: term })),
+      ...POPULAR_SEARCHES.map((term) => ({ type: "popular", label: term })),
     ];
   }, [isTyping, history]);
 
@@ -317,6 +373,9 @@ const SearchPanel = ({
     variant === "inline" ? styles.searchPanelInline : styles.searchPanelDropdown
   }`;
 
+  // ✅ Get only first 20 popular searches to display
+  const displayPopularSearches = POPULAR_SEARCHES.slice(0, 20);
+
   return (
     <div className={panelClass}>
       <form
@@ -436,7 +495,7 @@ const SearchPanel = ({
             <p className={styles.noResults}>No products found.</p>
           )
         ) : (
-          /* ============== BROWSE STATE: history + popular + trending ============== */
+          /* ============== BROWSE STATE: history + popular (trending removed) ============== */
           <>
             {history.length > 0 && (
               <div className={styles.searchSection}>
@@ -485,7 +544,7 @@ const SearchPanel = ({
             <div className={styles.searchSection}>
               <h4>Popular Searches</h4>
               <div className={styles.chipRow}>
-                {popularSearches.map((term, i) => {
+                {displayPopularSearches.map((term, i) => {
                   const listIndex = history.length + i;
                   return (
                     <button
@@ -498,33 +557,6 @@ const SearchPanel = ({
                       onMouseEnter={() => setActiveIndex(listIndex)}
                       onClick={() => commitTextSearch(term)}
                     >
-                      {term}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className={styles.searchSection}>
-              <h4>Trending Searches</h4>
-              <div className={styles.chipRow}>
-                {trendingSearches.map((term, i) => {
-                  const listIndex = history.length + popularSearches.length + i;
-                  return (
-                    <button
-                      key={term}
-                      type="button"
-                      id={`search-option-${listIndex}`}
-                      className={`${styles.searchChip} ${styles.trendingChip} ${
-                        listIndex === activeIndex ? styles.searchChipActive : ""
-                      }`}
-                      onMouseEnter={() => setActiveIndex(listIndex)}
-                      onClick={() => commitTextSearch(term)}
-                    >
-                      <FiTrendingUp
-                        className={styles.trendingIcon}
-                        aria-hidden="true"
-                      />
                       {term}
                     </button>
                   );
