@@ -130,10 +130,6 @@ export default function Shop() {
   const [budgetFilter, setBudgetFilter] = useState("all");
   const [promotionFilter, setPromotionFilter] = useState("all");
 
-  // ✅ Auto-category mapping for search
-  const [autoSelectedCategoryId, setAutoSelectedCategoryId] = useState("");
-  const [isManualFilterChange, setIsManualFilterChange] = useState(false);
-
   // Infinite scroll
   const [page, setPage] = useState(1);
   const [allProducts, setAllProducts] = useState([]);
@@ -147,13 +143,12 @@ export default function Shop() {
   // ✅ race-condition guard
   const requestIdRef = useRef(0);
 
-  // ✅ "You Might Also Like" recommendations
+  // ✅ "You Might Also Like" recommendations - ALWAYS from different categories
   const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
   const [hasLoadedRecommendations, setHasLoadedRecommendations] = useState(false);
   const recommendationRequestIdRef = useRef(0);
-  // ✅ Store the search query that recommendations are based on
-  const [recommendationSearchQuery, setRecommendationSearchQuery] = useState("");
+  const [recommendationContext, setRecommendationContext] = useState("");
 
   // Mobile filter sheet
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -168,6 +163,11 @@ export default function Shop() {
   // Desktop sidebar sort dropdown state
   const [isSidebarSortOpen, setIsSidebarSortOpen] = useState(false);
   const sidebarSortRef = useRef(null);
+
+  // ✅ track whether the user has actually scrolled, so the infinite-scroll
+  // observer doesn't fire the instant page 1 renders (when the grid doesn't
+  // fill the viewport, the loader sentinel can already be "visible")
+  const hasUserScrolledRef = useRef(false);
 
   // Fetch categories first
   useEffect(() => {
@@ -185,15 +185,12 @@ export default function Shop() {
       });
   }, []);
 
-  // ✅ Auto-detect category from search query - EXACT MATCH ONLY
-  useEffect(() => {
-    if (!isSearchMode || categories.length === 0) {
-      setAutoSelectedCategoryId("");
-      return;
-    }
+  // ✅ Synchronously derive the auto-matched category for the current search
+  const autoMatchedCategoryId = useMemo(() => {
+    if (!isSearchMode || categories.length === 0) return "";
 
     const searchLower = searchQuery.toLowerCase().trim();
-    
+
     let matchingCategory = categories.find(
       (c) => c.label.toLowerCase() === searchLower
     );
@@ -211,25 +208,23 @@ export default function Shop() {
       });
     }
 
-    if (matchingCategory && !isManualFilterChange) {
-      setAutoSelectedCategoryId(matchingCategory.id);
-      setSelectedCategoryId(matchingCategory.id);
-    } else if (!isManualFilterChange) {
-      setAutoSelectedCategoryId("");
-      setSelectedCategoryId("");
-    }
-  }, [searchQuery, categories, isSearchMode, isManualFilterChange]);
+    return matchingCategory ? matchingCategory.id : "";
+  }, [isSearchMode, categories, searchQuery]);
 
-  // ✅ When user manually changes category, clear search mode
+  // ✅ The category actually used for fetching/filtering/display.
+  const effectiveCategoryId = isSearchMode
+    ? autoMatchedCategoryId
+    : selectedCategoryId;
+
+  // ✅ When user manually changes category
   const handleCategoryChange = (categoryId) => {
-    setIsManualFilterChange(true);
     setSelectedCategoryId(categoryId);
-    setAutoSelectedCategoryId("");
-    
+
     // Clear recommendations when changing category
     setHasLoadedRecommendations(false);
     setRecommendedProducts([]);
-    
+    setRecommendationContext("");
+
     if (isSearchMode) {
       navigate(`/shop${categoryId ? `?category=${categoryId}` : ''}`);
     } else {
@@ -243,19 +238,12 @@ export default function Shop() {
         navigate("/shop");
       }
     }
-    
-    setTimeout(() => {
-      setIsManualFilterChange(false);
-    }, 500);
   };
 
   // Resolve category from slug or query param after categories load
   useEffect(() => {
     if (isResolvingSlug || categories.length === 0) return;
-
-    if (isSearchMode && autoSelectedCategoryId) {
-      return;
-    }
+    if (isSearchMode) return;
 
     const queryCategoryId = searchParams.get("category");
 
@@ -279,7 +267,7 @@ export default function Shop() {
         }
       }
     }
-  }, [categories, categorySlug, searchParams, isResolvingSlug, isSearchMode, autoSelectedCategoryId]);
+  }, [categories, categorySlug, searchParams, isResolvingSlug, isSearchMode]);
 
   // ✅ RESET PAGE WHEN FILTERS CHANGE
   useEffect(() => {
@@ -287,7 +275,8 @@ export default function Shop() {
     setAllProducts([]);
     setHasMore(true);
     setRefreshKey((k) => k + 1);
-  }, [sort, selectedCategoryId, budgetFilter, promotionFilter, searchQuery]);
+    hasUserScrolledRef.current = false; // reset scroll guard on filter/search change
+  }, [sort, effectiveCategoryId, budgetFilter, promotionFilter, searchQuery]);
 
   // Fetch products (infinite scroll)
   useEffect(() => {
@@ -300,7 +289,6 @@ export default function Shop() {
         setIsLoadingMore(true);
       }
 
-      const start = Date.now();
       try {
         setCategoryError(null);
         let result;
@@ -310,7 +298,7 @@ export default function Shop() {
         else if (sort === "price-high") sortParam = "price-desc";
         else if (sort === "latest") sortParam = "latest";
 
-        const categoryId = selectedCategoryId || undefined;
+        const categoryId = effectiveCategoryId || undefined;
 
         if (isSearchMode) {
           result = await dispatch(
@@ -350,13 +338,8 @@ export default function Shop() {
         toast.error(isSearchMode ? "Search failed" : "Failed to load products");
       } finally {
         if (requestId !== requestIdRef.current) return;
-        const elapsed = Date.now() - start;
-        const remaining = Math.max(0, 1000 - elapsed);
-        setTimeout(() => {
-          if (requestId !== requestIdRef.current) return;
-          if (isFirst) setIsInitialLoading(false);
-          else setIsLoadingMore(false);
-        }, remaining);
+        if (isFirst) setIsInitialLoading(false);
+        else setIsLoadingMore(false);
       }
     };
 
@@ -367,12 +350,21 @@ export default function Shop() {
     page,
     refreshKey,
     dispatch,
-    selectedCategoryId,
+    effectiveCategoryId,
     sort,
     isResolvingSlug,
     isSearchMode,
     searchQuery,
   ]);
+
+  // ✅ Track first real user scroll (used to gate the infinite-scroll observer)
+  useEffect(() => {
+    const onScroll = () => {
+      hasUserScrolledRef.current = true;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -383,6 +375,7 @@ export default function Shop() {
       (entries) => {
         if (
           entries[0].isIntersecting &&
+          hasUserScrolledRef.current &&
           hasMore &&
           !isLoadingMore &&
           !isInitialLoading
@@ -521,15 +514,16 @@ export default function Shop() {
     setSort("latest");
     setBudgetFilter("all");
     setPromotionFilter("all");
-    setAutoSelectedCategoryId("");
     setHasLoadedRecommendations(false);
     setRecommendedProducts([]);
+    setRecommendationContext("");
     navigate("/shop");
   };
 
   const clearSearch = () => {
     setHasLoadedRecommendations(false);
     setRecommendedProducts([]);
+    setRecommendationContext("");
     setSelectedCategoryId("");
     navigate("/shop");
   };
@@ -623,45 +617,124 @@ export default function Shop() {
     return getSortedProducts(filtered);
   }, [allProducts, budgetFilter, promotionFilter, getSortedProducts]);
 
-  // ✅ Seed product for the recommendation section
-  const searchSeedProductId = useMemo(() => {
-    if (!isSearchMode || filteredProducts.length === 0) return null;
-    return filteredProducts[0]._id;
-  }, [isSearchMode, filteredProducts]);
+  // ✅ Get a product from a DIFFERENT category for recommendations
+  const getRecommendationSeed = useCallback(() => {
+    if (allProducts.length === 0) return null;
 
-  // ✅ Fetch "You Might Also Like" recommendations - ONLY on search query change
-  useEffect(() => {
-    // Reset recommendations when search query changes
-    if (searchQuery !== recommendationSearchQuery) {
-      setRecommendedProducts([]);
-      setHasLoadedRecommendations(false);
-      setRecommendationSearchQuery(searchQuery);
+    // If we have a current category, try to find a product from a different category
+    if (effectiveCategoryId) {
+      const differentCategoryProduct = allProducts.find(
+        p => p.category?.categoryData?.id !== effectiveCategoryId
+      );
+      if (differentCategoryProduct) {
+        return differentCategoryProduct._id;
+      }
     }
 
-    if (!searchSeedProductId) {
+    // Fallback: use first product
+    return allProducts[0]._id;
+  }, [allProducts, effectiveCategoryId]);
+
+  const recommendationSeedId = useMemo(() => {
+    return getRecommendationSeed();
+  }, [getRecommendationSeed]);
+
+  // ✅ Fetch "You Might Also Like" - ALWAYS from DIFFERENT categories
+  useEffect(() => {
+    // Create a context string to detect changes
+    const context = isSearchMode ? searchQuery : effectiveCategoryId || "all";
+
+    // Reset recommendations when context changes
+    if (context !== recommendationContext) {
       setRecommendedProducts([]);
-      setIsLoadingRecommendations(false);
       setHasLoadedRecommendations(false);
+      setRecommendationContext(context);
+    }
+
+    // If we already loaded recommendations for this context, skip
+    if (hasLoadedRecommendations && context === recommendationContext) {
       return;
     }
 
-    // Only fetch if we haven't loaded recommendations for this search query yet
-    if (hasLoadedRecommendations && searchQuery === recommendationSearchQuery) {
+    // Don't fetch if we're loading products initially
+    if (isInitialLoading) {
       return;
     }
 
     const requestId = ++recommendationRequestIdRef.current;
     setIsLoadingRecommendations(true);
 
-    dispatch(
-      fetchRelevantProducts({ productId: searchSeedProductId, limit: 4 }),
-    )
-      .unwrap()
+    // ✅ If we have a seed product from a different category, get recommendations based on it
+    // Otherwise, fetch general recommendations from all categories
+    let fetchPromise;
+
+    if (recommendationSeedId) {
+      // Get recommendations based on the seed product
+      fetchPromise = dispatch(
+        fetchRelevantProducts({ productId: recommendationSeedId, limit: 6 })
+      ).unwrap();
+    } else {
+      // No products found - fetch general recommendations from all categories
+      fetchPromise = dispatch(
+        fetchProductsByPlacement({
+          placement: "shop",
+          page: 1,
+          limit: 6,
+          sort: "latest",
+        })
+      ).unwrap();
+    }
+
+    fetchPromise
       .then((result) => {
         if (requestId !== recommendationRequestIdRef.current) return;
-        setRecommendedProducts(result.products || []);
+
+        let products = result.products || [];
+
+        // ✅ CRITICAL: Filter out products from the current category
+        // This ensures "You Might Also Like" ONLY shows products from OTHER categories
+        if (effectiveCategoryId && products.length > 0) {
+          const filteredRecommendations = products.filter(
+            p => p.category?.categoryData?.id !== effectiveCategoryId
+          );
+
+          // If we have at least 2 products from other categories, use them
+          if (filteredRecommendations.length >= 2) {
+            products = filteredRecommendations;
+          } else {
+            // If not enough products from other categories, fetch more from all categories
+            // but still filter out the current category
+            dispatch(
+              fetchProductsByPlacement({
+                placement: "shop",
+                page: 1,
+                limit: 10,
+                sort: "latest",
+              })
+            ).unwrap()
+              .then((fallbackResult) => {
+                if (requestId !== recommendationRequestIdRef.current) return;
+                let fallbackProducts = fallbackResult.products || [];
+                // Filter out current category
+                const filteredFallback = fallbackProducts.filter(
+                  p => p.category?.categoryData?.id !== effectiveCategoryId
+                );
+                setRecommendedProducts(filteredFallback.slice(0, 4));
+                setHasLoadedRecommendations(true);
+                setIsLoadingRecommendations(false);
+              })
+              .catch(() => {
+                setRecommendedProducts(products.slice(0, 4));
+                setHasLoadedRecommendations(true);
+                setIsLoadingRecommendations(false);
+              });
+            return;
+          }
+        }
+
+        // Limit to 4 products
+        setRecommendedProducts(products.slice(0, 4));
         setHasLoadedRecommendations(true);
-        setRecommendationSearchQuery(searchQuery);
       })
       .catch(() => {
         if (requestId !== recommendationRequestIdRef.current) return;
@@ -672,38 +745,24 @@ export default function Shop() {
         if (requestId !== recommendationRequestIdRef.current) return;
         setIsLoadingRecommendations(false);
       });
-  }, [searchSeedProductId, dispatch, searchQuery, recommendationSearchQuery, hasLoadedRecommendations]);
+  }, [recommendationSeedId, dispatch, effectiveCategoryId, isSearchMode, searchQuery, recommendationContext, hasLoadedRecommendations, isInitialLoading]);
 
   const skeletonItems = Array.from({ length: 10 }, (_, i) => i);
 
   // Get the display name for results
   const getDisplayCategoryName = () => {
-    if (isSearchMode && !selectedCategoryId) {
+    if (isSearchMode && !effectiveCategoryId) {
       return `"${searchQuery}"`;
     }
-    if (!selectedCategoryId) return "All Products";
-    const category = categories.find((c) => c.id === selectedCategoryId);
+    if (!effectiveCategoryId) return "All Products";
+    const category = categories.find((c) => c.id === effectiveCategoryId);
     return category ? category.label : "Category";
   };
 
-  // ✅ Show "You Might Also Like" - ONLY when in search mode AND no category filter
-  const shouldShowRecommendations = useMemo(() => {
-    return (
-      isSearchMode &&
-      !selectedCategoryId &&
-      !categoryError &&
-      filteredProducts.length > 0 &&
-      (isLoadingRecommendations || hasLoadedRecommendations || recommendedProducts.length > 0)
-    );
-  }, [
-    isSearchMode,
-    selectedCategoryId,
-    categoryError,
-    filteredProducts.length,
-    isLoadingRecommendations,
-    hasLoadedRecommendations,
-    recommendedProducts.length,
-  ]);
+  // ✅ Show "You Might Also Like" when in search mode OR browsing a category
+  const shouldShowRecommendations = !categoryError && (
+    isSearchMode || effectiveCategoryId
+  );
 
   // ✅ Shared product card renderer
   const renderProductCard = (p) => {
@@ -711,6 +770,7 @@ export default function Shop() {
     const inWishlist = isInWishlist(p._id);
     const addingToCart = cartLoadingId === p._id;
     const displayName = truncateName(p.productName);
+    const productCategory = p.category?.categoryData?.label || "Uncategorized";
 
     return (
       <div className={styles.productCard} key={p._id}>
@@ -726,7 +786,7 @@ export default function Shop() {
             </span>
           )}
           <span className={styles.productCatOverlay}>
-            {p.category?.categoryData?.label || "Uncategorized"}
+            {productCategory}
           </span>
           <div className={styles.wishlistActions}>
             <button
@@ -803,25 +863,14 @@ export default function Shop() {
     <div className={styles.page}>
       <Header />
       <div className={styles.mainContent}>
-        {/* ✅ Search Header - Only show when coming from search, NOT from category filter */}
-        {isSearchMode && !selectedCategoryId && (
-          <div className={styles.searchHeader}>
-            <div className={styles.searchHeaderContent}>
-              <FiSearch className={styles.searchHeaderIcon} />
-              <span className={styles.searchHeaderText}>
-                Showing results for <strong>"{searchQuery}"</strong>
-              </span>
-              <button
-                type="button"
-                onClick={clearSearch}
-                className={styles.searchHeaderClear}
-              >
-                <FiX />
-                Clear search
-              </button>
-            </div>
-          </div>
-        )}
+        {/* ✅ Hero Banner - 40vh on all devices */}
+        <div className={styles.heroBanner}>
+          <img
+            src={shopHero}
+            alt="Shop our collection"
+            className={styles.heroImage}
+          />
+        </div>
 
         {/* Shop Content */}
         <div className={styles.shopWrap}>
@@ -886,7 +935,7 @@ export default function Shop() {
                 <input
                   type="radio"
                   name="category"
-                  checked={selectedCategoryId === ""}
+                  checked={effectiveCategoryId === ""}
                   onChange={() => handleCategoryChange("")}
                 />
                 All
@@ -896,7 +945,7 @@ export default function Shop() {
                   <input
                     type="radio"
                     name="category"
-                    checked={selectedCategoryId === c.id}
+                    checked={effectiveCategoryId === c.id}
                     onChange={() => handleCategoryChange(c.id)}
                   />
                   {c.label}
@@ -964,13 +1013,13 @@ export default function Shop() {
               <span className={styles.resultsCount}>
                 {isInitialLoading
                   ? "Loading..."
-                  : isSearchMode && !selectedCategoryId
+                  : isSearchMode
                   ? `Showing ${filteredProducts.length} result${
                       filteredProducts.length === 1 ? "" : "s"
                     } for "${searchQuery}"`
                   : `Showing ${filteredProducts.length} results for ${getDisplayCategoryName()}`}
               </span>
-              {isSearchMode && !selectedCategoryId && !isInitialLoading && (
+              {isSearchMode && !isInitialLoading && (
                 <button
                   type="button"
                   onClick={clearSearch}
@@ -1013,38 +1062,31 @@ export default function Shop() {
               </div>
             )}
 
-            {/* Products */}
+            {/* ✅ Products - Empty state only shows when NOT loading and NO products */}
             {!isInitialLoading && !categoryError && (
               <>
-                {filteredProducts.length === 0 && isSearchMode && (
+                {filteredProducts.length === 0 && (
                   <div className={styles.emptyState}>
                     <div className={styles.emptyStateIcon}>🔍</div>
-                    <h3>No products found</h3>
+                    <h3>
+                      {isSearchMode
+                        ? 'No products found'
+                        : effectiveCategoryId
+                          ? 'No Products Found'
+                          : 'No products available'}
+                    </h3>
                     <p>
-                      We couldn't find any products matching "{searchQuery}".
-                      Try a different keyword or browse our collections instead!
+                      {isSearchMode
+                        ? `We couldn't find any products matching "${searchQuery}". Try a different keyword or browse our collections instead!`
+                        : effectiveCategoryId
+                          ? `We couldn't find any products in "${getDisplayCategoryName()}". Try browsing our other collections!`
+                          : 'We\'re currently updating our inventory. Please check back soon!'}
                     </p>
                     <Link to="/shop" className={styles.emptyStateButton}>
                       Browse All Products
                     </Link>
                   </div>
                 )}
-
-                {filteredProducts.length === 0 &&
-                  !isSearchMode &&
-                  selectedCategoryId && (
-                    <div className={styles.emptyState}>
-                      <div className={styles.emptyStateIcon}>🔍</div>
-                      <h3>No Products Found</h3>
-                      <p>
-                        We couldn't find any products in "{getDisplayCategoryName()}".
-                        Try browsing our other collections!
-                      </p>
-                      <Link to="/shop" className={styles.emptyStateButton}>
-                        Browse All Products
-                      </Link>
-                    </div>
-                  )}
 
                 {filteredProducts.length > 0 && (
                   <div className={styles.productGrid}>
@@ -1080,15 +1122,16 @@ export default function Shop() {
           </main>
         </div>
 
-        {/* ✅ "You Might Also Like" - NOW BEFORE PERKS SECTION */}
+        {/* ✅ "You Might Also Like" - ALWAYS shows products from DIFFERENT categories */}
         {shouldShowRecommendations && (
           <section className={styles.recommendationSection}>
             <div className={styles.recommendationHeader}>
               <h2 className={styles.recommendationTitle}>
                 You Might Also Like
               </h2>
+              {/* ✅ Removed "Discover more from our other collections" subtitle */}
             </div>
-            {isLoadingRecommendations ? (
+            {isInitialLoading || isLoadingRecommendations ? (
               <div className={styles.recommendationGrid}>
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div className={styles.skeletonCard} key={`rec-skeleton-${i}`}>
@@ -1101,10 +1144,14 @@ export default function Shop() {
                   </div>
                 ))}
               </div>
-            ) : (
+            ) : recommendedProducts.length > 0 ? (
               <div className={styles.recommendationGrid}>
                 {recommendedProducts.map((p) => renderProductCard(p))}
               </div>
+            ) : (
+              <p className={styles.endMessage}>
+                No related picks available right now.
+              </p>
             )}
           </section>
         )}
@@ -1204,7 +1251,7 @@ export default function Shop() {
                   <input
                     type="radio"
                     name="mobile_category"
-                    checked={selectedCategoryId === ""}
+                    checked={effectiveCategoryId === ""}
                     onChange={() => handleCategoryChange("")}
                   />
                   All
@@ -1214,7 +1261,7 @@ export default function Shop() {
                     <input
                       type="radio"
                       name="mobile_category"
-                      checked={selectedCategoryId === c.id}
+                      checked={effectiveCategoryId === c.id}
                       onChange={() => handleCategoryChange(c.id)}
                     />
                     {c.label}

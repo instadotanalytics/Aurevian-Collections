@@ -45,6 +45,9 @@ import {
   FiCreditCard,
   FiLayout,
   FiGift, // ✅ NEW — icon for Promotions
+  FiInbox, // ✅ NEW — "Customer Requests" dropdown group icon
+  FiMail, // ✅ NEW — Contact Messages icon
+  FiBriefcase, // ✅ NEW — Franchise Enquiries icon
 } from "react-icons/fi";
 import {
   superAdminLogout,
@@ -75,6 +78,10 @@ import SellersProducts from "../components/SellersProducts/SellersProducts.jsx";
 import SellerProductsPage from "../components/SellersProducts/SellerProductsPage.jsx";
 // ✅ NEW: Homepage promotion request review
 import PromotionRequestsManagement from "../components/PromotionRequestsManagement/PromotionRequestsManagement.jsx";
+// ✅ NEW: Contact Messages & Franchise Enquiries (grouped with Support Tickets
+// under the "Customer Requests" sidebar dropdown)
+import ContactManagement from "../components/ContactManagement.jsx";
+import FranchiseManagement from "../components/FranchiseManagement.jsx";
 
 // ✅ SOCKET.IO — admin notifications
 import useAdminNotifications from "../../../hooks/useAdminNotifications.js";
@@ -219,6 +226,16 @@ const SuperAdminDashboard = () => {
     }));
   };
 
+  // ✅ NEW — hover open/close for dropdown groups, works alongside the
+  // click-to-toggle above (click still closes it even while hovering).
+  const openSubMenuOnHover = (menuId) => {
+    setExpandedMenus((prev) => ({ ...prev, [menuId]: true }));
+  };
+
+  const closeSubMenuOnHover = (menuId) => {
+    setExpandedMenus((prev) => ({ ...prev, [menuId]: false }));
+  };
+
   if (isVerifying || isLoading) {
     return (
       <div className={styles.loadingContainer}>
@@ -303,6 +320,23 @@ const SuperAdminDashboard = () => {
         { id: "blog-comments", label: "Comments", icon: FiMessageSquare },
       ],
     },
+    // ✅ NEW: "Customer Requests" dropdown — Support Tickets (existing),
+    // Contact Messages and Franchise Enquiries (new) all grouped together.
+    {
+      id: "requests",
+      label: "Customer Requests",
+      icon: FiInbox,
+      isSubMenu: true,
+      subItems: [
+        { id: "support", label: "Support Tickets", icon: FiMessageSquare },
+        { id: "contact-messages", label: "Contact Messages", icon: FiMail },
+        {
+          id: "franchise-enquiries",
+          label: "Franchise Enquiries",
+          icon: FiBriefcase,
+        },
+      ],
+    },
     {
       id: "analytics",
       label: "Analytics",
@@ -319,12 +353,6 @@ const SuperAdminDashboard = () => {
       id: "header",
       label: "Header Management",
       icon: FiLayout,
-      isSubMenu: false,
-    },
-    {
-      id: "support",
-      label: "Support Tickets",
-      icon: FiMessageSquare,
       isSubMenu: false,
     },
     {
@@ -414,6 +442,12 @@ const SuperAdminDashboard = () => {
         return <HeaderManagement />;
       case "support":
         return <SupportManagement />;
+      // ✅ NEW: Contact page form submissions
+      case "contact-messages":
+        return <ContactManagement />;
+      // ✅ NEW: Franchise inquiry form submissions
+      case "franchise-enquiries":
+        return <FranchiseManagement />;
       case "settings":
         return (
           <div className={styles.placeholderContent}>Settings Coming Soon</div>
@@ -493,10 +527,17 @@ const SuperAdminDashboard = () => {
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.isSubMenu ? (
-                  <div>
+                  // ✅ NEW — hover handlers added on this wrapper so the
+                  // dropdown opens on mouse-enter and closes on mouse-leave,
+                  // in addition to the existing click-to-toggle behaviour.
+                  <div
+                    onMouseEnter={() => openSubMenuOnHover(item.id)}
+                    onMouseLeave={() => closeSubMenuOnHover(item.id)}
+                  >
                     <button
                       className={`${styles.navItem} ${expandedMenus[item.id] ? styles.expanded : ""}`}
                       onClick={() => toggleSubMenu(item.id)}
+                      aria-expanded={!!expandedMenus[item.id]}
                     >
                       <item.icon className={styles.navIcon} />
                       <span className={styles.navLabel}>{item.label}</span>
