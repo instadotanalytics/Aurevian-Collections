@@ -337,9 +337,6 @@ export default function Shop() {
         );
         toast.error(isSearchMode ? "Search failed" : "Failed to load products");
       } finally {
-        // ✅ removed the artificial 1000ms minimum-delay — this was the
-        // main cause of slow-feeling loads. Loading state now clears as
-        // soon as the request actually finishes.
         if (requestId !== requestIdRef.current) return;
         if (isFirst) setIsInitialLoading(false);
         else setIsLoadingMore(false);
@@ -378,7 +375,7 @@ export default function Shop() {
       (entries) => {
         if (
           entries[0].isIntersecting &&
-          hasUserScrolledRef.current && // ✅ don't auto-fire before any scroll
+          hasUserScrolledRef.current &&
           hasMore &&
           !isLoadingMore &&
           !isInitialLoading
@@ -866,6 +863,15 @@ export default function Shop() {
     <div className={styles.page}>
       <Header />
       <div className={styles.mainContent}>
+        {/* ✅ Hero Banner - 40vh on all devices */}
+        <div className={styles.heroBanner}>
+          <img
+            src={shopHero}
+            alt="Shop our collection"
+            className={styles.heroImage}
+          />
+        </div>
+
         {/* Shop Content */}
         <div className={styles.shopWrap}>
           {/* Mobile Filter Toggle Button */}
@@ -1123,11 +1129,7 @@ export default function Shop() {
               <h2 className={styles.recommendationTitle}>
                 You Might Also Like
               </h2>
-              {effectiveCategoryId && (
-                <p className={styles.recommendationSubtitle}>
-                  Discover more from our other collections
-                </p>
-              )}
+              {/* ✅ Removed "Discover more from our other collections" subtitle */}
             </div>
             {isInitialLoading || isLoadingRecommendations ? (
               <div className={styles.recommendationGrid}>

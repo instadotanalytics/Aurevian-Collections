@@ -41,14 +41,39 @@
   color: inherit;
 }
 
-/* Hero */
-.heroImage {
-  display: block;
+/* ✅ Hero Banner - 40vh on all devices */
+.heroBanner {
   width: 100%;
-  height: auto;
-  aspect-ratio: 21 / 8;
+  height: 60vh;
+  overflow: hidden;
+  position: relative;
+  /* margin-bottom: 10px; */
+}
+
+.heroImage {
+  width: 100%;
+  height: 80%;
   object-fit: cover;
-  object-position: center 30%;
+  display: block;
+
+}
+
+/* ✅ Responsive - Same height on all devices */
+@media (max-width: 768px) {
+  .heroBanner {
+    height: 40vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroBanner {
+    height: 40vh;
+  }
+}
+
+/* ✅ Remove old heroImage styles - replaced by heroBanner */
+.heroImageOld {
+  display: none;
 }
 
 @keyframes titleFadeUp {
@@ -69,7 +94,7 @@
   gap: 40px;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 46px 40px 80px;
+  padding: 0 40px 80px;
   align-items: start;
 }
 
@@ -1175,6 +1200,11 @@
   margin: 0;
 }
 
+/* ✅ Remove subtitle completely */
+.recommendationSubtitle {
+  display: none !important;
+}
+
 .recommendationGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1226,7 +1256,7 @@
   }
   .shopWrap {
     grid-template-columns: 1fr;
-    padding: 24px 20px 60px;
+    padding: 0 20px 60px;
     gap: 0;
   }
   .productGrid {
@@ -1236,10 +1266,6 @@
   .perks {
     gap: 30px;
     padding: 30px 24px;
-  }
-  .heroImage {
-    aspect-ratio: 16 / 9;
-    object-position: center 25%;
   }
   .resultsCount {
     display: none;
@@ -1273,6 +1299,11 @@
   }
   .searchHeaderText {
     font-size: 13px;
+  }
+  
+  /* ✅ Hero banner same height on mobile */
+  .heroBanner {
+    height: 40vh;
   }
 }
 
@@ -1315,7 +1346,7 @@
     padding-top: 80px;
   }
   .shopWrap {
-    padding: 48px 14px;
+    padding: 0 14px 48px;
   }
   .productGrid {
     grid-template-columns: repeat(2, 1fr);
@@ -1387,10 +1418,6 @@
   .toolbar {
     margin-bottom: 18px;
   }
-  .heroImage {
-    aspect-ratio: 4 / 3;
-    object-position: center 20%;
-  }
   .perks {
     flex-direction: column;
     align-items: flex-start;
@@ -1426,6 +1453,11 @@
   .mobileFilterApply {
     padding: 12px;
     font-size: 15px;
+  }
+  
+  /* ✅ Hero banner same height on smaller mobile */
+  .heroBanner {
+    height: 40vh;
   }
 }
 
@@ -1528,6 +1560,11 @@
   .searchHeaderClear {
     font-size: 11px;
   }
+  
+  /* ✅ Hero banner same height on small mobile */
+  .heroBanner {
+    height: 37vh;
+  }
 }
 
 @media (max-width: 380px) {
@@ -1572,6 +1609,11 @@
   .searchHeaderClear {
     font-size: 10px;
     padding: 2px 6px;
+  }
+  
+  /* ✅ Hero banner same height on smallest mobile */
+  .heroBanner {
+    height: 37vh;
   }
 }
 
