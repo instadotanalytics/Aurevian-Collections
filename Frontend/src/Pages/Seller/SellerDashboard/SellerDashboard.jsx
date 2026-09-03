@@ -21,6 +21,8 @@ import {
   FiAward,
   FiSunrise,
   FiMapPin, // ✅ NEW — icon for Pickup Address
+  FiChevronDown, // ✅ NEW — dropdown indicator for grouped nav items
+  FiLayers, // ✅ NEW — icon for the "Homepage Sections" dropdown group
 } from "react-icons/fi";
 
 import { useSelector, useDispatch } from "react-redux";
@@ -95,14 +97,24 @@ const PLAN_THEME = {
 
 const getPlanTheme = (planId) => PLAN_THEME[planId] || PLAN_THEME.free;
 
-// ✅ Updated menuItems with New Collections and Pickup Address
+// ✅ Updated menuItems — "Offers Section", "Curated For You", "Trending Picks"
+// and "New Collections" are now grouped under a single dropdown item
+// called "Homepage Sections" (isDropdown: true, with a children array).
 const menuItems = [
   { id: "", label: "Dashboard", icon: FiHome },
   { id: "products", label: "Products", icon: FiPackage },
-  { id: "featured-offers", label: "Offers Section", icon: FiStar },
-  { id: "curated-for-you", label: "Curated For You", icon: FiGift },
-  { id: "trending-picks", label: "Trending Picks", icon: FiAward },
-  { id: "new-collections", label: "New Collections", icon: FiSunrise },
+  {
+    id: "homepage-sections",
+    label: "Homepage Sections",
+    icon: FiLayers,
+    isDropdown: true,
+    children: [
+      { id: "featured-offers", label: "Offers Section", icon: FiStar },
+      { id: "curated-for-you", label: "Curated For You", icon: FiGift },
+      { id: "trending-picks", label: "Trending Picks", icon: FiAward },
+      { id: "new-collections", label: "New Collections", icon: FiSunrise },
+    ],
+  },
   { id: "orders", label: "Orders", icon: FiShoppingBag },
   { id: "earnings", label: "Earnings", icon: FiDollarSign },
   { id: "customers", label: "Customers", icon: FiUsers },
@@ -158,6 +170,37 @@ const SellerDashboard = () => {
     .replace(basePath, "")
     .replace(/^\//, "");
   const activeMenu = relativePath.split("/")[0] || "";
+
+  // ✅ NEW — tracks which sidebar dropdown group is currently open.
+  // Works for both hover (mouse enter/leave on the group) and click
+  // (toggle on the group's header button) — see handlers below.
+  const dropdownGroup = menuItems.find((item) => item.isDropdown);
+  const [openMenu, setOpenMenu] = useState(() => {
+    if (dropdownGroup && dropdownGroup.children.some((c) => c.id === activeMenu)) {
+      return dropdownGroup.id;
+    }
+    return null;
+  });
+
+  // Keep the dropdown open automatically whenever the active route is
+  // one of its children (e.g. deep link or page refresh on a child page).
+  useEffect(() => {
+    if (dropdownGroup && dropdownGroup.children.some((c) => c.id === activeMenu)) {
+      setOpenMenu(dropdownGroup.id);
+    }
+  }, [activeMenu]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleDropdownToggle = (id) => {
+    setOpenMenu((prev) => (prev === id ? null : id));
+  };
+
+  const handleDropdownMouseEnter = (id) => {
+    setOpenMenu(id);
+  };
+
+  const handleDropdownMouseLeave = (id) => {
+    setOpenMenu((prev) => (prev === id ? null : prev));
+  };
 
   const planId =
     subscriptionData?.plan?.id ||
@@ -365,19 +408,75 @@ const SellerDashboard = () => {
           onMouseLeave={() => setSidebarExpanded(false)}
         >
           <div className={styles.sidebarNav}>
-            {menuItems.map((item) => (
-              <button
-                key={item.id || "dashboard"}
-                onClick={() => handleMenuClick(item.id)}
-                className={`${styles.navItem} ${
-                  activeMenu === item.id ? styles.active : ""
-                }`}
-                title={item.label}
-              >
-                <item.icon className={styles.navIcon} />
-                <span className={styles.navLabel}>{item.label}</span>
-              </button>
-            ))}
+            {menuItems.map((item) => {
+              // ✅ NEW — dropdown group rendering (hover + click support)
+              if (item.isDropdown) {
+                const isOpen = openMenu === item.id;
+                const isChildActive = item.children.some(
+                  (child) => child.id === activeMenu,
+                );
+
+                return (
+                  <div
+                    key={item.id}
+                    className={styles.navGroup}
+                    onMouseEnter={() => handleDropdownMouseEnter(item.id)}
+                    onMouseLeave={() => handleDropdownMouseLeave(item.id)}
+                  >
+                    <button
+                      onClick={() => handleDropdownToggle(item.id)}
+                      className={`${styles.navItem} ${
+                        isChildActive ? styles.active : ""
+                      }`}
+                      title={item.label}
+                      aria-expanded={isOpen}
+                    >
+                      <item.icon className={styles.navIcon} />
+                      <span className={styles.navLabel}>{item.label}</span>
+                      <FiChevronDown
+                        className={`${styles.navChevron} ${
+                          isOpen ? styles.navChevronOpen : ""
+                        }`}
+                      />
+                    </button>
+
+                    <div
+                      className={`${styles.submenu} ${
+                        isOpen ? styles.submenuOpen : ""
+                      }`}
+                    >
+                      {item.children.map((child) => (
+                        <button
+                          key={child.id}
+                          onClick={() => handleMenuClick(child.id)}
+                          className={`${styles.subNavItem} ${
+                            activeMenu === child.id ? styles.active : ""
+                          }`}
+                          title={child.label}
+                        >
+                          <child.icon className={styles.subNavIcon} />
+                          <span className={styles.navLabel}>{child.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <button
+                  key={item.id || "dashboard"}
+                  onClick={() => handleMenuClick(item.id)}
+                  className={`${styles.navItem} ${
+                    activeMenu === item.id ? styles.active : ""
+                  }`}
+                  title={item.label}
+                >
+                  <item.icon className={styles.navIcon} />
+                  <span className={styles.navLabel}>{item.label}</span>
+                </button>
+              );
+            })}
           </div>
 
           <div className={styles.sidebarFooter}>
