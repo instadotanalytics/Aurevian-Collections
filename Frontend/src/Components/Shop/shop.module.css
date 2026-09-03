@@ -55,7 +55,6 @@
   height: 80%;
   object-fit: cover;
   display: block;
-
 }
 
 /* ✅ Responsive - Same height on all devices */
@@ -234,7 +233,9 @@
   gap: 10px;
   padding: 6px 0;
   cursor: pointer;
-  transition: color 0.25s ease, transform 0.25s ease;
+  transition:
+    color 0.25s ease,
+    transform 0.25s ease;
   font-size: 14px;
   color: var(--ink-soft);
   font-weight: 400;
@@ -256,7 +257,9 @@
   cursor: pointer;
   flex-shrink: 0;
   position: relative;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .filterOption input[type="radio"]::after {
@@ -356,7 +359,9 @@
   cursor: pointer;
   padding: 10px 0 2px;
   font-family: "Jost", sans-serif;
-  transition: color 0.2s ease, letter-spacing 0.2s ease;
+  transition:
+    color 0.2s ease,
+    letter-spacing 0.2s ease;
   letter-spacing: 0.04em;
   margin-top: 6px;
   text-transform: uppercase;
@@ -443,7 +448,9 @@
   font-size: 14px;
   color: var(--ink);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .sidebarSortOption:hover {
@@ -547,7 +554,9 @@
   border-radius: 0;
   overflow: hidden;
   position: relative;
-  transition: box-shadow 0.25s, transform 0.25s;
+  transition:
+    box-shadow 0.25s,
+    transform 0.25s;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -646,8 +655,12 @@
   line-height: 1;
   cursor: pointer;
   color: var(--ink);
-  transition: transform 0.2s ease, font-size 0.2s ease, color 0.2s ease,
-    background 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    font-size 0.2s ease,
+    color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .wishlistActions button:hover {
@@ -744,7 +757,10 @@
   background: var(--gold);
   border: 1px solid var(--gold);
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease,
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease,
     box-shadow 0.2s ease;
   min-height: 40px;
   flex-shrink: 0;
@@ -1041,7 +1057,9 @@
   font-size: 14px;
   color: var(--ink);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .mobileSortOption:hover {
@@ -1236,7 +1254,7 @@
     width: calc(100% + 32px);
     margin: 10px -16px -4px;
   }
-  
+
   .recommendationSection {
     padding: 0 20px 32px;
   }
@@ -1244,7 +1262,7 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
   }
-  
+
   .searchHeader {
     padding: 0 20px 16px;
   }
@@ -1280,7 +1298,7 @@
     width: calc(100% + 28px);
     margin: 10px -14px -4px;
   }
-  
+
   .recommendationGrid {
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
@@ -1300,7 +1318,7 @@
   .searchHeaderText {
     font-size: 13px;
   }
-  
+
   /* ✅ Hero banner same height on mobile */
   .heroBanner {
     height: 40vh;
@@ -1315,7 +1333,7 @@
     width: calc(100% + 24px);
     margin: 8px -12px -4px;
   }
-  
+
   .recommendationSection {
     padding: 0 14px 24px;
   }
@@ -1329,7 +1347,7 @@
   .recommendationGrid .productCard {
     min-height: 260px;
   }
-  
+
   .searchHeader {
     padding: 0 14px 12px;
   }
@@ -1365,7 +1383,7 @@
     bottom: 10px;
     left: 10px;
   }
-  
+
   /* Mobile Product Name - Matching Collections */
   .productName {
     font-size: 13px;
@@ -1376,7 +1394,7 @@
     text-overflow: ellipsis;
     max-width: 100%;
   }
-  
+
   .productPrice {
     gap: 8px;
     font-size: 12px;
@@ -1389,7 +1407,7 @@
   .priceOld {
     font-size: 11px;
   }
-  
+
   .badge {
     top: 10px;
     left: 10px;
@@ -1454,7 +1472,7 @@
     padding: 12px;
     font-size: 15px;
   }
-  
+
   /* ✅ Hero banner same height on smaller mobile */
   .heroBanner {
     height: 40vh;
@@ -1483,7 +1501,7 @@
     padding: 10px;
     font-size: 14px;
   }
-  
+
   /* Smaller Mobile Product Name - Matching Collections */
   .productName {
     font-size: 12px;
@@ -1494,7 +1512,7 @@
     text-overflow: ellipsis;
     max-width: 100%;
   }
-  
+
   .productPrice {
     font-size: 12px;
     gap: 8px;
@@ -1506,7 +1524,7 @@
   .priceOld {
     font-size: 10px;
   }
-  
+
   .badge {
     top: 8px;
     left: 8px;
@@ -1536,14 +1554,14 @@
   .addToCartBtn svg {
     font-size: 13px;
   }
-  
+
   .recommendationGrid {
     gap: 10px;
   }
   .recommendationGrid .productCard {
     min-height: 240px;
   }
-  
+
   .searchHeader {
     padding: 0 14px 12px;
   }
@@ -1560,7 +1578,7 @@
   .searchHeaderClear {
     font-size: 11px;
   }
-  
+
   /* ✅ Hero banner same height on small mobile */
   .heroBanner {
     height: 37vh;
@@ -1585,14 +1603,14 @@
   .priceOld {
     font-size: 10px;
   }
-  
+
   .recommendationGrid {
     gap: 8px;
   }
   .recommendationGrid .productCard {
     min-height: 220px;
   }
-  
+
   .searchHeader {
     padding: 0 10px 10px;
   }
@@ -1610,7 +1628,7 @@
     font-size: 10px;
     padding: 2px 6px;
   }
-  
+
   /* ✅ Hero banner same height on smallest mobile */
   .heroBanner {
     height: 37vh;
@@ -1709,4 +1727,78 @@
   color: #999;
   grid-column: 1 / -1;
   font-size: 14px;
+}
+
+/* ==========================================================
+   ✅ NEW — CATEGORY FILTER SKELETON
+   Appended for the "Category" filter group (desktop sidebar +
+   mobile sheet), shown while the /seller/products/categories
+   request is in flight. Reuses the same shimmer keyframe already
+   defined above so the animation matches the product-card
+   skeletons exactly.
+   ========================================================== */
+.categorySkeletonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.categorySkeletonRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+}
+
+.categorySkeletonDot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, #e8ddcc 25%, #f0e8da 50%, #e8ddcc 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.categorySkeletonBar {
+  height: 12px;
+  border-radius: 4px;
+  flex: 1 1 auto;
+  max-width: 60%;
+  background: linear-gradient(90deg, #e8ddcc 25%, #f0e8da 50%, #e8ddcc 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Vary the widths slightly so the skeleton doesn't look like a
+   uniform stack of identical bars — matches real label lengths
+   (e.g. "Rings" vs "Necklace Sets") without hardcoding real data. */
+.categorySkeletonRow:nth-child(1) .categorySkeletonBar {
+  max-width: 40%;
+}
+.categorySkeletonRow:nth-child(2) .categorySkeletonBar {
+  max-width: 65%;
+}
+.categorySkeletonRow:nth-child(3) .categorySkeletonBar {
+  max-width: 50%;
+}
+.categorySkeletonRow:nth-child(4) .categorySkeletonBar {
+  max-width: 72%;
+}
+.categorySkeletonRow:nth-child(5) .categorySkeletonBar {
+  max-width: 45%;
+}
+
+/* Mobile sheet's grid is 2 columns; the skeleton group should span
+   both so it doesn't awkwardly wrap mid-list. */
+.mobileFilterGrid > .categorySkeletonGroup {
+  grid-column: 1 / -1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .categorySkeletonDot,
+  .categorySkeletonBar {
+    animation: none !important;
+    background: #e8ddcc;
+  }
 }

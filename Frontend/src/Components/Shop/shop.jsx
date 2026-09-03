@@ -102,6 +102,11 @@ const generateSlugFromLabel = (label) => {
     .replace(/^-+|-+$/g, "");
 };
 
+// ✅ NEW — skeleton placeholders for the Category filter list, shown while
+// categories are still being fetched. Purely a loading-state visual (same
+// pattern as ShopByCategory.jsx's SKELETON_CATEGORIES), never real data.
+const CATEGORY_SKELETON_COUNT = 5;
+
 export default function Shop() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -120,6 +125,10 @@ export default function Shop() {
   const isSearchMode = searchQuery.length > 0;
 
   const [categories, setCategories] = useState([]);
+  // ✅ NEW — tracks whether the categories request is still in flight, so
+  // the Category filter group can show a skeleton instead of silently
+  // rendering nothing (previously indistinguishable from "zero categories").
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [isResolvingSlug, setIsResolvingSlug] = useState(true);
   const [priceRange, setPriceRange] = useState([0, 7000]);
@@ -145,8 +154,10 @@ export default function Shop() {
 
   // ✅ "You Might Also Like" recommendations - ALWAYS from different categories
   const [recommendedProducts, setRecommendedProducts] = useState([]);
-  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
-  const [hasLoadedRecommendations, setHasLoadedRecommendations] = useState(false);
+  const [isLoadingRecommendations, setIsLoadingRecommendations] =
+    useState(false);
+  const [hasLoadedRecommendations, setHasLoadedRecommendations] =
+    useState(false);
   const recommendationRequestIdRef = useRef(0);
   const [recommendationContext, setRecommendationContext] = useState("");
 
@@ -171,6 +182,7 @@ export default function Shop() {
 
   // Fetch categories first
   useEffect(() => {
+    setCategoriesLoading(true);
     axios
       .get(`${API_URL}/seller/products/categories`)
       .then((res) => {
@@ -182,6 +194,12 @@ export default function Shop() {
         console.error("Failed to fetch categories:", err);
         setCategories([]);
         setIsResolvingSlug(false);
+      })
+      .finally(() => {
+        // ✅ NEW — flips regardless of success/failure, so the skeleton
+        // never gets stuck and the empty state only ever shows once the
+        // request has genuinely finished.
+        setCategoriesLoading(false);
       });
   }, []);
 
@@ -192,7 +210,7 @@ export default function Shop() {
     const searchLower = searchQuery.toLowerCase().trim();
 
     let matchingCategory = categories.find(
-      (c) => c.label.toLowerCase() === searchLower
+      (c) => c.label.toLowerCase() === searchLower,
     );
 
     if (!matchingCategory) {
@@ -226,10 +244,10 @@ export default function Shop() {
     setRecommendationContext("");
 
     if (isSearchMode) {
-      navigate(`/shop${categoryId ? `?category=${categoryId}` : ''}`);
+      navigate(`/shop${categoryId ? `?category=${categoryId}` : ""}`);
     } else {
       if (categoryId) {
-        const category = categories.find(c => c.id === categoryId);
+        const category = categories.find((c) => c.id === categoryId);
         if (category) {
           const slug = generateSlugFromLabel(category.label);
           navigate(`/shop/${slug}`);
@@ -559,29 +577,36 @@ export default function Shop() {
   };
 
   // ✅ Apply client-side sorting as fallback
-  const getSortedProducts = useCallback((products) => {
-    if (!products || products.length === 0) return products;
+  const getSortedProducts = useCallback(
+    (products) => {
+      if (!products || products.length === 0) return products;
 
-    const sorted = [...products];
+      const sorted = [...products];
 
-    switch (sort) {
-      case "price-low":
-        return sorted.sort((a, b) => {
-          const priceA = a.pricing?.salePrice || a.pricing?.originalPrice || 0;
-          const priceB = b.pricing?.salePrice || b.pricing?.originalPrice || 0;
-          return priceA - priceB;
-        });
-      case "price-high":
-        return sorted.sort((a, b) => {
-          const priceA = a.pricing?.salePrice || a.pricing?.originalPrice || 0;
-          const priceB = b.pricing?.salePrice || b.pricing?.originalPrice || 0;
-          return priceB - priceA;
-        });
-      case "latest":
-      default:
-        return sorted;
-    }
-  }, [sort]);
+      switch (sort) {
+        case "price-low":
+          return sorted.sort((a, b) => {
+            const priceA =
+              a.pricing?.salePrice || a.pricing?.originalPrice || 0;
+            const priceB =
+              b.pricing?.salePrice || b.pricing?.originalPrice || 0;
+            return priceA - priceB;
+          });
+        case "price-high":
+          return sorted.sort((a, b) => {
+            const priceA =
+              a.pricing?.salePrice || a.pricing?.originalPrice || 0;
+            const priceB =
+              b.pricing?.salePrice || b.pricing?.originalPrice || 0;
+            return priceB - priceA;
+          });
+        case "latest":
+        default:
+          return sorted;
+      }
+    },
+    [sort],
+  );
 
   // ✅ Apply client-side filters (budget and promotion) AND sorting
   const filteredProducts = useMemo(() => {
@@ -624,7 +649,7 @@ export default function Shop() {
     // If we have a current category, try to find a product from a different category
     if (effectiveCategoryId) {
       const differentCategoryProduct = allProducts.find(
-        p => p.category?.categoryData?.id !== effectiveCategoryId
+        (p) => p.category?.categoryData?.id !== effectiveCategoryId,
       );
       if (differentCategoryProduct) {
         return differentCategoryProduct._id;
@@ -671,7 +696,7 @@ export default function Shop() {
     if (recommendationSeedId) {
       // Get recommendations based on the seed product
       fetchPromise = dispatch(
-        fetchRelevantProducts({ productId: recommendationSeedId, limit: 6 })
+        fetchRelevantProducts({ productId: recommendationSeedId, limit: 6 }),
       ).unwrap();
     } else {
       // No products found - fetch general recommendations from all categories
@@ -681,7 +706,7 @@ export default function Shop() {
           page: 1,
           limit: 6,
           sort: "latest",
-        })
+        }),
       ).unwrap();
     }
 
@@ -695,7 +720,7 @@ export default function Shop() {
         // This ensures "You Might Also Like" ONLY shows products from OTHER categories
         if (effectiveCategoryId && products.length > 0) {
           const filteredRecommendations = products.filter(
-            p => p.category?.categoryData?.id !== effectiveCategoryId
+            (p) => p.category?.categoryData?.id !== effectiveCategoryId,
           );
 
           // If we have at least 2 products from other categories, use them
@@ -710,14 +735,15 @@ export default function Shop() {
                 page: 1,
                 limit: 10,
                 sort: "latest",
-              })
-            ).unwrap()
+              }),
+            )
+              .unwrap()
               .then((fallbackResult) => {
                 if (requestId !== recommendationRequestIdRef.current) return;
                 let fallbackProducts = fallbackResult.products || [];
                 // Filter out current category
                 const filteredFallback = fallbackProducts.filter(
-                  p => p.category?.categoryData?.id !== effectiveCategoryId
+                  (p) => p.category?.categoryData?.id !== effectiveCategoryId,
                 );
                 setRecommendedProducts(filteredFallback.slice(0, 4));
                 setHasLoadedRecommendations(true);
@@ -745,9 +771,23 @@ export default function Shop() {
         if (requestId !== recommendationRequestIdRef.current) return;
         setIsLoadingRecommendations(false);
       });
-  }, [recommendationSeedId, dispatch, effectiveCategoryId, isSearchMode, searchQuery, recommendationContext, hasLoadedRecommendations, isInitialLoading]);
+  }, [
+    recommendationSeedId,
+    dispatch,
+    effectiveCategoryId,
+    isSearchMode,
+    searchQuery,
+    recommendationContext,
+    hasLoadedRecommendations,
+    isInitialLoading,
+  ]);
 
   const skeletonItems = Array.from({ length: 10 }, (_, i) => i);
+  // ✅ NEW — placeholder rows for the category filter skeleton
+  const categorySkeletonItems = Array.from(
+    { length: CATEGORY_SKELETON_COUNT },
+    (_, i) => i,
+  );
 
   // Get the display name for results
   const getDisplayCategoryName = () => {
@@ -760,9 +800,8 @@ export default function Shop() {
   };
 
   // ✅ Show "You Might Also Like" when in search mode OR browsing a category
-  const shouldShowRecommendations = !categoryError && (
-    isSearchMode || effectiveCategoryId
-  );
+  const shouldShowRecommendations =
+    !categoryError && (isSearchMode || effectiveCategoryId);
 
   // ✅ Shared product card renderer
   const renderProductCard = (p) => {
@@ -785,9 +824,7 @@ export default function Shop() {
               % off
             </span>
           )}
-          <span className={styles.productCatOverlay}>
-            {productCategory}
-          </span>
+          <span className={styles.productCatOverlay}>{productCategory}</span>
           <div className={styles.wishlistActions}>
             <button
               type="button"
@@ -856,6 +893,60 @@ export default function Shop() {
           </button>
         </div>
       </div>
+    );
+  };
+
+  // ✅ NEW — shared renderer for the Category filter's contents, used by
+  // both the desktop sidebar and the mobile sheet so the loading/empty/
+  // loaded logic only lives in one place.
+  const renderCategoryOptions = (namePrefix) => {
+    if (categoriesLoading) {
+      return (
+        <div
+          className={styles.categorySkeletonGroup}
+          role="status"
+          aria-busy="true"
+          aria-label="Loading categories"
+        >
+          {categorySkeletonItems.map((i) => (
+            <div className={styles.categorySkeletonRow} key={i}>
+              <span className={styles.categorySkeletonDot} />
+              <span className={styles.categorySkeletonBar} />
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <label className={styles.filterOption}>
+          <input
+            type="radio"
+            name={namePrefix}
+            checked={effectiveCategoryId === ""}
+            onChange={() => handleCategoryChange("")}
+          />
+          All
+        </label>
+        {categories.length === 0 ? (
+          <span className={styles.filterEmptyNote}>
+            No categories configured yet
+          </span>
+        ) : (
+          categories.map((c) => (
+            <label key={c.id} className={styles.filterOption}>
+              <input
+                type="radio"
+                name={namePrefix}
+                checked={effectiveCategoryId === c.id}
+                onChange={() => handleCategoryChange(c.id)}
+              />
+              {c.label}
+            </label>
+          ))
+        )}
+      </>
     );
   };
 
@@ -929,28 +1020,12 @@ export default function Shop() {
               </div>
             </div>
 
+            {/* ✅ CHANGED — Category group now goes through
+                renderCategoryOptions(), which shows a skeleton while
+                categoriesLoading is true instead of nothing at all. */}
             <div className={styles.filterGroup}>
               <span className={styles.filterGroupLabel}>Category</span>
-              <label className={styles.filterOption}>
-                <input
-                  type="radio"
-                  name="category"
-                  checked={effectiveCategoryId === ""}
-                  onChange={() => handleCategoryChange("")}
-                />
-                All
-              </label>
-              {categories.map((c) => (
-                <label key={c.id} className={styles.filterOption}>
-                  <input
-                    type="radio"
-                    name="category"
-                    checked={effectiveCategoryId === c.id}
-                    onChange={() => handleCategoryChange(c.id)}
-                  />
-                  {c.label}
-                </label>
-              ))}
+              {renderCategoryOptions("category")}
             </div>
 
             <div className={styles.filterGroup}>
@@ -1014,10 +1089,10 @@ export default function Shop() {
                 {isInitialLoading
                   ? "Loading..."
                   : isSearchMode
-                  ? `Showing ${filteredProducts.length} result${
-                      filteredProducts.length === 1 ? "" : "s"
-                    } for "${searchQuery}"`
-                  : `Showing ${filteredProducts.length} results for ${getDisplayCategoryName()}`}
+                    ? `Showing ${filteredProducts.length} result${
+                        filteredProducts.length === 1 ? "" : "s"
+                      } for "${searchQuery}"`
+                    : `Showing ${filteredProducts.length} results for ${getDisplayCategoryName()}`}
               </span>
               {isSearchMode && !isInitialLoading && (
                 <button
@@ -1070,17 +1145,17 @@ export default function Shop() {
                     <div className={styles.emptyStateIcon}>🔍</div>
                     <h3>
                       {isSearchMode
-                        ? 'No products found'
+                        ? "No products found"
                         : effectiveCategoryId
-                          ? 'No Products Found'
-                          : 'No products available'}
+                          ? "No Products Found"
+                          : "No products available"}
                     </h3>
                     <p>
                       {isSearchMode
                         ? `We couldn't find any products matching "${searchQuery}". Try a different keyword or browse our collections instead!`
                         : effectiveCategoryId
                           ? `We couldn't find any products in "${getDisplayCategoryName()}". Try browsing our other collections!`
-                          : 'We\'re currently updating our inventory. Please check back soon!'}
+                          : "We're currently updating our inventory. Please check back soon!"}
                     </p>
                     <Link to="/shop" className={styles.emptyStateButton}>
                       Browse All Products
@@ -1134,7 +1209,10 @@ export default function Shop() {
             {isInitialLoading || isLoadingRecommendations ? (
               <div className={styles.recommendationGrid}>
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <div className={styles.skeletonCard} key={`rec-skeleton-${i}`}>
+                  <div
+                    className={styles.skeletonCard}
+                    key={`rec-skeleton-${i}`}
+                  >
                     <div className={styles.skeletonImage} />
                     <div className={styles.skeletonText} />
                     <div
@@ -1243,30 +1321,13 @@ export default function Shop() {
               </div>
             </div>
 
-            {/* Category */}
+            {/* ✅ CHANGED — same renderCategoryOptions() shared helper,
+                mobile radio group name kept distinct ("mobile_category")
+                to avoid clashing with the desktop radio group. */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Category</span>
               <div className={styles.mobileFilterGrid}>
-                <label className={styles.mobileFilterOption}>
-                  <input
-                    type="radio"
-                    name="mobile_category"
-                    checked={effectiveCategoryId === ""}
-                    onChange={() => handleCategoryChange("")}
-                  />
-                  All
-                </label>
-                {categories.map((c) => (
-                  <label key={c.id} className={styles.mobileFilterOption}>
-                    <input
-                      type="radio"
-                      name="mobile_category"
-                      checked={effectiveCategoryId === c.id}
-                      onChange={() => handleCategoryChange(c.id)}
-                    />
-                    {c.label}
-                  </label>
-                ))}
+                {renderCategoryOptions("mobile_category")}
               </div>
             </div>
 

@@ -5,7 +5,7 @@
 
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { HelmetProvider } from "react-helmet-async";
 import { fetchCurrentUser } from "./redux/slices/authSlice.js";
@@ -18,6 +18,11 @@ import SuperAdminRoute from "./Components/common/SuperAdminRoute.jsx";
 import SellerRoute from "./Components/common/SellerRoute.jsx";
 import Navbar from "./Pages/Layout/Header/Navbar.jsx";
 import LoadingScreen from "./Components/common/LoadingScreen.jsx";
+// ✅ NEW — Home Page skeleton, shown instead of the generic LoadingScreen
+// only when the pending auth-check gate below is about to block the "/"
+// route. Does not change what is being checked or when the gate lifts —
+// only what's rendered while it's up, and only on this one route.
+import HomePageSkeleton from "./Components/common/HomePageSkeleton/HomePageSkeleton.jsx";
 
 // ============================================
 // SELLER AUTH PROVIDER
@@ -173,6 +178,11 @@ const App = () => {
     seller,
   } = useSelector((state) => state.seller);
 
+  // ✅ NEW — read-only, used only to decide which loading UI to show
+  // below. Does not participate in any auth check and does not change
+  // routing/redirect behavior in any way.
+  const location = useLocation();
+
   // Check authentication on app load
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -192,11 +202,19 @@ const App = () => {
   }, [dispatch]);
 
   // Show loading screen while checking authentication
+  // ✅ UNCHANGED — this gate condition is byte-for-byte identical to
+  // before. Only the JSX returned when it's true has changed: the Home
+  // route ("/") now shows HomePageSkeleton (matching Home.jsx's real
+  // section layout) instead of the generic full-screen LoadingScreen.
+  // Every other route continues to show LoadingScreen exactly as before.
   if (
     isLoading ||
     superAdminLoading ||
     (sellerLoading && localStorage.getItem("sellerAccessToken"))
   ) {
+    if (location.pathname === ROUTES.HOME) {
+      return <HomePageSkeleton />;
+    }
     return <LoadingScreen text="Loading your account..." />;
   }
 
