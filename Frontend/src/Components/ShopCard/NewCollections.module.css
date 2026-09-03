@@ -1,3 +1,4 @@
+
 /* src/Components/NewCollections/NewCollections.module.css */
 
 /* ==========================================================
@@ -228,7 +229,7 @@
 .newBadge {
   position: absolute;
   top: -12px;
-  left: -12px;
+  left: 1px;
   z-index: 3;
   display: flex;
   align-items: center;
@@ -261,6 +262,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  padding: 0;
   transition:
     background 0.25s ease,
     color 0.25s ease,
@@ -268,8 +270,23 @@
 }
 
 .wishlistBtn:hover {
-  background: var(--ink);
-  color: #fff;
+   background: #ffffff;
+}
+
+.wishlistBtn:active {
+  transform: scale(0.9);
+}
+
+/* ✅ NEW — active/wishlisted state, same red-heart treatment as
+   GiftGuide's .wishlistBtnActive so both sections match exactly. */
+.wishlistBtnActive {
+  background: #ffffff;
+  color: #d6455f;
+}
+
+.wishlistBtnActive:hover {
+  background: #ffffff;
+  color: #d6455f;
   transform: translateY(-2px);
 }
 
@@ -307,33 +324,6 @@
   background: linear-gradient(150deg, #f2ece1 0%, #e6dbc6 100%);
 }
 
-/* bag button — gold circle, bottom-right, half-overlapping the card edge */
-.bagBtn {
-  position: absolute;
-  bottom: -14px;
-  right: -12px;
-  z-index: 4;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: none;
-  background: linear-gradient(155deg, var(--gold-soft), var(--gold-deep));
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 8px 18px rgba(169, 132, 63, 0.35);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.bagBtn:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 10px 22px rgba(169, 132, 63, 0.45);
-}
-
 /* ==========================================================
    BODY
    ========================================================== */
@@ -354,43 +344,25 @@
   margin: 0;
 }
 
+/* ✅ UPDATED — product name now matches Shop's .productName treatment
+   exactly: same font-family/weight/size/color, and the same single-line
+   ellipsis truncation so long names never wrap to a second line (which
+   is what was breaking the card layout before). Kept centered + with a
+   small top/bottom margin instead of Shop's left padding, since this
+   card's content is center-aligned, but the text rendering itself
+   (font, weight, size, color, truncation behavior) is identical. */
 .title {
-  font-family: "Playfair Display", "Cormorant Garamond", serif;
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--ink);
-  margin: 0;
-  line-height: 1.3;
-}
-
-.metaRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin: 2px 0 4px;
-}
-
-.stars {
-  display: flex;
-  align-items: center;
-  gap: 1px;
-}
-
-.starIcon {
-  color: var(--gold);
-  font-size: 11px;
-}
-
-.starIconEmpty {
-  color: var(--border);
-  font-size: 11px;
-}
-
-.ratingValue {
-  font-size: 11.5px;
-  color: var(--text-secondary);
+  font-family: "Jost", sans-serif;
+  font-size: 15px;
   font-weight: 500;
+  color: var(--ink);
+  margin: 2px 0 0;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  line-height: 1.3;
 }
 
 .priceRow {
@@ -440,6 +412,22 @@
 .bagBtn:hover {
   transform: translateY(-2px) scale(1.05);
   box-shadow: 0 10px 22px rgba(169, 132, 63, 0.45);
+}
+
+/* ✅ NEW — disabled/"already in cart" state, same dimmed treatment as
+   GiftGuide's .addToCartBtn:disabled so both sections match exactly. */
+.bagBtn:disabled,
+.bagBtnActive {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 8px 18px rgba(169, 132, 63, 0.35);
+}
+
+.bagBtn:disabled:hover,
+.bagBtnActive:hover {
+  transform: none;
+  box-shadow: 0 8px 18px rgba(169, 132, 63, 0.35);
 }
 
 /* ==========================================================
@@ -523,7 +511,7 @@
 
   .newBadge {
     top: -9px;
-    left: -9px;
+    left: 1px;
     width: 36px;
     height: 36px;
     font-size: 7.5px;
@@ -560,20 +548,6 @@
 
   .title {
     font-size: 13.5px;
-  }
-
-  .metaRow {
-    gap: 4px;
-    margin: 1px 0 3px;
-  }
-
-  .starIcon,
-  .starIconEmpty {
-    font-size: 9px;
-  }
-
-  .ratingValue {
-    font-size: 9.5px;
   }
 
   .priceRow {
@@ -663,7 +637,7 @@
 
   .newBadge {
     top: -8px;
-    left: -8px;
+    left: 1px;
     width: 32px;
     height: 32px;
     font-size: 7px;
@@ -745,5 +719,10 @@
 @media (prefers-reduced-motion: reduce) {
   .skeletonPulse {
     animation: none !important;
+  }
+
+  .wishlistBtn,
+  .wishlistBtnActive {
+    transition: none !important;
   }
 }

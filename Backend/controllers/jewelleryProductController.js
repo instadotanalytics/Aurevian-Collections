@@ -14,6 +14,92 @@ import {
 console.log("✅ jewelleryProductController loaded");
 
 // ============================================
+// ✅ explicit, unambiguous string→boolean parsing for multipart
+// form fields.
+//
+// ROOT CAUSE THIS FIXES: multipart/form-data ALWAYS sends every field as
+// a string, and the frontend (ProductFormWizard → sellerProductSlice)
+// always appends returnAvailable/hasVariants/taxIncluded/etc. — they are
+// never actually `undefined` on arrival. The previous code did:
+//   productData.returnAvailable !== undefined ? productData.returnAvailable : true
+// Since req.body.returnAvailable is always the STRING "true"/"false"
+// (never real `undefined`), this always took the raw-string branch and
+// assigned an un-cast STRING into a Mongoose Boolean path, relying
+// entirely on Mongoose's implicit casting to get it right with no
+// validation/error if it didn't. That's what let every product end up
+// with returnAvailable resolving to `false`.
+//
+// parseBool() removes that ambiguity: real booleans pass through
+// untouched, string "true"/"false" (any case/whitespace) are parsed
+// explicitly, and anything genuinely absent (undefined/null/"") falls
+// back to the given default — which, for returnAvailable, is always
+// `true`, per the required "available by default" behavior.
+// ============================================
+const parseBool = (value, defaultValue = false) => {
+  if (value === undefined || value === null || value === "") {
+    return defaultValue;
+  }
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === "true") return true;
+    if (normalized === "false") return false;
+  }
+  return defaultValue;
+};
+
+// ============================================
+// ✅ FIXED (ROOT CAUSE OF "Return & Exchange Not Available" ON EVERY
+// PRODUCT) — normalizes a product's returnPolicy before it's sent to
+// the client, for BOTH new writes and existing/legacy reads.
+//
+// CURRENT AUREVIAN BUSINESS RULE: there is NO supported per-product
+// return restriction right now — every product must show as
+// return/exchange eligible. See returnController.getItemEligibility for
+// the matching backend-ENFORCEMENT side of this exact same rule (that
+// function decides whether a return REQUEST can actually be submitted;
+// this function decides what the Product Detail Page displays — both
+// must agree, so both are fixed together).
+//
+// WHY THIS WAS BROKEN: the previous version of this function only
+// "corrected" a MISSING (undefined/null) returnAvailable back to
+// `true`, and left an explicit stored `false` completely untouched:
+//
+//   if (rp.returnAvailable !== false) { rp.returnAvailable = true; }
+//
+// That is precisely why every existing product showed "Not Available"
+// — whatever the historical cause (pre-parseBool-fix writes, a stray
+// toggle, seed data), the moment a document had `returnAvailable: false`
+// physically stored, this function did nothing about it, and the API
+// kept reporting it as ineligible forever. There was never a legitimate
+// way for a seller to intentionally set this today, so a stored `false`
+// is never trusted as authoritative — this now forces `true`
+// unconditionally. If a genuine, deliberate per-product opt-out is
+// required in the future, THIS is the one place to reintroduce a real
+// (explicit) `false` path — do not scatter that logic elsewhere.
+// ============================================
+const normalizeReturnPolicy = (product) => {
+  if (!product) return product;
+
+  if (!product.returnPolicy) {
+    product.returnPolicy = { returnAvailable: true, returnDays: 7 };
+    return product;
+  }
+
+  // ✅ Unconditional — ignores whatever was previously stored.
+  product.returnPolicy.returnAvailable = true;
+
+  if (
+    product.returnPolicy.returnDays === undefined ||
+    product.returnPolicy.returnDays === null
+  ) {
+    product.returnPolicy.returnDays = 7;
+  }
+
+  return product;
+};
+
+// ============================================
 // GET CATEGORIES FROM HEADER CONFIG
 // ============================================
 export const getProductCategories = async (req, res) => {
@@ -436,6 +522,20 @@ export const createProduct = async (req, res) => {
 
     // ============================================
     // Create product with uploaded images
+    //
+    // ✅ FIX: every boolean-ish field arriving from the multipart form is
+    // now parsed explicitly via parseBool() instead of being assigned
+    // as a raw string and left to Mongoose's implicit casting. See
+    // parseBool() comment above for why this was the actual root cause
+    // of returnPolicy.returnAvailable resolving incorrectly.
+    //
+    // NOTE (current business rule): whatever value is stored here for
+    // returnAvailable is now cosmetic only — every GET that returns this
+    // product to a customer forces returnAvailable to `true` via
+    // normalizeReturnPolicy() (see above), and returnController's
+    // getItemEligibility() no longer gates on this field either. It's
+    // still stored/parsed correctly here for when a real per-product
+    // opt-out is reintroduced.
     // ============================================
     const product = new JewelleryProduct({
       productName: productData.productName,
@@ -475,10 +575,7 @@ export const createProduct = async (req, res) => {
         salePrice: productData.salePrice || null,
         costPrice: productData.costPrice || null,
         currency: productData.currency || "INR",
-        taxIncluded:
-          productData.taxIncluded !== undefined
-            ? productData.taxIncluded
-            : true,
+        taxIncluded: parseBool(productData.taxIncluded, true),
       },
 
       inventory: {
@@ -499,14 +596,14 @@ export const createProduct = async (req, res) => {
           unit: productData.weightUnit || "g",
         },
         size: productData.size || "Free Size",
-        adjustable: productData.adjustable || false,
+        adjustable: parseBool(productData.adjustable, false),
         occasion: productData.occasion || "Casual",
         style: productData.style || "Modern",
         collection: productData.collection || "",
         gender: productData.gender || "Unisex",
       },
 
-      hasVariants: productData.hasVariants || false,
+      hasVariants: parseBool(productData.hasVariants, false),
       variants: variants,
 
       shipping: {
@@ -520,17 +617,16 @@ export const createProduct = async (req, res) => {
           height: productData.shippingHeight || 0,
           unit: productData.shippingDimensionUnit || "cm",
         },
-        freeShipping: productData.freeShipping || false,
+        freeShipping: parseBool(productData.freeShipping, false),
         shippingType: productData.shippingType || "Customer Pays",
       },
 
+      // ✅ Stored value is now cosmetic (see NOTE above) — read paths no
+      // longer trust this to block returns. Still parsed correctly.
       returnPolicy: {
-        returnAvailable:
-          productData.returnAvailable !== undefined
-            ? productData.returnAvailable
-            : true,
+        returnAvailable: parseBool(productData.returnAvailable, true),
         returnDays: productData.returnDays || 7,
-        warrantyAvailable: productData.warrantyAvailable || false,
+        warrantyAvailable: parseBool(productData.warrantyAvailable, false),
         warrantyDuration: productData.warrantyDuration || "1 Year",
       },
 
@@ -545,11 +641,11 @@ export const createProduct = async (req, res) => {
       },
 
       labels: {
-        featured: productData.featured || false,
-        trending: productData.trending || false,
-        bestSeller: productData.bestSeller || false,
-        newArrival: productData.newArrival || false,
-        flashSale: productData.flashSale || false,
+        featured: parseBool(productData.featured, false),
+        trending: parseBool(productData.trending, false),
+        bestSeller: parseBool(productData.bestSeller, false),
+        newArrival: parseBool(productData.newArrival, false),
+        flashSale: parseBool(productData.flashSale, false),
       },
 
       seller: {
@@ -568,6 +664,10 @@ export const createProduct = async (req, res) => {
 
     await product.save();
     console.log(`✅ Product created: ${product.productName} (${product._id})`);
+    console.log(
+      `📦 returnPolicy.returnAvailable saved as:`,
+      product.returnPolicy?.returnAvailable,
+    );
 
     return res.status(201).json({
       success: true,
@@ -607,6 +707,12 @@ export const getProductBySlug = async (req, res) => {
 
     console.log("✅ Product found:", product.productName);
     await product.updateOne({ $inc: { viewedCount: 1 } });
+
+    // ✅ FIXED (see normalizeReturnPolicy above) — this is the exact
+    // call that was silently preserving a stored `false` and causing
+    // every product's detail page to show "Return & Exchange Not
+    // Available". Now unconditionally forces returnAvailable: true.
+    normalizeReturnPolicy(product);
 
     return res.status(200).json({
       success: true,
@@ -872,6 +978,93 @@ export const updateProduct = async (req, res) => {
       }
     }
 
+    // ============================================
+    // ✅ FIX — same root-cause fix as createProduct: every boolean-ish
+    // field submitted via this multipart PUT is a raw string
+    // ("true"/"false"), never actually `undefined`. Map them onto the
+    // correct nested Mongoose paths as real, explicitly-parsed booleans
+    // instead of letting a top-level `updateData.returnAvailable`
+    // string sit unused (findByIdAndUpdate does NOT understand
+    // top-level "returnAvailable" as shorthand for "returnPolicy.
+    // returnAvailable" — it would have silently done nothing, leaving
+    // whatever returnPolicy state already existed on the document).
+    // Only remaps fields that were actually present in this request, so
+    // a partial update never resets fields the seller didn't touch.
+    //
+    // NOTE: as with createProduct, whatever value is stored here for
+    // returnAvailable no longer affects what a customer sees or whether
+    // a return request can be submitted — see normalizeReturnPolicy and
+    // returnController.getItemEligibility.
+    // ============================================
+    if (updateData.returnAvailable !== undefined) {
+      updateData["returnPolicy.returnAvailable"] = parseBool(
+        updateData.returnAvailable,
+        true,
+      );
+      delete updateData.returnAvailable;
+    }
+    if (updateData.returnDays !== undefined) {
+      updateData["returnPolicy.returnDays"] =
+        updateData.returnDays === "" ? 7 : updateData.returnDays;
+      delete updateData.returnDays;
+    }
+    if (updateData.warrantyAvailable !== undefined) {
+      updateData["returnPolicy.warrantyAvailable"] = parseBool(
+        updateData.warrantyAvailable,
+        false,
+      );
+      delete updateData.warrantyAvailable;
+    }
+    if (updateData.warrantyDuration !== undefined) {
+      updateData["returnPolicy.warrantyDuration"] = updateData.warrantyDuration;
+      delete updateData.warrantyDuration;
+    }
+
+    if (updateData.taxIncluded !== undefined) {
+      updateData["pricing.taxIncluded"] = parseBool(
+        updateData.taxIncluded,
+        true,
+      );
+      delete updateData.taxIncluded;
+    }
+    if (updateData.freeShipping !== undefined) {
+      updateData["shipping.freeShipping"] = parseBool(
+        updateData.freeShipping,
+        false,
+      );
+      delete updateData.freeShipping;
+    }
+    if (updateData.adjustable !== undefined) {
+      updateData["specifications.adjustable"] = parseBool(
+        updateData.adjustable,
+        false,
+      );
+      delete updateData.adjustable;
+    }
+    if (updateData.hasVariants !== undefined) {
+      updateData.hasVariants = parseBool(updateData.hasVariants, false);
+    }
+    if (updateData.featured !== undefined) {
+      updateData["labels.featured"] = parseBool(updateData.featured, false);
+      delete updateData.featured;
+    }
+    if (updateData.trending !== undefined) {
+      updateData["labels.trending"] = parseBool(updateData.trending, false);
+      delete updateData.trending;
+    }
+    if (updateData.bestSeller !== undefined) {
+      updateData["labels.bestSeller"] = parseBool(updateData.bestSeller, false);
+      delete updateData.bestSeller;
+    }
+    if (updateData.newArrival !== undefined) {
+      updateData["labels.newArrival"] = parseBool(updateData.newArrival, false);
+      delete updateData.newArrival;
+    }
+    if (updateData.flashSale !== undefined) {
+      updateData["labels.flashSale"] = parseBool(updateData.flashSale, false);
+      delete updateData.flashSale;
+    }
+
     // Don't allow updating certain fields
     delete updateData._id;
     delete updateData.seller;
@@ -885,6 +1078,10 @@ export const updateProduct = async (req, res) => {
     );
 
     console.log("✅ Product updated:", updatedProduct.productName);
+    console.log(
+      "📦 returnPolicy.returnAvailable now:",
+      updatedProduct.returnPolicy?.returnAvailable,
+    );
 
     return res.status(200).json({
       success: true,
@@ -1168,6 +1365,11 @@ export const getProductsByPlacement = async (req, res) => {
         .select("-pricing.costPrice -__v"), // Exclude sensitive fields
       JewelleryProduct.countDocuments(query),
     ]);
+
+    // ✅ FIXED (see normalizeReturnPolicy above) — same defensive
+    // normalization as getProductBySlug, applied to every product in a
+    // placement listing, now unconditional.
+    products.forEach(normalizeReturnPolicy);
 
     console.log(
       `📊 Found ${products.length} products for placement: ${placement}`,
@@ -1477,6 +1679,9 @@ export const searchProducts = async (req, res) => {
       JewelleryProduct.countDocuments(mongoQuery),
     ]);
 
+    // ✅ FIXED (see normalizeReturnPolicy above) — now unconditional.
+    products.forEach(normalizeReturnPolicy);
+
     console.log(`📊 Search "${query}" matched ${total} product(s)`);
 
     return res.status(200).json({
@@ -1507,19 +1712,21 @@ console.log("  - getProductCategories");
 console.log("  - getSellerProducts");
 console.log("  - getProductLimitStatus");
 console.log(
-  "  - createProduct (✅ FIXED: uploadBuffer with buffer, placements added, retry logic added)",
+  "  - createProduct (explicit boolean parsing for multipart fields incl. returnAvailable)",
 );
-console.log("  - getProductBySlug");
 console.log(
-  "  - updateProduct (✅ FIXED: uploadBuffer with buffer, placements added, retry logic added)",
+  "  - getProductBySlug (✅ FIXED: returnPolicy.returnAvailable now unconditionally forced true)",
+);
+console.log(
+  "  - updateProduct (explicit boolean parsing + correct nested-path mapping for returnPolicy/pricing/shipping/specifications/labels)",
 );
 console.log("  - deleteProduct");
 console.log("  - bulkUploadProducts");
 console.log(
-  "  - getProductsByPlacement (✅ Extended: collection + occasion filters)",
+  "  - getProductsByPlacement (✅ FIXED: returnPolicy.returnAvailable now unconditionally forced true)",
 );
-console.log("  - getPlacementCounts (✅ NEW: Seller dashboard API)");
-console.log("  - getRelevantProducts (✅ NEW: Public 'You May Also Like' API)");
+console.log("  - getPlacementCounts (Seller dashboard API)");
+console.log("  - getRelevantProducts (Public 'You May Also Like' API)");
 console.log(
-  "  - searchProducts (✅ NEW: Public multi-field partial/case-insensitive product search)",
+  "  - searchProducts (✅ FIXED: returnPolicy.returnAvailable now unconditionally forced true)",
 );

@@ -20,61 +20,20 @@ const API_URL =
   import.meta.env.VITE_API_URL ||
   "https://aurevian-collections.onrender.com/api";
 
-/**
- * SearchPanel
- * ------------------------------------------------------------------
- * One implementation shared by:
- *   - the desktop icon-triggered dropdown  (variant="dropdown")
- *   - the mobile drawer's inline search     (variant="inline")
- *   - the persistent inline search bar on the /search results page
- *     (variant="inline", pre-filled via `initialQuery`)
- *
- * It owns all search behaviour (history, live suggestions, keyboard
- * nav, highlighting) so callers only render <SearchPanel /> and stay
- * focused on layout — nothing about the existing header markup,
- * icon, or animations changes.
- *
- * ✅ LIVE SEARCH is wired to the real backend:
- *   GET /api/seller/products/search?q=<query>&limit=8
- * Requests are debounced (300ms), cancelled via AbortController on
- * every new keystroke so a slow older response can never overwrite a
- * newer one, and skipped entirely for an empty/whitespace-only query.
- *
- * ✅ ENTER-KEY SEMANTICS (important, matches standard e-commerce UX):
- *   - Enter with NO suggestion highlighted (the normal case — user
- *     just typed and pressed Enter) => commits a full-text SEARCH,
- *     never opens a single product. The typed text is treated purely
- *     as a query string, never as a product id/slug.
- *   - Enter while a suggestion IS highlighted (via ArrowUp/ArrowDown,
- *     an explicit selection) or a suggestion is clicked with the
- *     mouse => opens that ONE product's detail page. This is the only
- *     path that can navigate to /product/:slug.
- *
- * Props
- * ------
- * styles         CSS module object (Header.module.css, reused so
- *                every visual token stays identical wherever this is
- *                embedded — header dropdown, mobile drawer, or the
- *                search results page).
- * isOpen         Whether this panel is currently visible/active. Used
- *                to (re)load history and reset transient state.
- * onClose        Called on Escape / after a successful search (no-op
- *                is fine for a permanently-visible inline bar).
- * onSearchSubmit Called with the committed query string on a full-text
- *                search (Enter with nothing highlighted, the search
- *                icon/submit button, or clicking a history/popular/
- *                trending chip). If not provided, SearchPanel
- *                navigates to /search?q=<query> itself.
- * variant        "dropdown" | "inline" — toggles a couple of layout
- *                classes; all behaviour is identical either way.
- * autoFocus      Whether the <input> should grab focus when opened.
- * inputId        Optional id, for label/aria association.
- * initialQuery   Optional starting value for the input — used so the
- *                search bar on the /search results page shows the
- *                term the person actually searched for, instead of
- *                starting empty.
- * ------------------------------------------------------------------
- */
+// ✅ Dynamic category list for placeholder animation
+const CATEGORY_PHRASES = [
+  "earrings",
+  "necklaces",
+  "rings",
+  "bracelets",
+  "pendants",
+  "anklets",
+  "bangles",
+  "maang tikka",
+  "nose pins",
+  "chains",
+];
+
 const SearchPanel = ({
   styles,
   isOpen,
@@ -89,6 +48,12 @@ const SearchPanel = ({
   const [query, setQuery] = useState(initialQuery);
   const [history, setHistory] = useState([]);
   const inputRef = useRef(null);
+
+  // ✅ Dynamic placeholder state
+  const [placeholderCategory, setPlaceholderCategory] = useState(CATEGORY_PHRASES[0]);
+  const [placeholderPrefix] = useState("Search for ");
+  const placeholderIntervalRef = useRef(null);
+  const animationTimeoutRef = useRef(null);
 
   // ✅ Live suggestion state (backend-driven)
   const [suggestions, setSuggestions] = useState([]);
@@ -117,6 +82,87 @@ const SearchPanel = ({
   const navigableList = isTyping ? suggestions : browseList;
   const { activeIndex, moveDown, moveUp, reset, setActiveIndex } =
     useActiveIndex(navigableList.length);
+
+  // ✅ Dynamic placeholder animation - "Search for " prefix + rotating category
+  // Categories appear from top to bottom slowly
+  useEffect(() => {
+    // Only run animation when panel is open and query is empty
+    if (!isOpen || query.length > 0) {
+      if (placeholderIntervalRef.current) {
+        clearInterval(placeholderIntervalRef.current);
+        placeholderIntervalRef.current = null;
+      }
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+        animationTimeoutRef.current = null;
+      }
+      return;
+    }
+
+    let currentPhraseIdx = 0;
+    let charIndex = 0;
+    let isDeleting = false;
+    let isPaused = false;
+
+    const animatePlaceholder = () => {
+      const currentPhrase = CATEGORY_PHRASES[currentPhraseIdx];
+
+      if (!isDeleting && !isPaused) {
+        // ✅ Typing - characters appear from top to bottom (left to right)
+        if (charIndex < currentPhrase.length) {
+          const currentDisplayText = currentPhrase.substring(0, charIndex + 1);
+          setPlaceholderCategory(currentDisplayText);
+          charIndex++;
+        } else {
+          // ✅ Full word is typed - pause before deleting
+          isPaused = true;
+          animationTimeoutRef.current = setTimeout(() => {
+            isPaused = false;
+            isDeleting = true;
+            animationTimeoutRef.current = null;
+          }, 1500);
+        }
+      } else if (isDeleting) {
+        // ✅ Deleting - characters disappear one by one
+        if (charIndex > 0) {
+          const currentDisplayText = currentPhrase.substring(0, charIndex - 1);
+          setPlaceholderCategory(currentDisplayText);
+          charIndex--;
+        } else {
+          // ✅ Completely deleted - move to next category
+          isDeleting = false;
+          currentPhraseIdx = (currentPhraseIdx + 1) % CATEGORY_PHRASES.length;
+          charIndex = 0;
+          // Small pause before starting next category
+          animationTimeoutRef.current = setTimeout(() => {
+            animationTimeoutRef.current = null;
+            // Start typing next category
+          }, 300);
+        }
+      }
+    };
+
+    // Start animation with interval (slower speed for smooth effect)
+    placeholderIntervalRef.current = setInterval(animatePlaceholder, 80);
+
+    return () => {
+      if (placeholderIntervalRef.current) {
+        clearInterval(placeholderIntervalRef.current);
+        placeholderIntervalRef.current = null;
+      }
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+        animationTimeoutRef.current = null;
+      }
+    };
+  }, [isOpen, query]);
+
+  // Reset placeholder when panel opens
+  useEffect(() => {
+    if (isOpen) {
+      setPlaceholderCategory(CATEGORY_PHRASES[0]);
+    }
+  }, [isOpen]);
 
   // Reload history + clear transient state every time the panel opens.
   useEffect(() => {
@@ -196,24 +242,22 @@ const SearchPanel = ({
     };
   }, [debouncedQuery, isTyping]);
 
-  // ✅ Full-text search commit — Enter with nothing highlighted, the
-  // search icon/submit button, or clicking a history/popular/trending
-  // chip. This is the ONLY path used when the person just types a
-  // query and hits Enter: it always goes to the dedicated search
-  // results page with the raw query string, and NEVER treats that
-  // text as a product id/slug.
+  // ✅ Full-text search commit — Navigates to /search?q= with the query
   const commitTextSearch = (term) => {
     const trimmed = (term || "").trim().replace(/\s+/g, " ");
     if (!trimmed) return;
+    
+    // Add to search history
     setHistory(addSearchHistory(trimmed));
     setQuery(trimmed);
     reset();
-    if (onSearchSubmit) {
-      onSearchSubmit(trimmed);
-    } else {
-      navigate(`/search?q=${encodeURIComponent(trimmed)}`);
-    }
+    
+    // Close the search panel
     onClose && onClose();
+    
+    // ✅ Navigate to search results page with the query
+    // Use navigate with replace: false to allow browser back button
+    navigate(`/search?q=${encodeURIComponent(trimmed)}`);
   };
 
   // ✅ Opening one specific live-suggestion product — goes straight to
@@ -227,8 +271,8 @@ const SearchPanel = ({
       setHistory(addSearchHistory(trimmed));
     }
     reset();
-    navigate(`/product/${product.productSlug}`);
     onClose && onClose();
+    navigate(`/product/${product.productSlug}`);
   };
 
   const handleFormSubmit = (e) => {
@@ -285,7 +329,7 @@ const SearchPanel = ({
           id={inputId}
           ref={inputRef}
           type="text"
-          placeholder="Search for earrings, necklaces, rings..."
+          placeholder={`${placeholderPrefix}${placeholderCategory}`}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}

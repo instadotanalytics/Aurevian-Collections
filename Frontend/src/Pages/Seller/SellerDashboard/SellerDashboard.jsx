@@ -23,6 +23,7 @@ import {
   FiMapPin, // ✅ NEW — icon for Pickup Address
   FiChevronDown, // ✅ NEW — dropdown indicator for grouped nav items
   FiLayers, // ✅ NEW — icon for the "Homepage Sections" dropdown group
+  FiRefreshCw, // ✅ NEW — icon for Returns
 } from "react-icons/fi";
 
 import { useSelector, useDispatch } from "react-redux";
@@ -43,6 +44,7 @@ import Upgrade from "./components/Upgrade";
 import ProductManagement from "./components/ProductManagement";
 import ProductFormWizard from "./components/ProductFormWizard";
 import Orders from "./components/Orders";
+import Returns from "./components/Returns"; // ✅ NEW
 import FeaturedProductsManagement from "../SellerDashboard/components/FeaturedProductsManagement/FeaturedProductsManagement.jsx";
 
 import { sellerLogout } from "../../../redux/slices/sellerSlice";
@@ -96,10 +98,10 @@ const PLAN_THEME = {
 };
 
 const getPlanTheme = (planId) => PLAN_THEME[planId] || PLAN_THEME.free;
-
 // ✅ Updated menuItems — "Offers Section", "Curated For You", "Trending Picks"
 // and "New Collections" are now grouped under a single dropdown item
 // called "Homepage Sections" (isDropdown: true, with a children array).
+// ✅ Updated menuItems with New Collections, Pickup Address and Returns
 const menuItems = [
   { id: "", label: "Dashboard", icon: FiHome },
   { id: "products", label: "Products", icon: FiPackage },
@@ -116,6 +118,7 @@ const menuItems = [
     ],
   },
   { id: "orders", label: "Orders", icon: FiShoppingBag },
+  { id: "returns", label: "Returns", icon: FiRefreshCw }, // ✅ NEW
   { id: "earnings", label: "Earnings", icon: FiDollarSign },
   { id: "customers", label: "Customers", icon: FiUsers },
   { id: "settings", label: "Settings", icon: FiSettings },
@@ -584,6 +587,8 @@ const SellerDashboard = () => {
               />
 
               <Route path="orders" element={<Orders />} />
+              {/* ✅ NEW — Return/Exchange requests for this seller's products */}
+              <Route path="returns" element={<Returns />} />
               <Route path="earnings" element={<Earnings />} />
               <Route path="customers" element={<Customers />} />
               <Route path="settings" element={<Settings />} />

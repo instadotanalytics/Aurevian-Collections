@@ -15,6 +15,12 @@ import { emitShippingUpdated } from "../socket/orderEvents.js";
 
 const UNIT_TO_KG = { g: 0.001, kg: 1, oz: 0.0283495, lb: 0.453592 };
 
+// ✅ NEW — flat free-shipping threshold. Applied inside
+// calculateShippingRate() only, which is the single function already
+// shared by the cart shipping-quote endpoint and order creation, so
+// cart/checkout/order creation can never disagree about it.
+const FREE_SHIPPING_THRESHOLD = 999;
+
 // ============================================
 // STATUS MAPPING
 // ============================================
@@ -57,15 +63,17 @@ function isOwnerOrAdmin(order, req) {
 }
 
 // ============================================
-// ✅ NEW: RESOLVE THE SELLER THAT OWNS AN ORDER'S ITEMS
+// ✅ RESOLVE THE SELLER THAT OWNS AN ORDER'S ITEMS
 // Shipment creation is one Shiprocket shipment per Aurevian order, which
 // only works if every item in that order belongs to the same seller (this
 // was already implicitly assumed by the old single-global-address code —
 // it summed every item's weight into one payload). We now make that
 // assumption explicit and fail loudly instead of silently picking one
 // seller's address for a mixed-seller order.
+// ✅ CHANGED — exported so returnController.js can reuse it for reverse
+// pickups instead of duplicating the seller-resolution logic.
 // ============================================
-async function resolveOrderSeller(order) {
+export async function resolveOrderSeller(order) {
   const sellerIds = [
     ...new Set(
       (order.items || []).map((i) => i.seller?.toString()).filter(Boolean),
@@ -101,11 +109,13 @@ async function resolveOrderSeller(order) {
 }
 
 // ============================================
-// ✅ NEW: PICKUP LOCATION VALIDATION (PER SELLER)
+// ✅ PICKUP LOCATION VALIDATION (PER SELLER)
 // Confirms the seller's saved pickup address was actually registered with
 // Shiprocket (isRegisteredWithShiprocket + a nickname on the seller doc),
 // and — where possible — cross-checks that nickname still exists on the
 // Shiprocket account. Replaces the old single env-var check.
+// ✅ CHANGED — exported so returnController.js can reuse it for reverse
+// pickups instead of duplicating the validation logic.
 // ============================================
 let pickupLocationsCache = { names: null, fetchedAt: 0 };
 const PICKUP_CACHE_TTL_MS = 10 * 60 * 1000;
@@ -139,7 +149,7 @@ async function getRegisteredPickupLocationNames() {
   return pickupLocationsCache.names;
 }
 
-async function assertSellerPickupLocationRegistered(seller) {
+export async function assertSellerPickupLocationRegistered(seller) {
   const nickname = seller.pickupAddress?.shiprocketPickupLocationName;
 
   if (!seller.pickupAddress?.isRegisteredWithShiprocket || !nickname) {
@@ -194,16 +204,21 @@ export class ShippingUnavailableError extends Error {
 
 // ============================================
 // CALCULATE SHIPPING RATE
-// ✅ CHANGED — pickupPincode is now a REQUIRED parameter supplied by the
-// caller from the relevant seller's saved pickup address. There is no
-// env-var fallback: if the caller can't determine a seller pickup pincode,
-// it must not call this function.
+// pickupPincode is a REQUIRED parameter supplied by the caller from the
+// relevant seller's saved pickup address. There is no env-var fallback:
+// if the caller can't determine a seller pickup pincode, it must not call
+// this function.
+// ✅ CHANGED — accepts `itemsTotal` and applies the ₹999 free-shipping
+// threshold here, in the one function every shipping-fee call site (cart
+// quote, Razorpay order creation, COD order creation) already funnels
+// through — so the rule can never be applied inconsistently.
 // ============================================
 export async function calculateShippingRate({
   deliveryPincode,
   pickupPincode,
   weightKg,
   paymentMethod, // "cod" | "prepaid"
+  itemsTotal = 0,
 }) {
   if (!isValidIndianPincode(deliveryPincode)) {
     const err = new Error("A valid 6-digit delivery pincode is required");
@@ -246,12 +261,15 @@ export async function calculateShippingRate({
     );
   }
 
+  const isFreeShipping = Number(itemsTotal) >= FREE_SHIPPING_THRESHOLD;
+
   return {
-    shippingFee: Math.round(Number(chosen.rate)),
+    shippingFee: isFreeShipping ? 0 : Math.round(Number(chosen.rate)),
     courierId: chosen.courier_company_id,
     courierName: chosen.courier_name,
     estimatedDeliveryDays: chosen.estimated_delivery_days,
     codAvailable: !!chosen.cod,
+    freeShipping: isFreeShipping,
   };
 }
 
@@ -539,9 +557,12 @@ export async function createShipmentForOrder(orderId) {
 
 // ============================================
 // POST /api/shipping/calculate-rate
-// ✅ CHANGED — pickup pincode now comes from the seller who owns the
-// cart's products, not SHIPROCKET_PICKUP_PINCODE. If the cart mixes
-// sellers, we reject the quote rather than guessing whose address to use.
+// pickup pincode comes from the seller who owns the cart's products, not
+// SHIPROCKET_PICKUP_PINCODE. If the cart mixes sellers, we reject the
+// quote rather than guessing whose address to use.
+// ✅ CHANGED — passes itemsTotal through to calculateShippingRate so the
+// ₹999 free-shipping threshold applies here too, and surfaces
+// `freeShipping` in the response.
 // ============================================
 export const getShippingQuote = async (req, res) => {
   try {
@@ -622,6 +643,7 @@ export const getShippingQuote = async (req, res) => {
         pickupPincode,
         weightKg: totalWeightKg,
         paymentMethod: normalizedPaymentMethod,
+        itemsTotal,
       });
     } catch (err) {
       if (err instanceof ShippingUnavailableError) {
@@ -648,6 +670,7 @@ export const getShippingQuote = async (req, res) => {
         totalAmount: itemsTotal + rate.shippingFee,
         courierName: rate.courierName,
         estimatedDeliveryDays: rate.estimatedDeliveryDays,
+        freeShipping: rate.freeShipping,
       },
     });
   } catch (error) {

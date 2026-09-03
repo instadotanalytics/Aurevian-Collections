@@ -1,20 +1,34 @@
+
 // src/Components/ShopCardCategory/ShopCardCategory.jsx
 //
 // Products come from FeaturedProduct entries (section: "trending-picks"),
 // fetched via fetchFeaturedProducts — same pattern as GiftGuide.jsx /
-// Offers.jsx. No hardcoded product data. Layout, card markup/classes,
-// drag-to-scroll, and arrows are unchanged from the static version.
+// Offers.jsx. Wishlist + Add to Cart now wired to the same redux slices
+// and auth-guard pattern used in Offers.jsx (toggleWishlistItem,
+// addItemToCart, requireAuth + toast + navigate to /login).
 
 import React, { useRef, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { FiArrowRight, FiArrowLeft, FiHeart } from "react-icons/fi";
+import { FaHeart } from "react-icons/fa";
+import toast from "react-hot-toast";
 import styles from "./ShopCardCategory.module.css";
 
 import { fetchFeaturedProducts } from "../../redux/slices/featuredProductSlice";
+import { addItemToCart } from "../../redux/slices/cartSlice";
+import { toggleWishlistItem } from "../../redux/slices/wishlistSlice";
 
 const SECTION = "trending-picks";
 
-function ProductCard({ product, isWishlisted, onToggleWishlist, onAddToCart }) {
+function ProductCard({
+  product,
+  isInCart,
+  isInWishlist,
+  cartLoading,
+  onToggleWishlist,
+  onAddToCart,
+}) {
   const handleWishlistClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -24,7 +38,7 @@ function ProductCard({ product, isWishlisted, onToggleWishlist, onAddToCart }) {
   const handleAddToCartClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    onAddToCart(product);
+    onAddToCart(product.id);
   };
 
   return (
@@ -77,25 +91,30 @@ function ProductCard({ product, isWishlisted, onToggleWishlist, onAddToCart }) {
 
       <button
         type="button"
-        className={`${styles.wishlistBtn} ${isWishlisted ? styles.wishlistBtnActive : ""}`}
+        className={`${styles.wishlistBtn} ${isInWishlist ? styles.wishlistBtnActive : ""}`}
         onClick={handleWishlistClick}
-        aria-pressed={isWishlisted}
+        aria-pressed={isInWishlist}
         aria-label={
-          isWishlisted
+          isInWishlist
             ? `Remove ${product.name} from wishlist`
             : `Add ${product.name} to wishlist`
         }
       >
-        <FiHeart className={styles.wishlistIcon} />
+        {isInWishlist ? (
+          <FaHeart className={styles.wishlistIcon} />
+        ) : (
+          <FiHeart className={styles.wishlistIcon} />
+        )}
       </button>
 
       <button
         type="button"
         className={styles.addToCartBtn}
         onClick={handleAddToCartClick}
-        aria-label={`Add ${product.name} to cart`}
+        aria-label={isInCart ? "Already in cart" : `Add ${product.name} to cart`}
+        disabled={isInCart || cartLoading}
       >
-        Add To Cart
+        {isInCart ? "In Cart" : "Add To Cart"}
       </button>
     </div>
   );
@@ -157,8 +176,12 @@ const toCardProduct = (product) => {
 
 export default function ShopCardCategory() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const scrollContainerRef = useRef(null);
-  const [wishlist, setWishlist] = useState(() => new Set());
+
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const cartItems = useSelector((state) => state.cart.items);
+  const wishlistItems = useSelector((state) => state.wishlist.items);
 
   const { products, isLoading, error } = useSelector(
     (state) =>
@@ -168,6 +191,8 @@ export default function ShopCardCategory() {
         error: null,
       },
   );
+
+  const [cartLoadingId, setCartLoadingId] = useState(null);
 
   useEffect(() => {
     dispatch(fetchFeaturedProducts(SECTION));
@@ -227,23 +252,6 @@ export default function ShopCardCategory() {
     }
   };
 
-  const toggleWishlist = (productId) => {
-    setWishlist((prev) => {
-      const next = new Set(prev);
-      if (next.has(productId)) {
-        next.delete(productId);
-      } else {
-        next.add(productId);
-      }
-      return next;
-    });
-  };
-
-  const handleAddToCart = (product) => {
-    // Hook this up to your real cart logic/state/context as needed.
-    console.log("Added to cart:", product);
-  };
-
   useEffect(() => {
     const el = scrollContainerRef.current;
     if (!el) return;
@@ -257,12 +265,42 @@ export default function ShopCardCategory() {
     };
   }, []);
 
+  const requireAuth = () => {
+    if (!isAuthenticated) {
+      toast.error("Please login to continue");
+      navigate("/login", { state: { from: "/" } });
+      return false;
+    }
+    return true;
+  };
+
+  const isInCart = (id) => cartItems.some((i) => i.product === id);
+  const isInWishlist = (id) =>
+    wishlistItems.some((i) => (i.product?._id || i.product) === id);
+
+  const handleToggleWishlist = (id) => {
+    if (!requireAuth()) return;
+    dispatch(toggleWishlistItem(id)).catch(() => {});
+  };
+
+  const handleAddToCart = async (id) => {
+    if (!requireAuth()) return;
+    try {
+      setCartLoadingId(id);
+      await dispatch(addItemToCart({ productId: id, quantity: 1 })).unwrap();
+      toast.success("Added to cart");
+    } catch (err) {
+      toast.error(err || "Failed to add to cart");
+    } finally {
+      setCartLoadingId(null);
+    }
+  };
+
   return (
     <section className={styles.section} aria-labelledby="shop-cards-heading">
       <div className={styles.container}>
         <div className={styles.header}>
           <div className={styles.headerText}>
-            <p className={styles.topText}>✦ TRENDING PICKS ✦</p>
             <h2 id="shop-cards-heading" className={styles.heading}>
               Best Products For You
             </h2>
@@ -320,8 +358,10 @@ export default function ShopCardCategory() {
                     <ProductCard
                       key={product.id}
                       product={product}
-                      isWishlisted={wishlist.has(product.id)}
-                      onToggleWishlist={toggleWishlist}
+                      isInCart={isInCart(product.id)}
+                      isInWishlist={isInWishlist(product.id)}
+                      cartLoading={cartLoadingId === product.id}
+                      onToggleWishlist={handleToggleWishlist}
                       onAddToCart={handleAddToCart}
                     />
                   ))}

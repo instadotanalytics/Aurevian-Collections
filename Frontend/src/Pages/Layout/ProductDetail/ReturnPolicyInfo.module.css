@@ -1,0 +1,63 @@
+/* src/Pages/Layout/ProductDetail/ReturnPolicyInfo.module.css */
+
+.card {
+  margin: 18px 0;
+  padding: 16px 18px;
+  border: 1px solid #e8e2d8;
+  border-radius: 12px;
+  background: #fbf9f5;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.icon {
+  color: #1c1815;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #1c1815;
+  letter-spacing: 0.01em;
+}
+
+.list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.list li {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #5c564f;
+}
+
+.note {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #8a5a3a;
+}
+
+.warrantyBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #6b5b3e;
+  background: #f3ead9;
+  padding: 4px 10px;
+  border-radius: 999px;
+  width: fit-content;
+}

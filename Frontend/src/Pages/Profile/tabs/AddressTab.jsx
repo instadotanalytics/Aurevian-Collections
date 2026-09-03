@@ -39,47 +39,11 @@ const COUNTRIES = [
   "Switzerland",
 ];
 
-const STATES = {
-  India: [
-    "Andhra Pradesh",
-    "Karnataka",
-    "Tamil Nadu",
-    "Maharashtra",
-    "Delhi",
-    "Kerala",
-    "Telangana",
-    "Uttar Pradesh",
-    "Rajasthan",
-    "Gujarat",
-  ],
-  USA: [
-    "California",
-    "Texas",
-    "New York",
-    "Florida",
-    "Illinois",
-    "Pennsylvania",
-    "Ohio",
-    "Georgia",
-  ],
-  UK: ["England", "Scotland", "Wales", "Northern Ireland"],
-  Canada: ["Ontario", "British Columbia", "Quebec", "Alberta", "Manitoba"],
-  Australia: [
-    "New South Wales",
-    "Victoria",
-    "Queensland",
-    "Western Australia",
-    "South Australia",
-  ],
-  Germany: ["Bavaria", "Berlin", "Hesse", "North Rhine-Westphalia", "Saxony"],
-  France: [
-    "Île-de-France",
-    "Provence-Alpes-Côte d'Azur",
-    "Nouvelle-Aquitaine",
-    "Auvergne-Rhône-Alpes",
-  ],
-  Switzerland: ["Zurich", "Bern", "Geneva", "Basel", "Lausanne"],
-};
+// ✅ REMOVED — the hardcoded STATES map (previously keyed by country, each
+// with a short fixed list — e.g. only 10 Indian states) was the root
+// cause of users/sellers being unable to enter their real state. State
+// is now a free-text field below, same as City already was. No
+// predefined state/city list exists anywhere in this form anymore.
 
 const ADDRESS_TYPES = [
   { value: "home", label: "Home", icon: FiHome },
@@ -187,7 +151,9 @@ const AddressTab = () => {
       errors.city = "City is required";
     }
 
-    if (!newAddress.state) {
+    // ✅ State is now free text — just require it to be non-empty.
+    // No predefined list is checked against.
+    if (!newAddress.state.trim()) {
       errors.state = "State is required";
     }
 
@@ -373,7 +339,10 @@ const AddressTab = () => {
                       newAddress.addressType === type.value ? styles.active : ""
                     }`}
                     onClick={() =>
-                      setNewAddress((prev) => ({ ...prev, addressType: type.value }))
+                      setNewAddress((prev) => ({
+                        ...prev,
+                        addressType: type.value,
+                      }))
                     }
                   >
                     <Icon size={20} />
@@ -535,20 +504,18 @@ const AddressTab = () => {
               )}
             </div>
             <div className={styles.formGroup}>
+              {/* ✅ FIXED — State is now a free-text input, same as City.
+                  No predefined/hardcoded list of states is used anywhere
+                  in this form. The user can type any valid state name. */}
               <label>State *</label>
-              <select
+              <input
+                type="text"
                 name="state"
                 value={newAddress.state}
                 onChange={handleAddressChange}
+                placeholder="Enter your state"
                 className={formErrors.state ? styles.errorInput : ""}
-              >
-                <option value="">Select State</option>
-                {STATES[newAddress.country]?.map((state) => (
-                  <option key={state} value={state}>
-                    {state}
-                  </option>
-                ))}
-              </select>
+              />
               {formErrors.state && (
                 <span className={styles.errorMessage}>
                   <FiAlertCircle size={14} /> {formErrors.state}
@@ -677,7 +644,10 @@ const AddressTab = () => {
                 </p>
                 <p className={styles.addressLine}>{address.country}</p>
                 <p className={styles.addressPhone}>
-                  <span><FiSmartphone size={13} /> {address.mobileNumber || address.phone}</span>
+                  <span>
+                    <FiSmartphone size={13} />{" "}
+                    {address.mobileNumber || address.phone}
+                  </span>
                   {address.alternateMobile && (
                     <span className={styles.alternatePhone}>
                       (Alt: {address.alternateMobile})

@@ -121,6 +121,13 @@
   display: flex;
   gap: 26px;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.filterTabs::-webkit-scrollbar {
+  display: none;
 }
 
 .filterTab {
@@ -133,6 +140,7 @@
   cursor: pointer;
   white-space: nowrap;
   position: relative;
+  flex-shrink: 0;
   transition: color 0.2s ease;
 }
 
@@ -807,6 +815,23 @@
     align-items: stretch;
   }
 
+  /* FIX: filter tabs were overflowing off-screen with no scroll cue,
+     hiding "Cancelled" and "Return". Tighten spacing, keep tabs from
+     shrinking, and hide the scrollbar so it reads as an intentional
+     swipeable strip instead of a layout bug. */
+  .filterTabs {
+    gap: 18px;
+    padding: 0 2px 4px;
+    margin: 0 -14px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .filterTab {
+    font-size: 0.82rem;
+    flex-shrink: 0;
+  }
+
   .searchWrapper {
     max-width: none;
   }
@@ -851,6 +876,17 @@
   .summaryCard {
     padding: 20px 18px;
   }
+
+  .filterTabs {
+    gap: 14px;
+    margin: 0 -12px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .filterTab {
+    font-size: 0.78rem;
+  }
 }
 
 @media (max-width: 380px) {
@@ -864,6 +900,14 @@
 
   .pageSubtitle {
     font-size: 12.5px;
+  }
+
+  .filterTabs {
+    gap: 12px;
+  }
+
+  .filterTab {
+    font-size: 0.74rem;
   }
 }
 

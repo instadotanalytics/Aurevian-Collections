@@ -340,7 +340,6 @@ export default function Offers() {
       <div className={styles.container}>
         <div className={styles.header}>
           <div className={styles.headerText}>
-            <p className={styles.topText}>✦ Specially Made ✦</p>
             <h2 id="offers-heading" className={styles.heading}>
               Offers Worth The Splurge
             </h2>

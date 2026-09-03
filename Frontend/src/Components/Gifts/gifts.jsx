@@ -206,6 +206,31 @@ export default function Gifts() {
       });
   }, []);
 
+  // ✅ Apply client-side sorting as fallback
+  const getSortedProducts = useCallback((products) => {
+    if (!products || products.length === 0) return products;
+
+    const sorted = [...products];
+
+    switch (sortBy) {
+      case "price-low":
+        return sorted.sort((a, b) => {
+          const priceA = a.pricing?.salePrice || a.pricing?.originalPrice || 0;
+          const priceB = b.pricing?.salePrice || b.pricing?.originalPrice || 0;
+          return priceA - priceB;
+        });
+      case "price-high":
+        return sorted.sort((a, b) => {
+          const priceA = a.pricing?.salePrice || a.pricing?.originalPrice || 0;
+          const priceB = b.pricing?.salePrice || b.pricing?.originalPrice || 0;
+          return priceB - priceA;
+        });
+      case "latest":
+      default:
+        return sorted;
+    }
+  }, [sortBy]);
+
   // Fetch products with infinite scroll - like Shop
   useEffect(() => {
     const load = async () => {
@@ -219,6 +244,13 @@ export default function Gifts() {
       const start = Date.now();
       try {
         setCategoryError(null);
+        
+        // ✅ Convert sort value to backend format
+        let sortParam = sortBy;
+        if (sortBy === "price-low") sortParam = "price-asc";
+        else if (sortBy === "price-high") sortParam = "price-desc";
+        else if (sortBy === "latest") sortParam = "latest";
+
         const result = await dispatch(
           fetchProductsByPlacement({
             placement: "gifts",
@@ -226,7 +258,7 @@ export default function Gifts() {
             limit: 10,
             categoryId: selectedCategory !== "All" ? selectedCategory : undefined,
             occasion: selectedOccasion !== "All" ? selectedOccasion : undefined,
-            sort: sortBy || undefined,
+            sort: sortParam || undefined,
           }),
         ).unwrap();
 
@@ -411,8 +443,9 @@ export default function Gifts() {
     if (filterSlug) navigate("/gifts");
   };
 
+  // ✅ Apply client-side filters (recipient, budget, availability) AND sorting
   const clientFilteredProducts = useMemo(() => {
-    return allProducts.filter((p) => {
+    let filtered = allProducts.filter((p) => {
       if (selectedRecipient !== "All") {
         const wantGender = RECIPIENT_TO_GENDER[selectedRecipient];
         if (wantGender && p.specifications?.gender !== wantGender) {
@@ -441,7 +474,10 @@ export default function Gifts() {
       }
       return true;
     });
-  }, [allProducts, selectedRecipient, selectedBudget, selectedAvailability]);
+
+    // ✅ Apply client-side sorting as fallback
+    return getSortedProducts(filtered);
+  }, [allProducts, selectedRecipient, selectedBudget, selectedAvailability, getSortedProducts]);
 
   const openMobileFilter = () => {
     setIsMobileFilterOpen(true);
@@ -1201,16 +1237,15 @@ export default function Gifts() {
               </div>
             </div>
 
-
-             <button className={styles.filterClearBtn} onClick={clearAllFilters}>
-                          Clear All Filters
-                        </button>
-                        <button
-                          className={styles.mobileFilterApply}
-                          onClick={closeMobileFilter}
-                        >
-                          Apply Filters
-                        </button>
+            <button className={styles.filterClearBtn} onClick={clearAllFilters}>
+              Clear All Filters
+            </button>
+            <button
+              className={styles.mobileFilterApply}
+              onClick={closeMobileFilter}
+            >
+              Apply Filters
+            </button>
           </div>
         </div>
 

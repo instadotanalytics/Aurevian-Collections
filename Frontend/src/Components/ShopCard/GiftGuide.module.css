@@ -1,3 +1,4 @@
+
 /* src/Components/GiftGuide/GiftGuide.module.css */
 
 /* ==========================================================
@@ -297,19 +298,32 @@
 
 /* ==========================================================
    TITLE + PRICE
+
+   ✅ PRODUCT NAME (.title) — now matches shop.module.css's
+   .productName exactly: single line, ellipsis-truncated,
+   same font-size/weight/padding/truncation, instead of the
+   old 2-line -webkit-line-clamp with a fixed min-height.
+   Two small additions beyond a literal copy were required
+   because this card is a centered flex column (Shop's card
+   is a plain left-aligned block): `width: 100%` so the
+   element actually has a bounded width for the ellipsis to
+   truncate against (otherwise it would just grow to fit the
+   text and overflow the arch card), and `text-align: center`
+   to keep it visually centered like the price row beneath it.
    ========================================================== */
 .title {
-  font-family: "Cormorant Garamond", serif;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 500;
+  font-family: "Jost", sans-serif;
   color: var(--ink);
-  margin: 0 0 10px;
-  line-height: 1.3;
-  min-height: 38px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  padding: 10px 12px 5px;
+  display: block;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  width: 100%;
+  text-align: center;
 }
 
 .priceRow {
@@ -473,10 +487,10 @@
     padding: 12px 12px 0;
   }
 
+  /* ✅ Matches shop.module.css's @media (max-width: 560px) .productName */
   .title {
-    font-size: 14px;
-    min-height: 34px;
-    margin-bottom: 8px;
+    font-size: 13px;
+    padding: 8px 12px 2px;
   }
 
   .price {
@@ -532,6 +546,12 @@
 
   .heading {
     font-size: 18px;
+  }
+
+  /* ✅ Matches shop.module.css's @media (max-width: 480px) .productName */
+  .title {
+    font-size: 12px;
+    padding: 6px 12px 2px;
   }
 }
 

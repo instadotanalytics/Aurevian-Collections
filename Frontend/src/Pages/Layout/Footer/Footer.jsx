@@ -67,8 +67,8 @@ const aboutDropdown = [
 const policyLinks = [
   
 
-  { id: "privacy", label: "Privacy Policy", path: "/policies/privacy" },
-  { id: "terms", label: "Terms of Service", path: "/policies/terms" },
+  { id: "privacy", label: "Privacy Policy", path: "/privacy-policy" },
+  { id: "terms", label: "Terms of Service", path: "/terms" },
 ];
 
 /* ------------------------------------------------------------------

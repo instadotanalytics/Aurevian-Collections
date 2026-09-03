@@ -41,6 +41,9 @@
 .header {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   gap: 6px;
   margin-bottom: 28px;
   position: relative;
@@ -61,6 +64,7 @@
   font-size: clamp(24px, 3vw, 34px);
   color: var(--ink);
   margin: 0;
+  text-align: center;
 }
 
 .subText {
@@ -68,6 +72,7 @@
   color: #666;
   margin: 0;
   font-weight: 300;
+  text-align: center;
 }
 
 /* ==========================================================
@@ -110,6 +115,7 @@
 }
 
 .mediaWrap {
+  display: block;
   position: relative;
   width: 100%;
   aspect-ratio: 9 / 16;
@@ -358,6 +364,7 @@
 
   .subText {
     font-size: 12px;
+    text-align: center;
   }
 
   .card {

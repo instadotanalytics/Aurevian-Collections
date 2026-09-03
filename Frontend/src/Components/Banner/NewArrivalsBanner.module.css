@@ -353,17 +353,17 @@
 
 @media (max-width: 768px) {
   .bannerWrapper {
-    padding: 0 16px;
+    padding: 0;
   }
 
   .bannerContainer {
     min-height: 380px;
-    border-radius: 8px;
+    border-radius: 0 !important;
   }
 
   .slide {
     min-height: 380px;
-    border-radius: 8px;
+    border-radius: 0 !important;
   }
 
   .content {
@@ -377,7 +377,7 @@
 
   .skeletonBanner {
     min-height: 380px;
-    border-radius: 8px;
+    border-radius: 0 !important;
   }
 
   .dotsContainer {
@@ -398,17 +398,17 @@
 
 @media (max-width: 480px) {
   .bannerWrapper {
-    padding: 0 12px;
+    padding: 0;
   }
 
   .bannerContainer {
     min-height: 280px;
-    border-radius: 6px;
+    border-radius: 0 !important;
   }
 
   .slide {
     min-height: 280px;
-    border-radius: 6px;
+    border-radius: 0 !important;
   }
 
   .content {
@@ -504,7 +504,7 @@
 
   .skeletonBanner {
     min-height: 280px;
-    border-radius: 6px;
+    border-radius: 0 !important;
   }
 
   .dotsContainer {

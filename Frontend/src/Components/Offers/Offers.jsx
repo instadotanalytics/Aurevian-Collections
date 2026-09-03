@@ -207,6 +207,53 @@ export default function Offers() {
       });
   }, []);
 
+  // ✅ Apply client-side sorting as fallback
+  const getSortedProducts = useCallback((products) => {
+    if (!products || products.length === 0) return products;
+
+    const sorted = [...products];
+
+    switch (sortBy) {
+      case "price-asc":
+        return sorted.sort((a, b) => {
+          const priceA = a.pricing?.salePrice || a.pricing?.originalPrice || 0;
+          const priceB = b.pricing?.salePrice || b.pricing?.originalPrice || 0;
+          return priceA - priceB;
+        });
+      case "price-desc":
+        return sorted.sort((a, b) => {
+          const priceA = a.pricing?.salePrice || a.pricing?.originalPrice || 0;
+          const priceB = b.pricing?.salePrice || b.pricing?.originalPrice || 0;
+          return priceB - priceA;
+        });
+      case "name-asc":
+        return sorted.sort((a, b) => {
+          const nameA = a.productName?.toLowerCase() || "";
+          const nameB = b.productName?.toLowerCase() || "";
+          return nameA.localeCompare(nameB);
+        });
+      case "name-desc":
+        return sorted.sort((a, b) => {
+          const nameA = a.productName?.toLowerCase() || "";
+          const nameB = b.productName?.toLowerCase() || "";
+          return nameB.localeCompare(nameA);
+        });
+      case "discount-desc":
+        return sorted.sort((a, b) => {
+          const discountA = a.pricing?.salePrice && a.pricing?.originalPrice
+            ? Math.round(((a.pricing.originalPrice - a.pricing.salePrice) / a.pricing.originalPrice) * 100)
+            : 0;
+          const discountB = b.pricing?.salePrice && b.pricing?.originalPrice
+            ? Math.round(((b.pricing.originalPrice - b.pricing.salePrice) / b.pricing.originalPrice) * 100)
+            : 0;
+          return discountB - discountA;
+        });
+      case "newest":
+      default:
+        return sorted;
+    }
+  }, [sortBy]);
+
   // Fetch products with infinite scroll - like Shop
   useEffect(() => {
     const load = async () => {
@@ -220,13 +267,23 @@ export default function Offers() {
       const start = Date.now();
       try {
         setCategoryError(null);
+        
+        // ✅ Convert sort value to backend format
+        let sortParam = sortBy;
+        if (sortBy === "price-asc") sortParam = "price-asc";
+        else if (sortBy === "price-desc") sortParam = "price-desc";
+        else if (sortBy === "newest") sortParam = "latest";
+        else if (sortBy === "name-asc") sortParam = "name-asc";
+        else if (sortBy === "name-desc") sortParam = "name-desc";
+        else if (sortBy === "discount-desc") sortParam = "discount-desc";
+
         const result = await dispatch(
           fetchProductsByPlacement({
             placement: "offers",
             page,
             limit: 10,
             categoryId: selectedCategory !== "All" ? selectedCategory : undefined,
-            sort: sortBy || undefined,
+            sort: sortParam || undefined,
           }),
         ).unwrap();
 
@@ -456,6 +513,11 @@ export default function Offers() {
     return category ? category.label : "Category";
   };
 
+  // ✅ Apply client-side sorting with all sort options
+  const sortedProducts = useMemo(() => {
+    return getSortedProducts(allProducts);
+  }, [allProducts, getSortedProducts]);
+
   return (
     <>
       <Header />
@@ -603,7 +665,7 @@ export default function Offers() {
                   <span className={styles.productsCount}>
                     {isInitialLoading
                       ? "Loading..."
-                      : `Showing ${allProducts.length} results for ${getCategoryName()}`}
+                      : `Showing ${sortedProducts.length} results for ${getCategoryName()}`}
                   </span>
                 </div>
 
@@ -641,7 +703,7 @@ export default function Offers() {
                 {/* Products */}
                 {!isInitialLoading && !categoryError && (
                   <>
-                    {allProducts.length === 0 && (
+                    {sortedProducts.length === 0 && (
                       <div className={styles.emptyState}>
                         <div className={styles.emptyStateIcon}>🛍️</div>
                         <h3>No Products Available</h3>
@@ -652,9 +714,9 @@ export default function Offers() {
                       </div>
                     )}
 
-                    {allProducts.length > 0 && (
+                    {sortedProducts.length > 0 && (
                       <div className={styles.productsGrid}>
-                        {allProducts.map((p) => {
+                        {sortedProducts.map((p) => {
                           const inCart = isInCart(p._id);
                           const inWishlist = isInWishlist(p._id);
                           const addingToCart = cartLoadingId === p._id;
@@ -789,7 +851,7 @@ export default function Offers() {
                   </div>
                 )}
 
-                {!isInitialLoading && !hasMore && allProducts.length > 0 && (
+                {!isInitialLoading && !hasMore && sortedProducts.length > 0 && (
                   <div className={styles.endMessage}>No more products</div>
                 )}
               </div>

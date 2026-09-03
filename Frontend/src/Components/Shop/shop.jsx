@@ -46,7 +46,7 @@ const API_URL =
   "https://aurevian-collections.onrender.com/api";
 
 const SORT_OPTIONS = [
-  { value: "", label: "Default Sorting" },
+  { value: "latest", label: "Sort by latest" },
   { value: "price-low", label: "Price: Low to High" },
   { value: "price-high", label: "Price: High to Low" },
 ];
@@ -123,12 +123,16 @@ export default function Shop() {
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [isResolvingSlug, setIsResolvingSlug] = useState(true);
   const [priceRange, setPriceRange] = useState([0, 7000]);
-  const [sort, setSort] = useState("");
+  const [sort, setSort] = useState("latest");
   const [cartLoadingId, setCartLoadingId] = useState(null);
 
   // Filters
   const [budgetFilter, setBudgetFilter] = useState("all");
   const [promotionFilter, setPromotionFilter] = useState("all");
+
+  // ✅ Auto-category mapping for search
+  const [autoSelectedCategoryId, setAutoSelectedCategoryId] = useState("");
+  const [isManualFilterChange, setIsManualFilterChange] = useState(false);
 
   // Infinite scroll
   const [page, setPage] = useState(1);
@@ -145,15 +149,11 @@ export default function Shop() {
 
   // ✅ "You Might Also Like" recommendations
   const [recommendedProducts, setRecommendedProducts] = useState([]);
-  const [isLoadingRecommendations, setIsLoadingRecommendations] =
-    useState(false);
+  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
+  const [hasLoadedRecommendations, setHasLoadedRecommendations] = useState(false);
   const recommendationRequestIdRef = useRef(0);
-
-  // ✅ plain search input for the persistent bar
-  const [resultsSearchInput, setResultsSearchInput] = useState(searchQuery);
-  useEffect(() => {
-    setResultsSearchInput(searchQuery);
-  }, [searchQuery]);
+  // ✅ Store the search query that recommendations are based on
+  const [recommendationSearchQuery, setRecommendationSearchQuery] = useState("");
 
   // Mobile filter sheet
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -185,9 +185,77 @@ export default function Shop() {
       });
   }, []);
 
+  // ✅ Auto-detect category from search query - EXACT MATCH ONLY
+  useEffect(() => {
+    if (!isSearchMode || categories.length === 0) {
+      setAutoSelectedCategoryId("");
+      return;
+    }
+
+    const searchLower = searchQuery.toLowerCase().trim();
+    
+    let matchingCategory = categories.find(
+      (c) => c.label.toLowerCase() === searchLower
+    );
+
+    if (!matchingCategory) {
+      matchingCategory = categories.find((c) => {
+        const labelLower = c.label.toLowerCase();
+        return (
+          labelLower === searchLower ||
+          labelLower === searchLower + "s" ||
+          labelLower === searchLower + "es" ||
+          searchLower === labelLower + "s" ||
+          searchLower === labelLower + "es"
+        );
+      });
+    }
+
+    if (matchingCategory && !isManualFilterChange) {
+      setAutoSelectedCategoryId(matchingCategory.id);
+      setSelectedCategoryId(matchingCategory.id);
+    } else if (!isManualFilterChange) {
+      setAutoSelectedCategoryId("");
+      setSelectedCategoryId("");
+    }
+  }, [searchQuery, categories, isSearchMode, isManualFilterChange]);
+
+  // ✅ When user manually changes category, clear search mode
+  const handleCategoryChange = (categoryId) => {
+    setIsManualFilterChange(true);
+    setSelectedCategoryId(categoryId);
+    setAutoSelectedCategoryId("");
+    
+    // Clear recommendations when changing category
+    setHasLoadedRecommendations(false);
+    setRecommendedProducts([]);
+    
+    if (isSearchMode) {
+      navigate(`/shop${categoryId ? `?category=${categoryId}` : ''}`);
+    } else {
+      if (categoryId) {
+        const category = categories.find(c => c.id === categoryId);
+        if (category) {
+          const slug = generateSlugFromLabel(category.label);
+          navigate(`/shop/${slug}`);
+        }
+      } else {
+        navigate("/shop");
+      }
+    }
+    
+    setTimeout(() => {
+      setIsManualFilterChange(false);
+    }, 500);
+  };
+
   // Resolve category from slug or query param after categories load
   useEffect(() => {
     if (isResolvingSlug || categories.length === 0) return;
+
+    if (isSearchMode && autoSelectedCategoryId) {
+      return;
+    }
 
     const queryCategoryId = searchParams.get("category");
 
@@ -211,7 +279,15 @@ export default function Shop() {
         }
       }
     }
-  }, [categories, categorySlug, searchParams, isResolvingSlug]);
+  }, [categories, categorySlug, searchParams, isResolvingSlug, isSearchMode, autoSelectedCategoryId]);
+
+  // ✅ RESET PAGE WHEN FILTERS CHANGE
+  useEffect(() => {
+    setPage(1);
+    setAllProducts([]);
+    setHasMore(true);
+    setRefreshKey((k) => k + 1);
+  }, [sort, selectedCategoryId, budgetFilter, promotionFilter, searchQuery]);
 
   // Fetch products (infinite scroll)
   useEffect(() => {
@@ -229,14 +305,21 @@ export default function Shop() {
         setCategoryError(null);
         let result;
 
+        let sortParam = sort;
+        if (sort === "price-low") sortParam = "price-asc";
+        else if (sort === "price-high") sortParam = "price-desc";
+        else if (sort === "latest") sortParam = "latest";
+
+        const categoryId = selectedCategoryId || undefined;
+
         if (isSearchMode) {
           result = await dispatch(
             searchProducts({
               q: searchQuery,
               page,
               limit: 10,
-              categoryId: selectedCategoryId || undefined,
-              sort: sort || undefined,
+              categoryId: categoryId,
+              sort: sortParam || undefined,
             }),
           ).unwrap();
         } else {
@@ -245,8 +328,8 @@ export default function Shop() {
               placement: "shop",
               page,
               limit: 10,
-              categoryId: selectedCategoryId || undefined,
-              sort: sort || undefined,
+              categoryId: categoryId,
+              sort: sortParam || undefined,
             }),
           ).unwrap();
         }
@@ -290,14 +373,6 @@ export default function Shop() {
     isSearchMode,
     searchQuery,
   ]);
-
-  // Reset on filter change
-  useEffect(() => {
-    setPage(1);
-    setAllProducts([]);
-    setHasMore(true);
-    setRefreshKey((k) => k + 1);
-  }, [selectedCategoryId, sort, budgetFilter, promotionFilter, searchQuery]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -443,21 +518,20 @@ export default function Shop() {
   const clearAllFilters = () => {
     setSelectedCategoryId("");
     setPriceRange([0, 7000]);
-    setSort("");
+    setSort("latest");
     setBudgetFilter("all");
     setPromotionFilter("all");
+    setAutoSelectedCategoryId("");
+    setHasLoadedRecommendations(false);
+    setRecommendedProducts([]);
     navigate("/shop");
   };
 
   const clearSearch = () => {
+    setHasLoadedRecommendations(false);
+    setRecommendedProducts([]);
+    setSelectedCategoryId("");
     navigate("/shop");
-  };
-
-  const handleResultsSearchSubmit = (e) => {
-    e.preventDefault();
-    const trimmed = resultsSearchInput.trim().replace(/\s+/g, " ");
-    if (!trimmed) return;
-    navigate(`/search?q=${encodeURIComponent(trimmed)}`);
   };
 
   const openMobileFilter = () => {
@@ -487,11 +561,37 @@ export default function Shop() {
 
   const getSortLabel = () => {
     const option = SORT_OPTIONS.find((opt) => opt.value === sort);
-    return option ? option.label : "Default Sorting";
+    return option ? option.label : "Sort by latest";
   };
 
+  // ✅ Apply client-side sorting as fallback
+  const getSortedProducts = useCallback((products) => {
+    if (!products || products.length === 0) return products;
+
+    const sorted = [...products];
+
+    switch (sort) {
+      case "price-low":
+        return sorted.sort((a, b) => {
+          const priceA = a.pricing?.salePrice || a.pricing?.originalPrice || 0;
+          const priceB = b.pricing?.salePrice || b.pricing?.originalPrice || 0;
+          return priceA - priceB;
+        });
+      case "price-high":
+        return sorted.sort((a, b) => {
+          const priceA = a.pricing?.salePrice || a.pricing?.originalPrice || 0;
+          const priceB = b.pricing?.salePrice || b.pricing?.originalPrice || 0;
+          return priceB - priceA;
+        });
+      case "latest":
+      default:
+        return sorted;
+    }
+  }, [sort]);
+
+  // ✅ Apply client-side filters (budget and promotion) AND sorting
   const filteredProducts = useMemo(() => {
-    return allProducts.filter((p) => {
+    let filtered = allProducts.filter((p) => {
       const price = p.pricing?.salePrice || p.pricing?.originalPrice || 0;
       if (budgetFilter === "under-1000" && price >= 1000) return false;
       if (budgetFilter === "1000-3000" && (price < 1000 || price > 3000))
@@ -519,7 +619,9 @@ export default function Shop() {
       }
       return true;
     });
-  }, [allProducts, budgetFilter, promotionFilter]);
+
+    return getSortedProducts(filtered);
+  }, [allProducts, budgetFilter, promotionFilter, getSortedProducts]);
 
   // ✅ Seed product for the recommendation section
   const searchSeedProductId = useMemo(() => {
@@ -527,11 +629,24 @@ export default function Shop() {
     return filteredProducts[0]._id;
   }, [isSearchMode, filteredProducts]);
 
-  // ✅ Fetch "You Might Also Like" recommendations
+  // ✅ Fetch "You Might Also Like" recommendations - ONLY on search query change
   useEffect(() => {
+    // Reset recommendations when search query changes
+    if (searchQuery !== recommendationSearchQuery) {
+      setRecommendedProducts([]);
+      setHasLoadedRecommendations(false);
+      setRecommendationSearchQuery(searchQuery);
+    }
+
     if (!searchSeedProductId) {
       setRecommendedProducts([]);
       setIsLoadingRecommendations(false);
+      setHasLoadedRecommendations(false);
+      return;
+    }
+
+    // Only fetch if we haven't loaded recommendations for this search query yet
+    if (hasLoadedRecommendations && searchQuery === recommendationSearchQuery) {
       return;
     }
 
@@ -545,25 +660,50 @@ export default function Shop() {
       .then((result) => {
         if (requestId !== recommendationRequestIdRef.current) return;
         setRecommendedProducts(result.products || []);
+        setHasLoadedRecommendations(true);
+        setRecommendationSearchQuery(searchQuery);
       })
       .catch(() => {
         if (requestId !== recommendationRequestIdRef.current) return;
         setRecommendedProducts([]);
+        setHasLoadedRecommendations(true);
       })
       .finally(() => {
         if (requestId !== recommendationRequestIdRef.current) return;
         setIsLoadingRecommendations(false);
       });
-  }, [searchSeedProductId, dispatch]);
+  }, [searchSeedProductId, dispatch, searchQuery, recommendationSearchQuery, hasLoadedRecommendations]);
 
   const skeletonItems = Array.from({ length: 10 }, (_, i) => i);
 
-  // Get the category name for display
-  const getCategoryName = () => {
+  // Get the display name for results
+  const getDisplayCategoryName = () => {
+    if (isSearchMode && !selectedCategoryId) {
+      return `"${searchQuery}"`;
+    }
     if (!selectedCategoryId) return "All Products";
     const category = categories.find((c) => c.id === selectedCategoryId);
     return category ? category.label : "Category";
   };
+
+  // ✅ Show "You Might Also Like" - ONLY when in search mode AND no category filter
+  const shouldShowRecommendations = useMemo(() => {
+    return (
+      isSearchMode &&
+      !selectedCategoryId &&
+      !categoryError &&
+      filteredProducts.length > 0 &&
+      (isLoadingRecommendations || hasLoadedRecommendations || recommendedProducts.length > 0)
+    );
+  }, [
+    isSearchMode,
+    selectedCategoryId,
+    categoryError,
+    filteredProducts.length,
+    isLoadingRecommendations,
+    hasLoadedRecommendations,
+    recommendedProducts.length,
+  ]);
 
   // ✅ Shared product card renderer
   const renderProductCard = (p) => {
@@ -663,6 +803,26 @@ export default function Shop() {
     <div className={styles.page}>
       <Header />
       <div className={styles.mainContent}>
+        {/* ✅ Search Header - Only show when coming from search, NOT from category filter */}
+        {isSearchMode && !selectedCategoryId && (
+          <div className={styles.searchHeader}>
+            <div className={styles.searchHeaderContent}>
+              <FiSearch className={styles.searchHeaderIcon} />
+              <span className={styles.searchHeaderText}>
+                Showing results for <strong>"{searchQuery}"</strong>
+              </span>
+              <button
+                type="button"
+                onClick={clearSearch}
+                className={styles.searchHeaderClear}
+              >
+                <FiX />
+                Clear search
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Shop Content */}
         <div className={styles.shopWrap}>
           {/* Mobile Filter Toggle Button */}
@@ -727,10 +887,7 @@ export default function Shop() {
                   type="radio"
                   name="category"
                   checked={selectedCategoryId === ""}
-                  onChange={() => {
-                    setSelectedCategoryId("");
-                    if (!isSearchMode) navigate("/shop");
-                  }}
+                  onChange={() => handleCategoryChange("")}
                 />
                 All
               </label>
@@ -740,13 +897,7 @@ export default function Shop() {
                     type="radio"
                     name="category"
                     checked={selectedCategoryId === c.id}
-                    onChange={() => {
-                      setSelectedCategoryId(c.id);
-                      if (!isSearchMode) {
-                        const slug = generateSlugFromLabel(c.label);
-                        navigate(`/shop/${slug}`);
-                      }
-                    }}
+                    onChange={() => handleCategoryChange(c.id)}
                   />
                   {c.label}
                 </label>
@@ -813,29 +964,17 @@ export default function Shop() {
               <span className={styles.resultsCount}>
                 {isInitialLoading
                   ? "Loading..."
-                  : isSearchMode
+                  : isSearchMode && !selectedCategoryId
                   ? `Showing ${filteredProducts.length} result${
                       filteredProducts.length === 1 ? "" : "s"
                     } for "${searchQuery}"`
-                  : `Showing ${filteredProducts.length} results for ${getCategoryName()}`}
+                  : `Showing ${filteredProducts.length} results for ${getDisplayCategoryName()}`}
               </span>
-              {isSearchMode && !isInitialLoading && (
+              {isSearchMode && !selectedCategoryId && !isInitialLoading && (
                 <button
                   type="button"
                   onClick={clearSearch}
-                  style={{
-                    marginLeft: 12,
-                    background: "none",
-                    border: "none",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 4,
-                    cursor: "pointer",
-                    color: "inherit",
-                    textDecoration: "underline",
-                    fontSize: "0.9em",
-                    opacity: 0.8,
-                  }}
+                  className={styles.clearSearchLink}
                 >
                   <FiX size={14} />
                   Clear search
@@ -898,7 +1037,7 @@ export default function Shop() {
                       <div className={styles.emptyStateIcon}>🔍</div>
                       <h3>No Products Found</h3>
                       <p>
-                        We couldn't find any products in "{getCategoryName()}".
+                        We couldn't find any products in "{getDisplayCategoryName()}".
                         Try browsing our other collections!
                       </p>
                       <Link to="/shop" className={styles.emptyStateButton}>
@@ -941,37 +1080,34 @@ export default function Shop() {
           </main>
         </div>
 
-        {/* ✅ "You Might Also Like" — Fixed with proper styling */}
-        {isSearchMode &&
-          !isInitialLoading &&
-          !categoryError &&
-          (isLoadingRecommendations || recommendedProducts.length > 0) && (
-            <section className={styles.recommendationSection}>
-              <div className={styles.recommendationHeader}>
-                <h2 className={styles.recommendationTitle}>
-                  You Might Also Like
-                </h2>
+        {/* ✅ "You Might Also Like" - NOW BEFORE PERKS SECTION */}
+        {shouldShowRecommendations && (
+          <section className={styles.recommendationSection}>
+            <div className={styles.recommendationHeader}>
+              <h2 className={styles.recommendationTitle}>
+                You Might Also Like
+              </h2>
+            </div>
+            {isLoadingRecommendations ? (
+              <div className={styles.recommendationGrid}>
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div className={styles.skeletonCard} key={`rec-skeleton-${i}`}>
+                    <div className={styles.skeletonImage} />
+                    <div className={styles.skeletonText} />
+                    <div
+                      className={`${styles.skeletonText} ${styles.skeletonTextShort}`}
+                    />
+                    <div className={styles.skeletonBtn} />
+                  </div>
+                ))}
               </div>
-              {isLoadingRecommendations ? (
-                <div className={styles.recommendationGrid}>
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div className={styles.skeletonCard} key={`rec-skeleton-${i}`}>
-                      <div className={styles.skeletonImage} />
-                      <div className={styles.skeletonText} />
-                      <div
-                        className={`${styles.skeletonText} ${styles.skeletonTextShort}`}
-                      />
-                      <div className={styles.skeletonBtn} />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className={styles.recommendationGrid}>
-                  {recommendedProducts.map((p) => renderProductCard(p))}
-                </div>
-              )}
-            </section>
-          )}
+            ) : (
+              <div className={styles.recommendationGrid}>
+                {recommendedProducts.map((p) => renderProductCard(p))}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Perks Section */}
         <section className={styles.perks}>
@@ -1069,10 +1205,7 @@ export default function Shop() {
                     type="radio"
                     name="mobile_category"
                     checked={selectedCategoryId === ""}
-                    onChange={() => {
-                      setSelectedCategoryId("");
-                      if (!isSearchMode) navigate("/shop");
-                    }}
+                    onChange={() => handleCategoryChange("")}
                   />
                   All
                 </label>
@@ -1082,13 +1215,7 @@ export default function Shop() {
                       type="radio"
                       name="mobile_category"
                       checked={selectedCategoryId === c.id}
-                      onChange={() => {
-                        setSelectedCategoryId(c.id);
-                        if (!isSearchMode) {
-                          const slug = generateSlugFromLabel(c.label);
-                          navigate(`/shop/${slug}`);
-                        }
-                      }}
+                      onChange={() => handleCategoryChange(c.id)}
                     />
                     {c.label}
                   </label>
