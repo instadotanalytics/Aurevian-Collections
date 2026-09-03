@@ -1,4 +1,4 @@
-// backend/controllers/subscriptionPlanController.js — full file (createPlan/deletePlan updated)
+// backend/controllers/subscriptionPlanController.js — full file (homepagePromotion now editable)
 
 import SubscriptionPlan from "../models/SubscriptionPlan.js";
 
@@ -97,6 +97,7 @@ export const createPlan = async (req, res) => {
       features,
       order,
       isActive,
+      homepagePromotion, // ✅ NEW — { enabled, limit }
     } = req.body;
 
     if (
@@ -141,6 +142,13 @@ export const createPlan = async (req, res) => {
       order: planOrder,
       isActive: isActive !== undefined ? isActive : true,
       isSystemPlan: false,
+      homepagePromotion: {
+        enabled: !!homepagePromotion?.enabled,
+        limit:
+          homepagePromotion?.limit !== undefined
+            ? Number(homepagePromotion.limit)
+            : 0,
+      },
       createdBy: adminId,
     });
 
@@ -200,6 +208,22 @@ export const updatePlan = async (req, res) => {
         plan[field] = req.body[field];
       }
     });
+
+    // ✅ NEW — homepagePromotion is a nested object, handled explicitly so
+    // a partial update (e.g. only `limit`) doesn't wipe out `enabled`.
+    if (req.body.homepagePromotion !== undefined) {
+      const incoming = req.body.homepagePromotion || {};
+      plan.homepagePromotion = {
+        enabled:
+          incoming.enabled !== undefined
+            ? !!incoming.enabled
+            : plan.homepagePromotion?.enabled || false,
+        limit:
+          incoming.limit !== undefined
+            ? Number(incoming.limit)
+            : (plan.homepagePromotion?.limit ?? 0),
+      };
+    }
 
     if (plan.isSystemPlan && req.body.isActive === false) {
       return res.status(400).json({

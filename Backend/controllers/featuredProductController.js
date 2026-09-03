@@ -1,4 +1,4 @@
-// backend/controllers/featuredProductController.js
+// backend/controllers/featuredProductController.js — full file (gated sections routed to PromotionRequest)
 
 console.log("🔧 Loading featuredProductController...");
 
@@ -6,14 +6,29 @@ import mongoose from "mongoose";
 import FeaturedProduct, {
   FEATURED_SECTIONS,
 } from "../models/FeaturedProduct.js";
+import PromotionRequest, {
+  GATED_SECTIONS,
+} from "../models/PromotionRequest.js";
 import JewelleryProduct from "../models/JewelleryProduct.js";
+import { getPlan } from "../services/subscriptionPlanService.js";
 
 console.log("✅ featuredProductController loaded");
 
 const isValidSection = (section) => FEATURED_SECTIONS.includes(section);
+const isGatedSection = (section) => GATED_SECTIONS.includes(section);
+
+const GATED_SECTION_MESSAGE =
+  "This section requires Gold or Platinum membership and Super Admin approval. Please submit this product through Seller Panel → Promotions instead.";
 
 // ============================================
 // PUBLIC — GET FEATURED PRODUCTS FOR A SECTION
+// Gated sections (curated-for-you, new-collections) read from approved
+// PromotionRequest entries with a live re-check of the seller's CURRENT
+// plan/subscription — an expired or downgraded seller's products stop
+// appearing here automatically, without any cron job, unless an admin
+// explicitly set keepActiveAfterPlanExpiry on that request.
+// Non-gated sections (specially-made, trending-picks) are unchanged —
+// still simple self-service FeaturedProduct entries.
 // ============================================
 export const getPublicFeaturedProducts = async (req, res) => {
   console.log(
@@ -28,6 +43,10 @@ export const getPublicFeaturedProducts = async (req, res) => {
         success: false,
         message: `Invalid section. Must be one of: ${FEATURED_SECTIONS.join(", ")}`,
       });
+    }
+
+    if (isGatedSection(section)) {
+      return getPublicPromotedProducts(section, res);
     }
 
     const entries = await FeaturedProduct.find({ section, isActive: true })
@@ -68,8 +87,91 @@ export const getPublicFeaturedProducts = async (req, res) => {
 };
 
 // ============================================
+// Helper — resolve approved+live PromotionRequest entries for a gated
+// section into the same product-array shape the storefront expects.
+// ============================================
+async function getPublicPromotedProducts(section, res) {
+  try {
+    const now = new Date();
+
+    const requests = await PromotionRequest.find({
+      section,
+      status: "approved",
+      $and: [
+        { $or: [{ startDate: null }, { startDate: { $lte: now } }] },
+        { $or: [{ endDate: null }, { endDate: { $gte: now } }] },
+      ],
+    })
+      .sort({ order: 1, reviewedAt: 1 })
+      .populate({
+        path: "product",
+        select:
+          "productName productSlug thumbnail pricing reviews status isActive labels category",
+      })
+      .populate({
+        path: "seller",
+        select: "subscriptionPlanId subscriptionStatus subscriptionExpiresAt",
+      })
+      .lean();
+
+    const planCache = new Map();
+    const products = [];
+
+    for (const r of requests) {
+      if (
+        !r.product ||
+        r.product.status !== "Published" ||
+        !r.product.isActive
+      ) {
+        continue;
+      }
+
+      if (!r.keepActiveAfterPlanExpiry) {
+        const stillActive =
+          r.seller?.subscriptionStatus === "active" &&
+          r.seller?.subscriptionExpiresAt &&
+          new Date(r.seller.subscriptionExpiresAt) > now;
+
+        if (!stillActive) continue;
+
+        const planId = r.seller?.subscriptionPlanId || "free";
+        if (!planCache.has(planId)) {
+          planCache.set(planId, await getPlan(planId));
+        }
+        const plan = planCache.get(planId);
+        if (!plan?.homepagePromotion?.enabled) continue;
+      }
+
+      products.push({
+        promotionId: r._id,
+        order: r.order,
+        ...r.product,
+      });
+    }
+
+    console.log(
+      `📊 ${products.length} approved promotions live for gated section "${section}"`,
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: { products },
+    });
+  } catch (error) {
+    console.error("❌ Get public promoted products error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get featured products",
+    });
+  }
+}
+
+// ============================================
 // SELLER — GET FULL LIST FOR A SECTION (includes inactive entries)
-// Only returns entries belonging to the authenticated seller
+// Only returns entries belonging to the authenticated seller.
+// Gated sections are blocked here — sellers manage those through
+// /api/promotions instead, so there's exactly one code path (with real
+// entitlement checks) that can ever create a live gated-section entry.
 // ============================================
 export const getSellerFeaturedProducts = async (req, res) => {
   console.log(
@@ -84,6 +186,14 @@ export const getSellerFeaturedProducts = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: `Invalid section. Must be one of: ${FEATURED_SECTIONS.join(", ")}`,
+      });
+    }
+
+    if (isGatedSection(section)) {
+      return res.status(403).json({
+        success: false,
+        code: "USE_PROMOTIONS_API",
+        message: GATED_SECTION_MESSAGE,
       });
     }
 
@@ -114,7 +224,8 @@ export const getSellerFeaturedProducts = async (req, res) => {
 
 // ============================================
 // SELLER — SEARCH EXISTING PRODUCTS TO ADD
-// Only surfaces the seller's own Published + active products
+// Only surfaces the seller's own Published + active products.
+// Gated sections blocked (see note above).
 // ============================================
 export const getSellerAvailableProductsForFeaturing = async (req, res) => {
   console.log("✅ getSellerAvailableProductsForFeaturing called");
@@ -126,6 +237,14 @@ export const getSellerAvailableProductsForFeaturing = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: `Invalid section. Must be one of: ${FEATURED_SECTIONS.join(", ")}`,
+      });
+    }
+
+    if (isGatedSection(section)) {
+      return res.status(403).json({
+        success: false,
+        code: "USE_PROMOTIONS_API",
+        message: GATED_SECTION_MESSAGE,
       });
     }
 
@@ -182,7 +301,10 @@ export const getSellerAvailableProductsForFeaturing = async (req, res) => {
 
 // ============================================
 // SELLER — ADD AN EXISTING PRODUCT TO A SECTION
-// Only allows adding the seller's own products
+// Only allows adding the seller's own products. Gated sections blocked —
+// this 403 fires even if a Silver seller (or anyone) calls this endpoint
+// directly for curated-for-you/new-collections, regardless of what the
+// frontend shows.
 // ============================================
 export const addSellerFeaturedProduct = async (req, res) => {
   console.log("✅ addSellerFeaturedProduct called:", req.body);
@@ -194,6 +316,14 @@ export const addSellerFeaturedProduct = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: `Invalid section. Must be one of: ${FEATURED_SECTIONS.join(", ")}`,
+      });
+    }
+
+    if (isGatedSection(section)) {
+      return res.status(403).json({
+        success: false,
+        code: "USE_PROMOTIONS_API",
+        message: GATED_SECTION_MESSAGE,
       });
     }
 
@@ -279,7 +409,10 @@ export const addSellerFeaturedProduct = async (req, res) => {
 
 // ============================================
 // SELLER — REMOVE A PRODUCT FROM A SECTION
-// Only allows removing the seller's own entries
+// Only allows removing the seller's own entries. Gated sections never
+// have FeaturedProduct entries owned by a seller (they're blocked at
+// creation above), so a lookup miss there naturally 404s — no separate
+// gated check needed here.
 // ============================================
 export const removeSellerFeaturedProduct = async (req, res) => {
   console.log("✅ removeSellerFeaturedProduct called with id:", req.params.id);
@@ -316,7 +449,7 @@ export const removeSellerFeaturedProduct = async (req, res) => {
 
 // ============================================
 // SELLER — TOGGLE ACTIVE STATUS FOR ONE ENTRY
-// Only allows toggling the seller's own entries
+// Only allows toggling the seller's own entries.
 // ============================================
 export const toggleSellerFeaturedProductStatus = async (req, res) => {
   console.log(
@@ -358,7 +491,7 @@ export const toggleSellerFeaturedProductStatus = async (req, res) => {
 
 // ============================================
 // SELLER — REORDER PRODUCTS WITHIN A SECTION
-// Only allows reordering the seller's own entries
+// Only allows reordering the seller's own entries. Gated sections blocked.
 // ============================================
 export const reorderSellerFeaturedProducts = async (req, res) => {
   console.log("✅ reorderSellerFeaturedProducts called:", req.body);
@@ -370,6 +503,14 @@ export const reorderSellerFeaturedProducts = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: `Invalid section. Must be one of: ${FEATURED_SECTIONS.join(", ")}`,
+      });
+    }
+
+    if (isGatedSection(section)) {
+      return res.status(403).json({
+        success: false,
+        code: "USE_PROMOTIONS_API",
+        message: GATED_SECTION_MESSAGE,
       });
     }
 
@@ -422,6 +563,8 @@ export const reorderSellerFeaturedProducts = async (req, res) => {
 
 // ============================================
 // ADMIN — GET FULL LIST FOR A SECTION (includes all sellers)
+// Unchanged — admin still manages specially-made/trending-picks here.
+// Gated sections are managed via /api/promotions/admin instead.
 // ============================================
 export const getFeaturedProductsAdmin = async (req, res) => {
   console.log(

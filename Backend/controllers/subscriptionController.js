@@ -1,4 +1,4 @@
-// backend/controllers/subscriptionController.js — full updated file (plans now DB-backed)
+// backend/controllers/subscriptionController.js — full file (expireIfNeeded now exported)
 
 import Subscription from "../models/Subscription.js";
 import Seller from "../models/Seller.js";
@@ -15,8 +15,13 @@ const MIN_PAYABLE_AMOUNT = 100; // ₹1 floor so Razorpay never sees a ₹0 orde
 
 // ============================================
 // Auto-expire a seller's paid plan once endDate has passed.
+// ✅ EXPORTED — this is now the single source of truth for "is this
+// seller's subscription still actually active", reused by the
+// entitlements middleware (requireFeature) so premium feature access is
+// always checked against a freshly-expired-if-needed plan, never a
+// possibly-stale req.seller snapshot.
 // ============================================
-const expireIfNeeded = async (seller) => {
+export const expireIfNeeded = async (seller) => {
   const isPaidPlan =
     seller.subscriptionPlanId && seller.subscriptionPlanId !== "free";
   const isExpired =

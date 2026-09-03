@@ -1,0 +1,414 @@
+/* src/Pages/Seller/SellerDashboard/components/Promotions/Promotions.module.css — NEW FILE */
+
+.container {
+  padding: 24px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1c1c1c;
+  margin: 0 0 4px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #6b6258;
+  margin: 0;
+  max-width: 480px;
+}
+
+.addButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #1c1c1c;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.addButton:hover {
+  opacity: 0.85;
+}
+
+.addButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lockedState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 60px 24px;
+  text-align: center;
+  border: 1px dashed #eee2d0;
+  border-radius: 12px;
+  background: #faf6ef;
+}
+
+.lockIcon {
+  color: #b6863c;
+  margin-bottom: 4px;
+}
+
+.lockedState h3 {
+  margin: 0;
+  font-size: 17px;
+  color: #1c1c1c;
+}
+
+.lockedState p {
+  margin: 0;
+  max-width: 420px;
+  color: #6b6258;
+  font-size: 13.5px;
+}
+
+.upgradeButton {
+  margin-top: 8px;
+  background: #b6863c;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 600;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.usageBar {
+  font-size: 12.5px;
+  color: #6b6258;
+  background: #faf6ef;
+  border-radius: 8px;
+  padding: 8px 14px;
+  margin-bottom: 16px;
+  display: inline-block;
+}
+
+.guidelinesCard {
+  border: 1px solid #eee2d0;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  background: #fff;
+}
+
+.guidelinesCard h4 {
+  margin: 0 0 10px;
+  font-size: 13.5px;
+  color: #1c1c1c;
+}
+
+.guidelinesCard ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.guidelinesCard li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #6b6258;
+}
+
+.guidelinesCard li svg {
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+.emptyState,
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 50px 20px;
+  color: #8a8072;
+  text-align: center;
+}
+
+.spinner {
+  width: 26px;
+  height: 26px;
+  border: 3px solid #eee2d0;
+  border-top-color: #b6863c;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid #eee2d0;
+  border-radius: 10px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.table th {
+  text-align: left;
+  padding: 12px 16px;
+  background: #faf6ef;
+  color: #6b6258;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom: 1px solid #eee2d0;
+}
+
+.table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f2ece0;
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.productCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  color: #1c1c1c;
+}
+
+.productThumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #eee2d0;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.statusBadge.pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.statusBadge.approved {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.statusBadge.rejected {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.statusBadge.removed {
+  background: #f5f2ee;
+  color: #8a8072;
+}
+
+.rejectionReason {
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: #8a8072;
+}
+
+.cancelBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #fecaca;
+  background: #fff;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancelBtn:hover {
+  background: #fef2f2;
+}
+
+/* modal — mirrors FeaturedProductsManagement's picker */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 14, 6, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid #eee2d0;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1c1c1c;
+}
+
+.closeButton {
+  border: none;
+  background: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #6b6258;
+}
+
+.searchForm {
+  display: flex;
+  gap: 8px;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f2ece0;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid #eee2d0;
+  font-size: 13.5px;
+}
+
+.searchButton {
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: none;
+  background: #1c1c1c;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pickerList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 12px;
+}
+
+.pickerEmpty {
+  text-align: center;
+  padding: 30px 12px;
+  color: #8a8072;
+  font-size: 13px;
+}
+
+.pickerRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+  border-radius: 8px;
+}
+
+.pickerRow:hover {
+  background: #faf6ef;
+}
+
+.pickerThumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #eee2d0;
+  flex-shrink: 0;
+}
+
+.pickerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.pickerName {
+  font-weight: 600;
+  font-size: 13.5px;
+  color: #1c1c1c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pickerMeta {
+  font-size: 12px;
+  color: #8a8072;
+  margin-top: 2px;
+}
+
+.submitRowButton {
+  padding: 7px 14px;
+  border-radius: 7px;
+  border: none;
+  background: #1c1c1c;
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.submitRowButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

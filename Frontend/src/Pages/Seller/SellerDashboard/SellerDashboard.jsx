@@ -44,6 +44,12 @@ import ProductFormWizard from "./components/ProductFormWizard";
 import Orders from "./components/Orders";
 import Returns from "./components/Returns"; // ✅ NEW
 import FeaturedProductsManagement from "../SellerDashboard/components/FeaturedProductsManagement/FeaturedProductsManagement.jsx";
+// ✅ NEW — Curated For You / New Collections are now approval-gated
+// (Gold/Platinum + Super Admin review), so they render Promotions
+// instead of the self-service FeaturedProductsManagement component.
+// specially-made and trending-picks are UNCHANGED and still use
+// FeaturedProductsManagement above.
+import Promotions from "./components/Promotions/Promotions.jsx";
 
 import { sellerLogout } from "../../../redux/slices/sellerSlice";
 import { fetchCurrentSubscription } from "../../../redux/slices/sellerSubscriptionSlice";
@@ -436,7 +442,8 @@ const SellerDashboard = () => {
               <Route path="products/new" element={<ProductFormWizard />} />
               <Route path="products/edit/:id" element={<ProductFormWizard />} />
 
-              {/* ✅ Offers Section — "Offers Worth The Splurge" */}
+              {/* ✅ Offers Section — "Offers Worth The Splurge" — UNCHANGED,
+                  still self-service for any seller (specially-made section) */}
               <Route
                 path="featured-offers"
                 element={
@@ -448,20 +455,22 @@ const SellerDashboard = () => {
                 }
               />
 
-              {/* ✅ Curated For You — "You May Also Like" section */}
+              {/* ✅ Curated For You — now Gold/Platinum + admin-approval
+                  gated. Renders the new Promotions workflow instead of
+                  FeaturedProductsManagement. */}
               <Route
                 path="curated-for-you"
                 element={
-                  <FeaturedProductsManagement
+                  <Promotions
                     section="curated-for-you"
                     title="Curated For You"
-                    subtitle="Add or remove your products from the 'You May Also Like' section on the homepage, and control the order they appear in."
-                    pickerTitle="Add Product to Curated For You"
+                    subtitle="Submit products for review to appear in the 'You May Also Like' section on the homepage. Requires Gold or Platinum membership and Super Admin approval."
                   />
                 }
               />
 
-              {/* ✅ Trending Picks section */}
+              {/* ✅ Trending Picks — UNCHANGED, still self-service for any
+                  seller (trending-picks section) */}
               <Route
                 path="trending-picks"
                 element={
@@ -474,15 +483,16 @@ const SellerDashboard = () => {
                 }
               />
 
-              {/* ✅ NEW — New Collections / "Fresh Arrivals" section */}
+              {/* ✅ New Collections — now Gold/Platinum + admin-approval
+                  gated. Renders the new Promotions workflow instead of
+                  FeaturedProductsManagement. */}
               <Route
                 path="new-collections"
                 element={
-                  <FeaturedProductsManagement
+                  <Promotions
                     section="new-collections"
                     title="New Collections"
-                    subtitle="Add or remove your products from the 'Fresh Arrivals — New Collections' section on the homepage, and control the order they appear in."
-                    pickerTitle="Add Product to New Collections"
+                    subtitle="Submit products for review to appear in the 'Fresh Arrivals — New Collections' section on the homepage. Requires Gold or Platinum membership and Super Admin approval."
                   />
                 }
               />

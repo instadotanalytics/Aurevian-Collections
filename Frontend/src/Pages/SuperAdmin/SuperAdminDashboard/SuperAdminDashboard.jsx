@@ -1,3 +1,5 @@
+// src/Pages/SuperAdmin/SuperAdminDashboard/SuperAdminDashboard.jsx
+
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
@@ -42,6 +44,7 @@ import {
   FiPenTool,
   FiCreditCard,
   FiLayout,
+  FiGift, // ✅ NEW — icon for Promotions
 } from "react-icons/fi";
 import {
   superAdminLogout,
@@ -70,6 +73,8 @@ import OrderHistory from "../components/OrderHistory/OrderHistory.jsx";
 // ✅ NEW: Sellers & Products
 import SellersProducts from "../components/SellersProducts/SellersProducts.jsx";
 import SellerProductsPage from "../components/SellersProducts/SellerProductsPage.jsx";
+// ✅ NEW: Homepage promotion request review
+import PromotionRequestsManagement from "../components/PromotionRequestsManagement/PromotionRequestsManagement.jsx";
 
 // ✅ SOCKET.IO — admin notifications
 import useAdminNotifications from "../../../hooks/useAdminNotifications.js";
@@ -278,6 +283,13 @@ const SuperAdminDashboard = () => {
       icon: FiCreditCard,
       isSubMenu: false,
     },
+    // ✅ NEW: Homepage promotion request review (Curated For You / New Collections)
+    {
+      id: "promotions",
+      label: "Promotion Requests",
+      icon: FiGift,
+      isSubMenu: false,
+    },
     {
       id: "blog",
       label: "Blog Management",
@@ -381,6 +393,9 @@ const SuperAdminDashboard = () => {
             <SubscriptionPlanManagement />
           </div>
         );
+      // ✅ NEW: Homepage promotion request review
+      case "promotions":
+        return <PromotionRequestsManagement />;
       case "blog-all":
       case "blog-create":
       case "blog-drafts":

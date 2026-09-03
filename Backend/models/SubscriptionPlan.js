@@ -1,4 +1,4 @@
-// backend/models/SubscriptionPlan.js — full file (id is no longer enum-locked)
+// backend/models/SubscriptionPlan.js — full file (added homepagePromotion entitlement)
 
 import mongoose from "mongoose";
 
@@ -89,6 +89,19 @@ const subscriptionPlanSchema = new mongoose.Schema(
     features: {
       type: [String],
       default: [],
+    },
+    // ============================================
+    // ✅ NEW — HOMEPAGE PROMOTION ENTITLEMENT
+    // Single source of truth for whether this plan can submit products to
+    // the gated homepage sections (Curated For You / New Collections) and
+    // how many simultaneous pending+approved requests it may hold.
+    // limit: -1 = unlimited, 0 = not eligible even if enabled is true.
+    // Super Admin edits this exactly like price/commission/etc — nothing
+    // about promotion eligibility is hardcoded in any controller.
+    // ============================================
+    homepagePromotion: {
+      enabled: { type: Boolean, default: false },
+      limit: { type: Number, default: 0 },
     },
     // ✅ Protects a small set of built-in plans (currently just "free") from
     // deletion/deactivation — everything else, including the original

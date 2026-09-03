@@ -32,6 +32,9 @@ const emptyForm = {
   isSuperSeller: false,
   durationDays: 30,
   featuresText: "",
+  // ✅ NEW — homepage promotion entitlement
+  homepagePromotionEnabled: false,
+  homepagePromotionLimit: 0,
 };
 
 const formatPaise = (paise) => `₹${(paise / 100).toLocaleString("en-IN")}`;
@@ -90,6 +93,9 @@ const SubscriptionPlanManagement = () => {
       isSuperSeller: !!plan.isSuperSeller,
       durationDays: plan.durationDays || 30,
       featuresText: (plan.features || []).join("\n"),
+      // ✅ NEW
+      homepagePromotionEnabled: !!plan.homepagePromotion?.enabled,
+      homepagePromotionLimit: plan.homepagePromotion?.limit ?? 0,
     });
     setIsModalOpen(true);
   };
@@ -142,6 +148,11 @@ const SubscriptionPlanManagement = () => {
         .split("\n")
         .map((f) => f.trim())
         .filter(Boolean),
+      // ✅ NEW — sent as a nested object, matches the backend schema
+      homepagePromotion: {
+        enabled: formData.homepagePromotionEnabled,
+        limit: Number(formData.homepagePromotionLimit),
+      },
     };
 
     try {
@@ -251,6 +262,19 @@ const SubscriptionPlanManagement = () => {
                 <span>
                   {plan.productLimit === -1 ? "Unlimited" : plan.productLimit}{" "}
                   products
+                </span>
+              </div>
+
+              {/* ✅ NEW — homepage promotion entitlement indicator */}
+              <div className={styles.planStats}>
+                <span>
+                  {plan.homepagePromotion?.enabled
+                    ? `🏠 Homepage promo: ${
+                        plan.homepagePromotion.limit === -1
+                          ? "Unlimited"
+                          : plan.homepagePromotion.limit
+                      }`
+                    : "🏠 No homepage promotion"}
                 </span>
               </div>
 
@@ -502,6 +526,35 @@ const SubscriptionPlanManagement = () => {
                   onChange={handleChange}
                   required
                 />
+              </div>
+
+              {/* ✅ NEW — Homepage promotion entitlement */}
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label className={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      name="homepagePromotionEnabled"
+                      checked={formData.homepagePromotionEnabled}
+                      onChange={handleChange}
+                    />
+                    Eligible for Homepage Promotion (Curated For You / New
+                    Collections)
+                  </label>
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Homepage Promotion Limit</label>
+                  <input
+                    type="number"
+                    name="homepagePromotionLimit"
+                    value={formData.homepagePromotionLimit}
+                    onChange={handleChange}
+                    disabled={!formData.homepagePromotionEnabled}
+                  />
+                  <p className={styles.hint}>
+                    -1 = unlimited, 0 = none even if eligible above
+                  </p>
+                </div>
               </div>
 
               <div className={styles.formGroup}>

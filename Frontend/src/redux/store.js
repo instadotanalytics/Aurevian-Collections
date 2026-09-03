@@ -1,3 +1,5 @@
+// FILE: src / redux / store.js;
+
 import { configureStore } from "@reduxjs/toolkit";
 
 import authReducer from "./slices/authSlice.js";
@@ -15,6 +17,15 @@ import storefrontProductReducer from "./slices/storefrontProductSlice.js";
 
 // ✅ ADDED: Featured Products reducer
 import featuredProductReducer from "./slices/featuredProductSlice.js";
+
+// ✅ ROOT-CAUSE FIX — this was imported nowhere and never registered.
+// Every component reading `state.promotions` (Seller → Curated For You,
+// Seller → New Collections, Super Admin → Promotion Requests) was
+// destructuring a property off `undefined`, throwing synchronously
+// during render and producing a blank white page with no error UI
+// (no boundary caught it). This one import + registration fixes all
+// three blank-page reports.
+import promotionReducer from "./slices/promotionSlice.js";
 
 import cartReducer from "./slices/cartSlice.js";
 import wishlistReducer from "./slices/wishlistSlice.js";
@@ -40,6 +51,12 @@ export const store = configureStore({
 
     // ✅ ADDED: Featured Products
     featuredProducts: featuredProductReducer,
+
+    // ✅ ADDED — this key MUST be "promotions" because every component
+    // reads `state.promotions` / `state.promotions.admin`
+    // (Promotions.jsx, PromotionRequestsManagement.jsx). Naming this
+    // anything else would just move the crash, not fix it.
+    promotions: promotionReducer,
 
     cart: cartReducer,
     wishlist: wishlistReducer,
@@ -230,12 +247,28 @@ export const store = configureStore({
           "returns/reject/fulfilled",
           "returns/retrySync/fulfilled",
           "returns/updateStatus/fulfilled",
+
+          // ✅ ADDED — Promotion actions (dates arrive as ISO strings from
+          // JSON, so these aren't strictly required for serializability,
+          // but listed for consistency with the rest of this file and to
+          // pre-empt false-positive warnings if a thunk is ever changed
+          // to pass a Date object directly).
+          "promotions/fetchSellerEntitlements/fulfilled",
+          "promotions/fetchSellerRequests/fulfilled",
+          "promotions/fetchSellerAvailableProducts/fulfilled",
+          "promotions/submit/fulfilled",
+          "promotions/cancel/fulfilled",
+          "promotions/fetchAdminRequests/fulfilled",
+          "promotions/approveAdmin/fulfilled",
+          "promotions/rejectAdmin/fulfilled",
+          "promotions/removeAdmin/fulfilled",
         ],
 
         // ============================================
         // IGNORED ACTION PATHS
         // ============================================
         ignoredActionPaths: [
+          // Auth actions
           "payload.createdAt",
           "payload.updatedAt",
           "payload.lastLogin",
@@ -290,6 +323,19 @@ export const store = configureStore({
           "payload.shiprocketReturn.lastSyncAttemptAt",
           "payload.shiprocketReturn.syncedAt",
           "payload.statusHistory",
+
+          // ✅ ADDED — Promotion paths
+          "payload.reviewedAt",
+          "payload.request.createdAt",
+          "payload.request.updatedAt",
+          "payload.request.startDate",
+          "payload.request.endDate",
+          "payload.request.reviewedAt",
+          "payload.data.*.createdAt",
+          "payload.data.*.updatedAt",
+          "payload.data.*.reviewedAt",
+          "payload.data.*.startDate",
+          "payload.data.*.endDate",
         ],
 
         // ============================================
@@ -391,6 +437,10 @@ export const store = configureStore({
 
           // ✅ NEW — Return paths
           "returns.sellerReturns",
+
+          // ✅ ADDED — Promotion paths
+          "promotions.seller.requestsBySection",
+          "promotions.admin.requests",
         ],
       },
     }),

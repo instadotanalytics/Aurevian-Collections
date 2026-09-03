@@ -1,4 +1,4 @@
-// backend/server.js
+// backend/server.js — full file (promotionRoutes registered)
 import dns from "node:dns";
 
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
@@ -37,6 +37,7 @@ import shippingRoutes from "./routes/shippingRoutes.js";
 import featuredProductRoutes from "./routes/featuredProductRoutes.js";
 import paymentSettingsRoutes from "./routes/paymentSettingsRoutes.js"; // ✅ NEW
 import returnRoutes from "./routes/returnRoutes.js"; // ✅ NEW
+import promotionRoutes from "./routes/promotionRoutes.js"; // ✅ NEW — homepage promotion requests
 
 console.log("🔧 Importing jewelleryProductRoutes...");
 import jewelleryProductRoutes from "./routes/jewelleryProductRoutes.js";
@@ -160,6 +161,7 @@ app.get("/api", (req, res) => {
       orders: "/api/orders",
       shipping: "/api/shipping",
       featuredProducts: "/api/featured-products",
+      promotions: "/api/promotions", // ✅ NEW
       paymentSettings: "/api/payment-settings", // ✅ NEW
       returns: "/api/returns", // ✅ NEW
       health: "/health",
@@ -213,6 +215,8 @@ app.use("/api/shipping", shippingRoutes);
 console.log("  ✅ /api/shipping");
 app.use("/api/featured-products", featuredProductRoutes);
 console.log("  ✅ /api/featured-products");
+app.use("/api/promotions", promotionRoutes); // ✅ NEW
+console.log("  ✅ /api/promotions");
 app.use("/api/payment-settings", paymentSettingsRoutes); // ✅ NEW
 console.log("  ✅ /api/payment-settings");
 app.use("/api/returns", returnRoutes); // ✅ NEW
@@ -367,6 +371,7 @@ const server = httpServer.listen(PORT, () => {
   console.log("  🔹 /api/orders - Orders");
   console.log("  🔹 /api/shipping - Shipping (Shiprocket)");
   console.log("  🔹 /api/featured-products - Featured Product Sections");
+  console.log("  🔹 /api/promotions - Homepage Promotion Requests");
   console.log("  🔹 /api/payment-settings - Payment Settings (COD toggle)");
   console.log("  🔹 /api/returns - Return/Exchange Requests");
   console.log("  🔹 /health - Health Check");

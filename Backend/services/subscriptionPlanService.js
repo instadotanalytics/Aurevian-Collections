@@ -1,4 +1,4 @@
-// backend/services/subscriptionPlanService.js
+// backend/services/subscriptionPlanService.js — full file (added homepagePromotion + backfill)
 
 import SubscriptionPlan from "../models/SubscriptionPlan.js";
 
@@ -27,6 +27,7 @@ const DEFAULT_PLANS = [
     order: 0,
     isActive: true,
     isSystemPlan: true, // ✅ added — protects Free from deletion
+    homepagePromotion: { enabled: false, limit: 0 },
     features: [
       "50 Products",
       "Basic Dashboard",
@@ -58,6 +59,7 @@ const DEFAULT_PLANS = [
     durationDays: 30,
     order: 1,
     isActive: true,
+    homepagePromotion: { enabled: false, limit: 0 },
     features: [
       "300 Products",
       "Silver Verified Badge",
@@ -92,6 +94,7 @@ const DEFAULT_PLANS = [
     durationDays: 30,
     order: 2,
     isActive: true,
+    homepagePromotion: { enabled: true, limit: 10 },
     features: [
       "1000 Products",
       "Gold Verified Badge",
@@ -127,6 +130,7 @@ const DEFAULT_PLANS = [
     durationDays: 30,
     order: 3,
     isActive: true,
+    homepagePromotion: { enabled: true, limit: -1 },
     features: [
       "Unlimited Products",
       "Platinum Badge",
@@ -159,8 +163,46 @@ export const initializeDefaultPlans = async () => {
         console.log(`✅ Seeded subscription plan: ${defaults.name}`);
       }
     }
+    await backfillHomepagePromotionEntitlements();
   } catch (error) {
     console.error("❌ Failed to seed subscription plans:", error.message);
+  }
+};
+
+// ============================================
+// ✅ NEW — One-time backfill for plans that existed in the DB before the
+// homepagePromotion field was introduced. Only touches plans that don't
+// already have an explicit value set, so it never overwrites an admin's
+// own configuration on a later boot.
+// ============================================
+const backfillHomepagePromotionEntitlements = async () => {
+  try {
+    const defaultsById = new Map(DEFAULT_PLANS.map((p) => [p.id, p]));
+
+    const plans = await SubscriptionPlan.find({
+      $or: [
+        { homepagePromotion: { $exists: false } },
+        { homepagePromotion: null },
+      ],
+    });
+
+    for (const plan of plans) {
+      const fallback = defaultsById.get(plan.id)?.homepagePromotion || {
+        enabled: false,
+        limit: 0,
+      };
+      plan.homepagePromotion = fallback;
+      await plan.save();
+      console.log(
+        `✅ Backfilled homepagePromotion for plan "${plan.id}":`,
+        fallback,
+      );
+    }
+  } catch (error) {
+    console.error(
+      "❌ Failed to backfill homepagePromotion entitlements:",
+      error.message,
+    );
   }
 };
 
