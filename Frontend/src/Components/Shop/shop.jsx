@@ -143,13 +143,12 @@ export default function Shop() {
   // ✅ race-condition guard
   const requestIdRef = useRef(0);
 
-  // ✅ "You Might Also Like" recommendations
+  // ✅ "You Might Also Like" recommendations - ALWAYS from different categories
   const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
   const [hasLoadedRecommendations, setHasLoadedRecommendations] = useState(false);
   const recommendationRequestIdRef = useRef(0);
-  // ✅ Store the search query that recommendations are based on
-  const [recommendationSearchQuery, setRecommendationSearchQuery] = useState("");
+  const [recommendationContext, setRecommendationContext] = useState("");
 
   // Mobile filter sheet
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -164,6 +163,11 @@ export default function Shop() {
   // Desktop sidebar sort dropdown state
   const [isSidebarSortOpen, setIsSidebarSortOpen] = useState(false);
   const sidebarSortRef = useRef(null);
+
+  // ✅ track whether the user has actually scrolled, so the infinite-scroll
+  // observer doesn't fire the instant page 1 renders (when the grid doesn't
+  // fill the viewport, the loader sentinel can already be "visible")
+  const hasUserScrolledRef = useRef(false);
 
   // Fetch categories first
   useEffect(() => {
@@ -182,10 +186,6 @@ export default function Shop() {
   }, []);
 
   // ✅ Synchronously derive the auto-matched category for the current search
-  // query (EXACT MATCH ONLY, plus simple singular/plural variants).
-  // This is computed with useMemo (not state + effect) so there is never
-  // an in-between render where the category hasn't "caught up" yet —
-  // that gap was what caused the "No product found" flash.
   const autoMatchedCategoryId = useMemo(() => {
     if (!isSearchMode || categories.length === 0) return "";
 
@@ -212,19 +212,18 @@ export default function Shop() {
   }, [isSearchMode, categories, searchQuery]);
 
   // ✅ The category actually used for fetching/filtering/display.
-  // In search mode it's always the auto-matched one (kept in sync with
-  // the query); outside search mode it's whatever the user picked.
   const effectiveCategoryId = isSearchMode
     ? autoMatchedCategoryId
     : selectedCategoryId;
 
-  // ✅ When user manually changes category, clear search mode
+  // ✅ When user manually changes category
   const handleCategoryChange = (categoryId) => {
     setSelectedCategoryId(categoryId);
 
     // Clear recommendations when changing category
     setHasLoadedRecommendations(false);
     setRecommendedProducts([]);
+    setRecommendationContext("");
 
     if (isSearchMode) {
       navigate(`/shop${categoryId ? `?category=${categoryId}` : ''}`);
@@ -242,7 +241,6 @@ export default function Shop() {
   };
 
   // Resolve category from slug or query param after categories load
-  // (only relevant outside search mode — search mode uses autoMatchedCategoryId)
   useEffect(() => {
     if (isResolvingSlug || categories.length === 0) return;
     if (isSearchMode) return;
@@ -277,6 +275,7 @@ export default function Shop() {
     setAllProducts([]);
     setHasMore(true);
     setRefreshKey((k) => k + 1);
+    hasUserScrolledRef.current = false; // reset scroll guard on filter/search change
   }, [sort, effectiveCategoryId, budgetFilter, promotionFilter, searchQuery]);
 
   // Fetch products (infinite scroll)
@@ -290,7 +289,6 @@ export default function Shop() {
         setIsLoadingMore(true);
       }
 
-      const start = Date.now();
       try {
         setCategoryError(null);
         let result;
@@ -339,14 +337,12 @@ export default function Shop() {
         );
         toast.error(isSearchMode ? "Search failed" : "Failed to load products");
       } finally {
+        // ✅ removed the artificial 1000ms minimum-delay — this was the
+        // main cause of slow-feeling loads. Loading state now clears as
+        // soon as the request actually finishes.
         if (requestId !== requestIdRef.current) return;
-        const elapsed = Date.now() - start;
-        const remaining = Math.max(0, 1000 - elapsed);
-        setTimeout(() => {
-          if (requestId !== requestIdRef.current) return;
-          if (isFirst) setIsInitialLoading(false);
-          else setIsLoadingMore(false);
-        }, remaining);
+        if (isFirst) setIsInitialLoading(false);
+        else setIsLoadingMore(false);
       }
     };
 
@@ -364,6 +360,15 @@ export default function Shop() {
     searchQuery,
   ]);
 
+  // ✅ Track first real user scroll (used to gate the infinite-scroll observer)
+  useEffect(() => {
+    const onScroll = () => {
+      hasUserScrolledRef.current = true;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   // Intersection Observer for infinite scroll
   useEffect(() => {
     if (!loaderRef.current || !hasMore || isLoadingMore || isInitialLoading)
@@ -373,6 +378,7 @@ export default function Shop() {
       (entries) => {
         if (
           entries[0].isIntersecting &&
+          hasUserScrolledRef.current && // ✅ don't auto-fire before any scroll
           hasMore &&
           !isLoadingMore &&
           !isInitialLoading
@@ -513,12 +519,14 @@ export default function Shop() {
     setPromotionFilter("all");
     setHasLoadedRecommendations(false);
     setRecommendedProducts([]);
+    setRecommendationContext("");
     navigate("/shop");
   };
 
   const clearSearch = () => {
     setHasLoadedRecommendations(false);
     setRecommendedProducts([]);
+    setRecommendationContext("");
     setSelectedCategoryId("");
     navigate("/shop");
   };
@@ -612,51 +620,69 @@ export default function Shop() {
     return getSortedProducts(filtered);
   }, [allProducts, budgetFilter, promotionFilter, getSortedProducts]);
 
-  // ✅ Seed product for the recommendation section.
-  // Uses the raw fetched list (not the client-filtered one) so budget /
-  // promotion filters can never wipe out the recommendation seed.
-  const searchSeedProductId = useMemo(() => {
-    if (!isSearchMode || allProducts.length === 0) return null;
-    return allProducts[0]._id;
-  }, [isSearchMode, allProducts]);
+  // ✅ Get a product from a DIFFERENT category for recommendations
+  const getRecommendationSeed = useCallback(() => {
+    if (allProducts.length === 0) return null;
 
-  // ✅ Fetch "You Might Also Like" recommendations - ALWAYS from different categories
-  // When the current category has no products or we're in search mode,
-  // fetch recommendations from ALL categories (excluding the current one if possible)
-  useEffect(() => {
-    // Reset recommendations when search query changes
-    if (searchQuery !== recommendationSearchQuery) {
-      setRecommendedProducts([]);
-      setHasLoadedRecommendations(false);
-      setRecommendationSearchQuery(searchQuery);
+    // If we have a current category, try to find a product from a different category
+    if (effectiveCategoryId) {
+      const differentCategoryProduct = allProducts.find(
+        p => p.category?.categoryData?.id !== effectiveCategoryId
+      );
+      if (differentCategoryProduct) {
+        return differentCategoryProduct._id;
+      }
     }
 
-    // ✅ If we have products and they're from the same category, we can still show recommendations
-    // from OTHER categories. The key is to always show recommendations regardless of current results.
-    
-    // Always fetch recommendations when in search mode, even if no products found
-    // We'll use a fallback approach: fetch general recommendations
-    
+    // Fallback: use first product
+    return allProducts[0]._id;
+  }, [allProducts, effectiveCategoryId]);
+
+  const recommendationSeedId = useMemo(() => {
+    return getRecommendationSeed();
+  }, [getRecommendationSeed]);
+
+  // ✅ Fetch "You Might Also Like" - ALWAYS from DIFFERENT categories
+  useEffect(() => {
+    // Create a context string to detect changes
+    const context = isSearchMode ? searchQuery : effectiveCategoryId || "all";
+
+    // Reset recommendations when context changes
+    if (context !== recommendationContext) {
+      setRecommendedProducts([]);
+      setHasLoadedRecommendations(false);
+      setRecommendationContext(context);
+    }
+
+    // If we already loaded recommendations for this context, skip
+    if (hasLoadedRecommendations && context === recommendationContext) {
+      return;
+    }
+
+    // Don't fetch if we're loading products initially
+    if (isInitialLoading) {
+      return;
+    }
+
     const requestId = ++recommendationRequestIdRef.current;
     setIsLoadingRecommendations(true);
 
-    // ✅ If we have a seed product, get recommendations based on it
-    // Otherwise, fetch general recommendations (from any category)
+    // ✅ If we have a seed product from a different category, get recommendations based on it
+    // Otherwise, fetch general recommendations from all categories
     let fetchPromise;
-    
-    if (searchSeedProductId) {
-      // Get recommendations based on the first product
+
+    if (recommendationSeedId) {
+      // Get recommendations based on the seed product
       fetchPromise = dispatch(
-        fetchRelevantProducts({ productId: searchSeedProductId, limit: 4 })
+        fetchRelevantProducts({ productId: recommendationSeedId, limit: 6 })
       ).unwrap();
     } else {
       // No products found - fetch general recommendations from all categories
-      // We'll use fetchProductsByPlacement to get random products
       fetchPromise = dispatch(
         fetchProductsByPlacement({
           placement: "shop",
           page: 1,
-          limit: 4,
+          limit: 6,
           sort: "latest",
         })
       ).unwrap();
@@ -665,27 +691,53 @@ export default function Shop() {
     fetchPromise
       .then((result) => {
         if (requestId !== recommendationRequestIdRef.current) return;
-        
+
         let products = result.products || [];
-        
-        // ✅ If the current category has products, filter out products from the same category
-        // to show variety
+
+        // ✅ CRITICAL: Filter out products from the current category
+        // This ensures "You Might Also Like" ONLY shows products from OTHER categories
         if (effectiveCategoryId && products.length > 0) {
-          // Filter out products from the same category
           const filteredRecommendations = products.filter(
             p => p.category?.categoryData?.id !== effectiveCategoryId
           );
-          
+
           // If we have at least 2 products from other categories, use them
-          // Otherwise, use all products (including same category) as fallback
           if (filteredRecommendations.length >= 2) {
             products = filteredRecommendations;
+          } else {
+            // If not enough products from other categories, fetch more from all categories
+            // but still filter out the current category
+            dispatch(
+              fetchProductsByPlacement({
+                placement: "shop",
+                page: 1,
+                limit: 10,
+                sort: "latest",
+              })
+            ).unwrap()
+              .then((fallbackResult) => {
+                if (requestId !== recommendationRequestIdRef.current) return;
+                let fallbackProducts = fallbackResult.products || [];
+                // Filter out current category
+                const filteredFallback = fallbackProducts.filter(
+                  p => p.category?.categoryData?.id !== effectiveCategoryId
+                );
+                setRecommendedProducts(filteredFallback.slice(0, 4));
+                setHasLoadedRecommendations(true);
+                setIsLoadingRecommendations(false);
+              })
+              .catch(() => {
+                setRecommendedProducts(products.slice(0, 4));
+                setHasLoadedRecommendations(true);
+                setIsLoadingRecommendations(false);
+              });
+            return;
           }
         }
-        
-        setRecommendedProducts(products);
+
+        // Limit to 4 products
+        setRecommendedProducts(products.slice(0, 4));
         setHasLoadedRecommendations(true);
-        setRecommendationSearchQuery(searchQuery);
       })
       .catch(() => {
         if (requestId !== recommendationRequestIdRef.current) return;
@@ -696,7 +748,7 @@ export default function Shop() {
         if (requestId !== recommendationRequestIdRef.current) return;
         setIsLoadingRecommendations(false);
       });
-  }, [searchSeedProductId, dispatch, searchQuery, recommendationSearchQuery, hasLoadedRecommendations, effectiveCategoryId]);
+  }, [recommendationSeedId, dispatch, effectiveCategoryId, isSearchMode, searchQuery, recommendationContext, hasLoadedRecommendations, isInitialLoading]);
 
   const skeletonItems = Array.from({ length: 10 }, (_, i) => i);
 
@@ -710,11 +762,10 @@ export default function Shop() {
     return category ? category.label : "Category";
   };
 
-  // ✅ Show "You Might Also Like" any time we're in search mode (and the
-  // main list didn't hard-error). It stays visible through skeleton
-  // loading, results, and the "no products found" state so the section
-  // never pops in/out unexpectedly.
-  const shouldShowRecommendations = isSearchMode && !categoryError;
+  // ✅ Show "You Might Also Like" when in search mode OR browsing a category
+  const shouldShowRecommendations = !categoryError && (
+    isSearchMode || effectiveCategoryId
+  );
 
   // ✅ Shared product card renderer
   const renderProductCard = (p) => {
@@ -722,6 +773,7 @@ export default function Shop() {
     const inWishlist = isInWishlist(p._id);
     const addingToCart = cartLoadingId === p._id;
     const displayName = truncateName(p.productName);
+    const productCategory = p.category?.categoryData?.label || "Uncategorized";
 
     return (
       <div className={styles.productCard} key={p._id}>
@@ -737,7 +789,7 @@ export default function Shop() {
             </span>
           )}
           <span className={styles.productCatOverlay}>
-            {p.category?.categoryData?.label || "Uncategorized"}
+            {productCategory}
           </span>
           <div className={styles.wishlistActions}>
             <button
@@ -1011,14 +1063,14 @@ export default function Shop() {
                   <div className={styles.emptyState}>
                     <div className={styles.emptyStateIcon}>🔍</div>
                     <h3>
-                      {isSearchMode 
-                        ? 'No products found' 
-                        : effectiveCategoryId 
-                          ? 'No Products Found' 
+                      {isSearchMode
+                        ? 'No products found'
+                        : effectiveCategoryId
+                          ? 'No Products Found'
                           : 'No products available'}
                     </h3>
                     <p>
-                      {isSearchMode 
+                      {isSearchMode
                         ? `We couldn't find any products matching "${searchQuery}". Try a different keyword or browse our collections instead!`
                         : effectiveCategoryId
                           ? `We couldn't find any products in "${getDisplayCategoryName()}". Try browsing our other collections!`
@@ -1064,18 +1116,16 @@ export default function Shop() {
           </main>
         </div>
 
-        {/* ✅ "You Might Also Like" - always visible during search mode:
-             through skeleton loading, results, and no-results states.
-             Shows recommendations from OTHER categories. */}
+        {/* ✅ "You Might Also Like" - ALWAYS shows products from DIFFERENT categories */}
         {shouldShowRecommendations && (
           <section className={styles.recommendationSection}>
             <div className={styles.recommendationHeader}>
               <h2 className={styles.recommendationTitle}>
                 You Might Also Like
               </h2>
-              {effectiveCategoryId && filteredProducts.length === 0 && (
+              {effectiveCategoryId && (
                 <p className={styles.recommendationSubtitle}>
-                  No products found in this category. Here are some suggestions from other collections.
+                  Discover more from our other collections
                 </p>
               )}
             </div>
