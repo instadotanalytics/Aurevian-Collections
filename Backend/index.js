@@ -36,7 +36,8 @@ import orderRoutes from "./routes/orderRoutes.js";
 import shippingRoutes from "./routes/shippingRoutes.js";
 import featuredProductRoutes from "./routes/featuredProductRoutes.js";
 import paymentSettingsRoutes from "./routes/paymentSettingsRoutes.js"; // ✅ NEW
-import returnRoutes from "./routes/returnRoutes.js"; // ✅ NEW
+import contactRoutes from "./routes/contactRoutes.js"; // ✅ NEW — public Contact form
+import franchiseRoutes from "./routes/franchiseRoutes.js"; // ✅ NEW — public Franchise inquiry form
 
 console.log("🔧 Importing jewelleryProductRoutes...");
 import jewelleryProductRoutes from "./routes/jewelleryProductRoutes.js";
@@ -161,7 +162,8 @@ app.get("/api", (req, res) => {
       shipping: "/api/shipping",
       featuredProducts: "/api/featured-products",
       paymentSettings: "/api/payment-settings", // ✅ NEW
-      returns: "/api/returns", // ✅ NEW
+      contact: "/api/contact", // ✅ NEW
+      franchise: "/api/franchise", // ✅ NEW
       health: "/health",
     },
     documentation: "Contact support for API documentation",
@@ -215,8 +217,10 @@ app.use("/api/featured-products", featuredProductRoutes);
 console.log("  ✅ /api/featured-products");
 app.use("/api/payment-settings", paymentSettingsRoutes); // ✅ NEW
 console.log("  ✅ /api/payment-settings");
-app.use("/api/returns", returnRoutes); // ✅ NEW
-console.log("  ✅ /api/returns");
+app.use("/api/contact", contactRoutes); // ✅ NEW
+console.log("  ✅ /api/contact");
+app.use("/api/franchise", franchiseRoutes); // ✅ NEW
+console.log("  ✅ /api/franchise");
 
 console.log("\n" + "=".repeat(60));
 console.log("✅ ALL ROUTES REGISTERED");
@@ -368,7 +372,8 @@ const server = httpServer.listen(PORT, () => {
   console.log("  🔹 /api/shipping - Shipping (Shiprocket)");
   console.log("  🔹 /api/featured-products - Featured Product Sections");
   console.log("  🔹 /api/payment-settings - Payment Settings (COD toggle)");
-  console.log("  🔹 /api/returns - Return/Exchange Requests");
+  console.log("  🔹 /api/contact - Contact Page Form Submissions");
+  console.log("  🔹 /api/franchise - Franchise Inquiry Form Submissions");
   console.log("  🔹 /health - Health Check");
   console.log("  🔹 /api - API Info");
   console.log("=".repeat(60));

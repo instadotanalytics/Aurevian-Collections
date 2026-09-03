@@ -27,6 +27,20 @@ import {
   getSellerProductsAdmin,
   getSellerProductDetailAdmin,
 } from "../controllers/superAdminProductManagementController.js";
+// ✅ NEW: Contact Messages admin view layer
+import {
+  getAllContacts,
+  getContactDetail,
+  updateContactStatus,
+  deleteContact,
+} from "../controllers/contactController.js";
+// ✅ NEW: Franchise Enquiries admin view layer
+import {
+  getAllFranchises,
+  getFranchiseDetail,
+  updateFranchiseStatus,
+  deleteFranchise,
+} from "../controllers/franchiseController.js";
 import { protectSuperAdmin } from "../middleware/superAdminAuth.js";
 
 const router = express.Router();
@@ -76,6 +90,22 @@ router.get("/sellers-products", getSellersWithProductCounts);
 router.get("/sellers/:id/product-stats", getSellerProductStatsAdmin);
 router.get("/sellers/:id/products", getSellerProductsAdmin);
 router.get("/sellers/:id/products/:productId", getSellerProductDetailAdmin);
+
+// ============================================
+// ✅ NEW: CONTACT MESSAGES (from the public Contact page form)
+// ============================================
+router.get("/contacts", getAllContacts);
+router.get("/contacts/:id", getContactDetail);
+router.put("/contacts/:id/status", updateContactStatus);
+router.delete("/contacts/:id", deleteContact);
+
+// ============================================
+// ✅ NEW: FRANCHISE ENQUIRIES (from the public Franchise page form)
+// ============================================
+router.get("/franchises", getAllFranchises);
+router.get("/franchises/:id", getFranchiseDetail);
+router.put("/franchises/:id/status", updateFranchiseStatus);
+router.delete("/franchises/:id", deleteFranchise);
 
 // ============================================
 // PAYMENTS

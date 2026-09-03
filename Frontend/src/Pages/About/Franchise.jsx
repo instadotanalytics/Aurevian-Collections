@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
 import { motion, AnimatePresence, useInView } from "framer-motion";
+import toast from "react-hot-toast"; // ✅ NEW — submit feedback
 import {
   FaGem,
   FaChartLine,
@@ -52,6 +53,11 @@ import necklaceImage from "../../assets/Necklaceimage.png";
 import earingsImage from "../../assets/Earingsimage.png";
 import banglesImage from "../../assets/Banglesimage.png";
 import ankletsImage from "../../assets/Ankletsimage.png";
+
+// ✅ NEW — backend base URL. Set VITE_API_URL in your .env if the API
+// lives on a different origin than the frontend; otherwise this falls
+// back to a same-origin relative request.
+const API_BASE = import.meta.env.VITE_API_URL || "";
 
 /* ---------------------------------------------------------------- */
 /* Static data                                                       */
@@ -977,11 +983,33 @@ const InquiryForm = () => {
     return Object.keys(next).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  // ✅ UPDATED — now actually submits to the backend instead of using a
+  // fake setTimeout. Stores the enquiry in MongoDB and makes it visible
+  // under Super Admin → Customer Requests → Franchise Enquiries.
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
+
     setStatus("loading");
-    setTimeout(() => setStatus("success"), 1600);
+    try {
+      const res = await fetch(`${API_BASE}/franchise/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Failed to submit your inquiry");
+      }
+
+      setStatus("success");
+    } catch (error) {
+      console.error("❌ Franchise submit error:", error);
+      toast.error(error.message || "Something went wrong. Please try again.");
+      setStatus("idle");
+    }
   };
 
   if (status === "success") {

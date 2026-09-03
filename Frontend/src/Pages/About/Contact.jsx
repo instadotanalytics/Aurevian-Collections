@@ -10,12 +10,17 @@ import {
   FiCheckCircle,
   FiArrowRight,
 } from "react-icons/fi";
+import toast from "react-hot-toast"; // ✅ NEW — submit feedback
 import styles from "./Contact.module.css";
 import Header from "../Layout/Header/Header";
 import Footer from "../Layout/Footer/Footer";
 
 import CONTACT_IMAGE_URL from "../../assets/contactpage.png";
 
+// ✅ NEW — backend base URL. Set VITE_API_URL in your .env if the API
+// lives on a different origin than the frontend; otherwise this falls
+// back to a same-origin relative request.
+const API_BASE = import.meta.env.VITE_API_URL || "";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -111,6 +116,7 @@ const Contact = () => {
   });
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ NEW
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -132,17 +138,41 @@ const Contact = () => {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  // ✅ UPDATED — now actually submits to the backend instead of
+  // just logging to the console. Stores the message in MongoDB and
+  // makes it visible under Super Admin → Customer Requests → Contact Messages.
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-    console.log("Form submitted:", formData);
-    setIsSubmitted(true);
-    setFormData({ name: "", email: "", phone: "", message: "" });
-    setTimeout(() => setIsSubmitted(false), 5000);
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`${API_BASE}/contact/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Failed to send your message");
+      }
+
+      setIsSubmitted(true);
+      toast.success(data.message || "Message sent successfully!");
+      setFormData({ name: "", email: "", phone: "", message: "" });
+      setTimeout(() => setIsSubmitted(false), 5000);
+    } catch (error) {
+      console.error("❌ Contact submit error:", error);
+      toast.error(error.message || "Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -326,12 +356,18 @@ A Conversation
                 )}
               </div>
 
-              <button type="submit" className={styles.submitButton}>
+              <button
+                type="submit"
+                className={styles.submitButton}
+                disabled={isSubmitting}
+              >
                 {isSubmitted ? (
                   <>
                     <FiCheckCircle className={styles.submitIcon} /> Message
                     Sent!
                   </>
+                ) : isSubmitting ? (
+                  "Sending..."
                 ) : (
                   <>
                     Send Message
