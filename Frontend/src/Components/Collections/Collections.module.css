@@ -372,7 +372,7 @@
 }
 
 /* ==========================================================
-   Shop Layout
+   Shop Layout - Fixed Filter Sidebar & Scrollable Products
    ========================================================== */
 .shopLayout {
   display: grid;
@@ -380,9 +380,10 @@
   gap: 40px;
   align-items: start;
   margin-bottom: 20px;
+  position: relative;
 }
 
-/* Filter Sidebar - Desktop */
+/* Filter Sidebar - Sticky/Fixed */
 .filterSidebar {
   position: sticky;
   top: 100px;
@@ -713,10 +714,32 @@
   color: var(--gold-deep);
 }
 
-/* Products Section */
+/* Products Section - Scrollable */
 .productsWrapper {
   display: flex;
   flex-direction: column;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--cream-line) transparent;
+}
+
+.productsWrapper::-webkit-scrollbar {
+  width: 5px;
+}
+
+.productsWrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.productsWrapper::-webkit-scrollbar-thumb {
+  background: var(--cream-line);
+  border-radius: 4px;
+}
+
+.productsWrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-light);
 }
 
 .productsHeader {
@@ -728,6 +751,7 @@
   gap: 12px;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--cream-line);
+  flex-shrink: 0;
 }
 
 .productsCount {
@@ -1633,6 +1657,75 @@
 }
 
 /* ==========================================================
+   Filter Empty Note
+   ========================================================== */
+.filterEmptyNote {
+  display: block;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 6px 0;
+}
+
+/* ==========================================================
+   Empty State
+   ========================================================== */
+.emptyState {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: clamp(50px, 8vw, 80px) 20px;
+  background: var(--cream-card);
+  border: 1px solid var(--cream-line);
+  border-radius: 4px;
+  margin: 20px 0;
+}
+
+.emptyStateIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  line-height: 1;
+}
+
+.emptyState h3 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 10px;
+}
+
+.emptyState p {
+  font-size: 14px;
+  color: var(--text-muted);
+  max-width: 420px;
+  margin: 0 auto 22px;
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+.emptyStateButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 30px;
+  background: var(--gold);
+  color: #fff;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  transition:
+    background 0.25s ease,
+    transform 0.2s ease;
+}
+
+.emptyStateButton:hover {
+  background: var(--gold-deep);
+  transform: translateY(-2px);
+}
+
+/* ==========================================================
    Responsive
    ========================================================== */
 @media (max-width: 1024px) {
@@ -1652,6 +1745,12 @@
 
   .filterOverlay {
     display: block;
+  }
+
+  .productsWrapper {
+    max-height: none;
+    overflow-y: visible;
+    padding-right: 0;
   }
 
   .heroGallery {
@@ -1888,7 +1987,6 @@
     min-height: 260px;
   }
 
-  /* Mobile Product Name - Single line with ellipsis */
   .productName {
     font-size: 13px;
     padding: 8px 12px 2px;
@@ -1916,7 +2014,7 @@
   .productAddBtn {
     font-size: 10px;
     min-height: 36px;
-    padding: 8px 0; /* Changed from 9px to 8px */
+    padding: 8px 0;
     width: calc(100% + 24px);
     margin: 8px -12px -4px;
   }
@@ -2093,7 +2191,7 @@
   .productAddBtn {
     font-size: 9px;
     min-height: 32px;
-    padding: 8px 0px; /* Changed from 10px/12px to 8px */
+    padding: 8px 0px;
     width: calc(100% + 20px);
     margin: 6px -10px -4px;
   }
@@ -2154,7 +2252,6 @@
 
   .mobileFilterContent {
     padding: 0 14px 18px;
-    /* margin-bottom: 60px; */
   }
 
   .mobileFilterGroup {
@@ -2226,7 +2323,7 @@
   .productAddBtn {
     font-size: 10px;
     min-height: 28px;
-    padding: 8px 0; /* Changed from 5px to 8px */
+    padding: 8px 0;
     width: calc(100% + 16px);
     margin: 4px -8px -4px;
   }
@@ -2321,82 +2418,5 @@
   .skeletonBtn {
     animation: none !important;
     background: var(--cream-line) !important;
-  }
-}
-
-/* APPEND TO: src/Components/Collections/Collections.module.css */
-
-.filterEmptyNote {
-  display: block;
-  font-size: 13px;
-  color: var(--text-muted);
-  font-style: italic;
-  padding: 6px 0;
-}
-
-.emptyState {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: clamp(50px, 8vw, 80px) 20px;
-  background: var(--cream-card);
-  border: 1px solid var(--cream-line);
-  border-radius: 4px;
-  margin: 20px 0;
-}
-
-.emptyStateIcon {
-  font-size: 48px;
-  margin-bottom: 16px;
-  line-height: 1;
-}
-
-.emptyState h3 {
-  font-family: "Cormorant Garamond", serif;
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--ink);
-  margin: 0 0 10px;
-}
-
-.emptyState p {
-  font-size: 14px;
-  color: var(--text-muted);
-  max-width: 420px;
-  margin: 0 auto 22px;
-  line-height: 1.6;
-  font-weight: 300;
-}
-
-.emptyStateButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 30px;
-  background: var(--gold);
-  color: #fff;
-  border-radius: 30px;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-decoration: none;
-  transition:
-    background 0.25s ease,
-    transform 0.2s ease;
-}
-
-.emptyStateButton:hover {
-  background: var(--gold-deep);
-  transform: translateY(-2px);
-}
-
-@media (max-width: 640px) {
-  .emptyState {
-    padding: 40px 16px;
-  }
-  .emptyStateIcon {
-    font-size: 38px;
-  }
-  .emptyState h3 {
-    font-size: 20px;
   }
 }

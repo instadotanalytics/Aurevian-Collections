@@ -725,7 +725,7 @@ export default function Collections() {
 
           {/* ---------------- Shop Layout ---------------- */}
           <div id="filter-section" className={styles.shopLayout}>
-            {/* Desktop Filter Sidebar */}
+            {/* Desktop Filter Sidebar - Sticky/Fixed */}
             <Reveal as="aside" className={styles.filterSidebar} delay={100}>
               <h3 className={styles.filterTitle}>Filter</h3>
 
@@ -861,7 +861,7 @@ export default function Collections() {
               </button>
             </Reveal>
 
-            {/* Products */}
+            {/* Products Section - Scrollable */}
             <div className={styles.productsWrapper}>
               {/* Desktop header: count + active style/collection filter */}
               <div className={styles.productsHeader}>
@@ -1066,7 +1066,8 @@ export default function Collections() {
             </div>
           </div>
 
-          {/* ---------------- From: Blush Set ---------------- */}
+          {/* ---------------- Rest of the sections remain the same ---------------- */}
+          {/* From: Blush Set */}
           <div className={styles.featureSection}>
             <Reveal as="div" className={styles.featureImageWrap} delay={0}>
               <img
