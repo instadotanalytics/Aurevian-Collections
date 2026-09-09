@@ -1,3 +1,4 @@
+
 /* src/Components/Offers/Offers.module.css - Complete updated file */
 
 .offers {
@@ -508,10 +509,40 @@
   color: var(--gold-deep);
 }
 
-/* Products Wrapper */
+/* ==========================================================
+   Products Wrapper
+   ✅ UPDATED: added max-height + overflow-y so this becomes
+   an independently-scrolling column beside the sticky
+   .filterSidebar — mirrors Collections.module.css's
+   .productsWrapper exactly. Previously this had no clamp,
+   so the sidebar's "sticky" never had anything to scroll
+   against on desktop.
+   ========================================================== */
 .productsWrapper {
   display: flex;
   flex-direction: column;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--cream-line) transparent;
+}
+
+.productsWrapper::-webkit-scrollbar {
+  width: 5px;
+}
+
+.productsWrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.productsWrapper::-webkit-scrollbar-thumb {
+  background: var(--cream-line);
+  border-radius: 4px;
+}
+
+.productsWrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-light);
 }
 
 .productsHeader {

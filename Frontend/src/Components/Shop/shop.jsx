@@ -1,3 +1,4 @@
+
 import React, {
   useEffect,
   useState,
@@ -101,7 +102,7 @@ const generateSlugFromLabel = (label) => {
     .replace(/^-+|-+$/g, "");
 };
 
-// ✅ NEW — skeleton placeholders for the Category filter list, shown while
+// ✅ skeleton placeholders for the Category filter list, shown while
 // categories are still being fetched. Purely a loading-state visual (same
 // pattern as ShopByCategory.jsx's SKELETON_CATEGORIES), never real data.
 const CATEGORY_SKELETON_COUNT = 5;
@@ -124,7 +125,7 @@ export default function Shop() {
   const isSearchMode = searchQuery.length > 0;
 
   const [categories, setCategories] = useState([]);
-  // ✅ NEW — tracks whether the categories request is still in flight, so
+  // ✅ tracks whether the categories request is still in flight, so
   // the Category filter group can show a skeleton instead of silently
   // rendering nothing (previously indistinguishable from "zero categories").
   const [categoriesLoading, setCategoriesLoading] = useState(true);
@@ -152,12 +153,6 @@ export default function Shop() {
   const requestIdRef = useRef(0);
 
   // ✅ "You Might Also Like" recommendations - ALWAYS from different categories
-  // NOTE: this is intentionally decoupled from `allProducts` / infinite scroll.
-  // It used to re-derive a "seed product" from allProducts, which meant it
-  // refired (and re-showed the skeleton) every time the user scrolled and
-  // loaded another page. Now it fetches once per category/search "context"
-  // and is keyed with refs instead of state, so changing it doesn't cause
-  // extra render/effect cycles.
   const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [isLoadingRecommendations, setIsLoadingRecommendations] =
     useState(false);
@@ -180,8 +175,7 @@ export default function Shop() {
   const sidebarSortRef = useRef(null);
 
   // ✅ track whether the user has actually scrolled, so the infinite-scroll
-  // observer doesn't fire the instant page 1 renders (when the grid doesn't
-  // fill the viewport, the loader sentinel can already be "visible")
+  // observer doesn't fire the instant page 1 renders
   const hasUserScrolledRef = useRef(false);
 
   // Fetch categories first
@@ -200,9 +194,6 @@ export default function Shop() {
         setIsResolvingSlug(false);
       })
       .finally(() => {
-        // ✅ NEW — flips regardless of success/failure, so the skeleton
-        // never gets stuck and the empty state only ever shows once the
-        // request has genuinely finished.
         setCategoriesLoading(false);
       });
   }, []);
@@ -242,8 +233,6 @@ export default function Shop() {
   const handleCategoryChange = (categoryId) => {
     setSelectedCategoryId(categoryId);
 
-    // Clear recommendations immediately for a snappy UI; the effect below
-    // will refetch for the new context on its own.
     setRecommendedProducts([]);
 
     if (isSearchMode) {
@@ -296,7 +285,7 @@ export default function Shop() {
     setAllProducts([]);
     setHasMore(true);
     setRefreshKey((k) => k + 1);
-    hasUserScrolledRef.current = false; // reset scroll guard on filter/search change
+    hasUserScrolledRef.current = false;
   }, [sort, effectiveCategoryId, budgetFilter, promotionFilter, searchQuery]);
 
   // Fetch products (infinite scroll)
@@ -642,17 +631,6 @@ export default function Shop() {
   }, [allProducts, budgetFilter, promotionFilter, getSortedProducts]);
 
   // ✅ Fetch "You Might Also Like" — ALWAYS from DIFFERENT categories.
-  //
-  // Rewritten to be simple and race-safe:
-  //  - Fires once per "context" (current category, or search query, or
-  //    "all" when no category/search is active). A ref tracks the last
-  //    context we fetched for, so this does NOT refire on every
-  //    infinite-scroll page load (that was the old bug that left the
-  //    skeleton spinning forever).
-  //  - Fetches one pool of latest products, then filters out the current
-  //    category client-side. No nested nested `.then()` chains, so
-  //    `isLoadingRecommendations` can't get set to `false` before the
-  //    real result is ready.
   useEffect(() => {
     if (isResolvingSlug || isInitialLoading) return;
 
@@ -662,7 +640,7 @@ export default function Shop() {
       context === recommendationContextRef.current &&
       recommendationLoadedRef.current
     ) {
-      return; // already have recommendations for this context
+      return;
     }
 
     recommendationContextRef.current = context;
@@ -693,9 +671,6 @@ export default function Shop() {
           const filtered = products.filter(
             (p) => p.category?.categoryData?.id !== effectiveCategoryId,
           );
-          // Only use the filtered set if it actually leaves us enough
-          // items — otherwise fall back to the unfiltered pool so the
-          // section never ends up permanently empty.
           products = filtered.length >= 2 ? filtered : products;
         }
 
@@ -727,7 +702,6 @@ export default function Shop() {
   ]);
 
   const skeletonItems = Array.from({ length: 10 }, (_, i) => i);
-  // ✅ NEW — placeholder rows for the category filter skeleton
   const categorySkeletonItems = Array.from(
     { length: CATEGORY_SKELETON_COUNT },
     (_, i) => i,
@@ -743,8 +717,6 @@ export default function Shop() {
     return category ? category.label : "Category";
   };
 
-  // ✅ Show "You Might Also Like" any time there's no category error —
-  // including when "All" is selected (fixes it disappearing on that filter).
   const shouldShowRecommendations = !categoryError;
 
   // ✅ Shared product card renderer
@@ -840,7 +812,7 @@ export default function Shop() {
     );
   };
 
-  // ✅ NEW — shared renderer for the Category filter's contents, used by
+  // ✅ shared renderer for the Category filter's contents, used by
   // both the desktop sidebar and the mobile sheet so the loading/empty/
   // loaded logic only lives in one place.
   const renderCategoryOptions = (namePrefix) => {
@@ -964,9 +936,7 @@ export default function Shop() {
               </div>
             </div>
 
-            {/* ✅ CHANGED — Category group now goes through
-                renderCategoryOptions(), which shows a skeleton while
-                categoriesLoading is true instead of nothing at all. */}
+            {/* Category */}
             <div className={styles.filterGroup}>
               <span className={styles.filterGroupLabel}>Category</span>
               {renderCategoryOptions("category")}
@@ -1025,8 +995,10 @@ export default function Shop() {
             </button>
           </aside>
 
-          {/* Product Grid */}
-          <main>
+          {/* ✅ Product Grid — CHANGED: was a bare <main> with no class,
+              so none of the scroll/sticky CSS ever attached to it. Now
+              wired to .productsWrapper, mirroring Collections exactly. */}
+          <main className={styles.productsWrapper}>
             {/* Toolbar */}
             <div className={styles.toolbar}>
               <span className={styles.resultsCount}>
@@ -1264,9 +1236,7 @@ export default function Shop() {
               </div>
             </div>
 
-            {/* ✅ CHANGED — same renderCategoryOptions() shared helper,
-                mobile radio group name kept distinct ("mobile_category")
-                to avoid clashing with the desktop radio group. */}
+            {/* Category */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Category</span>
               <div className={styles.mobileFilterGrid}>

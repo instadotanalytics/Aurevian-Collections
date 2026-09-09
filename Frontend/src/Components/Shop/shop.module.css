@@ -1,3 +1,4 @@
+
 /* src/Pages/Shop/shop.module.css */
 
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap");
@@ -47,7 +48,6 @@
   height: 60vh;
   overflow: hidden;
   position: relative;
-  /* margin-bottom: 10px; */
 }
 
 .heroImage {
@@ -70,7 +70,6 @@
   }
 }
 
-/* ✅ Remove old heroImage styles - replaced by heroBanner */
 .heroImageOld {
   display: none;
 }
@@ -172,6 +171,42 @@
 }
 
 .filterSidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-soft);
+}
+
+/* ==========================================================
+   ✅ NEW — Products Wrapper (scrollable column beside the
+   sticky sidebar). Mirrors .filterSidebar's max-height so both
+   columns cap at the same viewport-relative height, exactly
+   like Collections.module.css's .productsWrapper. Previously
+   this class didn't exist and <main> had no className at all,
+   so the sidebar looked "fixed" only because it had nothing to
+   scroll against.
+   ========================================================== */
+.productsWrapper {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--cream-line) transparent;
+}
+
+.productsWrapper::-webkit-scrollbar {
+  width: 5px;
+}
+
+.productsWrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.productsWrapper::-webkit-scrollbar-thumb {
+  background: var(--cream-line);
+  border-radius: 4px;
+}
+
+.productsWrapper::-webkit-scrollbar-thumb:hover {
   background: var(--gold-soft);
 }
 
@@ -703,7 +738,6 @@
   font-family: "Jost", sans-serif;
   color: var(--ink);
   padding: 10px 12px 5px;
-  /* Single line with ellipsis */
   display: block;
   white-space: nowrap;
   overflow: hidden;
@@ -1218,7 +1252,6 @@
   margin: 0;
 }
 
-/* ✅ Remove subtitle completely */
 .recommendationSubtitle {
   display: none !important;
 }
@@ -1277,6 +1310,15 @@
     padding: 0 20px 60px;
     gap: 0;
   }
+
+  /* ✅ NEW — undo the desktop scroll-clamp on mobile, same as
+     Collections' .productsWrapper mobile override */
+  .productsWrapper {
+    max-height: none;
+    overflow-y: visible;
+    padding-right: 0;
+  }
+
   .productGrid {
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
@@ -1319,7 +1361,6 @@
     font-size: 13px;
   }
 
-  /* ✅ Hero banner same height on mobile */
   .heroBanner {
     height: 40vh;
   }
@@ -1384,7 +1425,6 @@
     left: 10px;
   }
 
-  /* Mobile Product Name - Matching Collections */
   .productName {
     font-size: 13px;
     padding: 8px 12px 2px;
@@ -1473,7 +1513,6 @@
     font-size: 15px;
   }
 
-  /* ✅ Hero banner same height on smaller mobile */
   .heroBanner {
     height: 40vh;
   }
@@ -1502,7 +1541,6 @@
     font-size: 14px;
   }
 
-  /* Smaller Mobile Product Name - Matching Collections */
   .productName {
     font-size: 12px;
     padding: 6px 12px 2px;
@@ -1579,7 +1617,6 @@
     font-size: 11px;
   }
 
-  /* ✅ Hero banner same height on small mobile */
   .heroBanner {
     height: 37vh;
   }
@@ -1629,7 +1666,6 @@
     padding: 2px 6px;
   }
 
-  /* ✅ Hero banner same height on smallest mobile */
   .heroBanner {
     height: 37vh;
   }
@@ -1730,12 +1766,7 @@
 }
 
 /* ==========================================================
-   ✅ NEW — CATEGORY FILTER SKELETON
-   Appended for the "Category" filter group (desktop sidebar +
-   mobile sheet), shown while the /seller/products/categories
-   request is in flight. Reuses the same shimmer keyframe already
-   defined above so the animation matches the product-card
-   skeletons exactly.
+   CATEGORY FILTER SKELETON
    ========================================================== */
 .categorySkeletonGroup {
   display: flex;
@@ -1770,9 +1801,6 @@
   animation: shimmer 1.5s infinite;
 }
 
-/* Vary the widths slightly so the skeleton doesn't look like a
-   uniform stack of identical bars — matches real label lengths
-   (e.g. "Rings" vs "Necklace Sets") without hardcoding real data. */
 .categorySkeletonRow:nth-child(1) .categorySkeletonBar {
   max-width: 40%;
 }
@@ -1789,8 +1817,6 @@
   max-width: 45%;
 }
 
-/* Mobile sheet's grid is 2 columns; the skeleton group should span
-   both so it doesn't awkwardly wrap mid-list. */
 .mobileFilterGrid > .categorySkeletonGroup {
   grid-column: 1 / -1;
 }
