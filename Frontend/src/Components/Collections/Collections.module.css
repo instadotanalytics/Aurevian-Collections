@@ -37,7 +37,7 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 clamp(15px, 4vw, 40px);
+  padding: 0 clamp(14px, 4vw, 40px);
   box-sizing: border-box;
 }
 
@@ -718,7 +718,7 @@
 .productsWrapper {
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 120px) !important;
+  max-height: calc(100vh - 120px);
   overflow-y: auto;
   padding-right: 4px;
   scrollbar-width: thin;

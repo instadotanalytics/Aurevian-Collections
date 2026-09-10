@@ -1508,7 +1508,7 @@
   /* ✅ Match the smaller header height */
   .filterToggle {
     top: 80px;
-    margin: 20px auto 10px;
+    margin: 20px auto 0;
     width: calc(100% - 28px);
     padding: 10px 16px;
     font-size: 13px;
@@ -1691,7 +1691,7 @@
     padding-top: 38px;
   }
   .commitment {
-    padding: 44px 16px;
+    padding: 44px 14px;
   }
   .commitmentTitle {
     font-size: 21px;
