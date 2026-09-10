@@ -156,8 +156,8 @@ export default function Gifts() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const initialOccasion = filterSlug
     ? OCCASION_OPTIONS.find(
-      (o) => o.toLowerCase().replace(/[^a-z0-9]+/g, "-") === filterSlug,
-    ) || "All"
+        (o) => o.toLowerCase().replace(/[^a-z0-9]+/g, "-") === filterSlug,
+      ) || "All"
     : "All";
   const [selectedOccasion, setSelectedOccasion] = useState(initialOccasion);
   const [selectedRecipient, setSelectedRecipient] = useState("All");
@@ -212,29 +212,36 @@ export default function Gifts() {
   }, []);
 
   // ✅ Apply client-side sorting as fallback
-  const getSortedProducts = useCallback((products) => {
-    if (!products || products.length === 0) return products;
+  const getSortedProducts = useCallback(
+    (products) => {
+      if (!products || products.length === 0) return products;
 
-    const sorted = [...products];
+      const sorted = [...products];
 
-    switch (sortBy) {
-      case "price-low":
-        return sorted.sort((a, b) => {
-          const priceA = a.pricing?.salePrice || a.pricing?.originalPrice || 0;
-          const priceB = b.pricing?.salePrice || b.pricing?.originalPrice || 0;
-          return priceA - priceB;
-        });
-      case "price-high":
-        return sorted.sort((a, b) => {
-          const priceA = a.pricing?.salePrice || a.pricing?.originalPrice || 0;
-          const priceB = b.pricing?.salePrice || b.pricing?.originalPrice || 0;
-          return priceB - priceA;
-        });
-      case "latest":
-      default:
-        return sorted;
-    }
-  }, [sortBy]);
+      switch (sortBy) {
+        case "price-low":
+          return sorted.sort((a, b) => {
+            const priceA =
+              a.pricing?.salePrice || a.pricing?.originalPrice || 0;
+            const priceB =
+              b.pricing?.salePrice || b.pricing?.originalPrice || 0;
+            return priceA - priceB;
+          });
+        case "price-high":
+          return sorted.sort((a, b) => {
+            const priceA =
+              a.pricing?.salePrice || a.pricing?.originalPrice || 0;
+            const priceB =
+              b.pricing?.salePrice || b.pricing?.originalPrice || 0;
+            return priceB - priceA;
+          });
+        case "latest":
+        default:
+          return sorted;
+      }
+    },
+    [sortBy],
+  );
 
   // Fetch products with infinite scroll - like Shop
   useEffect(() => {
@@ -261,8 +268,10 @@ export default function Gifts() {
             placement: "gifts",
             page,
             limit: 10,
-            categoryId: selectedCategory !== "All" ? selectedCategory : undefined,
-            occasion: selectedOccasion !== "All" ? selectedOccasion : undefined,
+            categoryId:
+              selectedCategory !== "All" ? selectedCategory : undefined,
+            occasion:
+              selectedOccasion !== "All" ? selectedOccasion : undefined,
             sort: sortParam || undefined,
             // ✅ NEW
             lat: coords?.lat,
@@ -429,7 +438,7 @@ export default function Gifts() {
 
   const toggleWishlist = (id) => {
     if (!requireAuth()) return;
-    dispatch(toggleWishlistItem(id)).catch(() => { });
+    dispatch(toggleWishlistItem(id)).catch(() => {});
   };
 
   const addToCart = async (id) => {
@@ -493,7 +502,13 @@ export default function Gifts() {
 
     // ✅ Apply client-side sorting as fallback
     return getSortedProducts(filtered);
-  }, [allProducts, selectedRecipient, selectedBudget, selectedAvailability, getSortedProducts]);
+  }, [
+    allProducts,
+    selectedRecipient,
+    selectedBudget,
+    selectedAvailability,
+    getSortedProducts,
+  ]);
 
   const openMobileFilter = () => {
     setIsMobileFilterOpen(true);
@@ -554,20 +569,23 @@ export default function Gifts() {
           </section>
 
           {/* ================= GIFT SHOP BODY ================= */}
-          <div className={styles.shopWrap} id="shopSection">
-            {/* Mobile Filter Toggle */}
-            <button
-              type="button"
-              className={styles.filterToggle}
-              onClick={openMobileFilter}
-              aria-expanded={isMobileFilterOpen}
-            >
-              <span className={styles.filterToggleText}>Filter Options</span>
-              <span className={styles.filterToggleIcon}>
-                <LuSlidersHorizontal />
-              </span>
-            </button>
+          {/* ✅ MOBILE STICKY FILTER TOGGLE — moved OUT of .shopWrap,
+              as a direct sibling, so its sticky top is measured
+              against the page scroll, not .shopWrap's inner scroll
+              context. */}
+          <button
+            type="button"
+            className={styles.filterToggle}
+            onClick={openMobileFilter}
+            aria-expanded={isMobileFilterOpen}
+          >
+            <span className={styles.filterToggleText}>Filter Options</span>
+            <span className={styles.filterToggleIcon}>
+              <LuSlidersHorizontal />
+            </span>
+          </button>
 
+          <div className={styles.shopWrap} id="shopSection">
             {/* Desktop Sidebar */}
             <aside className={styles.filters}>
               <h3 className={styles.filtersHeading}>Filter</h3>
@@ -575,16 +593,24 @@ export default function Gifts() {
               {/* Sort By - Desktop Sidebar */}
               <div className={styles.filterGroup}>
                 <span className={styles.filterGroupLabel}>Sort By</span>
-                <div className={styles.sidebarSortWrapper} ref={sidebarSortRef}>
+                <div
+                  className={styles.sidebarSortWrapper}
+                  ref={sidebarSortRef}
+                >
                   <button
                     className={styles.sidebarSortButton}
-                    onClick={() => setIsSidebarSortOpen(!isSidebarSortOpen)}
+                    onClick={() =>
+                      setIsSidebarSortOpen(!isSidebarSortOpen)
+                    }
                     aria-expanded={isSidebarSortOpen}
                   >
                     <span>{getSortLabel()}</span>
                     <FiChevronDown
-                      className={`${styles.sidebarSortChevron} ${isSidebarSortOpen ? styles.sidebarSortChevronOpen : ""
-                        }`}
+                      className={`${styles.sidebarSortChevron} ${
+                        isSidebarSortOpen
+                          ? styles.sidebarSortChevronOpen
+                          : ""
+                      }`}
                     />
                   </button>
                   {isSidebarSortOpen && (
@@ -592,10 +618,11 @@ export default function Gifts() {
                       {SORT_OPTIONS.map((option) => (
                         <button
                           key={option.value}
-                          className={`${styles.sidebarSortOption} ${sortBy === option.value
+                          className={`${styles.sidebarSortOption} ${
+                            sortBy === option.value
                               ? styles.sidebarSortOptionActive
                               : ""
-                            }`}
+                          }`}
                           onClick={() => {
                             setSortBy(option.value);
                             setIsSidebarSortOpen(false);
@@ -692,9 +719,13 @@ export default function Gifts() {
                   max="8000"
                   step="100"
                   value={priceRange[1]}
-                  onChange={(e) => setPriceRange([0, Number(e.target.value)])}
+                  onChange={(e) =>
+                    setPriceRange([0, Number(e.target.value)])
+                  }
                   className={styles.filterPriceInput}
-                  style={{ "--_progress": `${(priceRange[1] / 8000) * 100}%` }}
+                  style={{
+                    "--_progress": `${(priceRange[1] / 8000) * 100}%`,
+                  }}
                 />
                 <div className={styles.filterPriceRange}>
                   <span>₹0</span>
@@ -790,11 +821,11 @@ export default function Gifts() {
                         const discount =
                           p.pricing?.salePrice && p.pricing?.originalPrice
                             ? Math.round(
-                              ((p.pricing.originalPrice -
-                                p.pricing.salePrice) /
-                                p.pricing.originalPrice) *
-                              100,
-                            )
+                                ((p.pricing.originalPrice -
+                                  p.pricing.salePrice) /
+                                  p.pricing.originalPrice) *
+                                  100,
+                              )
                             : 0;
                         const inCart = isInCart(p._id);
                         const inWishlist = isInWishlist(p._id);
@@ -817,8 +848,11 @@ export default function Gifts() {
                               <div className={styles.wishlistActions}>
                                 <button
                                   type="button"
-                                  className={`${styles.wishlistBtn} ${inWishlist ? styles.wishlistBtnActive : ""
-                                    }`}
+                                  className={`${styles.wishlistBtn} ${
+                                    inWishlist
+                                      ? styles.wishlistBtnActive
+                                      : ""
+                                  }`}
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
@@ -871,8 +905,9 @@ export default function Gifts() {
                               </div>
                               <button
                                 type="button"
-                                className={`${styles.addToCartBtn} ${inCart ? styles.addToCartBtnActive : ""
-                                  }`}
+                                className={`${styles.addToCartBtn} ${
+                                  inCart ? styles.addToCartBtnActive : ""
+                                }`}
                                 onClick={() => addToCart(p._id)}
                                 disabled={inCart || addingToCart}
                               >
@@ -883,7 +918,9 @@ export default function Gifts() {
                                 ) : (
                                   <>
                                     <FiShoppingBag />{" "}
-                                    {addingToCart ? "Adding..." : "Add to Cart"}
+                                    {addingToCart
+                                      ? "Adding..."
+                                      : "Add to Cart"}
                                   </>
                                 )}
                               </button>
@@ -902,7 +939,10 @@ export default function Gifts() {
                   {isLoadingMore && (
                     <div className={styles.skeletonGrid}>
                       {Array.from({ length: 3 }).map((_, i) => (
-                        <div className={styles.skeletonCard} key={`more-${i}`}>
+                        <div
+                          className={styles.skeletonCard}
+                          key={`more-${i}`}
+                        >
                           <div className={styles.skeletonImage} />
                           <div className={styles.skeletonText} />
                           <div
@@ -916,9 +956,11 @@ export default function Gifts() {
                 </div>
               )}
 
-              {!isInitialLoading && !hasMore && clientFilteredProducts.length > 0 && (
-                <div className={styles.endMessage}>No more products</div>
-              )}
+              {!isInitialLoading &&
+                !hasMore &&
+                clientFilteredProducts.length > 0 && (
+                  <div className={styles.endMessage}>No more products</div>
+                )}
             </main>
           </div>
 
@@ -940,7 +982,9 @@ export default function Gifts() {
                         <FiStar
                           key={i}
                           className={
-                            i < t.rating ? styles.starFilled : styles.starEmpty
+                            i < t.rating
+                              ? styles.starFilled
+                              : styles.starEmpty
                           }
                         />
                       ))}
@@ -973,7 +1017,9 @@ export default function Gifts() {
                           />
                         ))}
                       </div>
-                      <p className={styles.testimonialQuote}>"{t.quote}"</p>
+                      <p className={styles.testimonialQuote}>
+                        "{t.quote}"
+                      </p>
                       <div className={styles.authorName}>– {t.name}</div>
                     </div>
                   </div>
@@ -993,10 +1039,10 @@ export default function Gifts() {
                   Commitment, Forever, In Every Sparkling Jewel
                 </h2>
                 <p className={styles.commitmentDesc}>
-                  Every piece we craft is built on precision and care, from the
-                  first cut to the final polish. We pair timeless design with
-                  honest quality, so what you gift carries meaning that lasts
-                  well beyond the moment it's opened.
+                  Every piece we craft is built on precision and care, from
+                  the first cut to the final polish. We pair timeless design
+                  with honest quality, so what you gift carries meaning that
+                  lasts well beyond the moment it's opened.
                 </p>
 
                 <div className={styles.featureList}>
@@ -1055,8 +1101,9 @@ export default function Gifts() {
         {/* ── Mobile Bottom Sheet ── */}
         <div
           ref={sheetRef}
-          className={`${styles.mobileFilterSheet} ${isMobileFilterOpen ? styles.mobileFilterSheetActive : ""
-            }`}
+          className={`${styles.mobileFilterSheet} ${
+            isMobileFilterOpen ? styles.mobileFilterSheetActive : ""
+          }`}
         >
           <div
             className={styles.mobileFilterHandle}
@@ -1094,8 +1141,9 @@ export default function Gifts() {
                 >
                   <span>{getSortLabel()}</span>
                   <FiChevronDown
-                    className={`${styles.mobileSortChevron} ${isSortDropdownOpen ? styles.mobileSortChevronOpen : ""
-                      }`}
+                    className={`${styles.mobileSortChevron} ${
+                      isSortDropdownOpen ? styles.mobileSortChevronOpen : ""
+                    }`}
                   />
                 </button>
                 {isSortDropdownOpen && (
@@ -1103,10 +1151,11 @@ export default function Gifts() {
                     {SORT_OPTIONS.map((option) => (
                       <button
                         key={option.value}
-                        className={`${styles.mobileSortOption} ${sortBy === option.value
+                        className={`${styles.mobileSortOption} ${
+                          sortBy === option.value
                             ? styles.mobileSortOptionActive
                             : ""
-                          }`}
+                        }`}
                         onClick={() => {
                           handleSortSelect(option.value);
                           setIsSortDropdownOpen(false);
@@ -1229,16 +1278,22 @@ export default function Gifts() {
 
             {/* Price Range */}
             <div className={styles.mobileFilterGroup}>
-              <span className={styles.mobileFilterGroupLabel}>Price Range</span>
+              <span className={styles.mobileFilterGroupLabel}>
+                Price Range
+              </span>
               <input
                 type="range"
                 min="0"
                 max="8000"
                 step="100"
                 value={priceRange[1]}
-                onChange={(e) => setPriceRange([0, Number(e.target.value)])}
+                onChange={(e) =>
+                  setPriceRange([0, Number(e.target.value)])
+                }
                 className={styles.filterPriceInput}
-                style={{ "--_progress": `${(priceRange[1] / 8000) * 100}%` }}
+                style={{
+                  "--_progress": `${(priceRange[1] / 8000) * 100}%`,
+                }}
               />
               <div className={styles.filterPriceRange}>
                 <span>₹0</span>
@@ -1246,7 +1301,10 @@ export default function Gifts() {
               </div>
             </div>
 
-            <button className={styles.filterClearBtn} onClick={clearAllFilters}>
+            <button
+              className={styles.filterClearBtn}
+              onClick={clearAllFilters}
+            >
               Clear All Filters
             </button>
             <button

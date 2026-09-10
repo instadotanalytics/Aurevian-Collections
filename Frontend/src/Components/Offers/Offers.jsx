@@ -1,4 +1,3 @@
-
 // src/Components/Offers/Offers.jsx
 
 import React, {
@@ -35,7 +34,6 @@ import {
   toggleWishlistItem,
   fetchWishlist,
 } from "../../redux/slices/wishlistSlice";
-// ✅ NEW — forward the user's (optional) coordinates for location ranking
 import { useLocationContext } from "../../contexts/LocationContext";
 
 const API_BASE =
@@ -83,9 +81,6 @@ const generateSlugFromLabel = (label) => {
     .replace(/^-+|-+$/g, "");
 };
 
-/* ----------------------------------------------------------------
-   Skeleton Card - Matching Shop component
-------------------------------------------------------------------- */
 function SkeletonCard() {
   return (
     <div className={styles.skeletonCard}>
@@ -99,9 +94,6 @@ function SkeletonCard() {
   );
 }
 
-/* ----------------------------------------------------------------
-   Reveal-on-scroll
-------------------------------------------------------------------- */
 function useReveal(options = {}) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -148,9 +140,6 @@ function Reveal({
   );
 }
 
-/* ----------------------------------------------------------------
-   Main Component
-------------------------------------------------------------------- */
 export default function Offers() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -159,17 +148,14 @@ export default function Offers() {
   const cartItems = useSelector((state) => state.cart.items);
   const wishlistItems = useSelector((state) => state.wishlist.items);
 
-  // ✅ NEW
   const { coords } = useLocationContext();
 
-  // Categories
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [priceRange, setPriceRange] = useState([0, 7000]);
   const [sortBy, setSortBy] = useState("newest");
   const [cartLoadingId, setCartLoadingId] = useState(null);
 
-  // Infinite scroll state - like Shop component
   const [page, setPage] = useState(1);
   const [allProducts, setAllProducts] = useState([]);
   const [hasMore, setHasMore] = useState(true);
@@ -179,17 +165,14 @@ export default function Offers() {
   const [categoryError, setCategoryError] = useState(null);
   const loaderRef = useRef(null);
 
-  // Mobile filter sheet
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const sheetRef = useRef(null);
   const dragState = useRef({ startY: 0, currentY: 0 });
   const [isDraggingSheet, setIsDraggingSheet] = useState(false);
 
-  // Mobile sort dropdown
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const sortDropdownRef = useRef(null);
 
-  // Desktop sidebar sort dropdown
   const [isSidebarSortOpen, setIsSidebarSortOpen] = useState(false);
   const sidebarSortRef = useRef(null);
 
@@ -197,7 +180,6 @@ export default function Offers() {
     ? filterSlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
     : null;
 
-  // Fetch categories
   useEffect(() => {
     axios
       .get(`${API_BASE}/seller/products/categories`)
@@ -208,54 +190,69 @@ export default function Offers() {
       });
   }, []);
 
-  // ✅ Apply client-side sorting as fallback
-  const getSortedProducts = useCallback((products) => {
-    if (!products || products.length === 0) return products;
+  const getSortedProducts = useCallback(
+    (products) => {
+      if (!products || products.length === 0) return products;
 
-    const sorted = [...products];
+      const sorted = [...products];
 
-    switch (sortBy) {
-      case "price-asc":
-        return sorted.sort((a, b) => {
-          const priceA = a.pricing?.salePrice || a.pricing?.originalPrice || 0;
-          const priceB = b.pricing?.salePrice || b.pricing?.originalPrice || 0;
-          return priceA - priceB;
-        });
-      case "price-desc":
-        return sorted.sort((a, b) => {
-          const priceA = a.pricing?.salePrice || a.pricing?.originalPrice || 0;
-          const priceB = b.pricing?.salePrice || b.pricing?.originalPrice || 0;
-          return priceB - priceA;
-        });
-      case "name-asc":
-        return sorted.sort((a, b) => {
-          const nameA = a.productName?.toLowerCase() || "";
-          const nameB = b.productName?.toLowerCase() || "";
-          return nameA.localeCompare(nameB);
-        });
-      case "name-desc":
-        return sorted.sort((a, b) => {
-          const nameA = a.productName?.toLowerCase() || "";
-          const nameB = b.productName?.toLowerCase() || "";
-          return nameB.localeCompare(nameA);
-        });
-      case "discount-desc":
-        return sorted.sort((a, b) => {
-          const discountA = a.pricing?.salePrice && a.pricing?.originalPrice
-            ? Math.round(((a.pricing.originalPrice - a.pricing.salePrice) / a.pricing.originalPrice) * 100)
-            : 0;
-          const discountB = b.pricing?.salePrice && b.pricing?.originalPrice
-            ? Math.round(((b.pricing.originalPrice - b.pricing.salePrice) / b.pricing.originalPrice) * 100)
-            : 0;
-          return discountB - discountA;
-        });
-      case "newest":
-      default:
-        return sorted;
-    }
-  }, [sortBy]);
+      switch (sortBy) {
+        case "price-asc":
+          return sorted.sort((a, b) => {
+            const priceA =
+              a.pricing?.salePrice || a.pricing?.originalPrice || 0;
+            const priceB =
+              b.pricing?.salePrice || b.pricing?.originalPrice || 0;
+            return priceA - priceB;
+          });
+        case "price-desc":
+          return sorted.sort((a, b) => {
+            const priceA =
+              a.pricing?.salePrice || a.pricing?.originalPrice || 0;
+            const priceB =
+              b.pricing?.salePrice || b.pricing?.originalPrice || 0;
+            return priceB - priceA;
+          });
+        case "name-asc":
+          return sorted.sort((a, b) => {
+            const nameA = a.productName?.toLowerCase() || "";
+            const nameB = b.productName?.toLowerCase() || "";
+            return nameA.localeCompare(nameB);
+          });
+        case "name-desc":
+          return sorted.sort((a, b) => {
+            const nameA = a.productName?.toLowerCase() || "";
+            const nameB = b.productName?.toLowerCase() || "";
+            return nameB.localeCompare(nameA);
+          });
+        case "discount-desc":
+          return sorted.sort((a, b) => {
+            const discountA =
+              a.pricing?.salePrice && a.pricing?.originalPrice
+                ? Math.round(
+                    ((a.pricing.originalPrice - a.pricing.salePrice) /
+                      a.pricing.originalPrice) *
+                      100,
+                  )
+                : 0;
+            const discountB =
+              b.pricing?.salePrice && b.pricing?.originalPrice
+                ? Math.round(
+                    ((b.pricing.originalPrice - b.pricing.salePrice) /
+                      b.pricing.originalPrice) *
+                      100,
+                  )
+                : 0;
+            return discountB - discountA;
+          });
+        case "newest":
+        default:
+          return sorted;
+      }
+    },
+    [sortBy],
+  );
 
-  // Fetch products with infinite scroll - like Shop
   useEffect(() => {
     const load = async () => {
       const isFirst = page === 1;
@@ -269,7 +266,6 @@ export default function Offers() {
       try {
         setCategoryError(null);
 
-        // ✅ Convert sort value to backend format
         let sortParam = sortBy;
         if (sortBy === "price-asc") sortParam = "price-asc";
         else if (sortBy === "price-desc") sortParam = "price-desc";
@@ -283,9 +279,9 @@ export default function Offers() {
             placement: "offers",
             page,
             limit: 10,
-            categoryId: selectedCategory !== "All" ? selectedCategory : undefined,
+            categoryId:
+              selectedCategory !== "All" ? selectedCategory : undefined,
             sort: sortParam || undefined,
-            // ✅ NEW
             lat: coords?.lat,
             lng: coords?.lng,
           }),
@@ -311,7 +307,6 @@ export default function Offers() {
     load();
   }, [page, refreshKey, dispatch, selectedCategory, sortBy]);
 
-  // Reset on filter change
   useEffect(() => {
     setPage(1);
     setAllProducts([]);
@@ -319,7 +314,6 @@ export default function Offers() {
     setRefreshKey((k) => k + 1);
   }, [selectedCategory, sortBy]);
 
-  // ✅ NEW — refetch when the user's location becomes available/changes
   useEffect(() => {
     setPage(1);
     setAllProducts([]);
@@ -327,7 +321,6 @@ export default function Offers() {
     setRefreshKey((k) => k + 1);
   }, [coords?.lat, coords?.lng]);
 
-  // Intersection Observer for infinite scroll
   useEffect(() => {
     if (!loaderRef.current || !hasMore || isLoadingMore || isInitialLoading)
       return;
@@ -356,7 +349,6 @@ export default function Offers() {
     }
   }, [dispatch, isAuthenticated]);
 
-  // Close mobile sort dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -370,7 +362,6 @@ export default function Offers() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Close desktop sidebar sort dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -384,7 +375,6 @@ export default function Offers() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Drag to close sheet
   useEffect(() => {
     if (!isDraggingSheet) return;
 
@@ -460,7 +450,7 @@ export default function Offers() {
 
   const toggleWishlist = (productId) => {
     if (!requireAuth()) return;
-    dispatch(toggleWishlistItem(productId)).catch(() => { });
+    dispatch(toggleWishlistItem(productId)).catch(() => {});
   };
 
   const handleAddToCart = async (productId) => {
@@ -524,7 +514,6 @@ export default function Offers() {
     return category ? category.label : "Category";
   };
 
-  // ✅ Apply client-side sorting with all sort options
   const sortedProducts = useMemo(() => {
     return getSortedProducts(allProducts);
   }, [allProducts, getSortedProducts]);
@@ -532,7 +521,10 @@ export default function Offers() {
   return (
     <>
       <Header />
-      <section className={styles.offers} aria-label="Aurevian Exclusive Offers">
+      <section
+        className={styles.offers}
+        aria-label="Aurevian Exclusive Offers"
+      >
         <div
           className={styles.heroBanner}
           style={{ backgroundImage: `url(${craftImage1})` }}
@@ -553,7 +545,9 @@ export default function Offers() {
               )}
             </div>
 
-            {/* Mobile Filter Toggle Button */}
+            {/* ✅ MOBILE STICKY FILTER TOGGLE — lives OUTSIDE .shopLayout,
+                as a direct sibling, so its sticky top is relative to the
+                page scroll, not .shopLayout's inner scroll context. */}
             <button
               type="button"
               className={styles.filterToggle}
@@ -574,16 +568,24 @@ export default function Offers() {
                 {/* Sort By — Desktop Sidebar */}
                 <div className={styles.filterGroup}>
                   <span className={styles.filterGroupLabel}>Sort By</span>
-                  <div className={styles.sidebarSortWrapper} ref={sidebarSortRef}>
+                  <div
+                    className={styles.sidebarSortWrapper}
+                    ref={sidebarSortRef}
+                  >
                     <button
                       className={styles.sidebarSortButton}
-                      onClick={() => setIsSidebarSortOpen(!isSidebarSortOpen)}
+                      onClick={() =>
+                        setIsSidebarSortOpen(!isSidebarSortOpen)
+                      }
                       aria-expanded={isSidebarSortOpen}
                     >
                       <span>{getSortLabel()}</span>
                       <FiChevronDown
-                        className={`${styles.sidebarSortChevron} ${isSidebarSortOpen ? styles.sidebarSortChevronOpen : ""
-                          }`}
+                        className={`${styles.sidebarSortChevron} ${
+                          isSidebarSortOpen
+                            ? styles.sidebarSortChevronOpen
+                            : ""
+                        }`}
                       />
                     </button>
                     {isSidebarSortOpen && (
@@ -591,10 +593,11 @@ export default function Offers() {
                         {SORT_OPTIONS.map((option) => (
                           <button
                             key={option.value}
-                            className={`${styles.sidebarSortOption} ${sortBy === option.value
+                            className={`${styles.sidebarSortOption} ${
+                              sortBy === option.value
                                 ? styles.sidebarSortOptionActive
                                 : ""
-                              }`}
+                            }`}
                             onClick={() => {
                               setSortBy(option.value);
                               setIsSidebarSortOpen(false);
@@ -648,7 +651,9 @@ export default function Offers() {
                     max="7000"
                     step="100"
                     value={priceRange[1]}
-                    onChange={(e) => setPriceRange([0, Number(e.target.value)])}
+                    onChange={(e) =>
+                      setPriceRange([0, Number(e.target.value)])
+                    }
                     className={styles.filterPriceInput}
                     style={{
                       "--_progress": `${(priceRange[1] / 7000) * 100}%`,
@@ -668,7 +673,7 @@ export default function Offers() {
                 </button>
               </aside>
 
-              {/* Products */}
+              {/* Products Wrapper — becomes the scroll container on mobile */}
               <div className={styles.productsWrapper}>
                 <div className={styles.productsHeader}>
                   <span className={styles.productsCount}>
@@ -678,7 +683,6 @@ export default function Offers() {
                   </span>
                 </div>
 
-                {/* Skeleton Loading */}
                 {isInitialLoading && (
                   <div className={styles.skeletonGrid}>
                     {skeletonItems.map((i) => (
@@ -694,7 +698,6 @@ export default function Offers() {
                   </div>
                 )}
 
-                {/* Error State */}
                 {categoryError && !isInitialLoading && (
                   <div className={styles.errorState}>
                     <div className={styles.errorStateIcon}>⚠️</div>
@@ -709,7 +712,6 @@ export default function Offers() {
                   </div>
                 )}
 
-                {/* Products */}
                 {!isInitialLoading && !categoryError && (
                   <>
                     {sortedProducts.length === 0 && (
@@ -717,8 +719,8 @@ export default function Offers() {
                         <div className={styles.emptyStateIcon}>🛍️</div>
                         <h3>No Products Available</h3>
                         <p>
-                          We're currently updating our offers. Please check back
-                          later!
+                          We're currently updating our offers. Please check
+                          back later!
                         </p>
                       </div>
                     )}
@@ -730,14 +732,13 @@ export default function Offers() {
                           const inWishlist = isInWishlist(p._id);
                           const addingToCart = cartLoadingId === p._id;
                           const discount =
-                            p.pricing?.salePrice &&
-                              p.pricing?.originalPrice
+                            p.pricing?.salePrice && p.pricing?.originalPrice
                               ? Math.round(
-                                ((p.pricing.originalPrice -
-                                  p.pricing.salePrice) /
-                                  p.pricing.originalPrice) *
-                                100,
-                              )
+                                  ((p.pricing.originalPrice -
+                                    p.pricing.salePrice) /
+                                    p.pricing.originalPrice) *
+                                    100,
+                                )
                               : 0;
 
                           return (
@@ -757,15 +758,20 @@ export default function Offers() {
                                     {discount}% off
                                   </span>
                                 )}
-                                <span className={styles.productCategoryOverlay}>
+                                <span
+                                  className={styles.productCategoryOverlay}
+                                >
                                   {p.category?.categoryData?.label ||
                                     "Uncategorized"}
                                 </span>
                                 <div className={styles.wishlistActions}>
                                   <button
                                     type="button"
-                                    className={`${styles.wishlistBtn} ${inWishlist ? styles.wishlistBtnActive : ""
-                                      }`}
+                                    className={`${styles.wishlistBtn} ${
+                                      inWishlist
+                                        ? styles.wishlistBtnActive
+                                        : ""
+                                    }`}
                                     onClick={(e) => {
                                       e.preventDefault();
                                       e.stopPropagation();
@@ -794,7 +800,9 @@ export default function Offers() {
                                   {p.productName}
                                 </Link>
                                 <div className={styles.productPriceRow}>
-                                  <span className={styles.productCurrentPrice}>
+                                  <span
+                                    className={styles.productCurrentPrice}
+                                  >
                                     ₹
                                     {(
                                       p.pricing?.salePrice ||
@@ -804,7 +812,9 @@ export default function Offers() {
                                   {p.pricing?.salePrice &&
                                     p.pricing?.originalPrice && (
                                       <span
-                                        className={styles.productOriginalPrice}
+                                        className={
+                                          styles.productOriginalPrice
+                                        }
                                       >
                                         ₹
                                         {p.pricing.originalPrice.toLocaleString()}
@@ -813,8 +823,11 @@ export default function Offers() {
                                 </div>
                                 <button
                                   type="button"
-                                  className={`${styles.productAddBtn} ${inCart ? styles.productAddBtnActive : ""
-                                    }`}
+                                  className={`${styles.productAddBtn} ${
+                                    inCart
+                                      ? styles.productAddBtnActive
+                                      : ""
+                                  }`}
                                   onClick={() => handleAddToCart(p._id)}
                                   disabled={inCart || addingToCart}
                                 >
@@ -825,7 +838,9 @@ export default function Offers() {
                                   ) : (
                                     <>
                                       <FiShoppingBag />{" "}
-                                      {addingToCart ? "Adding..." : "Add to Cart"}
+                                      {addingToCart
+                                        ? "Adding..."
+                                        : "Add to Cart"}
                                     </>
                                   )}
                                 </button>
@@ -838,13 +853,15 @@ export default function Offers() {
                   </>
                 )}
 
-                {/* Infinite scroll loader */}
                 {!isInitialLoading && !categoryError && hasMore && (
                   <div ref={loaderRef} className={styles.infiniteLoader}>
                     {isLoadingMore && (
                       <div className={styles.skeletonGrid}>
                         {Array.from({ length: 3 }).map((_, i) => (
-                          <div className={styles.skeletonCard} key={`more-${i}`}>
+                          <div
+                            className={styles.skeletonCard}
+                            key={`more-${i}`}
+                          >
                             <div className={styles.skeletonImage} />
                             <div className={styles.skeletonText} />
                             <div
@@ -858,9 +875,13 @@ export default function Offers() {
                   </div>
                 )}
 
-                {!isInitialLoading && !hasMore && sortedProducts.length > 0 && (
-                  <div className={styles.endMessage}>No more products</div>
-                )}
+                {!isInitialLoading &&
+                  !hasMore &&
+                  sortedProducts.length > 0 && (
+                    <div className={styles.endMessage}>
+                      No more products
+                    </div>
+                  )}
               </div>
             </div>
           </Reveal>
@@ -899,7 +920,9 @@ export default function Offers() {
           >
             {BOTTOM_FEATURES.map((feature, i) => (
               <div key={i} className={styles.bottomFeature}>
-                <span className={styles.bottomFeatureIcon}>{feature.icon}</span>
+                <span className={styles.bottomFeatureIcon}>
+                  {feature.icon}
+                </span>
                 <h4>{feature.title}</h4>
                 <p>{feature.description}</p>
               </div>
@@ -907,16 +930,15 @@ export default function Offers() {
           </Reveal>
         </div>
 
-        {/* Mobile Filter Overlay */}
         {isMobileFilterOpen && (
           <div className={styles.filterOverlay} onClick={closeMobileFilter} />
         )}
 
-        {/* Mobile Filter Sheet */}
         <div
           ref={sheetRef}
-          className={`${styles.mobileFilterSheet} ${isMobileFilterOpen ? styles.mobileFilterSheetOpen : ""
-            }`}
+          className={`${styles.mobileFilterSheet} ${
+            isMobileFilterOpen ? styles.mobileFilterSheetOpen : ""
+          }`}
         >
           <div
             className={styles.mobileFilterHandle}
@@ -944,7 +966,6 @@ export default function Offers() {
           </div>
 
           <div className={styles.mobileFilterInner}>
-            {/* Sort By */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Sort By</span>
               <div className={styles.mobileSortWrapper} ref={sortDropdownRef}>
@@ -955,8 +976,9 @@ export default function Offers() {
                 >
                   <span>{getSortLabel()}</span>
                   <FiChevronDown
-                    className={`${styles.mobileSortChevron} ${isSortDropdownOpen ? styles.mobileSortChevronOpen : ""
-                      }`}
+                    className={`${styles.mobileSortChevron} ${
+                      isSortDropdownOpen ? styles.mobileSortChevronOpen : ""
+                    }`}
                   />
                 </button>
                 {isSortDropdownOpen && (
@@ -964,10 +986,11 @@ export default function Offers() {
                     {SORT_OPTIONS.map((option) => (
                       <button
                         key={option.value}
-                        className={`${styles.mobileSortOption} ${sortBy === option.value
+                        className={`${styles.mobileSortOption} ${
+                          sortBy === option.value
                             ? styles.mobileSortOptionActive
                             : ""
-                          }`}
+                        }`}
                         onClick={() => handleSortSelect(option.value)}
                       >
                         {option.label}
@@ -978,7 +1001,6 @@ export default function Offers() {
               </div>
             </div>
 
-            {/* Category */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Category</span>
               <div className={styles.mobileFilterGrid}>
@@ -1011,16 +1033,19 @@ export default function Offers() {
               </div>
             </div>
 
-            {/* Price Range */}
             <div className={styles.mobileFilterGroup}>
-              <span className={styles.mobileFilterGroupLabel}>Price Range</span>
+              <span className={styles.mobileFilterGroupLabel}>
+                Price Range
+              </span>
               <input
                 type="range"
                 min="0"
                 max="7000"
                 step="100"
                 value={priceRange[1]}
-                onChange={(e) => setPriceRange([0, Number(e.target.value)])}
+                onChange={(e) =>
+                  setPriceRange([0, Number(e.target.value)])
+                }
                 className={styles.filterPriceInput}
                 style={{
                   "--_progress": `${(priceRange[1] / 7000) * 100}%`,
@@ -1032,7 +1057,10 @@ export default function Offers() {
               </div>
             </div>
 
-            <button className={styles.filterClearBtn} onClick={clearAllFilters}>
+            <button
+              className={styles.filterClearBtn}
+              onClick={clearAllFilters}
+            >
               Clear All Filters
             </button>
             <button

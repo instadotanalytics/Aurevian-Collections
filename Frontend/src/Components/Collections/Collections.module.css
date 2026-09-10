@@ -718,7 +718,7 @@
 .productsWrapper {
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 120px);
+  max-height: calc(100vh - 120px) !important;
   overflow-y: auto;
   padding-right: 4px;
   scrollbar-width: thin;
@@ -835,7 +835,9 @@
   border: 1px solid var(--cream-line);
   border-radius: 0;
   overflow: hidden;
-  transition: box-shadow 0.25s, transform 0.25s;
+  transition:
+    box-shadow 0.25s,
+    transform 0.25s;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -875,7 +877,6 @@
   transform: scale(1.05);
 }
 
-/* Discount Badge - Top Left (white background, dark text) */
 .productDiscount {
   position: absolute;
   top: 12px;
@@ -892,7 +893,6 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-/* Category Overlay on Image - Bottom Left */
 .productCategoryOverlay {
   position: absolute;
   bottom: 12px;
@@ -909,7 +909,6 @@
   font-weight: 600;
 }
 
-/* Wishlist Button on Image */
 .wishlistActions {
   position: absolute;
   top: 14px;
@@ -962,7 +961,6 @@
   color: #d9534f;
 }
 
-/* Product Body */
 .productBody {
   display: flex;
   flex-direction: column;
@@ -970,9 +968,6 @@
   justify-content: space-between;
 }
 
-/* ==========================================================
-   PRODUCT NAME - SINGLE LINE WITH ELLIPSIS (MATCHING SHOP)
-   ========================================================== */
 .productName {
   font-family: "Jost", "Helvetica Neue", Arial, sans-serif;
   font-size: 15px;
@@ -980,7 +975,6 @@
   color: var(--ink);
   text-decoration: none;
   padding: 10px 12px 5px;
-  /* Single line with ellipsis */
   display: block;
   white-space: nowrap;
   overflow: hidden;
@@ -1014,7 +1008,6 @@
   font-size: 13px;
 }
 
-/* Add to Cart Button */
 .productAddBtn {
   display: flex;
   align-items: center;
@@ -1072,7 +1065,6 @@
   transform: none;
 }
 
-/* Infinite scroll loader */
 .infiniteLoader {
   margin-top: 24px;
   min-height: 100px;
@@ -1080,7 +1072,7 @@
 
 .endMessage {
   text-align: center;
-  padding: 40px 0;
+  padding: 30px 0 0;
   color: var(--text-muted);
   font-size: 14px;
   letter-spacing: 0.05em;
@@ -1516,7 +1508,6 @@
   display: block;
 }
 
-/* Mobile Filter Grid - 2 columns */
 .mobileFilterGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1728,19 +1719,52 @@
 /* ==========================================================
    Responsive
    ========================================================== */
+
+/* ============================================================
+   ✅ MOBILE STICKY FIX — mirrors the Shop component exactly.
+   • .filterToggle is a SIBLING of .shopLayout (see Collections.jsx).
+   • .shopLayout becomes the scroll container on mobile, exactly
+     like .shopWrap in Shop.
+   ============================================================ */
 @media (max-width: 1024px) {
+  /* ✅ Sticky toggle pinned below the fixed header. */
+  .filterToggle {
+    display: flex;
+    position: sticky;
+    top: 100px;
+    z-index: 60;
+    background: var(--cream);
+    box-shadow: 0 6px 12px -6px rgba(28, 25, 23, 0.12);
+    margin: 0 0 16px;
+  }
+
+  /* ✅ .shopLayout becomes the inner scroll container on mobile. */
   .shopLayout {
+    display: block;
     grid-template-columns: 1fr;
     gap: 0;
+    max-height: calc(100vh - 160px); /* header 100 + toggle ~60 */
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--cream-line) transparent;
     margin-bottom: 40px;
+  }
+
+  .shopLayout::-webkit-scrollbar {
+    width: 5px;
+  }
+  .shopLayout::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .shopLayout::-webkit-scrollbar-thumb {
+    background: var(--cream-line);
+    border-radius: 4px;
   }
 
   .filterSidebar {
     display: none;
-  }
-
-  .filterToggle {
-    display: flex;
   }
 
   .filterOverlay {
@@ -1925,6 +1949,16 @@
 @media (max-width: 640px) {
   .collections {
     padding: 80px 0 20px;
+  }
+
+  /* ✅ Match the smaller header height */
+  .filterToggle {
+    top: 80px;
+    margin: 0 0 14px;
+  }
+
+  .shopLayout {
+    max-height: calc(100vh - 140px); /* header 80 + toggle ~60 */
   }
 
   .heroGallery {
@@ -2129,6 +2163,9 @@
     padding: 12px;
     font-size: 15px;
   }
+    .productsWrapper {
+  max-height: calc(70vh - 120px);
+}
 }
 
 @media (max-width: 480px) {

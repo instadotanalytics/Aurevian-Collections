@@ -1,4 +1,3 @@
-
 /* src/Pages/Shop/shop.module.css */
 
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap");
@@ -104,7 +103,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  width: 100%;
+  width: 92%;
   padding: 10px 16px;
   background: var(--cream-card);
   border: 1px solid var(--cream-line);
@@ -115,7 +114,7 @@
   text-transform: uppercase;
   color: var(--ink);
   cursor: pointer;
-  margin-bottom: 20px;
+  margin: 0 auto 20px;
   transition: all 0.2s ease;
 }
 
@@ -175,13 +174,7 @@
 }
 
 /* ==========================================================
-   ✅ NEW — Products Wrapper (scrollable column beside the
-   sticky sidebar). Mirrors .filterSidebar's max-height so both
-   columns cap at the same viewport-relative height, exactly
-   like Collections.module.css's .productsWrapper. Previously
-   this class didn't exist and <main> had no className at all,
-   so the sidebar looked "fixed" only because it had nothing to
-   scroll against.
+   ✅ Products Wrapper (scrollable column beside the sticky sidebar)
    ========================================================== */
 .productsWrapper {
   display: flex;
@@ -192,6 +185,7 @@
   scrollbar-width: thin;
   scrollbar-color: var(--cream-line) transparent;
 }
+
 
 .productsWrapper::-webkit-scrollbar {
   width: 5px;
@@ -1269,13 +1263,62 @@
 /* ==========================================================
    RESPONSIVE - MATCHING COLLECTIONS
    ========================================================== */
+
+/* ============================================================
+   ✅ MOBILE STICKY FIX — .shopWrap becomes the scroll container
+   (mirrors how .productsWrapper scrolls on desktop), so
+   .filterToggle sticks to the top of that container while the
+   product cards scroll inside it.
+   ============================================================ */
 @media (max-width: 1024px) {
+  /* ✅ Turn .shopWrap into the scroll container on mobile */
+  .shopWrap {
+    display: block;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 20px 60px;
+    gap: 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--cream-line) transparent;
+  }
+
+  .shopWrap::-webkit-scrollbar {
+    width: 5px;
+  }
+  .shopWrap::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .shopWrap::-webkit-scrollbar-thumb {
+    background: var(--cream-line);
+    border-radius: 4px;
+  }
+
+  /* ✅ filterToggle is the first child of the scroll container.
+     Sticky top:0 pins it right below the fixed header. */
+  .filterToggle {
+    display: flex;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--cream-card);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 6px 12px -6px rgba(28, 25, 23, 0.12);
+    margin-bottom: 16px;
+  }
+
   .filterSidebar {
     display: none;
   }
-  .filterToggle {
-    display: flex;
+
+  /* ✅ productsWrapper no longer scrolls on mobile — .shopWrap does. */
+  .productsWrapper {
+    max-height: none;
+    overflow-y: visible;
+    padding-right: 0;
   }
+
   .filterOverlay {
     display: block;
   }
@@ -1299,24 +1342,18 @@
   .searchHeader {
     padding: 0 20px 16px;
   }
+  
 }
 
 @media (max-width: 900px) {
   .mainContent {
     padding-top: 100px;
   }
-  .shopWrap {
-    grid-template-columns: 1fr;
-    padding: 0 20px 60px;
-    gap: 0;
-  }
 
-  /* ✅ NEW — undo the desktop scroll-clamp on mobile, same as
-     Collections' .productsWrapper mobile override */
-  .productsWrapper {
-    max-height: none;
-    overflow-y: visible;
-    padding-right: 0;
+  /* ✅ Keep .shopWrap as the scroll container, height matches header. */
+  .shopWrap {
+    max-height: calc(100vh - 100px);
+    padding: 0 20px 60px;
   }
 
   .productGrid {
@@ -1333,6 +1370,7 @@
   .toolbar {
     justify-content: flex-end;
   }
+
 }
 
 @media (max-width: 860px) {
@@ -1384,6 +1422,7 @@
   }
   .recommendationTitle {
     font-size: 18px;
+    margin-top: 30px;
   }
   .recommendationGrid .productCard {
     min-height: 260px;
@@ -1398,15 +1437,22 @@
   .searchHeaderText {
     font-size: 12px;
   }
+  .productsWrapper {
+  max-height: calc(70vh - 120px);
+}
 }
 
 @media (max-width: 560px) {
   .mainContent {
     padding-top: 80px;
   }
+
+  /* ✅ Scroll container height matches smaller header at this breakpoint */
   .shopWrap {
-    padding: 0 14px 48px;
+    max-height: calc(100vh - 80px);
+    padding: 0 14px 20px;
   }
+
   .productGrid {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
@@ -1669,6 +1715,7 @@
   .heroBanner {
     height: 37vh;
   }
+
 }
 
 /* Empty State */
@@ -1759,7 +1806,7 @@
 /* End message */
 .endMessage {
   text-align: center;
-  padding: 40px 20px;
+  padding: 30px 0 0;
   color: #999;
   grid-column: 1 / -1;
   font-size: 14px;

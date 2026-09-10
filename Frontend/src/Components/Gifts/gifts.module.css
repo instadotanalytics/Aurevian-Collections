@@ -1,4 +1,3 @@
-
 /* src/Pages/Gifts/gifts.module.css */
 
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap");
@@ -166,7 +165,9 @@
   text-transform: uppercase;
   padding: 16px 42px;
   border-radius: 8px;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
 .knowMoreBtn:hover {
@@ -337,7 +338,9 @@
   gap: 10px;
   padding: 6px 0;
   cursor: pointer;
-  transition: color 0.25s ease, transform 0.25s ease;
+  transition:
+    color 0.25s ease,
+    transform 0.25s ease;
   font-size: 14px;
   color: var(--ink-soft);
   font-weight: 400;
@@ -359,7 +362,9 @@
   cursor: pointer;
   flex-shrink: 0;
   position: relative;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .filterOption input[type="radio"]::after {
@@ -457,7 +462,9 @@
   cursor: pointer;
   padding: 10px 0 2px;
   font-family: "Jost", sans-serif;
-  transition: color 0.2s ease, letter-spacing 0.2s ease;
+  transition:
+    color 0.2s ease,
+    letter-spacing 0.2s ease;
   letter-spacing: 0.04em;
   margin-top: 6px;
   text-transform: uppercase;
@@ -543,7 +550,9 @@
   font-size: 14px;
   color: var(--ink);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .sidebarSortOption:hover {
@@ -560,11 +569,7 @@
   color: var(--gold-deep);
 }
 
-/* ---------- Products Wrapper ----------
-   ✅ UPDATED: added max-height + overflow so this scrolls
-   independently while .filters stays sticky beside it —
-   mirrors Collections' .productsWrapper behaviour exactly.
-------------------------------------------------------------- */
+/* ---------- Products Wrapper ---------- */
 .productsWrapper {
   display: flex;
   flex-direction: column;
@@ -678,7 +683,9 @@
   border: 1px solid var(--cream-line);
   border-radius: 0;
   overflow: hidden;
-  transition: box-shadow 0.25s, transform 0.25s;
+  transition:
+    box-shadow 0.25s,
+    transform 0.25s;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -728,7 +735,6 @@
   transform: scale(1.05);
 }
 
-/* Discount Badge - Top Left (white background, dark text) */
 .badge {
   position: absolute;
   top: 12px;
@@ -745,7 +751,6 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-/* Category Overlay on Image - Bottom Left */
 .productCatOverlay {
   position: absolute;
   bottom: 12px;
@@ -762,7 +767,6 @@
   font-weight: 600;
 }
 
-/* Wishlist Button on Image */
 .wishlistActions {
   position: absolute;
   top: 14px;
@@ -782,8 +786,12 @@
   font-size: 14px;
   cursor: pointer;
   color: var(--ink);
-  transition: transform 0.2s ease, font-size 0.2s ease, color 0.2s ease,
-    background 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    font-size 0.2s ease,
+    color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .wishlistBtn:hover {
@@ -807,7 +815,6 @@
   color: #d9534f;
 }
 
-/* Product Body */
 .productInfo {
   display: flex;
   flex-direction: column;
@@ -816,7 +823,6 @@
   padding: 0;
 }
 
-/* Product Name - Single line with ellipsis */
 .productName {
   font-size: 15px;
   font-weight: 500;
@@ -857,7 +863,6 @@
   font-size: 13px;
 }
 
-/* Add to Cart Button - Full width */
 .addToCartBtn {
   display: flex;
   align-items: center;
@@ -875,7 +880,10 @@
   background: var(--gold);
   border: 1px solid var(--gold);
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease,
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease,
     box-shadow 0.2s ease;
   min-height: 40px;
   flex-shrink: 0;
@@ -917,7 +925,6 @@
   transform: none;
 }
 
-/* Infinite scroll loader */
 .infiniteLoader {
   margin-top: 24px;
   min-height: 100px;
@@ -925,7 +932,7 @@
 
 .endMessage {
   text-align: center;
-  padding: 40px 0;
+  padding: 30px 0 0;
   color: var(--muted);
   font-size: 14px;
   letter-spacing: 0.05em;
@@ -1010,7 +1017,6 @@
   color: var(--ink);
 }
 
-/* Mobile Carousel - hidden on desktop */
 .testimonialsCarousel {
   display: none;
 }
@@ -1188,7 +1194,6 @@
   flex-shrink: 0;
 }
 
-/* Mobile Sort Dropdown */
 .mobileSortWrapper {
   position: relative;
   display: block;
@@ -1256,7 +1261,9 @@
   font-size: 14px;
   color: var(--ink);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .mobileSortOption:hover {
@@ -1340,6 +1347,11 @@
   }
 }
 
+/* ============================================================
+   ✅ MOBILE STICKY FIX — mirrors the Shop component exactly.
+   • .filterToggle is a SIBLING of .shopWrap (see Gifts.jsx).
+   • .shopWrap becomes the inner scroll container on mobile.
+   ============================================================ */
 @media (max-width: 900px) {
   .mainContent {
     padding-top: 100px;
@@ -1384,21 +1396,48 @@
     gap: 16px;
   }
 
-  .shopWrap {
-    grid-template-columns: 1fr;
-    padding: 24px 20px 60px;
-    gap: 0;
-  }
-
+  /* ✅ Sticky toggle pinned just below the fixed header */
   .filterToggle {
     display: flex;
+    position: sticky;
+    top: 100px;
+    z-index: 60;
+    background: var(--cream);
+    box-shadow: 0 6px 12px -6px rgba(28, 25, 23, 0.12);
+    margin: 0 20px 16px;
+    width: calc(100% - 40px);
+    box-sizing: border-box;
   }
+
+  /* ✅ .shopWrap becomes the inner scroll container on mobile. */
+  .shopWrap {
+    display: block;
+    grid-template-columns: 1fr;
+    max-height: calc(100vh - 160px); /* header 100 + toggle ~60 */
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 24px 20px 60px;
+    gap: 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--cream-line) transparent;
+  }
+
+  .shopWrap::-webkit-scrollbar {
+    width: 5px;
+  }
+  .shopWrap::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .shopWrap::-webkit-scrollbar-thumb {
+    background: var(--cream-line);
+    border-radius: 4px;
+  }
+
   .filters {
     display: none;
   }
 
-  /* ✅ UPDATED: undo the desktop scroll-clamp on mobile,
-     matching Collections' mobile behaviour exactly */
   .productsWrapper {
     max-height: none;
     overflow-y: visible;
@@ -1442,6 +1481,9 @@
     width: calc(100% + 24px);
     margin: 8px -12px -4px;
   }
+  .productsWrapper {
+  max-height: calc(70vh - 120px);
+}
 }
 
 @media (max-width: 560px) {
@@ -1463,15 +1505,22 @@
     padding-top: 28px;
   }
 
-  .shopWrap {
-    padding: 20px 14px 48px;
-  }
+  /* ✅ Match the smaller header height */
   .filterToggle {
+    top: 80px;
+    margin: 20px auto 10px;
+    width: calc(100% - 28px);
     padding: 10px 16px;
     font-size: 13px;
   }
   .filterToggleText {
     font-size: 12px;
+  }
+
+  .shopWrap {
+    /* 80px header + ~60px toggle */
+    max-height: calc(100vh - 140px);
+    padding: 20px 14px 48px;
   }
 
   .productGrid {
@@ -1783,7 +1832,7 @@
 
   .productName {
     font-size: 12px;
-    padding:  4px 8px 2px;
+    padding: 4px 8px 2px;
     display: block;
     white-space: nowrap;
     overflow: hidden;
@@ -1880,7 +1929,9 @@
   font-weight: 600;
   letter-spacing: 0.05em;
   cursor: pointer;
-  transition: background 0.25s ease, transform 0.2s ease;
+  transition:
+    background 0.25s ease,
+    transform 0.2s ease;
   font-family: "Jost", sans-serif;
 }
 

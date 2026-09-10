@@ -16,7 +16,6 @@ import {
   toggleWishlistItem,
   fetchWishlist,
 } from "../../redux/slices/wishlistSlice";
-// ✅ NEW — forward the user's (optional) coordinates for location ranking
 import { useLocationContext } from "../../contexts/LocationContext";
 
 const API_URL =
@@ -201,7 +200,6 @@ export default function Collections() {
   const cartItems = useSelector((state) => state.cart.items);
   const wishlistItems = useSelector((state) => state.wishlist.items);
 
-  // ✅ NEW
   const { coords } = useLocationContext();
 
   const heroRef = useRef(null);
@@ -264,29 +262,36 @@ export default function Collections() {
     );
   }, [filterSlug]);
 
-  const getSortedProducts = useCallback((products) => {
-    if (!products || products.length === 0) return products;
+  const getSortedProducts = useCallback(
+    (products) => {
+      if (!products || products.length === 0) return products;
 
-    const sorted = [...products];
+      const sorted = [...products];
 
-    switch (sortBy) {
-      case "price-low":
-        return sorted.sort((a, b) => {
-          const priceA = a.pricing?.salePrice || a.pricing?.originalPrice || 0;
-          const priceB = b.pricing?.salePrice || b.pricing?.originalPrice || 0;
-          return priceA - priceB;
-        });
-      case "price-high":
-        return sorted.sort((a, b) => {
-          const priceA = a.pricing?.salePrice || a.pricing?.originalPrice || 0;
-          const priceB = b.pricing?.salePrice || b.pricing?.originalPrice || 0;
-          return priceB - priceA;
-        });
-      case "latest":
-      default:
-        return sorted;
-    }
-  }, [sortBy]);
+      switch (sortBy) {
+        case "price-low":
+          return sorted.sort((a, b) => {
+            const priceA =
+              a.pricing?.salePrice || a.pricing?.originalPrice || 0;
+            const priceB =
+              b.pricing?.salePrice || b.pricing?.originalPrice || 0;
+            return priceA - priceB;
+          });
+        case "price-high":
+          return sorted.sort((a, b) => {
+            const priceA =
+              a.pricing?.salePrice || a.pricing?.originalPrice || 0;
+            const priceB =
+              b.pricing?.salePrice || b.pricing?.originalPrice || 0;
+            return priceB - priceA;
+          });
+        case "latest":
+        default:
+          return sorted;
+      }
+    },
+    [sortBy],
+  );
 
   useEffect(() => {
     const load = async () => {
@@ -313,7 +318,6 @@ export default function Collections() {
               ? activeCollectionSlug.replace(/-/g, " ")
               : undefined,
             sort: sortParam || undefined,
-            // ✅ NEW
             lat: coords?.lat,
             lng: coords?.lng,
           }),
@@ -357,7 +361,6 @@ export default function Collections() {
     activeCollectionSlug,
   ]);
 
-  // ✅ NEW — refetch when the user's location becomes available/changes
   useEffect(() => {
     setPage(1);
     setAllProducts([]);
@@ -490,7 +493,9 @@ export default function Collections() {
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev === 0 ? HERO_SLIDES.length - 1 : prev - 1));
+    setCurrentSlide((prev) =>
+      prev === 0 ? HERO_SLIDES.length - 1 : prev - 1,
+    );
   };
 
   const nextSlide = () => {
@@ -557,7 +562,7 @@ export default function Collections() {
 
   const toggleWishlist = (productId) => {
     if (!requireAuth()) return;
-    dispatch(toggleWishlistItem(productId)).catch(() => { });
+    dispatch(toggleWishlistItem(productId)).catch(() => {});
   };
 
   const handleAddToCart = async (productId) => {
@@ -600,10 +605,10 @@ export default function Collections() {
         const discount =
           p.pricing?.originalPrice && p.pricing?.salePrice
             ? Math.round(
-              ((p.pricing.originalPrice - p.pricing.salePrice) /
-                p.pricing.originalPrice) *
-              100,
-            )
+                ((p.pricing.originalPrice - p.pricing.salePrice) /
+                  p.pricing.originalPrice) *
+                  100,
+              )
             : 0;
 
         if (promotionFilter === "best-seller" && discount < 20) return false;
@@ -627,7 +632,10 @@ export default function Collections() {
   return (
     <>
       <Header />
-      <section className={styles.collections} aria-label="Aurevian Collections">
+      <section
+        className={styles.collections}
+        aria-label="Aurevian Collections"
+      >
         <div className={styles.heroGallery}>
           <div className={styles.heroTrack} ref={heroRef}>
             {HERO_SLIDES.map((slide, index) => (
@@ -674,8 +682,9 @@ export default function Collections() {
                 {HERO_SLIDES.map((_, index) => (
                   <button
                     key={index}
-                    className={`${styles.heroDot} ${index === currentSlide ? styles.heroDotActive : ""
-                      }`}
+                    className={`${styles.heroDot} ${
+                      index === currentSlide ? styles.heroDotActive : ""
+                    }`}
                     onClick={() => goToSlide(index)}
                     aria-label={`Go to slide ${index + 1}`}
                   />
@@ -693,6 +702,9 @@ export default function Collections() {
         </div>
 
         <div className={styles.container}>
+          {/* ✅ MOBILE STICKY FILTER TOGGLE — now a SIBLING of
+              .shopLayout, so its sticky top is measured against the
+              page scroll, not .shopLayout's inner scroll context. */}
           <button
             type="button"
             className={styles.filterToggle}
@@ -706,22 +718,30 @@ export default function Collections() {
           </button>
 
           <div id="filter-section" className={styles.shopLayout}>
-            {/* Desktop Filter Sidebar - Sticky/Fixed */}
+            {/* Desktop Filter Sidebar */}
             <Reveal as="aside" className={styles.filterSidebar} delay={100}>
               <h3 className={styles.filterTitle}>Filter</h3>
 
               <div className={styles.filterGroup}>
                 <span className={styles.filterGroupLabel}>Sort By</span>
-                <div className={styles.sidebarSortWrapper} ref={sidebarSortRef}>
+                <div
+                  className={styles.sidebarSortWrapper}
+                  ref={sidebarSortRef}
+                >
                   <button
                     className={styles.sidebarSortButton}
-                    onClick={() => setIsSidebarSortOpen(!isSidebarSortOpen)}
+                    onClick={() =>
+                      setIsSidebarSortOpen(!isSidebarSortOpen)
+                    }
                     aria-expanded={isSidebarSortOpen}
                   >
                     <span>{getSortLabel()}</span>
                     <FiChevronDown
-                      className={`${styles.sidebarSortChevron} ${isSidebarSortOpen ? styles.sidebarSortChevronOpen : ""
-                        }`}
+                      className={`${styles.sidebarSortChevron} ${
+                        isSidebarSortOpen
+                          ? styles.sidebarSortChevronOpen
+                          : ""
+                      }`}
                     />
                   </button>
 
@@ -730,10 +750,11 @@ export default function Collections() {
                       {SORT_OPTIONS.map((option) => (
                         <button
                           key={option.value}
-                          className={`${styles.sidebarSortOption} ${sortBy === option.value
-                            ? styles.sidebarSortOptionActive
-                            : ""
-                            }`}
+                          className={`${styles.sidebarSortOption} ${
+                            sortBy === option.value
+                              ? styles.sidebarSortOptionActive
+                              : ""
+                          }`}
                           onClick={() => {
                             setSortBy(option.value);
                             setIsSidebarSortOpen(false);
@@ -815,7 +836,9 @@ export default function Collections() {
                   max="7000"
                   step="100"
                   value={priceRange[1]}
-                  onChange={(e) => setPriceRange([0, Number(e.target.value)])}
+                  onChange={(e) =>
+                    setPriceRange([0, Number(e.target.value)])
+                  }
                   className={styles.filterPriceInput}
                   style={{
                     "--_progress": `${(priceRange[1] / 7000) * 100}%`,
@@ -835,7 +858,7 @@ export default function Collections() {
               </button>
             </Reveal>
 
-            {/* Products Section - Scrollable */}
+            {/* Products Section */}
             <div className={styles.productsWrapper}>
               <div className={styles.productsHeader}>
                 <span className={styles.productsCount}>
@@ -886,7 +909,10 @@ export default function Collections() {
                       : "We're currently updating this section. Please check back soon."}
                   </p>
                   {activeCollectionLabel && (
-                    <Link to="/collections" className={styles.emptyStateButton}>
+                    <Link
+                      to="/collections"
+                      className={styles.emptyStateButton}
+                    >
                       Browse All Collections
                     </Link>
                   )}
@@ -901,13 +927,13 @@ export default function Collections() {
                     const addingToCart = cartLoadingId === product._id;
                     const discount =
                       product.pricing?.salePrice &&
-                        product.pricing?.originalPrice
+                      product.pricing?.originalPrice
                         ? Math.round(
-                          ((product.pricing.originalPrice -
-                            product.pricing.salePrice) /
-                            product.pricing.originalPrice) *
-                          100,
-                        )
+                            ((product.pricing.originalPrice -
+                              product.pricing.salePrice) /
+                              product.pricing.originalPrice) *
+                              100,
+                          )
                         : 0;
                     return (
                       <Reveal
@@ -938,8 +964,9 @@ export default function Collections() {
                           <div className={styles.wishlistActions}>
                             <button
                               type="button"
-                              className={`${styles.wishlistBtn} ${inWishlist ? styles.wishlistBtnActive : ""
-                                }`}
+                              className={`${styles.wishlistBtn} ${
+                                inWishlist ? styles.wishlistBtnActive : ""
+                              }`}
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -977,7 +1004,9 @@ export default function Collections() {
                             </span>
                             {product.pricing?.salePrice &&
                               product.pricing?.originalPrice && (
-                                <span className={styles.productOriginalPrice}>
+                                <span
+                                  className={styles.productOriginalPrice}
+                                >
                                   ₹
                                   {product.pricing.originalPrice.toLocaleString()}
                                 </span>
@@ -985,8 +1014,9 @@ export default function Collections() {
                           </div>
                           <button
                             type="button"
-                            className={`${styles.productAddBtn} ${inCart ? styles.productAddBtnActive : ""
-                              }`}
+                            className={`${styles.productAddBtn} ${
+                              inCart ? styles.productAddBtnActive : ""
+                            }`}
                             onClick={() => handleAddToCart(product._id)}
                             disabled={inCart || addingToCart}
                           >
@@ -997,7 +1027,9 @@ export default function Collections() {
                             ) : (
                               <>
                                 <FiShoppingBag />{" "}
-                                {addingToCart ? "Adding..." : "Add to Cart"}
+                                {addingToCart
+                                  ? "Adding..."
+                                  : "Add to Cart"}
                               </>
                             )}
                           </button>
@@ -1013,11 +1045,13 @@ export default function Collections() {
                   {isLoadingMore && (
                     <div className={styles.skeletonGrid}>
                       {Array.from({ length: 3 }).map((_, i) => (
-                        <div className={styles.skeletonCard} key={`more-${i}`}>
+                        <div
+                          className={styles.skeletonCard}
+                          key={`more-${i}`}
+                        >
                           <div className={styles.skeletonImage} />
                           <div className={styles.skeletonText} />
-                          <div
-                            className={`${styles.skeletonText} ${styles.skeletonTextShort}`}
+                          <div                            className={`${styles.skeletonText} ${styles.skeletonTextShort}`}
                           />
                           <div className={styles.skeletonBtn} />
                         </div>
@@ -1027,14 +1061,17 @@ export default function Collections() {
                 </div>
               )}
 
-              {!isInitialLoading && !hasMore && filteredProducts.length > 0 && (
-                <div className={styles.endMessage}>No more products</div>
-              )}
+              {!isInitialLoading &&
+                !hasMore &&
+                filteredProducts.length > 0 && (
+                  <div className={styles.endMessage}>
+                    No more products
+                  </div>
+                )}
             </div>
           </div>
 
-          {/* ---------------- Rest of the sections remain the same ---------------- */}
-          {/* From: Blush Set */}
+          {/* Feature Section — unchanged */}
           <div className={styles.featureSection}>
             <Reveal as="div" className={styles.featureImageWrap} delay={0}>
               <img
@@ -1051,8 +1088,8 @@ export default function Collections() {
                 Introducing The Blossom Set
               </h3>
               <p className={styles.featureBody}>
-                Inspired by nature's delicate beauty, the Blossom Set brings a
-                touch of freshness and femininity to your everyday look.
+                Inspired by nature's delicate beauty, the Blossom Set brings
+                a touch of freshness and femininity to your everyday look.
               </p>
 
               <ul className={styles.featureList}>
@@ -1107,7 +1144,11 @@ export default function Collections() {
 
         <div className={styles.container}>
           <div className={styles.closingSection}>
-            <Reveal as="div" className={styles.closingContent} delay={100}>
+            <Reveal
+              as="div"
+              className={styles.closingContent}
+              delay={100}
+            >
               <h3 className={styles.closingTitle}>
                 Shine in <em>your</em>
                 <br />
@@ -1147,8 +1188,9 @@ export default function Collections() {
 
         <div
           ref={sheetRef}
-          className={`${styles.mobileFilterSheet} ${isMobileFilterOpen ? styles.mobileFilterSheetActive : ""
-            }`}
+          className={`${styles.mobileFilterSheet} ${
+            isMobileFilterOpen ? styles.mobileFilterSheetActive : ""
+          }`}
         >
           <div
             className={styles.mobileFilterHandle}
@@ -1185,8 +1227,9 @@ export default function Collections() {
                 >
                   <span>{getSortLabel()}</span>
                   <FiChevronDown
-                    className={`${styles.mobileSortChevron} ${isMobileSortOpen ? styles.mobileSortChevronOpen : ""
-                      }`}
+                    className={`${styles.mobileSortChevron} ${
+                      isMobileSortOpen ? styles.mobileSortChevronOpen : ""
+                    }`}
                   />
                 </button>
 
@@ -1195,10 +1238,11 @@ export default function Collections() {
                     {SORT_OPTIONS.map((option) => (
                       <button
                         key={option.value}
-                        className={`${styles.mobileSortOption} ${sortBy === option.value
-                          ? styles.mobileSortOptionActive
-                          : ""
-                          }`}
+                        className={`${styles.mobileSortOption} ${
+                          sortBy === option.value
+                            ? styles.mobileSortOptionActive
+                            : ""
+                        }`}
                         onClick={() => handleSortSelect(option.value)}
                       >
                         {option.label}
@@ -1276,14 +1320,18 @@ export default function Collections() {
             </div>
 
             <div className={styles.mobileFilterGroup}>
-              <span className={styles.mobileFilterGroupLabel}>Price Range</span>
+              <span className={styles.mobileFilterGroupLabel}>
+                Price Range
+              </span>
               <input
                 type="range"
                 min="0"
                 max="7000"
                 step="100"
                 value={priceRange[1]}
-                onChange={(e) => setPriceRange([0, Number(e.target.value)])}
+                onChange={(e) =>
+                  setPriceRange([0, Number(e.target.value)])
+                }
                 className={styles.filterPriceInput}
                 style={{
                   "--_progress": `${(priceRange[1] / 7000) * 100}%`,
@@ -1295,7 +1343,10 @@ export default function Collections() {
               </div>
             </div>
 
-            <button className={styles.filterClearBtn} onClick={clearAllFilters}>
+            <button
+              className={styles.filterClearBtn}
+              onClick={clearAllFilters}
+            >
               Clear All Filters
             </button>
 

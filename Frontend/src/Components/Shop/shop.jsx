@@ -860,7 +860,7 @@ export default function Shop() {
     );
   };
 
-  return (
+    return (
     <div className={styles.page}>
       <Header />
       <div className={styles.mainContent}>
@@ -872,19 +872,22 @@ export default function Shop() {
           />
         </div>
 
-        <div className={styles.shopWrap}>
-          <button
-            type="button"
-            className={styles.filterToggle}
-            onClick={openMobileFilter}
-            aria-expanded={isMobileFilterOpen}
-          >
-            <span className={styles.filterToggleText}>Filter Options</span>
-            <span className={styles.filterToggleIcon}>
-              <LuSlidersHorizontal />
-            </span>
-          </button>
+        {/* ✅ MOBILE STICKY FILTER TOGGLE — lives OUTSIDE .shopWrap,
+            as a direct sibling, so its sticky top is relative to the
+            page/body scroll, not .shopWrap's own scroll context. */}
+        <button
+          type="button"
+          className={styles.filterToggle}
+          onClick={openMobileFilter}
+          aria-expanded={isMobileFilterOpen}
+        >
+          <span className={styles.filterToggleText}>Filter Options</span>
+          <span className={styles.filterToggleIcon}>
+            <LuSlidersHorizontal />
+          </span>
+        </button>
 
+        <div className={styles.shopWrap}>
           <aside className={styles.filterSidebar}>
             <h3 className={styles.filterTitle}>Filter</h3>
             <div className={styles.filterGroup}>
@@ -897,8 +900,9 @@ export default function Shop() {
                 >
                   <span>{getSortLabel()}</span>
                   <FiChevronDown
-                    className={`${styles.sidebarSortChevron} ${isSidebarSortOpen ? styles.sidebarSortChevronOpen : ""
-                      }`}
+                    className={`${styles.sidebarSortChevron} ${
+                      isSidebarSortOpen ? styles.sidebarSortChevronOpen : ""
+                    }`}
                   />
                 </button>
                 {isSidebarSortOpen && (
@@ -906,10 +910,11 @@ export default function Shop() {
                     {SORT_OPTIONS.map((option) => (
                       <button
                         key={option.value}
-                        className={`${styles.sidebarSortOption} ${sort === option.value
-                          ? styles.sidebarSortOptionActive
-                          : ""
-                          }`}
+                        className={`${styles.sidebarSortOption} ${
+                          sort === option.value
+                            ? styles.sidebarSortOptionActive
+                            : ""
+                        }`}
                         onClick={() => {
                           setSort(option.value);
                           setIsSidebarSortOpen(false);
@@ -982,9 +987,6 @@ export default function Shop() {
             </button>
           </aside>
 
-          {/* ✅ Product Grid — CHANGED: was a bare <main> with no class,
-              so none of the scroll/sticky CSS ever attached to it. Now
-              wired to .productsWrapper, mirroring Collections exactly. */}
           <main className={styles.productsWrapper}>
             {/* Toolbar */}
             <div className={styles.toolbar}>
@@ -992,8 +994,9 @@ export default function Shop() {
                 {isInitialLoading
                   ? "Loading..."
                   : isSearchMode
-                    ? `Showing ${filteredProducts.length} result${filteredProducts.length === 1 ? "" : "s"
-                    } for "${searchQuery}"`
+                    ? `Showing ${filteredProducts.length} result${
+                        filteredProducts.length === 1 ? "" : "s"
+                      } for "${searchQuery}"`
                     : `Showing ${filteredProducts.length} results for ${getDisplayCategoryName()}`}
               </span>
               {isSearchMode && !isInitialLoading && (
@@ -1152,8 +1155,9 @@ export default function Shop() {
         )}
         <div
           ref={sheetRef}
-          className={`${styles.mobileFilterSheet} ${isMobileFilterOpen ? styles.mobileFilterSheetActive : ""
-            }`}
+          className={`${styles.mobileFilterSheet} ${
+            isMobileFilterOpen ? styles.mobileFilterSheetActive : ""
+          }`}
         >
           <div
             className={styles.mobileFilterHandle}
@@ -1188,8 +1192,9 @@ export default function Shop() {
                 >
                   <span>{getSortLabel()}</span>
                   <FiChevronDown
-                    className={`${styles.mobileSortChevron} ${isSortDropdownOpen ? styles.mobileSortChevronOpen : ""
-                      }`}
+                    className={`${styles.mobileSortChevron} ${
+                      isSortDropdownOpen ? styles.mobileSortChevronOpen : ""
+                    }`}
                   />
                 </button>
                 {isSortDropdownOpen && (
@@ -1197,10 +1202,11 @@ export default function Shop() {
                     {SORT_OPTIONS.map((option) => (
                       <button
                         key={option.value}
-                        className={`${styles.mobileSortOption} ${sort === option.value
-                          ? styles.mobileSortOptionActive
-                          : ""
-                          }`}
+                        className={`${styles.mobileSortOption} ${
+                          sort === option.value
+                            ? styles.mobileSortOptionActive
+                            : ""
+                        }`}
                         onClick={() => handleSortSelect(option.value)}
                       >
                         {option.label}
