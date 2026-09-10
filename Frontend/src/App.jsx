@@ -3,7 +3,7 @@
  * Sets up routing and global providers with authentication
  */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
@@ -153,39 +153,42 @@ const LayoutWithoutHeader = ({ children }) => <>{children}</>;
 
 const App = () => {
   const dispatch = useDispatch();
-  const { isLoading, isAuthenticated } = useSelector((state) => state.auth);
-  const { isLoading: superAdminLoading, isAuthenticated: isSuperAdmin } =
-    useSelector((state) => state.superAdmin);
-  const {
-    isLoading: sellerLoading,
-    isAuthenticated: isSeller,
-    seller,
-  } = useSelector((state) => state.seller);
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated: isSuperAdmin } = useSelector(
+    (state) => state.superAdmin,
+  );
+  const { isAuthenticated: isSeller, seller } = useSelector(
+    (state) => state.seller,
+  );
 
   const location = useLocation();
 
+  // ✅ NEW — run the "who am I" bootstrapping once, then never gate on it again
+  const [bootstrapping, setBootstrapping] = useState(true);
+
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      dispatch(fetchCurrentUser());
+    const tasks = [];
+
+    if (localStorage.getItem("accessToken")) {
+      tasks.push(dispatch(fetchCurrentUser()));
+    }
+    if (localStorage.getItem("superAdminToken")) {
+      tasks.push(dispatch(fetchCurrentSuperAdmin()));
+    }
+    if (localStorage.getItem("sellerAccessToken")) {
+      tasks.push(dispatch(fetchCurrentSeller()));
     }
 
-    const superAdminToken = localStorage.getItem("superAdminToken");
-    if (superAdminToken) {
-      dispatch(fetchCurrentSuperAdmin());
+    if (tasks.length === 0) {
+      setBootstrapping(false);
+      return;
     }
 
-    const sellerToken = localStorage.getItem("sellerAccessToken");
-    if (sellerToken) {
-      dispatch(fetchCurrentSeller());
-    }
+    Promise.allSettled(tasks).finally(() => setBootstrapping(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
-  if (
-    isLoading ||
-    superAdminLoading ||
-    (sellerLoading && localStorage.getItem("sellerAccessToken"))
-  ) {
+  if (bootstrapping) {
     if (location.pathname === ROUTES.HOME) {
       return <HomePageSkeleton />;
     }

@@ -1,7 +1,7 @@
 // src/Pages/Seller/SellerAuth/SellerLogin.jsx
 
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { sellerLogin, clearSellerError } from '../../../redux/slices/sellerSlice';
 import {
@@ -22,6 +22,7 @@ import Footer from "../../Layout/Footer/Footer";
 
 const SellerLogin = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const { isLoading, error, isAuthenticated, seller } = useSelector((state) => state.seller);
 
@@ -33,6 +34,10 @@ const SellerLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState(null);
   const [focusedField, setFocusedField] = useState(null);
+
+  const from = location.state?.from?.pathname
+    ? location.state.from.pathname + (location.state.from.search || "")
+    : '/seller/dashboard';
 
   // Redirect based on status
   useEffect(() => {
@@ -48,7 +53,7 @@ const SellerLogin = () => {
       }
 
       if (seller.status === 'approved') {
-        navigate('/seller/dashboard');
+        navigate(from);
         return;
       }
 
@@ -58,7 +63,7 @@ const SellerLogin = () => {
         toast.error('Your account has been suspended. Please contact support.');
       }
     }
-  }, [isAuthenticated, seller, navigate]);
+  }, [isAuthenticated, seller, navigate, from]);
 
   useEffect(() => {
     return () => {
@@ -129,7 +134,7 @@ const SellerLogin = () => {
         return;
       } else if (sellerData.status === 'approved') {
         toast.success('Welcome back! Redirecting to dashboard...');
-        navigate('/seller/dashboard');
+        navigate(from);
       } else {
         toast.error('Your account is not approved yet.');
       }

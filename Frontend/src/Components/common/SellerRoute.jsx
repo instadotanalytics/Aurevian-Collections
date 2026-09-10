@@ -1,13 +1,17 @@
 // src/Components/common/SellerRoute.jsx
 
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 const SellerRoute = ({ children }) => {
-  const { isAuthenticated, isLoading, seller } = useSelector((state) => state.seller);
+  const { isAuthenticated, authChecked, seller } = useSelector((state) => state.seller);
+  const location = useLocation();
 
-  if (isLoading) {
+  // ✅ NEW — wait for the boot-time "who am I" check before deciding.
+  // Prevents a flash-redirect to /seller/login on refresh when a valid
+  // sellerAccessToken exists but fetchCurrentSeller hasn't resolved yet.
+  if (!authChecked) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold"></div>
@@ -16,7 +20,7 @@ const SellerRoute = ({ children }) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/seller/login" replace />;
+    return <Navigate to="/seller/login" state={{ from: location }} replace />;
   }
 
   // Check seller status
@@ -66,7 +70,7 @@ const SellerRoute = ({ children }) => {
 
   // Only approved sellers can access
   if (seller?.status !== 'approved') {
-    return <Navigate to="/seller/login" replace />;
+    return <Navigate to="/seller/login" state={{ from: location }} replace />;
   }
 
   return children;

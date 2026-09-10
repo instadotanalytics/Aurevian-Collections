@@ -6,7 +6,9 @@
 // ============================================
 // API Configuration
 // ============================================
-export const API_URL = import.meta.env.VITE_API_URL || "https://aurevian-collections-ng4w.onrender.com/api";
+export const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://aurevian-collections-ng4w.onrender.com/api";
 
 // ============================================
 // Firebase Configuration (from environment variables)
@@ -24,13 +26,19 @@ export const FIREBASE_CONFIG = {
 // ============================================
 // Validate Firebase Config
 // ============================================
-console.log('📋 Firebase Config Validation:');
-console.log('  - API Key:', FIREBASE_CONFIG.apiKey ? '✅ Set' : '❌ MISSING');
-console.log('  - Auth Domain:', FIREBASE_CONFIG.authDomain ? '✅ Set' : '❌ MISSING');
-console.log('  - Project ID:', FIREBASE_CONFIG.projectId ? '✅ Set' : '❌ MISSING');
+console.log("📋 Firebase Config Validation:");
+console.log("  - API Key:", FIREBASE_CONFIG.apiKey ? "✅ Set" : "❌ MISSING");
+console.log(
+  "  - Auth Domain:",
+  FIREBASE_CONFIG.authDomain ? "✅ Set" : "❌ MISSING",
+);
+console.log(
+  "  - Project ID:",
+  FIREBASE_CONFIG.projectId ? "✅ Set" : "❌ MISSING",
+);
 
 if (!FIREBASE_CONFIG.apiKey) {
-  console.error('❌ Firebase API Key is missing! Please check your .env file');
+  console.error("❌ Firebase API Key is missing! Please check your .env file");
 }
 
 // ============================================
@@ -46,6 +54,8 @@ export const AUTH_CONFIG = {
   ACCESS_TOKEN_KEY: "accessToken",
   USER_KEY: "user",
   REFRESH_TOKEN_KEY: "refreshToken",
+  SUPER_ADMIN_TOKEN_KEY: "superAdminToken", // NEW — was undefined before
+  SUPER_ADMIN_USER_KEY: "superAdminUser", // NEW — was undefined before
 };
 
 // ============================================

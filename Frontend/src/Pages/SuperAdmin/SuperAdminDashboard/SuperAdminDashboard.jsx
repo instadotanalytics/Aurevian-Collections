@@ -1,4 +1,3 @@
-
 // src/Pages/SuperAdmin/SuperAdminDashboard/SuperAdminDashboard.jsx
 
 import React, { useState, useEffect, useRef } from "react";
@@ -39,9 +38,6 @@ import {
 
 import {
   superAdminLogout,
-  verifySuperAdminToken,
-  setSuperAdminAuth,
-  clearSuperAdminAuth,
 } from "../../../redux/slices/superAdminSlice";
 
 import toast from "react-hot-toast";
@@ -173,7 +169,6 @@ const SuperAdminDashboard = () => {
     (state) => state.superAdmin,
   );
 
-  const hasVerified = useRef(false);
   const profileRef = useRef(null);
 
   // Route precedence: /seller-details/:id and /sellers-products/:sellerId
@@ -189,7 +184,6 @@ const SuperAdminDashboard = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(true);
 
   // Which sidebar dropdown group ("blog" / "requests") is currently open
   const [openMenu, setOpenMenu] = useState(() => {
@@ -217,47 +211,6 @@ const SuperAdminDashboard = () => {
   const goToSection = (sectionId) => {
     navigate(`/super-admin/dashboard/${sectionId}`);
   };
-
-  useEffect(() => {
-    if (hasVerified.current) return;
-    hasVerified.current = true;
-
-    const verifyToken = async () => {
-      try {
-        setIsVerifying(true);
-        const token =
-          localStorage.getItem("superAdminToken") ||
-          localStorage.getItem("accessToken");
-
-        if (!token) {
-          setIsVerifying(false);
-          navigate("/super-admin/login");
-          return;
-        }
-
-        if (user && isAuthenticated) {
-          setIsVerifying(false);
-          return;
-        }
-
-        const result = await dispatch(verifySuperAdminToken()).unwrap();
-        if (result) {
-          dispatch(setSuperAdminAuth(result));
-          setIsVerifying(false);
-        } else {
-          throw new Error("Invalid token response");
-        }
-      } catch (error) {
-        dispatch(clearSuperAdminAuth());
-        toast.error("Session expired. Please login again.");
-        navigate("/super-admin/login");
-      } finally {
-        setIsVerifying(false);
-      }
-    };
-
-    verifyToken();
-  }, [dispatch, navigate, user, isAuthenticated]);
 
   const handleLogout = async () => {
     try {
@@ -307,11 +260,11 @@ const SuperAdminDashboard = () => {
     setOpenMenu((prev) => (prev === id ? null : prev));
   };
 
-  if (isVerifying || isLoading) {
+  if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.spinner}></div>
-        <p>Verifying session...</p>
+        <p>Loading...</p>
       </div>
     );
   }

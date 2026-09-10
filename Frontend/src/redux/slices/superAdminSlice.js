@@ -12,10 +12,12 @@ import { AUTH_CONFIG } from "../../utils/constants.js";
 
 // ✅ FIX: Get token safely
 const getToken = () => {
-  return localStorage.getItem(AUTH_CONFIG.SUPER_ADMIN_TOKEN_KEY) || 
-         localStorage.getItem(AUTH_CONFIG.ACCESS_TOKEN_KEY) || 
-         localStorage.getItem("superAdminToken") ||
-         null;
+  return (
+    localStorage.getItem(AUTH_CONFIG.SUPER_ADMIN_TOKEN_KEY) ||
+    localStorage.getItem(AUTH_CONFIG.ACCESS_TOKEN_KEY) ||
+    localStorage.getItem("superAdminToken") ||
+    null
+  );
 };
 
 // ✅ FIX: Get user safely from localStorage
@@ -26,16 +28,16 @@ const getUserFromStorage = () => {
     if (userData) {
       return JSON.parse(userData);
     }
-    
+
     // Try fallback key
     const fallbackUser = localStorage.getItem("superAdminUser");
     if (fallbackUser) {
       return JSON.parse(fallbackUser);
     }
-    
+
     return null;
   } catch (error) {
-    console.error('Error parsing user data from localStorage:', error);
+    console.error("Error parsing user data from localStorage:", error);
     // Clear corrupted data
     localStorage.removeItem(AUTH_CONFIG.SUPER_ADMIN_USER_KEY);
     localStorage.removeItem("superAdminUser");
@@ -47,6 +49,7 @@ const initialState = {
   user: getUserFromStorage(),
   isAuthenticated: !!getToken(),
   isLoading: false,
+  authChecked: !getToken(), // NEW
   error: null,
   isVerified: false,
 };
@@ -67,7 +70,7 @@ export const superAdminLogin = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message || "Login failed");
     }
-  }
+  },
 );
 
 export const superAdminLogout = createAsyncThunk(
@@ -83,7 +86,7 @@ export const superAdminLogout = createAsyncThunk(
       // Still clear local state even if API fails
       return null;
     }
-  }
+  },
 );
 
 export const fetchCurrentSuperAdmin = createAsyncThunk(
@@ -98,7 +101,7 @@ export const fetchCurrentSuperAdmin = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message || "Failed to fetch user");
     }
-  }
+  },
 );
 
 export const verifySuperAdminToken = createAsyncThunk(
@@ -110,7 +113,7 @@ export const verifySuperAdminToken = createAsyncThunk(
       if (state.superAdmin?.isVerified && state.superAdmin?.user) {
         return state.superAdmin.user;
       }
-      
+
       const response = await verifySuperAdminTokenAPI();
       if (response.success) {
         return response.admin;
@@ -119,7 +122,7 @@ export const verifySuperAdminToken = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message || "Token verification failed");
     }
-  }
+  },
 );
 
 // ============================================
@@ -137,6 +140,7 @@ const superAdminSlice = createSlice({
       state.user = null;
       state.isAuthenticated = false;
       state.isVerified = false;
+      state.authChecked = true; // NEW
       state.error = null;
       localStorage.removeItem(AUTH_CONFIG.SUPER_ADMIN_USER_KEY);
       localStorage.removeItem(AUTH_CONFIG.SUPER_ADMIN_TOKEN_KEY);
@@ -148,16 +152,23 @@ const superAdminSlice = createSlice({
       state.user = action.payload;
       state.isAuthenticated = true;
       state.isVerified = true;
+      state.authChecked = true; // NEW
       state.error = null;
       if (action.payload) {
         try {
-          localStorage.setItem(AUTH_CONFIG.SUPER_ADMIN_USER_KEY, JSON.stringify(action.payload));
-          localStorage.setItem("superAdminUser", JSON.stringify(action.payload));
+          localStorage.setItem(
+            AUTH_CONFIG.SUPER_ADMIN_USER_KEY,
+            JSON.stringify(action.payload),
+          );
+          localStorage.setItem(
+            "superAdminUser",
+            JSON.stringify(action.payload),
+          );
         } catch (error) {
-          console.error('Error saving user to localStorage:', error);
+          console.error("Error saving user to localStorage:", error);
         }
       }
-    }
+    },
   },
   extraReducers: (builder) => {
     // Login
@@ -168,24 +179,32 @@ const superAdminSlice = createSlice({
       })
       .addCase(superAdminLogin.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.authChecked = true; // NEW
         state.user = action.payload;
         state.isAuthenticated = true;
         state.isVerified = true;
         state.error = null;
         try {
-          localStorage.setItem(AUTH_CONFIG.SUPER_ADMIN_USER_KEY, JSON.stringify(action.payload));
-          localStorage.setItem("superAdminUser", JSON.stringify(action.payload));
+          localStorage.setItem(
+            AUTH_CONFIG.SUPER_ADMIN_USER_KEY,
+            JSON.stringify(action.payload),
+          );
+          localStorage.setItem(
+            "superAdminUser",
+            JSON.stringify(action.payload),
+          );
           // ✅ Store token separately
           const token = localStorage.getItem("superAdminToken");
           if (token) {
             localStorage.setItem(AUTH_CONFIG.SUPER_ADMIN_TOKEN_KEY, token);
           }
         } catch (error) {
-          console.error('Error saving data to localStorage:', error);
+          console.error("Error saving data to localStorage:", error);
         }
       })
       .addCase(superAdminLogin.rejected, (state, action) => {
         state.isLoading = false;
+        state.authChecked = true; // NEW
         state.isAuthenticated = false;
         state.isVerified = false;
         state.error = action.payload || "Login failed";
@@ -233,21 +252,29 @@ const superAdminSlice = createSlice({
       })
       .addCase(verifySuperAdminToken.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.authChecked = true; // NEW
         state.user = action.payload;
         state.isAuthenticated = true;
         state.isVerified = true;
         state.error = null;
         if (action.payload) {
           try {
-            localStorage.setItem(AUTH_CONFIG.SUPER_ADMIN_USER_KEY, JSON.stringify(action.payload));
-            localStorage.setItem("superAdminUser", JSON.stringify(action.payload));
+            localStorage.setItem(
+              AUTH_CONFIG.SUPER_ADMIN_USER_KEY,
+              JSON.stringify(action.payload),
+            );
+            localStorage.setItem(
+              "superAdminUser",
+              JSON.stringify(action.payload),
+            );
           } catch (error) {
-            console.error('Error saving user to localStorage:', error);
+            console.error("Error saving user to localStorage:", error);
           }
         }
       })
       .addCase(verifySuperAdminToken.rejected, (state, action) => {
         state.isLoading = false;
+        state.authChecked = true; // NEW
         state.isAuthenticated = false;
         state.isVerified = false;
         state.user = null;
@@ -266,21 +293,29 @@ const superAdminSlice = createSlice({
       })
       .addCase(fetchCurrentSuperAdmin.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.authChecked = true; // NEW
         state.user = action.payload;
         state.isAuthenticated = true;
         state.isVerified = true;
         state.error = null;
         if (action.payload) {
           try {
-            localStorage.setItem(AUTH_CONFIG.SUPER_ADMIN_USER_KEY, JSON.stringify(action.payload));
-            localStorage.setItem("superAdminUser", JSON.stringify(action.payload));
+            localStorage.setItem(
+              AUTH_CONFIG.SUPER_ADMIN_USER_KEY,
+              JSON.stringify(action.payload),
+            );
+            localStorage.setItem(
+              "superAdminUser",
+              JSON.stringify(action.payload),
+            );
           } catch (error) {
-            console.error('Error saving user to localStorage:', error);
+            console.error("Error saving user to localStorage:", error);
           }
         }
       })
       .addCase(fetchCurrentSuperAdmin.rejected, (state, action) => {
         state.isLoading = false;
+        state.authChecked = true; // NEW
         state.isAuthenticated = false;
         state.isVerified = false;
         state.error = action.payload || "Failed to fetch user";
@@ -293,5 +328,6 @@ const superAdminSlice = createSlice({
   },
 });
 
-export const { clearSuperAdminError, clearSuperAdminAuth, setSuperAdminAuth } = superAdminSlice.actions;
+export const { clearSuperAdminError, clearSuperAdminAuth, setSuperAdminAuth } =
+  superAdminSlice.actions;
 export default superAdminSlice.reducer;

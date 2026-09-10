@@ -440,6 +440,7 @@ const initialState = {
   seller: null,
   isAuthenticated: false,
   isLoading: false,
+  authChecked: !localStorage.getItem("sellerAccessToken"), // NEW
   dashboardLoading: false,
   ordersLoading: false,
   activitiesLoading: false,
@@ -548,6 +549,7 @@ const sellerSlice = createSlice({
       })
       .addCase(sellerLogin.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.authChecked = true; // NEW
         state.seller = action.payload;
         state.isAuthenticated = true;
         state.status = "succeeded";
@@ -555,6 +557,7 @@ const sellerSlice = createSlice({
       })
       .addCase(sellerLogin.rejected, (state, action) => {
         state.isLoading = false;
+        state.authChecked = true; // NEW
         state.error = action.payload?.message || "Login failed";
         state.status = "failed";
       })
@@ -568,12 +571,14 @@ const sellerSlice = createSlice({
       })
       .addCase(fetchCurrentSeller.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.authChecked = true; // NEW
         state.seller = action.payload;
         state.isAuthenticated = true;
         state.status = "succeeded";
       })
       .addCase(fetchCurrentSeller.rejected, (state) => {
         state.isLoading = false;
+        state.authChecked = true; // NEW
         state.seller = null;
         state.isAuthenticated = false;
         state.status = "failed";
@@ -778,6 +783,7 @@ const sellerSlice = createSlice({
       .addCase(sellerLogout.fulfilled, (state) => {
         state.seller = null;
         state.isAuthenticated = false;
+        state.authChecked = true; // NEW
         state.dashboardStats = null;
         state.recentOrders = [];
         state.recentActivities = [];
