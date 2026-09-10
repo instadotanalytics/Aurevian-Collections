@@ -20,6 +20,10 @@ import { normalizePhoneNumber } from "../utils/phoneUtils.js";
 import shiprocketService from "../services/shiprocketService.js";
 import { isValidIndianPincode } from "./shippingController.js";
 
+// ✅ NEW — showroom coordinate validation/parsing for location-based
+// product discovery (Feature 2/9). Independent of Shiprocket entirely.
+import { isValidCoordinate, parseCoordinate } from "../utils/geoUtils.js";
+
 // ✅ NEW — Resend cooldown — prevents SMS/email spam via the resend endpoint.
 const RESEND_COOLDOWN_MS = 60 * 1000; // 60s
 
@@ -330,10 +334,6 @@ export const registerSeller = async (req, res) => {
     }
     await seller.save();
 
-    // ✅ Registration record is intentionally kept even on partial OTP
-    // failure — this is the existing convention (see the "existingSeller"
-    // update-branch above), which lets the seller resend without
-    // re-registering. Not adding a rollback.
     return res.status(201).json({
       success: true,
       message: "Seller registration initiated. Verify the OTPs.",
@@ -442,10 +442,6 @@ export const verifyPhoneOTP = async (req, res) => {
         .json({ success: false, message: "Phone and OTP are required" });
     }
 
-    // ✅ NEW — normalize before lookup, same as registerSeller/resendOTP.
-    // Seller.phone is always stored in E.164; comparing against a raw,
-    // unnormalized value here is what was causing "Seller not found"
-    // even with a correct OTP.
     const phoneCheck = normalizePhoneNumber(phone);
     if (!phoneCheck.valid) {
       return res.status(400).json({
@@ -560,7 +556,6 @@ export const resendOTP = async (req, res) => {
         .json({ success: false, message: "Phone already verified" });
     }
 
-    // ✅ NEW — cooldown so resend can't be spammed into Twilio/Gmail.
     const lastSentAt = seller.otp?.[type]?.lastSentAt;
     if (
       lastSentAt &&
@@ -720,7 +715,6 @@ export const sellerLogin = async (req, res) => {
       });
     }
 
-    // ✅ Compare password
     const isPasswordValid = await seller.comparePassword(password);
     if (!isPasswordValid) {
       await seller.addLoginHistory(req.ip, req.headers["user-agent"], false);
@@ -732,10 +726,8 @@ export const sellerLogin = async (req, res) => {
 
     await seller.addLoginHistory(req.ip, req.headers["user-agent"], true);
 
-    // ✅ Generate tokens
     const { accessToken, refreshToken } = generateTokens(seller._id);
 
-    // ✅ Update refresh token - using findByIdAndUpdate
     await Seller.findByIdAndUpdate(seller._id, {
       refreshToken: refreshToken,
       refreshTokenExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
@@ -900,12 +892,7 @@ export const refreshSellerToken = async (req, res) => {
 };
 
 // ============================================
-// 9. GET SELLER DASHBOARD — ✅ FULLY REBUILT ON REAL DATA
-//
-// One call returns everything the dashboard's top cards, status grid,
-// low-stock list and top-products list need. Revenue/customer figures
-// reuse the exact same aggregation helpers as /earnings and /customers
-// so the numbers can never silently drift apart across pages.
+// 9. GET SELLER DASHBOARD
 // ============================================
 export const getSellerDashboard = async (req, res) => {
   try {
@@ -914,7 +901,6 @@ export const getSellerDashboard = async (req, res) => {
     const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
-    // ---------------- PRODUCTS ----------------
     const [totalProducts, activeProducts, newProductsThisMonth, lowStockDocs] =
       await Promise.all([
         JewelleryProduct.countDocuments({
@@ -953,8 +939,6 @@ export const getSellerDashboard = async (req, res) => {
           .limit(6),
       ]);
 
-    // ---------------- ORDERS / REVENUE ----------------
-    // Same seller-item isolation + refund treatment as the Earnings tab.
     const rows = await getSellerOrderRows(sellerId);
     const paidRows = rows.filter((r) => r.paymentStatus === "paid");
     const refundedPaid = paidRows.filter((r) =>
@@ -987,7 +971,6 @@ export const getSellerDashboard = async (req, res) => {
         ? ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
         : null;
 
-    // Last 7 calendar days — powers the Revenue card's mini sparkline.
     const revenueTrend = [];
     for (let i = 6; i >= 0; i--) {
       const dayStart = new Date(now);
@@ -1009,7 +992,6 @@ export const getSellerDashboard = async (req, res) => {
       "items.seller": sellerId,
     });
 
-    // Real fulfillmentStatus counts — no invented status values.
     const fulfillmentCountsAgg = await Order.aggregate([
       { $match: { "items.seller": toObjectId(sellerId) } },
       { $group: { _id: "$fulfillmentStatus", count: { $sum: 1 } } },
@@ -1027,7 +1009,6 @@ export const getSellerDashboard = async (req, res) => {
       (fulfillmentCounts.AWB_PENDING || 0) +
       (fulfillmentCounts.AWB_ASSIGNED || 0);
 
-    // ---------------- CUSTOMERS ----------------
     const customerRows = await getSellerOrderRowsForCustomers(sellerId);
     const customers = buildCustomerRecords(customerRows);
     const totalCustomers = customers.length;
@@ -1035,7 +1016,6 @@ export const getSellerDashboard = async (req, res) => {
       (c) => new Date(c.firstOrderAt) >= thisMonthStart,
     ).length;
 
-    // ---------------- TOP PRODUCTS ----------------
     const byProduct = {};
     for (const r of paidRows) {
       for (const it of r.sellerItems) {
@@ -1123,7 +1103,7 @@ export const getSellerDashboard = async (req, res) => {
 };
 
 // ============================================
-// 10. GET RECENT ORDERS — ✅ REAL, seller-scoped, no dummy data
+// 10. GET RECENT ORDERS
 // ============================================
 export const getRecentOrders = async (req, res) => {
   try {
@@ -1435,13 +1415,7 @@ export const getVerificationStatus = async (req, res) => {
 };
 
 // ============================================
-// 14. GET RECENT ACTIVITIES — ✅ REAL, derived from Order.statusHistory
-//
-// There's no separate Activity model in this codebase, so activities are
-// derived from the same statusHistory entries the order lifecycle already
-// writes (system/seller/super_admin actions on this seller's orders).
-// Nothing here is fabricated — every entry maps to a real status change
-// that actually happened.
+// 14. GET RECENT ACTIVITIES
 // ============================================
 const ACTIVITY_LABELS = {
   PENDING_SELLER_CONFIRMATION: {
@@ -1587,14 +1561,12 @@ export const sellerForgotPassword = async (req, res) => {
       });
     }
 
-    // ✅ Generate reset token
     const resetToken = crypto.randomBytes(20).toString("hex");
     const hashedToken = crypto
       .createHash("sha256")
       .update(resetToken)
       .digest("hex");
 
-    // ✅ Update directly with findOneAndUpdate (bypasses pre-save issues)
     await Seller.findByIdAndUpdate(seller._id, {
       resetPasswordToken: hashedToken,
       resetPasswordExpire: Date.now() + 10 * 60 * 1000,
@@ -1619,7 +1591,6 @@ export const sellerForgotPassword = async (req, res) => {
     } catch (emailError) {
       console.error("❌ Email send error:", emailError);
 
-      // ✅ Clear token if email fails
       await Seller.findByIdAndUpdate(seller._id, {
         resetPasswordToken: undefined,
         resetPasswordExpire: undefined,
@@ -1718,16 +1689,14 @@ export const sellerResetPassword = async (req, res) => {
 };
 
 // ============================================
-// 17. UPDATE SELLER PICKUP ADDRESS — ✅ REWRITTEN
+// 17. UPDATE SELLER PICKUP ADDRESS
 //
-// Two-phase, per the required architecture:
-//   Phase A: validate + save locally. This ALWAYS succeeds or fails on
-//            its own terms (validation / DB error) — Shiprocket cannot
-//            touch this phase.
-//   Phase B: attempt Shiprocket sync. Failure here is recorded on the
-//            seller doc (shiprocketSyncStatus/shiprocketSyncError) but
-//            NEVER rolls back or blocks Phase A, and the HTTP response
-//            is still 200/success:true — the address WAS saved.
+//   Phase A: validate + save locally (address fields, unchanged from
+//            before) PLUS ✅ NEW optional showroom coordinates —
+//            entirely independent of Shiprocket. A seller can save an
+//            address with or without coordinates, and add/update
+//            coordinates later without re-triggering Shiprocket sync.
+//   Phase B: attempt Shiprocket sync (unchanged).
 // ============================================
 export const updateSellerPickupAddress = async (req, res) => {
   try {
@@ -1742,6 +1711,8 @@ export const updateSellerPickupAddress = async (req, res) => {
       state,
       pincode,
       country,
+      latitude, // ✅ NEW
+      longitude, // ✅ NEW
     } = req.body;
 
     // ---- PHASE A.1: VALIDATE ----
@@ -1784,6 +1755,29 @@ export const updateSellerPickupAddress = async (req, res) => {
     // ---- PHASE A.2: DETECT REAL CONTENT CHANGE (drives nickname revision) ----
     const prev =
       seller.pickupAddress?.toObject?.() || seller.pickupAddress || {};
+
+    // ✅ NEW — showroom coordinates (Feature 2/9). Optional and never
+    // required for the address save to succeed; preserved from the
+    // previous value when this request doesn't include new ones, and
+    // validated server-side when it does (never trust client numbers
+    // blindly — Feature 13).
+    let coordinates = prev.coordinates || { lat: null, lng: null };
+    if (req.body.latitude !== undefined || req.body.longitude !== undefined) {
+      const parsedLat = parseCoordinate(latitude);
+      const parsedLng = parseCoordinate(longitude);
+      if (!isValidCoordinate(parsedLat, parsedLng)) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Latitude/longitude must be valid numbers (latitude -90 to 90, longitude -180 to 180)",
+        });
+      }
+      coordinates = { lat: parsedLat, lng: parsedLng };
+    }
+    const coordinatesChanged =
+      coordinates.lat !== (prev.coordinates?.lat ?? null) ||
+      coordinates.lng !== (prev.coordinates?.lng ?? null);
+
     const normalizedNew = {
       contactName: contactName.trim(),
       contactPhone: phoneCheck.e164,
@@ -1813,6 +1807,13 @@ export const updateSellerPickupAddress = async (req, res) => {
     // ---- PHASE A.3: SAVE LOCALLY — THIS IS THE SOURCE OF TRUTH ----
     seller.pickupAddress = {
       ...normalizedNew,
+      // ✅ NEW — coordinates are saved unconditionally alongside the
+      // address, on their own timeline (coordinatesUpdatedAt), fully
+      // decoupled from the Shiprocket sync fields below.
+      coordinates,
+      coordinatesUpdatedAt: coordinatesChanged
+        ? new Date()
+        : prev.coordinatesUpdatedAt || null,
       shiprocketPickupLocationName: addressChanged
         ? null
         : prev.shiprocketPickupLocationName || null,
@@ -1834,6 +1835,8 @@ export const updateSellerPickupAddress = async (req, res) => {
     console.log(
       "✅ Pickup address saved locally for seller:",
       seller._id.toString(),
+      "coordinates:",
+      coordinates,
     );
 
     // ---- PHASE B: ATTEMPT SHIPROCKET SYNC — FAILURE HERE NEVER UNDOES PHASE A ----
@@ -1850,8 +1853,6 @@ export const updateSellerPickupAddress = async (req, res) => {
       },
     });
   } catch (error) {
-    // Only genuine local failures (validation already handled above, so
-    // this is really DB/unexpected errors) land here.
     console.error("❌ Update pickup address error:", error);
     return res.status(500).json({
       success: false,
@@ -1861,8 +1862,6 @@ export const updateSellerPickupAddress = async (req, res) => {
   }
 };
 
-// ✅ NEW — retry Shiprocket sync using whatever is already saved locally.
-// The seller never has to retype the address to retry.
 export const retrySellerPickupSync = async (req, res) => {
   try {
     const seller = await Seller.findById(req.seller._id);
@@ -1900,11 +1899,6 @@ export const retrySellerPickupSync = async (req, res) => {
   }
 };
 
-// ✅ NEW — shared by save + retry. Mutates and persists `seller`.
-// Idempotent by design: reuses the existing nickname (tied to
-// pickupLocationRevision) so repeated calls never create duplicate
-// Shiprocket pickup locations. An "already exists" response from
-// Shiprocket for that nickname is treated as a successful registration.
 async function syncSellerPickupWithShiprocket(seller) {
   const addr = seller.pickupAddress;
   seller.pickupAddress.shiprocketSyncStatus = "pending";

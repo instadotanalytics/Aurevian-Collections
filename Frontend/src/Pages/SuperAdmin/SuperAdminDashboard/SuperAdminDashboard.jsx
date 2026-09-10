@@ -44,10 +44,11 @@ import {
   FiPenTool,
   FiCreditCard,
   FiLayout,
-  FiGift, // ✅ NEW — icon for Promotions
-  FiInbox, // ✅ NEW — "Customer Requests" dropdown group icon
-  FiMail, // ✅ NEW — Contact Messages icon
-  FiBriefcase, // ✅ NEW — Franchise Enquiries icon
+  FiGift,
+  FiInbox,
+  FiMail,
+  FiBriefcase,
+  FiMapPin, // ✅ NEW — Location Settings icon
 } from "react-icons/fi";
 import {
   superAdminLogout,
@@ -73,22 +74,18 @@ import SubscriptionPlanManagement from "../components/SubscriptionPlanManagement
 import HeaderManagement from "../components/HeaderManagement/HeaderManagement";
 import OrdersManagement from "../components/OrdersManagement/OrdersManagement";
 import OrderHistory from "../components/OrderHistory/OrderHistory.jsx";
-// ✅ NEW: Sellers & Products
 import SellersProducts from "../components/SellersProducts/SellersProducts.jsx";
 import SellerProductsPage from "../components/SellersProducts/SellerProductsPage.jsx";
-// ✅ NEW: Homepage promotion request review
 import PromotionRequestsManagement from "../components/PromotionRequestsManagement/PromotionRequestsManagement.jsx";
-// ✅ NEW: Contact Messages & Franchise Enquiries (grouped with Support Tickets
-// under the "Customer Requests" sidebar dropdown)
 import ContactManagement from "../components/ContactManagement.jsx";
 import FranchiseManagement from "../components/FranchiseManagement.jsx";
+// ✅ NEW — Location Settings admin page
+import LocationSettings from "../../Seller/SellerDashboard/components/LocationSettings/LocationSettings.jsx";
 
-// ✅ SOCKET.IO — admin notifications
 import useAdminNotifications from "../../../hooks/useAdminNotifications.js";
 import NotificationCenter from "../../../Components/common/NotificationCenter/NotificationCenter.jsx";
 
 const SuperAdminDashboard = () => {
-  // ✅ Page title
   useEffect(() => {
     document.title = "Super Admin Dashboard | Aurevian Collections";
   }, []);
@@ -102,9 +99,6 @@ const SuperAdminDashboard = () => {
 
   const hasVerified = useRef(false);
 
-  // ✅ Route precedence: /seller-details/:id and /sellers-products/:sellerId
-  // are both more specific than the generic /:section route, so they're
-  // checked first here — same pattern as the existing seller-details logic.
   const activeMenu = sellerId
     ? "seller-products-detail"
     : id
@@ -117,7 +111,6 @@ const SuperAdminDashboard = () => {
   const [expandedMenus, setExpandedMenus] = useState({});
   const [isVerifying, setIsVerifying] = useState(true);
 
-  // ✅ SOCKET.IO — mounted at the persistent dashboard shell level
   const { notifications, unreadCount, handleItemClick } =
     useAdminNotifications();
 
@@ -126,35 +119,28 @@ const SuperAdminDashboard = () => {
   };
 
   useEffect(() => {
-    // Prevent multiple verification calls
     if (hasVerified.current) return;
     hasVerified.current = true;
 
     const verifyToken = async () => {
       try {
         setIsVerifying(true);
-        console.log("🔍 Verifying super admin token...");
-
         const token =
           localStorage.getItem("superAdminToken") ||
           localStorage.getItem("accessToken");
 
         if (!token) {
-          console.log("❌ No token found, redirecting to super admin login");
           setIsVerifying(false);
           navigate("/super-admin/login");
           return;
         }
 
         if (user && isAuthenticated) {
-          console.log("✅ User already in state, skipping verification");
           setIsVerifying(false);
           return;
         }
 
         const result = await dispatch(verifySuperAdminToken()).unwrap();
-        console.log("✅ Token verified:", result);
-
         if (result) {
           dispatch(setSuperAdminAuth(result));
           setIsVerifying(false);
@@ -162,7 +148,6 @@ const SuperAdminDashboard = () => {
           throw new Error("Invalid token response");
         }
       } catch (error) {
-        console.log("❌ Token verification failed:", error);
         dispatch(clearSuperAdminAuth());
         toast.error("Session expired. Please login again.");
         navigate("/super-admin/login");
@@ -198,8 +183,6 @@ const SuperAdminDashboard = () => {
     }
   };
 
-  // ✅ Instant render using the seller object we already have, while the
-  // URL updates to a shareable/refreshable /seller-details/:id route
   const handleViewSeller = (seller) => {
     setSelectedSeller(seller);
     navigate(`/super-admin/dashboard/seller-details/${seller._id}`);
@@ -210,7 +193,6 @@ const SuperAdminDashboard = () => {
     goToSection("sellers");
   };
 
-  // ✅ NEW: navigate to a seller's product listing (shareable/refreshable URL)
   const handleViewSellerProducts = (seller) => {
     navigate(`/super-admin/dashboard/sellers-products/${seller._id}`);
   };
@@ -226,8 +208,6 @@ const SuperAdminDashboard = () => {
     }));
   };
 
-  // ✅ NEW — hover open/close for dropdown groups, works alongside the
-  // click-to-toggle above (click still closes it even while hovering).
   const openSubMenuOnHover = (menuId) => {
     setExpandedMenus((prev) => ({ ...prev, [menuId]: true }));
   };
@@ -251,60 +231,40 @@ const SuperAdminDashboard = () => {
   }
 
   const menuItems = [
-    {
-      id: "dashboard",
-      label: "Dashboard",
-      icon: FiHome,
-      isSubMenu: false,
-    },
-    {
-      id: "sellers",
-      label: "Seller Requests",
-      icon: FiUsers,
-      isSubMenu: false,
-    },
-    // ✅ NEW: Sellers & Products
+    { id: "dashboard", label: "Dashboard", icon: FiHome, isSubMenu: false },
+    { id: "sellers", label: "Seller Requests", icon: FiUsers, isSubMenu: false },
     {
       id: "sellers-products",
       label: "Sellers & Products",
       icon: FiGrid,
       isSubMenu: false,
     },
-    {
-      id: "orders",
-      label: "Orders",
-      icon: FiShoppingBag,
-      isSubMenu: false,
-    },
+    { id: "orders", label: "Orders", icon: FiShoppingBag, isSubMenu: false },
     {
       id: "order-history",
       label: "Order History",
       icon: FiClock,
       isSubMenu: false,
     },
-    {
-      id: "products",
-      label: "Products",
-      icon: FiPackage,
-      isSubMenu: false,
-    },
-    {
-      id: "payments",
-      label: "Payments",
-      icon: FiDollarSign,
-      isSubMenu: false,
-    },
+    { id: "products", label: "Products", icon: FiPackage, isSubMenu: false },
+    { id: "payments", label: "Payments", icon: FiDollarSign, isSubMenu: false },
     {
       id: "subscription-plans",
       label: "Subscription Plans",
       icon: FiCreditCard,
       isSubMenu: false,
     },
-    // ✅ NEW: Homepage promotion request review (Curated For You / New Collections)
     {
       id: "promotions",
       label: "Promotion Requests",
       icon: FiGift,
+      isSubMenu: false,
+    },
+    // ✅ NEW — Location Settings menu entry
+    {
+      id: "location-settings",
+      label: "Location Settings",
+      icon: FiMapPin,
       isSubMenu: false,
     },
     {
@@ -320,8 +280,6 @@ const SuperAdminDashboard = () => {
         { id: "blog-comments", label: "Comments", icon: FiMessageSquare },
       ],
     },
-    // ✅ NEW: "Customer Requests" dropdown — Support Tickets (existing),
-    // Contact Messages and Franchise Enquiries (new) all grouped together.
     {
       id: "requests",
       label: "Customer Requests",
@@ -337,30 +295,15 @@ const SuperAdminDashboard = () => {
         },
       ],
     },
-    {
-      id: "analytics",
-      label: "Analytics",
-      icon: FiTrendingUp,
-      isSubMenu: false,
-    },
-    {
-      id: "banners",
-      label: "Banners",
-      icon: FiImage,
-      isSubMenu: false,
-    },
+    { id: "analytics", label: "Analytics", icon: FiTrendingUp, isSubMenu: false },
+    { id: "banners", label: "Banners", icon: FiImage, isSubMenu: false },
     {
       id: "header",
       label: "Header Management",
       icon: FiLayout,
       isSubMenu: false,
     },
-    {
-      id: "settings",
-      label: "Settings",
-      icon: FiSettings,
-      isSubMenu: false,
-    },
+    { id: "settings", label: "Settings", icon: FiSettings, isSubMenu: false },
   ];
 
   const renderContent = () => {
@@ -377,7 +320,6 @@ const SuperAdminDashboard = () => {
             onClose={handleCloseDetails}
           />
         );
-      // ✅ NEW: Sellers & Products list
       case "sellers-products":
         return (
           <SellersProducts
@@ -385,7 +327,6 @@ const SuperAdminDashboard = () => {
             onViewSellerProducts={handleViewSellerProducts}
           />
         );
-      // ✅ NEW: A specific seller's product catalog
       case "seller-products-detail":
         return (
           <SellerProductsPage
@@ -421,9 +362,11 @@ const SuperAdminDashboard = () => {
             <SubscriptionPlanManagement />
           </div>
         );
-      // ✅ NEW: Homepage promotion request review
       case "promotions":
         return <PromotionRequestsManagement />;
+      // ✅ NEW — Location Settings route
+      case "location-settings":
+        return <LocationSettings />;
       case "blog-all":
       case "blog-create":
       case "blog-drafts":
@@ -442,10 +385,8 @@ const SuperAdminDashboard = () => {
         return <HeaderManagement />;
       case "support":
         return <SupportManagement />;
-      // ✅ NEW: Contact page form submissions
       case "contact-messages":
         return <ContactManagement />;
-      // ✅ NEW: Franchise inquiry form submissions
       case "franchise-enquiries":
         return <FranchiseManagement />;
       case "settings":
@@ -459,7 +400,6 @@ const SuperAdminDashboard = () => {
 
   return (
     <div className={styles.dashboardContainer}>
-      {/* TOP HEADER */}
       <header className={styles.topHeader}>
         <div className={styles.headerLeft}>
           <button
@@ -517,9 +457,7 @@ const SuperAdminDashboard = () => {
         </div>
       </header>
 
-      {/* MAIN CONTENT */}
       <div className={styles.mainContent}>
-        {/* Sidebar */}
         <aside
           className={`${styles.sidebar} ${sidebarOpen ? styles.open : styles.closed} ${mobileMenuOpen ? styles.mobileOpen : ""}`}
         >
@@ -527,9 +465,6 @@ const SuperAdminDashboard = () => {
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.isSubMenu ? (
-                  // ✅ NEW — hover handlers added on this wrapper so the
-                  // dropdown opens on mouse-enter and closes on mouse-leave,
-                  // in addition to the existing click-to-toggle behaviour.
                   <div
                     onMouseEnter={() => openSubMenuOnHover(item.id)}
                     onMouseLeave={() => closeSubMenuOnHover(item.id)}
@@ -570,15 +505,12 @@ const SuperAdminDashboard = () => {
                   </div>
                 ) : (
                   <button
-                    className={`${styles.navItem} ${
-                      activeMenu === item.id ||
-                      // ✅ Keep "Sellers & Products" highlighted while viewing
-                      // a specific seller's product catalog
-                      (item.id === "sellers-products" &&
-                        activeMenu === "seller-products-detail")
+                    className={`${styles.navItem} ${activeMenu === item.id ||
+                        (item.id === "sellers-products" &&
+                          activeMenu === "seller-products-detail")
                         ? styles.active
                         : ""
-                    }`}
+                      }`}
                     onClick={() => {
                       goToSection(item.id);
                       setMobileMenuOpen(false);
@@ -589,8 +521,8 @@ const SuperAdminDashboard = () => {
                     {(activeMenu === item.id ||
                       (item.id === "sellers-products" &&
                         activeMenu === "seller-products-detail")) && (
-                      <div className={styles.activeIndicator} />
-                    )}
+                        <div className={styles.activeIndicator} />
+                      )}
                   </button>
                 )}
               </div>
@@ -625,7 +557,6 @@ const SuperAdminDashboard = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {mobileMenuOpen && (
           <div
             className={styles.overlay}
@@ -633,7 +564,6 @@ const SuperAdminDashboard = () => {
           />
         )}
 
-        {/* Content Area */}
         <main
           className={`${styles.contentArea} ${!sidebarOpen ? styles.expanded : ""}`}
         >

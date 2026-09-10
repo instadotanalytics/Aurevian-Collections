@@ -16,23 +16,18 @@ import {
   toggleWishlistItem,
   fetchWishlist,
 } from "../../redux/slices/wishlistSlice";
+// ✅ NEW — forward the user's (optional) coordinates for location ranking
+import { useLocationContext } from "../../contexts/LocationContext";
 
 const API_URL =
   import.meta.env.VITE_API_URL ||
   "https://aurevian-collections.onrender.com/api";
 
-// Same slug helper Header.jsx / Shop.jsx already use — kept identical
-// so a link generated in the header always resolves to the same filter
-// here.
 const slugify = (label) =>
   label
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
-
-/* ----------------------------------------------------------------
-   Data — Hero slides, features, categories, closing images
-------------------------------------------------------------------- */
 
 const HERO_SLIDES = [
   {
@@ -145,9 +140,6 @@ const PROMOTION_OPTIONS = [
   { value: "premium-gift", label: "Premium Gift" },
 ];
 
-/* ----------------------------------------------------------------
-   Persistent Reveal-on-scroll with Blur Effect
-------------------------------------------------------------------- */
 function useReveal(options = {}) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -209,14 +201,15 @@ export default function Collections() {
   const cartItems = useSelector((state) => state.cart.items);
   const wishlistItems = useSelector((state) => state.wishlist.items);
 
+  // ✅ NEW
+  const { coords } = useLocationContext();
+
   const heroRef = useRef(null);
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // ✅ Real, seller-panel-controlled shop categories
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
 
-  // ✅ Collection/style filter driven by URL
   const [activeCollectionSlug, setActiveCollectionSlug] = useState(
     filterSlug || null,
   );
@@ -233,21 +226,17 @@ export default function Collections() {
 
   const [cartLoadingId, setCartLoadingId] = useState(null);
 
-  // Mobile filter sheet state
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const sheetRef = useRef(null);
   const dragState = useRef({ startY: 0, currentY: 0 });
   const [isDraggingSheet, setIsDraggingSheet] = useState(false);
 
-  // Mobile sort dropdown state
   const [isMobileSortOpen, setIsMobileSortOpen] = useState(false);
   const mobileSortRef = useRef(null);
 
-  // Desktop sidebar sort dropdown state
   const [isSidebarSortOpen, setIsSidebarSortOpen] = useState(false);
   const sidebarSortRef = useRef(null);
 
-  // Infinite scroll
   const [page, setPage] = useState(1);
   const [allProducts, setAllProducts] = useState([]);
   const [hasMore, setHasMore] = useState(true);
@@ -256,7 +245,6 @@ export default function Collections() {
   const [refreshKey, setRefreshKey] = useState(0);
   const loaderRef = useRef(null);
 
-  // ✅ Fetch real categories (seller-panel controlled)
   useEffect(() => {
     axios
       .get(`${API_URL}/seller/products/categories`)
@@ -267,7 +255,6 @@ export default function Collections() {
       });
   }, []);
 
-  // ✅ Keep collection/style filter in sync with URL
   useEffect(() => {
     setActiveCollectionSlug(filterSlug || null);
     setActiveCollectionLabel(
@@ -277,7 +264,6 @@ export default function Collections() {
     );
   }, [filterSlug]);
 
-  // ✅ Apply client-side sorting as fallback
   const getSortedProducts = useCallback((products) => {
     if (!products || products.length === 0) return products;
 
@@ -302,7 +288,6 @@ export default function Collections() {
     }
   }, [sortBy]);
 
-  // Fetch products (infinite scroll)
   useEffect(() => {
     const load = async () => {
       const isFirst = page === 1;
@@ -312,7 +297,6 @@ export default function Collections() {
       const start = Date.now();
 
       try {
-        // ✅ Convert sort value to backend format
         let sortParam = sortBy;
         if (sortBy === "price-low") sortParam = "price-asc";
         else if (sortBy === "price-high") sortParam = "price-desc";
@@ -329,6 +313,9 @@ export default function Collections() {
               ? activeCollectionSlug.replace(/-/g, " ")
               : undefined,
             sort: sortParam || undefined,
+            // ✅ NEW
+            lat: coords?.lat,
+            lng: coords?.lng,
           }),
         ).unwrap();
 
@@ -357,7 +344,6 @@ export default function Collections() {
     activeCollectionSlug,
   ]);
 
-  // Reset on filter change
   useEffect(() => {
     setPage(1);
     setAllProducts([]);
@@ -371,7 +357,14 @@ export default function Collections() {
     activeCollectionSlug,
   ]);
 
-  // Intersection Observer for infinite scroll
+  // ✅ NEW — refetch when the user's location becomes available/changes
+  useEffect(() => {
+    setPage(1);
+    setAllProducts([]);
+    setHasMore(true);
+    setRefreshKey((k) => k + 1);
+  }, [coords?.lat, coords?.lng]);
+
   useEffect(() => {
     if (!loaderRef.current || !hasMore || isLoadingMore || isInitialLoading)
       return;
@@ -400,7 +393,6 @@ export default function Collections() {
     }
   }, [dispatch, isAuthenticated]);
 
-  // Close mobile sort dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -414,7 +406,6 @@ export default function Collections() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Close desktop sidebar sort dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -428,7 +419,6 @@ export default function Collections() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Drag to close sheet
   useEffect(() => {
     if (!isDraggingSheet) return;
 
@@ -481,7 +471,6 @@ export default function Collections() {
     };
   }, [isDraggingSheet]);
 
-  // Auto-scroll for hero gallery
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
@@ -489,7 +478,6 @@ export default function Collections() {
     return () => clearInterval(interval);
   }, []);
 
-  // Scroll hero to current slide
   useEffect(() => {
     const hero = heroRef.current;
     if (!hero) return;
@@ -519,7 +507,6 @@ export default function Collections() {
     setAllProducts([]);
     setHasMore(true);
     setRefreshKey((k) => k + 1);
-    // Also clear the collection filter by navigating to the base collections page
     if (activeCollectionSlug) {
       navigate("/collections");
     }
@@ -570,7 +557,7 @@ export default function Collections() {
 
   const toggleWishlist = (productId) => {
     if (!requireAuth()) return;
-    dispatch(toggleWishlistItem(productId)).catch(() => {});
+    dispatch(toggleWishlistItem(productId)).catch(() => { });
   };
 
   const handleAddToCart = async (productId) => {
@@ -598,7 +585,6 @@ export default function Collections() {
     }
   };
 
-  // ✅ Apply client-side filters (budget and promotion) AND sorting
   const filteredProducts = useMemo(() => {
     let filtered = allProducts.filter((p) => {
       const price = p.pricing?.salePrice || p.pricing?.originalPrice || 0;
@@ -614,10 +600,10 @@ export default function Collections() {
         const discount =
           p.pricing?.originalPrice && p.pricing?.salePrice
             ? Math.round(
-                ((p.pricing.originalPrice - p.pricing.salePrice) /
-                  p.pricing.originalPrice) *
-                  100,
-              )
+              ((p.pricing.originalPrice - p.pricing.salePrice) /
+                p.pricing.originalPrice) *
+              100,
+            )
             : 0;
 
         if (promotionFilter === "best-seller" && discount < 20) return false;
@@ -633,7 +619,6 @@ export default function Collections() {
       return true;
     });
 
-    // ✅ Apply client-side sorting as fallback
     return getSortedProducts(filtered);
   }, [allProducts, budgetFilter, promotionFilter, getSortedProducts]);
 
@@ -643,7 +628,6 @@ export default function Collections() {
     <>
       <Header />
       <section className={styles.collections} aria-label="Aurevian Collections">
-        {/* ---------------- Hero Gallery ---------------- */}
         <div className={styles.heroGallery}>
           <div className={styles.heroTrack} ref={heroRef}>
             {HERO_SLIDES.map((slide, index) => (
@@ -690,9 +674,8 @@ export default function Collections() {
                 {HERO_SLIDES.map((_, index) => (
                   <button
                     key={index}
-                    className={`${styles.heroDot} ${
-                      index === currentSlide ? styles.heroDotActive : ""
-                    }`}
+                    className={`${styles.heroDot} ${index === currentSlide ? styles.heroDotActive : ""
+                      }`}
                     onClick={() => goToSlide(index)}
                     aria-label={`Go to slide ${index + 1}`}
                   />
@@ -710,7 +693,6 @@ export default function Collections() {
         </div>
 
         <div className={styles.container}>
-          {/* ---------------- Mobile Filter Toggle Button ---------------- */}
           <button
             type="button"
             className={styles.filterToggle}
@@ -723,13 +705,11 @@ export default function Collections() {
             </span>
           </button>
 
-          {/* ---------------- Shop Layout ---------------- */}
           <div id="filter-section" className={styles.shopLayout}>
             {/* Desktop Filter Sidebar - Sticky/Fixed */}
             <Reveal as="aside" className={styles.filterSidebar} delay={100}>
               <h3 className={styles.filterTitle}>Filter</h3>
 
-              {/* Sort By — Desktop Sidebar */}
               <div className={styles.filterGroup}>
                 <span className={styles.filterGroupLabel}>Sort By</span>
                 <div className={styles.sidebarSortWrapper} ref={sidebarSortRef}>
@@ -740,9 +720,8 @@ export default function Collections() {
                   >
                     <span>{getSortLabel()}</span>
                     <FiChevronDown
-                      className={`${styles.sidebarSortChevron} ${
-                        isSidebarSortOpen ? styles.sidebarSortChevronOpen : ""
-                      }`}
+                      className={`${styles.sidebarSortChevron} ${isSidebarSortOpen ? styles.sidebarSortChevronOpen : ""
+                        }`}
                     />
                   </button>
 
@@ -751,11 +730,10 @@ export default function Collections() {
                       {SORT_OPTIONS.map((option) => (
                         <button
                           key={option.value}
-                          className={`${styles.sidebarSortOption} ${
-                            sortBy === option.value
-                              ? styles.sidebarSortOptionActive
-                              : ""
-                          }`}
+                          className={`${styles.sidebarSortOption} ${sortBy === option.value
+                            ? styles.sidebarSortOptionActive
+                            : ""
+                            }`}
                           onClick={() => {
                             setSortBy(option.value);
                             setIsSidebarSortOpen(false);
@@ -769,7 +747,6 @@ export default function Collections() {
                 </div>
               </div>
 
-              {/* Category — ✅ real, seller-panel data */}
               <div className={styles.filterGroup}>
                 <span className={styles.filterGroupLabel}>Category</span>
                 <label className={styles.filterOption}>
@@ -800,7 +777,6 @@ export default function Collections() {
                 )}
               </div>
 
-              {/* Budget */}
               <div className={styles.filterGroup}>
                 <span className={styles.filterGroupLabel}>Budget</span>
                 {BUDGET_OPTIONS.map((opt) => (
@@ -816,7 +792,6 @@ export default function Collections() {
                 ))}
               </div>
 
-              {/* Promotions */}
               <div className={styles.filterGroup}>
                 <span className={styles.filterGroupLabel}>Promotions</span>
                 {PROMOTION_OPTIONS.map((opt) => (
@@ -832,7 +807,6 @@ export default function Collections() {
                 ))}
               </div>
 
-              {/* Price Range */}
               <div className={styles.filterGroup}>
                 <span className={styles.filterGroupLabel}>Price Range</span>
                 <input
@@ -863,7 +837,6 @@ export default function Collections() {
 
             {/* Products Section - Scrollable */}
             <div className={styles.productsWrapper}>
-              {/* Desktop header: count + active style/collection filter */}
               <div className={styles.productsHeader}>
                 <span className={styles.productsCount}>
                   {isInitialLoading
@@ -884,7 +857,6 @@ export default function Collections() {
                 )}
               </div>
 
-              {/* Skeleton Loading */}
               {isInitialLoading && (
                 <div className={styles.skeletonGrid}>
                   {skeletonItems.map((i) => (
@@ -900,7 +872,6 @@ export default function Collections() {
                 </div>
               )}
 
-              {/* Empty state — a real filter matched zero products */}
               {!isInitialLoading && filteredProducts.length === 0 && (
                 <div className={styles.emptyState}>
                   <div className={styles.emptyStateIcon}>✨</div>
@@ -922,7 +893,6 @@ export default function Collections() {
                 </div>
               )}
 
-              {/* Products */}
               {!isInitialLoading && filteredProducts.length > 0 && (
                 <div className={styles.productsGrid}>
                   {filteredProducts.map((product) => {
@@ -931,13 +901,13 @@ export default function Collections() {
                     const addingToCart = cartLoadingId === product._id;
                     const discount =
                       product.pricing?.salePrice &&
-                      product.pricing?.originalPrice
+                        product.pricing?.originalPrice
                         ? Math.round(
-                            ((product.pricing.originalPrice -
-                              product.pricing.salePrice) /
-                              product.pricing.originalPrice) *
-                              100,
-                          )
+                          ((product.pricing.originalPrice -
+                            product.pricing.salePrice) /
+                            product.pricing.originalPrice) *
+                          100,
+                        )
                         : 0;
                     return (
                       <Reveal
@@ -968,9 +938,8 @@ export default function Collections() {
                           <div className={styles.wishlistActions}>
                             <button
                               type="button"
-                              className={`${styles.wishlistBtn} ${
-                                inWishlist ? styles.wishlistBtnActive : ""
-                              }`}
+                              className={`${styles.wishlistBtn} ${inWishlist ? styles.wishlistBtnActive : ""
+                                }`}
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -1016,9 +985,8 @@ export default function Collections() {
                           </div>
                           <button
                             type="button"
-                            className={`${styles.productAddBtn} ${
-                              inCart ? styles.productAddBtnActive : ""
-                            }`}
+                            className={`${styles.productAddBtn} ${inCart ? styles.productAddBtnActive : ""
+                              }`}
                             onClick={() => handleAddToCart(product._id)}
                             disabled={inCart || addingToCart}
                           >
@@ -1040,7 +1008,6 @@ export default function Collections() {
                 </div>
               )}
 
-              {/* Infinite scroll loader */}
               {!isInitialLoading && hasMore && (
                 <div ref={loaderRef} className={styles.infiniteLoader}>
                   {isLoadingMore && (
@@ -1113,7 +1080,6 @@ export default function Collections() {
           </div>
         </div>
 
-        {/* ---------------- Explore More ---------------- */}
         <Reveal as="div" className={styles.exploreSection} delay={100}>
           <div className={styles.container}>
             <div className={styles.exploreInner}>
@@ -1139,7 +1105,6 @@ export default function Collections() {
           </div>
         </Reveal>
 
-        {/* ---------------- Shine in your own way ---------------- */}
         <div className={styles.container}>
           <div className={styles.closingSection}>
             <Reveal as="div" className={styles.closingContent} delay={100}>
@@ -1176,16 +1141,14 @@ export default function Collections() {
           </div>
         </div>
 
-        {/* ---------------- Mobile Bottom Sheet Filter ---------------- */}
         {isMobileFilterOpen && (
           <div className={styles.filterOverlay} onClick={closeMobileFilter} />
         )}
 
         <div
           ref={sheetRef}
-          className={`${styles.mobileFilterSheet} ${
-            isMobileFilterOpen ? styles.mobileFilterSheetActive : ""
-          }`}
+          className={`${styles.mobileFilterSheet} ${isMobileFilterOpen ? styles.mobileFilterSheetActive : ""
+            }`}
         >
           <div
             className={styles.mobileFilterHandle}
@@ -1212,7 +1175,6 @@ export default function Collections() {
           </div>
 
           <div className={styles.mobileFilterContent}>
-            {/* Sort By */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Sort By</span>
               <div className={styles.mobileSortWrapper} ref={mobileSortRef}>
@@ -1223,9 +1185,8 @@ export default function Collections() {
                 >
                   <span>{getSortLabel()}</span>
                   <FiChevronDown
-                    className={`${styles.mobileSortChevron} ${
-                      isMobileSortOpen ? styles.mobileSortChevronOpen : ""
-                    }`}
+                    className={`${styles.mobileSortChevron} ${isMobileSortOpen ? styles.mobileSortChevronOpen : ""
+                      }`}
                   />
                 </button>
 
@@ -1234,11 +1195,10 @@ export default function Collections() {
                     {SORT_OPTIONS.map((option) => (
                       <button
                         key={option.value}
-                        className={`${styles.mobileSortOption} ${
-                          sortBy === option.value
-                            ? styles.mobileSortOptionActive
-                            : ""
-                        }`}
+                        className={`${styles.mobileSortOption} ${sortBy === option.value
+                          ? styles.mobileSortOptionActive
+                          : ""
+                          }`}
                         onClick={() => handleSortSelect(option.value)}
                       >
                         {option.label}
@@ -1249,7 +1209,6 @@ export default function Collections() {
               </div>
             </div>
 
-            {/* Category — ✅ real, seller-panel data */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Category</span>
               <div className={styles.mobileFilterGrid}>
@@ -1282,7 +1241,6 @@ export default function Collections() {
               </div>
             </div>
 
-            {/* Budget */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Budget</span>
               <div className={styles.mobileFilterGrid}>
@@ -1300,7 +1258,6 @@ export default function Collections() {
               </div>
             </div>
 
-            {/* Promotions */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Promotions</span>
               <div className={styles.mobileFilterGrid}>
@@ -1318,7 +1275,6 @@ export default function Collections() {
               </div>
             </div>
 
-            {/* Price Range */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Price Range</span>
               <input

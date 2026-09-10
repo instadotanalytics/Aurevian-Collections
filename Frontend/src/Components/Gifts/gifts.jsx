@@ -34,6 +34,8 @@ import {
   toggleWishlistItem,
   fetchWishlist,
 } from "../../redux/slices/wishlistSlice";
+// ✅ NEW — forward the user's (optional) coordinates for location ranking
+import { useLocationContext } from "../../contexts/LocationContext";
 
 const API_BASE =
   import.meta.env.VITE_API_URL ||
@@ -146,13 +148,16 @@ export default function Gifts() {
   const cartItems = useSelector((state) => state.cart.items);
   const wishlistItems = useSelector((state) => state.wishlist.items);
 
+  // ✅ NEW
+  const { coords } = useLocationContext();
+
   // Categories
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const initialOccasion = filterSlug
     ? OCCASION_OPTIONS.find(
-        (o) => o.toLowerCase().replace(/[^a-z0-9]+/g, "-") === filterSlug,
-      ) || "All"
+      (o) => o.toLowerCase().replace(/[^a-z0-9]+/g, "-") === filterSlug,
+    ) || "All"
     : "All";
   const [selectedOccasion, setSelectedOccasion] = useState(initialOccasion);
   const [selectedRecipient, setSelectedRecipient] = useState("All");
@@ -244,7 +249,7 @@ export default function Gifts() {
       const start = Date.now();
       try {
         setCategoryError(null);
-        
+
         // ✅ Convert sort value to backend format
         let sortParam = sortBy;
         if (sortBy === "price-low") sortParam = "price-asc";
@@ -259,6 +264,9 @@ export default function Gifts() {
             categoryId: selectedCategory !== "All" ? selectedCategory : undefined,
             occasion: selectedOccasion !== "All" ? selectedOccasion : undefined,
             sort: sortParam || undefined,
+            // ✅ NEW
+            lat: coords?.lat,
+            lng: coords?.lng,
           }),
         ).unwrap();
 
@@ -289,6 +297,14 @@ export default function Gifts() {
     setHasMore(true);
     setRefreshKey((k) => k + 1);
   }, [selectedCategory, selectedOccasion, sortBy]);
+
+  // ✅ NEW — refetch when the user's location becomes available/changes
+  useEffect(() => {
+    setPage(1);
+    setAllProducts([]);
+    setHasMore(true);
+    setRefreshKey((k) => k + 1);
+  }, [coords?.lat, coords?.lng]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -413,7 +429,7 @@ export default function Gifts() {
 
   const toggleWishlist = (id) => {
     if (!requireAuth()) return;
-    dispatch(toggleWishlistItem(id)).catch(() => {});
+    dispatch(toggleWishlistItem(id)).catch(() => { });
   };
 
   const addToCart = async (id) => {
@@ -567,9 +583,8 @@ export default function Gifts() {
                   >
                     <span>{getSortLabel()}</span>
                     <FiChevronDown
-                      className={`${styles.sidebarSortChevron} ${
-                        isSidebarSortOpen ? styles.sidebarSortChevronOpen : ""
-                      }`}
+                      className={`${styles.sidebarSortChevron} ${isSidebarSortOpen ? styles.sidebarSortChevronOpen : ""
+                        }`}
                     />
                   </button>
                   {isSidebarSortOpen && (
@@ -577,11 +592,10 @@ export default function Gifts() {
                       {SORT_OPTIONS.map((option) => (
                         <button
                           key={option.value}
-                          className={`${styles.sidebarSortOption} ${
-                            sortBy === option.value
+                          className={`${styles.sidebarSortOption} ${sortBy === option.value
                               ? styles.sidebarSortOptionActive
                               : ""
-                          }`}
+                            }`}
                           onClick={() => {
                             setSortBy(option.value);
                             setIsSidebarSortOpen(false);
@@ -776,11 +790,11 @@ export default function Gifts() {
                         const discount =
                           p.pricing?.salePrice && p.pricing?.originalPrice
                             ? Math.round(
-                                ((p.pricing.originalPrice -
-                                  p.pricing.salePrice) /
-                                  p.pricing.originalPrice) *
-                                  100,
-                              )
+                              ((p.pricing.originalPrice -
+                                p.pricing.salePrice) /
+                                p.pricing.originalPrice) *
+                              100,
+                            )
                             : 0;
                         const inCart = isInCart(p._id);
                         const inWishlist = isInWishlist(p._id);
@@ -803,9 +817,8 @@ export default function Gifts() {
                               <div className={styles.wishlistActions}>
                                 <button
                                   type="button"
-                                  className={`${styles.wishlistBtn} ${
-                                    inWishlist ? styles.wishlistBtnActive : ""
-                                  }`}
+                                  className={`${styles.wishlistBtn} ${inWishlist ? styles.wishlistBtnActive : ""
+                                    }`}
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
@@ -858,9 +871,8 @@ export default function Gifts() {
                               </div>
                               <button
                                 type="button"
-                                className={`${styles.addToCartBtn} ${
-                                  inCart ? styles.addToCartBtnActive : ""
-                                }`}
+                                className={`${styles.addToCartBtn} ${inCart ? styles.addToCartBtnActive : ""
+                                  }`}
                                 onClick={() => addToCart(p._id)}
                                 disabled={inCart || addingToCart}
                               >
@@ -1043,9 +1055,8 @@ export default function Gifts() {
         {/* ── Mobile Bottom Sheet ── */}
         <div
           ref={sheetRef}
-          className={`${styles.mobileFilterSheet} ${
-            isMobileFilterOpen ? styles.mobileFilterSheetActive : ""
-          }`}
+          className={`${styles.mobileFilterSheet} ${isMobileFilterOpen ? styles.mobileFilterSheetActive : ""
+            }`}
         >
           <div
             className={styles.mobileFilterHandle}
@@ -1083,9 +1094,8 @@ export default function Gifts() {
                 >
                   <span>{getSortLabel()}</span>
                   <FiChevronDown
-                    className={`${styles.mobileSortChevron} ${
-                      isSortDropdownOpen ? styles.mobileSortChevronOpen : ""
-                    }`}
+                    className={`${styles.mobileSortChevron} ${isSortDropdownOpen ? styles.mobileSortChevronOpen : ""
+                      }`}
                   />
                 </button>
                 {isSortDropdownOpen && (
@@ -1093,11 +1103,10 @@ export default function Gifts() {
                     {SORT_OPTIONS.map((option) => (
                       <button
                         key={option.value}
-                        className={`${styles.mobileSortOption} ${
-                          sortBy === option.value
+                        className={`${styles.mobileSortOption} ${sortBy === option.value
                             ? styles.mobileSortOptionActive
                             : ""
-                        }`}
+                          }`}
                         onClick={() => {
                           handleSortSelect(option.value);
                           setIsSortDropdownOpen(false);

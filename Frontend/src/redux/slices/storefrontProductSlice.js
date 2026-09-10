@@ -9,11 +9,24 @@ const API_URL =
 
 // ============================================
 // FETCH PRODUCTS BY PLACEMENT (Public - No Auth)
+// ✅ CHANGED — accepts optional lat/lng; if present (and valid), the
+// backend prioritizes closer showrooms while preserving the chosen
+// sort as a tiebreak. Omitting lat/lng behaves exactly as before.
 // ============================================
 export const fetchProductsByPlacement = createAsyncThunk(
   "storefrontProducts/fetchByPlacement",
   async (
-    { placement, page = 1, limit = 20, categoryId, collection, occasion, sort },
+    {
+      placement,
+      page = 1,
+      limit = 20,
+      categoryId,
+      collection,
+      occasion,
+      sort,
+      lat,
+      lng,
+    },
     { rejectWithValue },
   ) => {
     try {
@@ -24,6 +37,10 @@ export const fetchProductsByPlacement = createAsyncThunk(
       if (collection) params.append("collection", collection);
       if (occasion) params.append("occasion", occasion);
       if (sort) params.append("sort", sort);
+      if (lat != null && lng != null) {
+        params.append("lat", lat);
+        params.append("lng", lng);
+      }
 
       const { data } = await axios.get(
         `${API_URL}/seller/products/placements/${placement}?${params.toString()}`,
@@ -38,13 +55,23 @@ export const fetchProductsByPlacement = createAsyncThunk(
 );
 
 // ============================================
-// ✅ NEW: FETCH SINGLE PRODUCT BY SLUG (Public)
+// ✅ FETCH SINGLE PRODUCT BY SLUG (Public)
+// ✅ CHANGED — now takes { slug, lat, lng } instead of a bare slug
+// string, so the product page can also show distance info.
 // ============================================
 export const fetchProductBySlug = createAsyncThunk(
   "storefrontProducts/fetchBySlug",
-  async (slug, { rejectWithValue }) => {
+  async ({ slug, lat, lng } = {}, { rejectWithValue }) => {
     try {
-      const { data } = await axios.get(`${API_URL}/seller/products/${slug}`);
+      const params = new URLSearchParams();
+      if (lat != null && lng != null) {
+        params.append("lat", lat);
+        params.append("lng", lng);
+      }
+      const qs = params.toString();
+      const { data } = await axios.get(
+        `${API_URL}/seller/products/${slug}${qs ? `?${qs}` : ""}`,
+      );
       return data.data;
     } catch (error) {
       return rejectWithValue(
@@ -55,10 +82,7 @@ export const fetchProductBySlug = createAsyncThunk(
 );
 
 // ============================================
-// ✅ NEW: FETCH RELEVANT PRODUCTS ("You May Also Like") (Public)
-// One request per product-detail-page load, keyed by productId so a
-// fast product-to-product navigation can't let a slow, superseded
-// request overwrite the newer one (see fulfilled/rejected guards below).
+// ✅ FETCH RELEVANT PRODUCTS ("You May Also Like") (Public)
 // ============================================
 export const fetchRelevantProducts = createAsyncThunk(
   "storefrontProducts/fetchRelevant",
@@ -79,17 +103,14 @@ export const fetchRelevantProducts = createAsyncThunk(
 );
 
 // ============================================
-// ✅ NEW: SEARCH PRODUCTS (Public — header search bar + /shop?search=)
-// Same "guard against stale response" pattern as fetchRelevantProducts:
-// pending stamps the in-flight query onto state.searchResults.forQuery,
-// fulfilled/rejected only apply if their query is still the latest one
-// requested — this is what stops a slow response for an earlier
-// keystroke/query from clobbering a faster response to a later one.
+// ✅ SEARCH PRODUCTS (Public — header search bar + /shop?search=)
+// ✅ CHANGED — accepts optional lat/lng, forwarded straight through to
+// the backend's location+relevance ranking.
 // ============================================
 export const searchProducts = createAsyncThunk(
   "storefrontProducts/search",
   async (
-    { q, page = 1, limit = 20, categoryId, sort },
+    { q, page = 1, limit = 20, categoryId, sort, lat, lng },
     { rejectWithValue },
   ) => {
     try {
@@ -99,6 +120,10 @@ export const searchProducts = createAsyncThunk(
       params.append("limit", limit);
       if (categoryId) params.append("categoryId", categoryId);
       if (sort) params.append("sort", sort);
+      if (lat != null && lng != null) {
+        params.append("lat", lat);
+        params.append("lng", lng);
+      }
 
       const { data } = await axios.get(
         `${API_URL}/seller/products/search?${params.toString()}`,
@@ -122,7 +147,7 @@ const initialSearchResultsState = {
   isLoading: false,
   error: null,
   query: "",
-  forQuery: null, // internal guard against stale/out-of-order responses
+  forQuery: null,
 };
 
 const storefrontProductSlice = createSlice({
@@ -148,18 +173,15 @@ const storefrontProductSlice = createSlice({
     },
     isLoading: false,
     error: null,
-    // ✅ NEW: single product detail state
     currentProduct: null,
     currentProductLoading: false,
     currentProductError: null,
-    // ✅ NEW: relevant products ("You May Also Like") state
     relevantProducts: {
       products: [],
       isLoading: false,
       error: null,
-      forProductId: null, // guards against stale responses on fast navigation
+      forProductId: null,
     },
-    // ✅ NEW: search results state (header search + /shop?search=)
     searchResults: { ...initialSearchResultsState },
   },
   reducers: {
@@ -195,13 +217,11 @@ const storefrontProductSlice = createSlice({
         },
       };
     },
-    // ✅ NEW: Clear current product
     clearCurrentProduct: (state) => {
       state.currentProduct = null;
       state.currentProductError = null;
       state.currentProductLoading = false;
     },
-    // ✅ NEW: Clear relevant products (e.g. on unmount)
     clearRelevantProducts: (state) => {
       state.relevantProducts = {
         products: [],
@@ -210,7 +230,6 @@ const storefrontProductSlice = createSlice({
         forProductId: null,
       };
     },
-    // ✅ NEW: Clear search results (e.g. when the ?search= param is removed)
     clearSearchResults: (state) => {
       state.searchResults = { ...initialSearchResultsState };
     },
@@ -238,7 +257,6 @@ const storefrontProductSlice = createSlice({
         state.error = action.payload || "Failed to fetch products";
       })
 
-      // ✅ NEW: single product by slug
       .addCase(fetchProductBySlug.pending, (state) => {
         state.currentProductLoading = true;
         state.currentProductError = null;
@@ -253,11 +271,7 @@ const storefrontProductSlice = createSlice({
         state.currentProduct = null;
       })
 
-      // ✅ NEW: relevant products
       .addCase(fetchRelevantProducts.pending, (state, action) => {
-        // Reset immediately — this is what guarantees stale product-A
-        // recommendations never linger visually once a request for
-        // product B has started.
         state.relevantProducts = {
           products: [],
           isLoading: true,
@@ -266,8 +280,6 @@ const storefrontProductSlice = createSlice({
         };
       })
       .addCase(fetchRelevantProducts.fulfilled, (state, action) => {
-        // Ignore a response that arrives after a newer request has
-        // already superseded it (rapid product-to-product navigation).
         if (action.payload.productId !== state.relevantProducts.forProductId) {
           return;
         }
@@ -287,14 +299,12 @@ const storefrontProductSlice = createSlice({
           action.payload?.message || "Failed to fetch relevant products";
       })
 
-      // ✅ NEW: search products
       .addCase(searchProducts.pending, (state, action) => {
         state.searchResults.isLoading = true;
         state.searchResults.error = null;
         state.searchResults.forQuery = action.meta.arg.q;
       })
       .addCase(searchProducts.fulfilled, (state, action) => {
-        // Ignore a response superseded by a newer search request.
         if (action.payload.query !== state.searchResults.forQuery) {
           return;
         }
@@ -323,9 +333,9 @@ export const {
   clearStorefrontError,
   clearPlacementProducts,
   clearAllPlacements,
-  clearCurrentProduct, // ✅ NEW: Export the new action
-  clearRelevantProducts, // ✅ NEW: Export the new action
-  clearSearchResults, // ✅ NEW: Export the new action
+  clearCurrentProduct,
+  clearRelevantProducts,
+  clearSearchResults,
 } = storefrontProductSlice.actions;
 
 export default storefrontProductSlice.reducer;

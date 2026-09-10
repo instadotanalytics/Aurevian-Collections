@@ -6,7 +6,9 @@ import {
   FiAlertTriangle,
   FiClock,
   FiRefreshCw,
+  FiCrosshair,
 } from "react-icons/fi";
+import toast from "react-hot-toast";
 
 import {
   updateSellerPickupAddress,
@@ -24,11 +26,10 @@ const EMPTY_FORM = {
   state: "",
   pincode: "",
   country: "India",
+  latitude: "",
+  longitude: "",
 };
 
-// NOTE: I don't have PickupAddressSettings.module.css, so the new status
-// badge/retry-button below use small inline styles as a safe fallback.
-// Send me the CSS module and I'll wire in matching classes instead.
 const SYNC_STATUS_META = {
   synced: { label: "Synced with Shiprocket", icon: FiCheckCircle, ok: true },
   pending: { label: "Pending Shiprocket Sync", icon: FiClock, ok: false },
@@ -42,6 +43,7 @@ const PickupAddressSettings = () => {
 
   const [form, setForm] = useState(EMPTY_FORM);
   const [retrying, setRetrying] = useState(false);
+  const [locating, setLocating] = useState(false);
 
   useEffect(() => {
     if (seller?.pickupAddress) {
@@ -55,6 +57,14 @@ const PickupAddressSettings = () => {
         state: seller.pickupAddress.state || "",
         pincode: seller.pickupAddress.pincode || "",
         country: seller.pickupAddress.country || "India",
+        latitude:
+          seller.pickupAddress.coordinates?.lat != null
+            ? String(seller.pickupAddress.coordinates.lat)
+            : "",
+        longitude:
+          seller.pickupAddress.coordinates?.lng != null
+            ? String(seller.pickupAddress.coordinates.lng)
+            : "",
       });
     }
   }, [seller?.pickupAddress]);
@@ -66,14 +76,54 @@ const PickupAddressSettings = () => {
     SYNC_STATUS_META[syncStatus] || SYNC_STATUS_META.not_synced;
   const StatusIcon = statusMeta.icon;
 
+  const hasCoordinates =
+    seller?.pickupAddress?.coordinates?.lat != null &&
+    seller?.pickupAddress?.coordinates?.lng != null;
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleUseCurrentLocation = () => {
+    if (!("geolocation" in navigator)) {
+      toast.error("Location isn't supported on this browser.");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setForm((prev) => ({
+          ...prev,
+          latitude: String(position.coords.latitude),
+          longitude: String(position.coords.longitude),
+        }));
+        setLocating(false);
+        toast.success("Showroom location captured. Review and Save.");
+      },
+      () => {
+        setLocating(false);
+        toast.error(
+          "Couldn't get your current location. You can enter it manually below.",
+        );
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(updateSellerPickupAddress(form));
+
+    const payload = { ...form };
+    // Only send latitude/longitude if the seller actually provided both —
+    // omitting them entirely preserves any previously saved coordinates
+    // (see Backend/controllers/sellerController.js updateSellerPickupAddress).
+    if (form.latitude === "" || form.longitude === "") {
+      delete payload.latitude;
+      delete payload.longitude;
+    }
+
+    dispatch(updateSellerPickupAddress(payload));
   };
 
   const handleRetry = async () => {
@@ -101,9 +151,8 @@ const PickupAddressSettings = () => {
 
       {hasSavedAddress && (
         <div
-          className={`${styles.statusBanner} ${
-            statusMeta.ok ? styles.statusOk : styles.statusPending
-          }`}
+          className={`${styles.statusBanner} ${statusMeta.ok ? styles.statusOk : styles.statusPending
+            }`}
         >
           <StatusIcon size={16} />
           <span>{statusMeta.label}</span>
@@ -247,6 +296,61 @@ const PickupAddressSettings = () => {
               value={form.country}
               onChange={handleChange}
             />
+          </div>
+        </div>
+
+        {/* ✅ NEW — showroom coordinates, independent of Shiprocket sync.
+            Used only for customer-facing distance/zone ranking (never
+            exposes exact coordinates to customers — see backend
+            attachLocationInfo). Optional: leaving both blank preserves
+            whatever was previously saved. */}
+        <div className={styles.showroomSection}>
+          <div className={styles.showroomHeader}>
+            <span className={styles.showroomTitle}>
+              Showroom Location {hasCoordinates && "✅"}
+            </span>
+            <button
+              type="button"
+              className={styles.locateBtn}
+              onClick={handleUseCurrentLocation}
+              disabled={locating}
+            >
+              <FiCrosshair size={14} />
+              {locating ? "Locating..." : "Use Current Location"}
+            </button>
+          </div>
+          <p className={styles.showroomHint}>
+            Used to show customers how far your products are from them.
+            Optional — leave blank to keep it unset, or unchanged if already
+            saved.
+          </p>
+          <div className={styles.grid}>
+            <div className={styles.field}>
+              <label>Latitude</label>
+              <input
+                type="number"
+                step="any"
+                name="latitude"
+                value={form.latitude}
+                onChange={handleChange}
+                placeholder="e.g. 23.2599"
+                min={-90}
+                max={90}
+              />
+            </div>
+            <div className={styles.field}>
+              <label>Longitude</label>
+              <input
+                type="number"
+                step="any"
+                name="longitude"
+                value={form.longitude}
+                onChange={handleChange}
+                placeholder="e.g. 77.4126"
+                min={-180}
+                max={180}
+              />
+            </div>
           </div>
         </div>
 
