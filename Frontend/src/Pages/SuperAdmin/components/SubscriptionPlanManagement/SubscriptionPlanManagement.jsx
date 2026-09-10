@@ -1,3 +1,4 @@
+
 // src/Pages/SuperAdmin/components/SubscriptionPlanManagement/SubscriptionPlanManagement.jsx
 
 import React, { useState, useEffect } from "react";
@@ -12,12 +13,39 @@ import {
 } from "../../../../redux/slices/subscriptionPlanSlice";
 import styles from "./SubscriptionPlanManagement.module.css";
 import toast from "react-hot-toast";
-import { FiPlus } from "react-icons/fi";
+import { FiPlus, FiStar, FiZap, FiAward, FiTrendingUp, FiShield, FiGift } from "react-icons/fi";
+import { FaCrown, FaGem, FaRocket, FaBolt } from "react-icons/fa";
+
+// ✅ NEW — icon options for the plan icon picker (react-icons instead of emoji)
+const ICON_OPTIONS = [
+  { value: "star", label: "Star", Icon: FiStar },
+  { value: "zap", label: "Zap", Icon: FiZap },
+  { value: "award", label: "Award", Icon: FiAward },
+  { value: "trending", label: "Trending", Icon: FiTrendingUp },
+  { value: "shield", label: "Shield", Icon: FiShield },
+  { value: "gift", label: "Gift", Icon: FiGift },
+  { value: "crown", label: "Crown", Icon: FaCrown },
+  { value: "gem", label: "Gem", Icon: FaGem },
+  { value: "rocket", label: "Rocket", Icon: FaRocket },
+  { value: "bolt", label: "Bolt", Icon: FaBolt },
+];
+
+const ICON_MAP = ICON_OPTIONS.reduce((acc, opt) => {
+  acc[opt.value] = opt.Icon;
+  return acc;
+}, {});
+
+// Renders whichever icon key is stored on the plan; falls back to Star
+// so old emoji-based data (or anything unrecognized) still shows something.
+const PlanIcon = ({ name, size = 28 }) => {
+  const Icon = ICON_MAP[name] || FiStar;
+  return <Icon size={size} />;
+};
 
 const emptyForm = {
   id: "",
   name: "",
-  icon: "🟢",
+  icon: "star",
   price: 0,
   priceDisplay: "",
   bestFor: "",
@@ -78,7 +106,7 @@ const SubscriptionPlanManagement = () => {
     setFormData({
       id: plan.id,
       name: plan.name || "",
-      icon: plan.icon || "🟢",
+      icon: plan.icon && ICON_MAP[plan.icon] ? plan.icon : "star",
       price: plan.price ?? 0,
       priceDisplay: plan.priceDisplay || "",
       bestFor: plan.bestFor || "",
@@ -123,6 +151,11 @@ const SubscriptionPlanManagement = () => {
       // if the person hasn't hand-edited the id field themselves.
       id: !editingPlan ? slugify(name) : prev.id,
     }));
+  };
+
+  // ✅ NEW — picking an icon from the grid
+  const handleIconSelect = (value) => {
+    setFormData((prev) => ({ ...prev, icon: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -203,20 +236,18 @@ const SubscriptionPlanManagement = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <h1 className={styles.title}>Subscription Plan Management</h1>
-          <p className={styles.subtitle}>
-            Control the pricing, limits, and features sellers see on the Upgrade
-            page
-          </p>
-        </div>
-        <button className={styles.createButton} onClick={openCreate}>
-          <FiPlus size={18} />
-          <span>Add New Plan</span>
-        </button>
-      </div>
+<div className={styles.container}>
+  <div className={styles.header}>
+    <div className={styles.headerContent}>
+      <h1>Subscription Plan Management</h1>
+      <p>Manage your subscription plans, pricing, and features</p>
+    </div>
+
+    <button className={styles.createButton} onClick={openCreate}>
+      <FiPlus size={18} />
+      <span>Add New Plan</span>
+    </button>
+  </div>
 
       {isLoading ? (
         <div className={styles.loadingState}>
@@ -246,7 +277,9 @@ const SubscriptionPlanManagement = () => {
                 <div className={styles.systemBadge}>System</div>
               )}
 
-              <div className={styles.planIcon}>{plan.icon}</div>
+              <div className={styles.planIcon}>
+                <PlanIcon name={plan.icon} />
+              </div>
               <h3 className={styles.planName}>{plan.name}</h3>
               <span className={styles.planSlug}>id: {plan.id}</span>
 
@@ -349,25 +382,39 @@ const SubscriptionPlanManagement = () => {
             </div>
 
             <form onSubmit={handleSubmit} className={styles.modalForm}>
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label>Plan Name *</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleNameChange}
-                    required
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Icon (emoji)</label>
-                  <input
-                    type="text"
-                    name="icon"
-                    value={formData.icon}
-                    onChange={handleChange}
-                  />
+              <div className={styles.formGroup}>
+                <label>Plan Name *</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleNameChange}
+                  required
+                />
+              </div>
+
+              {/* ✅ NEW — icon picker (react-icons) replaces the emoji input */}
+              <div className={styles.formGroup}>
+                <label>Icon</label>
+                <div className={styles.iconPicker}>
+                  {ICON_OPTIONS.map((opt) => {
+                    const { Icon } = opt;
+                    const selected = formData.icon === opt.value;
+                    return (
+                      <button
+                        type="button"
+                        key={opt.value}
+                        className={`${styles.iconOption} ${
+                          selected ? styles.iconOptionSelected : ""
+                        }`}
+                        onClick={() => handleIconSelect(opt.value)}
+                        title={opt.label}
+                        aria-pressed={selected}
+                      >
+                        <Icon size={20} />
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

@@ -318,14 +318,7 @@ const SuperAdminDashboard = () => {
         return (
           <div className={styles.subscriptionPlansContainer}>
             <div className={styles.pageHeader}>
-              <div>
-                <h1 className={styles.pageTitle}>
-                  Subscription Plan Management
-                </h1>
-                <p className={styles.pageSubtitle}>
-                  Manage your subscription plans, pricing, and features
-                </p>
-              </div>
+            
             </div>
             <SubscriptionPlanManagement />
           </div>

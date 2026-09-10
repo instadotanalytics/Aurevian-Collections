@@ -1,80 +1,84 @@
+
 /* src/Pages/SuperAdmin/components/SubscriptionPlanManagement/SubscriptionPlanManagement.module.css */
+/* Design tokens match SellerRequests.module.css / OrdersManagement.module.css
+   exactly, so this screen reads as part of the same product. */
 
 .container {
   padding: 0;
   max-width: 1300px;
-  margin: 0 auto;
+  margin: -12px auto;
   width: 100%;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #14140f;
 }
 
 /* ============================================
-   HEADER - LUXURY STYLE
+   HEADER — title/subtitle removed, now just
+   frames the create action on the right
    ============================================ */
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-  padding: 0 0.5rem;
+  align-items: center;
+  margin-bottom: 24px;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 20px;
+  padding: 16px 24px;
+  background: #ffffff;
+  border: 1px solid #e8e3dc;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.headerLeft {
-  flex: 1;
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.title {
-  font-size: 2rem;
-  font-weight: 300;
-  color: #e0e0e0;
-  margin: 0 0 0.5rem 0;
-  letter-spacing: 0.5px;
-  background: linear-gradient(135deg, #f0e6d0, #c8a86e);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.subtitle {
-  font-size: 0.95rem;
-  color: #888;
+.headerContent h1 {
   margin: 0;
-  font-weight: 300;
-  letter-spacing: 0.3px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #14140f;
+  line-height: 1.2;
 }
 
+.headerContent p {
+  margin: 0;
+  font-size: 14px;
+  color: #8a8072;
+  line-height: 1.5;
+}
 /* ============================================
-   CREATE BUTTON - GOLD THEME
+   CREATE BUTTON — same gold-gradient language as
+   .approveBtn / .refreshBtn elsewhere in the app
    ============================================ */
 .createButton {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.7rem 1.8rem;
+  gap: 8px;
+  padding: 10px 20px;
   background: linear-gradient(135deg, #c8a86e, #a0804a);
-  color: #0a0a0a;
+  color: #ffffff;
   border: none;
-  border-radius: 10px;
-  font-size: 0.9rem;
+  border-radius: 8px;
+  font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   font-family: inherit;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
   white-space: nowrap;
-  box-shadow: 0 4px 15px rgba(200, 168, 110, 0.2);
 }
 
 .createButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(200, 168, 110, 0.35);
-  background: linear-gradient(135deg, #d4b87a, #b0884a);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(200, 168, 110, 0.35);
 }
 
 .createButton:active {
   transform: translateY(0);
-  box-shadow: 0 2px 10px rgba(200, 168, 110, 0.2);
 }
 
 .createButton svg {
@@ -91,33 +95,34 @@
 .planGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
+  gap: 20px;
 }
 
 .planCard {
-  background: rgba(26, 26, 26, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 16px;
-  padding: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 22px;
+  border: 1px solid #e8e3dc;
   position: relative;
   display: flex;
   flex-direction: column;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .planCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
-  border-color: rgba(200, 168, 110, 0.2);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: #d8cfbe;
 }
 
 .planCard.popular {
-  border-color: rgba(200, 168, 110, 0.4);
-  background: rgba(26, 26, 26, 0.8);
-  box-shadow: 0 4px 30px rgba(200, 168, 110, 0.05);
+  border-color: rgba(200, 168, 110, 0.45);
+  background: linear-gradient(180deg, #fdfbf6 0%, #ffffff 100%);
+  box-shadow: 0 4px 20px rgba(200, 168, 110, 0.12);
 }
 
 .planCard.inactive {
@@ -132,20 +137,21 @@
   top: -12px;
   right: 20px;
   background: linear-gradient(135deg, #c8a86e, #a0804a);
-  color: #0a0a0a;
+  color: #ffffff;
   padding: 4px 14px;
   border-radius: 20px;
   font-size: 11px;
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(200, 168, 110, 0.35);
+  box-shadow: 0 4px 12px rgba(200, 168, 110, 0.3);
 }
 
 .systemBadge {
   position: absolute;
   top: -12px;
   left: 20px;
-  background: #64748b;
-  color: white;
+  background: #f5f2ee;
+  border: 1px solid #e8e3dc;
+  color: #8a8072;
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 11px;
@@ -156,46 +162,54 @@
    PLAN CONTENT
    ============================================ */
 .planIcon {
-  font-size: 2.2rem;
-  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(200, 168, 110, 0.16), rgba(160, 128, 74, 0.1));
+  color: #a0804a;
 }
 
 .planName {
   font-size: 17px;
   font-weight: 700;
-  color: #e0e0e0;
-  margin: 0 0 6px;
+  color: #14140f;
+  margin: 0 0 4px;
 }
 
 .planSlug {
   font-size: 11px;
-  color: #666;
-  font-family: monospace;
-  margin-bottom: 10px;
+  color: #b5aa9a;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  margin-bottom: 12px;
   display: block;
 }
 
 .planPrice {
   font-size: 26px;
   font-weight: 800;
-  color: #c8a86e;
+  color: #a0804a;
   margin-bottom: 4px;
 }
 
 .period {
   font-size: 13px;
   font-weight: 500;
-  color: #666;
+  color: #8a8072;
   margin-left: 4px;
 }
 
 .bestFor {
   display: inline-block;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 2px 10px;
+  background: #faf9f5;
+  border: 1px solid #f0edeb;
+  padding: 3px 10px;
   border-radius: 12px;
   font-size: 12px;
-  color: #888;
+  color: #8a8072;
   margin-bottom: 14px;
   width: fit-content;
 }
@@ -207,16 +221,17 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .planStats span {
-  background: rgba(255, 255, 255, 0.05);
+  background: #faf9f5;
+  border: 1px solid #f0edeb;
   padding: 4px 10px;
   border-radius: 8px;
   font-size: 12px;
   font-weight: 600;
-  color: #aaa;
+  color: #55554d;
 }
 
 /* ============================================
@@ -234,7 +249,7 @@
 
 .featureList li {
   font-size: 13px;
-  color: #aaa;
+  color: #55554d;
   padding-left: 18px;
   position: relative;
 }
@@ -248,7 +263,7 @@
 }
 
 .moreFeatures {
-  color: #666 !important;
+  color: #b5aa9a !important;
   font-style: italic;
 }
 
@@ -257,77 +272,107 @@
 }
 
 /* ============================================
-   STATUS
+   STATUS — same green/grey pill language as
+   SellerRequests' statusApproved / statusNeutral
    ============================================ */
 .statusRow {
   margin-bottom: 14px;
 }
 
 .statusBadge {
+  display: inline-block;
   padding: 4px 12px;
-  border-radius: 20px;
+  border-radius: 12px;
   font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
 }
 
 .statusBadge.active {
-  background: #10b981;
-  color: white;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #10b981;
 }
 
 .statusBadge.inactiveBadge {
-  background: #666;
-  color: #ddd;
+  background: #f5f2ee;
+  border: 1px solid #e8e3dc;
+  color: #8a8072;
 }
 
 /* ============================================
-   CARD ACTIONS
+   CARD ACTIONS — mirrors SellerRequests'
+   .actionIconBtn color-variant pattern
    ============================================ */
 .cardActions {
   display: flex;
   gap: 8px;
   margin-top: auto;
+  flex-wrap: wrap;
 }
 
 .editButton,
 .toggleButton,
 .deleteButton {
   flex: 1;
-  padding: 9px 12px;
+  min-width: 80px;
+  padding: 8px 10px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.03);
-  color: #aaa;
+  transition: all 0.2s ease;
+  border: 1px solid #e8e3dc;
+  background: transparent;
+  color: #8a8072;
   font-family: inherit;
 }
 
 .editButton:hover {
-  background: rgba(200, 168, 110, 0.15);
-  color: #c8a86e;
-  border-color: rgba(200, 168, 110, 0.2);
+  background: rgba(200, 168, 110, 0.1);
+  color: #a0804a;
+  border-color: #c8a86e;
 }
 
-.toggleButton:hover:not(:disabled) {
-  border-color: rgba(200, 168, 110, 0.2);
-  color: #c8a86e;
-  background: rgba(200, 168, 110, 0.05);
+/* Deactivate = warning amber, Activate = info blue —
+   purely visual, driven by the same plan.isActive value
+   already used to pick the button label. */
+.deactivateToggle {
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #d97706;
+}
+
+.deactivateToggle:hover:not(:disabled) {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  border-color: #d97706;
+}
+
+.activateToggle {
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #3b82f6;
+}
+
+.activateToggle:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.deleteButton {
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
 }
 
 .deleteButton:hover {
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(239, 68, 68, 0.1);
   color: #ef4444;
-  border-color: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
 }
 
 .disabledToggle,
 .toggleButton:disabled {
-  opacity: 0.4;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
@@ -339,15 +384,18 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
-  color: #666;
+  padding: 80px 20px;
+  color: #8a8072;
   gap: 16px;
+  background: #ffffff;
+  border: 1px solid #e8e3dc;
+  border-radius: 12px;
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(255, 255, 255, 0.05);
+  width: 36px;
+  height: 36px;
+  border: 3px solid #f0edeb;
   border-top-color: #c8a86e;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -364,32 +412,40 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
-  color: #666;
-  gap: 16px;
-  background: rgba(26, 26, 26, 0.4);
-  border-radius: 16px;
-  border: 1px dashed rgba(255, 255, 255, 0.06);
+  text-align: center;
+  padding: 80px 20px;
+  color: #8a8072;
+  gap: 14px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e8e3dc;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 15px;
+  color: #8a8072;
+}
+
+.emptyState .createButton {
+  margin-top: 4px;
 }
 
 /* ============================================
-   MODAL - MATCHES THEME
+   MODAL — light theme, fixed header (never
+   scrolls), scrollable form body
    ============================================ */
 .modalOverlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  inset: 0;
+  background: rgba(20, 20, 15, 0.55);
+  backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 1200;
   padding: 20px;
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.2s ease;
 }
 
 @keyframes fadeIn {
@@ -402,21 +458,22 @@
 }
 
 .modal {
-  background: #1a1a1a;
-  border-radius: 16px;
+  background: #ffffff;
+  border-radius: 14px;
   max-width: 640px;
   width: 100%;
   max-height: 90vh;
-  overflow-y: auto;
-  padding: 24px;
-  animation: slideUp 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 8px 60px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.25s ease;
+  border: 1px solid #e8e3dc;
+  box-shadow: 0 20px 60px rgba(20, 20, 15, 0.25);
 }
 
 @keyframes slideUp {
   from {
-    transform: translateY(20px);
+    transform: translateY(16px);
     opacity: 0;
   }
   to {
@@ -429,29 +486,39 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0edeb;
+  flex-shrink: 0;
 }
 
 .modalHeader h2 {
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 700;
-  color: #e0e0e0;
+  color: #14140f;
   margin: 0;
 }
 
 .closeButton {
-  background: none;
-  border: none;
-  font-size: 28px;
-  color: #666;
+  background: #f5f2ee;
+  border: 1px solid #e8e3dc;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  line-height: 1;
+  color: #8a8072;
   cursor: pointer;
-  transition: color 0.3s;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .closeButton:hover {
-  color: #fff;
+  background: #f0edeb;
+  color: #14140f;
+  border-color: #c8a86e;
 }
 
 /* ============================================
@@ -461,18 +528,21 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
 .formGroup label {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
-  color: #aaa;
+  color: #55554d;
 }
 
 .formGroup input[type="text"],
@@ -480,13 +550,13 @@
 .formGroup select,
 .formGroup textarea {
   padding: 10px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid #e8e3dc;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 13.5px;
   font-family: inherit;
-  transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.03);
-  color: #e0e0e0;
+  transition: all 0.2s ease;
+  background: #ffffff;
+  color: #14140f;
 }
 
 .formGroup textarea {
@@ -498,18 +568,23 @@
 .formGroup textarea:focus {
   outline: none;
   border-color: #c8a86e;
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 0 20px rgba(200, 168, 110, 0.05);
+  box-shadow: 0 0 0 3px rgba(200, 168, 110, 0.12);
 }
 
 .formGroup input:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  background: #faf9f5;
 }
 
 .formGroup select option {
-  background: #1a1a1a;
-  color: #e0e0e0;
+  background: #ffffff;
+  color: #14140f;
+}
+
+.formGroup input::placeholder,
+.formGroup textarea::placeholder {
+  color: #b5aa9a;
 }
 
 .formRow {
@@ -524,20 +599,62 @@
   gap: 8px;
   cursor: pointer;
   font-weight: 500 !important;
-  color: #aaa !important;
+  color: #55554d !important;
 }
 
 .checkboxLabel input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   accent-color: #c8a86e;
   cursor: pointer;
 }
 
 .hint {
-  font-size: 12px;
-  color: #666;
+  font-size: 11.5px;
+  color: #b5aa9a;
   margin: 0;
+}
+
+/* ============================================
+   ICON PICKER — react-icons grid, replaces the
+   old free-text emoji input
+   ============================================ */
+.iconPicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.iconOption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid #e8e3dc;
+  background: #ffffff;
+  color: #8a8072;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.iconOption:hover {
+  border-color: #c8a86e;
+  color: #a0804a;
+  background: rgba(200, 168, 110, 0.08);
+}
+
+.iconOptionSelected {
+  border-color: #c8a86e;
+  background: linear-gradient(135deg, #c8a86e, #a0804a);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(200, 168, 110, 0.3);
+}
+
+.iconOptionSelected:hover {
+  color: #ffffff;
+  background: linear-gradient(135deg, #c8a86e, #a0804a);
 }
 
 /* ============================================
@@ -545,52 +662,54 @@
    ============================================ */
 .modalActions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   justify-content: flex-end;
-  margin-top: 8px;
+  margin-top: 4px;
   padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid #f0edeb;
 }
 
 .cancelButton {
-  padding: 10px 24px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 9px 20px;
+  border: 1px solid #e8e3dc;
   border-radius: 8px;
-  background: transparent;
-  color: #aaa;
-  font-size: 14px;
+  background: #ffffff;
+  color: #55554d;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   font-family: inherit;
 }
 
 .cancelButton:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
+  background: #f5f2ee;
+  color: #14140f;
 }
 
 .submitButton {
-  padding: 10px 24px;
+  padding: 9px 22px;
   border: none;
   border-radius: 8px;
   background: linear-gradient(135deg, #c8a86e, #a0804a);
-  color: #0a0a0a;
-  font-size: 14px;
+  color: #ffffff;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   font-family: inherit;
 }
 
 .submitButton:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(200, 168, 110, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(200, 168, 110, 0.35);
 }
 
 .submitButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* ============================================
@@ -598,23 +717,27 @@
    ============================================ */
 @media (max-width: 768px) {
   .header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
+    justify-content: space-between;
+    padding: 14px 16px;
   }
 
-  .title {
-    font-size: 1.5rem;
+  .headerContent {
+    flex: 1;
+    min-width: 200px;
   }
 
-  .subtitle {
-    font-size: 0.85rem;
+  .headerContent h1 {
+    font-size: 20px;
+  }
+
+  .headerContent p {
+    font-size: 13px;
   }
 
   .createButton {
     width: 100%;
     justify-content: center;
-    padding: 0.8rem 1.5rem;
+    padding: 10px 16px;
   }
 
   .formRow {
@@ -626,23 +749,24 @@
   }
 
   .modal {
-    padding: 16px;
-    margin: 10px;
+    max-height: 100vh;
+    height: 100%;
+    border-radius: 0;
+  }
+
+  .modalHeader {
+    padding: 16px 18px;
+  }
+
+  .modalForm {
+    padding: 18px;
   }
 }
 
 @media (max-width: 480px) {
-  .title {
-    font-size: 1.25rem;
-  }
-
-  .subtitle {
-    font-size: 0.8rem;
-  }
-
   .createButton {
-    font-size: 0.85rem;
-    padding: 0.7rem 1.2rem;
+    font-size: 12.5px;
+    padding: 9px 14px;
   }
 
   .cardActions {
@@ -654,4 +778,19 @@
   .deleteButton {
     width: 100%;
   }
+
+  .planCard {
+    padding: 18px;
+  }
+}
+
+/* ============================================
+   FOCUS VISIBLE
+   ============================================ */
+button:focus-visible,
+.formGroup input:focus-visible,
+.formGroup select:focus-visible,
+.formGroup textarea:focus-visible {
+  outline: 2px solid #c8a86e;
+  outline-offset: 2px;
 }
