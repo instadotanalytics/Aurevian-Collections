@@ -11,30 +11,19 @@ import {
   getCategoriesForDropdown,
 } from "../services/headerConfigService.js";
 
+// ✅ NEW — location-aware ranking (Features 3/4/5/10/13)
+import {
+  isValidCoordinate,
+  parseCoordinate,
+  haversineKm,
+  getZoneForDistance,
+  zoneLabel,
+  buildLocationAggregationStages,
+} from "../utils/geoUtils.js";
+import { getLocationSettings } from "../services/locationSettingsService.js";
+
 console.log("✅ jewelleryProductController loaded");
 
-// ============================================
-// ✅ explicit, unambiguous string→boolean parsing for multipart
-// form fields.
-//
-// ROOT CAUSE THIS FIXES: multipart/form-data ALWAYS sends every field as
-// a string, and the frontend (ProductFormWizard → sellerProductSlice)
-// always appends returnAvailable/hasVariants/taxIncluded/etc. — they are
-// never actually `undefined` on arrival. The previous code did:
-//   productData.returnAvailable !== undefined ? productData.returnAvailable : true
-// Since req.body.returnAvailable is always the STRING "true"/"false"
-// (never real `undefined`), this always took the raw-string branch and
-// assigned an un-cast STRING into a Mongoose Boolean path, relying
-// entirely on Mongoose's implicit casting to get it right with no
-// validation/error if it didn't. That's what let every product end up
-// with returnAvailable resolving to `false`.
-//
-// parseBool() removes that ambiguity: real booleans pass through
-// untouched, string "true"/"false" (any case/whitespace) are parsed
-// explicitly, and anything genuinely absent (undefined/null/"") falls
-// back to the given default — which, for returnAvailable, is always
-// `true`, per the required "available by default" behavior.
-// ============================================
 const parseBool = (value, defaultValue = false) => {
   if (value === undefined || value === null || value === "") {
     return defaultValue;
@@ -48,36 +37,6 @@ const parseBool = (value, defaultValue = false) => {
   return defaultValue;
 };
 
-// ============================================
-// ✅ FIXED (ROOT CAUSE OF "Return & Exchange Not Available" ON EVERY
-// PRODUCT) — normalizes a product's returnPolicy before it's sent to
-// the client, for BOTH new writes and existing/legacy reads.
-//
-// CURRENT AUREVIAN BUSINESS RULE: there is NO supported per-product
-// return restriction right now — every product must show as
-// return/exchange eligible. See returnController.getItemEligibility for
-// the matching backend-ENFORCEMENT side of this exact same rule (that
-// function decides whether a return REQUEST can actually be submitted;
-// this function decides what the Product Detail Page displays — both
-// must agree, so both are fixed together).
-//
-// WHY THIS WAS BROKEN: the previous version of this function only
-// "corrected" a MISSING (undefined/null) returnAvailable back to
-// `true`, and left an explicit stored `false` completely untouched:
-//
-//   if (rp.returnAvailable !== false) { rp.returnAvailable = true; }
-//
-// That is precisely why every existing product showed "Not Available"
-// — whatever the historical cause (pre-parseBool-fix writes, a stray
-// toggle, seed data), the moment a document had `returnAvailable: false`
-// physically stored, this function did nothing about it, and the API
-// kept reporting it as ineligible forever. There was never a legitimate
-// way for a seller to intentionally set this today, so a stored `false`
-// is never trusted as authoritative — this now forces `true`
-// unconditionally. If a genuine, deliberate per-product opt-out is
-// required in the future, THIS is the one place to reintroduce a real
-// (explicit) `false` path — do not scatter that logic elsewhere.
-// ============================================
 const normalizeReturnPolicy = (product) => {
   if (!product) return product;
 
@@ -86,7 +45,6 @@ const normalizeReturnPolicy = (product) => {
     return product;
   }
 
-  // ✅ Unconditional — ignores whatever was previously stored.
   product.returnPolicy.returnAvailable = true;
 
   if (
@@ -98,6 +56,25 @@ const normalizeReturnPolicy = (product) => {
 
   return product;
 };
+
+// ✅ NEW — attaches a customer-safe `locationInfo` block (distance +
+// zone label only — never raw seller coordinates, per Feature 13) and
+// strips the internal ranking fields the aggregation added.
+function attachLocationInfo(product) {
+  if (product.distanceKm != null) {
+    product.locationInfo = {
+      distanceKm: Math.round(product.distanceKm * 10) / 10,
+      zone: product.locationZone,
+      zoneLabel: zoneLabel(product.locationZone),
+    };
+  } else {
+    product.locationInfo = null;
+  }
+  delete product.distanceKm;
+  delete product.locationZone;
+  delete product.zoneRankValue;
+  return product;
+}
 
 // ============================================
 // GET CATEGORIES FROM HEADER CONFIG
@@ -151,8 +128,6 @@ export const getSellerProducts = async (req, res) => {
 
     const query = { "seller.sellerId": seller._id };
 
-    // ✅ FIX: default view excludes Archived products (soft-deleted),
-    // matching normal "delete" behavior in the UI. Explicit ?status=Archived still works.
     if (status) {
       query.status = status;
     } else {
@@ -248,7 +223,7 @@ export const getProductLimitStatus = async (req, res) => {
 };
 
 // ============================================
-// CREATE PRODUCT - FIXED with uploadBuffer & Retry Logic
+// CREATE PRODUCT
 // ============================================
 export const createProduct = async (req, res) => {
   console.log("✅ createProduct called");
@@ -270,12 +245,6 @@ export const createProduct = async (req, res) => {
       });
     }
 
-    // ============================================
-    // ✅ FIX: Handle file uploads from req.files using uploadBuffer
-    // Multer is using memoryStorage, so files arrive as .buffer
-    // ============================================
-
-    // Validate thumbnail exists
     if (!req.files || !req.files.thumbnail || !req.files.thumbnail[0]) {
       console.log("❌ No thumbnail uploaded");
       return res.status(400).json({
@@ -284,7 +253,6 @@ export const createProduct = async (req, res) => {
       });
     }
 
-    // Validate at least 2 images
     if (!req.files.images || req.files.images.length < 2) {
       console.log(
         "❌ Less than 2 images uploaded:",
@@ -296,9 +264,6 @@ export const createProduct = async (req, res) => {
       });
     }
 
-    // ============================================
-    // ✅ UPLOAD THUMBNAIL WITH RETRY LOGIC
-    // ============================================
     console.log("📤 Uploading thumbnail to Cloudinary...");
 
     let thumbnailResult = null;
@@ -309,7 +274,7 @@ export const createProduct = async (req, res) => {
         thumbnailResult = await cloudinaryService.uploadBuffer(
           req.files.thumbnail[0].buffer,
           `products/${seller._id}`,
-          { timeout: 60000 }, // 60 second timeout
+          { timeout: 60000 },
         );
 
         if (!thumbnailResult.success) {
@@ -351,9 +316,6 @@ export const createProduct = async (req, res) => {
     }
     console.log("✅ Thumbnail uploaded:", thumbnailResult.url);
 
-    // ============================================
-    // UPLOAD PRODUCT IMAGES WITH RETRY LOGIC
-    // ============================================
     console.log("📤 Uploading product images to Cloudinary...");
     const uploadedImages = [];
 
@@ -474,7 +436,7 @@ export const createProduct = async (req, res) => {
       imagesPerProduct,
     );
 
-    const totalImages = uploadedImages.length + 1; // +1 for thumbnail
+    const totalImages = uploadedImages.length + 1;
     if (totalImages > imagesPerProduct) {
       console.log(
         "❌ Image limit exceeded:",
@@ -505,7 +467,6 @@ export const createProduct = async (req, res) => {
       }
     }
 
-    // ✅ NEW: Parse placements
     let placements = [];
     if (productData.placements) {
       try {
@@ -520,23 +481,6 @@ export const createProduct = async (req, res) => {
       }
     }
 
-    // ============================================
-    // Create product with uploaded images
-    //
-    // ✅ FIX: every boolean-ish field arriving from the multipart form is
-    // now parsed explicitly via parseBool() instead of being assigned
-    // as a raw string and left to Mongoose's implicit casting. See
-    // parseBool() comment above for why this was the actual root cause
-    // of returnPolicy.returnAvailable resolving incorrectly.
-    //
-    // NOTE (current business rule): whatever value is stored here for
-    // returnAvailable is now cosmetic only — every GET that returns this
-    // product to a customer forces returnAvailable to `true` via
-    // normalizeReturnPolicy() (see above), and returnController's
-    // getItemEligibility() no longer gates on this field either. It's
-    // still stored/parsed correctly here for when a real per-product
-    // opt-out is reintroduced.
-    // ============================================
     const product = new JewelleryProduct({
       productName: productData.productName,
       productSlug: productData.productSlug || undefined,
@@ -621,8 +565,6 @@ export const createProduct = async (req, res) => {
         shippingType: productData.shippingType || "Customer Pays",
       },
 
-      // ✅ Stored value is now cosmetic (see NOTE above) — read paths no
-      // longer trust this to block returns. Still parsed correctly.
       returnPolicy: {
         returnAvailable: parseBool(productData.returnAvailable, true),
         returnDays: productData.returnDays || 7,
@@ -658,7 +600,6 @@ export const createProduct = async (req, res) => {
 
       status: productData.status || "Draft",
 
-      // ✅ NEW: Add placements to product
       placements: placements,
     });
 
@@ -685,17 +626,25 @@ export const createProduct = async (req, res) => {
 
 // ============================================
 // GET PRODUCT BY SLUG (Public)
+// ✅ CHANGED — accepts optional ?lat=&lng= and, when both the request
+// and the owning seller's showroom have valid coordinates, includes a
+// customer-safe `locationInfo` (distance + zone label). Raw seller
+// coordinates are always stripped from the response (Feature 13).
 // ============================================
 export const getProductBySlug = async (req, res) => {
   console.log("✅ getProductBySlug called with slug:", req.params.slug);
   try {
     const { slug } = req.params;
+    const { lat, lng } = req.query;
 
     const product = await JewelleryProduct.findOne({
       productSlug: slug,
       status: "Published",
       isActive: true,
-    }).populate("seller.sellerId", "firstName lastName storeName email");
+    }).populate(
+      "seller.sellerId",
+      "firstName lastName storeName email pickupAddress.coordinates pickupAddress.city storeInfo.storeName",
+    );
 
     if (!product) {
       console.log("❌ Product not found for slug:", slug);
@@ -708,15 +657,50 @@ export const getProductBySlug = async (req, res) => {
     console.log("✅ Product found:", product.productName);
     await product.updateOne({ $inc: { viewedCount: 1 } });
 
-    // ✅ FIXED (see normalizeReturnPolicy above) — this is the exact
-    // call that was silently preserving a stored `false` and causing
-    // every product's detail page to show "Return & Exchange Not
-    // Available". Now unconditionally forces returnAvailable: true.
     normalizeReturnPolicy(product);
+
+    const userLat = parseCoordinate(lat);
+    const userLng = parseCoordinate(lng);
+    const sellerCoords = product.seller?.sellerId?.pickupAddress?.coordinates;
+
+    let locationInfo = null;
+    if (
+      isValidCoordinate(userLat, userLng) &&
+      sellerCoords &&
+      isValidCoordinate(sellerCoords.lat, sellerCoords.lng)
+    ) {
+      const settings = await getLocationSettings();
+      if (settings.locationRankingEnabled) {
+        const distanceKm = haversineKm(
+          userLat,
+          userLng,
+          sellerCoords.lat,
+          sellerCoords.lng,
+        );
+        if (distanceKm != null) {
+          const zone = getZoneForDistance(distanceKm, settings);
+          locationInfo = {
+            distanceKm: Math.round(distanceKm * 10) / 10,
+            zone,
+            zoneLabel: zoneLabel(zone),
+          };
+        }
+      }
+    }
+
+    const productObj = product.toObject();
+    // Never leak the seller's exact showroom coordinates to the storefront.
+    if (
+      productObj.seller?.sellerId &&
+      typeof productObj.seller.sellerId === "object"
+    ) {
+      delete productObj.seller.sellerId.pickupAddress;
+    }
+    productObj.locationInfo = locationInfo;
 
     return res.status(200).json({
       success: true,
-      data: product,
+      data: productObj,
     });
   } catch (error) {
     console.error("❌ Get product by slug error:", error);
@@ -728,7 +712,7 @@ export const getProductBySlug = async (req, res) => {
 };
 
 // ============================================
-// UPDATE PRODUCT - FIXED with uploadBuffer & Retry Logic
+// UPDATE PRODUCT
 // ============================================
 export const updateProduct = async (req, res) => {
   console.log("✅ updateProduct called with id:", req.params.id);
@@ -762,16 +746,9 @@ export const updateProduct = async (req, res) => {
 
     console.log("✅ Product found:", product.productName);
 
-    // ============================================
-    // ✅ FIX: Handle file uploads from req.files using uploadBuffer
-    // Multer is using memoryStorage, so files arrive as .buffer
-    // ============================================
-
-    // Handle thumbnail upload if provided with retry logic
     if (req.files && req.files.thumbnail && req.files.thumbnail[0]) {
       console.log("📤 Uploading new thumbnail...");
 
-      // Delete old thumbnail from Cloudinary if it exists
       if (product.thumbnail?.publicId) {
         console.log("🗑️ Deleting old thumbnail:", product.thumbnail.publicId);
         await cloudinaryService.deleteFile(product.thumbnail.publicId);
@@ -832,11 +809,9 @@ export const updateProduct = async (req, res) => {
       console.log("✅ New thumbnail uploaded:", thumbnailResult.url);
     }
 
-    // Handle product images upload if provided with retry logic
     if (req.files && req.files.images && req.files.images.length > 0) {
       console.log(`📤 Uploading ${req.files.images.length} new images...`);
 
-      // Delete old images from Cloudinary
       if (product.images && product.images.length > 0) {
         console.log(`🗑️ Deleting ${product.images.length} old images...`);
         for (const image of product.images) {
@@ -846,7 +821,6 @@ export const updateProduct = async (req, res) => {
         }
       }
 
-      // Upload new images using buffer with retry
       const uploadedImages = [];
       for (let i = 0; i < req.files.images.length; i++) {
         let imageResult = null;
@@ -964,7 +938,6 @@ export const updateProduct = async (req, res) => {
       }
     }
 
-    // ✅ NEW: Parse placements if provided
     if (updateData.placements) {
       try {
         updateData.placements =
@@ -978,24 +951,6 @@ export const updateProduct = async (req, res) => {
       }
     }
 
-    // ============================================
-    // ✅ FIX — same root-cause fix as createProduct: every boolean-ish
-    // field submitted via this multipart PUT is a raw string
-    // ("true"/"false"), never actually `undefined`. Map them onto the
-    // correct nested Mongoose paths as real, explicitly-parsed booleans
-    // instead of letting a top-level `updateData.returnAvailable`
-    // string sit unused (findByIdAndUpdate does NOT understand
-    // top-level "returnAvailable" as shorthand for "returnPolicy.
-    // returnAvailable" — it would have silently done nothing, leaving
-    // whatever returnPolicy state already existed on the document).
-    // Only remaps fields that were actually present in this request, so
-    // a partial update never resets fields the seller didn't touch.
-    //
-    // NOTE: as with createProduct, whatever value is stored here for
-    // returnAvailable no longer affects what a customer sees or whether
-    // a return request can be submitted — see normalizeReturnPolicy and
-    // returnController.getItemEligibility.
-    // ============================================
     if (updateData.returnAvailable !== undefined) {
       updateData["returnPolicy.returnAvailable"] = parseBool(
         updateData.returnAvailable,
@@ -1065,7 +1020,6 @@ export const updateProduct = async (req, res) => {
       delete updateData.flashSale;
     }
 
-    // Don't allow updating certain fields
     delete updateData._id;
     delete updateData.seller;
     delete updateData.sku;
@@ -1287,7 +1241,13 @@ export const bulkUploadProducts = async (req, res) => {
 
 // ============================================
 // ✅ GET PRODUCTS BY PLACEMENT (Public - Storefront Pages)
-// Extended with collection & occasion filters
+// ✅ CHANGED — accepts optional ?lat=&lng= and, when valid + location
+// ranking is enabled in Super Admin settings, computes each product's
+// distance to its seller's showroom server-side (single aggregation
+// pipeline, one $lookup — no N+1) and uses it as the PRIMARY sort key,
+// with the caller's chosen sort (latest/price/popular) preserved as the
+// tiebreak within each distance zone (Feature 3/15). When no location
+// is supplied, behavior is completely unchanged from before.
 // ============================================
 export const getProductsByPlacement = async (req, res) => {
   console.log(
@@ -1296,13 +1256,6 @@ export const getProductsByPlacement = async (req, res) => {
   );
   try {
     const { placement } = req.params;
-    // ✅ NEW: `collection` and `occasion` — both reuse EXISTING indexed
-    // fields on JewelleryProduct (specifications.collection,
-    // specifications.occasion). No schema change. This is what lets
-    // header links like "Bridal Collection" (shopMegaMenu.byStyle /
-    // collectionsDropdown) and "Birthday" (giftGuideMegaMenu.byOccasion)
-    // actually filter real products instead of showing the unfiltered
-    // placement every time.
     const {
       page = 1,
       limit = 20,
@@ -1310,6 +1263,8 @@ export const getProductsByPlacement = async (req, res) => {
       collection,
       occasion,
       sort,
+      lat,
+      lng,
     } = req.query;
     const valid = ["shop", "collections", "gifts", "offers"];
 
@@ -1334,8 +1289,6 @@ export const getProductsByPlacement = async (req, res) => {
     }
 
     if (collection) {
-      // Escaped, case-insensitive EXACT match against the free-typed
-      // specifications.collection field (e.g. "Bridal Collection").
       const escaped = collection.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       query["specifications.collection"] = new RegExp(`^${escaped}$`, "i");
       console.log("📊 Filtering by collection:", collection);
@@ -1347,29 +1300,63 @@ export const getProductsByPlacement = async (req, res) => {
       console.log("📊 Filtering by occasion:", occasion);
     }
 
-    let sortOption = { createdAt: -1 };
-    if (sort === "price-low") sortOption = { "pricing.originalPrice": 1 };
-    if (sort === "price-high") sortOption = { "pricing.originalPrice": -1 };
-    if (sort === "newest") sortOption = { createdAt: -1 };
-    if (sort === "popular") sortOption = { "reviews.totalSold": -1 };
+    let baseSort = { createdAt: -1 };
+    if (sort === "price-low") baseSort = { "pricing.originalPrice": 1 };
+    if (sort === "price-high") baseSort = { "pricing.originalPrice": -1 };
+    if (sort === "newest") baseSort = { createdAt: -1 };
+    if (sort === "popular") baseSort = { "reviews.totalSold": -1 };
 
-    console.log("📊 Sort option:", sortOption);
+    console.log("📊 Sort option:", baseSort);
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
+    // ✅ NEW — location-aware ranking
+    const userLat = parseCoordinate(lat);
+    const userLng = parseCoordinate(lng);
+    const hasUserLocation = isValidCoordinate(userLat, userLng);
+    const locationSettings = await getLocationSettings();
+    const useLocationRanking =
+      hasUserLocation && locationSettings.locationRankingEnabled;
+
+    const pipeline = [{ $match: query }];
+
+    if (useLocationRanking) {
+      pipeline.push(
+        {
+          $lookup: {
+            from: "sellers",
+            localField: "seller.sellerId",
+            foreignField: "_id",
+            as: "sellerInfo",
+          },
+        },
+        { $unwind: { path: "$sellerInfo", preserveNullAndEmptyArrays: true } },
+        ...buildLocationAggregationStages({
+          userLat,
+          userLng,
+          thresholds: locationSettings,
+        }),
+      );
+    }
+
+    const sortStage = useLocationRanking
+      ? { zoneRankValue: 1, ...baseSort }
+      : baseSort;
+
+    pipeline.push(
+      { $sort: sortStage },
+      { $skip: skip },
+      { $limit: parseInt(limit) },
+      { $unset: ["pricing.costPrice", "__v", "sellerInfo"] },
+    );
+
     const [products, total] = await Promise.all([
-      JewelleryProduct.find(query)
-        .sort(sortOption)
-        .skip(skip)
-        .limit(parseInt(limit))
-        .select("-pricing.costPrice -__v"), // Exclude sensitive fields
+      JewelleryProduct.aggregate(pipeline),
       JewelleryProduct.countDocuments(query),
     ]);
 
-    // ✅ FIXED (see normalizeReturnPolicy above) — same defensive
-    // normalization as getProductBySlug, applied to every product in a
-    // placement listing, now unconditional.
     products.forEach(normalizeReturnPolicy);
+    products.forEach(attachLocationInfo);
 
     console.log(
       `📊 Found ${products.length} products for placement: ${placement}`,
@@ -1449,13 +1436,6 @@ export const getPlacementCounts = async (req, res) => {
 
 // ============================================
 // ✅ NEW: GET RELEVANT PRODUCTS (Public - "You May Also Like")
-//
-// Fallback chain (deliberately does NOT fall back to unrelated products —
-// if a product is the only one in its category, this returns an empty
-// list rather than filling the section with irrelevant items):
-//   1. Same subCategoryId within the same categoryId
-//   2. Same categoryId (broader), deduped against step 1, fills remaining slots
-// One query set per request — no per-card fetching, no full-collection scan.
 // ============================================
 export const getRelevantProducts = async (req, res) => {
   console.log(
@@ -1465,7 +1445,7 @@ export const getRelevantProducts = async (req, res) => {
   try {
     const { productId } = req.params;
     const requestedLimit = parseInt(req.query.limit) || 8;
-    const limit = Math.min(Math.max(requestedLimit, 1), 12); // cap 1–12
+    const limit = Math.min(Math.max(requestedLimit, 1), 12);
 
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       console.log("❌ Invalid productId:", productId);
@@ -1514,7 +1494,6 @@ export const getRelevantProducts = async (req, res) => {
       }
     };
 
-    // Step 1 — same subcategory (only if the current product has one)
     if (subCategoryId) {
       const subMatches = await JewelleryProduct.find({
         _id: { $ne: currentProduct._id },
@@ -1531,7 +1510,6 @@ export const getRelevantProducts = async (req, res) => {
       console.log(`📊 Step 1 (subcategory) matched: ${subMatches.length}`);
     }
 
-    // Step 2 — same category, broader, fills remaining slots only
     if (collected.length < limit) {
       const remaining = limit - collected.length;
       const categoryMatches = await JewelleryProduct.find({
@@ -1547,11 +1525,6 @@ export const getRelevantProducts = async (req, res) => {
       addResults(categoryMatches);
       console.log(`📊 Step 2 (category) matched: ${categoryMatches.length}`);
     }
-
-    // ✅ Deliberately no "other products" fallback beyond this point —
-    // an empty/short result here means the category genuinely doesn't
-    // have enough relevant products, and the frontend should show an
-    // empty state rather than unrelated items.
 
     console.log(
       `📊 Total relevant products for ${productId}: ${collected.length}`,
@@ -1572,41 +1545,24 @@ export const getRelevantProducts = async (req, res) => {
 
 // ============================================
 // ✅ NEW: SEARCH PRODUCTS (Public - Header search bar + /shop?search=)
-//
-// Why regex, not $text:
-// MongoDB's $text index tokenizes into whole (stemmed) words and can
-// only match whole tokens — it CANNOT match a substring inside a word
-// (e.g. "cot" would never match "Cotton", a bare single letter would
-// never match anything). The product brief explicitly requires
-// substring / partial-word / single-character matching from anywhere
-// in the name, so a case-insensitive regex across the searchable
-// fields is the correct tool here, not the existing text index.
-//
-// Query is split on whitespace; every word must match at least one
-// searchable field ($and of per-word $or) so multi-word queries like
-// "premium cotton" require both words to appear somewhere on the
-// product, in any order, across any of the fields — this is what
-// lets "Premium Cotton", "cotton oversized", "premium cotton
-// oversized t-shirt" etc. all resolve to the same product.
-//
-// Performance: the compound {status:1, isActive:1} index (see model)
-// prunes to public/live products before the regex scan runs — this
-// keeps the (unavoidably unindexed) regex matching scoped to the
-// storefront-visible catalog rather than the entire collection,
-// including seller drafts/archived/rejected products.
+// ✅ CHANGED — accepts optional ?lat=&lng=. Ranking is: (1) relevance
+// tier (exact productName substring match beats a match found only via
+// another field — Feature 15), then (2) distance zone (when location
+// is available and enabled), then (3) the caller's chosen sort as a
+// final tiebreak. The regex $and match that determines "is this even a
+// result" is completely untouched — location only re-orders results
+// that already matched the query.
 // ============================================
 export const searchProducts = async (req, res) => {
   console.log("✅ searchProducts called with query:", req.query);
   try {
     const rawQuery = (req.query.q ?? req.query.search ?? "").toString();
-    // Trim + collapse internal multiple spaces into one
     const query = rawQuery.trim().replace(/\s+/g, " ");
 
-    const { page = 1, limit = 20, categoryId, sort } = req.query;
+    const { page = 1, limit = 20, categoryId, sort, lat, lng } = req.query;
     const parsedLimit = Math.min(Math.max(parseInt(limit) || 20, 1), 50);
     const parsedPage = Math.max(parseInt(page) || 1, 1);
 
-    // ✅ Never hit the database for an empty query
     if (!query) {
       console.log("⚠️ Empty search query — returning empty result set");
       return res.status(200).json({
@@ -1628,7 +1584,7 @@ export const searchProducts = async (req, res) => {
     const words = query.split(" ").filter(Boolean);
 
     const wordCondition = (word) => {
-      const regex = new RegExp(escapeRegex(word), "i"); // case-insensitive, substring, anywhere
+      const regex = new RegExp(escapeRegex(word), "i");
       return {
         $or: [
           { productName: regex },
@@ -1648,8 +1604,6 @@ export const searchProducts = async (req, res) => {
     };
 
     const mongoQuery = {
-      // Base filter uses the {status:1, isActive:1} compound index —
-      // only ever search products that are actually live on the storefront.
       status: "Published",
       isActive: true,
       $and: words.map(wordCondition),
@@ -1660,27 +1614,86 @@ export const searchProducts = async (req, res) => {
       console.log("📊 Restricting search to category:", categoryId);
     }
 
-    let sortOption = { createdAt: -1 };
-    if (sort === "price-low") sortOption = { "pricing.originalPrice": 1 };
-    if (sort === "price-high") sortOption = { "pricing.originalPrice": -1 };
-    if (sort === "newest") sortOption = { createdAt: -1 };
-    if (sort === "popular") sortOption = { "reviews.totalSold": -1 };
+    let baseSort = { createdAt: -1 };
+    if (sort === "price-low") baseSort = { "pricing.originalPrice": 1 };
+    if (sort === "price-high") baseSort = { "pricing.originalPrice": -1 };
+    if (sort === "newest") baseSort = { createdAt: -1 };
+    if (sort === "popular") baseSort = { "reviews.totalSold": -1 };
 
     console.log("🔍 Search Mongo query:", JSON.stringify(mongoQuery));
 
     const skip = (parsedPage - 1) * parsedLimit;
 
+    const userLat = parseCoordinate(lat);
+    const userLng = parseCoordinate(lng);
+    const hasUserLocation = isValidCoordinate(userLat, userLng);
+    const locationSettings = await getLocationSettings();
+    const useLocationRanking =
+      hasUserLocation && locationSettings.locationRankingEnabled;
+
+    // ✅ NEW — lightweight relevance tier from the existing regex match:
+    // 0 = whole query appears verbatim in productName (strongest signal)
+    // 1 = at least one search word appears in productName
+    // 2 = matched only via a secondary field (brand/description/etc.)
+    const wholeQueryRegex = new RegExp(escapeRegex(query), "i");
+    const anyWordInNameOr = words.map((w) => ({
+      $regexMatch: {
+        input: "$productName",
+        regex: new RegExp(escapeRegex(w), "i"),
+      },
+    }));
+
+    const relevanceStage = {
+      $addFields: {
+        relevanceTier: {
+          $cond: [
+            { $regexMatch: { input: "$productName", regex: wholeQueryRegex } },
+            0,
+            { $cond: [{ $or: anyWordInNameOr }, 1, 2] },
+          ],
+        },
+      },
+    };
+
+    const pipeline = [{ $match: mongoQuery }, relevanceStage];
+
+    if (useLocationRanking) {
+      pipeline.push(
+        {
+          $lookup: {
+            from: "sellers",
+            localField: "seller.sellerId",
+            foreignField: "_id",
+            as: "sellerInfo",
+          },
+        },
+        { $unwind: { path: "$sellerInfo", preserveNullAndEmptyArrays: true } },
+        ...buildLocationAggregationStages({
+          userLat,
+          userLng,
+          thresholds: locationSettings,
+        }),
+      );
+    }
+
+    const sortStage = useLocationRanking
+      ? { relevanceTier: 1, zoneRankValue: 1, ...baseSort }
+      : { relevanceTier: 1, ...baseSort };
+
+    pipeline.push(
+      { $sort: sortStage },
+      { $skip: skip },
+      { $limit: parsedLimit },
+      { $unset: ["pricing.costPrice", "__v", "sellerInfo", "relevanceTier"] },
+    );
+
     const [products, total] = await Promise.all([
-      JewelleryProduct.find(mongoQuery)
-        .sort(sortOption)
-        .skip(skip)
-        .limit(parsedLimit)
-        .select("-pricing.costPrice -__v"),
+      JewelleryProduct.aggregate(pipeline),
       JewelleryProduct.countDocuments(mongoQuery),
     ]);
 
-    // ✅ FIXED (see normalizeReturnPolicy above) — now unconditional.
     products.forEach(normalizeReturnPolicy);
+    products.forEach(attachLocationInfo);
 
     console.log(`📊 Search "${query}" matched ${total} product(s)`);
 
@@ -1707,26 +1720,3 @@ export const searchProducts = async (req, res) => {
 };
 
 console.log("✅ jewelleryProductController fully loaded");
-console.log("📌 Exported functions:");
-console.log("  - getProductCategories");
-console.log("  - getSellerProducts");
-console.log("  - getProductLimitStatus");
-console.log(
-  "  - createProduct (explicit boolean parsing for multipart fields incl. returnAvailable)",
-);
-console.log(
-  "  - getProductBySlug (✅ FIXED: returnPolicy.returnAvailable now unconditionally forced true)",
-);
-console.log(
-  "  - updateProduct (explicit boolean parsing + correct nested-path mapping for returnPolicy/pricing/shipping/specifications/labels)",
-);
-console.log("  - deleteProduct");
-console.log("  - bulkUploadProducts");
-console.log(
-  "  - getProductsByPlacement (✅ FIXED: returnPolicy.returnAvailable now unconditionally forced true)",
-);
-console.log("  - getPlacementCounts (Seller dashboard API)");
-console.log("  - getRelevantProducts (Public 'You May Also Like' API)");
-console.log(
-  "  - searchProducts (✅ FIXED: returnPolicy.returnAvailable now unconditionally forced true)",
-);

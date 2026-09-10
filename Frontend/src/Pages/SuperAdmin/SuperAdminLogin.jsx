@@ -5,9 +5,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { superAdminLogin } from "../../redux/slices/superAdminSlice";
 import toast from "react-hot-toast";
-import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowLeft, FiShield } from "react-icons/fi";
+import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowLeft } from "react-icons/fi";
 import styles from "./SuperAdminLogin.module.css";
-import shopHero from "../../assets/superadmin.png";
+import shopHero from "../../assets/newlogo1.png";
+import superadminimg from "../../assets/superadmin.png";
 
 const SuperAdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -49,102 +50,89 @@ const SuperAdminLogin = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
-        {/* Left image panel - hidden on mobile */}
-        <div
-          className={styles.imagePanel}
-          style={{ backgroundImage: `url(${shopHero})` }}
-        />
+      {/* Left image panel - full height, hidden on mobile/tablet */}
+      <div
+        className={styles.imagePanel}
+        style={{ backgroundImage: `url(${superadminimg})` }}
+      />
 
-        {/* Right form panel */}
-        <div className={styles.formPanel}>
-          <div className={styles.formInner}>
-            {/* Back Button */}
-            <Link to="/" className={styles.backButton}>
-              <FiArrowLeft />
-              <span>Back to Home</span>
-            </Link>
+      {/* Right form panel - full height */}
+      <div className={styles.formPanel}>
+        <div className={styles.formInner}>
+          {/* Back Button */}
+          <Link to="/" className={styles.backButton}>
+            <FiArrowLeft />
+            <span>Back to Home</span>
+          </Link>
 
-            {/* Header */}
-            <div className={styles.header}>
-              <div className={styles.iconWrapper}>
-                <FiShield className={styles.shieldIcon} />
-              </div>
-              <h1 className={styles.title}>Super Admin Login</h1>
-              <p className={styles.subtitle}>Secure access to admin panel</p>
-            </div>
-
-            {/* Login Form */}
-            <form onSubmit={handleSubmit} className={styles.form}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Email Address</label>
-                <div className={styles.inputWrapper}>
-                  <FiMail className={styles.inputIcon} />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={styles.input}
-                    placeholder="superadmin@aurevian.com"
-                    required
-                    disabled={isLoading || authLoading}
-                  />
-                </div>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Password</label>
-                <div className={styles.inputWrapper}>
-                  <FiLock className={styles.inputIcon} />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className={styles.input}
-                    placeholder="••••••••"
-                    required
-                    disabled={isLoading || authLoading}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className={styles.eyeButton}
-                    tabIndex={-1}
-                  >
-                    {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
-                  </button>
-                </div>
-              </div>
-
-              <div className={styles.infoBox}>
-                <p className={styles.infoText}>
-                  <strong>Default Credentials:</strong>
-                  <br />
-                  Email: superadmin@aurevian.com
-                  <br />
-                  Password: SuperAdmin@2024
-                </p>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading || authLoading}
-                className={styles.submitButton}
-              >
-                {isLoading || authLoading ? "Logging in..." : "Login as Super Admin"}
-              </button>
-            </form>
-
-            <div className={styles.footer}>
-              <Link to="/login" className={styles.footerLink}>
-                User Login
-              </Link>
-              <span className={styles.footerDivider}>|</span>
-              <Link to="/admin/login" className={styles.footerLink}>
-                Admin Login
-              </Link>
-            </div>
+          {/* Header with Logo */}
+          <div className={styles.header}>
+            <img src={shopHero} alt="AUREVIAN" className={styles.logo} />
+            <h1 className={styles.title}>Super Admin</h1>
+            <p className={styles.subtitle}>Secure access to the admin panel</p>
           </div>
+
+          {/* Login Form */}
+          <form onSubmit={handleSubmit} className={styles.form}>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Email Address</label>
+              <div className={styles.inputWrapper}>
+                <FiMail className={styles.inputIcon} />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={styles.input}
+                  placeholder="superadmin@aurevian.com"
+                  required
+                  disabled={isLoading || authLoading}
+                />
+              </div>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Password</label>
+              <div className={styles.inputWrapper}>
+                <FiLock className={styles.inputIcon} />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={styles.input}
+                  placeholder="••••••••"
+                  required
+                  disabled={isLoading || authLoading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className={styles.eyeButton}
+                  tabIndex={-1}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                </button>
+              </div>
+            </div>
+
+            <div className={styles.infoBox}>
+              <p className={styles.infoText}>
+                <strong>Default Credentials:</strong>
+                <br />
+                Email: superadmin@aurevian.com
+                <br />
+                Password: SuperAdmin@2024
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading || authLoading}
+              className={styles.submitButton}
+            >
+              {isLoading || authLoading ? "Logging in..." : "Login as Super Admin"}
+            </button>
+          </form>
         </div>
       </div>
     </div>

@@ -34,13 +34,16 @@ import {
   FiMail,
   FiBriefcase,
   FiTrendingUp,
+  FiMapPin,
 } from "react-icons/fi";
+
 import {
   superAdminLogout,
   verifySuperAdminToken,
   setSuperAdminAuth,
   clearSuperAdminAuth,
 } from "../../../redux/slices/superAdminSlice";
+
 import toast from "react-hot-toast";
 import styles from "./SuperAdminDashboard.module.css";
 
@@ -61,6 +64,7 @@ import SellerProductsPage from "../components/SellersProducts/SellerProductsPage
 import PromotionRequestsManagement from "../components/PromotionRequestsManagement/PromotionRequestsManagement.jsx";
 import ContactManagement from "../components/ContactManagement.jsx";
 import FranchiseManagement from "../components/FranchiseManagement.jsx";
+import LocationSettings from "../../Seller/SellerDashboard/components/LocationSettings/LocationSettings.jsx";
 
 // SOCKET.IO — admin notifications
 import useAdminNotifications from "../../../hooks/useAdminNotifications.js";
@@ -69,8 +73,7 @@ import NotificationCenter from "../../../Components/common/NotificationCenter/No
 // Same logo asset used on the Seller Dashboard header
 import logo from "../../../assets/newlogo.png";
 
-// Sidebar menu — static, so it lives outside the component (same pattern
-// as SellerDashboard.jsx's menuItems).
+// Sidebar menu — static, so it lives outside the component
 const menuItems = [
   { id: "dashboard", label: "Dashboard", icon: FiHome, isSubMenu: false },
   { id: "sellers", label: "Seller Requests", icon: FiUsers, isSubMenu: false },
@@ -104,6 +107,12 @@ const menuItems = [
     id: "promotions",
     label: "Promotion Requests",
     icon: FiGift,
+    isSubMenu: false,
+  },
+  {
+    id: "location-settings",
+    label: "Location Settings",
+    icon: FiMapPin,
     isSubMenu: false,
   },
   {
@@ -182,9 +191,7 @@ const SuperAdminDashboard = () => {
   const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
   const [isVerifying, setIsVerifying] = useState(true);
 
-  // Which sidebar dropdown group ("blog" / "requests") is currently open —
-  // same accordion pattern as SellerDashboard's "Homepage Sections" group,
-  // generalised to handle more than one group.
+  // Which sidebar dropdown group ("blog" / "requests") is currently open
   const [openMenu, setOpenMenu] = useState(() => {
     const found = dropdownMenuItems.find((item) =>
       item.subItems.some((c) => c.id === activeMenu),
@@ -212,35 +219,28 @@ const SuperAdminDashboard = () => {
   };
 
   useEffect(() => {
-    // Prevent multiple verification calls
     if (hasVerified.current) return;
     hasVerified.current = true;
 
     const verifyToken = async () => {
       try {
         setIsVerifying(true);
-        console.log("🔍 Verifying super admin token...");
-
         const token =
           localStorage.getItem("superAdminToken") ||
           localStorage.getItem("accessToken");
 
         if (!token) {
-          console.log("❌ No token found, redirecting to super admin login");
           setIsVerifying(false);
           navigate("/super-admin/login");
           return;
         }
 
         if (user && isAuthenticated) {
-          console.log("✅ User already in state, skipping verification");
           setIsVerifying(false);
           return;
         }
 
         const result = await dispatch(verifySuperAdminToken()).unwrap();
-        console.log("✅ Token verified:", result);
-
         if (result) {
           dispatch(setSuperAdminAuth(result));
           setIsVerifying(false);
@@ -248,7 +248,6 @@ const SuperAdminDashboard = () => {
           throw new Error("Invalid token response");
         }
       } catch (error) {
-        console.log("❌ Token verification failed:", error);
         dispatch(clearSuperAdminAuth());
         toast.error("Session expired. Please login again.");
         navigate("/super-admin/login");
@@ -380,6 +379,8 @@ const SuperAdminDashboard = () => {
         );
       case "promotions":
         return <PromotionRequestsManagement />;
+      case "location-settings":
+        return <LocationSettings />;
       case "blog-all":
       case "blog-create":
       case "blog-drafts":
@@ -415,7 +416,6 @@ const SuperAdminDashboard = () => {
 
   return (
     <div className={styles.dashboardContainer}>
-      {/* TOP HEADER */}
       <header className={styles.topHeader}>
         <div className={styles.headerLeft}>
           <button
@@ -556,7 +556,6 @@ const SuperAdminDashboard = () => {
         )}
       </header>
 
-      {/* MAIN CONTENT */}
       <div className={styles.mainContent}>
         {/* Sidebar — hover to expand on desktop, hamburger on mobile */}
         <aside
@@ -664,7 +663,6 @@ const SuperAdminDashboard = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {mobileMenuOpen && (
           <div
             className={styles.overlay}

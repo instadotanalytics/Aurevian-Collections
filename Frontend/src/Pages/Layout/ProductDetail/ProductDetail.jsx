@@ -35,6 +35,7 @@ import {
   toggleWishlistItem,
   fetchWishlist,
 } from "../../../redux/slices/wishlistSlice";
+import { useLocationContext } from "../../../contexts/LocationContext";
 
 import RelevantProducts from "./RelevantProducts";
 
@@ -159,21 +160,9 @@ const PriceBreakdown = ({ product }) => {
   );
 };
 
-/* ─── Helper: Return & Exchange Policy ───
-   Reads directly from the product's own returnPolicy (see
-   backend/models/JewelleryProduct.js — returnPolicy.returnAvailable,
-   returnPolicy.returnDays, returnPolicy.warrantyAvailable,
-   returnPolicy.warrantyDuration). getProductBySlug returns the full
-   product document, so these fields are already present on `product`
-   with no extra fetch needed. Nothing here is hard-coded per-product;
-   only the generic policy wording (packaging/tags/condition) is fixed
-   text, same as printed on any storefront's policy panel — the actual
-   eligibility (days, available or not) always comes from the product. ─── */
+/* ─── Helper: Return & Exchange Policy ─── */
 const ReturnPolicyInfo = ({ product }) => {
   const policy = product?.returnPolicy || {};
-  // Default to available/7-days only if the field is genuinely absent
-  // (older product docs saved before this schema field existed) — never
-  // overrides an explicit false.
   const returnAvailable = policy.returnAvailable !== false;
   const returnDays = policy.returnDays || 7;
 
@@ -290,9 +279,9 @@ const ImageGallery = ({ images, productName }) => {
           style={
             isZooming
               ? {
-                  transform: "scale(2.5)",
-                  transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
-                }
+                transform: "scale(2.5)",
+                transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
+              }
               : {}
           }
           onError={(e) => {
@@ -342,9 +331,8 @@ const ImageGallery = ({ images, productName }) => {
             <button
               type="button"
               key={idx}
-              className={`${styles.thumbBtn} ${
-                idx === activeIndex ? styles.thumbBtnActive : ""
-              }`}
+              className={`${styles.thumbBtn} ${idx === activeIndex ? styles.thumbBtnActive : ""
+                }`}
               onClick={() => setActiveIndex(idx)}
             >
               <img
@@ -364,12 +352,10 @@ const ImageGallery = ({ images, productName }) => {
 
 /* ─── Helper: Product Description Component ─── */
 const ProductDescription = ({ product }) => {
-  // Get descriptions from product - matching schema fields
   const shortDescription = product.shortDescription || "";
   const fullDescription = product.fullDescription || "";
   const seoDescription = product.seo?.description || "";
 
-  // Determine which description to show - prefer full, then short, then seo
   let displayDescription = "";
 
   if (fullDescription) {
@@ -396,6 +382,9 @@ export default function ProductDetail() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // ✅ coords for ranking on this page + promptLocationIfNeeded to gate purchases
+  const { coords, promptLocationIfNeeded } = useLocationContext();
+
   const { currentProduct, currentProductLoading, currentProductError } =
     useSelector((state) => state.storefrontProduct);
   const { isAuthenticated } = useSelector((state) => state.auth);
@@ -405,15 +394,21 @@ export default function ProductDetail() {
   const [addedToCart, setAddedToCart] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
 
-  /* ── Fetch product data ── */
+  /* ── Fetch product data with location ── */
   useEffect(() => {
     if (slug) {
-      dispatch(fetchProductBySlug(slug));
+      dispatch(
+        fetchProductBySlug({
+          slug,
+          lat: coords?.lat,
+          lng: coords?.lng,
+        })
+      );
     }
     return () => {
       dispatch(clearCurrentProduct());
     };
-  }, [dispatch, slug]);
+  }, [dispatch, slug, coords?.lat, coords?.lng]);
 
   /* ── Fetch wishlist ── */
   useEffect(() => {
@@ -425,9 +420,8 @@ export default function ProductDetail() {
   /* ── Reset quantity/cart state when product changes ── */
   useEffect(() => {
     if (currentProduct?.productName) {
-      document.title = `${
-        currentProduct.seo?.title || currentProduct.productName
-      } | Aurevian Collections`;
+      document.title = `${currentProduct.seo?.title || currentProduct.productName
+        } | Aurevian Collections`;
     }
     setQuantity(1);
     setAddedToCart(false);
@@ -541,10 +535,9 @@ export default function ProductDetail() {
     return true;
   };
 
-  const handleAddToCart = async () => {
-    if (!inStock) return;
+  // Actual add-to-cart logic, only runs once location + auth are settled
+  const doAddToCart = async () => {
     if (!requireAuth()) return;
-
     try {
       setCartLoading(true);
       await dispatch(
@@ -562,10 +555,18 @@ export default function ProductDetail() {
     }
   };
 
-  const handleBuyNow = () => {
+  // Gates on location before proceeding to add-to-cart
+  const handleAddToCart = () => {
     if (!inStock) return;
-    if (!requireAuth()) return;
+    const alreadyHasLocation = promptLocationIfNeeded(doAddToCart);
+    if (alreadyHasLocation) {
+      doAddToCart();
+    }
+  };
 
+  // Actual buy-now logic
+  const doBuyNow = () => {
+    if (!requireAuth()) return;
     navigate("/checkout", {
       state: {
         items: [
@@ -580,6 +581,15 @@ export default function ProductDetail() {
         buyNow: true,
       },
     });
+  };
+
+  // Gates on location before proceeding to buy-now
+  const handleBuyNow = () => {
+    if (!inStock) return;
+    const alreadyHasLocation = promptLocationIfNeeded(doBuyNow);
+    if (alreadyHasLocation) {
+      doBuyNow();
+    }
   };
 
   const handleToggleWishlist = async () => {
@@ -636,17 +646,20 @@ export default function ProductDetail() {
               )}
             </div>
 
-            <p className={styles.stockStatus}>
-              {inStock ? (
-                <span className={styles.inStock}>
-                  <FiCheck />
-                  In Stock{" "}
-                  {stockQty > 0 && stockQty <= 10 && `(only ${stockQty} left)`}
-                </span>
-              ) : (
-                <span className={styles.outOfStock}>Out of Stock</span>
-              )}
-            </p>
+            {/* Stock status only — distance/location badge intentionally removed */}
+            <div className={styles.locationStockRow}>
+              <p className={styles.stockStatus}>
+                {inStock ? (
+                  <span className={styles.inStock}>
+                    <FiCheck />
+                    In Stock{" "}
+                    {stockQty > 0 && stockQty <= 10 && `(only ${stockQty} left)`}
+                  </span>
+                ) : (
+                  <span className={styles.outOfStock}>Out of Stock</span>
+                )}
+              </p>
+            </div>
 
             {/* Product Description - Full without Read More */}
             <ProductDescription product={product} />
@@ -672,9 +685,8 @@ export default function ProductDetail() {
 
               <button
                 type="button"
-                className={`${styles.addToCartBtn} ${
-                  addedToCart ? styles.addToCartBtnActive : ""
-                }`}
+                className={`${styles.addToCartBtn} ${addedToCart ? styles.addToCartBtnActive : ""
+                  }`}
                 onClick={handleAddToCart}
                 disabled={!inStock || cartLoading}
               >
@@ -703,9 +715,8 @@ export default function ProductDetail() {
 
               <button
                 type="button"
-                className={`${styles.wishlistBtn} ${
-                  isWishlisted ? styles.wishlistBtnActive : ""
-                }`}
+                className={`${styles.wishlistBtn} ${isWishlisted ? styles.wishlistBtnActive : ""
+                  }`}
                 onClick={handleToggleWishlist}
                 aria-label="Add to wishlist"
               >
@@ -713,8 +724,7 @@ export default function ProductDetail() {
               </button>
             </div>
 
-            {/* ✅ NEW — Return & Exchange policy, sourced from
-                product.returnPolicy (backend JewelleryProduct schema) */}
+            {/* Return & Exchange policy */}
             <ReturnPolicyInfo product={product} />
 
             {/* Perks */}

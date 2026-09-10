@@ -18,10 +18,6 @@ import SuperAdminRoute from "./Components/common/SuperAdminRoute.jsx";
 import SellerRoute from "./Components/common/SellerRoute.jsx";
 import Navbar from "./Pages/Layout/Header/Navbar.jsx";
 import LoadingScreen from "./Components/common/LoadingScreen.jsx";
-// ✅ NEW — Home Page skeleton, shown instead of the generic LoadingScreen
-// only when the pending auth-check gate below is about to block the "/"
-// route. Does not change what is being checked or when the gate lifts —
-// only what's rendered while it's up, and only on this one route.
 import HomePageSkeleton from "./Components/common/HomePageSkeleton/HomePageSkeleton.jsx";
 
 // ============================================
@@ -30,9 +26,13 @@ import HomePageSkeleton from "./Components/common/HomePageSkeleton/HomePageSkele
 import { SellerAuthProvider } from "./contexts/SellerAuthContext";
 
 // ============================================
-// SOCKET.IO PROVIDER (ADDED)
+// SOCKET.IO PROVIDER
 // ============================================
 import { SocketProvider } from "./contexts/SocketContext.jsx";
+
+// ✅ NEW — location-based product discovery (browsing side)
+import { LocationProvider } from "./contexts/LocationContext.jsx";
+import LocationPermissionModal from "./Components/common/LocationPermissionModal/LocationPermissionModal.jsx";
 
 // Pages
 import Home from "./Pages/Home/Home";
@@ -82,9 +82,6 @@ import BlogDetail from "./Pages/UserBlog/BlogDetail.jsx";
 import Profile from "./Pages/Profile/Profile.jsx";
 import Settings from "./Pages/Settings/Settings.jsx";
 
-// ✅ REMOVED: import SellerKYC from "./Pages/Seller/SellerKYC/SellerKYC";
-// KYC now lives inside the dashboard shell at /seller/dashboard/kyc
-
 import ScrollToTop from "./Pages/Seller/ScrollToTop.jsx";
 
 import Shop from "./Components/Shop/shop.jsx";
@@ -93,15 +90,8 @@ import Earrings from "./Components/Shop/Earrings.jsx";
 import Gifts from "./Components/Gifts/gifts.jsx";
 import Collections from "./Components/Collections/Collections.jsx";
 import Offers from "./Components/Offers/Offers.jsx";
-// import GiftGuide from "./Components/ShopCard/GiftGuide.jsx";
 
 import ProductDetail from "./Pages/Layout/ProductDetail/ProductDetail";
-
-// ============================================
-// PRODUCT PAGES ✅ (NEW)
-// ============================================
-// Public Product Detail Page (Storefront)
-// import ProductDetail from "./Pages/ProductDetail/ProductDetail.jsx";
 
 // ============================================
 // ROUTES CONSTANTS
@@ -132,31 +122,26 @@ const ROUTES = {
   ORDER_DETAIL: "/orders/:id",
   SUPER_ADMIN_LOGIN: "/super-admin/login",
   SUPER_ADMIN_DASHBOARD: "/super-admin/dashboard",
-  // Seller Routes
   SELLER_LOGIN: "/seller/login",
   SELLER_REGISTER: "/seller/register",
   SELLER_VERIFY_OTP: "/seller/verify-otp",
   SELLER_DASHBOARD: "/seller/dashboard",
   SELLER_PROFILE: "/seller/profile",
   SELLER_DOCUMENTS: "/seller/documents",
-  // SELLER_KYC: "/seller/kyc", // ✅ REMOVED — now redirected to /seller/dashboard/kyc
   SELLER_ORDERS: "/seller/orders",
-  SELLER_PRODUCTS: "/seller/dashboard/products", // Updated: Products inside dashboard
+  SELLER_PRODUCTS: "/seller/dashboard/products",
   SELLER_FORGOT_PASSWORD: "/seller/forgot-password",
   SELLER_RESET_PASSWORD: "/seller/reset-password/:token",
   BECOME_A_PARTNER: "/become-a-partner",
-  // Blog Routes
   BLOG: "/blog",
   BLOG_DETAIL: "/blog/:slug",
-  // Public Product Routes (Storefront)
-  PRODUCT_DETAIL: "/product/:slug", // ✅ NEW
+  PRODUCT_DETAIL: "/product/:slug",
 };
 
 // ============================================
 // LAYOUT COMPONENTS
 // ============================================
 
-// Layout with Header
 const LayoutWithHeader = ({ children }) => (
   <>
     <Navbar />
@@ -164,7 +149,6 @@ const LayoutWithHeader = ({ children }) => (
   </>
 );
 
-// Layout without Header
 const LayoutWithoutHeader = ({ children }) => <>{children}</>;
 
 const App = () => {
@@ -178,12 +162,8 @@ const App = () => {
     seller,
   } = useSelector((state) => state.seller);
 
-  // ✅ NEW — read-only, used only to decide which loading UI to show
-  // below. Does not participate in any auth check and does not change
-  // routing/redirect behavior in any way.
   const location = useLocation();
 
-  // Check authentication on app load
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) {
@@ -201,12 +181,6 @@ const App = () => {
     }
   }, [dispatch]);
 
-  // Show loading screen while checking authentication
-  // ✅ UNCHANGED — this gate condition is byte-for-byte identical to
-  // before. Only the JSX returned when it's true has changed: the Home
-  // route ("/") now shows HomePageSkeleton (matching Home.jsx's real
-  // section layout) instead of the generic full-screen LoadingScreen.
-  // Every other route continues to show LoadingScreen exactly as before.
   if (
     isLoading ||
     superAdminLoading ||
@@ -220,502 +194,434 @@ const App = () => {
 
   return (
     <HelmetProvider>
-      {/* ✅ SOCKET.IO — one authenticated connection for the whole app,
-          connects/disconnects automatically as auth state changes */}
       <SocketProvider>
-        <div className="min-h-screen bg-gray-50">
-          {/* Toast Notifications */}
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: "#363636",
-                color: "#fff",
-                borderRadius: "8px",
-                padding: "12px 16px",
-              },
-              success: {
+        {/* ✅ NEW — location permission + coordinates for the whole app.
+            Wraps everything so any page can call useLocationContext(). */}
+        <LocationProvider>
+          <div className="min-h-screen bg-gray-50">
+            {/* Toast Notifications */}
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
                 style: {
-                  background: "#10B981",
+                  background: "#363636",
+                  color: "#fff",
+                  borderRadius: "8px",
+                  padding: "12px 16px",
                 },
-                iconTheme: {
-                  primary: "#fff",
-                  secondary: "#10B981",
+                success: {
+                  style: {
+                    background: "#10B981",
+                  },
+                  iconTheme: {
+                    primary: "#fff",
+                    secondary: "#10B981",
+                  },
                 },
-              },
-              error: {
-                style: {
-                  background: "#EF4444",
+                error: {
+                  style: {
+                    background: "#EF4444",
+                  },
+                  iconTheme: {
+                    primary: "#fff",
+                    secondary: "#EF4444",
+                  },
                 },
-                iconTheme: {
-                  primary: "#fff",
-                  secondary: "#EF4444",
-                },
-              },
-            }}
-          />
-          <ScrollToTop />
-          <Routes>
-            {/* ============================================
-                  PUBLIC ROUTES - WITH HEADER
-                  ============================================ */}
-            <Route path={ROUTES.HOME} element={<Home />} />
-            <Route path={ROUTES.ABOUT} element={<AboutUs />} />
-
-            <Route path="/AboutUs" element={<AboutUs />} />
-            <Route path="/stories" element={<Story />} />
-            <Route path="/why-aurevian" element={<WhyAurevian />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/support" element={<Support />} />
-            <Route path="/franchise" element={<Franchise />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/wishlist" element={<Wishlist />} />
-            <Route
-              path={ROUTES.CHECKOUT}
-              element={
-                <PrivateRoute>
-                  <Checkout />
-                </PrivateRoute>
-              }
+              }}
             />
-            <Route
-              path={ROUTES.ORDERS}
-              element={
-                <PrivateRoute>
-                  <OrdersPage />
-                </PrivateRoute>
-              }
-            />
-            <Route path={ROUTES.BECOME_A_PARTNER} element={<BecomePartner />} />
 
-            {/* ============================================
-  SHOP ROUTE - WITH HEADER
-  ============================================ */}
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/shop/:categorySlug" element={<Shop />} />
+            {/* ✅ NEW — Feature 1: the location permission popup itself.
+                Renders nothing until the user hasn't yet decided. */}
+            <LocationPermissionModal />
 
-            {/* ============================================
-                  ✅ NEW: DEDICATED SEARCH RESULTS ROUTE - WITH HEADER
-                  URL: /search?q=<query>
-                  Reuses the Shop component — it already fully implements
-                  search mode (results grid, filters, sorting, pagination,
-                  empty state, and the "You Might Also Like" section), so
-                  this is a pure routing addition, no duplicate page.
-                  ============================================ */}
-            <Route path={ROUTES.SEARCH} element={<Shop />} />
+            <ScrollToTop />
+            <Routes>
+              {/* ============================================
+                    PUBLIC ROUTES - WITH HEADER
+                    ============================================ */}
+              <Route path={ROUTES.HOME} element={<Home />} />
+              <Route path={ROUTES.ABOUT} element={<AboutUs />} />
 
-            {/* ============================================
-                  GIFTS ROUTE - WITH HEADER
-                  ============================================ */}
-            <Route path={ROUTES.GIFTS} element={<Gifts />} />
-            <Route path={ROUTES.GIFT_GUIDE} element={<Gifts />} />
-            {/* ✅ NEW — giftGuideMegaMenu.byRecipient/byOccasion/byBudget
-                 links (e.g. "/gifts/birthday") previously had no route
-                 and fell through to the "*" catch-all -> home redirect. */}
-            <Route path="/gifts/:filterSlug" element={<Gifts />} />
+              <Route path="/AboutUs" element={<AboutUs />} />
+              <Route path="/stories" element={<Story />} />
+              <Route path="/why-aurevian" element={<WhyAurevian />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/franchise" element={<Franchise />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/wishlist" element={<Wishlist />} />
+              <Route
+                path={ROUTES.CHECKOUT}
+                element={
+                  <PrivateRoute>
+                    <Checkout />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path={ROUTES.ORDERS}
+                element={
+                  <PrivateRoute>
+                    <OrdersPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route path={ROUTES.BECOME_A_PARTNER} element={<BecomePartner />} />
 
-            {/* ============================================
-                  COLLECTIONS ROUTE - WITH HEADER
-                  ============================================ */}
-            <Route path={ROUTES.COLLECTIONS} element={<Collections />} />
-            {/* ✅ NEW — shopMegaMenu.byStyle / collectionsDropdown links
-                 (e.g. "/collections/bridal-collection") previously had
-                 no route. */}
-            <Route path="/collections/:filterSlug" element={<Collections />} />
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/shop/:categorySlug" element={<Shop />} />
 
-            {/* ============================================
-                  OFFERS ROUTE - WITH HEADER
-                  ============================================ */}
-            <Route path={ROUTES.OFFERS} element={<Offers />} />
-            {/* ✅ NEW — offersDropdown links (e.g. "/offers/flash-sale")
-                 previously had no route. */}
-            <Route path="/offers/:filterSlug" element={<Offers />} />
+              <Route path={ROUTES.SEARCH} element={<Shop />} />
 
-            {/* ============================================
-                  PUBLIC PRODUCT DETAIL ROUTE - WITH HEADER ✅
-                  Storefront: Customer viewing product
-                  URL: /product/:slug
-                  Example: /product/diamond-pendant-necklace
-                  ============================================ */}
-            <Route path={ROUTES.PRODUCT_DETAIL} element={<ProductDetail />} />
+              <Route path={ROUTES.GIFTS} element={<Gifts />} />
+              <Route path={ROUTES.GIFT_GUIDE} element={<Gifts />} />
+              <Route path="/gifts/:filterSlug" element={<Gifts />} />
 
-            {/* ============================================
-                  BLOG ROUTES - WITH HEADER ✅
-                  ============================================ */}
-            <Route path={ROUTES.BLOG} element={<BlogList />} />
-            <Route path={ROUTES.BLOG_DETAIL} element={<BlogDetail />} />
+              <Route path={ROUTES.COLLECTIONS} element={<Collections />} />
+              <Route path="/collections/:filterSlug" element={<Collections />} />
 
-            {/* ============================================
-                  AUTH ROUTES - WITHOUT HEADER
-                  ============================================ */}
-            <Route
-              path={ROUTES.LOGIN}
-              element={
-                isAuthenticated ? (
-                  <Navigate to="/" replace />
-                ) : (
+              <Route path={ROUTES.OFFERS} element={<Offers />} />
+              <Route path="/offers/:filterSlug" element={<Offers />} />
+
+              <Route path={ROUTES.PRODUCT_DETAIL} element={<ProductDetail />} />
+
+              <Route path={ROUTES.BLOG} element={<BlogList />} />
+              <Route path={ROUTES.BLOG_DETAIL} element={<BlogDetail />} />
+
+              {/* ============================================
+                    AUTH ROUTES - WITHOUT HEADER
+                    ============================================ */}
+              <Route
+                path={ROUTES.LOGIN}
+                element={
+                  isAuthenticated ? (
+                    <Navigate to="/" replace />
+                  ) : (
+                    <LayoutWithoutHeader>
+                      <Login />
+                    </LayoutWithoutHeader>
+                  )
+                }
+              />
+              <Route
+                path={ROUTES.REGISTER}
+                element={
+                  isAuthenticated ? (
+                    <Navigate to="/" replace />
+                  ) : (
+                    <LayoutWithoutHeader>
+                      <Register />
+                    </LayoutWithoutHeader>
+                  )
+                }
+              />
+
+              <Route
+                path={ROUTES.VERIFY_OTP}
+                element={
+                  isAuthenticated ? (
+                    <Navigate to="/" replace />
+                  ) : (
+                    <LayoutWithoutHeader>
+                      <VerifyOTP />
+                    </LayoutWithoutHeader>
+                  )
+                }
+              />
+              <Route
+                path={ROUTES.FORGOT_PASSWORD}
+                element={
+                  isAuthenticated ? (
+                    <Navigate to="/" replace />
+                  ) : (
+                    <LayoutWithoutHeader>
+                      <ForgotPassword />
+                    </LayoutWithoutHeader>
+                  )
+                }
+              />
+              <Route
+                path={ROUTES.RESET_PASSWORD}
+                element={
+                  isAuthenticated ? (
+                    <Navigate to="/" replace />
+                  ) : (
+                    <LayoutWithoutHeader>
+                      <ResetPassword />
+                    </LayoutWithoutHeader>
+                  )
+                }
+              />
+
+              <Route
+                path={ROUTES.PRIVACY_POLICY}
+                element={
                   <LayoutWithoutHeader>
-                    <Login />
+                    <PrivacyPolicy />
                   </LayoutWithoutHeader>
-                )
-              }
-            />
-            <Route
-              path={ROUTES.REGISTER}
-              element={
-                isAuthenticated ? (
-                  <Navigate to="/" replace />
-                ) : (
-                  <LayoutWithoutHeader>
-                    <Register />
-                  </LayoutWithoutHeader>
-                )
-              }
-            />
+                }
+              />
 
-            <Route
-              path={ROUTES.VERIFY_OTP}
-              element={
-                isAuthenticated ? (
-                  <Navigate to="/" replace />
-                ) : (
+              <Route
+                path={ROUTES.TERMS}
+                element={
                   <LayoutWithoutHeader>
-                    <VerifyOTP />
+                    <Terms />
                   </LayoutWithoutHeader>
-                )
-              }
-            />
-            <Route
-              path={ROUTES.FORGOT_PASSWORD}
-              element={
-                isAuthenticated ? (
-                  <Navigate to="/" replace />
-                ) : (
+                }
+              />
+
+              {/* ============================================
+                    SUPER ADMIN ROUTES - WITHOUT HEADER
+                    ============================================ */}
+              <Route
+                path={ROUTES.SUPER_ADMIN_LOGIN}
+                element={
+                  isSuperAdmin ? (
+                    <Navigate to={ROUTES.SUPER_ADMIN_DASHBOARD} replace />
+                  ) : (
+                    <LayoutWithoutHeader>
+                      <SuperAdminLogin />
+                    </LayoutWithoutHeader>
+                  )
+                }
+              />
+              <Route
+                path={ROUTES.SUPER_ADMIN_DASHBOARD}
+                element={
+                  <SuperAdminRoute>
+                    <LayoutWithoutHeader>
+                      <SuperAdminDashboard />
+                    </LayoutWithoutHeader>
+                  </SuperAdminRoute>
+                }
+              />
+              <Route
+                path={`${ROUTES.SUPER_ADMIN_DASHBOARD}/seller-details/:id`}
+                element={
+                  <SuperAdminRoute>
+                    <LayoutWithoutHeader>
+                      <SuperAdminDashboard />
+                    </LayoutWithoutHeader>
+                  </SuperAdminRoute>
+                }
+              />
+              <Route
+                path={`${ROUTES.SUPER_ADMIN_DASHBOARD}/sellers-products/:sellerId`}
+                element={
+                  <SuperAdminRoute>
+                    <LayoutWithoutHeader>
+                      <SuperAdminDashboard />
+                    </LayoutWithoutHeader>
+                  </SuperAdminRoute>
+                }
+              />
+              <Route
+                path={`${ROUTES.SUPER_ADMIN_DASHBOARD}/:section`}
+                element={
+                  <SuperAdminRoute>
+                    <LayoutWithoutHeader>
+                      <SuperAdminDashboard />
+                    </LayoutWithoutHeader>
+                  </SuperAdminRoute>
+                }
+              />
+
+              {/* ============================================
+                    SELLER ROUTES - WITHOUT HEADER (Auth Pages)
+                    ============================================ */}
+              <Route
+                path={ROUTES.SELLER_LOGIN}
+                element={
+                  isSeller && seller?.status === "approved" ? (
+                    <Navigate to={ROUTES.SELLER_DASHBOARD} replace />
+                  ) : (
+                    <LayoutWithoutHeader>
+                      <SellerLogin />
+                    </LayoutWithoutHeader>
+                  )
+                }
+              />
+              <Route
+                path={ROUTES.SELLER_REGISTER}
+                element={
+                  isSeller && seller?.status === "approved" ? (
+                    <Navigate to={ROUTES.SELLER_DASHBOARD} replace />
+                  ) : (
+                    <LayoutWithoutHeader>
+                      <SellerRegister />
+                    </LayoutWithoutHeader>
+                  )
+                }
+              />
+              <Route
+                path={ROUTES.SELLER_VERIFY_OTP}
+                element={
                   <LayoutWithoutHeader>
-                    <ForgotPassword />
+                    <SellerVerifyOTP />
                   </LayoutWithoutHeader>
-                )
-              }
-            />
-            <Route
-              path={ROUTES.RESET_PASSWORD}
-              element={
-                isAuthenticated ? (
-                  <Navigate to="/" replace />
-                ) : (
+                }
+              />
+
+              <Route
+                path={ROUTES.SELLER_FORGOT_PASSWORD}
+                element={
                   <LayoutWithoutHeader>
-                    <ResetPassword />
+                    <SellerForgotPassword />
                   </LayoutWithoutHeader>
-                )
-              }
-            />
-
-            <Route
-              path={ROUTES.PRIVACY_POLICY}
-              element={
-                <LayoutWithoutHeader>
-                  <PrivacyPolicy />
-                </LayoutWithoutHeader>
-              }
-            />
-
-            <Route
-              path={ROUTES.TERMS}
-              element={
-                <LayoutWithoutHeader>
-                  <Terms />
-                </LayoutWithoutHeader>
-              }
-            />
-
-            {/* ============================================
-                  SUPER ADMIN ROUTES - WITHOUT HEADER
-                  ============================================ */}
-            <Route
-              path={ROUTES.SUPER_ADMIN_LOGIN}
-              element={
-                isSuperAdmin ? (
-                  <Navigate to={ROUTES.SUPER_ADMIN_DASHBOARD} replace />
-                ) : (
+                }
+              />
+              <Route
+                path={ROUTES.SELLER_RESET_PASSWORD}
+                element={
                   <LayoutWithoutHeader>
-                    <SuperAdminLogin />
+                    <SellerResetPassword />
                   </LayoutWithoutHeader>
-                )
-              }
-            />
-            <Route
-              path={ROUTES.SUPER_ADMIN_DASHBOARD}
-              element={
-                <SuperAdminRoute>
-                  <LayoutWithoutHeader>
-                    <SuperAdminDashboard />
-                  </LayoutWithoutHeader>
-                </SuperAdminRoute>
-              }
-            />
-            <Route
-              path={`${ROUTES.SUPER_ADMIN_DASHBOARD}/seller-details/:id`}
-              element={
-                <SuperAdminRoute>
-                  <LayoutWithoutHeader>
-                    <SuperAdminDashboard />
-                  </LayoutWithoutHeader>
-                </SuperAdminRoute>
-              }
-            />
-            {/* ✅ NEW: Sellers & Products — a specific seller's product catalog.
-                 Registered alongside seller-details/:id, before the generic
-                 /:section route, following the same convention. */}
-            <Route
-              path={`${ROUTES.SUPER_ADMIN_DASHBOARD}/sellers-products/:sellerId`}
-              element={
-                <SuperAdminRoute>
-                  <LayoutWithoutHeader>
-                    <SuperAdminDashboard />
-                  </LayoutWithoutHeader>
-                </SuperAdminRoute>
-              }
-            />
-            <Route
-              path={`${ROUTES.SUPER_ADMIN_DASHBOARD}/:section`}
-              element={
-                <SuperAdminRoute>
-                  <LayoutWithoutHeader>
-                    <SuperAdminDashboard />
-                  </LayoutWithoutHeader>
-                </SuperAdminRoute>
-              }
-            />
+                }
+              />
 
-            {/* ============================================
-                  SELLER ROUTES - WITHOUT HEADER (Auth Pages)
-                  ============================================ */}
-            <Route
-              path={ROUTES.SELLER_LOGIN}
-              element={
-                isSeller && seller?.status === "approved" ? (
-                  <Navigate to={ROUTES.SELLER_DASHBOARD} replace />
-                ) : (
-                  <LayoutWithoutHeader>
-                    <SellerLogin />
-                  </LayoutWithoutHeader>
-                )
-              }
-            />
-            <Route
-              path={ROUTES.SELLER_REGISTER}
-              element={
-                isSeller && seller?.status === "approved" ? (
-                  <Navigate to={ROUTES.SELLER_DASHBOARD} replace />
-                ) : (
-                  <LayoutWithoutHeader>
-                    <SellerRegister />
-                  </LayoutWithoutHeader>
-                )
-              }
-            />
-            <Route
-              path={ROUTES.SELLER_VERIFY_OTP}
-              element={
-                <LayoutWithoutHeader>
-                  <SellerVerifyOTP />
-                </LayoutWithoutHeader>
-              }
-            />
+              <Route
+                path={`${ROUTES.SELLER_DASHBOARD}/*`}
+                element={
+                  <SellerRoute>
+                    <LayoutWithoutHeader>
+                      <SellerDashboard />
+                    </LayoutWithoutHeader>
+                  </SellerRoute>
+                }
+              />
 
-            {/* ✅ SELLER FORGOT PASSWORD ROUTES - WITHOUT HEADER */}
-            <Route
-              path={ROUTES.SELLER_FORGOT_PASSWORD}
-              element={
-                <LayoutWithoutHeader>
-                  <SellerForgotPassword />
-                </LayoutWithoutHeader>
-              }
-            />
-            <Route
-              path={ROUTES.SELLER_RESET_PASSWORD}
-              element={
-                <LayoutWithoutHeader>
-                  <SellerResetPassword />
-                </LayoutWithoutHeader>
-              }
-            />
+              <Route
+                path="/seller/kyc"
+                element={<Navigate to="/seller/dashboard/kyc" replace />}
+              />
 
-            {/* ============================================
-                  SELLER DASHBOARD ROUTES - WITHOUT HEADER (Protected)
-                  This handles ALL seller dashboard routes including:
-                  - /seller/dashboard/products
-                  - /seller/dashboard/products/new
-                  - /seller/dashboard/products/edit/:id
-                  - /seller/dashboard/orders
-                  - /seller/dashboard/earnings
-                  - /seller/dashboard/upgrade
-                  - /seller/dashboard/kyc ← KYC now lives here!
-                  etc.
-                  ============================================ */}
-            <Route
-              path={`${ROUTES.SELLER_DASHBOARD}/*`}
-              element={
-                <SellerRoute>
-                  <LayoutWithoutHeader>
-                    <SellerDashboard />
-                  </LayoutWithoutHeader>
-                </SellerRoute>
-              }
-            />
+              <Route
+                path={ROUTES.SELLER_PROFILE}
+                element={
+                  <SellerRoute>
+                    <LayoutWithoutHeader>
+                      <div className="p-8 text-center">
+                        <h1 className="text-3xl font-bold text-gray-800">
+                          Seller Profile
+                        </h1>
+                        <p className="text-gray-600 mt-2">
+                          Manage your seller profile
+                        </p>
+                      </div>
+                    </LayoutWithoutHeader>
+                  </SellerRoute>
+                }
+              />
 
-            {/* ============================================
-                  SELLER KYC ROUTE — now lives inside the dashboard
-                  shell (SellerDashboard.jsx). Redirect old URL.
-                  ============================================ */}
-            <Route
-              path="/seller/kyc"
-              element={<Navigate to="/seller/dashboard/kyc" replace />}
-            />
+              <Route
+                path={ROUTES.SELLER_DOCUMENTS}
+                element={
+                  <SellerRoute>
+                    <LayoutWithoutHeader>
+                      <div className="p-8 text-center">
+                        <h1 className="text-3xl font-bold text-gray-800">
+                          Documents
+                        </h1>
+                        <p className="text-gray-600 mt-2">
+                          Manage your documents
+                        </p>
+                      </div>
+                    </LayoutWithoutHeader>
+                  </SellerRoute>
+                }
+              />
 
-            {/* ============================================
-                  SELLER PROFILE ROUTE
-                  ============================================ */}
-            <Route
-              path={ROUTES.SELLER_PROFILE}
-              element={
-                <SellerRoute>
-                  <LayoutWithoutHeader>
-                    <div className="p-8 text-center">
-                      <h1 className="text-3xl font-bold text-gray-800">
-                        Seller Profile
-                      </h1>
-                      <p className="text-gray-600 mt-2">
-                        Manage your seller profile
-                      </p>
-                    </div>
-                  </LayoutWithoutHeader>
-                </SellerRoute>
-              }
-            />
+              <Route
+                path={ROUTES.SELLER_ORDERS}
+                element={
+                  <SellerRoute>
+                    <LayoutWithoutHeader>
+                      <div className="p-8 text-center">
+                        <h1 className="text-3xl font-bold text-gray-800">
+                          Orders
+                        </h1>
+                        <p className="text-gray-600 mt-2">View your orders</p>
+                      </div>
+                    </LayoutWithoutHeader>
+                  </SellerRoute>
+                }
+              />
 
-            {/* ============================================
-                  SELLER DOCUMENTS ROUTE
-                  ============================================ */}
-            <Route
-              path={ROUTES.SELLER_DOCUMENTS}
-              element={
-                <SellerRoute>
-                  <LayoutWithoutHeader>
-                    <div className="p-8 text-center">
-                      <h1 className="text-3xl font-bold text-gray-800">
-                        Documents
-                      </h1>
-                      <p className="text-gray-600 mt-2">
-                        Manage your documents
-                      </p>
-                    </div>
-                  </LayoutWithoutHeader>
-                </SellerRoute>
-              }
-            />
+              <Route
+                path="/seller/payment/:planId"
+                element={
+                  <SellerRoute>
+                    <LayoutWithoutHeader>
+                      <SellerPayment />
+                    </LayoutWithoutHeader>
+                  </SellerRoute>
+                }
+              />
 
-            {/* ============================================
-                  SELLER ORDERS ROUTE (Standalone - if needed)
-                  ============================================ */}
-            <Route
-              path={ROUTES.SELLER_ORDERS}
-              element={
-                <SellerRoute>
-                  <LayoutWithoutHeader>
-                    <div className="p-8 text-center">
-                      <h1 className="text-3xl font-bold text-gray-800">
-                        Orders
-                      </h1>
-                      <p className="text-gray-600 mt-2">View your orders</p>
-                    </div>
-                  </LayoutWithoutHeader>
-                </SellerRoute>
-              }
-            />
+              {/* ============================================
+                    USER PROTECTED ROUTES - WITH HEADER
+                    ============================================ */}
+              <Route
+                path={ROUTES.DASHBOARD}
+                element={
+                  <PrivateRoute>
+                    <LayoutWithHeader>
+                      <div className="p-8 text-center">
+                        <h1 className="text-3xl font-bold text-gray-800">
+                          Dashboard
+                        </h1>
+                        <p className="text-gray-600 mt-2">
+                          Welcome to your dashboard!
+                        </p>
+                        <p className="text-gray-500 mt-4">
+                          (Dashboard page coming soon...)
+                        </p>
+                      </div>
+                    </LayoutWithHeader>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path={ROUTES.PROFILE}
+                element={
+                  <PrivateRoute>
+                    <Profile />
+                  </PrivateRoute>
+                }
+              />
 
-            {/* ============================================
-                  SELLER PAYMENT ROUTE
-                  ============================================ */}
-            <Route
-              path="/seller/payment/:planId"
-              element={
-                <SellerRoute>
-                  <LayoutWithoutHeader>
-                    <SellerPayment />
-                  </LayoutWithoutHeader>
-                </SellerRoute>
-              }
-            />
+              <Route
+                path="/settings"
+                element={
+                  <PrivateRoute>
+                    <Settings />
+                  </PrivateRoute>
+                }
+              />
 
-            {/* ============================================
-                  USER PROTECTED ROUTES - WITH HEADER
-                  ============================================ */}
-            <Route
-              path={ROUTES.DASHBOARD}
-              element={
-                <PrivateRoute>
-                  <LayoutWithHeader>
-                    <div className="p-8 text-center">
-                      <h1 className="text-3xl font-bold text-gray-800">
-                        Dashboard
-                      </h1>
-                      <p className="text-gray-600 mt-2">
-                        Welcome to your dashboard!
-                      </p>
-                      <p className="text-gray-500 mt-4">
-                        (Dashboard page coming soon...)
-                      </p>
-                    </div>
-                  </LayoutWithHeader>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path={ROUTES.PROFILE}
-              element={
-                <PrivateRoute>
-                  <Profile />
-                </PrivateRoute>
-              }
-            />
+              <Route
+                path={ROUTES.ORDER_SUCCESS}
+                element={
+                  <PrivateRoute>
+                    <OrderSuccess />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path={ROUTES.ORDER_DETAIL}
+                element={
+                  <PrivateRoute>
+                    <OrderDetail />
+                  </PrivateRoute>
+                }
+              />
 
-            <Route
-              path="/settings"
-              element={
-                <PrivateRoute>
-                  <Settings />
-                </PrivateRoute>
-              }
-            />
-
-            {/* ============================================
-                  ORDER SUCCESS & ORDER DETAIL ROUTES - WITH HEADER
-                  ============================================ */}
-            <Route
-              path={ROUTES.ORDER_SUCCESS}
-              element={
-                <PrivateRoute>
-                  <OrderSuccess />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path={ROUTES.ORDER_DETAIL}
-              element={
-                <PrivateRoute>
-                  <OrderDetail />
-                </PrivateRoute>
-              }
-            />
-
-            {/* ============================================
-                  REDIRECT - Any unknown routes to home
-                  ============================================ */}
-            <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
-          </Routes>
-        </div>
+              <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
+            </Routes>
+          </div>
+        </LocationProvider>
       </SocketProvider>
     </HelmetProvider>
   );

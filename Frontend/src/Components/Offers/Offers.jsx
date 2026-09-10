@@ -35,14 +35,12 @@ import {
   toggleWishlistItem,
   fetchWishlist,
 } from "../../redux/slices/wishlistSlice";
+// ✅ NEW — forward the user's (optional) coordinates for location ranking
+import { useLocationContext } from "../../contexts/LocationContext";
 
 const API_BASE =
   import.meta.env.VITE_API_URL ||
   "https://aurevian-collections.onrender.com/api";
-
-/* ----------------------------------------------------------------
-   Data
-------------------------------------------------------------------- */
 
 const BOTTOM_FEATURES = [
   {
@@ -78,7 +76,6 @@ const SORT_OPTIONS = [
 
 const ITEMS_PER_BATCH = 10;
 
-// Helper function to generate slug from label
 const generateSlugFromLabel = (label) => {
   return label
     .toLowerCase()
@@ -161,6 +158,9 @@ export default function Offers() {
   const { isAuthenticated } = useSelector((state) => state.auth);
   const cartItems = useSelector((state) => state.cart.items);
   const wishlistItems = useSelector((state) => state.wishlist.items);
+
+  // ✅ NEW
+  const { coords } = useLocationContext();
 
   // Categories
   const [categories, setCategories] = useState([]);
@@ -268,7 +268,7 @@ export default function Offers() {
       const start = Date.now();
       try {
         setCategoryError(null);
-        
+
         // ✅ Convert sort value to backend format
         let sortParam = sortBy;
         if (sortBy === "price-asc") sortParam = "price-asc";
@@ -285,6 +285,9 @@ export default function Offers() {
             limit: 10,
             categoryId: selectedCategory !== "All" ? selectedCategory : undefined,
             sort: sortParam || undefined,
+            // ✅ NEW
+            lat: coords?.lat,
+            lng: coords?.lng,
           }),
         ).unwrap();
 
@@ -315,6 +318,14 @@ export default function Offers() {
     setHasMore(true);
     setRefreshKey((k) => k + 1);
   }, [selectedCategory, sortBy]);
+
+  // ✅ NEW — refetch when the user's location becomes available/changes
+  useEffect(() => {
+    setPage(1);
+    setAllProducts([]);
+    setHasMore(true);
+    setRefreshKey((k) => k + 1);
+  }, [coords?.lat, coords?.lng]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -449,7 +460,7 @@ export default function Offers() {
 
   const toggleWishlist = (productId) => {
     if (!requireAuth()) return;
-    dispatch(toggleWishlistItem(productId)).catch(() => {});
+    dispatch(toggleWishlistItem(productId)).catch(() => { });
   };
 
   const handleAddToCart = async (productId) => {
@@ -507,7 +518,6 @@ export default function Offers() {
 
   const skeletonItems = Array.from({ length: 10 }, (_, i) => i);
 
-  // Get the category name for display
   const getCategoryName = () => {
     if (!selectedCategory || selectedCategory === "All") return "All Products";
     const category = categories.find((c) => c.id === selectedCategory);
@@ -572,9 +582,8 @@ export default function Offers() {
                     >
                       <span>{getSortLabel()}</span>
                       <FiChevronDown
-                        className={`${styles.sidebarSortChevron} ${
-                          isSidebarSortOpen ? styles.sidebarSortChevronOpen : ""
-                        }`}
+                        className={`${styles.sidebarSortChevron} ${isSidebarSortOpen ? styles.sidebarSortChevronOpen : ""
+                          }`}
                       />
                     </button>
                     {isSidebarSortOpen && (
@@ -582,11 +591,10 @@ export default function Offers() {
                         {SORT_OPTIONS.map((option) => (
                           <button
                             key={option.value}
-                            className={`${styles.sidebarSortOption} ${
-                              sortBy === option.value
+                            className={`${styles.sidebarSortOption} ${sortBy === option.value
                                 ? styles.sidebarSortOptionActive
                                 : ""
-                            }`}
+                              }`}
                             onClick={() => {
                               setSortBy(option.value);
                               setIsSidebarSortOpen(false);
@@ -723,13 +731,13 @@ export default function Offers() {
                           const addingToCart = cartLoadingId === p._id;
                           const discount =
                             p.pricing?.salePrice &&
-                            p.pricing?.originalPrice
+                              p.pricing?.originalPrice
                               ? Math.round(
-                                  ((p.pricing.originalPrice -
-                                    p.pricing.salePrice) /
-                                    p.pricing.originalPrice) *
-                                    100,
-                                )
+                                ((p.pricing.originalPrice -
+                                  p.pricing.salePrice) /
+                                  p.pricing.originalPrice) *
+                                100,
+                              )
                               : 0;
 
                           return (
@@ -756,9 +764,8 @@ export default function Offers() {
                                 <div className={styles.wishlistActions}>
                                   <button
                                     type="button"
-                                    className={`${styles.wishlistBtn} ${
-                                      inWishlist ? styles.wishlistBtnActive : ""
-                                    }`}
+                                    className={`${styles.wishlistBtn} ${inWishlist ? styles.wishlistBtnActive : ""
+                                      }`}
                                     onClick={(e) => {
                                       e.preventDefault();
                                       e.stopPropagation();
@@ -806,9 +813,8 @@ export default function Offers() {
                                 </div>
                                 <button
                                   type="button"
-                                  className={`${styles.productAddBtn} ${
-                                    inCart ? styles.productAddBtnActive : ""
-                                  }`}
+                                  className={`${styles.productAddBtn} ${inCart ? styles.productAddBtnActive : ""
+                                    }`}
                                   onClick={() => handleAddToCart(p._id)}
                                   disabled={inCart || addingToCart}
                                 >
@@ -909,9 +915,8 @@ export default function Offers() {
         {/* Mobile Filter Sheet */}
         <div
           ref={sheetRef}
-          className={`${styles.mobileFilterSheet} ${
-            isMobileFilterOpen ? styles.mobileFilterSheetOpen : ""
-          }`}
+          className={`${styles.mobileFilterSheet} ${isMobileFilterOpen ? styles.mobileFilterSheetOpen : ""
+            }`}
         >
           <div
             className={styles.mobileFilterHandle}
@@ -950,9 +955,8 @@ export default function Offers() {
                 >
                   <span>{getSortLabel()}</span>
                   <FiChevronDown
-                    className={`${styles.mobileSortChevron} ${
-                      isSortDropdownOpen ? styles.mobileSortChevronOpen : ""
-                    }`}
+                    className={`${styles.mobileSortChevron} ${isSortDropdownOpen ? styles.mobileSortChevronOpen : ""
+                      }`}
                   />
                 </button>
                 {isSortDropdownOpen && (
@@ -960,11 +964,10 @@ export default function Offers() {
                     {SORT_OPTIONS.map((option) => (
                       <button
                         key={option.value}
-                        className={`${styles.mobileSortOption} ${
-                          sortBy === option.value
+                        className={`${styles.mobileSortOption} ${sortBy === option.value
                             ? styles.mobileSortOptionActive
                             : ""
-                        }`}
+                          }`}
                         onClick={() => handleSortSelect(option.value)}
                       >
                         {option.label}

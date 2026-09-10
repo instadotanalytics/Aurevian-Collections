@@ -85,13 +85,13 @@ const sellerSchema = new mongoose.Schema(
         code: { type: String, select: false },
         expiresAt: { type: Date, select: false },
         verified: { type: Boolean, default: false },
-        lastSentAt: { type: Date, default: null }, // ✅ NEW — resend cooldown
+        lastSentAt: { type: Date, default: null },
       },
       phone: {
         code: { type: String, select: false },
         expiresAt: { type: Date, select: false },
         verified: { type: Boolean, default: false },
-        lastSentAt: { type: Date, default: null }, // ✅ NEW — resend cooldown
+        lastSentAt: { type: Date, default: null },
       },
     },
 
@@ -119,17 +119,16 @@ const sellerSchema = new mongoose.Schema(
     },
 
     // ============================================
-    // ✅ UPDATED — PICKUP ADDRESS (SHIPROCKET)
-    // The seller's own warehouse/pickup address. Replaces the old
-    // platform-wide SHIPROCKET_PICKUP_LOCATION / SHIPROCKET_PICKUP_PINCODE
-    // env values. `shiprocketPickupLocationName` is the nickname Shiprocket
-    // assigns this address to once it's registered via the
-    // /settings/company/addpickup API (see sellerController.updateSellerPickupAddress
-    // and shiprocketService.addPickupLocation) — every Shiprocket order/
-    // shipment/return payload for this seller references that nickname.
-    // `isRegisteredWithShiprocket` gates shipment creation: if false, the
-    // seller must (re)save their pickup address before any order of theirs
-    // can be shipped. There is no fallback to any other address.
+    // PICKUP ADDRESS (SHIPROCKET) + SHOWROOM COORDINATES
+    // The seller's own warehouse/pickup address. `coordinates` is
+    // ✅ NEW — the showroom's lat/lng, used ONLY for location-based
+    // product discovery/ranking (Feature 2/3). It is completely
+    // independent of the Shiprocket sync fields below: saving/changing
+    // coordinates never triggers a Shiprocket resync, and a missing
+    // Shiprocket registration never blocks coordinates from being saved.
+    // Both are optional — a seller can save an address without
+    // coordinates and add them later (see sellerController.
+    // updateSellerPickupAddress).
     // ============================================
     pickupAddress: {
       contactName: { type: String, trim: true, default: "" },
@@ -141,23 +140,20 @@ const sellerSchema = new mongoose.Schema(
       state: { type: String, trim: true, default: "" },
       pincode: { type: String, trim: true, default: "" },
       country: { type: String, trim: true, default: "India" },
+      // ✅ NEW — showroom coordinates for location-based discovery.
+      coordinates: {
+        lat: { type: Number, default: null, min: -90, max: 90 },
+        lng: { type: Number, default: null, min: -180, max: 180 },
+      },
+      coordinatesUpdatedAt: { type: Date, default: null },
       shiprocketPickupLocationName: { type: String, trim: true, default: null },
-      // Kept for back-compat with any code still reading this boolean —
-      // it's now derived from shiprocketSyncStatus === "synced".
       isRegisteredWithShiprocket: { type: Boolean, default: false },
-      // ✅ NEW — explicit sync state machine, independent of the fact
-      // that the local address itself is ALWAYS saved once this
-      // sub-document is set.
       shiprocketSyncStatus: {
         type: String,
         enum: ["not_synced", "pending", "synced", "failed"],
         default: "not_synced",
       },
       shiprocketSyncError: { type: String, trim: true, default: null },
-      // ✅ NEW — bumped only when the address CONTENT changes, not on
-      // every retry. This is what makes the Shiprocket nickname stable
-      // across retries, so retries reuse the same pickup location
-      // instead of registering a new one every time.
       pickupLocationRevision: { type: Number, default: 0 },
       lastSyncAttemptAt: { type: Date, default: null },
       lastSyncedAt: { type: Date, default: null },
@@ -467,6 +463,12 @@ sellerSchema.index({ "kyc.status": 1 });
 sellerSchema.index({ "documents.panNumber": 1 });
 sellerSchema.index({ "documents.aadhaarNumber": 1 });
 sellerSchema.index({ subscriptionPlanId: 1, subscriptionStatus: 1 });
+// ✅ NEW — supports the Super Admin "sellers with/without location"
+// overview queries and the location-aware product $lookup filter.
+sellerSchema.index({
+  "pickupAddress.coordinates.lat": 1,
+  "pickupAddress.coordinates.lng": 1,
+});
 
 // ============================================
 // VIRTUALS
@@ -640,10 +642,6 @@ sellerSchema.methods.updateStats = async function (data) {
   if (data.totalSales !== undefined) this.stats.totalSales += data.totalSales;
   return this.save();
 };
-
-// ============================================
-// ✅ NO PRE-SAVE MIDDLEWARE - ALL HANDLED IN CONTROLLER
-// ============================================
 
 // ============================================
 // STATIC METHODS

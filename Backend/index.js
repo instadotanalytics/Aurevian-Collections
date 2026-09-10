@@ -40,6 +40,7 @@ import returnRoutes from "./routes/returnRoutes.js"; // ✅ NEW
 import promotionRoutes from "./routes/promotionRoutes.js"; // ✅ NEW — homepage promotion requests
 import contactRoutes from "./routes/contactRoutes.js"; // ✅ NEW — public Contact form
 import franchiseRoutes from "./routes/franchiseRoutes.js"; // ✅ NEW — public Franchise inquiry form
+import locationRoutes from "./routes/locationRoutes.js"; // ✅ NEW — location settings/overview (Super Admin)
 
 console.log("🔧 Importing jewelleryProductRoutes...");
 import jewelleryProductRoutes from "./routes/jewelleryProductRoutes.js";
@@ -48,6 +49,7 @@ console.log("✅ jewelleryProductRoutes imported successfully");
 import superAdminService from "./services/superAdminService.js";
 import { initializeDefaultPlans } from "./services/subscriptionPlanService.js";
 import { initializeHeaderConfig } from "./services/headerConfigService.js";
+import { initializeLocationSettings } from "./services/locationSettingsService.js"; // ✅ NEW
 
 import { createServer } from "http";
 import { initSocket } from "./socket/socketService.js";
@@ -65,6 +67,10 @@ import { initSocket } from "./socket/socketService.js";
     console.log("🔧 Seeding header config...");
     await initializeHeaderConfig();
     console.log("✅ Header config ready");
+
+    console.log("🔧 Seeding location settings...");
+    await initializeLocationSettings();
+    console.log("✅ Location settings ready");
   } catch (error) {
     console.error("❌ Failed to initialize services:", error.message);
   }
@@ -226,6 +232,8 @@ app.use("/api/contact", contactRoutes); // ✅ NEW
 console.log("  ✅ /api/contact");
 app.use("/api/franchise", franchiseRoutes); // ✅ NEW
 console.log("  ✅ /api/franchise");
+app.use("/api/super-admin/location", locationRoutes); // ✅ NEW
+console.log("  ✅ /api/super-admin/location");
 
 console.log("\n" + "=".repeat(60));
 console.log("✅ ALL ROUTES REGISTERED");
@@ -380,6 +388,7 @@ const server = httpServer.listen(PORT, () => {
   console.log("  🔹 /api/payment-settings - Payment Settings (COD toggle)");
   console.log("  🔹 /api/contact - Contact Page Form Submissions");
   console.log("  🔹 /api/franchise - Franchise Inquiry Form Submissions");
+  console.log("  🔹 /api/super-admin/location - Location Settings/Overview");
   console.log("  🔹 /health - Health Check");
   console.log("  🔹 /api - API Info");
   console.log("=".repeat(60));

@@ -1,4 +1,3 @@
-
 import React, {
   useEffect,
   useState,
@@ -40,6 +39,8 @@ import {
   fetchWishlist,
 } from "../../redux/slices/wishlistSlice";
 import headerStyles from "../../Pages/Layout/Header/Header.module.css";
+// ✅ NEW — read the user's (optional, self-supplied) coordinates
+import { useLocationContext } from "../../contexts/LocationContext";
 
 const API_URL =
   import.meta.env.VITE_API_URL ||
@@ -94,7 +95,6 @@ const truncateName = (name) => {
   return name;
 };
 
-// Helper function to generate slug from label
 const generateSlugFromLabel = (label) => {
   return label
     .toLowerCase()
@@ -114,11 +114,13 @@ export default function Shop() {
   const cartItems = useSelector((state) => state.cart.items);
   const wishlistItems = useSelector((state) => state.wishlist.items);
 
-  // Get URL parameters
+  // ✅ NEW — the user's own, self-shared coordinates (or null). Never
+  // sent anywhere except as query params on these product/search calls.
+  const { coords } = useLocationContext();
+
   const [searchParams] = useSearchParams();
   const { categorySlug } = useParams();
 
-  // ✅ search mode — driven entirely by the ?q= query param
   const rawSearchQuery =
     searchParams.get("q") || searchParams.get("search") || "";
   const searchQuery = rawSearchQuery.trim().replace(/\s+/g, " ");
@@ -135,11 +137,9 @@ export default function Shop() {
   const [sort, setSort] = useState("latest");
   const [cartLoadingId, setCartLoadingId] = useState(null);
 
-  // Filters
   const [budgetFilter, setBudgetFilter] = useState("all");
   const [promotionFilter, setPromotionFilter] = useState("all");
 
-  // Infinite scroll
   const [page, setPage] = useState(1);
   const [allProducts, setAllProducts] = useState([]);
   const [hasMore, setHasMore] = useState(true);
@@ -149,7 +149,6 @@ export default function Shop() {
   const [categoryError, setCategoryError] = useState(null);
   const loaderRef = useRef(null);
 
-  // ✅ race-condition guard
   const requestIdRef = useRef(0);
 
   // ✅ "You Might Also Like" recommendations - ALWAYS from different categories
@@ -157,20 +156,17 @@ export default function Shop() {
   const [isLoadingRecommendations, setIsLoadingRecommendations] =
     useState(false);
   const recommendationRequestIdRef = useRef(0);
-  const recommendationContextRef = useRef(""); // last context we fetched for
-  const recommendationLoadedRef = useRef(false); // whether that fetch finished
+  const recommendationContextRef = useRef("");
+  const recommendationLoadedRef = useRef(false);
 
-  // Mobile filter sheet
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const sheetRef = useRef(null);
   const dragState = useRef({ startY: 0, currentY: 0 });
   const [isDraggingSheet, setIsDraggingSheet] = useState(false);
 
-  // Mobile sort dropdown state
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const sortDropdownRef = useRef(null);
 
-  // Desktop sidebar sort dropdown state
   const [isSidebarSortOpen, setIsSidebarSortOpen] = useState(false);
   const sidebarSortRef = useRef(null);
 
@@ -178,7 +174,6 @@ export default function Shop() {
   // observer doesn't fire the instant page 1 renders
   const hasUserScrolledRef = useRef(false);
 
-  // Fetch categories first
   useEffect(() => {
     setCategoriesLoading(true);
     axios
@@ -198,7 +193,6 @@ export default function Shop() {
       });
   }, []);
 
-  // ✅ Synchronously derive the auto-matched category for the current search
   const autoMatchedCategoryId = useMemo(() => {
     if (!isSearchMode || categories.length === 0) return "";
 
@@ -224,12 +218,10 @@ export default function Shop() {
     return matchingCategory ? matchingCategory.id : "";
   }, [isSearchMode, categories, searchQuery]);
 
-  // ✅ The category actually used for fetching/filtering/display.
   const effectiveCategoryId = isSearchMode
     ? autoMatchedCategoryId
     : selectedCategoryId;
 
-  // ✅ When user manually changes category
   const handleCategoryChange = (categoryId) => {
     setSelectedCategoryId(categoryId);
 
@@ -250,7 +242,6 @@ export default function Shop() {
     }
   };
 
-  // Resolve category from slug or query param after categories load
   useEffect(() => {
     if (isResolvingSlug || categories.length === 0) return;
     if (isSearchMode) return;
@@ -279,7 +270,6 @@ export default function Shop() {
     }
   }, [categories, categorySlug, searchParams, isResolvingSlug, isSearchMode]);
 
-  // ✅ RESET PAGE WHEN FILTERS CHANGE
   useEffect(() => {
     setPage(1);
     setAllProducts([]);
@@ -287,6 +277,15 @@ export default function Shop() {
     setRefreshKey((k) => k + 1);
     hasUserScrolledRef.current = false;
   }, [sort, effectiveCategoryId, budgetFilter, promotionFilter, searchQuery]);
+
+  // ✅ CHANGED — also resets/refetches when the user's location changes
+  // (Feature: "if the user's location changes, ordering should update").
+  useEffect(() => {
+    setPage(1);
+    setAllProducts([]);
+    setHasMore(true);
+    setRefreshKey((k) => k + 1);
+  }, [coords?.lat, coords?.lng]);
 
   // Fetch products (infinite scroll)
   useEffect(() => {
@@ -318,6 +317,8 @@ export default function Shop() {
               limit: 10,
               categoryId: categoryId,
               sort: sortParam || undefined,
+              lat: coords?.lat,
+              lng: coords?.lng,
             }),
           ).unwrap();
         } else {
@@ -328,6 +329,8 @@ export default function Shop() {
               limit: 10,
               categoryId: categoryId,
               sort: sortParam || undefined,
+              lat: coords?.lat,
+              lng: coords?.lng,
             }),
           ).unwrap();
         }
@@ -356,6 +359,7 @@ export default function Shop() {
     if (!isResolvingSlug) {
       load();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     page,
     refreshKey,
@@ -367,7 +371,6 @@ export default function Shop() {
     searchQuery,
   ]);
 
-  // ✅ Track first real user scroll (used to gate the infinite-scroll observer)
   useEffect(() => {
     const onScroll = () => {
       hasUserScrolledRef.current = true;
@@ -376,7 +379,6 @@ export default function Shop() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Intersection Observer for infinite scroll
   useEffect(() => {
     if (!loaderRef.current || !hasMore || isLoadingMore || isInitialLoading)
       return;
@@ -406,7 +408,6 @@ export default function Shop() {
     }
   }, [dispatch, isAuthenticated]);
 
-  // Close mobile sort dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -420,7 +421,6 @@ export default function Shop() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Close desktop sidebar sort dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -434,7 +434,6 @@ export default function Shop() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Drag to close sheet
   useEffect(() => {
     if (!isDraggingSheet) return;
 
@@ -502,7 +501,7 @@ export default function Shop() {
 
   const handleToggleWishlist = (id) => {
     if (!requireAuth()) return;
-    dispatch(toggleWishlistItem(id)).catch(() => {});
+    dispatch(toggleWishlistItem(id)).catch(() => { });
   };
 
   const handleAddToCart = async (id) => {
@@ -564,7 +563,6 @@ export default function Shop() {
     return option ? option.label : "Sort by latest";
   };
 
-  // ✅ Apply client-side sorting as fallback
   const getSortedProducts = useCallback(
     (products) => {
       if (!products || products.length === 0) return products;
@@ -596,7 +594,6 @@ export default function Shop() {
     [sort],
   );
 
-  // ✅ Apply client-side filters (budget and promotion) AND sorting
   const filteredProducts = useMemo(() => {
     let filtered = allProducts.filter((p) => {
       const price = p.pricing?.salePrice || p.pricing?.originalPrice || 0;
@@ -610,10 +607,10 @@ export default function Shop() {
         const discount =
           p.pricing?.originalPrice && p.pricing?.salePrice
             ? Math.round(
-                ((p.pricing.originalPrice - p.pricing.salePrice) /
-                  p.pricing.originalPrice) *
-                  100,
-              )
+              ((p.pricing.originalPrice - p.pricing.salePrice) /
+                p.pricing.originalPrice) *
+              100,
+            )
             : 0;
         if (promotionFilter === "best-seller" && discount < 20) return false;
         if (promotionFilter === "trending" && price < 500) return false;
@@ -707,7 +704,6 @@ export default function Shop() {
     (_, i) => i,
   );
 
-  // Get the display name for results
   const getDisplayCategoryName = () => {
     if (isSearchMode && !effectiveCategoryId) {
       return `"${searchQuery}"`;
@@ -719,7 +715,6 @@ export default function Shop() {
 
   const shouldShowRecommendations = !categoryError;
 
-  // ✅ Shared product card renderer
   const renderProductCard = (p) => {
     const inCart = isInCart(p._id);
     const inWishlist = isInWishlist(p._id);
@@ -735,7 +730,7 @@ export default function Shop() {
               {Math.round(
                 ((p.pricing.originalPrice - p.pricing.salePrice) /
                   p.pricing.originalPrice) *
-                  100,
+                100,
               )}
               % off
             </span>
@@ -744,9 +739,8 @@ export default function Shop() {
           <div className={styles.wishlistActions}>
             <button
               type="button"
-              className={`${styles.wishlistBtn} ${
-                inWishlist ? styles.wishlistBtnActive : ""
-              }`}
+              className={`${styles.wishlistBtn} ${inWishlist ? styles.wishlistBtnActive : ""
+                }`}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -776,6 +770,7 @@ export default function Shop() {
           >
             {displayName}
           </Link>
+          {/* ✅ CHANGED — distance badge removed from product cards */}
           <div className={styles.productPrice}>
             <span className={styles.priceNow}>
               ₹
@@ -791,9 +786,8 @@ export default function Shop() {
           </div>
           <button
             type="button"
-            className={`${styles.addToCartBtn} ${
-              inCart ? styles.addToCartBtnActive : ""
-            }`}
+            className={`${styles.addToCartBtn} ${inCart ? styles.addToCartBtnActive : ""
+              }`}
             onClick={() => handleAddToCart(p._id)}
             disabled={inCart || addingToCart}
           >
@@ -870,7 +864,6 @@ export default function Shop() {
     <div className={styles.page}>
       <Header />
       <div className={styles.mainContent}>
-        {/* ✅ Hero Banner - 40vh on all devices */}
         <div className={styles.heroBanner}>
           <img
             src={shopHero}
@@ -879,9 +872,7 @@ export default function Shop() {
           />
         </div>
 
-        {/* Shop Content */}
         <div className={styles.shopWrap}>
-          {/* Mobile Filter Toggle Button */}
           <button
             type="button"
             className={styles.filterToggle}
@@ -894,10 +885,8 @@ export default function Shop() {
             </span>
           </button>
 
-          {/* Desktop Filter Sidebar */}
           <aside className={styles.filterSidebar}>
             <h3 className={styles.filterTitle}>Filter</h3>
-            {/* Sort By — Desktop Sidebar */}
             <div className={styles.filterGroup}>
               <span className={styles.filterGroupLabel}>Sort By</span>
               <div className={styles.sidebarSortWrapper} ref={sidebarSortRef}>
@@ -908,9 +897,8 @@ export default function Shop() {
                 >
                   <span>{getSortLabel()}</span>
                   <FiChevronDown
-                    className={`${styles.sidebarSortChevron} ${
-                      isSidebarSortOpen ? styles.sidebarSortChevronOpen : ""
-                    }`}
+                    className={`${styles.sidebarSortChevron} ${isSidebarSortOpen ? styles.sidebarSortChevronOpen : ""
+                      }`}
                   />
                 </button>
                 {isSidebarSortOpen && (
@@ -918,11 +906,10 @@ export default function Shop() {
                     {SORT_OPTIONS.map((option) => (
                       <button
                         key={option.value}
-                        className={`${styles.sidebarSortOption} ${
-                          sort === option.value
-                            ? styles.sidebarSortOptionActive
-                            : ""
-                        }`}
+                        className={`${styles.sidebarSortOption} ${sort === option.value
+                          ? styles.sidebarSortOptionActive
+                          : ""
+                          }`}
                         onClick={() => {
                           setSort(option.value);
                           setIsSidebarSortOpen(false);
@@ -1005,9 +992,8 @@ export default function Shop() {
                 {isInitialLoading
                   ? "Loading..."
                   : isSearchMode
-                    ? `Showing ${filteredProducts.length} result${
-                        filteredProducts.length === 1 ? "" : "s"
-                      } for "${searchQuery}"`
+                    ? `Showing ${filteredProducts.length} result${filteredProducts.length === 1 ? "" : "s"
+                    } for "${searchQuery}"`
                     : `Showing ${filteredProducts.length} results for ${getDisplayCategoryName()}`}
               </span>
               {isSearchMode && !isInitialLoading && (
@@ -1022,7 +1008,6 @@ export default function Shop() {
               )}
             </div>
 
-            {/* Skeleton Loading */}
             {isInitialLoading && (
               <div className={styles.skeletonGrid}>
                 {skeletonItems.map((i) => (
@@ -1038,7 +1023,6 @@ export default function Shop() {
               </div>
             )}
 
-            {/* Error State */}
             {categoryError && !isInitialLoading && (
               <div className={styles.errorState}>
                 <div className={styles.errorStateIcon}>⚠️</div>
@@ -1053,7 +1037,6 @@ export default function Shop() {
               </div>
             )}
 
-            {/* ✅ Products - Empty state only shows when NOT loading and NO products */}
             {!isInitialLoading && !categoryError && (
               <>
                 {filteredProducts.length === 0 && (
@@ -1087,7 +1070,6 @@ export default function Shop() {
               </>
             )}
 
-            {/* Infinite scroll loader */}
             {!isInitialLoading && !categoryError && hasMore && (
               <div ref={loaderRef} className={styles.infiniteLoader}>
                 {isLoadingMore && (
@@ -1113,7 +1095,6 @@ export default function Shop() {
           </main>
         </div>
 
-        {/* ✅ "You Might Also Like" - ALWAYS shows products from DIFFERENT categories */}
         {shouldShowRecommendations && (
           <section className={styles.recommendationSection}>
             <div className={styles.recommendationHeader}>
@@ -1149,7 +1130,6 @@ export default function Shop() {
           </section>
         )}
 
-        {/* Perks Section */}
         <section className={styles.perks}>
           {perks.map((perk) => {
             const Icon = perk.icon;
@@ -1167,15 +1147,13 @@ export default function Shop() {
           })}
         </section>
 
-        {/* Mobile Bottom Sheet Filter */}
         {isMobileFilterOpen && (
           <div className={styles.filterOverlay} onClick={closeMobileFilter} />
         )}
         <div
           ref={sheetRef}
-          className={`${styles.mobileFilterSheet} ${
-            isMobileFilterOpen ? styles.mobileFilterSheetActive : ""
-          }`}
+          className={`${styles.mobileFilterSheet} ${isMobileFilterOpen ? styles.mobileFilterSheetActive : ""
+            }`}
         >
           <div
             className={styles.mobileFilterHandle}
@@ -1200,7 +1178,6 @@ export default function Shop() {
             </button>
           </div>
           <div className={styles.mobileFilterContent}>
-            {/* Sort By */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Sort By</span>
               <div className={styles.mobileSortWrapper} ref={sortDropdownRef}>
@@ -1211,9 +1188,8 @@ export default function Shop() {
                 >
                   <span>{getSortLabel()}</span>
                   <FiChevronDown
-                    className={`${styles.mobileSortChevron} ${
-                      isSortDropdownOpen ? styles.mobileSortChevronOpen : ""
-                    }`}
+                    className={`${styles.mobileSortChevron} ${isSortDropdownOpen ? styles.mobileSortChevronOpen : ""
+                      }`}
                   />
                 </button>
                 {isSortDropdownOpen && (
@@ -1221,11 +1197,10 @@ export default function Shop() {
                     {SORT_OPTIONS.map((option) => (
                       <button
                         key={option.value}
-                        className={`${styles.mobileSortOption} ${
-                          sort === option.value
-                            ? styles.mobileSortOptionActive
-                            : ""
-                        }`}
+                        className={`${styles.mobileSortOption} ${sort === option.value
+                          ? styles.mobileSortOptionActive
+                          : ""
+                          }`}
                         onClick={() => handleSortSelect(option.value)}
                       >
                         {option.label}
@@ -1244,7 +1219,6 @@ export default function Shop() {
               </div>
             </div>
 
-            {/* Budget */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Budget</span>
               <div className={styles.mobileFilterGrid}>
@@ -1262,7 +1236,6 @@ export default function Shop() {
               </div>
             </div>
 
-            {/* Promotions */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Promotions</span>
               <div className={styles.mobileFilterGrid}>
@@ -1280,7 +1253,6 @@ export default function Shop() {
               </div>
             </div>
 
-            {/* Price Range */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Price Range</span>
               <input

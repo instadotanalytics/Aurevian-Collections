@@ -1,115 +1,117 @@
 .container {
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
   width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, #1a9daa 0%, #0d3b52 40%, #081b2b 70%, #030509 100%);
-}
-
-.card {
-  display: flex;
-  width: 100%;
-  max-width: 68rem;
-  min-height: 40rem;
-  background: #ffffff;
-  border-radius: 1.75rem;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
   overflow: hidden;
+  background: #faf9f7;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif;
 }
 
-/* Left image panel */
+/* Left image panel — full height, half width, full bleed */
 .imagePanel {
-  flex: 1 1 58%;
-  margin: 0.75rem;
-  border-radius: 1.25rem;
+  flex: 0 0 50%;
+  height: 100vh;
+  height: 100dvh;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-color: #0d1117;
+  background-color: #0d1b26;
+  position: relative;
 }
 
-/* Right form panel */
+.imagePanel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(13, 27, 38, 0.05) 0%, rgba(13, 27, 38, 0.25) 100%);
+}
+
+/* Right form panel — full height, half width */
 .formPanel {
-  flex: 1 1 42%;
+  flex: 1;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
+  overflow-y: auto;
+  background: #faf9f7;
 }
 
 .formInner {
   width: 100%;
   max-width: 26rem;
+  margin: 1.5rem 0 auto;
 }
 
 .backButton {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  color: #8a8a8a;
-  font-size: 0.85rem;
+  gap: 0.45rem;
+  color: #9a9d9f;
+  font-size: 0.875rem;
+  font-weight: 500;
   text-decoration: none;
-  transition: color 0.2s;
-  margin-bottom: 1.25rem;
+  transition: color 0.2s ease;
+  margin-bottom: 2rem;
 }
 
 .backButton:hover {
-  color: #000000;
+  color: #0d1b26;
 }
 
 .header {
+  margin-bottom: 2rem;
   text-align: center;
-  margin-bottom: 1.75rem;
-}
-
-.iconWrapper {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 4.1rem;
-  height: 4.1rem;
-  background: #0f0f0f;
-  border-radius: 50%;
-  margin-bottom: 1rem;
 }
 
-.shieldIcon {
-  font-size: 2rem;
-  color: #ffffff;
+.logo {
+  height: 4rem;
+  width: auto;
+  margin-bottom: 1rem;
+  object-fit: contain;
+  display: block;
 }
 
 .title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #0a0a0a;
-  margin-bottom: 0.4rem;
+  font-size: 2.25rem;
+  font-weight: 600;
+  color: #0d1b26;
+  margin: 0 0 0.5rem;
+  line-height: 1.15;
   letter-spacing: -0.01em;
 }
 
 .subtitle {
-  color: #7a7a7a;
-  font-size: 0.9rem;
+  color: #8b8f94;
+  font-size: 1rem;
+  font-weight: 400;
+  margin: 0;
+  line-height: 1.5;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: 1.5rem;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.55rem;
 }
 
 .label {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #333333;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4a4d50;
+  letter-spacing: 0.01em;
 }
 
 .inputWrapper {
@@ -120,31 +122,34 @@
 
 .inputIcon {
   position: absolute;
-  left: 0.9rem;
-  color: #a3a3a3;
-  font-size: 1rem;
+  left: 0;
+  color: #b0b3b5;
+  font-size: 1.1rem;
   pointer-events: none;
 }
 
 .input {
   width: 100%;
-  padding: 0.8rem 2.6rem 0.8rem 2.6rem;
-  background: #ffffff;
-  border: 1px solid #e2e2e2;
-  border-radius: 0.65rem;
-  font-size: 0.95rem;
-  color: #0a0a0a;
-  transition: all 0.2s;
+  padding: 0.85rem 2.4rem 0.85rem 1.9rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid #e0e0e0;
+  border-radius: 0;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #0d1b26;
+  transition: border-color 0.2s ease;
   outline: none;
 }
 
 .input::placeholder {
-  color: #b3b3b3;
+  color: #b0b3b5;
+  font-weight: 400;
 }
 
 .input:focus {
-  border-color: #0a0a0a;
-  box-shadow: 0 0 0 3px rgba(10, 10, 10, 0.08);
+  border-bottom-color: #0d1b26;
 }
 
 .input:disabled {
@@ -152,60 +157,89 @@
   cursor: not-allowed;
 }
 
+/* ✅ Kill browser autofill blue background */
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus,
+.input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #faf9f7 inset !important;
+  box-shadow: 0 0 0 1000px #faf9f7 inset !important;
+  -webkit-text-fill-color: #0d1b26 !important;
+  caret-color: #0d1b26;
+  transition: background-color 5000s ease-in-out 0s;
+  border-bottom: 1.5px solid #e0e0e0;
+}
+
+.input:-webkit-autofill:focus {
+  border-bottom: 1.5px solid #0d1b26;
+}
+
+/* ✅ Kill yellow/golden outline some browsers add on autofill */
+.input:focus,
+.input:active,
+.input:-webkit-autofill {
+  outline: none !important;
+  box-shadow: none;
+}
+
 .eyeButton {
   position: absolute;
-  right: 0.75rem;
+  right: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background: none;
   border: none;
-  color: #a3a3a3;
+  color: #b0b3b5;
   cursor: pointer;
   padding: 0;
-  transition: color 0.2s;
+  transition: color 0.2s ease;
 }
 
 .eyeButton:hover {
-  color: #0a0a0a;
+  color: #0d1b26;
 }
 
 .infoBox {
-  background: #f5f5f5;
-  border: 1px solid #e6e6e6;
-  border-radius: 0.65rem;
-  padding: 0.75rem 1rem;
+  background: #f1efea;
+  border-left: 3px solid #1a9daa;
+  border-radius: 0.35rem;
+  padding: 1rem 1.15rem;
   margin-top: 0.1rem;
 }
 
 .infoText {
-  font-size: 0.78rem;
-  color: #666666;
-  line-height: 1.6;
+  font-size: 0.85rem;
+  color: #6b6e70;
+  line-height: 1.7;
   margin: 0;
+  font-weight: 400;
 }
 
 .infoText strong {
-  color: #0a0a0a;
+  color: #0d1b26;
+  font-weight: 600;
 }
 
 .submitButton {
   width: 100%;
-  background: #0a0a0a;
+  background: #0d1b26;
   color: #ffffff;
-  padding: 0.85rem;
+  padding: 1rem;
   border: none;
-  border-radius: 999px;
-  font-size: 0.95rem;
+  border-radius: 0.4rem;
+  font-family: inherit;
+  font-size: 1rem;
   font-weight: 600;
+  letter-spacing: 0.01em;
   cursor: pointer;
-  transition: all 0.25s;
-  margin-top: 0.3rem;
+  transition: background 0.25s ease, box-shadow 0.25s ease;
+  margin-top: 0.25rem;
 }
 
 .submitButton:hover:not(:disabled) {
-  background: #262626;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  background: #1a9daa;
+  box-shadow: 0 10px 30px rgba(26, 157, 170, 0.3);
 }
 
 .submitButton:active:not(:disabled) {
@@ -217,114 +251,94 @@
   cursor: not-allowed;
 }
 
-.footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.footerLink {
-  color: #7a7a7a;
-  text-decoration: none;
-  font-size: 0.85rem;
-  transition: color 0.2s;
-}
-
-.footerLink:hover {
-  color: #0a0a0a;
-}
-
-.footerDivider {
-  color: #d9d9d9;
-}
-
-/* Tablet: hide image panel */
+/* Tablet: hide image panel, form takes full width */
 @media (max-width: 900px) {
   .imagePanel {
     display: none;
   }
 
   .formPanel {
-    padding: 1.75rem;
+    flex: 1 1 100%;
+    padding: 2.5rem 2rem;
   }
 }
 
-/* Mobile: form only, no image — white card, black text/buttons, same gradient bg */
+/* Mobile: form only, full height, no image */
 @media (max-width: 640px) {
   .container {
-    padding: 1.25rem;
-    align-items: center;
-  }
-
-  .card {
-    display: block;
-    min-height: auto;
-    border-radius: 1.5rem;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    background: #faf9f7;
   }
 
   .formPanel {
-    padding: 2rem 1.5rem 1.75rem;
-    width: 100%;
-    background: #ffffff;
+    padding: 2rem 1.5rem;
+    align-items: flex-start;
   }
 
   .formInner {
     max-width: none;
+    padding-top: 1rem;
+    margin: 0;
+  }
+
+  .backButton {
+    margin-bottom: 3rem;
+    font-size: 0.85rem;
   }
 
   .header {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .logo {
+    height: 4rem;
   }
 
   .title {
-    font-size: 1.35rem;
-    color: #0a0a0a;
+    font-size: 1.85rem;
   }
 
   .subtitle {
-    font-size: 0.85rem;
-    padding: 0 0.5rem;
-    color: #7a7a7a;
+    font-size: 0.95rem;
   }
 
   .form {
-    gap: 1rem;
+    gap: 1.4rem;
+  }
+
+  .label {
+    font-size: 0.85rem;
   }
 
   .input {
-    padding-top: 0.85rem;
-    padding-bottom: 0.85rem;
+    padding: 0.9rem 2.4rem 0.9rem 1.9rem;
     font-size: 1rem;
-    color: #0a0a0a;
+  }
+
+  .infoBox {
+    padding: 0.9rem 1rem;
+  }
+
+  .infoText {
+    font-size: 0.82rem;
   }
 
   .submitButton {
-    padding: 0.9rem;
+    padding: 1.05rem;
     font-size: 1rem;
-    background: #0a0a0a;
-    color: #ffffff;
-  }
-
-  .footer {
-    margin-top: 1.5rem;
-    padding-top: 1.25rem;
-    border-top: 1px solid #f0f0f0;
-  }
-
-  .footerLink {
-    color: #7a7a7a;
   }
 }
 
 @media (max-width: 380px) {
   .formPanel {
-    padding: 1.75rem 1.15rem 1.5rem;
+    padding: 2rem;
   }
 
   .title {
-    font-size: 1.2rem;
+    font-size: 1.65rem;
+  }
+
+  .logo {
+    height: 3.5rem;
+    margin-bottom: 1rem;
   }
 }
