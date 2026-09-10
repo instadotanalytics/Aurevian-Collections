@@ -156,9 +156,6 @@ const SellerRequests = ({ onViewSeller }) => {
   };
 
   const getStatusBadge = (status) => {
-    // Reuses the exact same hue mapping as ProductManagement's status badges:
-    // grey = neutral/under review, amber = pending, green = approved,
-    // blue = suspended, red = rejected.
     const badges = {
       pending: { label: "Pending", className: styles.statusPending },
       approved: { label: "Approved", className: styles.statusApproved },
@@ -496,18 +493,22 @@ const SellerRequests = ({ onViewSeller }) => {
 
                     <td className={styles.contactCell} data-label="Contact">
                       <div className={styles.contactInfo}>
-                        <div>
-                          <FiMail size={12} /> {seller.email}
+                        <div title={seller.email}>
+                          <FiMail size={12} />
+                          <span>{seller.email}</span>
                         </div>
                         <div>
-                          <FiPhone size={12} /> {seller.phone}
+                          <FiPhone size={12} />
+                          <span>{seller.phone}</span>
                         </div>
                       </div>
                     </td>
 
                     <td className={styles.storeCell} data-label="Store">
                       <div className={styles.storeInfo}>
-                        <strong>{seller.storeInfo?.storeName}</strong>
+                        <strong title={seller.storeInfo?.storeName}>
+                          {seller.storeInfo?.storeName}
+                        </strong>
                         <span>
                           {seller.productCategories?.join(", ") ||
                             "No categories"}

@@ -1,3 +1,4 @@
+
 // src/Pages/SuperAdmin/components/OrderHistory/AdminOrderDetailModal.jsx
 import React, { useEffect, useState } from "react";
 import { FaRupeeSign } from "react-icons/fa";
@@ -31,24 +32,45 @@ const AdminOrderDetailModal = ({ orderId, onClose }) => {
     };
   }, [orderId]);
 
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.detailModal} onClick={(e) => e.stopPropagation()}>
-        <button className={styles.modalCloseBtn} onClick={onClose}>
-          <FiX size={20} />
-        </button>
+        <div className={styles.modalHeader}>
+          <div className={styles.modalHeaderLeft}>
+            {!loading && order && (
+              <>
+                <h2 className={styles.modalTitle}>#{order.orderNumber}</h2>
+                <span className={styles.modalDate}>
+                  {new Date(order.createdAt).toLocaleString("en-IN")}
+                </span>
+              </>
+            )}
+            {loading && (
+              <h2 className={styles.modalTitle}>Loading order...</h2>
+            )}
+          </div>
+          <button
+            type="button"
+            className={styles.modalCloseBtn}
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <FiX size={20} />
+          </button>
+        </div>
 
-        {loading && <p className={styles.loadingText}>Loading order...</p>}
+        <div className={styles.modalBody}>
+          {loading && <p className={styles.loadingText}>Loading order...</p>}
 
-        {!loading && order && (
-          <>
-            <div className={styles.detailHeader}>
-              <h2>#{order.orderNumber}</h2>
-              <span className={styles.detailDate}>
-                {new Date(order.createdAt).toLocaleString("en-IN")}
-              </span>
-            </div>
-
+          {!loading && order && (
             <div className={styles.detailGrid}>
               <div className={styles.detailMain}>
                 <section className={styles.detailCard}>
@@ -105,7 +127,9 @@ const AdminOrderDetailModal = ({ orderId, onClose }) => {
                     <div className={styles.productRow} key={idx}>
                       <img src={item.image} alt={item.name} />
                       <div className={styles.productInfo}>
-                        <span className={styles.productName}>{item.name}</span>
+                        <span className={styles.productName}>
+                          {item.name}
+                        </span>
                         <span className={styles.productQty}>
                           Qty: {item.quantity}
                         </span>
@@ -315,8 +339,8 @@ const AdminOrderDetailModal = ({ orderId, onClose }) => {
                 </section>
               </div>
             </div>
-          </>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

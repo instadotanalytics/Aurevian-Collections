@@ -1,13 +1,9 @@
+
 // src/Pages/SuperAdmin/components/OrderHistory/AdminOrderTimeline.jsx
 import React from "react";
 import { FiCheck } from "react-icons/fi";
 import styles from "./OrderHistory.module.css";
 
-// Reads ONLY what the backend actually recorded. Fulfillment stages
-// (seller confirm → admin approve → AWB) come from order.statusHistory,
-// which the app writes. Shipment-progress stages (picked up → delivered)
-// come from order.orderStatus + shipping.shippedAt/deliveredAt, because
-// the Shiprocket webhook writes those fields, not fulfillmentStatus.
 const SHIPMENT_PROGRESS_ORDER = [
   "ready_to_ship",
   "shipped",
@@ -61,12 +57,7 @@ const AdminOrderTimeline = ({ order }) => {
   const shippedIdx = SHIPMENT_PROGRESS_ORDER.indexOf(order.orderStatus);
 
   const steps = [
-    {
-      key: "placed",
-      label: "Order Placed",
-      done: true,
-      date: order.createdAt,
-    },
+    { key: "placed", label: "Order Placed", done: true, date: order.createdAt },
     {
       key: "paid",
       label: "Payment Confirmed",
