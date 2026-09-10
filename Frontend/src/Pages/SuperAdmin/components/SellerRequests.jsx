@@ -1,3 +1,4 @@
+
 // src/Pages/SuperAdmin/SuperAdminDashboard/components/SellerRequests.jsx
 
 import React, { useState, useEffect } from "react";
@@ -6,24 +7,46 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import {
   FiSearch,
-  FiFilter,
   FiEye,
   FiCheck,
   FiX,
-  FiClock,
   FiUser,
   FiMail,
   FiPhone,
-  FiShoppingBag,
-  FiMapPin,
   FiCalendar,
-  FiLoader,
   FiChevronLeft,
   FiChevronRight,
   FiAlertCircle,
   FiShield,
+  FiUsers,
 } from "react-icons/fi";
 import styles from "./SellerRequests.module.css";
+
+// Skeleton Loader Component (mirrors ProductManagement's SkeletonLoader)
+const SkeletonLoader = ({ count = 8 }) => {
+  return (
+    <div className={styles.skeletonContainer}>
+      {Array.from({ length: count }).map((_, index) => (
+        <div key={index} className={styles.skeletonRow}>
+          <div className={styles.skeletonIndex}></div>
+          <div className={styles.skeletonAvatar}></div>
+          <div className={styles.skeletonName}>
+            <div className={styles.skeletonLine}></div>
+            <div className={styles.skeletonLineShort}></div>
+          </div>
+          <div className={styles.skeletonContact}></div>
+          <div className={styles.skeletonStore}></div>
+          <div className={styles.skeletonStatus}></div>
+          <div className={styles.skeletonStatus}></div>
+          <div className={styles.skeletonActions}>
+            <div className={styles.skeletonIcon}></div>
+            <div className={styles.skeletonIcon}></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const SellerRequests = ({ onViewSeller }) => {
   const dispatch = useDispatch();
@@ -61,13 +84,13 @@ const SellerRequests = ({ onViewSeller }) => {
 
   useEffect(() => {
     fetchSellers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, page, search]);
 
   const handleStatusChange = async (sellerId, status, reason = "") => {
     setActionLoading(sellerId);
     try {
       let endpoint = "";
-      let method = "put";
       let data = {};
 
       switch (status) {
@@ -90,9 +113,9 @@ const SellerRequests = ({ onViewSeller }) => {
       }
 
       const response = await axios({
-        method: method,
+        method: "put",
         url: endpoint,
-        data: data,
+        data,
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -133,28 +156,37 @@ const SellerRequests = ({ onViewSeller }) => {
   };
 
   const getStatusBadge = (status) => {
+    // Reuses the exact same hue mapping as ProductManagement's status badges:
+    // grey = neutral/under review, amber = pending, green = approved,
+    // blue = suspended, red = rejected.
     const badges = {
-      pending: { label: "Pending", className: styles.pending },
-      approved: { label: "Approved", className: styles.approved },
-      rejected: { label: "Rejected", className: styles.rejected },
-      suspended: { label: "Suspended", className: styles.suspended },
-      under_review: { label: "Under Review", className: styles.underReview },
+      pending: { label: "Pending", className: styles.statusPending },
+      approved: { label: "Approved", className: styles.statusApproved },
+      rejected: { label: "Rejected", className: styles.statusRejected },
+      suspended: { label: "Suspended", className: styles.statusSuspended },
+      under_review: {
+        label: "Under Review",
+        className: styles.statusNeutral,
+      },
     };
-    return badges[status] || { label: status, className: styles.pending };
+    return badges[status] || { label: status, className: styles.statusNeutral };
   };
 
   const getKycBadge = (kycStatus) => {
     const badges = {
-      not_submitted: { label: "Not submitted", className: styles.pending },
-      submitted: { label: "Submitted", className: styles.underReview },
-      under_review: { label: "Reviewing", className: styles.underReview },
-      verified: { label: "Verified", className: styles.approved },
-      rejected: { label: "Rejected", className: styles.rejected },
+      not_submitted: {
+        label: "Not submitted",
+        className: styles.statusNeutral,
+      },
+      submitted: { label: "Submitted", className: styles.statusPending },
+      under_review: { label: "Reviewing", className: styles.statusSuspended },
+      verified: { label: "Verified", className: styles.statusApproved },
+      rejected: { label: "Rejected", className: styles.statusRejected },
     };
     return (
       badges[kycStatus] || {
         label: kycStatus || "Not submitted",
-        className: styles.pending,
+        className: styles.statusNeutral,
       }
     );
   };
@@ -169,27 +201,33 @@ const SellerRequests = ({ onViewSeller }) => {
     );
   };
 
+  const getSerialNumber = (index) => (page - 1) * 10 + index + 1;
+
   const renderStatusActions = (seller) => {
     if (seller.status === "pending") {
       return (
-        <div className={styles.actionButtons}>
+        <div className={styles.actionBtnGroup}>
           <button
-            className={`${styles.actionBtn} ${styles.approveBtn}`}
+            className={`${styles.actionIconBtn} ${styles.approveIconBtn}`}
             onClick={() => handleStatusChange(seller._id, "approved")}
             disabled={actionLoading === seller._id}
+            title="Approve seller"
           >
-            <FiCheck size={16} /> Approve
+            <FiCheck size={14} />
+            <span className={styles.actionBtnLabel}>Approve</span>
           </button>
           <button
-            className={`${styles.actionBtn} ${styles.rejectBtn}`}
+            className={`${styles.actionIconBtn} ${styles.rejectIconBtn}`}
             onClick={() => {
               const reason = prompt("Enter rejection reason:");
               if (reason !== null)
                 handleStatusChange(seller._id, "rejected", reason);
             }}
             disabled={actionLoading === seller._id}
+            title="Reject seller"
           >
-            <FiX size={16} /> Reject
+            <FiX size={14} />
+            <span className={styles.actionBtnLabel}>Reject</span>
           </button>
         </div>
       );
@@ -197,17 +235,19 @@ const SellerRequests = ({ onViewSeller }) => {
 
     if (seller.status === "approved") {
       return (
-        <div className={styles.actionButtons}>
+        <div className={styles.actionBtnGroup}>
           <button
-            className={`${styles.actionBtn} ${styles.suspendBtn}`}
+            className={`${styles.actionIconBtn} ${styles.suspendIconBtn}`}
             onClick={() => {
               const reason = prompt("Enter suspension reason:");
               if (reason !== null)
                 handleStatusChange(seller._id, "suspended", reason);
             }}
             disabled={actionLoading === seller._id}
+            title="Suspend seller"
           >
-            <FiAlertCircle size={16} /> Suspend
+            <FiAlertCircle size={14} />
+            <span className={styles.actionBtnLabel}>Suspend</span>
           </button>
         </div>
       );
@@ -215,19 +255,21 @@ const SellerRequests = ({ onViewSeller }) => {
 
     if (seller.status === "suspended") {
       return (
-        <div className={styles.actionButtons}>
+        <div className={styles.actionBtnGroup}>
           <button
-            className={`${styles.actionBtn} ${styles.unsuspendBtn}`}
+            className={`${styles.actionIconBtn} ${styles.unsuspendIconBtn}`}
             onClick={() => handleStatusChange(seller._id, "unsuspend")}
             disabled={actionLoading === seller._id}
+            title="Unsuspend seller"
           >
-            <FiCheck size={16} /> Unsuspend
+            <FiCheck size={14} />
+            <span className={styles.actionBtnLabel}>Unsuspend</span>
           </button>
         </div>
       );
     }
 
-    return null;
+    return <span className={styles.mutedNote}>—</span>;
   };
 
   // Only offer KYC approve/reject once the seller has actually submitted something
@@ -236,154 +278,200 @@ const SellerRequests = ({ onViewSeller }) => {
 
     if (kycStatus === "submitted" || kycStatus === "under_review") {
       return (
-        <div className={styles.actionButtons}>
+        <div className={styles.actionBtnGroup}>
           <button
-            className={`${styles.actionBtn} ${styles.approveBtn}`}
+            className={`${styles.actionIconBtn} ${styles.approveIconBtn}`}
             onClick={() => handleKycChange(seller._id, "verified")}
             disabled={kycActionLoading === seller._id}
+            title="Verify KYC"
           >
-            <FiShield size={16} /> Verify KYC
+            <FiShield size={14} />
+            <span className={styles.actionBtnLabel}>Verify</span>
           </button>
           <button
-            className={`${styles.actionBtn} ${styles.rejectBtn}`}
+            className={`${styles.actionIconBtn} ${styles.rejectIconBtn}`}
             onClick={() => {
               const reason = prompt("Enter KYC rejection reason:");
               if (reason !== null)
                 handleKycChange(seller._id, "rejected", reason);
             }}
             disabled={kycActionLoading === seller._id}
+            title="Reject KYC"
           >
-            <FiX size={16} /> Reject KYC
+            <FiX size={14} />
+            <span className={styles.actionBtnLabel}>Reject</span>
           </button>
         </div>
       );
     }
 
     if (kycStatus === "verified") {
-      return <span className={styles.kycVerifiedNote}>KYC verified</span>;
+      return <span className={styles.verifiedNote}>KYC verified</span>;
     }
 
     if (kycStatus === "rejected") {
       return (
         <button
-          className={`${styles.actionBtn} ${styles.approveBtn}`}
+          className={`${styles.actionIconBtn} ${styles.approveIconBtn}`}
           onClick={() => handleKycChange(seller._id, "verified")}
           disabled={kycActionLoading === seller._id}
+          title="Verify anyway"
         >
-          <FiShield size={16} /> Verify anyway
+          <FiShield size={14} />
+          <span className={styles.actionBtnLabel}>Verify anyway</span>
         </button>
       );
     }
 
-    return <span className={styles.kycWaitingNote}>Awaiting submission</span>;
+    return <span className={styles.mutedNote}>Awaiting submission</span>;
   };
 
-  if (loading && sellers.length === 0) {
-    return (
-      <div className={styles.loadingContainer}>
-        <FiLoader className={styles.spinner} />
-        <p>Loading seller requests...</p>
-      </div>
-    );
-  }
+  const renderEmptyState = () => (
+    <div className={styles.emptyState}>
+      <FiUsers size={60} className={styles.emptyIcon} />
+      <h3>No seller requests found</h3>
+      <p>
+        {search || filter !== "all"
+          ? "Try adjusting your filters or search terms"
+          : "Seller applications will show up here once submitted"}
+      </p>
+      {(search || filter !== "all") && (
+        <button
+          className={styles.clearFiltersBtn}
+          onClick={() => {
+            setSearch("");
+            setFilter("all");
+            setPage(1);
+          }}
+        >
+          <FiX size={18} />
+          Clear All Filters
+        </button>
+      )}
+    </div>
+  );
+
+  const showLoadingState = loading && sellers.length === 0;
 
   return (
-    <div className={styles.sellerRequests}>
+    <div className={styles.container}>
       {/* Header */}
       <div className={styles.header}>
-        <div>
-          <h2 className={styles.title}>Seller Requests</h2>
-          <p className={styles.subtitle}>
-            Manage seller registrations and approvals
-          </p>
+        <div className={styles.headerLeft}>
+          <h1 className={styles.title}>Seller Requests</h1>
+          <span className={styles.countPill}>{stats?.total ?? 0} sellers</span>
         </div>
-        <div className={styles.headerActions}>
-          <div className={styles.searchBox}>
-            <FiSearch className={styles.searchIcon} />
-            <input
-              type="text"
-              placeholder="Search sellers..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className={styles.searchInput}
-            />
+        {stats && (
+          <div className={styles.headerRight}>
+            <div className={styles.statsBar}>
+              <span className={styles.statsLabel}>
+                <FiUser size={14} />
+                Overview:
+              </span>
+              <span className={styles.statsItem}>
+                Pending: <strong>{stats.pending}</strong>
+              </span>
+              <span className={styles.statsItem}>
+                Approved: <strong>{stats.approved}</strong>
+              </span>
+              <span className={styles.statsItem}>
+                Rejected: <strong>{stats.rejected}</strong>
+              </span>
+              <span className={styles.statsItem}>
+                Suspended: <strong>{stats.suspended}</strong>
+              </span>
+            </div>
           </div>
-          <div className={styles.filterBox}>
-            <FiFilter className={styles.filterIcon} />
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className={styles.filterSelect}
+        )}
+      </div>
+
+      {/* Filters */}
+      <div className={styles.filters}>
+        <div className={styles.searchWrapper}>
+          <FiSearch className={styles.searchIcon} />
+          <input
+            type="text"
+            className={styles.searchInput}
+            placeholder="Search sellers..."
+            value={search}
+            onChange={(e) => {
+              setPage(1);
+              setSearch(e.target.value);
+            }}
+          />
+        </div>
+
+        <div className={styles.filterGroup}>
+          <select
+            className={styles.filterSelect}
+            value={filter}
+            onChange={(e) => {
+              setPage(1);
+              setFilter(e.target.value);
+            }}
+          >
+            <option value="all">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="suspended">Suspended</option>
+            <option value="under_review">Under Review</option>
+          </select>
+
+          {(search || filter !== "all") && (
+            <button
+              className={styles.clearFiltersBtn}
+              onClick={() => {
+                setSearch("");
+                setFilter("all");
+                setPage(1);
+              }}
             >
-              <option value="all">All</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
-              <option value="suspended">Suspended</option>
-              <option value="under_review">Under Review</option>
-            </select>
-          </div>
+              <FiX size={16} />
+              Clear
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Stats */}
-      {stats && (
-        <div className={styles.statsRow}>
-          <div className={styles.statItem}>
-            <span className={styles.statNumber}>{stats.total}</span>
-            <span className={styles.statLabel}>Total</span>
-          </div>
-          <div className={`${styles.statItem} ${styles.pendingStat}`}>
-            <span className={styles.statNumber}>{stats.pending}</span>
-            <span className={styles.statLabel}>Pending</span>
-          </div>
-          <div className={`${styles.statItem} ${styles.approvedStat}`}>
-            <span className={styles.statNumber}>{stats.approved}</span>
-            <span className={styles.statLabel}>Approved</span>
-          </div>
-          <div className={`${styles.statItem} ${styles.rejectedStat}`}>
-            <span className={styles.statNumber}>{stats.rejected}</span>
-            <span className={styles.statLabel}>Rejected</span>
-          </div>
-          <div className={`${styles.statItem} ${styles.suspendedStat}`}>
-            <span className={styles.statNumber}>{stats.suspended}</span>
-            <span className={styles.statLabel}>Suspended</span>
-          </div>
-        </div>
-      )}
-
       {/* Table */}
-      <div className={styles.tableWrapper}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Seller</th>
-              <th>Contact</th>
-              <th>Store</th>
-              <th>Account status</th>
-              <th>KYC status</th>
-              <th>Date</th>
-              <th>Account actions</th>
-              <th>KYC actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sellers.length === 0 ? (
+      {showLoadingState ? (
+        <div className={styles.tableContainer}>
+          <SkeletonLoader count={8} />
+        </div>
+      ) : sellers.length === 0 ? (
+        renderEmptyState()
+      ) : (
+        <div className={styles.tableContainer}>
+          <table className={styles.sellerTable}>
+            <thead>
               <tr>
-                <td colSpan="8" className={styles.emptyRow}>
-                  <div className={styles.emptyState}>
-                    <FiUser size={40} />
-                    <p>No seller requests found</p>
-                  </div>
-                </td>
+                <th className={styles.indexCell}>#</th>
+                <th className={styles.sellerCell}>Seller</th>
+                <th className={styles.contactCell}>Contact</th>
+                <th className={styles.storeCell}>Store</th>
+                <th className={styles.statusCell}>Account status</th>
+                <th className={styles.statusCell}>KYC status</th>
+                <th className={styles.dateCell}>Date</th>
+                <th className={styles.actionsCell}>Account actions</th>
+                <th className={styles.actionsCell}>KYC actions</th>
               </tr>
-            ) : (
-              sellers.map((seller) => {
+            </thead>
+            <tbody>
+              {sellers.map((seller, index) => {
                 const status = getStatusBadge(seller.status);
                 const kyc = getKycBadge(seller.kyc?.status);
+                const serialNumber = getSerialNumber(index);
+
                 return (
-                  <tr key={seller._id}>
-                    <td>
+                  <tr key={seller._id} className={styles.tableRow}>
+                    <td className={styles.indexCell} data-label="#">
+                      <span className={styles.indexNumber}>
+                        {serialNumber}
+                      </span>
+                    </td>
+
+                    <td className={styles.sellerCell} data-label="Seller">
                       <div className={styles.sellerInfo}>
                         <div className={styles.sellerAvatar}>
                           {seller.profileImage ? (
@@ -405,17 +493,19 @@ const SellerRequests = ({ onViewSeller }) => {
                         </div>
                       </div>
                     </td>
-                    <td>
+
+                    <td className={styles.contactCell} data-label="Contact">
                       <div className={styles.contactInfo}>
                         <div>
-                          <FiMail size={14} /> {seller.email}
+                          <FiMail size={12} /> {seller.email}
                         </div>
                         <div>
-                          <FiPhone size={14} /> {seller.phone}
+                          <FiPhone size={12} /> {seller.phone}
                         </div>
                       </div>
                     </td>
-                    <td>
+
+                    <td className={styles.storeCell} data-label="Store">
                       <div className={styles.storeInfo}>
                         <strong>{seller.storeInfo?.storeName}</strong>
                         <span>
@@ -424,14 +514,19 @@ const SellerRequests = ({ onViewSeller }) => {
                         </span>
                       </div>
                     </td>
-                    <td>
+
+                    <td
+                      className={styles.statusCell}
+                      data-label="Account status"
+                    >
                       <span
                         className={`${styles.statusBadge} ${status.className}`}
                       >
                         {status.label}
                       </span>
                     </td>
-                    <td>
+
+                    <td className={styles.statusCell} data-label="KYC status">
                       <span
                         className={`${styles.statusBadge} ${kyc.className}`}
                       >
@@ -444,54 +539,99 @@ const SellerRequests = ({ onViewSeller }) => {
                           </div>
                         )}
                     </td>
-                    <td>
+
+                    <td className={styles.dateCell} data-label="Date">
                       <div className={styles.dateInfo}>
-                        <FiCalendar size={14} />
+                        <FiCalendar size={12} />
                         <span>
                           {new Date(seller.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                     </td>
-                    <td>
+
+                    <td
+                      className={styles.actionsCell}
+                      data-label="Account actions"
+                    >
                       <div className={styles.actions}>
                         <button
-                          className={styles.viewBtn}
+                          className={styles.actionIconBtn}
                           onClick={() => onViewSeller(seller)}
-                          title="View Details"
+                          title="View details"
                         >
-                          <FiEye size={16} />
+                          <FiEye size={14} />
+                          <span className={styles.actionBtnLabel}>View</span>
                         </button>
                         {renderStatusActions(seller)}
                       </div>
                     </td>
-                    <td>{renderKycActions(seller)}</td>
+
+                    <td className={styles.actionsCell} data-label="KYC actions">
+                      <div className={styles.actions}>
+                        {renderKycActions(seller)}
+                      </div>
+                    </td>
                   </tr>
                 );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {!showLoadingState && totalPages > 1 && (
         <div className={styles.pagination}>
           <button
-            className={`${styles.pageBtn} ${page === 1 ? styles.disabled : ""}`}
+            className={styles.paginationBtn}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
           >
-            <FiChevronLeft size={16} />
+            <FiChevronLeft size={18} />
           </button>
-          <span className={styles.pageInfo}>
-            Page {page} of {totalPages}
-          </span>
+
+          <div className={styles.paginationPages}>
+            {[...Array(totalPages)].map((_, i) => {
+              const p = i + 1;
+              const isActive = p === page;
+              const isNearCurrent = Math.abs(p - page) <= 2;
+              const isFirst = p === 1;
+              const isLast = p === totalPages;
+
+              if (isNearCurrent || isFirst || isLast) {
+                return (
+                  <button
+                    key={p}
+                    className={`${styles.pageBtn} ${
+                      isActive ? styles.activePage : ""
+                    }`}
+                    onClick={() => setPage(p)}
+                  >
+                    {p}
+                  </button>
+                );
+              }
+
+              if (
+                (p === page - 3 && page > 4) ||
+                (p === page + 3 && page < totalPages - 3)
+              ) {
+                return (
+                  <span key={p} className={styles.pageDots}>
+                    ...
+                  </span>
+                );
+              }
+              return null;
+            })}
+          </div>
+
           <button
-            className={`${styles.pageBtn} ${page === totalPages ? styles.disabled : ""}`}
+            className={styles.paginationBtn}
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
           >
-            <FiChevronRight size={16} />
+            <FiChevronRight size={18} />
           </button>
         </div>
       )}

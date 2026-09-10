@@ -1,3 +1,4 @@
+
 // src/Pages/SuperAdmin/SuperAdminDashboard/SuperAdminDashboard.jsx
 
 import React, { useState, useEffect, useRef } from "react";
@@ -11,60 +12,42 @@ import {
   FiPackage,
   FiDollarSign,
   FiSettings,
-  FiShield,
   FiUser,
   FiLogOut,
   FiMenu,
   FiX,
   FiChevronDown,
-  FiChevronRight,
-  FiClipboard,
-  FiStar,
-  FiTrendingUp,
-  FiBell,
+  FiClock,
   FiSearch,
   FiPlus,
   FiGrid,
   FiList,
-  FiDownload,
-  FiFilter,
-  FiEdit,
-  FiTrash2,
-  FiEye,
-  FiCheckCircle,
-  FiXCircle,
-  FiClock,
-  FiAlertCircle,
-  FiBookOpen,
   FiTag,
   FiMessageSquare,
   FiFileText,
-  FiLayers,
   FiImage,
   FiPenTool,
   FiCreditCard,
   FiLayout,
-  FiGift, // ✅ NEW — icon for Promotions
-  FiInbox, // ✅ NEW — "Customer Requests" dropdown group icon
-  FiMail, // ✅ NEW — Contact Messages icon
-  FiBriefcase, // ✅ NEW — Franchise Enquiries icon
+  FiGift,
+  FiInbox,
+  FiMail,
+  FiBriefcase,
+  FiTrendingUp,
 } from "react-icons/fi";
 import {
   superAdminLogout,
   verifySuperAdminToken,
   setSuperAdminAuth,
   clearSuperAdminAuth,
-  fetchCurrentSuperAdmin,
 } from "../../../redux/slices/superAdminSlice";
 import toast from "react-hot-toast";
 import styles from "./SuperAdminDashboard.module.css";
 
 // Components
-import StatsCards from "../components/StatsCards";
 import SellerRequests from "../components/SellerRequests";
 import SellerDetails from "../components/SellerDetails";
 import DashboardOverview from "../components/DashboardOverview";
-import RecentActivities from "../components/RecentActivities";
 import BannerManagement from "../components/BannerManagement/BannerManagement";
 import BlogManagement from "../components/BlogManagement/BlogManagement";
 import PaymentsManagement from "../components/PaymentsManagement/PaymentsManagement";
@@ -73,22 +56,103 @@ import SubscriptionPlanManagement from "../components/SubscriptionPlanManagement
 import HeaderManagement from "../components/HeaderManagement/HeaderManagement";
 import OrdersManagement from "../components/OrdersManagement/OrdersManagement";
 import OrderHistory from "../components/OrderHistory/OrderHistory.jsx";
-// ✅ NEW: Sellers & Products
 import SellersProducts from "../components/SellersProducts/SellersProducts.jsx";
 import SellerProductsPage from "../components/SellersProducts/SellerProductsPage.jsx";
-// ✅ NEW: Homepage promotion request review
 import PromotionRequestsManagement from "../components/PromotionRequestsManagement/PromotionRequestsManagement.jsx";
-// ✅ NEW: Contact Messages & Franchise Enquiries (grouped with Support Tickets
-// under the "Customer Requests" sidebar dropdown)
 import ContactManagement from "../components/ContactManagement.jsx";
 import FranchiseManagement from "../components/FranchiseManagement.jsx";
 
-// ✅ SOCKET.IO — admin notifications
+// SOCKET.IO — admin notifications
 import useAdminNotifications from "../../../hooks/useAdminNotifications.js";
 import NotificationCenter from "../../../Components/common/NotificationCenter/NotificationCenter.jsx";
 
+// Same logo asset used on the Seller Dashboard header
+import logo from "../../../assets/newlogo.png";
+
+// Sidebar menu — static, so it lives outside the component (same pattern
+// as SellerDashboard.jsx's menuItems).
+const menuItems = [
+  { id: "dashboard", label: "Dashboard", icon: FiHome, isSubMenu: false },
+  { id: "sellers", label: "Seller Requests", icon: FiUsers, isSubMenu: false },
+  {
+    id: "sellers-products",
+    label: "Sellers & Products",
+    icon: FiGrid,
+    isSubMenu: false,
+  },
+  { id: "orders", label: "Orders", icon: FiShoppingBag, isSubMenu: false },
+  {
+    id: "order-history",
+    label: "Order History",
+    icon: FiClock,
+    isSubMenu: false,
+  },
+  { id: "products", label: "Products", icon: FiPackage, isSubMenu: false },
+  {
+    id: "payments",
+    label: "Payments",
+    icon: FiDollarSign,
+    isSubMenu: false,
+  },
+  {
+    id: "subscription-plans",
+    label: "Subscription Plans",
+    icon: FiCreditCard,
+    isSubMenu: false,
+  },
+  {
+    id: "promotions",
+    label: "Promotion Requests",
+    icon: FiGift,
+    isSubMenu: false,
+  },
+  {
+    id: "blog",
+    label: "Blog Management",
+    icon: FiPenTool,
+    isSubMenu: true,
+    subItems: [
+      { id: "blog-all", label: "All Blogs", icon: FiList },
+      { id: "blog-create", label: "Create Blog", icon: FiPlus },
+      { id: "blog-drafts", label: "Drafts", icon: FiFileText },
+      { id: "blog-categories", label: "Categories", icon: FiTag },
+      { id: "blog-comments", label: "Comments", icon: FiMessageSquare },
+    ],
+  },
+  {
+    id: "requests",
+    label: "Customer Requests",
+    icon: FiInbox,
+    isSubMenu: true,
+    subItems: [
+      { id: "support", label: "Support Tickets", icon: FiMessageSquare },
+      { id: "contact-messages", label: "Contact Messages", icon: FiMail },
+      {
+        id: "franchise-enquiries",
+        label: "Franchise Enquiries",
+        icon: FiBriefcase,
+      },
+    ],
+  },
+  {
+    id: "analytics",
+    label: "Analytics",
+    icon: FiTrendingUp,
+    isSubMenu: false,
+  },
+  { id: "banners", label: "Banners", icon: FiImage, isSubMenu: false },
+  {
+    id: "header",
+    label: "Header Management",
+    icon: FiLayout,
+    isSubMenu: false,
+  },
+  { id: "settings", label: "Settings", icon: FiSettings, isSubMenu: false },
+];
+
+const dropdownMenuItems = menuItems.filter((item) => item.isSubMenu);
+
 const SuperAdminDashboard = () => {
-  // ✅ Page title
   useEffect(() => {
     document.title = "Super Admin Dashboard | Aurevian Collections";
   }, []);
@@ -101,23 +165,45 @@ const SuperAdminDashboard = () => {
   );
 
   const hasVerified = useRef(false);
+  const profileRef = useRef(null);
 
-  // ✅ Route precedence: /seller-details/:id and /sellers-products/:sellerId
-  // are both more specific than the generic /:section route, so they're
-  // checked first here — same pattern as the existing seller-details logic.
+  // Route precedence: /seller-details/:id and /sellers-products/:sellerId
+  // are both more specific than the generic /:section route.
   const activeMenu = sellerId
     ? "seller-products-detail"
     : id
       ? "seller-details"
       : section || "dashboard";
 
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedSeller, setSelectedSeller] = useState(null);
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [expandedMenus, setExpandedMenus] = useState({});
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
   const [isVerifying, setIsVerifying] = useState(true);
 
-  // ✅ SOCKET.IO — mounted at the persistent dashboard shell level
+  // Which sidebar dropdown group ("blog" / "requests") is currently open —
+  // same accordion pattern as SellerDashboard's "Homepage Sections" group,
+  // generalised to handle more than one group.
+  const [openMenu, setOpenMenu] = useState(() => {
+    const found = dropdownMenuItems.find((item) =>
+      item.subItems.some((c) => c.id === activeMenu),
+    );
+    return found ? found.id : null;
+  });
+
+  useEffect(() => {
+    const found = dropdownMenuItems.find((item) =>
+      item.subItems.some((c) => c.id === activeMenu),
+    );
+    if (found) setOpenMenu(found.id);
+  }, [activeMenu]);
+
+  useEffect(() => {
+    setMobileProfileOpen(false);
+  }, [activeMenu]);
+
+  // SOCKET.IO — mounted at the persistent dashboard shell level
   const { notifications, unreadCount, handleItemClick } =
     useAdminNotifications();
 
@@ -174,19 +260,6 @@ const SuperAdminDashboard = () => {
     verifyToken();
   }, [dispatch, navigate, user, isAuthenticated]);
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setSidebarOpen(false);
-      } else {
-        setSidebarOpen(true);
-      }
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   const handleLogout = async () => {
     try {
       await dispatch(superAdminLogout()).unwrap();
@@ -198,7 +271,7 @@ const SuperAdminDashboard = () => {
     }
   };
 
-  // ✅ Instant render using the seller object we already have, while the
+  // Instant render using the seller object we already have, while the
   // URL updates to a shareable/refreshable /seller-details/:id route
   const handleViewSeller = (seller) => {
     setSelectedSeller(seller);
@@ -210,7 +283,6 @@ const SuperAdminDashboard = () => {
     goToSection("sellers");
   };
 
-  // ✅ NEW: navigate to a seller's product listing (shareable/refreshable URL)
   const handleViewSellerProducts = (seller) => {
     navigate(`/super-admin/dashboard/sellers-products/${seller._id}`);
   };
@@ -219,21 +291,21 @@ const SuperAdminDashboard = () => {
     goToSection("sellers-products");
   };
 
-  const toggleSubMenu = (menuId) => {
-    setExpandedMenus((prev) => ({
-      ...prev,
-      [menuId]: !prev[menuId],
-    }));
+  const handleMenuClick = (item) => {
+    goToSection(item.id);
+    setMobileMenuOpen(false);
   };
 
-  // ✅ NEW — hover open/close for dropdown groups, works alongside the
-  // click-to-toggle above (click still closes it even while hovering).
-  const openSubMenuOnHover = (menuId) => {
-    setExpandedMenus((prev) => ({ ...prev, [menuId]: true }));
+  const handleDropdownToggle = (id) => {
+    setOpenMenu((prev) => (prev === id ? null : id));
   };
 
-  const closeSubMenuOnHover = (menuId) => {
-    setExpandedMenus((prev) => ({ ...prev, [menuId]: false }));
+  const handleDropdownMouseEnter = (id) => {
+    setOpenMenu(id);
+  };
+
+  const handleDropdownMouseLeave = (id) => {
+    setOpenMenu((prev) => (prev === id ? null : prev));
   };
 
   if (isVerifying || isLoading) {
@@ -250,119 +322,6 @@ const SuperAdminDashboard = () => {
     return null;
   }
 
-  const menuItems = [
-    {
-      id: "dashboard",
-      label: "Dashboard",
-      icon: FiHome,
-      isSubMenu: false,
-    },
-    {
-      id: "sellers",
-      label: "Seller Requests",
-      icon: FiUsers,
-      isSubMenu: false,
-    },
-    // ✅ NEW: Sellers & Products
-    {
-      id: "sellers-products",
-      label: "Sellers & Products",
-      icon: FiGrid,
-      isSubMenu: false,
-    },
-    {
-      id: "orders",
-      label: "Orders",
-      icon: FiShoppingBag,
-      isSubMenu: false,
-    },
-    {
-      id: "order-history",
-      label: "Order History",
-      icon: FiClock,
-      isSubMenu: false,
-    },
-    {
-      id: "products",
-      label: "Products",
-      icon: FiPackage,
-      isSubMenu: false,
-    },
-    {
-      id: "payments",
-      label: "Payments",
-      icon: FiDollarSign,
-      isSubMenu: false,
-    },
-    {
-      id: "subscription-plans",
-      label: "Subscription Plans",
-      icon: FiCreditCard,
-      isSubMenu: false,
-    },
-    // ✅ NEW: Homepage promotion request review (Curated For You / New Collections)
-    {
-      id: "promotions",
-      label: "Promotion Requests",
-      icon: FiGift,
-      isSubMenu: false,
-    },
-    {
-      id: "blog",
-      label: "Blog Management",
-      icon: FiPenTool,
-      isSubMenu: true,
-      subItems: [
-        { id: "blog-all", label: "All Blogs", icon: FiList },
-        { id: "blog-create", label: "Create Blog", icon: FiPlus },
-        { id: "blog-drafts", label: "Drafts", icon: FiFileText },
-        { id: "blog-categories", label: "Categories", icon: FiTag },
-        { id: "blog-comments", label: "Comments", icon: FiMessageSquare },
-      ],
-    },
-    // ✅ NEW: "Customer Requests" dropdown — Support Tickets (existing),
-    // Contact Messages and Franchise Enquiries (new) all grouped together.
-    {
-      id: "requests",
-      label: "Customer Requests",
-      icon: FiInbox,
-      isSubMenu: true,
-      subItems: [
-        { id: "support", label: "Support Tickets", icon: FiMessageSquare },
-        { id: "contact-messages", label: "Contact Messages", icon: FiMail },
-        {
-          id: "franchise-enquiries",
-          label: "Franchise Enquiries",
-          icon: FiBriefcase,
-        },
-      ],
-    },
-    {
-      id: "analytics",
-      label: "Analytics",
-      icon: FiTrendingUp,
-      isSubMenu: false,
-    },
-    {
-      id: "banners",
-      label: "Banners",
-      icon: FiImage,
-      isSubMenu: false,
-    },
-    {
-      id: "header",
-      label: "Header Management",
-      icon: FiLayout,
-      isSubMenu: false,
-    },
-    {
-      id: "settings",
-      label: "Settings",
-      icon: FiSettings,
-      isSubMenu: false,
-    },
-  ];
-
   const renderContent = () => {
     switch (activeMenu) {
       case "dashboard":
@@ -377,7 +336,6 @@ const SuperAdminDashboard = () => {
             onClose={handleCloseDetails}
           />
         );
-      // ✅ NEW: Sellers & Products list
       case "sellers-products":
         return (
           <SellersProducts
@@ -385,7 +343,6 @@ const SuperAdminDashboard = () => {
             onViewSellerProducts={handleViewSellerProducts}
           />
         );
-      // ✅ NEW: A specific seller's product catalog
       case "seller-products-detail":
         return (
           <SellerProductsPage
@@ -409,7 +366,7 @@ const SuperAdminDashboard = () => {
         return (
           <div className={styles.subscriptionPlansContainer}>
             <div className={styles.pageHeader}>
-              <div className={styles.headerLeft}>
+              <div>
                 <h1 className={styles.pageTitle}>
                   Subscription Plan Management
                 </h1>
@@ -421,7 +378,6 @@ const SuperAdminDashboard = () => {
             <SubscriptionPlanManagement />
           </div>
         );
-      // ✅ NEW: Homepage promotion request review
       case "promotions":
         return <PromotionRequestsManagement />;
       case "blog-all":
@@ -442,10 +398,8 @@ const SuperAdminDashboard = () => {
         return <HeaderManagement />;
       case "support":
         return <SupportManagement />;
-      // ✅ NEW: Contact page form submissions
       case "contact-messages":
         return <ContactManagement />;
-      // ✅ NEW: Franchise inquiry form submissions
       case "franchise-enquiries":
         return <FranchiseManagement />;
       case "settings":
@@ -457,6 +411,8 @@ const SuperAdminDashboard = () => {
     }
   };
 
+  const initials = `${user?.firstName?.[0] || "S"}${user?.lastName?.[0] || "A"}`;
+
   return (
     <div className={styles.dashboardContainer}>
       {/* TOP HEADER */}
@@ -465,21 +421,29 @@ const SuperAdminDashboard = () => {
           <button
             className={styles.menuToggle}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
           >
-            <FiMenu size={24} />
+            {mobileMenuOpen ? <FiX size={22} /> : <FiMenu size={22} />}
           </button>
-          <button
-            className={styles.sidebarToggle}
-            onClick={() => setSidebarOpen(!sidebarOpen)}
+
+          <div
+            className={styles.headerLogo}
+            onClick={() => goToSection("dashboard")}
           >
-            {sidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-          </button>
-          <div className={styles.headerLogo}>
-            <FiShield className={styles.logoIcon} />
-            <span className={styles.logoText}>Super Admin</span>
+            <img
+              src={logo}
+              alt="Aurevian Collections"
+              className={styles.logoImage}
+            />
           </div>
+
+          <div className={styles.headerTitleBlock}>
+            <span className={styles.logoText}>Super Admin Dashboard</span>
+            <span className={styles.headerRoleBadge}>Super Admin</span>
+          </div>
+
           <div className={styles.headerSearch}>
-            <FiSearch className={styles.searchIcon} />
+            <FiSearch className={styles.searchIcon} size={17} />
             <input
               type="text"
               placeholder="Search..."
@@ -487,114 +451,187 @@ const SuperAdminDashboard = () => {
             />
           </div>
         </div>
+
         <div className={styles.headerRight}>
+          <button
+            className={styles.mobileSearchToggle}
+            onClick={() => setMobileSearchOpen((v) => !v)}
+            aria-label="Search"
+          >
+            <FiSearch size={19} />
+          </button>
+
           <NotificationCenter
             notifications={notifications}
             unreadCount={unreadCount}
             onItemClick={handleItemClick}
           />
-          <div className={styles.adminProfile}>
-            <div className={styles.avatar}>
-              {user?.profileImage ? (
-                <img src={user.profileImage} alt="Admin" />
-              ) : (
-                <span>
-                  {user?.firstName?.[0] || "S"}
-                  {user?.lastName?.[0] || "A"}
+
+          <div className={styles.profileWrap} ref={profileRef}>
+            <button
+              className={styles.adminProfile}
+              onClick={() => setMobileProfileOpen((v) => !v)}
+              aria-label="Account"
+            >
+              <div className={styles.avatar}>
+                {user?.profileImage ? (
+                  <img src={user.profileImage} alt="Admin" />
+                ) : (
+                  <span>{initials}</span>
+                )}
+              </div>
+
+              <div className={styles.adminInfo}>
+                <span className={styles.adminName}>
+                  {user?.firstName || "Super"} {user?.lastName || "Admin"}
                 </span>
-              )}
-            </div>
-            <div className={styles.adminInfo}>
-              <span className={styles.adminName}>
-                {user?.firstName || "Super"} {user?.lastName || "Admin"}
+                <span className={styles.adminRole}>Super Admin</span>
+              </div>
+
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleLogout();
+                }}
+                className={styles.logoutBtn}
+              >
+                <FiLogOut size={18} />
               </span>
-              <span className={styles.adminRole}>Super Admin</span>
-            </div>
-            <button onClick={handleLogout} className={styles.logoutBtn}>
-              <FiLogOut size={18} />
             </button>
+
+            {mobileProfileOpen && (
+              <>
+                <div
+                  className={styles.profileDropdownOverlay}
+                  onClick={() => setMobileProfileOpen(false)}
+                />
+                <div className={styles.mobileProfileDropdown}>
+                  <div className={styles.mobileProfileHeader}>
+                    <div className={styles.mobileProfileAvatar}>
+                      {user?.profileImage ? (
+                        <img src={user.profileImage} alt="Admin" />
+                      ) : (
+                        <span>{initials}</span>
+                      )}
+                    </div>
+                    <div className={styles.mobileProfileInfo}>
+                      <span className={styles.mobileProfileName}>
+                        {user?.firstName || "Super"} {user?.lastName || "Admin"}
+                      </span>
+                      <span className={styles.mobileProfileRole}>
+                        Super Admin
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    className={styles.mobileProfileLogout}
+                    onClick={handleLogout}
+                  >
+                    <FiLogOut size={17} />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
+
+        {mobileSearchOpen && (
+          <div className={styles.mobileSearchBar}>
+            <FiSearch className={styles.searchIcon} size={17} />
+            <input
+              type="text"
+              placeholder="Search..."
+              className={styles.searchInput}
+              autoFocus
+            />
+            <button
+              className={styles.mobileSearchClose}
+              onClick={() => setMobileSearchOpen(false)}
+              aria-label="Close search"
+            >
+              <FiX size={18} />
+            </button>
+          </div>
+        )}
       </header>
 
       {/* MAIN CONTENT */}
       <div className={styles.mainContent}>
-        {/* Sidebar */}
+        {/* Sidebar — hover to expand on desktop, hamburger on mobile */}
         <aside
-          className={`${styles.sidebar} ${sidebarOpen ? styles.open : styles.closed} ${mobileMenuOpen ? styles.mobileOpen : ""}`}
+          className={`${styles.sidebar} ${sidebarExpanded ? styles.expanded : ""} ${mobileMenuOpen ? styles.mobileOpen : ""}`}
+          onMouseEnter={() => setSidebarExpanded(true)}
+          onMouseLeave={() => setSidebarExpanded(false)}
         >
           <div className={styles.sidebarNav}>
-            {menuItems.map((item) => (
-              <div key={item.id}>
-                {item.isSubMenu ? (
-                  // ✅ NEW — hover handlers added on this wrapper so the
-                  // dropdown opens on mouse-enter and closes on mouse-leave,
-                  // in addition to the existing click-to-toggle behaviour.
+            {menuItems.map((item) => {
+              if (item.isSubMenu) {
+                const isOpen = openMenu === item.id;
+                const isChildActive = item.subItems.some(
+                  (child) => child.id === activeMenu,
+                );
+
+                return (
                   <div
-                    onMouseEnter={() => openSubMenuOnHover(item.id)}
-                    onMouseLeave={() => closeSubMenuOnHover(item.id)}
+                    key={item.id}
+                    className={styles.navGroup}
+                    onMouseEnter={() => handleDropdownMouseEnter(item.id)}
+                    onMouseLeave={() => handleDropdownMouseLeave(item.id)}
                   >
                     <button
-                      className={`${styles.navItem} ${expandedMenus[item.id] ? styles.expanded : ""}`}
-                      onClick={() => toggleSubMenu(item.id)}
-                      aria-expanded={!!expandedMenus[item.id]}
+                      onClick={() => handleDropdownToggle(item.id)}
+                      className={`${styles.navItem} ${isChildActive ? styles.active : ""}`}
+                      title={item.label}
+                      aria-expanded={isOpen}
                     >
                       <item.icon className={styles.navIcon} />
                       <span className={styles.navLabel}>{item.label}</span>
                       <FiChevronDown
-                        className={`${styles.chevron} ${expandedMenus[item.id] ? styles.rotated : ""}`}
+                        className={`${styles.navChevron} ${isOpen ? styles.navChevronOpen : ""}`}
                       />
                     </button>
+
                     <div
-                      className={`${styles.subMenu} ${expandedMenus[item.id] ? styles.open : ""}`}
+                      className={`${styles.submenu} ${isOpen ? styles.submenuOpen : ""}`}
                     >
                       {item.subItems.map((subItem) => (
                         <button
                           key={subItem.id}
+                          onClick={() => handleMenuClick(subItem)}
                           className={`${styles.subNavItem} ${activeMenu === subItem.id ? styles.active : ""}`}
-                          onClick={() => {
-                            goToSection(subItem.id);
-                            setMobileMenuOpen(false);
-                          }}
+                          title={subItem.label}
                         >
                           <subItem.icon className={styles.subNavIcon} />
-                          <span className={styles.subNavLabel}>
+                          <span className={styles.navLabel}>
                             {subItem.label}
                           </span>
-                          {activeMenu === subItem.id && (
-                            <div className={styles.activeIndicator} />
-                          )}
                         </button>
                       ))}
                     </div>
                   </div>
-                ) : (
-                  <button
-                    className={`${styles.navItem} ${
-                      activeMenu === item.id ||
-                      // ✅ Keep "Sellers & Products" highlighted while viewing
-                      // a specific seller's product catalog
-                      (item.id === "sellers-products" &&
-                        activeMenu === "seller-products-detail")
-                        ? styles.active
-                        : ""
-                    }`}
-                    onClick={() => {
-                      goToSection(item.id);
-                      setMobileMenuOpen(false);
-                    }}
-                  >
-                    <item.icon className={styles.navIcon} />
-                    <span className={styles.navLabel}>{item.label}</span>
-                    {(activeMenu === item.id ||
-                      (item.id === "sellers-products" &&
-                        activeMenu === "seller-products-detail")) && (
-                      <div className={styles.activeIndicator} />
-                    )}
-                  </button>
-                )}
-              </div>
-            ))}
+                );
+              }
+
+              const isActive =
+                activeMenu === item.id ||
+                // Keep "Sellers & Products" highlighted while viewing a
+                // specific seller's product catalog
+                (item.id === "sellers-products" &&
+                  activeMenu === "seller-products-detail");
+
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleMenuClick(item)}
+                  className={`${styles.navItem} ${isActive ? styles.active : ""}`}
+                  title={item.label}
+                >
+                  <item.icon className={styles.navIcon} />
+                  <span className={styles.navLabel}>{item.label}</span>
+                </button>
+              );
+            })}
           </div>
 
           <div className={styles.sidebarFooter}>
@@ -603,24 +640,26 @@ const SuperAdminDashboard = () => {
                 {user?.profileImage ? (
                   <img src={user.profileImage} alt="Admin" />
                 ) : (
-                  <span>
-                    {user?.firstName?.[0] || "S"}
-                    {user?.lastName?.[0] || "A"}
-                  </span>
+                  <span>{initials}</span>
                 )}
               </div>
-              {sidebarOpen && (
-                <div className={styles.sidebarUserInfo}>
-                  <span className={styles.sidebarUserName}>
-                    {user?.firstName || "Super"} {user?.lastName || "Admin"}
-                  </span>
-                  <span className={styles.sidebarUserRole}>Super Admin</span>
-                </div>
-              )}
+              <div className={styles.sidebarUserInfo}>
+                <span className={styles.sidebarUserName}>
+                  {user?.firstName || "Super"} {user?.lastName || "Admin"}
+                </span>
+                <span className={styles.sidebarUserRole}>Super Admin</span>
+              </div>
             </div>
-            <button onClick={handleLogout} className={styles.sidebarLogout}>
-              <FiLogOut size={18} />
-              {sidebarOpen && <span>Logout</span>}
+
+            <button
+              className={styles.sidebarLogout}
+              onClick={handleLogout}
+              title="Logout"
+            >
+              <span className={styles.logoutIconWrap}>
+                <FiLogOut size={18} />
+              </span>
+              <span className={styles.logoutLabel}>Logout</span>
             </button>
           </div>
         </aside>
@@ -634,9 +673,7 @@ const SuperAdminDashboard = () => {
         )}
 
         {/* Content Area */}
-        <main
-          className={`${styles.contentArea} ${!sidebarOpen ? styles.expanded : ""}`}
-        >
+        <main className={styles.contentArea}>
           <div className={styles.contentWrapper}>{renderContent()}</div>
         </main>
       </div>
