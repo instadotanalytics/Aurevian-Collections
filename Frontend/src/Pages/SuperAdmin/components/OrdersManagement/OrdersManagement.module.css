@@ -1,6 +1,7 @@
+
 /* src/Pages/SuperAdmin/components/OrdersManagement/OrdersManagement.module.css */
-/* Design tokens match SellerRequests.module.css / ProductManagement.module.css
-   exactly, so this screen reads as part of the same product. */
+/* Design tokens match SellerRequests.module.css exactly, so this screen
+   reads as part of the same product. */
 
 /* ============================================
    ROOT
@@ -13,6 +14,18 @@
     BlinkMacSystemFont,
     sans-serif;
   color: #14140f;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ============================================
@@ -22,7 +35,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
   gap: 16px;
   padding: 20px 24px;
@@ -60,15 +73,51 @@
 .headerRight {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   flex-wrap: wrap;
 }
 
-.headerSubtitle {
-  font-size: 13.5px;
+.statsBar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 16px;
+  background: #faf9f5;
+  border: 1px solid #e8e3dc;
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.statsLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   color: #8a8072;
-  margin: 0;
-  max-width: 340px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.statsItem {
+  color: #55554d;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.statsItem strong {
+  color: #c8a86e;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+.pageSubtitle {
+  color: #8a8072;
+  font-size: 13.5px;
+  margin: 0 0 20px;
+  max-width: 720px;
+  line-height: 1.5;
 }
 
 .refreshBtn {
@@ -92,6 +141,79 @@
   background: #f5f2ee;
   color: #14140f;
   border-color: #c8a86e;
+}
+
+/* ============================================
+   FILTERS / SEARCH
+   ============================================ */
+.filters {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.searchWrapper {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e8e3dc;
+  border-radius: 8px;
+  padding: 0 14px;
+  transition: all 0.3s ease;
+}
+
+.searchWrapper:focus-within {
+  border-color: #c8a86e;
+  box-shadow: 0 0 0 3px rgba(200, 168, 110, 0.12);
+}
+
+.searchIcon {
+  color: #8a8072;
+  font-size: 18px;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 10px 0;
+  background: transparent;
+  border: none;
+  color: #14140f;
+  font-size: 14px;
+  outline: none;
+  font-family: inherit;
+  width: 100%;
+  min-width: 120px;
+}
+
+.searchInput::placeholder {
+  color: #b5aa9a;
+  font-weight: 400;
+}
+
+.clearFiltersBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.clearFiltersBtn:hover {
+  background: rgba(239, 68, 68, 0.15);
 }
 
 /* ============================================
@@ -401,7 +523,9 @@
   gap: 2px;
 }
 
-/* Status Badges — same five-hue system used across the admin app */
+/* Status Badges — same five-hue system used across the admin app
+   (Fixed: previously every state was hardcoded to gold — restored the
+   grey / amber / green / blue / red hues used in SellerRequests) */
 .statusBadge {
   display: inline-flex;
   align-items: center;
@@ -413,6 +537,7 @@
   letter-spacing: 0.2px;
   white-space: nowrap;
   width: fit-content;
+  text-transform: capitalize;
 }
 
 .statusNeutral {
@@ -424,25 +549,25 @@
 .statusPending {
   background: rgba(245, 158, 11, 0.12);
   border: 1px solid rgba(245, 158, 11, 0.2);
-  color:#c8a86e;
+  color: #d97706;
 }
 
 .statusApproved {
   background: rgba(16, 185, 129, 0.12);
   border: 1px solid rgba(16, 185, 129, 0.2);
-  color: #c8a86e;
+  color: #10b981;
 }
 
 .statusSuspended {
   background: rgba(59, 130, 246, 0.12);
   border: 1px solid rgba(59, 130, 246, 0.2);
-  color: #c8a86e;
+  color: #3b82f6;
 }
 
 .statusRejected {
   background: rgba(239, 68, 68, 0.12);
   border: 1px solid rgba(239, 68, 68, 0.2);
-  color: #c8a86e;
+  color: #ef4444;
 }
 
 /* Shipping Info Strip */
@@ -686,7 +811,7 @@
 
 .emptyState p {
   color: #8a8072;
-  margin: 0;
+  margin: 0 0 24px;
   max-width: 360px;
 }
 
@@ -811,7 +936,7 @@
 }
 
 /* ============================================
-   RESPONSIVE
+   RESPONSIVE - TABLET
    ============================================ */
 @media (max-width: 1024px) {
   .orderInfoGrid {
@@ -819,28 +944,67 @@
   }
 }
 
+/* ============================================
+   RESPONSIVE - MOBILE (rebuilt, matches
+   SellerRequests mobile treatment)
+   ============================================ */
 @media (max-width: 768px) {
   .header {
     flex-direction: column;
     align-items: stretch;
     padding: 14px 16px;
+    gap: 12px;
+    border-radius: 10px;
   }
 
   .title {
-    font-size: 22px;
+    font-size: 21px;
+  }
+
+  .headerLeft {
+    justify-content: space-between;
   }
 
   .headerRight {
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
   }
 
-  .headerSubtitle {
-    max-width: none;
+  .statsBar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 14px;
+    padding: 12px 14px;
+  }
+
+  .statsLabel {
+    grid-column: 1 / -1;
+  }
+
+  .statsItem {
+    font-size: 12.5px;
   }
 
   .refreshBtn {
+    justify-content: center;
+  }
+
+  .pageSubtitle {
+    margin-bottom: 16px;
+  }
+
+  .filters {
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .searchWrapper {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .clearFiltersBtn {
     justify-content: center;
   }
 
@@ -854,45 +1018,81 @@
     font-size: 12px;
   }
 
+  /* Order cards */
   .orderCard {
-    padding: 16px;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 12px;
   }
 
   .orderCardHeader {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     gap: 10px;
+    padding: 14px 16px;
+    margin-bottom: 0;
+    background: #faf9f5;
+    border-bottom: 1px solid #f0edeb;
   }
 
   .orderHeaderLeft {
-    gap: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
   }
 
   .orderHeaderRight {
-    width: 100%;
+    width: auto;
   }
 
   .orderInfoGrid {
     grid-template-columns: 1fr;
     gap: 10px;
+    padding: 14px 16px 0;
+    margin-bottom: 14px;
+  }
+
+  .itemsSection {
+    padding: 0 16px;
   }
 
   .metaRow {
-    gap: 16px;
+    gap: 12px;
     padding: 12px;
+    margin: 0 16px 14px;
+    width: auto;
   }
 
   .metaBlock {
-    min-width: calc(50% - 8px);
+    min-width: calc(50% - 6px);
+  }
+
+  .shippingInfo {
+    margin: 0 16px 14px;
+  }
+
+  .fulfillmentRow {
+    padding: 0 16px;
+    margin-bottom: 14px;
   }
 
   .actionRow {
     flex-direction: column;
+    margin: 0;
+    padding: 14px 16px;
+    border-top: 1px solid #f0edeb;
+    border-radius: 0;
   }
 
   .actionBtn {
     justify-content: center;
     width: 100%;
+    padding: 11px 18px;
+  }
+
+  .skeletonCard {
+    padding: 16px;
   }
 
   .skeletonCardHeader {
@@ -924,13 +1124,18 @@
     font-size: 19px;
   }
 
-  .orderCard {
-    padding: 14px;
+  .statsBar {
+    grid-template-columns: 1fr;
+  }
+
+  .orderNumber {
+    font-size: 14px;
   }
 
   .itemRow {
     flex-wrap: wrap;
     gap: 6px;
+    padding: 10px 0;
   }
 
   .itemName {
@@ -954,7 +1159,7 @@
 
   .metaRow {
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
   }
 
   .metaBlock {
@@ -964,12 +1169,23 @@
   .modal {
     padding: 20px;
   }
+
+  .modalActions {
+    flex-direction: column-reverse;
+  }
+
+  .modalCancelBtn,
+  .modalConfirmRejectBtn {
+    width: 100%;
+    text-align: center;
+  }
 }
 
 /* ============================================
    FOCUS VISIBLE
    ============================================ */
 button:focus-visible,
+.searchInput:focus-visible,
 .modalTextarea:focus-visible {
   outline: 2px solid #c8a86e;
   outline-offset: 2px;

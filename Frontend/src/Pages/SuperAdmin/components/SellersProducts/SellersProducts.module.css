@@ -463,12 +463,10 @@
 }
 
 .productsIconBtn:hover {
-  color: #fff;
-  border-color: transparent;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(200, 168, 110, 0.35);
+  background: #f5f2ee;
+  color: #14140f;
+  border-color: #c8a86e;
 }
-
 /* ============================================
    SKELETON LOADER
    ============================================ */

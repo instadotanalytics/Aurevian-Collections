@@ -1,5 +1,6 @@
+
 // src/Pages/SuperAdmin/components/OrdersManagement/OrdersManagement.jsx
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { FaRupeeSign } from "react-icons/fa";
 import {
   FiTruck,
@@ -14,11 +15,12 @@ import {
   FiShoppingBag,
   FiAlertCircle,
   FiCreditCard,
-  FiClock, // new
-  FiCheckCircle, // new
-  FiAlertTriangle, // new
-  FiXCircle, // new
-  FiSlash, // new
+  FiClock,
+  FiCheckCircle,
+  FiAlertTriangle,
+  FiXCircle,
+  FiSlash,
+  FiSearch,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import styles from "./OrdersManagement.module.css";
@@ -181,6 +183,7 @@ const OrdersManagement = () => {
   const [actioningId, setActioningId] = useState(null);
   const [rejectingId, setRejectingId] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [search, setSearch] = useState("");
 
   const loadOrders = useCallback(async (status) => {
     setIsLoading(true);
@@ -289,13 +292,53 @@ const OrdersManagement = () => {
     };
   };
 
+  // Client-side search across order number, customer name, and seller/store name
+  const filteredOrders = useMemo(() => {
+    if (!search.trim()) return orders;
+    const q = search.trim().toLowerCase();
+    return orders.filter((order) => {
+      const orderNumber = order.orderNumber?.toLowerCase() || "";
+      const customerName = order.customerName?.toLowerCase() || "";
+      const storeName = order.seller?.storeInfo?.storeName?.toLowerCase() || "";
+      const sellerName = order.seller?.fullName?.toLowerCase() || "";
+      return (
+        orderNumber.includes(q) ||
+        customerName.includes(q) ||
+        storeName.includes(q) ||
+        sellerName.includes(q)
+      );
+    });
+  }, [orders, search]);
+
+  // Payment status breakdown for the header stats bar
+  const stats = useMemo(() => {
+    const counts = { paid: 0, pending: 0, failed: 0, refunded: 0 };
+    orders.forEach((o) => {
+      if (counts[o.paymentStatus] !== undefined) counts[o.paymentStatus] += 1;
+    });
+    return counts;
+  }, [orders]);
+
   const showLoadingState = isLoading && orders.length === 0;
 
   const renderEmptyState = () => (
     <div className={styles.emptyState}>
       <FiInbox size={60} className={styles.emptyIcon} />
       <h3>No orders in this queue</h3>
-      <p>Orders will show up here once they reach this stage.</p>
+      <p>
+        {search
+          ? "Try adjusting your search terms"
+          : "Orders will show up here once they reach this stage."}
+      </p>
+      {search && (
+        <button
+          className={styles.clearFiltersBtn}
+          onClick={() => setSearch("")}
+        >
+          <FiX size={18} />
+          Clear Search
+        </button>
+      )}
     </div>
   );
 
@@ -306,14 +349,28 @@ const OrdersManagement = () => {
         <div className={styles.headerLeft}>
           <h1 className={styles.title}>Order Fulfillment</h1>
           <span className={styles.countPill}>
-            {orders.length} order{orders.length === 1 ? "" : "s"} in queue
+            {filteredOrders.length} order{filteredOrders.length === 1 ? "" : "s"} in queue
           </span>
         </div>
         <div className={styles.headerRight}>
-          <p className={styles.headerSubtitle}>
-            Review seller-confirmed orders and approve them for Shiprocket
-            fulfillment
-          </p>
+          <div className={styles.statsBar}>
+            <span className={styles.statsLabel}>
+              <FiCreditCard size={14} />
+              Payments:
+            </span>
+            <span className={styles.statsItem}>
+              Paid: <strong>{stats.paid}</strong>
+            </span>
+            <span className={styles.statsItem}>
+              Pending: <strong>{stats.pending}</strong>
+            </span>
+            <span className={styles.statsItem}>
+              Failed: <strong>{stats.failed}</strong>
+            </span>
+            <span className={styles.statsItem}>
+              Refunded: <strong>{stats.refunded}</strong>
+            </span>
+          </div>
           <button
             className={styles.refreshBtn}
             onClick={() => loadOrders(activeTab)}
@@ -321,6 +378,34 @@ const OrdersManagement = () => {
             <FiRefreshCw size={14} /> Refresh
           </button>
         </div>
+      </div>
+
+      <p className={styles.pageSubtitle}>
+        Review seller-confirmed orders and approve them for Shiprocket
+        fulfillment.
+      </p>
+
+      {/* Search */}
+      <div className={styles.filters}>
+        <div className={styles.searchWrapper}>
+          <FiSearch className={styles.searchIcon} />
+          <input
+            type="text"
+            className={styles.searchInput}
+            placeholder="Search by order #, customer, or seller..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        {search && (
+          <button
+            className={styles.clearFiltersBtn}
+            onClick={() => setSearch("")}
+          >
+            <FiX size={16} />
+            Clear
+          </button>
+        )}
       </div>
 
       {/* Tabs */}
@@ -353,11 +438,11 @@ const OrdersManagement = () => {
       {/* Orders */}
       {showLoadingState ? (
         <SkeletonLoader count={4} />
-      ) : orders.length === 0 ? (
+      ) : filteredOrders.length === 0 ? (
         renderEmptyState()
       ) : (
         <div className={styles.ordersList}>
-          {orders.map((order) => {
+          {filteredOrders.map((order) => {
             const fulfillmentBadge = getFulfillmentBadge(
               order.fulfillmentStatus,
             );

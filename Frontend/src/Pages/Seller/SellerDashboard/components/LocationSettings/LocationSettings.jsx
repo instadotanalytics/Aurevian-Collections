@@ -1,3 +1,6 @@
+
+// src/Pages/SuperAdmin/SuperAdminDashboard/components/LocationSettings.jsx
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -11,6 +14,7 @@ import {
     FiUsers,
     FiPackage,
     FiSearch,
+    FiX,
     FiChevronLeft,
     FiChevronRight,
 } from "react-icons/fi";
@@ -19,6 +23,25 @@ import styles from "./LocationSettings.module.css";
 const API_URL =
     import.meta.env.VITE_API_URL ||
     "https://aurevian-collections.onrender.com/api";
+
+// Skeleton Loader Component (mirrors SellerRequests' SkeletonLoader)
+const SkeletonLoader = ({ count = 8 }) => {
+    return (
+        <div className={styles.skeletonContainer}>
+            {Array.from({ length: count }).map((_, index) => (
+                <div key={index} className={styles.skeletonRow}>
+                    <div className={styles.skeletonIndex}></div>
+                    <div className={styles.skeletonName}>
+                        <div className={styles.skeletonLine}></div>
+                        <div className={styles.skeletonLineShort}></div>
+                    </div>
+                    <div className={styles.skeletonStore}></div>
+                    <div className={styles.skeletonStatus}></div>
+                </div>
+            ))}
+        </div>
+    );
+};
 
 const LocationSettings = () => {
     const token = localStorage.getItem("superAdminToken");
@@ -41,6 +64,7 @@ const LocationSettings = () => {
     const [sellers, setSellers] = useState([]);
     const [sellersLoading, setSellersLoading] = useState(true);
     const [onlyMissing, setOnlyMissing] = useState(false);
+    const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
@@ -80,7 +104,12 @@ const LocationSettings = () => {
             setSellersLoading(true);
             const res = await axios.get(`${API_URL}/super-admin/location/sellers`, {
                 ...authHeader,
-                params: { page, limit: 10, onlyMissing: onlyMissing ? "true" : "false" },
+                params: {
+                    page,
+                    limit: 10,
+                    onlyMissing: onlyMissing ? "true" : "false",
+                    search,
+                },
             });
             if (res.data.success) {
                 setSellers(res.data.data);
@@ -103,11 +132,11 @@ const LocationSettings = () => {
     useEffect(() => {
         fetchSellers();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page, onlyMissing]);
+    }, [page, onlyMissing, search]);
 
     useEffect(() => {
         setPage(1);
-    }, [onlyMissing]);
+    }, [onlyMissing, search]);
 
     const handleFieldChange = (field, value) => {
         setForm((prev) => ({ ...prev, [field]: value }));
@@ -152,6 +181,33 @@ const LocationSettings = () => {
         }
     };
 
+    const getSerialNumber = (index) => (page - 1) * 10 + index + 1;
+
+    const renderEmptyState = () => (
+        <div className={styles.emptyState}>
+            <FiMapPin size={60} className={styles.emptyIcon} />
+            <h3>No sellers found</h3>
+            <p>
+                {search || onlyMissing
+                    ? "Try adjusting your filters or search terms"
+                    : "Seller showroom locations will show up here once configured"}
+            </p>
+            {(search || onlyMissing) && (
+                <button
+                    className={styles.clearFiltersBtn}
+                    onClick={() => {
+                        setSearch("");
+                        setOnlyMissing(false);
+                        setPage(1);
+                    }}
+                >
+                    <FiX size={18} />
+                    Clear All Filters
+                </button>
+            )}
+        </div>
+    );
+
     if (loading) {
         return (
             <div className={styles.loadingContainer}>
@@ -181,47 +237,46 @@ const LocationSettings = () => {
             : 0
         : 0;
 
-    return (
-        <div className={styles.page}>
-            <div className={styles.headerBlock}>
-                <h2 className={styles.title}>Location Ranking Settings</h2>
-                <p className={styles.subtitle}>
-                    Manage distance-based product ranking, showroom location coverage,
-                    and thresholds. Exact user coordinates are never stored or shown
-                    here.
-                </p>
-            </div>
+    const showLoadingState = sellersLoading && sellers.length === 0;
 
-            {/* Overview cards */}
-            {overview && (
-                <div className={styles.overviewGrid}>
-                    <div className={styles.overviewCard}>
-                        <FiUsers size={20} />
-                        <div>
-                            <span className={styles.overviewValue}>
-                                {overview.sellersWithLocation}/{overview.totalSellers}
+    return (
+        <div className={styles.container}>
+            {/* Header */}
+            <div className={styles.header}>
+                <div className={styles.headerLeft}>
+                    <h1 className={styles.title}>Location Ranking Settings</h1>
+                    <span className={styles.countPill}>
+                        {overview ? overview.totalSellers : 0} sellers
+                    </span>
+                </div>
+                {overview && (
+                    <div className={styles.headerRight}>
+                        <div className={styles.statsBar}>
+                            <span className={styles.statsLabel}>
+                                <FiUsers size={14} />
+                                Overview:
                             </span>
-                            <span className={styles.overviewLabel}>
-                                Sellers with showroom location ({coveragePct}%)
+                            <span className={styles.statsItem}>
+                                Location set: <strong>{overview.sellersWithLocation}</strong>/
+                                {overview.totalSellers} ({coveragePct}%)
                             </span>
-                        </div>
-                    </div>
-                    <div className={styles.overviewCard}>
-                        <FiPackage size={20} />
-                        <div>
-                            <span className={styles.overviewValue}>
-                                {overview.productsWithLocationRanking}/
+                            <span className={styles.statsItem}>
+                                Products eligible:{" "}
+                                <strong>{overview.productsWithLocationRanking}</strong>/
                                 {overview.totalPublishedProducts}
                             </span>
-                            <span className={styles.overviewLabel}>
-                                Published products eligible for location ranking
-                            </span>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
 
-            {/* Settings form */}
+            <p className={styles.pageSubtitle}>
+                Manage distance-based product ranking, showroom location coverage,
+                and thresholds. Exact user coordinates are never stored or shown
+                here.
+            </p>
+
+            {/* Settings card */}
             <form className={styles.settingsCard} onSubmit={handleSave}>
                 <div className={styles.toggleRow}>
                     <div>
@@ -301,15 +356,28 @@ const LocationSettings = () => {
                 </button>
             </form>
 
-            {/* Sellers & Showrooms table */}
-            <div className={styles.tableCard}>
-                <div className={styles.tableHeader}>
-                    <div>
-                        <h3 className={styles.tableTitle}>Sellers &amp; Showrooms</h3>
-                        <p className={styles.tableSubtitle}>
-                            Which sellers have configured a showroom location for ranking.
-                        </p>
-                    </div>
+            {/* Sellers & Showrooms */}
+            <div className={styles.sectionHeaderRow}>
+                <h2 className={styles.sectionTitle}>Sellers &amp; Showrooms</h2>
+                <p className={styles.sectionSubtitle}>
+                    Which sellers have configured a showroom location for ranking.
+                </p>
+            </div>
+
+            {/* Filters */}
+            <div className={styles.filters}>
+                <div className={styles.searchWrapper}>
+                    <FiSearch className={styles.searchIcon} />
+                    <input
+                        type="text"
+                        className={styles.searchInput}
+                        placeholder="Search sellers..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                </div>
+
+                <div className={styles.filterGroup}>
                     <label className={styles.missingFilter}>
                         <input
                             type="checkbox"
@@ -318,77 +386,154 @@ const LocationSettings = () => {
                         />
                         Show only missing location
                     </label>
+
+                    {(search || onlyMissing) && (
+                        <button
+                            className={styles.clearFiltersBtn}
+                            onClick={() => {
+                                setSearch("");
+                                setOnlyMissing(false);
+                                setPage(1);
+                            }}
+                        >
+                            <FiX size={16} />
+                            Clear
+                        </button>
+                    )}
                 </div>
-
-                {sellersLoading ? (
-                    <div className={styles.tableLoading}>
-                        <FiLoader className={styles.spinner} />
-                    </div>
-                ) : sellers.length === 0 ? (
-                    <div className={styles.tableEmpty}>
-                        <FiMapPin size={28} />
-                        <p>No sellers match this filter.</p>
-                    </div>
-                ) : (
-                    <>
-                        <div className={styles.tableWrap}>
-                            <table className={styles.table}>
-                                <thead>
-                                    <tr>
-                                        <th>Seller</th>
-                                        <th>Store</th>
-                                        <th>City / State</th>
-                                        <th>Location Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {sellers.map((s) => (
-                                        <tr key={s._id}>
-                                            <td>{s.sellerName}</td>
-                                            <td>{s.storeName || "—"}</td>
-                                            <td>
-                                                {s.showroomCity || "—"}
-                                                {s.showroomState ? `, ${s.showroomState}` : ""}
-                                            </td>
-                                            <td>
-                                                {s.locationConfigured ? (
-                                                    <span className={styles.badgeOk}>Configured</span>
-                                                ) : (
-                                                    <span className={styles.badgeMissing}>
-                                                        Not Set
-                                                    </span>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {totalPages > 1 && (
-                            <div className={styles.pagination}>
-                                <button
-                                    className={styles.pageBtn}
-                                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                    disabled={page === 1}
-                                >
-                                    <FiChevronLeft size={16} /> Previous
-                                </button>
-                                <span className={styles.pageInfo}>
-                                    Page {page} of {totalPages}
-                                </span>
-                                <button
-                                    className={styles.pageBtn}
-                                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                                    disabled={page === totalPages}
-                                >
-                                    Next <FiChevronRight size={16} />
-                                </button>
-                            </div>
-                        )}
-                    </>
-                )}
             </div>
+
+            {/* Table */}
+            {showLoadingState ? (
+                <div className={styles.tableContainer}>
+                    <SkeletonLoader count={8} />
+                </div>
+            ) : sellers.length === 0 ? (
+                renderEmptyState()
+            ) : (
+                <div className={styles.tableContainer}>
+                    <table className={styles.sellerTable}>
+                        <thead>
+                            <tr>
+                                <th className={styles.indexCell}>#</th>
+                                <th className={styles.sellerCell}>Seller</th>
+                                <th className={styles.storeCell}>Store</th>
+                                <th className={styles.cityCell}>City / State</th>
+                                <th className={styles.statusCell}>Location Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sellers.map((s, index) => (
+                                <tr key={s._id} className={styles.tableRow}>
+                                    <td className={styles.indexCell} data-label="#">
+                                        <span className={styles.indexNumber}>
+                                            {getSerialNumber(index)}
+                                        </span>
+                                    </td>
+                                    <td className={styles.sellerCell} data-label="Seller">
+                                        <div className={styles.sellerInfo}>
+                                            <div className={styles.sellerAvatar}>
+                                                <span>
+                                                    {s.sellerName
+                                                        ?.split(" ")
+                                                        .map((n) => n[0])
+                                                        .join("")
+                                                        .toUpperCase() || "S"}
+                                                </span>
+                                            </div>
+                                            <div className={styles.sellerName}>
+                                                {s.sellerName}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className={styles.storeCell} data-label="Store">
+                                        {s.storeName || "—"}
+                                    </td>
+                                    <td className={styles.cityCell} data-label="City / State">
+                                        {s.showroomCity || "—"}
+                                        {s.showroomState ? `, ${s.showroomState}` : ""}
+                                    </td>
+                                    <td
+                                        className={styles.statusCell}
+                                        data-label="Location Status"
+                                    >
+                                        {s.locationConfigured ? (
+                                            <span
+                                                className={`${styles.statusBadge} ${styles.statusApproved}`}
+                                            >
+                                                Configured
+                                            </span>
+                                        ) : (
+                                            <span
+                                                className={`${styles.statusBadge} ${styles.statusRejected}`}
+                                            >
+                                                Not Set
+                                            </span>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {/* Pagination */}
+            {!showLoadingState && sellers.length > 0 && totalPages > 1 && (
+                <div className={styles.pagination}>
+                    <button
+                        className={styles.paginationBtn}
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                    >
+                        <FiChevronLeft size={18} />
+                    </button>
+
+                    <div className={styles.paginationPages}>
+                        {[...Array(totalPages)].map((_, i) => {
+                            const p = i + 1;
+                            const isActive = p === page;
+                            const isNearCurrent = Math.abs(p - page) <= 2;
+                            const isFirst = p === 1;
+                            const isLast = p === totalPages;
+
+                            if (isNearCurrent || isFirst || isLast) {
+                                return (
+                                    <button
+                                        key={p}
+                                        className={`${styles.pageBtn} ${
+                                            isActive ? styles.activePage : ""
+                                        }`}
+                                        onClick={() => setPage(p)}
+                                    >
+                                        {p}
+                                    </button>
+                                );
+                            }
+
+                            if (
+                                (p === page - 3 && page > 4) ||
+                                (p === page + 3 && page < totalPages - 3)
+                            ) {
+                                return (
+                                    <span key={p} className={styles.pageDots}>
+                                        ...
+                                    </span>
+                                );
+                            }
+                            return null;
+                        })}
+                    </div>
+
+                    <button
+                        className={styles.paginationBtn}
+                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                        disabled={page === totalPages}
+                    >
+                        <FiChevronRight size={18} />
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
