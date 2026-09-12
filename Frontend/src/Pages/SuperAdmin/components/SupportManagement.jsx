@@ -1,3 +1,4 @@
+
 // src/Pages/SuperAdmin/components/SupportManagement/index.jsx
 
 import React, { useState, useEffect } from "react";
@@ -9,8 +10,6 @@ import {
   FiXCircle,
   FiAlertCircle,
   FiSearch,
-  FiFilter,
-  FiChevronDown,
   FiEye,
   FiSend,
   FiLoader,
@@ -18,9 +17,10 @@ import {
   FiMessageSquare,
   FiCalendar,
   FiRefreshCw,
-  FiArrowUp,
-  FiArrowDown,
+  FiChevronLeft,
+  FiChevronRight,
   FiX,
+  FiInbox,
 } from "react-icons/fi";
 import {
   getAllTickets,
@@ -32,6 +32,28 @@ import {
 } from "../../../redux/slices/supportSlice";
 import toast from "react-hot-toast";
 import styles from "./SupportManagement.module.css";
+
+// Skeleton loader — mirrors the card-row skeleton used on Seller Requests
+const SkeletonLoader = ({ count = 6 }) => (
+  <div className={styles.skeletonContainer}>
+    {Array.from({ length: count }).map((_, index) => (
+      <div key={index} className={styles.skeletonRow}>
+        <div className={styles.skeletonIndex}></div>
+        <div className={styles.skeletonName}>
+          <div className={styles.skeletonLine}></div>
+          <div className={styles.skeletonLineShort}></div>
+        </div>
+        <div className={styles.skeletonContact}></div>
+        <div className={styles.skeletonStatus}></div>
+        <div className={styles.skeletonStatus}></div>
+        <div className={styles.skeletonActions}>
+          <div className={styles.skeletonIcon}></div>
+          <div className={styles.skeletonIcon}></div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
 
 const SupportManagement = () => {
   const dispatch = useDispatch();
@@ -49,19 +71,19 @@ const SupportManagement = () => {
   const [showReplyBox, setShowReplyBox] = useState(null);
   const [sendingReply, setSendingReply] = useState(false);
   const [sortBy, setSortBy] = useState("newest");
-  const [showFilters, setShowFilters] = useState(false);
 
   const statusOptions = [
-    { value: "all", label: "All Tickets", color: "#6b7280" },
-    { value: "pending", label: "Pending", color: "#f59e0b" },
-    { value: "in-progress", label: "In Progress", color: "#3b82f6" },
-    { value: "resolved", label: "Resolved", color: "#22c55e" },
-    { value: "closed", label: "Closed", color: "#6b7280" },
+    { value: "all", label: "All Status" },
+    { value: "pending", label: "Pending" },
+    { value: "in-progress", label: "In Progress" },
+    { value: "resolved", label: "Resolved" },
+    { value: "closed", label: "Closed" },
   ];
 
   useEffect(() => {
     fetchTickets();
     fetchStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterStatus, currentPage, sortBy]);
 
   useEffect(() => {
@@ -123,14 +145,14 @@ const SupportManagement = () => {
           status: replyStatus || undefined,
         })
       ).unwrap();
-      
-      toast.success("✅ Reply sent successfully!");
+
+      toast.success("Reply sent successfully");
       setReplyMessage("");
       setReplyStatus("");
       setShowReplyBox(null);
       fetchTickets();
       fetchStats();
-      
+
       if (showDetails) {
         setShowDetails(false);
         setTimeout(() => setShowDetails(true), 100);
@@ -157,10 +179,10 @@ const SupportManagement = () => {
 
   const getStatusBadge = (status) => {
     const statusMap = {
-      pending: { label: "Pending", icon: <FiClock />, className: styles.statusPending },
-      "in-progress": { label: "In Progress", icon: <FiLoader />, className: styles.statusInProgress },
-      resolved: { label: "Resolved", icon: <FiCheckCircle />, className: styles.statusResolved },
-      closed: { label: "Closed", icon: <FiXCircle />, className: styles.statusClosed },
+      pending: { label: "Pending", icon: <FiClock size={11} />, className: styles.statusPending },
+      "in-progress": { label: "In Progress", icon: <FiLoader size={11} />, className: styles.statusSuspended },
+      resolved: { label: "Resolved", icon: <FiCheckCircle size={11} />, className: styles.statusApproved },
+      closed: { label: "Closed", icon: <FiXCircle size={11} />, className: styles.statusNeutral },
     };
     return statusMap[status] || statusMap.pending;
   };
@@ -192,6 +214,14 @@ const SupportManagement = () => {
     });
   };
 
+  const getInitials = (name) =>
+    name
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) || "?";
+
   const filteredTickets = allTickets.filter((ticket) => {
     const searchLower = searchTerm.toLowerCase();
     return (
@@ -214,312 +244,375 @@ const SupportManagement = () => {
     return 0;
   });
 
+  const getSerialNumber = (index) => (currentPage - 1) * 20 + index + 1;
+  const showLoadingState = loading && allTickets.length === 0;
+
+  const renderEmptyState = () => (
+    <div className={styles.emptyState}>
+      <FiInbox size={60} className={styles.emptyIcon} />
+      <h3>No tickets found</h3>
+      <p>
+        {searchTerm || filterStatus !== "all"
+          ? "Try adjusting your filters or search terms"
+          : "Support tickets will show up here once submitted"}
+      </p>
+      {(searchTerm || filterStatus !== "all") && (
+        <button
+          className={styles.clearFiltersBtn}
+          onClick={() => {
+            setSearchTerm("");
+            setFilterStatus("all");
+            setCurrentPage(1);
+          }}
+        >
+          <FiX size={16} />
+          Clear all filters
+        </button>
+      )}
+    </div>
+  );
+
   return (
-    <div className={styles.supportManagement}>
-      {/* Stats Cards */}
-      <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <div className={styles.statIconWrapper} style={{ background: "#6366f1" }}>
-            <FiMail />
-          </div>
-          <div>
-            <p className={styles.statValue}>{stats?.total || 0}</p>
-            <p className={styles.statLabel}>Total Tickets</p>
-          </div>
+    <div className={styles.container}>
+      {/* Header */}
+      <div className={styles.header}>
+        <div className={styles.headerLeft}>
+          <h1 className={styles.title}>Support Tickets</h1>
+          <span className={styles.countPill}>{stats?.total ?? 0} tickets</span>
         </div>
-        <div className={styles.statCard}>
-          <div className={styles.statIconWrapper} style={{ background: "#f59e0b" }}>
-            <FiClock />
+        <div className={styles.headerRight}>
+          <div className={styles.statsBar}>
+            <span className={styles.statsLabel}>
+              <FiMail size={14} />
+              Overview:
+            </span>
+            <span className={styles.statsItem}>
+              Pending: <strong>{stats?.pending ?? 0}</strong>
+            </span>
+            <span className={styles.statsItem}>
+              In progress: <strong>{stats?.inProgress ?? 0}</strong>
+            </span>
+            <span className={styles.statsItem}>
+              Resolved: <strong>{stats?.resolved ?? 0}</strong>
+            </span>
+            <span className={`${styles.statsItem} ${styles.statsItemUrgent}`}>
+              Urgent: <strong>{stats?.urgent ?? 0}</strong>
+            </span>
           </div>
-          <div>
-            <p className={styles.statValue}>{stats?.pending || 0}</p>
-            <p className={styles.statLabel}>Pending</p>
-          </div>
-        </div>
-        <div className={styles.statCard}>
-          <div className={styles.statIconWrapper} style={{ background: "#3b82f6" }}>
-            <FiLoader />
-          </div>
-          <div>
-            <p className={styles.statValue}>{stats?.inProgress || 0}</p>
-            <p className={styles.statLabel}>In Progress</p>
-          </div>
-        </div>
-        <div className={styles.statCard}>
-          <div className={styles.statIconWrapper} style={{ background: "#22c55e" }}>
-            <FiCheckCircle />
-          </div>
-          <div>
-            <p className={styles.statValue}>{stats?.resolved || 0}</p>
-            <p className={styles.statLabel}>Resolved</p>
-          </div>
-        </div>
-        <div className={styles.statCard}>
-          <div className={styles.statIconWrapper} style={{ background: "#ef4444" }}>
-            <FiAlertCircle />
-          </div>
-          <div>
-            <p className={styles.statValue}>{stats?.urgent || 0}</p>
-            <p className={styles.statLabel}>Urgent</p>
-          </div>
+          <button
+            className={styles.refreshBtn}
+            onClick={() => {
+              fetchTickets();
+              fetchStats();
+              toast.success("Refreshed");
+            }}
+            title="Refresh"
+          >
+            <FiRefreshCw size={15} className={loading ? styles.spinIcon : ""} />
+          </button>
         </div>
       </div>
 
-      {/* Filters and Search */}
-      <div className={styles.filtersSection}>
+      {/* Filters */}
+      <div className={styles.filters}>
         <div className={styles.searchWrapper}>
           <FiSearch className={styles.searchIcon} />
           <input
             type="text"
-            placeholder="Search tickets by name, email, subject..."
+            className={styles.searchInput}
+            placeholder="Search by name, email, or subject..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className={styles.searchInput}
           />
         </div>
 
-        <div className={styles.filterControls}>
-          <button
-            className={styles.filterToggle}
-            onClick={() => setShowFilters(!showFilters)}
+        <div className={styles.filterGroup}>
+          <select
+            className={styles.filterSelect}
+            value={filterStatus}
+            onChange={(e) => {
+              setCurrentPage(1);
+              setFilterStatus(e.target.value);
+            }}
           >
-            <FiFilter />
-            Filters
-            <FiChevronDown className={showFilters ? styles.rotated : ""} />
-          </button>
+            {statusOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
 
-          <div className={styles.sortControls}>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className={styles.sortSelect}
+          <select
+            className={styles.filterSelect}
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+          >
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="priority">By priority</option>
+          </select>
+
+          {(searchTerm || filterStatus !== "all") && (
+            <button
+              className={styles.clearFiltersBtn}
+              onClick={() => {
+                setSearchTerm("");
+                setFilterStatus("all");
+                setCurrentPage(1);
+              }}
             >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-              <option value="priority">Priority</option>
-            </select>
-          </div>
-
-          <button className={styles.refreshBtn} onClick={() => {
-            fetchTickets();
-            fetchStats();
-            toast.success("Refreshed");
-          }}>
-            <FiRefreshCw />
-          </button>
+              <FiX size={16} />
+              Clear
+            </button>
+          )}
         </div>
       </div>
 
-      {showFilters && (
-        <div className={styles.filterPanel}>
-          <div className={styles.filterGroup}>
-            <label>Filter by Status</label>
-            <div className={styles.statusFilterButtons}>
-              {statusOptions.map((status) => (
-                <button
-                  key={status.value}
-                  className={`${styles.statusFilterBtn} ${
-                    filterStatus === status.value ? styles.active : ""
-                  }`}
-                  onClick={() => setFilterStatus(status.value)}
-                >
-                  <span
-                    className={styles.statusDot}
-                    style={{ background: status.color }}
-                  />
-                  {status.label}
-                </button>
-              ))}
-            </div>
-          </div>
+      {/* Table */}
+      {showLoadingState ? (
+        <div className={styles.tableContainer}>
+          <SkeletonLoader count={6} />
+        </div>
+      ) : sortedTickets.length === 0 ? (
+        renderEmptyState()
+      ) : (
+        <div className={styles.tableContainer}>
+          <table className={styles.ticketTable}>
+            <thead>
+              <tr>
+                <th className={styles.indexCell}>#</th>
+                <th className={styles.ticketCell}>Ticket</th>
+                <th className={styles.contactCell}>Customer</th>
+                <th className={styles.statusCell}>Status</th>
+                <th className={styles.priorityCellHead}>Priority</th>
+                <th className={styles.dateCell}>Date</th>
+                <th className={styles.actionsCell}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedTickets.map((ticket, index) => {
+                const status = getStatusBadge(ticket.status);
+                const priority = getPriorityBadge(ticket.priority);
+                const hasReplies = ticket.replies && ticket.replies.length > 0;
+                const isReplying = showReplyBox === ticket._id;
+
+                return (
+                  <React.Fragment key={ticket._id}>
+                    <tr className={styles.tableRow}>
+                      <td className={styles.indexCell} data-label="#">
+                        <span className={styles.indexNumber}>
+                          {getSerialNumber(index)}
+                        </span>
+                      </td>
+
+                      <td className={styles.ticketCell} data-label="Ticket">
+                        <div className={styles.ticketInfo}>
+                          <div className={styles.ticketAvatar}>
+                            {getInitials(ticket.name)}
+                          </div>
+                          <div className={styles.ticketTextWrap}>
+                            <div className={styles.ticketSubject}>
+                              {ticket.subject}
+                            </div>
+                            <div className={styles.ticketPreview}>
+                              {ticket.message.substring(0, 70)}
+                              {ticket.message.length > 70 && "…"}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className={styles.contactCell} data-label="Customer">
+                        <div className={styles.contactInfo}>
+                          <div title={ticket.name}>
+                            <FiUser size={12} />
+                            <span>{ticket.name}</span>
+                          </div>
+                          <div title={ticket.email}>
+                            <FiMail size={12} />
+                            <span>{ticket.email}</span>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className={styles.statusCell} data-label="Status">
+                        <span className={`${styles.statusBadge} ${status.className}`}>
+                          {status.icon}
+                          {status.label}
+                        </span>
+                        {hasReplies && (
+                          <div className={styles.replyCount}>
+                            <FiMessageSquare size={10} />
+                            {ticket.replies.length} repl{ticket.replies.length === 1 ? "y" : "ies"}
+                          </div>
+                        )}
+                      </td>
+
+                      <td className={styles.priorityCell} data-label="Priority">
+                        <span className={`${styles.priorityBadge} ${priority.className}`}>
+                          {priority.label}
+                        </span>
+                      </td>
+
+                      <td className={styles.dateCell} data-label="Date">
+                        <div className={styles.dateInfo}>
+                          <FiCalendar size={12} />
+                          <span>{formatDate(ticket.createdAt)}</span>
+                        </div>
+                      </td>
+
+                      <td className={styles.actionsCell} data-label="Actions">
+                        <div className={styles.actions}>
+                          <button
+                            className={styles.actionIconBtn}
+                            onClick={() => handleViewTicket(ticket)}
+                            title="View details"
+                          >
+                            <FiEye size={14} />
+                            <span className={styles.actionBtnLabel}>View</span>
+                          </button>
+                          <button
+                            className={`${styles.actionIconBtn} ${styles.replyIconBtn}`}
+                            onClick={() => {
+                              setSelectedTicket(ticket);
+                              setShowReplyBox(isReplying ? null : ticket._id);
+                              setReplyMessage("");
+                              setReplyStatus("");
+                            }}
+                            title="Reply"
+                          >
+                            <FiSend size={14} />
+                            <span className={styles.actionBtnLabel}>Reply</span>
+                          </button>
+                          <select
+                            value={ticket.status}
+                            onChange={(e) => handleStatusChange(ticket._id, e.target.value)}
+                            className={styles.rowStatusSelect}
+                            title="Change status"
+                          >
+                            <option value="pending">Pending</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="resolved">Resolved</option>
+                            <option value="closed">Closed</option>
+                          </select>
+                        </div>
+                      </td>
+                    </tr>
+
+                    {isReplying && (
+                      <tr className={styles.replyRow}>
+                        <td colSpan={7} className={styles.replyRowCell}>
+                          <div className={styles.replyBox}>
+                            <textarea
+                              placeholder="Write your reply..."
+                              value={replyMessage}
+                              onChange={(e) => setReplyMessage(e.target.value)}
+                              className={styles.replyTextarea}
+                              rows="3"
+                              autoFocus
+                            />
+                            <div className={styles.replyActions}>
+                              <select
+                                value={replyStatus}
+                                onChange={(e) => setReplyStatus(e.target.value)}
+                                className={styles.replyStatusSelect}
+                              >
+                                <option value="">Keep current status</option>
+                                <option value="pending">Set to pending</option>
+                                <option value="in-progress">Set to in progress</option>
+                                <option value="resolved">Set to resolved</option>
+                                <option value="closed">Set to closed</option>
+                              </select>
+                              <div className={styles.replyButtons}>
+                                <button
+                                  className={styles.cancelReplyBtn}
+                                  onClick={() => setShowReplyBox(null)}
+                                >
+                                  <FiX size={14} />
+                                  Cancel
+                                </button>
+                                <button
+                                  className={styles.sendReplyBtn}
+                                  onClick={() => handleReply(ticket._id)}
+                                  disabled={sendingReply || !replyMessage.trim()}
+                                >
+                                  {sendingReply ? (
+                                    <>
+                                      <FiLoader size={14} className={styles.spinIcon} />
+                                      Sending...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <FiSend size={14} />
+                                      Send reply
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
 
-      {/* Tickets Table */}
-      <div className={styles.ticketsTable}>
-        <div className={styles.tableHeader}>
-          <div className={styles.headerCell}>Ticket</div>
-          <div className={styles.headerCell}>Customer</div>
-          <div className={styles.headerCell}>Status</div>
-          <div className={styles.headerCell}>Priority</div>
-          <div className={styles.headerCell}>Date</div>
-          <div className={styles.headerCell}>Actions</div>
-        </div>
-
-        {loading ? (
-          <div className={styles.loadingState}>
-            <FiLoader className={styles.spinner} />
-            <p>Loading tickets...</p>
-          </div>
-        ) : sortedTickets.length === 0 ? (
-          <div className={styles.emptyState}>
-            <FiMail className={styles.emptyIcon} />
-            <h3>No Tickets Found</h3>
-            <p>There are no support tickets matching your criteria.</p>
-          </div>
-        ) : (
-          sortedTickets.map((ticket) => {
-            const status = getStatusBadge(ticket.status);
-            const priority = getPriorityBadge(ticket.priority);
-            const hasReplies = ticket.replies && ticket.replies.length > 0;
-
-            return (
-              <div key={ticket._id} className={styles.tableRow}>
-                <div className={styles.ticketInfo}>
-                  <div className={styles.ticketSubject}>{ticket.subject}</div>
-                  <div className={styles.ticketPreview}>
-                    {ticket.message.substring(0, 60)}
-                    {ticket.message.length > 60 && "..."}
-                  </div>
-                </div>
-
-                <div className={styles.customerInfo}>
-                  <div className={styles.customerName}>
-                    <FiUser />
-                    {ticket.name}
-                  </div>
-                  <div className={styles.customerEmail}>
-                    <FiMail />
-                    {ticket.email}
-                  </div>
-                </div>
-
-                <div className={styles.statusCell}>
-                  <span className={`${styles.statusBadge} ${status.className}`}>
-                    {status.icon}
-                    {status.label}
-                  </span>
-                </div>
-
-                <div className={styles.priorityCell}>
-                  <span className={`${styles.priorityBadge} ${priority.className}`}>
-                    {priority.label}
-                  </span>
-                </div>
-
-                <div className={styles.dateCell}>
-                  <FiCalendar />
-                  {formatDate(ticket.createdAt)}
-                  {hasReplies && (
-                    <span className={styles.replyCount}>
-                      <FiMessageSquare />
-                      {ticket.replies.length}
-                    </span>
-                  )}
-                </div>
-
-                <div className={styles.actionsCell}>
-                  <button
-                    className={styles.actionBtn}
-                    onClick={() => handleViewTicket(ticket)}
-                    title="View Details"
-                  >
-                    <FiEye />
-                  </button>
-                  <button
-                    className={styles.actionBtn}
-                    onClick={() => {
-                      setSelectedTicket(ticket);
-                      setShowReplyBox(ticket._id);
-                      setReplyMessage("");
-                      setReplyStatus("");
-                    }}
-                    title="Reply"
-                  >
-                    <FiSend /> {/* ✅ Changed from FiReply to FiSend */}
-                  </button>
-                  <div className={styles.statusDropdown}>
-                    <select
-                      value={ticket.status}
-                      onChange={(e) => handleStatusChange(ticket._id, e.target.value)}
-                      className={styles.statusSelect}
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="in-progress">In Progress</option>
-                      <option value="resolved">Resolved</option>
-                      <option value="closed">Closed</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Reply Box */}
-                {showReplyBox === ticket._id && (
-                  <div className={styles.replyBox}>
-                    <textarea
-                      placeholder="Write your reply..."
-                      value={replyMessage}
-                      onChange={(e) => setReplyMessage(e.target.value)}
-                      className={styles.replyTextarea}
-                      rows="3"
-                    />
-                    <div className={styles.replyActions}>
-                      <select
-                        value={replyStatus}
-                        onChange={(e) => setReplyStatus(e.target.value)}
-                        className={styles.replyStatusSelect}
-                      >
-                        <option value="">Keep Current Status</option>
-                        <option value="pending">Set to Pending</option>
-                        <option value="in-progress">Set to In Progress</option>
-                        <option value="resolved">Set to Resolved</option>
-                        <option value="closed">Set to Closed</option>
-                      </select>
-                      <div className={styles.replyButtons}>
-                        <button
-                          className={styles.cancelReplyBtn}
-                          onClick={() => setShowReplyBox(null)}
-                        >
-                          <FiX />
-                          Cancel
-                        </button>
-                        <button
-                          className={styles.sendReplyBtn}
-                          onClick={() => handleReply(ticket._id)}
-                          disabled={sendingReply || !replyMessage.trim()}
-                        >
-                          {sendingReply ? (
-                            <>
-                              <FiLoader className={styles.spinnerSmall} />
-                              Sending...
-                            </>
-                          ) : (
-                            <>
-                              <FiSend />
-                              Send Reply
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })
-        )}
-      </div>
-
       {/* Pagination */}
-      {pagination && pagination.pages > 1 && (
+      {!showLoadingState && pagination && pagination.pages > 1 && (
         <div className={styles.pagination}>
           <button
-            className={styles.pageBtn}
+            className={styles.paginationBtn}
             disabled={currentPage === 1}
-            onClick={() => setCurrentPage(currentPage - 1)}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
           >
-            <FiArrowUp />
-            Previous
+            <FiChevronLeft size={18} />
           </button>
-          <span className={styles.pageInfo}>
-            Page {currentPage} of {pagination.pages}
-          </span>
+
+          <div className={styles.paginationPages}>
+            {[...Array(pagination.pages)].map((_, i) => {
+              const p = i + 1;
+              const isActive = p === currentPage;
+              const isNearCurrent = Math.abs(p - currentPage) <= 2;
+              const isFirst = p === 1;
+              const isLast = p === pagination.pages;
+
+              if (isNearCurrent || isFirst || isLast) {
+                return (
+                  <button
+                    key={p}
+                    className={`${styles.pageBtn} ${isActive ? styles.activePage : ""}`}
+                    onClick={() => setCurrentPage(p)}
+                  >
+                    {p}
+                  </button>
+                );
+              }
+
+              if (
+                (p === currentPage - 3 && currentPage > 4) ||
+                (p === currentPage + 3 && currentPage < pagination.pages - 3)
+              ) {
+                return (
+                  <span key={p} className={styles.pageDots}>
+                    ...
+                  </span>
+                );
+              }
+              return null;
+            })}
+          </div>
+
           <button
-            className={styles.pageBtn}
+            className={styles.paginationBtn}
             disabled={currentPage === pagination.pages}
-            onClick={() => setCurrentPage(currentPage + 1)}
+            onClick={() => setCurrentPage((p) => Math.min(pagination.pages, p + 1))}
           >
-            Next
-            <FiArrowDown />
+            <FiChevronRight size={18} />
           </button>
         </div>
       )}
@@ -531,28 +624,33 @@ const SupportManagement = () => {
             <div className={styles.modalHeader}>
               <h2>{selectedTicket.subject}</h2>
               <button className={styles.closeBtn} onClick={handleCloseDetails}>
-                <FiX />
+                <FiX size={20} />
               </button>
             </div>
 
-            <div className={styles.ticketInfo}>
+            <div className={styles.modalMeta}>
               <div className={styles.infoRow}>
-                <FiUser />
+                <FiUser size={14} />
                 <span>
                   <strong>{selectedTicket.name}</strong>
                   <span className={styles.email}>({selectedTicket.email})</span>
                 </span>
               </div>
               <div className={styles.infoRow}>
-                <FiClock />
-                <span>Submitted: {formatDate(selectedTicket.createdAt)}</span>
+                <FiClock size={14} />
+                <span>Submitted {formatDate(selectedTicket.createdAt)}</span>
               </div>
               <div className={styles.infoRow}>
-                <span className={`${styles.statusBadge} ${styles[selectedTicket.status]}`}>
-                  {selectedTicket.status}
+                <span
+                  className={`${styles.statusBadge} ${getStatusBadge(selectedTicket.status).className}`}
+                >
+                  {getStatusBadge(selectedTicket.status).icon}
+                  {getStatusBadge(selectedTicket.status).label}
                 </span>
-                <span className={`${styles.priorityBadge} ${styles[selectedTicket.priority]}`}>
-                  {selectedTicket.priority}
+                <span
+                  className={`${styles.priorityBadge} ${getPriorityBadge(selectedTicket.priority).className}`}
+                >
+                  {getPriorityBadge(selectedTicket.priority).label}
                 </span>
               </div>
             </div>
@@ -569,12 +667,10 @@ const SupportManagement = () => {
                   <div key={index} className={styles.replyItem}>
                     <div className={styles.replyHeader}>
                       <span className={styles.replyAdmin}>
-                        <FiUser />
+                        <FiUser size={12} />
                         {reply.adminName || "Admin"}
                       </span>
-                      <span className={styles.replyDate}>
-                        {formatDate(reply.createdAt)}
-                      </span>
+                      <span className={styles.replyDate}>{formatDate(reply.createdAt)}</span>
                     </div>
                     <div className={styles.replyMessage}>{reply.message}</div>
                   </div>
@@ -583,7 +679,7 @@ const SupportManagement = () => {
             )}
 
             <div className={styles.replySection}>
-              <h4>Reply to Ticket</h4>
+              <h4>Reply to ticket</h4>
               <textarea
                 placeholder="Write your reply..."
                 value={replyMessage}
@@ -598,13 +694,13 @@ const SupportManagement = () => {
               >
                 {sendingReply ? (
                   <>
-                    <FiLoader className={styles.spinner} />
+                    <FiLoader size={14} className={styles.spinIcon} />
                     Sending...
                   </>
                 ) : (
                   <>
-                    <FiSend />
-                    Send Reply
+                    <FiSend size={14} />
+                    Send reply
                   </>
                 )}
               </button>

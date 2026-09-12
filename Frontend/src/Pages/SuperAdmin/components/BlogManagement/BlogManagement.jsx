@@ -1,42 +1,64 @@
+
 // src/Pages/SuperAdmin/components/BlogManagement/BlogManagement.jsx
 
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
-  fetchAllBlogsAdmin, 
-  createBlog, 
-  updateBlog, 
+import {
+  fetchAllBlogsAdmin,
+  createBlog,
+  updateBlog,
   deleteBlog,
   clearBlogError,
   clearCurrentBlog
 } from '../../../../redux/slices/blogSlice';
 import toast from 'react-hot-toast';
-import { 
-  FiPlus, 
-  FiSearch, 
-  FiEdit, 
-  FiTrash2, 
-  FiEye, 
-  FiX, 
+import {
+  FiPlus,
+  FiSearch,
+  FiEdit,
+  FiTrash2,
+  FiEye,
+  FiX,
   FiFileText,
-  FiTag,
   FiCalendar,
-  FiClock,
-  FiUser,
   FiImage,
   FiLoader,
-  FiCheckCircle,
-  FiAlertCircle,
-  FiRefreshCw
+  FiRefreshCw,
+  FiChevronLeft,
+  FiChevronRight,
 } from 'react-icons/fi';
 import styles from './BlogManagement.module.css';
+
+// Skeleton Loader — mirrors SellerRequests' row skeleton
+const SkeletonLoader = ({ count = 8 }) => (
+  <div className={styles.skeletonContainer}>
+    {Array.from({ length: count }).map((_, index) => (
+      <div key={index} className={styles.skeletonRow}>
+        <div className={styles.skeletonImage}></div>
+        <div className={styles.skeletonTitle}>
+          <div className={styles.skeletonLine}></div>
+          <div className={styles.skeletonLineShort}></div>
+        </div>
+        <div className={styles.skeletonCategory}></div>
+        <div className={styles.skeletonStatus}></div>
+        <div className={styles.skeletonViews}></div>
+        <div className={styles.skeletonDate}></div>
+        <div className={styles.skeletonActions}>
+          <div className={styles.skeletonIcon}></div>
+          <div className={styles.skeletonIcon}></div>
+          <div className={styles.skeletonIcon}></div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
 
 const BlogManagement = ({ activeTab = 'blog-all' }) => {
   const dispatch = useDispatch();
   const { blogs, isLoading, isUploading, error, pagination, stats } = useSelector(
     (state) => state.blogs
   );
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -66,16 +88,15 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
   const [imagePreview, setImagePreview] = useState(null);
 
   const categories = [
-    'jewellery', 'diamonds', 'gold', 'bridal', 
+    'jewellery', 'diamonds', 'gold', 'bridal',
     'fashion', 'care', 'trends', 'culture', 'sustainability', 'other'
   ];
 
-  // ✅ Fix: Fetch blogs with proper dependency
   useEffect(() => {
     fetchBlogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, filterStatus, selectedCategory, searchTerm, activeTab]);
 
-  // ✅ Fix: Clear error on unmount
   useEffect(() => {
     return () => {
       dispatch(clearBlogError());
@@ -83,7 +104,6 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
     };
   }, [dispatch]);
 
-  // ✅ Fix: Handle activeTab changes
   useEffect(() => {
     if (activeTab === 'blog-drafts') {
       setFilterStatus('draft');
@@ -102,22 +122,10 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
   }, [error, dispatch]);
 
   const fetchBlogs = () => {
-    const params = {
-      page: currentPage,
-      limit: 10,
-    };
-    
-    // ✅ Fix: Only add filters if they have values
-    if (filterStatus && filterStatus !== 'all') {
-      params.status = filterStatus;
-    }
-    if (selectedCategory && selectedCategory !== 'all') {
-      params.category = selectedCategory;
-    }
-    if (searchTerm && searchTerm.trim()) {
-      params.search = searchTerm.trim();
-    }
-
+    const params = { page: currentPage, limit: 10 };
+    if (filterStatus && filterStatus !== 'all') params.status = filterStatus;
+    if (selectedCategory && selectedCategory !== 'all') params.category = selectedCategory;
+    if (searchTerm && searchTerm.trim()) params.search = searchTerm.trim();
     dispatch(fetchAllBlogsAdmin(params));
   };
 
@@ -125,15 +133,9 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
     const { name, value, type, checked } = e.target;
     if (name.startsWith('seo.')) {
       const seoField = name.split('.')[1];
-      setFormData(prev => ({
-        ...prev,
-        seo: { ...prev.seo, [seoField]: value }
-      }));
+      setFormData(prev => ({ ...prev, seo: { ...prev.seo, [seoField]: value } }));
     } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value
-      }));
+      setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     }
   };
 
@@ -142,9 +144,7 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
     if (file) {
       setFormData(prev => ({ ...prev, featuredImage: file }));
       const reader = new FileReader();
-      reader.onload = (event) => {
-        setImagePreview(event.target.result);
-      };
+      reader.onload = (event) => setImagePreview(event.target.result);
       reader.readAsDataURL(file);
     }
   };
@@ -159,11 +159,7 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
       status: 'draft',
       isFeatured: false,
       isTrending: false,
-      seo: {
-        metaTitle: '',
-        metaDescription: '',
-        metaKeywords: '',
-      },
+      seo: { metaTitle: '', metaDescription: '', metaKeywords: '' },
       featuredImage: null,
       scheduledPublish: '',
     });
@@ -173,20 +169,10 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validate required fields
-    if (!formData.title.trim()) {
-      toast.error('Title is required');
-      return;
-    }
-    if (!formData.excerpt.trim()) {
-      toast.error('Excerpt is required');
-      return;
-    }
-    if (!formData.content.trim()) {
-      toast.error('Content is required');
-      return;
-    }
+
+    if (!formData.title.trim()) return toast.error('Title is required');
+    if (!formData.excerpt.trim()) return toast.error('Excerpt is required');
+    if (!formData.content.trim()) return toast.error('Content is required');
 
     try {
       const formDataToSend = new FormData();
@@ -194,46 +180,39 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
       formDataToSend.append('excerpt', formData.excerpt);
       formDataToSend.append('content', formData.content);
       formDataToSend.append('category', formData.category);
-      
-      // ✅ Fix: Handle tags properly
+
       const tagsArray = formData.tags.split(',').map(t => t.trim()).filter(Boolean);
       formDataToSend.append('tags', JSON.stringify(tagsArray));
-      
+
       formDataToSend.append('status', formData.status);
       formDataToSend.append('isFeatured', formData.isFeatured);
       formDataToSend.append('isTrending', formData.isTrending);
       formDataToSend.append('seo', JSON.stringify(formData.seo));
-      
+
       if (formData.scheduledPublish) {
         formDataToSend.append('scheduledPublish', formData.scheduledPublish);
       }
-      
       if (formData.featuredImage) {
         formDataToSend.append('featuredImage', formData.featuredImage);
       }
 
-      let result;
       if (editingBlog) {
-        result = await dispatch(updateBlog({ 
-          id: editingBlog._id, 
-          formData: formDataToSend 
-        })).unwrap();
+        await dispatch(updateBlog({ id: editingBlog._id, formData: formDataToSend })).unwrap();
         toast.success('Blog updated successfully!');
       } else {
-        // ✅ Fix: Only require image for new blogs
         if (!formData.featuredImage) {
           toast.error('Featured image is required for new blog');
           return;
         }
-        result = await dispatch(createBlog(formDataToSend)).unwrap();
+        await dispatch(createBlog(formDataToSend)).unwrap();
         toast.success('Blog created successfully!');
       }
 
       setIsModalOpen(false);
       resetForm();
       fetchBlogs();
-    } catch (error) {
-      toast.error(error || 'Failed to save blog');
+    } catch (err) {
+      toast.error(err || 'Failed to save blog');
     }
   };
 
@@ -266,8 +245,8 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
         await dispatch(deleteBlog(id)).unwrap();
         toast.success('Blog deleted successfully!');
         fetchBlogs();
-      } catch (error) {
-        toast.error(error || 'Failed to delete blog');
+      } catch (err) {
+        toast.error(err || 'Failed to delete blog');
       }
     }
   };
@@ -283,28 +262,54 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
   };
 
   const getStatusBadge = (status) => {
-    const statusMap = {
-      published: { label: 'Published', className: styles.published },
-      draft: { label: 'Draft', className: styles.draft },
-      archived: { label: 'Archived', className: styles.archived },
+    const map = {
+      published: { label: 'Published', className: styles.statusApproved },
+      draft: { label: 'Draft', className: styles.statusPending },
+      archived: { label: 'Archived', className: styles.statusNeutral },
     };
-    return statusMap[status] || statusMap.draft;
+    return map[status] || map.draft;
   };
 
-  const getCategoryLabel = (category) => {
-    return category.charAt(0).toUpperCase() + category.slice(1);
-  };
+  const getCategoryLabel = (category) => category.charAt(0).toUpperCase() + category.slice(1);
 
   const formatDate = (date) => {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+      year: 'numeric', month: 'short', day: 'numeric',
     });
   };
 
-  // ✅ Fix: Loading state
+  const hasActiveFilters = searchTerm || filterStatus !== 'all' || selectedCategory !== 'all';
+
+  const clearAllFilters = () => {
+    setSearchTerm('');
+    setFilterStatus('all');
+    setSelectedCategory('all');
+    setCurrentPage(1);
+  };
+
+  const renderEmptyState = () => (
+    <div className={styles.emptyState}>
+      <FiFileText size={60} className={styles.emptyIcon} />
+      <h3>No blogs found</h3>
+      <p>
+        {hasActiveFilters
+          ? 'Try adjusting your filters or search terms'
+          : 'Create your first blog post to get started'}
+      </p>
+      {hasActiveFilters ? (
+        <button className={styles.clearFiltersBtn} onClick={clearAllFilters}>
+          <FiX size={18} />
+          Clear All Filters
+        </button>
+      ) : (
+        <button className={styles.createBtn} onClick={() => { resetForm(); setIsModalOpen(true); }}>
+          <FiPlus size={16} /> Create Blog
+        </button>
+      )}
+    </div>
+  );
+
   if (isLoading && !blogs) {
     return (
       <div className={styles.loadingContainer}>
@@ -314,216 +319,251 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
     );
   }
 
+  const showLoadingState = isLoading && (!blogs || blogs.length === 0);
+
   return (
     <div className={styles.container}>
-      {/* Header */}
+      {/* Header — same shape as SellerRequests */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <h1>Blog Management</h1>
-          <p>Create and manage your blog posts</p>
+          <h1 className={styles.title}>Blog Management</h1>
+          <span className={styles.countPill}>{stats?.total ?? 0} blogs</span>
         </div>
-        <div className={styles.headerActions}>
-          <button 
-            className={styles.refreshBtn}
-            onClick={handleRefresh}
-            title="Refresh"
-          >
-            <FiRefreshCw />
-          </button>
-          <button 
-            className={styles.createBtn}
-            onClick={() => {
-              resetForm();
-              setIsModalOpen(true);
-            }}
-          >
-            <FiPlus /> Create Blog
-          </button>
+        <div className={styles.headerRight}>
+          {stats && (
+            <div className={styles.statsBar}>
+              <span className={styles.statsLabel}>
+                <FiFileText size={14} />
+                Overview:
+              </span>
+              <span className={styles.statsItem}>
+                Published: <strong>{stats.published || 0}</strong>
+              </span>
+              <span className={styles.statsItem}>
+                Drafts: <strong>{stats.draft || 0}</strong>
+              </span>
+              <span className={styles.statsItem}>
+                Archived: <strong>{stats.archived || 0}</strong>
+              </span>
+            </div>
+          )}
+          <div className={styles.headerActions}>
+            <button className={styles.refreshBtn} onClick={handleRefresh} title="Refresh">
+              <FiRefreshCw size={16} />
+            </button>
+            <button className={styles.createBtn} onClick={() => { resetForm(); setIsModalOpen(true); }}>
+              <FiPlus size={16} /> Create Blog
+            </button>
+          </div>
         </div>
       </div>
-
-      {/* ✅ Fix: Stats with safe check */}
-      {stats && (
-        <div className={styles.statsGrid}>
-          <div className={`${styles.statCard} ${styles.total}`}>
-            <span className={styles.statNumber}>{stats.total || 0}</span>
-            <span className={styles.statLabel}>Total Blogs</span>
-          </div>
-          <div className={`${styles.statCard} ${styles.published}`}>
-            <span className={styles.statNumber}>{stats.published || 0}</span>
-            <span className={styles.statLabel}>Published</span>
-          </div>
-          <div className={`${styles.statCard} ${styles.draft}`}>
-            <span className={styles.statNumber}>{stats.draft || 0}</span>
-            <span className={styles.statLabel}>Drafts</span>
-          </div>
-          <div className={`${styles.statCard} ${styles.archived}`}>
-            <span className={styles.statNumber}>{stats.archived || 0}</span>
-            <span className={styles.statLabel}>Archived</span>
-          </div>
-        </div>
-      )}
 
       {/* Filters */}
       <div className={styles.filters}>
-        <div className={styles.searchBox}>
+        <div className={styles.searchWrapper}>
           <FiSearch className={styles.searchIcon} />
           <input
             type="text"
+            className={styles.searchInput}
             placeholder="Search blogs..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => { setCurrentPage(1); setSearchTerm(e.target.value); }}
           />
         </div>
-        <select 
-          className={styles.filterSelect}
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-        >
-          <option value="all">All Status</option>
-          <option value="published">Published</option>
-          <option value="draft">Draft</option>
-          <option value="archived">Archived</option>
-        </select>
-        <select 
-          className={styles.filterSelect}
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-        >
-          <option value="all">All Categories</option>
-          {categories.map(cat => (
-            <option key={cat} value={cat}>{getCategoryLabel(cat)}</option>
-          ))}
-        </select>
+
+        <div className={styles.filterGroup}>
+          <select
+            className={styles.filterSelect}
+            value={filterStatus}
+            onChange={(e) => { setCurrentPage(1); setFilterStatus(e.target.value); }}
+          >
+            <option value="all">All Status</option>
+            <option value="published">Published</option>
+            <option value="draft">Draft</option>
+            <option value="archived">Archived</option>
+          </select>
+
+          <select
+            className={styles.filterSelect}
+            value={selectedCategory}
+            onChange={(e) => { setCurrentPage(1); setSelectedCategory(e.target.value); }}
+          >
+            <option value="all">All Categories</option>
+            {categories.map(cat => (
+              <option key={cat} value={cat}>{getCategoryLabel(cat)}</option>
+            ))}
+          </select>
+
+          {hasActiveFilters && (
+            <button className={styles.clearFiltersBtn} onClick={clearAllFilters}>
+              <FiX size={16} />
+              Clear
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Table */}
-      <div className={styles.tableWrapper}>
-        {isLoading ? (
-          <div className={styles.loadingState}>
-            <div className={styles.spinner}></div>
-            <p>Loading blogs...</p>
-          </div>
-        ) : blogs && blogs.length > 0 ? (
-          <>
+      {showLoadingState ? (
+        <div className={styles.tableContainer}>
+          <SkeletonLoader count={8} />
+        </div>
+      ) : blogs && blogs.length > 0 ? (
+        <>
+          <div className={styles.tableContainer}>
             <table className={styles.blogTable}>
               <thead>
                 <tr>
-                  <th>Image</th>
-                  <th>Title</th>
-                  <th>Category</th>
-                  <th>Status</th>
-                  <th>Views</th>
-                  <th>Date</th>
-                  <th>Actions</th>
+                  <th className={styles.imageCell}>Image</th>
+                  <th className={styles.titleCell}>Title</th>
+                  <th className={styles.categoryCellCol}>Category</th>
+                  <th className={styles.statusCellCol}>Status</th>
+                  <th className={styles.viewsCellCol}>Views</th>
+                  <th className={styles.dateCellCol}>Date</th>
+                  <th className={styles.actionsCellCol}>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {blogs.map((blog) => (
-                  <tr key={blog._id}>
-                    <td className={styles.imageCell}>
-                      {blog.featuredImage?.url ? (
-                        <img src={blog.featuredImage.url} alt={blog.title} />
-                      ) : (
-                        <div className={styles.noImage}>No Image</div>
-                      )}
-                    </td>
-                    <td className={styles.titleCell}>
-                      <div className={styles.title}>{blog.title}</div>
-                      <div className={styles.excerpt}>
-                        {blog.excerpt?.substring(0, 80)}...
-                      </div>
-                    </td>
-                    <td>
-                      <span className={styles.categoryCell}>
-                        {getCategoryLabel(blog.category)}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`${styles.statusBadge} ${getStatusBadge(blog.status).className}`}>
-                        <span className={styles.dot}></span>
-                        {getStatusBadge(blog.status).label}
-                      </span>
-                    </td>
-                    <td className={styles.viewsCell}>
-                      <FiEye /> {blog.views || 0}
-                    </td>
-                    <td className={styles.dateCell}>
-                      {formatDate(blog.publishedAt || blog.createdAt)}
-                    </td>
-                    <td className={styles.actionsCell}>
-                      <button 
-                        className={`${styles.actionBtn} ${styles.view}`}
-                        onClick={() => window.open(`/blog/${blog.slug}`, '_blank')}
-                        title="View"
-                      >
-                        <FiEye />
-                      </button>
-                      <button 
-                        className={`${styles.actionBtn} ${styles.edit}`}
-                        onClick={() => handleEdit(blog)}
-                        title="Edit"
-                      >
-                        <FiEdit />
-                      </button>
-                      <button 
-                        className={`${styles.actionBtn} ${styles.delete}`}
-                        onClick={() => handleDelete(blog._id)}
-                        title="Delete"
-                      >
-                        <FiTrash2 />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {blogs.map((blog) => {
+                  const status = getStatusBadge(blog.status);
+                  return (
+                    <tr key={blog._id} className={styles.tableRow}>
+                      <td className={styles.imageCell} data-label="Image">
+                        {blog.featuredImage?.url ? (
+                          <img src={blog.featuredImage.url} alt={blog.title} />
+                        ) : (
+                          <div className={styles.noImage}>No Image</div>
+                        )}
+                      </td>
+
+                      <td className={styles.titleCell} data-label="Title">
+                        <div className={styles.titleText}>{blog.title}</div>
+                        <div className={styles.excerptText}>
+                          {blog.excerpt?.substring(0, 80)}...
+                        </div>
+                      </td>
+
+                      <td className={styles.categoryCellCol} data-label="Category">
+                        <span className={styles.categoryPill}>
+                          {getCategoryLabel(blog.category)}
+                        </span>
+                      </td>
+
+                      <td className={styles.statusCellCol} data-label="Status">
+                        <span className={`${styles.statusBadge} ${status.className}`}>
+                          <span className={styles.dot}></span>
+                          {status.label}
+                        </span>
+                      </td>
+
+                      <td className={styles.viewsCellCol} data-label="Views">
+                        <div className={styles.viewsInfo}>
+                          <FiEye size={12} /> {blog.views || 0}
+                        </div>
+                      </td>
+
+                      <td className={styles.dateCellCol} data-label="Date">
+                        <div className={styles.dateInfo}>
+                          <FiCalendar size={12} />
+                          <span>{formatDate(blog.publishedAt || blog.createdAt)}</span>
+                        </div>
+                      </td>
+
+                      <td className={styles.actionsCellCol} data-label="Actions">
+                        <div className={styles.actions}>
+                          <button
+                            className={`${styles.actionIconBtn} ${styles.viewIconBtn}`}
+                            onClick={() => window.open(`/blog/${blog.slug}`, '_blank')}
+                            title="View"
+                          >
+                            <FiEye size={14} />
+                            <span className={styles.actionBtnLabel}>View</span>
+                          </button>
+                          <button
+                            className={`${styles.actionIconBtn} ${styles.editIconBtn}`}
+                            onClick={() => handleEdit(blog)}
+                            title="Edit"
+                          >
+                            <FiEdit size={14} />
+                            <span className={styles.actionBtnLabel}>Edit</span>
+                          </button>
+                          <button
+                            className={`${styles.actionIconBtn} ${styles.deleteIconBtn}`}
+                            onClick={() => handleDelete(blog._id)}
+                            title="Delete"
+                          >
+                            <FiTrash2 size={14} />
+                            <span className={styles.actionBtnLabel}>Delete</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
-            
-            {/* Pagination */}
-            {pagination && pagination.pages > 1 && (
-              <div className={styles.pagination}>
-                <div className={styles.paginationInfo}>
-                  Showing {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
-                </div>
-                <div className={styles.paginationControls}>
-                  <button 
-                    className={styles.pageBtn}
-                    onClick={() => setCurrentPage(pagination.page - 1)}
-                    disabled={pagination.page === 1}
-                  >
-                    Previous
-                  </button>
-                  <span className={styles.pageNumber}>
-                    Page {pagination.page} of {pagination.pages}
-                  </span>
-                  <button 
-                    className={styles.pageBtn}
-                    onClick={() => setCurrentPage(pagination.page + 1)}
-                    disabled={pagination.page === pagination.pages}
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className={styles.emptyState}>
-            <FiFileText size={60} />
-            <h3>No blogs found</h3>
-            <p>Create your first blog post to get started</p>
-            <button 
-              className={styles.createBtn}
-              onClick={() => {
-                resetForm();
-                setIsModalOpen(true);
-              }}
-            >
-              <FiPlus /> Create Blog
-            </button>
           </div>
-        )}
-      </div>
+
+          {/* Pagination — same numbered pattern as SellerRequests */}
+          {pagination && pagination.pages > 1 && (
+            <>
+              <div className={styles.pagination}>
+                <button
+                  className={styles.paginationBtn}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={pagination.page === 1}
+                >
+                  <FiChevronLeft size={18} />
+                </button>
+
+                <div className={styles.paginationPages}>
+                  {[...Array(pagination.pages)].map((_, i) => {
+                    const p = i + 1;
+                    const isActive = p === pagination.page;
+                    const isNearCurrent = Math.abs(p - pagination.page) <= 2;
+                    const isFirst = p === 1;
+                    const isLast = p === pagination.pages;
+
+                    if (isNearCurrent || isFirst || isLast) {
+                      return (
+                        <button
+                          key={p}
+                          className={`${styles.pageBtn} ${isActive ? styles.activePage : ''}`}
+                          onClick={() => setCurrentPage(p)}
+                        >
+                          {p}
+                        </button>
+                      );
+                    }
+
+                    if (
+                      (p === pagination.page - 3 && pagination.page > 4) ||
+                      (p === pagination.page + 3 && pagination.page < pagination.pages - 3)
+                    ) {
+                      return <span key={p} className={styles.pageDots}>...</span>;
+                    }
+                    return null;
+                  })}
+                </div>
+
+                <button
+                  className={styles.paginationBtn}
+                  onClick={() => setCurrentPage((p) => Math.min(pagination.pages, p + 1))}
+                  disabled={pagination.page === pagination.pages}
+                >
+                  <FiChevronRight size={18} />
+                </button>
+              </div>
+              <div className={styles.paginationInfo}>
+                Showing {((pagination.page - 1) * pagination.limit) + 1}–
+                {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
+              </div>
+            </>
+          )}
+        </>
+      ) : (
+        renderEmptyState()
+      )}
 
       {/* Create/Edit Modal */}
       {isModalOpen && (
@@ -532,12 +572,11 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
             <div className={styles.modalHeader}>
               <h2>{editingBlog ? 'Edit Blog' : 'Create New Blog'}</h2>
               <button className={styles.closeBtn} onClick={handleCloseModal}>
-                <FiX />
+                <FiX size={16} />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className={styles.modalForm}>
-              {/* Basic Info */}
               <div className={styles.formGroup}>
                 <label>Title <span className={styles.required}>*</span></label>
                 <input
@@ -578,12 +617,7 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
                   <label>Category <span className={styles.required}>*</span></label>
-                  <select
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    required
-                  >
+                  <select name="category" value={formData.category} onChange={handleInputChange} required>
                     {categories.map(cat => (
                       <option key={cat} value={cat}>{getCategoryLabel(cat)}</option>
                     ))}
@@ -605,11 +639,7 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
                   <label>Status</label>
-                  <select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleInputChange}
-                  >
+                  <select name="status" value={formData.status} onChange={handleInputChange}>
                     <option value="draft">Draft</option>
                     <option value="published">Published</option>
                     <option value="archived">Archived</option>
@@ -626,7 +656,6 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
                 </div>
               </div>
 
-              {/* Featured Image */}
               <div className={styles.formGroup}>
                 <label>Featured Image {!editingBlog && <span className={styles.required}>*</span>}</label>
                 <div className={styles.imageUpload}>
@@ -638,12 +667,12 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
                     id="featuredImage"
                   />
                   <label htmlFor="featuredImage" className={styles.fileLabel}>
-                    <FiImage /> {imagePreview ? 'Change Image' : 'Upload Image'}
+                    <FiImage size={15} /> {imagePreview ? 'Change Image' : 'Upload Image'}
                   </label>
                   {imagePreview && (
                     <div className={styles.imagePreview}>
                       <img src={imagePreview} alt="Preview" />
-                      <button 
+                      <button
                         type="button"
                         className={styles.removeImage}
                         onClick={() => {
@@ -651,14 +680,13 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
                           setFormData(prev => ({ ...prev, featuredImage: null }));
                         }}
                       >
-                        <FiX />
+                        <FiX size={14} />
                       </button>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* SEO Section */}
               <div className={styles.seoSection}>
                 <h3>SEO Settings</h3>
                 <div className={styles.formGroup}>
@@ -697,7 +725,6 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
                 </div>
               </div>
 
-              {/* Checkboxes */}
               <div className={styles.checkboxGroup}>
                 <label className={styles.checkboxLabel}>
                   <input
@@ -719,19 +746,14 @@ const BlogManagement = ({ activeTab = 'blog-all' }) => {
                 </label>
               </div>
 
-              {/* Actions */}
               <div className={styles.modalActions}>
                 <button type="button" className={styles.cancelBtn} onClick={handleCloseModal}>
                   Cancel
                 </button>
-                <button 
-                  type="submit" 
-                  className={styles.submitBtn}
-                  disabled={isUploading}
-                >
+                <button type="submit" className={styles.submitBtn} disabled={isUploading}>
                   {isUploading ? (
                     <>
-                      <FiLoader className={styles.spinning} /> Saving...
+                      <FiLoader size={14} className={styles.spinning} /> Saving...
                     </>
                   ) : (
                     editingBlog ? 'Update Blog' : 'Create Blog'

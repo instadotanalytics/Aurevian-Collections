@@ -1,3 +1,4 @@
+
 import React, { useCallback, useEffect, useState } from "react";
 import {
   FiMail,
@@ -18,6 +19,7 @@ import {
   FiArchive,
   FiMessageSquare,
   FiLayers,
+  FiX,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import styles from "./FranchiseManagement.module.css";
@@ -36,11 +38,11 @@ const STATUS_TABS = [
 
 const STATUS_META = {
   new: { label: "New", className: "statusNew" },
-  contacted: { label: "Contacted", className: "statusContacted" },
-  qualified: { label: "Qualified", className: "statusQualified" },
-  converted: { label: "Converted", className: "statusConverted" },
+  contacted: { label: "Contacted", className: "statusPending" },
+  qualified: { label: "Qualified", className: "statusSuspended" },
+  converted: { label: "Converted", className: "statusApproved" },
   rejected: { label: "Rejected", className: "statusRejected" },
-  archived: { label: "Archived", className: "statusArchived" },
+  archived: { label: "Archived", className: "statusNeutral" },
 };
 
 const getAuthHeaders = () => {
@@ -64,6 +66,36 @@ const formatDate = (dateStr) => {
     minute: "2-digit",
   });
 };
+
+const getInitials = (name) =>
+  name
+    ?.split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2) || "?";
+
+// Skeleton loader — mirrors the card-row skeleton used across the admin
+const SkeletonLoader = ({ count = 6 }) => (
+  <div className={styles.skeletonContainer}>
+    {Array.from({ length: count }).map((_, index) => (
+      <div key={index} className={styles.skeletonRow}>
+        <div className={styles.skeletonIndex}></div>
+        <div className={styles.skeletonName}>
+          <div className={styles.skeletonLine}></div>
+          <div className={styles.skeletonLineShort}></div>
+        </div>
+        <div className={styles.skeletonContact}></div>
+        <div className={styles.skeletonStatus}></div>
+        <div className={styles.skeletonStatus}></div>
+        <div className={styles.skeletonActions}>
+          <div className={styles.skeletonIcon}></div>
+          <div className={styles.skeletonIcon}></div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
 
 const FranchiseManagement = () => {
   const [franchises, setFranchises] = useState([]);
@@ -96,7 +128,7 @@ const FranchiseManagement = () => {
       setFranchises(data.data || []);
       setStats(data.stats || null);
     } catch (error) {
-      console.error("❌ Fetch franchises error:", error);
+      console.error("Fetch franchises error:", error);
       toast.error(error.message || "Failed to load franchise inquiries");
     } finally {
       setLoading(false);
@@ -138,7 +170,7 @@ const FranchiseManagement = () => {
       );
       toast.success("Status updated");
     } catch (error) {
-      console.error("❌ Update franchise status error:", error);
+      console.error("Update franchise status error:", error);
       toast.error(error.message || "Failed to update status");
     } finally {
       setSavingId(null);
@@ -166,7 +198,7 @@ const FranchiseManagement = () => {
       );
       toast.success("Notes saved");
     } catch (error) {
-      console.error("❌ Save franchise notes error:", error);
+      console.error("Save franchise notes error:", error);
       toast.error(error.message || "Failed to save notes");
     } finally {
       setSavingId(null);
@@ -180,75 +212,113 @@ const FranchiseManagement = () => {
       return;
     }
     try {
-      const res = await fetch(
-        `${API_BASE}/super-admin/franchises/${id}`,
-        {
-          method: "DELETE",
-          headers: getAuthHeaders(),
-          credentials: "include",
-        }
-      );
+      const res = await fetch(`${API_BASE}/super-admin/franchises/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
       const data = await res.json();
       if (!res.ok || !data.success) {
         throw new Error(data.message || "Failed to delete inquiry");
       }
       setFranchises((prev) => prev.filter((f) => f._id !== id));
+      if (expandedId === id) {
+        setExpandedId(null);
+        setNoteDraft("");
+      }
       toast.success("Franchise inquiry deleted");
     } catch (error) {
-      console.error("❌ Delete franchise error:", error);
+      console.error("Delete franchise error:", error);
       toast.error(error.message || "Failed to delete inquiry");
     }
   };
 
-  return (
-    <div className={styles.wrap}>
-      <div className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Franchise Inquiries</h1>
-          <p className={styles.subtitle}>
-            Partnership requests submitted through the website's Franchise page
-          </p>
-        </div>
-        <button
-          className={styles.refreshBtn}
-          onClick={fetchFranchises}
-          disabled={loading}
-        >
-          <FiRefreshCw className={loading ? styles.spinIcon : ""} />
-          Refresh
+  const clearFilters = () => {
+    setSearch("");
+    setStatusFilter("all");
+  };
+
+  const renderEmptyState = () => (
+    <div className={styles.emptyState}>
+      <FiBriefcase size={60} className={styles.emptyIcon} />
+      <h3>No franchise inquiries found</h3>
+      <p>
+        {search || statusFilter !== "all"
+          ? "Try adjusting your filters or search terms"
+          : "Partnership requests submitted through the website will show up here"}
+      </p>
+      {(search || statusFilter !== "all") && (
+        <button className={styles.clearFiltersBtn} onClick={clearFilters}>
+          <FiX size={16} />
+          Clear all filters
         </button>
+      )}
+    </div>
+  );
+
+  const showLoadingState = loading && franchises.length === 0;
+
+  return (
+    <div className={styles.container}>
+      {/* Header */}
+      <div className={styles.header}>
+        <div className={styles.headerLeft}>
+          <div>
+            <h1 className={styles.title}>Franchise Inquiries</h1>
+            <p className={styles.subtitle}>
+              Partnership requests submitted through the website's Franchise page
+            </p>
+          </div>
+          <span className={styles.countPill}>{stats?.total ?? 0} inquiries</span>
+        </div>
+        <div className={styles.headerRight}>
+          {stats && (
+            <div className={styles.statsBar}>
+              <span className={styles.statsLabel}>
+                <FiBriefcase size={14} />
+                Overview:
+              </span>
+              <span className={styles.statsItem}>
+                New: <strong>{stats.new}</strong>
+              </span>
+              <span className={styles.statsItem}>
+                Contacted: <strong>{stats.contacted}</strong>
+              </span>
+              <span className={styles.statsItem}>
+                Qualified: <strong>{stats.qualified}</strong>
+              </span>
+              <span className={styles.statsItem}>
+                Converted: <strong>{stats.converted}</strong>
+              </span>
+              <span className={`${styles.statsItem} ${styles.statsItemMuted}`}>
+                Rejected: <strong>{stats.rejected}</strong>
+              </span>
+            </div>
+          )}
+          <button
+            className={styles.refreshBtn}
+            onClick={fetchFranchises}
+            disabled={loading}
+            title="Refresh"
+          >
+            <FiRefreshCw size={15} className={loading ? styles.spinIcon : ""} />
+          </button>
+        </div>
       </div>
 
-      {stats && (
-        <div className={styles.statsGrid}>
-          <div className={styles.statCard}>
-            <span className={styles.statValue}>{stats.total}</span>
-            <span className={styles.statLabel}>Total</span>
-          </div>
-          <div className={`${styles.statCard} ${styles.statNew}`}>
-            <span className={styles.statValue}>{stats.new}</span>
-            <span className={styles.statLabel}>New</span>
-          </div>
-          <div className={styles.statCard}>
-            <span className={styles.statValue}>{stats.contacted}</span>
-            <span className={styles.statLabel}>Contacted</span>
-          </div>
-          <div className={styles.statCard}>
-            <span className={styles.statValue}>{stats.qualified}</span>
-            <span className={styles.statLabel}>Qualified</span>
-          </div>
-          <div className={styles.statCard}>
-            <span className={styles.statValue}>{stats.converted}</span>
-            <span className={styles.statLabel}>Converted</span>
-          </div>
-          <div className={styles.statCard}>
-            <span className={styles.statValue}>{stats.rejected}</span>
-            <span className={styles.statLabel}>Rejected</span>
-          </div>
+      {/* Filters */}
+      <div className={styles.filters}>
+        <div className={styles.searchWrapper}>
+          <FiSearch className={styles.searchIcon} />
+          <input
+            type="text"
+            className={styles.searchInput}
+            placeholder="Search by name, city, email..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
-      )}
 
-      <div className={styles.toolbar}>
         <div className={styles.tabs}>
           {STATUS_TABS.map((tab) => (
             <button
@@ -262,213 +332,262 @@ const FranchiseManagement = () => {
             </button>
           ))}
         </div>
-        <div className={styles.searchBox}>
-          <FiSearch className={styles.searchIcon} />
-          <input
-            type="text"
-            placeholder="Search by name, city, email..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
       </div>
 
-      {loading ? (
-        <div className={styles.loadingState}>Loading franchise inquiries...</div>
-      ) : franchises.length === 0 ? (
-        <div className={styles.emptyState}>
-          <FiBriefcase size={36} />
-          <p>No franchise inquiries found</p>
+      {/* Table */}
+      {showLoadingState ? (
+        <div className={styles.tableContainer}>
+          <SkeletonLoader count={6} />
         </div>
+      ) : franchises.length === 0 ? (
+        renderEmptyState()
       ) : (
-        <div className={styles.list}>
-          {franchises.map((item) => {
-            const meta = STATUS_META[item.status] || STATUS_META.new;
-            const isExpanded = expandedId === item._id;
-            return (
-              <div key={item._id} className={styles.card}>
-                <button
-                  className={styles.cardHeader}
-                  onClick={() => toggleExpand(item)}
-                >
-                  <div className={styles.cardMain}>
-                    <span
-                      className={`${styles.statusBadge} ${styles[meta.className]}`}
+        <div className={styles.tableContainer}>
+          <table className={styles.franchiseTable}>
+            <thead>
+              <tr>
+                <th className={styles.indexCell}>#</th>
+                <th className={styles.inquiryCell}>Inquiry</th>
+                <th className={styles.contactCell}>Contact</th>
+                <th className={styles.locationCell}>Location</th>
+                <th className={styles.budgetCell}>Budget / Experience</th>
+                <th className={styles.statusCellHead}>Status</th>
+                <th className={styles.dateCell}>Date</th>
+                <th className={styles.actionsCell}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {franchises.map((item, index) => {
+                const meta = STATUS_META[item.status] || STATUS_META.new;
+                const isExpanded = expandedId === item._id;
+
+                return (
+                  <React.Fragment key={item._id}>
+                    <tr
+                      className={`${styles.tableRow} ${isExpanded ? styles.tableRowActive : ""}`}
                     >
-                      {meta.label}
-                    </span>
-                    <div className={styles.cardIdentity}>
-                      <span className={styles.cardName}>{item.name}</span>
-                      <span className={styles.cardMetaRow}>
-                        <FiMail size={12} /> {item.email}
-                        {" · "}
-                        <FiPhone size={12} /> {item.phone}
-                      </span>
-                    </div>
-                  </div>
-                  <div className={styles.cardMeta}>
-                    <span className={styles.cardDate}>
-                      <FiClock size={12} /> {formatDate(item.createdAt)}
-                    </span>
-                    {isExpanded ? <FiChevronUp /> : <FiChevronDown />}
-                  </div>
-                </button>
+                      <td className={styles.indexCell} data-label="#">
+                        <span className={styles.indexNumber}>{index + 1}</span>
+                      </td>
 
-                <div className={styles.cardPreview}>
-                  <span className={styles.previewTag}>
-                    <FiMapPin size={12} /> {item.city}, {item.state}
-                  </span>
-                  {item.budget && (
-                    <span className={styles.previewTag}>
-                      <FiDollarSign size={12} /> {item.budget}
-                    </span>
-                  )}
-                  {item.experience && (
-                    <span className={styles.previewTag}>
-                      <FiBriefcase size={12} /> {item.experience}
-                    </span>
-                  )}
-                </div>
+                      <td className={styles.inquiryCell} data-label="Inquiry">
+                        <div className={styles.inquiryInfo}>
+                          <div className={styles.inquiryAvatar}>
+                            {getInitials(item.name)}
+                          </div>
+                          <div className={styles.inquiryTextWrap}>
+                            <div className={styles.inquiryName}>{item.name}</div>
+                            <div className={styles.inquiryEmail}>{item.email}</div>
+                          </div>
+                        </div>
+                      </td>
 
-                {isExpanded && (
-                  <div className={styles.cardExpanded}>
-                    <div className={styles.detailGrid}>
-                      <div className={styles.detailItem}>
-                        <label>
-                          <FiUser size={12} /> Full Name
-                        </label>
-                        <p>{item.name}</p>
-                      </div>
-                      <div className={styles.detailItem}>
-                        <label>
-                          <FiPhone size={12} /> Phone
-                        </label>
-                        <p>{item.phone}</p>
-                      </div>
-                      <div className={styles.detailItem}>
-                        <label>
-                          <FiMail size={12} /> Email
-                        </label>
-                        <p>{item.email}</p>
-                      </div>
-                      <div className={styles.detailItem}>
-                        <label>
-                          <FiMapPin size={12} /> City
-                        </label>
-                        <p>{item.city}</p>
-                      </div>
-                      <div className={styles.detailItem}>
-                        <label>
-                          <FiLayers size={12} /> State
-                        </label>
-                        <p>{item.state}</p>
-                      </div>
-                      <div className={styles.detailItem}>
-                        <label>
-                          <FiDollarSign size={12} /> Budget
-                        </label>
-                        <p>{item.budget || "—"}</p>
-                      </div>
-                      <div className={styles.detailItem}>
-                        <label>
-                          <FiHome size={12} /> Store Size
-                        </label>
-                        <p>{item.size || "—"}</p>
-                      </div>
-                      <div className={styles.detailItem}>
-                        <label>
-                          <FiBriefcase size={12} /> Experience
-                        </label>
-                        <p>{item.experience || "—"}</p>
-                      </div>
-                    </div>
+                      <td className={styles.contactCell} data-label="Contact">
+                        <div className={styles.contactInfo}>
+                          <div title={item.email}>
+                            <FiMail size={12} />
+                            <span>{item.email}</span>
+                          </div>
+                          <div title={item.phone}>
+                            <FiPhone size={12} />
+                            <span>{item.phone}</span>
+                          </div>
+                        </div>
+                      </td>
 
-                    {item.message && (
-                      <div className={styles.messageBlock}>
-                        <label>
-                          <FiMessageSquare size={12} /> Message
-                        </label>
-                        <p className={styles.fullMessage}>{item.message}</p>
-                      </div>
+                      <td className={styles.locationCell} data-label="Location">
+                        <div className={styles.locationInfo}>
+                          <FiMapPin size={12} />
+                          <span>
+                            {item.city}
+                            {item.state ? `, ${item.state}` : ""}
+                          </span>
+                        </div>
+                      </td>
+
+                      <td className={styles.budgetCell} data-label="Budget / Experience">
+                        <div className={styles.budgetInfo}>
+                          <span className={styles.budgetLine}>
+                            <FiDollarSign size={12} /> {item.budget || "—"}
+                          </span>
+                          <span className={styles.experienceLine}>
+                            <FiBriefcase size={12} /> {item.experience || "—"}
+                          </span>
+                        </div>
+                      </td>
+
+                      <td className={styles.statusCell} data-label="Status">
+                        <span
+                          className={`${styles.statusBadge} ${styles[meta.className]}`}
+                        >
+                          {meta.label}
+                        </span>
+                      </td>
+
+                      <td className={styles.dateCell} data-label="Date">
+                        <div className={styles.dateInfo}>
+                          <FiClock size={12} />
+                          <span>{formatDate(item.createdAt)}</span>
+                        </div>
+                      </td>
+
+                      <td className={styles.actionsCell} data-label="Actions">
+                        <div className={styles.actions}>
+                          <button
+                            className={styles.actionIconBtn}
+                            onClick={() => toggleExpand(item)}
+                            title={isExpanded ? "Collapse" : "View details"}
+                          >
+                            {isExpanded ? (
+                              <FiChevronUp size={14} />
+                            ) : (
+                              <FiChevronDown size={14} />
+                            )}
+                            <span className={styles.actionBtnLabel}>
+                              {isExpanded ? "Close" : "View"}
+                            </span>
+                          </button>
+                          <button
+                            className={`${styles.actionIconBtn} ${styles.deleteIconBtn}`}
+                            onClick={() => handleDelete(item._id)}
+                            title="Delete inquiry"
+                          >
+                            <FiTrash2 size={14} />
+                            <span className={styles.actionBtnLabel}>Delete</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+
+                    {isExpanded && (
+                      <tr className={styles.expandRow}>
+                        <td colSpan={8} className={styles.expandRowCell}>
+                          <div className={styles.expandBox}>
+                            <div className={styles.detailGrid}>
+                              <div className={styles.detailItem}>
+                                <label>
+                                  <FiUser size={12} /> Full name
+                                </label>
+                                <p>{item.name}</p>
+                              </div>
+                              <div className={styles.detailItem}>
+                                <label>
+                                  <FiPhone size={12} /> Phone
+                                </label>
+                                <p>{item.phone}</p>
+                              </div>
+                              <div className={styles.detailItem}>
+                                <label>
+                                  <FiMail size={12} /> Email
+                                </label>
+                                <p>{item.email}</p>
+                              </div>
+                              <div className={styles.detailItem}>
+                                <label>
+                                  <FiMapPin size={12} /> City
+                                </label>
+                                <p>{item.city || "—"}</p>
+                              </div>
+                              <div className={styles.detailItem}>
+                                <label>
+                                  <FiLayers size={12} /> State
+                                </label>
+                                <p>{item.state || "—"}</p>
+                              </div>
+                              <div className={styles.detailItem}>
+                                <label>
+                                  <FiDollarSign size={12} /> Budget
+                                </label>
+                                <p>{item.budget || "—"}</p>
+                              </div>
+                              <div className={styles.detailItem}>
+                                <label>
+                                  <FiHome size={12} /> Store size
+                                </label>
+                                <p>{item.size || "—"}</p>
+                              </div>
+                              <div className={styles.detailItem}>
+                                <label>
+                                  <FiBriefcase size={12} /> Experience
+                                </label>
+                                <p>{item.experience || "—"}</p>
+                              </div>
+                            </div>
+
+                            {item.message && (
+                              <div className={styles.messageBlock}>
+                                <label>
+                                  <FiMessageSquare size={12} /> Message
+                                </label>
+                                <p className={styles.fullMessage}>{item.message}</p>
+                              </div>
+                            )}
+
+                            <div className={styles.actionsRow}>
+                              <div className={styles.statusActions}>
+                                <button
+                                  className={styles.statusActionBtn}
+                                  disabled={savingId === item._id}
+                                  onClick={() => updateStatus(item._id, "contacted")}
+                                >
+                                  <FiCheckCircle size={13} /> Mark contacted
+                                </button>
+                                <button
+                                  className={styles.statusActionBtn}
+                                  disabled={savingId === item._id}
+                                  onClick={() => updateStatus(item._id, "qualified")}
+                                >
+                                  <FiCheckCircle size={13} /> Mark qualified
+                                </button>
+                                <button
+                                  className={styles.statusActionBtn}
+                                  disabled={savingId === item._id}
+                                  onClick={() => updateStatus(item._id, "converted")}
+                                >
+                                  <FiCheckCircle size={13} /> Mark converted
+                                </button>
+                                <button
+                                  className={`${styles.statusActionBtn} ${styles.rejectActionBtn}`}
+                                  disabled={savingId === item._id}
+                                  onClick={() => updateStatus(item._id, "rejected")}
+                                >
+                                  <FiXCircle size={13} /> Reject
+                                </button>
+                                <button
+                                  className={styles.statusActionBtn}
+                                  disabled={savingId === item._id}
+                                  onClick={() => updateStatus(item._id, "archived")}
+                                >
+                                  <FiArchive size={13} /> Archive
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className={styles.notesBlock}>
+                              <label>Admin notes</label>
+                              <textarea
+                                rows={3}
+                                value={noteDraft}
+                                onChange={(e) => setNoteDraft(e.target.value)}
+                                placeholder="Internal notes about this lead..."
+                              />
+                              <button
+                                className={styles.saveNotesBtn}
+                                disabled={savingId === item._id}
+                                onClick={() => saveNotes(item._id)}
+                              >
+                                Save notes
+                              </button>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
                     )}
-
-                    <div className={styles.actionsRow}>
-                      <div className={styles.statusActions}>
-                        <button
-                          className={styles.actionBtn}
-                          disabled={savingId === item._id}
-                          onClick={() =>
-                            updateStatus(item._id, "contacted")
-                          }
-                        >
-                          <FiCheckCircle size={14} /> Mark Contacted
-                        </button>
-                        <button
-                          className={styles.actionBtn}
-                          disabled={savingId === item._id}
-                          onClick={() =>
-                            updateStatus(item._id, "qualified")
-                          }
-                        >
-                          <FiCheckCircle size={14} /> Mark Qualified
-                        </button>
-                        <button
-                          className={styles.actionBtn}
-                          disabled={savingId === item._id}
-                          onClick={() =>
-                            updateStatus(item._id, "converted")
-                          }
-                        >
-                          <FiCheckCircle size={14} /> Mark Converted
-                        </button>
-                        <button
-                          className={styles.actionBtn}
-                          disabled={savingId === item._id}
-                          onClick={() =>
-                            updateStatus(item._id, "rejected")
-                          }
-                        >
-                          <FiXCircle size={14} /> Reject
-                        </button>
-                        <button
-                          className={styles.actionBtn}
-                          disabled={savingId === item._id}
-                          onClick={() =>
-                            updateStatus(item._id, "archived")
-                          }
-                        >
-                          <FiArchive size={14} /> Archive
-                        </button>
-                      </div>
-                      <button
-                        className={styles.deleteBtn}
-                        onClick={() => handleDelete(item._id)}
-                      >
-                        <FiTrash2 size={14} /> Delete
-                      </button>
-                    </div>
-
-                    <div className={styles.notesBlock}>
-                      <label>Admin Notes</label>
-                      <textarea
-                        rows={3}
-                        value={noteDraft}
-                        onChange={(e) => setNoteDraft(e.target.value)}
-                        placeholder="Internal notes about this lead..."
-                      />
-                      <button
-                        className={styles.saveNotesBtn}
-                        disabled={savingId === item._id}
-                        onClick={() => saveNotes(item._id)}
-                      >
-                        Save Notes
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
