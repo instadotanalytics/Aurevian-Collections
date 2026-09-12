@@ -146,11 +146,11 @@ const SkeletonLoader = ({ count = 4 }) => (
           <div className={styles.skeletonHeaderLeft}>
             <div
               className={styles.skeletonLine}
-              style={{ width: "120px" }}
+              style={{ width: "110px" }}
             ></div>
             <div
               className={styles.skeletonLineShort}
-              style={{ width: "80px" }}
+              style={{ width: "70px" }}
             ></div>
           </div>
           <div className={styles.skeletonPill}></div>
@@ -323,7 +323,7 @@ const OrdersManagement = () => {
 
   const renderEmptyState = () => (
     <div className={styles.emptyState}>
-      <FiInbox size={60} className={styles.emptyIcon} />
+      <FiInbox size={44} className={styles.emptyIcon} />
       <h3>No orders in this queue</h3>
       <p>
         {search
@@ -335,7 +335,7 @@ const OrdersManagement = () => {
           className={styles.clearFiltersBtn}
           onClick={() => setSearch("")}
         >
-          <FiX size={18} />
+          <FiX size={14} />
           Clear Search
         </button>
       )}
@@ -355,7 +355,7 @@ const OrdersManagement = () => {
         <div className={styles.headerRight}>
           <div className={styles.statsBar}>
             <span className={styles.statsLabel}>
-              <FiCreditCard size={14} />
+              <FiCreditCard size={12} />
               Payments:
             </span>
             <span className={styles.statsItem}>
@@ -375,7 +375,7 @@ const OrdersManagement = () => {
             className={styles.refreshBtn}
             onClick={() => loadOrders(activeTab)}
           >
-            <FiRefreshCw size={14} /> Refresh
+            <FiRefreshCw size={12} /> Refresh
           </button>
         </div>
       </div>
@@ -402,7 +402,7 @@ const OrdersManagement = () => {
             className={styles.clearFiltersBtn}
             onClick={() => setSearch("")}
           >
-            <FiX size={16} />
+            <FiX size={14} />
             Clear
           </button>
         )}
@@ -420,9 +420,10 @@ const OrdersManagement = () => {
                 className={`${styles.tab} ${isActive ? styles.tabActive : ""}`}
                 style={{ "--tab-accent": TAB_ACCENT_COLOR[tab.accent] }}
                 onClick={() => setActiveTab(tab.key)}
+                title={tab.label}
               >
                 <Icon
-                  size={14}
+                  size={13}
                   className={styles.tabIcon}
                   style={{
                     color: isActive ? TAB_ACCENT_COLOR[tab.accent] : undefined,
@@ -454,13 +455,13 @@ const OrdersManagement = () => {
                 <div className={styles.orderCardHeader}>
                   <div className={styles.orderHeaderLeft}>
                     <div className={styles.orderNumberWrap}>
-                      <FiPackage size={14} className={styles.orderNumberIcon} />
+                      <FiPackage size={12} className={styles.orderNumberIcon} />
                       <span className={styles.orderNumber}>
                         #{order.orderNumber}
                       </span>
                     </div>
                     <div className={styles.orderDateWrap}>
-                      <FiCalendar size={12} />
+                      <FiCalendar size={11} />
                       <span className={styles.orderDate}>
                         {new Date(order.createdAt).toLocaleDateString("en-IN", {
                           day: "numeric",
@@ -474,7 +475,7 @@ const OrdersManagement = () => {
                     <span
                       className={`${styles.statusBadge} ${paymentBadge.className}`}
                     >
-                      <FiCreditCard size={11} />
+                      <FiCreditCard size={10} />
                       {paymentBadge.label}
                     </span>
                   </div>
@@ -484,13 +485,13 @@ const OrdersManagement = () => {
                 <div className={styles.orderInfoGrid}>
                   <div className={styles.infoBlock}>
                     <span className={styles.infoLabel}>
-                      <FiUser size={12} /> Customer
+                      <FiUser size={10} /> Customer
                     </span>
                     <span className={styles.infoValue}>
                       {order.customerName}
                     </span>
                     <span className={styles.infoSub}>
-                      <FiMapPin size={11} />
+                      <FiMapPin size={10} />
                       {order.shippingAddress?.addressLine1},{" "}
                       {order.shippingAddress?.city},{" "}
                       {order.shippingAddress?.state} -{" "}
@@ -499,7 +500,7 @@ const OrdersManagement = () => {
                   </div>
                   <div className={styles.infoBlock}>
                     <span className={styles.infoLabel}>
-                      <FiShoppingBag size={12} /> Seller
+                      <FiShoppingBag size={10} /> Seller
                     </span>
                     <span className={styles.infoValue}>
                       {order.seller?.storeInfo?.storeName ||
@@ -519,7 +520,7 @@ const OrdersManagement = () => {
                         <span className={styles.itemName}>{item.name}</span>
                         <span className={styles.itemQty}>x{item.quantity}</span>
                         <span className={styles.itemPrice}>
-                          <FaRupeeSign size={11} />
+                          <FaRupeeSign size={9} />
                           {item.subtotal.toLocaleString("en-IN")}
                         </span>
                       </div>
@@ -532,14 +533,14 @@ const OrdersManagement = () => {
                   <div className={styles.metaBlock}>
                     <span className={styles.metaLabel}>Total Amount</span>
                     <span className={styles.metaValue}>
-                      <FaRupeeSign size={11} />
+                      <FaRupeeSign size={10} />
                       {order.totalAmount.toLocaleString("en-IN")}
                     </span>
                   </div>
                   <div className={styles.metaBlock}>
                     <span className={styles.metaLabel}>Shipping Fee</span>
                     <span className={styles.metaValue}>
-                      <FaRupeeSign size={11} />
+                      <FaRupeeSign size={10} />
                       {order.shippingFee.toLocaleString("en-IN")}
                     </span>
                   </div>
@@ -568,7 +569,7 @@ const OrdersManagement = () => {
                     order.shipping.status ||
                     order.shipping.lastError) && (
                     <div className={styles.shippingInfo}>
-                      <FiTruck size={14} className={styles.shippingIcon} />
+                      <FiTruck size={12} className={styles.shippingIcon} />
                       <span className={styles.shippingText}>
                         {order.shipping.shiprocketOrderId
                           ? `Shiprocket #${order.shipping.shiprocketOrderId}`
@@ -582,7 +583,7 @@ const OrdersManagement = () => {
                       </span>
                       {order.shipping.lastError && (
                         <span className={styles.shippingError}>
-                          <FiAlertCircle size={12} />
+                          <FiAlertCircle size={11} />
                           {order.shipping.lastError}
                         </span>
                       )}
@@ -599,7 +600,7 @@ const OrdersManagement = () => {
                   {order.fulfillmentStatus === "ADMIN_REJECTED" &&
                     order.adminRejectionReason && (
                       <span className={styles.rejectionReasonText}>
-                        <FiAlertCircle size={12} />
+                        <FiAlertCircle size={11} />
                         Reason: {order.adminRejectionReason}
                       </span>
                     )}
@@ -613,7 +614,7 @@ const OrdersManagement = () => {
                       disabled={actioningId === order._id}
                       onClick={() => handleApprove(order._id)}
                     >
-                      <FiCheck size={14} />
+                      <FiCheck size={13} />
                       <span>
                         {actioningId === order._id
                           ? "Approving..."
@@ -625,7 +626,7 @@ const OrdersManagement = () => {
                       disabled={actioningId === order._id}
                       onClick={() => openRejectDialog(order._id)}
                     >
-                      <FiX size={14} />
+                      <FiX size={13} />
                       <span>Reject</span>
                     </button>
                   </div>
@@ -639,7 +640,7 @@ const OrdersManagement = () => {
                       disabled={actioningId === order._id}
                       onClick={() => handleRetrySync(order._id)}
                     >
-                      <FiRefreshCw size={14} />
+                      <FiRefreshCw size={13} />
                       <span>
                         {actioningId === order._id
                           ? "Retrying..."
@@ -662,7 +663,7 @@ const OrdersManagement = () => {
         >
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalIconWrap}>
-              <FiPackage size={22} />
+              <FiPackage size={18} />
             </div>
             <h3 className={styles.modalTitle}>Reject Fulfillment</h3>
             <p className={styles.modalSub}>

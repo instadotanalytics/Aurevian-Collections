@@ -1,3 +1,4 @@
+
 // src/Pages/SuperAdmin/SuperAdminDashboard/components/DashboardOverview.jsx
 
 import React, { useState, useEffect } from 'react';
@@ -10,20 +11,26 @@ import {
   FiUserX,
   FiClock,
   FiAlertCircle,
-  FiTrendingUp,
-  FiTrendingDown,
-  FiActivity,
   FiShoppingBag,
-  FiDollarSign,
-  FiPackage,
-  FiStar,
-  FiCalendar,
   FiArrowRight,
-  FiRefreshCw
+  FiRefreshCw,
+  FiCalendar,
 } from 'react-icons/fi';
 import StatsCards from './StatsCards';
 import RecentActivities from './RecentActivities';
 import styles from './DashboardOverview.module.css';
+
+// Skeleton Loader Component — mirrors SellerRequests' row skeleton
+const SkeletonRows = ({ count = 4 }) => (
+  <>
+    {Array.from({ length: count }).map((_, index) => (
+      <div key={index} className={styles.skeletonRow}>
+        <div className={styles.skeletonAvatar}></div>
+        <div className={styles.skeletonLine}></div>
+      </div>
+    ))}
+  </>
+);
 
 const DashboardOverview = () => {
   const dispatch = useDispatch();
@@ -38,7 +45,7 @@ const DashboardOverview = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch seller stats
       const statsRes = await axios.get('/api/super-admin/sellers/stats', {
         headers: { Authorization: `Bearer ${token}` }
@@ -69,17 +76,17 @@ const DashboardOverview = () => {
 
   const generateActivities = (sellers) => {
     const activities = [];
-    
+
     sellers.forEach(seller => {
       const statusMap = {
-        'pending': { icon: <FiClock />, label: 'New seller registration', color: '#f59e0b' },
+        'pending': { icon: <FiClock />, label: 'New seller registration', color: '#d97706' },
         'approved': { icon: <FiUserCheck />, label: 'Seller approved', color: '#10b981' },
         'rejected': { icon: <FiUserX />, label: 'Seller rejected', color: '#ef4444' },
-        'suspended': { icon: <FiAlertCircle />, label: 'Seller suspended', color: '#8b5cf6' },
+        'suspended': { icon: <FiAlertCircle />, label: 'Seller suspended', color: '#3b82f6' },
       };
-      
+
       const activity = statusMap[seller.status] || statusMap.pending;
-      
+
       activities.push({
         id: seller._id,
         type: 'seller',
@@ -141,6 +148,34 @@ const DashboardOverview = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const getInitials = (name) =>
+    name
+      ?.split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase() || 'S';
+
+  const getSellerStatusBadge = (status) => {
+    const map = {
+      pending: styles.statusPending,
+      approved: styles.statusApproved,
+      rejected: styles.statusRejected,
+      suspended: styles.statusSuspended,
+      under_review: styles.statusNeutral,
+    };
+    return map[status] || styles.statusNeutral;
+  };
+
+  const getOrderStatusBadge = (status) => {
+    const map = {
+      delivered: styles.statusApproved,
+      processing: styles.statusPending,
+      shipped: styles.statusSuspended,
+      pending: styles.statusRejected,
+    };
+    return map[status] || styles.statusNeutral;
+  };
+
   if (loading && !stats) {
     return (
       <div className={styles.loadingContainer}>
@@ -150,139 +185,183 @@ const DashboardOverview = () => {
     );
   }
 
+  const showLoadingState = loading && recentSellers.length === 0 && recentOrders.length === 0;
+
   return (
-    <div className={styles.dashboardOverview}>
-      {/* Welcome Section */}
-      <div className={styles.welcomeSection}>
-        <div className={styles.welcomeContent}>
-          <h1 className={styles.welcomeTitle}>👋 Welcome to Super Admin Dashboard</h1>
-          <p className={styles.welcomeSubtitle}>
-            Here's an overview of your platform's performance and recent activities
-          </p>
+    <div className={styles.container}>
+      {/* Header — same shape as SellerRequests: title + count pill,
+          stats bar on the right */}
+      <div className={styles.header}>
+        <div className={styles.headerLeft}>
+          <h1 className={styles.title}>Dashboard Overview</h1>
+          <span className={styles.countPill}>{stats?.total ?? 0} sellers</span>
         </div>
-        <div className={styles.welcomeStats}>
-          <div className={styles.welcomeStat}>
-            <span className={styles.welcomeStatValue}>{stats?.total || 0}</span>
-            <span className={styles.welcomeStatLabel}>Total Sellers</span>
+        {stats && (
+          <div className={styles.headerRight}>
+            <div className={styles.statsBar}>
+              <span className={styles.statsLabel}>
+                <FiUsers size={14} />
+                Overview:
+              </span>
+              <span className={styles.statsItem}>
+                Active: <strong>{stats.active}</strong>
+              </span>
+              <span className={styles.statsItem}>
+                Pending: <strong>{stats.pending}</strong>
+              </span>
+              <span className={styles.statsItem}>
+                Rejected: <strong>{stats.rejected}</strong>
+              </span>
+              <span className={styles.statsItem}>
+                Suspended: <strong>{stats.suspended}</strong>
+              </span>
+            </div>
           </div>
-          <div className={styles.welcomeStat}>
-            <span className={styles.welcomeStatValue}>{stats?.active || 0}</span>
-            <span className={styles.welcomeStatLabel}>Active Sellers</span>
-          </div>
-          <div className={styles.welcomeStat}>
-            <span className={styles.welcomeStatValue}>{stats?.pending || 0}</span>
-            <span className={styles.welcomeStatLabel}>Pending Approvals</span>
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards (existing component) */}
       <StatsCards stats={stats} />
 
-      {/* Recent Activity and Orders */}
+      {/* Recent Activity + Recent Orders */}
       <div className={styles.twoColumnLayout}>
         <div className={styles.leftColumn}>
           <RecentActivities activities={recentActivities} title="Recent Seller Activity" />
         </div>
         <div className={styles.rightColumn}>
-          <div className={styles.recentOrders}>
+          <div className={styles.section}>
             <div className={styles.sectionHeader}>
               <h3 className={styles.sectionTitle}>
-                <FiShoppingBag className={styles.sectionIcon} />
+                <FiShoppingBag className={styles.sectionIcon} size={16} />
                 Recent Orders
               </h3>
               <button className={styles.viewAllBtn}>
-                View All <FiArrowRight />
+                View All <FiArrowRight size={13} />
               </button>
             </div>
-            <div className={styles.ordersList}>
-              {recentOrders.length === 0 ? (
+            <div className={styles.tableContainer}>
+              {showLoadingState ? (
+                <SkeletonRows count={4} />
+              ) : recentOrders.length === 0 ? (
                 <div className={styles.emptyState}>
-                  <p>No recent orders</p>
+                  <FiShoppingBag size={40} className={styles.emptyIcon} />
+                  <h3>No recent orders</h3>
+                  <p>Orders will show up here as they come in.</p>
                 </div>
               ) : (
-                recentOrders.map((order) => (
-                  <div key={order._id} className={styles.orderItem}>
-                    <div className={styles.orderInfo}>
-                      <span className={styles.orderNumber}>#{order.orderNumber}</span>
-                      <span className={styles.orderCustomer}>{order.customer}</span>
-                    </div>
-                    <div className={styles.orderDetails}>
-                      <span className={styles.orderTotal}>${order.total.toFixed(2)}</span>
-                      <span className={`${styles.orderStatus} ${styles[order.status]}`}>
-                        {order.status}
-                      </span>
-                      <span className={styles.orderTime}>
-                        {new Date(order.date).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                ))
+                <table className={styles.dashTable}>
+                  <thead>
+                    <tr>
+                      <th className={styles.orderCell}>Order</th>
+                      <th className={styles.amountCell}>Amount</th>
+                      <th className={styles.statusCell}>Status</th>
+                      <th className={styles.dateCell}>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentOrders.map((order) => (
+                      <tr key={order._id} className={styles.tableRow}>
+                        <td className={styles.orderCell} data-label="Order">
+                          <div className={styles.orderInfo}>
+                            <span className={styles.orderNumber}>#{order.orderNumber}</span>
+                            <span className={styles.orderCustomer}>{order.customer}</span>
+                          </div>
+                        </td>
+                        <td className={styles.amountCell} data-label="Amount">
+                          <span className={styles.amountValue}>${order.total.toFixed(2)}</span>
+                        </td>
+                        <td className={styles.statusCell} data-label="Status">
+                          <span className={`${styles.statusBadge} ${getOrderStatusBadge(order.status)}`}>
+                            {order.status}
+                          </span>
+                        </td>
+                        <td className={styles.dateCell} data-label="Date">
+                          <div className={styles.dateInfo}>
+                            <FiCalendar size={12} />
+                            <span>{new Date(order.date).toLocaleDateString()}</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Recent Sellers Table */}
-      <div className={styles.recentSellers}>
+      {/* Recent Sellers — same table pattern as SellerRequests */}
+      <div className={styles.section}>
         <div className={styles.sectionHeader}>
           <h3 className={styles.sectionTitle}>
-            <FiUsers className={styles.sectionIcon} />
+            <FiUsers className={styles.sectionIcon} size={16} />
             Recent Seller Registrations
           </h3>
           <button className={styles.viewAllBtn}>
-            View All <FiArrowRight />
+            View All <FiArrowRight size={13} />
           </button>
         </div>
-        <div className={styles.sellersTable}>
-          <table>
-            <thead>
-              <tr>
-                <th>Seller</th>
-                <th>Store</th>
-                <th>Email</th>
-                <th>Status</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentSellers.length === 0 ? (
+        <div className={styles.tableContainer}>
+          {showLoadingState ? (
+            <SkeletonRows count={5} />
+          ) : recentSellers.length === 0 ? (
+            <div className={styles.emptyState}>
+              <FiUsers size={40} className={styles.emptyIcon} />
+              <h3>No sellers registered yet</h3>
+              <p>Seller applications will show up here once submitted.</p>
+            </div>
+          ) : (
+            <table className={styles.dashTable}>
+              <thead>
                 <tr>
-                  <td colSpan="5" className={styles.emptyRow}>
-                    <div className={styles.emptyState}>
-                      <p>No sellers registered yet</p>
-                    </div>
-                  </td>
+                  <th className={styles.sellerCell}>Seller</th>
+                  <th className={styles.storeCell}>Store</th>
+                  <th className={styles.statusCell}>Status</th>
+                  <th className={styles.dateCell}>Date</th>
                 </tr>
-              ) : (
-                recentSellers.map((seller) => (
-                  <tr key={seller._id}>
-                    <td>
-                      <div className={styles.sellerCell}>
+              </thead>
+              <tbody>
+                {recentSellers.map((seller) => (
+                  <tr key={seller._id} className={styles.tableRow}>
+                    <td className={styles.sellerCell} data-label="Seller">
+                      <div className={styles.sellerInfo}>
                         <div className={styles.sellerAvatar}>
                           {seller.profileImage ? (
                             <img src={seller.profileImage} alt={seller.fullName} />
                           ) : (
-                            <span>{seller.fullName?.[0] || 'S'}</span>
+                            <span>{getInitials(seller.fullName)}</span>
                           )}
                         </div>
-                        <span className={styles.sellerName}>{seller.fullName}</span>
+                        <div>
+                          <div className={styles.sellerName}>{seller.fullName}</div>
+                          <div className={styles.sellerEmail}>{seller.email}</div>
+                        </div>
                       </div>
                     </td>
-                    <td>{seller.storeInfo?.storeName || 'N/A'}</td>
-                    <td>{seller.email}</td>
-                    <td>
-                      <span className={`${styles.statusBadge} ${styles[seller.status]}`}>
+                    <td className={styles.storeCell} data-label="Store">
+                      <div className={styles.storeInfo}>
+                        <strong title={seller.storeInfo?.storeName}>
+                          {seller.storeInfo?.storeName || 'N/A'}
+                        </strong>
+                      </div>
+                    </td>
+                    <td className={styles.statusCell} data-label="Status">
+                      <span className={`${styles.statusBadge} ${getSellerStatusBadge(seller.status)}`}>
                         {seller.status || 'pending'}
                       </span>
                     </td>
-                    <td>{new Date(seller.createdAt).toLocaleDateString()}</td>
+                    <td className={styles.dateCell} data-label="Date">
+                      <div className={styles.dateInfo}>
+                        <FiCalendar size={12} />
+                        <span>{new Date(seller.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>

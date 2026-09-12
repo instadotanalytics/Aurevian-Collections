@@ -1,7 +1,7 @@
 
 /* src/Pages/SuperAdmin/components/OrdersManagement/OrdersManagement.module.css */
-/* Design tokens match SellerRequests.module.css exactly, so this screen
-   reads as part of the same product. */
+/* Design tokens match SellerRequests.module.css. Compact pass: tighter
+   paddings, smaller type scale, denser rows — especially on mobile. */
 
 /* ============================================
    ROOT
@@ -14,13 +14,14 @@
     BlinkMacSystemFont,
     sans-serif;
   color: #14140f;
-  animation: fadeIn 0.4s ease;
+  animation: fadeIn 0.3s ease;
+  font-size: 13px;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -34,38 +35,38 @@
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 12px;
+  align-items: center;
+  margin-bottom: 10px;
   flex-wrap: wrap;
-  gap: 16px;
-  padding: 20px 24px;
+  gap: 10px;
+  padding: 12px 16px;
   background: #ffffff;
   border: 1px solid #e8e3dc;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 .headerLeft {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .title {
-  font-size: 28px;
+  font-size: 18px;
   font-weight: 700;
   color: #14140f;
   margin: 0;
 }
 
 .countPill {
-  padding: 4px 14px;
+  padding: 3px 10px;
   background: #f5f2ee;
   border: 1px solid #e8e3dc;
   border-radius: 20px;
   color: #55554d;
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -73,36 +74,36 @@
 .headerRight {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .statsBar {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 8px 16px;
+  gap: 10px;
+  padding: 6px 12px;
   background: #faf9f5;
   border: 1px solid #e8e3dc;
-  border-radius: 8px;
+  border-radius: 7px;
   flex-wrap: wrap;
 }
 
 .statsLabel {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   color: #8a8072;
-  font-size: 12px;
+  font-size: 10.5px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
   white-space: nowrap;
 }
 
 .statsItem {
   color: #55554d;
-  font-size: 13px;
+  font-size: 11.5px;
   white-space: nowrap;
 }
 
@@ -114,21 +115,21 @@
 
 .pageSubtitle {
   color: #8a8072;
-  font-size: 13.5px;
-  margin: 0 0 20px;
+  font-size: 12px;
+  margin: 0 0 12px;
   max-width: 720px;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .refreshBtn {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   background: #ffffff;
   border: 1px solid #e8e3dc;
-  padding: 9px 16px;
-  border-radius: 8px;
-  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 7px;
+  font-size: 11.5px;
   font-weight: 500;
   cursor: pointer;
   color: #55554d;
@@ -148,21 +149,21 @@
    ============================================ */
 .filters {
   display: flex;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
 }
 
 .searchWrapper {
   flex: 1;
-  min-width: 220px;
+  min-width: 200px;
   display: flex;
   align-items: center;
   background: #ffffff;
   border: 1px solid #e8e3dc;
-  border-radius: 8px;
-  padding: 0 14px;
-  transition: all 0.3s ease;
+  border-radius: 7px;
+  padding: 0 10px;
+  transition: all 0.2s ease;
 }
 
 .searchWrapper:focus-within {
@@ -172,22 +173,22 @@
 
 .searchIcon {
   color: #8a8072;
-  font-size: 18px;
-  margin-right: 10px;
+  font-size: 15px;
+  margin-right: 8px;
   flex-shrink: 0;
 }
 
 .searchInput {
   flex: 1;
-  padding: 10px 0;
+  padding: 7px 0;
   background: transparent;
   border: none;
   color: #14140f;
-  font-size: 14px;
+  font-size: 12.5px;
   outline: none;
   font-family: inherit;
   width: 100%;
-  min-width: 120px;
+  min-width: 100px;
 }
 
 .searchInput::placeholder {
@@ -198,15 +199,15 @@
 .clearFiltersBtn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 16px;
+  gap: 5px;
+  padding: 7px 12px;
   background: rgba(239, 68, 68, 0.08);
   border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: 8px;
+  border-radius: 7px;
   color: #ef4444;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 13px;
+  transition: all 0.2s ease;
+  font-size: 11.5px;
   font-weight: 500;
   font-family: inherit;
   white-space: nowrap;
@@ -220,7 +221,7 @@
    TABS — segmented control style
    ============================================ */
 .tabsWrap {
-  margin-bottom: 24px;
+  margin-bottom: 14px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -233,11 +234,11 @@
 .tabsTrack {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   background: #f5f2ee;
   border: 1px solid #e8e3dc;
-  border-radius: 14px;
-  padding: 5px;
+  border-radius: 11px;
+  padding: 3px;
   min-width: max-content;
 }
 
@@ -245,12 +246,12 @@
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 5px;
   background: transparent;
   border: none;
-  padding: 9px 16px;
-  border-radius: 10px;
-  font-size: 12.5px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 11.5px;
   font-weight: 600;
   color: #6f6a5e;
   cursor: pointer;
@@ -271,7 +272,7 @@
   background: #ffffff;
   color: #14140f;
   box-shadow:
-    0 2px 6px rgba(20, 20, 15, 0.08),
+    0 1px 4px rgba(20, 20, 15, 0.08),
     0 0 0 1px rgba(200, 168, 110, 0.18);
 }
 
@@ -279,10 +280,10 @@
   content: "";
   position: absolute;
   left: 50%;
-  bottom: 3px;
+  bottom: 2px;
   transform: translateX(-50%);
-  width: 16px;
-  height: 2.5px;
+  width: 13px;
+  height: 2px;
   border-radius: 2px;
   background: var(--tab-accent, #c8a86e);
 }
@@ -299,15 +300,15 @@
 .ordersList {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 
 .orderCard {
   background: #ffffff;
   border: 1px solid #e8e3dc;
-  border-radius: 12px;
-  padding: 20px 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border-radius: 10px;
+  padding: 12px 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
@@ -315,7 +316,7 @@
 
 .orderCard:hover {
   border-color: #d8cfbe;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
 }
 
 /* Card Header */
@@ -323,24 +324,24 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
   flex-wrap: wrap;
-  padding-bottom: 14px;
-  margin-bottom: 16px;
+  padding-bottom: 9px;
+  margin-bottom: 9px;
   border-bottom: 1px solid #f0edeb;
 }
 
 .orderHeaderLeft {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .orderNumberWrap {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .orderNumberIcon {
@@ -350,16 +351,16 @@
 .orderNumber {
   font-family: "SFMono-Regular", Consolas, monospace;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 13px;
   color: #a0804a;
 }
 
 .orderDateWrap {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   color: #8a8072;
-  font-size: 12.5px;
+  font-size: 11px;
 }
 
 .orderDate {
@@ -369,40 +370,40 @@
 .orderHeaderRight {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
-/* Order Info Grid */
+/* Order Info Grid — compacted into a single inline row on desktop */
 .orderInfoGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 9px;
 }
 
 .infoBlock {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 12px 14px;
+  gap: 2px;
+  padding: 7px 10px;
   background: #faf9f5;
   border: 1px solid #f0edeb;
-  border-radius: 8px;
+  border-radius: 7px;
 }
 
 .infoLabel {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 11px;
+  gap: 4px;
+  font-size: 9.5px;
   color: #8a8072;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
   font-weight: 600;
 }
 
 .infoValue {
-  font-size: 13.5px;
+  font-size: 12px;
   font-weight: 600;
   color: #14140f;
 }
@@ -410,25 +411,25 @@
 .infoSub {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 12px;
+  gap: 4px;
+  font-size: 10.5px;
   color: #8a8072;
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 /* Items Section */
 .itemsSection {
-  margin-bottom: 16px;
+  margin-bottom: 9px;
 }
 
 .sectionLabel {
   display: block;
-  font-size: 11px;
+  font-size: 9.5px;
   color: #8a8072;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
 }
 
 .itemsList {
@@ -436,16 +437,16 @@
   flex-direction: column;
   gap: 0;
   border: 1px solid #f0edeb;
-  border-radius: 8px;
+  border-radius: 7px;
   overflow: hidden;
 }
 
 .itemRow {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  font-size: 13px;
+  gap: 8px;
+  padding: 5px 10px;
+  font-size: 11.5px;
   border-bottom: 1px solid #faf9f5;
   background: #ffffff;
 }
@@ -455,10 +456,10 @@
 }
 
 .itemRow img {
-  width: 36px;
-  height: 36px;
+  width: 26px;
+  height: 26px;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: 5px;
   border: 1px solid #f0edeb;
   flex-shrink: 0;
 }
@@ -474,7 +475,7 @@
 
 .itemQty {
   color: #8a8072;
-  font-size: 12.5px;
+  font-size: 11px;
   white-space: nowrap;
 }
 
@@ -486,36 +487,37 @@
   color: #14140f;
   flex-shrink: 0;
   white-space: nowrap;
+  font-size: 11.5px;
 }
 
 /* Meta Row */
 .metaRow {
   display: flex;
-  gap: 24px;
+  gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
-  padding: 14px 16px;
+  margin-bottom: 9px;
+  padding: 8px 12px;
   background: #faf9f5;
   border: 1px solid #f0edeb;
-  border-radius: 8px;
+  border-radius: 7px;
 }
 
 .metaBlock {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .metaLabel {
-  font-size: 11px;
+  font-size: 9.5px;
   color: #8a8072;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
   font-weight: 600;
 }
 
 .metaValue {
-  font-size: 13.5px;
+  font-size: 12px;
   color: #14140f;
   font-weight: 600;
   display: flex;
@@ -523,18 +525,16 @@
   gap: 2px;
 }
 
-/* Status Badges — same five-hue system used across the admin app
-   (Fixed: previously every state was hardcoded to gold — restored the
-   grey / amber / green / blue / red hues used in SellerRequests) */
+/* Status Badges */
 .statusBadge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 11px;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 10px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.15px;
   white-space: nowrap;
   width: fit-content;
   text-transform: capitalize;
@@ -574,14 +574,14 @@
 .shippingInfo {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 12.5px;
+  gap: 8px;
+  font-size: 11px;
   color: #55554d;
   background: #faf9f5;
   border: 1px solid #f0edeb;
-  padding: 10px 14px;
-  border-radius: 8px;
-  margin-bottom: 14px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  margin-bottom: 9px;
   flex-wrap: wrap;
 }
 
@@ -598,29 +598,29 @@
 .shippingError {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   color: #ef4444;
-  font-size: 12px;
+  font-size: 10.5px;
   font-weight: 500;
   background: rgba(239, 68, 68, 0.08);
-  padding: 3px 8px;
-  border-radius: 6px;
+  padding: 2px 7px;
+  border-radius: 5px;
 }
 
 /* Fulfillment Row */
 .fulfillmentRow {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  margin-bottom: 9px;
 }
 
 .rejectionReasonText {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 12.5px;
+  gap: 4px;
+  font-size: 11px;
   color: #ef4444;
   font-weight: 500;
 }
@@ -628,19 +628,19 @@
 /* Actions */
 .actionRow {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
-  padding-top: 16px;
+  padding-top: 9px;
   border-top: 1px solid #f0edeb;
 }
 
 .actionBtn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 9px 18px;
-  border-radius: 8px;
-  font-size: 13px;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 7px;
+  font-size: 11.5px;
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
@@ -656,7 +656,7 @@
 
 .approveBtn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(200, 168, 110, 0.35);
+  box-shadow: 0 5px 12px rgba(200, 168, 110, 0.32);
 }
 
 .rejectBtn {
@@ -683,53 +683,53 @@
 .skeletonList {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 
 .skeletonCard {
   background: #ffffff;
   border: 1px solid #e8e3dc;
-  border-radius: 12px;
-  padding: 20px 24px;
+  border-radius: 10px;
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 
 .skeletonCardHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  padding-bottom: 14px;
+  gap: 10px;
+  padding-bottom: 9px;
   border-bottom: 1px solid #f0edeb;
 }
 
 .skeletonHeaderLeft {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .skeletonLine {
-  height: 15px;
+  height: 12px;
   background: #f0edeb;
   border-radius: 4px;
   animation: pulse 1.5s ease-in-out infinite;
 }
 
 .skeletonLineShort {
-  height: 11px;
+  height: 9px;
   background: #f0edeb;
   border-radius: 4px;
   animation: pulse 1.5s ease-in-out infinite;
 }
 
 .skeletonPill {
-  width: 90px;
-  height: 24px;
+  width: 76px;
+  height: 20px;
   background: #f0edeb;
-  border-radius: 12px;
+  border-radius: 10px;
   animation: pulse 1.5s ease-in-out infinite;
   flex-shrink: 0;
 }
@@ -737,21 +737,21 @@
 .skeletonBody {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .skeletonMetaRow {
   display: flex;
-  gap: 24px;
+  gap: 16px;
   flex-wrap: wrap;
-  padding: 14px 16px;
+  padding: 8px 12px;
   background: #faf9f5;
-  border-radius: 8px;
+  border-radius: 7px;
 }
 
 .skeletonMetaBlock {
-  width: 100px;
-  height: 32px;
+  width: 84px;
+  height: 26px;
   background: #f0edeb;
   border-radius: 4px;
   animation: pulse 1.5s ease-in-out infinite;
@@ -759,16 +759,16 @@
 
 .skeletonActionsRow {
   display: flex;
-  gap: 10px;
-  padding-top: 16px;
+  gap: 8px;
+  padding-top: 9px;
   border-top: 1px solid #f0edeb;
 }
 
 .skeletonBtn {
-  width: 160px;
-  height: 36px;
+  width: 140px;
+  height: 30px;
   background: #f0edeb;
-  border-radius: 8px;
+  border-radius: 7px;
   animation: pulse 1.5s ease-in-out infinite;
 }
 
@@ -792,10 +792,10 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 80px 20px;
+  padding: 48px 16px;
   background: #ffffff;
   border: 1px solid #e8e3dc;
-  border-radius: 12px;
+  border-radius: 10px;
   color: #8a8072;
 }
 
@@ -805,14 +805,15 @@
 
 .emptyState h3 {
   color: #14140f;
-  font-size: 22px;
-  margin: 20px 0 8px;
+  font-size: 17px;
+  margin: 14px 0 6px;
 }
 
 .emptyState p {
   color: #8a8072;
-  margin: 0 0 24px;
-  max-width: 360px;
+  font-size: 12.5px;
+  margin: 0 0 16px;
+  max-width: 340px;
 }
 
 /* ============================================
@@ -826,51 +827,51 @@
   align-items: center;
   justify-content: center;
   z-index: 1200;
-  padding: 20px;
+  padding: 16px;
   backdrop-filter: blur(2px);
 }
 
 .modal {
   background: #ffffff;
-  border-radius: 14px;
-  padding: 26px;
-  width: 440px;
+  border-radius: 12px;
+  padding: 20px;
+  width: 400px;
   max-width: 100%;
-  box-shadow: 0 20px 60px rgba(20, 20, 15, 0.25);
+  box-shadow: 0 16px 48px rgba(20, 20, 15, 0.25);
 }
 
 .modalIconWrap {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
   background: rgba(239, 68, 68, 0.1);
   color: #ef4444;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 14px;
+  margin-bottom: 11px;
 }
 
 .modalTitle {
-  font-size: 18px;
+  font-size: 15.5px;
   font-weight: 700;
   color: #14140f;
-  margin: 0 0 6px;
+  margin: 0 0 5px;
 }
 
 .modalSub {
-  font-size: 13px;
+  font-size: 11.5px;
   color: #8a8072;
-  margin: 0 0 16px;
-  line-height: 1.5;
+  margin: 0 0 12px;
+  line-height: 1.4;
 }
 
 .modalTextarea {
   width: 100%;
   border: 1px solid #e8e3dc;
-  border-radius: 8px;
-  padding: 12px;
-  font-size: 13px;
+  border-radius: 7px;
+  padding: 9px 10px;
+  font-size: 12px;
   font-family: inherit;
   resize: vertical;
   color: #14140f;
@@ -891,17 +892,17 @@
 .modalActions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 18px;
+  gap: 8px;
+  margin-top: 14px;
 }
 
 .modalCancelBtn {
   background: #ffffff;
   border: 1px solid #e8e3dc;
-  padding: 9px 18px;
-  border-radius: 8px;
+  padding: 7px 14px;
+  border-radius: 7px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 500;
   color: #55554d;
   font-family: inherit;
@@ -917,10 +918,10 @@
   background: #ef4444;
   color: #ffffff;
   border: none;
-  padding: 9px 18px;
-  border-radius: 8px;
+  padding: 7px 14px;
+  border-radius: 7px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 600;
   font-family: inherit;
   transition: all 0.2s ease;
@@ -940,25 +941,28 @@
    ============================================ */
 @media (max-width: 1024px) {
   .orderInfoGrid {
-    gap: 14px;
+    gap: 8px;
   }
 }
 
 /* ============================================
-   RESPONSIVE - MOBILE (rebuilt, matches
-   SellerRequests mobile treatment)
+   RESPONSIVE - MOBILE (dense, no wasted chrome)
    ============================================ */
 @media (max-width: 768px) {
+  .wrap {
+    font-size: 12px;
+  }
+
   .header {
     flex-direction: column;
     align-items: stretch;
-    padding: 14px 16px;
-    gap: 12px;
-    border-radius: 10px;
+    padding: 10px 12px;
+    gap: 8px;
+    border-radius: 9px;
   }
 
   .title {
-    font-size: 21px;
+    font-size: 16px;
   }
 
   .headerLeft {
@@ -968,13 +972,14 @@
   .headerRight {
     flex-direction: column;
     align-items: stretch;
+    gap: 8px;
   }
 
   .statsBar {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px 14px;
-    padding: 12px 14px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px 8px;
+    padding: 7px 8px;
   }
 
   .statsLabel {
@@ -982,21 +987,24 @@
   }
 
   .statsItem {
-    font-size: 12.5px;
+    font-size: 10.5px;
+    text-align: center;
   }
 
   .refreshBtn {
     justify-content: center;
+    padding: 6px 10px;
   }
 
   .pageSubtitle {
-    margin-bottom: 16px;
+    font-size: 11px;
+    margin-bottom: 10px;
   }
 
   .filters {
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 16px;
+    gap: 6px;
+    margin-bottom: 10px;
   }
 
   .searchWrapper {
@@ -1010,36 +1018,52 @@
 
   .tabsTrack {
     gap: 2px;
-    padding: 4px;
+    padding: 3px;
   }
 
   .tab {
-    padding: 8px 13px;
-    font-size: 12px;
+    padding: 6px 10px;
+    font-size: 10.5px;
   }
 
-  /* Order cards */
+  .tab span {
+    display: none;
+  }
+
+  .tab {
+    gap: 0;
+  }
+
+  /* Order cards — dense row-style, minimal internal padding */
   .orderCard {
     padding: 0;
     overflow: hidden;
-    border-radius: 12px;
+    border-radius: 9px;
   }
 
   .orderCardHeader {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    padding: 14px 16px;
+    gap: 8px;
+    padding: 9px 12px;
     margin-bottom: 0;
     background: #faf9f5;
     border-bottom: 1px solid #f0edeb;
   }
 
   .orderHeaderLeft {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .orderNumber {
+    font-size: 11.5px;
+  }
+
+  .orderDateWrap {
+    font-size: 10px;
   }
 
   .orderHeaderRight {
@@ -1048,126 +1072,141 @@
 
   .orderInfoGrid {
     grid-template-columns: 1fr;
-    gap: 10px;
-    padding: 14px 16px 0;
-    margin-bottom: 14px;
+    gap: 6px;
+    padding: 9px 12px 0;
+    margin-bottom: 8px;
+  }
+
+  .infoBlock {
+    padding: 6px 8px;
   }
 
   .itemsSection {
-    padding: 0 16px;
+    padding: 0 12px;
+  }
+
+  .itemRow {
+    padding: 5px 8px;
   }
 
   .metaRow {
-    gap: 12px;
-    padding: 12px;
-    margin: 0 16px 14px;
+    gap: 8px;
+    padding: 8px 10px;
+    margin: 0 12px 8px;
     width: auto;
   }
 
   .metaBlock {
-    min-width: calc(50% - 6px);
+    min-width: calc(33.333% - 6px);
   }
 
   .shippingInfo {
-    margin: 0 16px 14px;
+    margin: 0 12px 8px;
+    padding: 6px 8px;
   }
 
   .fulfillmentRow {
-    padding: 0 16px;
-    margin-bottom: 14px;
+    padding: 0 12px;
+    margin-bottom: 8px;
   }
 
   .actionRow {
-    flex-direction: column;
+    flex-direction: row;
     margin: 0;
-    padding: 14px 16px;
+    padding: 9px 12px;
     border-top: 1px solid #f0edeb;
     border-radius: 0;
   }
 
   .actionBtn {
     justify-content: center;
-    width: 100%;
-    padding: 11px 18px;
+    flex: 1;
+    padding: 8px 10px;
   }
 
   .skeletonCard {
-    padding: 16px;
+    padding: 10px 12px;
   }
 
   .skeletonCardHeader {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
   }
 
   .skeletonMetaRow {
-    flex-direction: column;
-    gap: 10px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
   }
 
   .skeletonMetaBlock {
-    width: 100%;
+    width: calc(50% - 3px);
   }
 
   .skeletonActionsRow {
-    flex-direction: column;
+    flex-direction: row;
   }
 
   .skeletonBtn {
-    width: 100%;
+    flex: 1;
+    width: auto;
   }
 }
 
 @media (max-width: 480px) {
   .title {
-    font-size: 19px;
+    font-size: 15px;
   }
 
   .statsBar {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .orderNumber {
-    font-size: 14px;
+    font-size: 11px;
   }
 
   .itemRow {
     flex-wrap: wrap;
-    gap: 6px;
-    padding: 10px 0;
+    gap: 4px;
+    padding: 6px 0;
   }
 
   .itemName {
     white-space: normal;
     flex-basis: 100%;
     order: 2;
+    font-size: 11px;
   }
 
   .itemRow img {
     order: 1;
+    width: 22px;
+    height: 22px;
   }
 
   .itemQty {
     order: 3;
     margin-left: auto;
+    font-size: 10px;
   }
 
   .itemPrice {
     order: 4;
+    font-size: 11px;
   }
 
   .metaRow {
-    flex-direction: column;
-    gap: 10px;
+    flex-wrap: wrap;
   }
 
   .metaBlock {
-    min-width: 100%;
+    min-width: calc(50% - 4px);
   }
 
   .modal {
-    padding: 20px;
+    padding: 16px;
   }
 
   .modalActions {

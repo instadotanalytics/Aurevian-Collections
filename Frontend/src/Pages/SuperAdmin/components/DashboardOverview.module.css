@@ -1,9 +1,15 @@
-/* src/Pages/SuperAdmin/SuperAdminDashboard/components/DashboardOverview.module.css */
 
-.dashboardOverview {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+/* src/Pages/SuperAdmin/SuperAdminDashboard/components/DashboardOverview.module.css */
+/* Built to be a 1:1 visual match with SellerRequests.module.css — same
+   header, stats bar, table, badge, and mobile-card patterns reused here. */
+
+/* ============================================
+   ROOT CONTAINER
+   ============================================ */
+.container {
+  padding: 0;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #14140f;
 }
 
 /* ============================================
@@ -14,9 +20,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 400px;
+  min-height: 320px;
   gap: 16px;
-  color: #999;
+  color: #8a8072;
 }
 
 .spinner {
@@ -31,66 +37,100 @@
 }
 
 /* ============================================
-   Welcome Section
+   HEADER — identical shape to SellerRequests:
+   title + count pill on the left, stats bar on
+   the right
    ============================================ */
-.welcomeSection {
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-  border-radius: 16px;
-  padding: 32px 40px;
+.header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  margin-bottom: 24px;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 16px;
+  padding: 20px 24px;
+  background: #ffffff;
+  border: 1px solid #e8e3dc;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.welcomeContent {
-  color: white;
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.welcomeTitle {
-  font-size: 24px;
+.title {
+  font-size: 28px;
   font-weight: 700;
-  margin: 0 0 8px;
-}
-
-.welcomeSubtitle {
-  font-size: 14px;
-  opacity: 0.7;
+  color: #14140f;
   margin: 0;
 }
 
-.welcomeStats {
+.countPill {
+  padding: 4px 14px;
+  background: #f5f2ee;
+  border: 1px solid #e8e3dc;
+  border-radius: 20px;
+  color: #55554d;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.headerRight {
   display: flex;
-  gap: 32px;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
 }
 
-.welcomeStat {
-  text-align: center;
+.statsBar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 16px;
+  background: #faf9f5;
+  border: 1px solid #e8e3dc;
+  border-radius: 8px;
+  flex-wrap: wrap;
 }
 
-.welcomeStatValue {
-  display: block;
-  font-size: 28px;
-  font-weight: 700;
-  color: #c8a86e;
-}
-
-.welcomeStatLabel {
-  display: block;
+.statsLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #8a8072;
   font-size: 12px;
-  opacity: 0.6;
-  color: white;
-  margin-top: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.statsItem {
+  color: #55554d;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.statsItem strong {
+  color: #c8a86e;
+  font-weight: 700;
+  margin-left: 2px;
 }
 
 /* ============================================
-   Two Column Layout
+   SECTION BLOCKS — each wraps a table, same
+   surface as SellerRequests' .tableContainer
+   plus a header row above it
    ============================================ */
 .twoColumnLayout {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
+  margin-bottom: 24px;
 }
 
 .leftColumn,
@@ -98,32 +138,32 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  min-width: 0;
 }
 
-/* ============================================
-   Recent Orders
-   ============================================ */
-.recentOrders {
-  background: white;
+.section {
+  background: #ffffff;
+  border: 1px solid #e8e3dc;
   border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
 }
 
 .sectionHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0edeb;
 }
 
 .sectionTitle {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #1a1a1a;
+  font-size: 15px;
+  font-weight: 700;
+  color: #14140f;
   margin: 0;
 }
 
@@ -134,158 +174,123 @@
 .viewAllBtn {
   display: flex;
   align-items: center;
-  gap: 4px;
-  background: none;
-  border: none;
-  color: #c8a86e;
-  font-size: 13px;
-  font-weight: 500;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid #e8e3dc;
+  padding: 6px 12px;
+  border-radius: 8px;
+  color: #a0804a;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
-  transition: color 0.3s ease;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .viewAllBtn:hover {
-  color: #b8944a;
-}
-
-.ordersList {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.orderItem {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  background: #f8f6f4;
-  border-radius: 8px;
-  transition: background 0.3s ease;
-}
-
-.orderItem:hover {
-  background: #f0ebe6;
-}
-
-.orderInfo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.orderNumber {
-  font-weight: 600;
-  color: #c8a86e;
-  font-size: 13px;
-}
-
-.orderCustomer {
-  font-size: 14px;
-  color: #333;
-}
-
-.orderDetails {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.orderTotal {
-  font-weight: 600;
-  color: #1a1a1a;
-}
-
-.orderStatus {
-  padding: 2px 10px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: capitalize;
-}
-
-.orderStatus.delivered {
-  background: #ecfdf5;
-  color: #065f46;
-}
-
-.orderStatus.processing {
-  background: #fffbeb;
-  color: #92400e;
-}
-
-.orderStatus.shipped {
-  background: #e0e7ff;
-  color: #1e40af;
-}
-
-.orderStatus.pending {
-  background: #fef2f2;
-  color: #991b1b;
-}
-
-.orderTime {
-  font-size: 12px;
-  color: #999;
+  background: #f5f2ee;
+  color: #14140f;
+  border-color: #c8a86e;
 }
 
 /* ============================================
-   Recent Sellers Table
+   TABLE — exact same visual language as
+   SellerRequests.sellerTable
    ============================================ */
-.recentSellers {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
-
-.sellersTable {
+.tableContainer {
+  width: 100%;
   overflow-x: auto;
 }
 
-.sellersTable table {
+.dashTable {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 13.5px;
+  table-layout: auto;
 }
 
-.sellersTable thead th {
+.dashTable thead {
+  background: #faf9f5;
+  border-bottom: 2px solid #e8e3dc;
+}
+
+.dashTable th {
+  padding: 12px 12px;
   text-align: left;
-  padding: 10px 12px;
+  font-size: 11.5px;
   font-weight: 600;
-  color: #666;
-  border-bottom: 2px solid #f0ebe6;
-  font-size: 12px;
+  color: #8a8072;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
-.sellersTable tbody td {
-  padding: 10px 12px;
-  border-bottom: 1px solid #f0ebe6;
+.dashTable td {
+  padding: 12px 12px;
+  border-bottom: 1px solid #f0edeb;
+  vertical-align: middle;
+  color: #14140f;
 }
 
-.sellersTable tbody tr:hover {
-  background: #faf8f6;
+.dashTable tr:last-child td {
+  border-bottom: none;
 }
 
+.tableRow {
+  transition: background 0.2s ease;
+}
+
+.tableRow:hover {
+  background: #faf9f5;
+}
+
+/* Column sizing hints (mirrors SellerRequests' cell min-widths) */
 .sellerCell {
+  min-width: 160px;
+}
+
+.storeCell {
+  min-width: 110px;
+}
+
+.orderCell {
+  min-width: 150px;
+}
+
+.statusCell {
+  min-width: 100px;
+  white-space: nowrap;
+}
+
+.dateCell {
+  min-width: 95px;
+  white-space: nowrap;
+}
+
+.amountCell {
+  min-width: 90px;
+  white-space: nowrap;
+}
+
+/* Seller Info — identical to SellerRequests.sellerInfo */
+.sellerInfo {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
 .sellerAvatar {
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: #c8a86e;
+  background: linear-gradient(135deg, #c8a86e, #a0804a);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-weight: 600;
-  font-size: 12px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -297,154 +302,400 @@
 }
 
 .sellerName {
-  font-weight: 500;
-  color: #1a1a1a;
+  font-weight: 600;
+  color: #14140f;
+  font-size: 13.5px;
 }
 
+.sellerEmail {
+  font-size: 11px;
+  color: #8a8072;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+.storeInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.storeInfo strong {
+  color: #14140f;
+  font-weight: 600;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Order identity cell */
+.orderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.orderNumber {
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-weight: 700;
+  font-size: 13px;
+  color: #a0804a;
+}
+
+.orderCustomer {
+  font-size: 11.5px;
+  color: #8a8072;
+}
+
+.amountValue {
+  font-weight: 700;
+  color: #14140f;
+  font-size: 13px;
+}
+
+/* Status badges — same five-hue system as SellerRequests/OrdersManagement */
 .statusBadge {
-  padding: 2px 10px;
+  display: inline-block;
+  padding: 4px 12px;
   border-radius: 12px;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
   text-transform: capitalize;
 }
 
-.statusBadge.pending {
-  background: #fffbeb;
-  color: #92400e;
+.statusNeutral {
+  background: #f5f2ee;
+  border: 1px solid #e8e3dc;
+  color: #8a8072;
 }
 
-.statusBadge.approved {
-  background: #ecfdf5;
-  color: #065f46;
+.statusPending {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  color: #d97706;
 }
 
-.statusBadge.rejected {
-  background: #fef2f2;
-  color: #991b1b;
+.statusApproved {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #10b981;
 }
 
-.statusBadge.suspended {
-  background: #f5f3ff;
-  color: #5b21b6;
+.statusSuspended {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
 }
 
-.statusBadge.under_review {
-  background: #ecfeff;
-  color: #0e7490;
+.statusRejected {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.dateInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: #55554d;
+  white-space: nowrap;
 }
 
 /* ============================================
-   Empty State
+   SKELETON LOADER — same pattern as
+   SellerRequests.skeletonRow
+   ============================================ */
+.skeletonRow {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f0edeb;
+  gap: 14px;
+}
+
+.skeletonRow:last-child {
+  border-bottom: none;
+}
+
+.skeletonAvatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #f0edeb;
+  flex-shrink: 0;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.skeletonLine {
+  height: 15px;
+  background: #f0edeb;
+  border-radius: 4px;
+  animation: pulse 1.5s ease-in-out infinite;
+  flex: 1;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* ============================================
+   EMPTY STATE — identical to SellerRequests
    ============================================ */
 .emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  padding: 20px;
-  color: #999;
+  padding: 60px 20px;
+  color: #8a8072;
+}
+
+.emptyIcon {
+  color: #c8a86e;
+}
+
+.emptyState h3 {
+  color: #14140f;
+  font-size: 18px;
+  margin: 16px 0 4px;
 }
 
 .emptyState p {
+  color: #8a8072;
   margin: 0;
+  max-width: 320px;
 }
 
 .emptyRow td {
-  padding: 30px 0 !important;
+  padding: 0 !important;
+  border-bottom: none !important;
 }
 
 /* ============================================
-   Responsive
+   RESPONSIVE - TABLET
    ============================================ */
+@media (max-width: 1200px) {
+  .dashTable th,
+  .dashTable td {
+    padding: 12px 10px;
+  }
+}
+
 @media (max-width: 1024px) {
   .twoColumnLayout {
     grid-template-columns: 1fr;
   }
+
+  .dashTable th,
+  .dashTable td {
+    padding: 10px 8px;
+  }
 }
 
+/* ============================================
+   RESPONSIVE - MOBILE (rebuilt card layout,
+   same recipe as SellerRequests)
+   ============================================ */
 @media (max-width: 768px) {
-  .welcomeSection {
+  .header {
     flex-direction: column;
-    text-align: center;
-    padding: 24px 20px;
+    align-items: stretch;
+    padding: 14px 16px;
+    gap: 12px;
+    border-radius: 10px;
   }
 
-  .welcomeStats {
-    gap: 20px;
+  .title {
+    font-size: 21px;
+  }
+
+  .headerLeft {
+    justify-content: space-between;
+  }
+
+  .headerRight {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .statsBar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 14px;
+    padding: 12px 14px;
+  }
+
+  .statsLabel {
+    grid-column: 1 / -1;
+  }
+
+  .statsItem {
+    font-size: 12.5px;
+  }
+
+  .twoColumnLayout {
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .leftColumn,
+  .rightColumn {
+    gap: 16px;
+  }
+
+  .sectionHeader {
+    padding: 14px 16px;
+  }
+
+  .sectionTitle {
+    font-size: 13.5px;
+  }
+
+  .viewAllBtn {
+    padding: 6px 10px;
+    font-size: 11.5px;
+  }
+
+  /* Card container */
+  .tableContainer {
+    overflow: visible;
+  }
+
+  .dashTable,
+  .dashTable thead,
+  .dashTable tbody,
+  .dashTable tr,
+  .dashTable td {
+    display: block;
     width: 100%;
-    justify-content: center;
   }
 
-  .welcomeStatValue {
-    font-size: 22px;
+  .dashTable thead {
+    display: none;
   }
 
-  .orderItem {
+  .dashTable tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .dashTable tbody tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: #ffffff;
+    border: 1px solid #e8e3dc;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .dashTable tbody tr:hover {
+    background: #ffffff;
+  }
+
+  .dashTable td {
+    border-bottom: none;
+    padding: 9px 14px;
+    min-width: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+    display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    justify-content: center;
+    text-align: left;
+    gap: 3px;
   }
 
-  .orderDetails {
-    width: 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
+  .dashTable td[data-label]::before {
+    content: attr(data-label);
+    font-size: 10px;
+    color: #8a8072;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
   }
 
-  .sellersTable table {
-    font-size: 13px;
+  /* Identity cell (seller or order) spans full width on a tinted strip */
+  .sellerCell,
+  .orderCell {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 14px !important;
+    background: #faf9f5;
+    border-bottom: 1px solid #f0edeb;
   }
 
-  .sellersTable thead th,
-  .sellersTable tbody td {
-    padding: 8px 10px;
+  .sellerCell::before,
+  .orderCell::before {
+    content: none !important;
+  }
+
+  .storeCell,
+  .amountCell {
+    border-bottom: 1px solid #f7f5f2;
+  }
+
+  .storeCell {
+    border-right: 1px solid #f7f5f2;
+  }
+
+  .statusCell,
+  .dateCell {
+    grid-column: 1 / -1;
+    border-bottom: 1px solid #f7f5f2;
+    white-space: normal;
+  }
+
+  .dashTable tbody tr td:last-child {
+    border-bottom: none !important;
   }
 }
 
 @media (max-width: 480px) {
-  .welcomeTitle {
-    font-size: 20px;
+  .title {
+    font-size: 19px;
   }
 
-  .welcomeStats {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .welcomeStat {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-  }
-
-  .welcomeStat:last-child {
-    border-bottom: none;
-  }
-
-  .welcomeStatValue {
-    font-size: 18px;
-  }
-
-  .welcomeStatLabel {
-    font-size: 13px;
-  }
-
-  .sectionTitle {
-    font-size: 14px;
-  }
-
-  .orderItem {
-    padding: 10px 12px;
-  }
-
-  .orderNumber {
+  .countPill {
     font-size: 12px;
   }
 
-  .orderCustomer {
-    font-size: 13px;
+  .statsBar {
+    grid-template-columns: 1fr;
   }
 
-  .orderTotal {
-    font-size: 13px;
+  .dashTable tbody tr {
+    grid-template-columns: 1fr;
   }
+
+  .storeCell {
+    border-right: none;
+  }
+
+  .sellerAvatar {
+    width: 34px;
+    height: 34px;
+    font-size: 12px;
+  }
+}
+
+/* ============================================
+   FOCUS VISIBLE
+   ============================================ */
+button:focus-visible {
+  outline: 2px solid #c8a86e;
+  outline-offset: 2px;
 }
