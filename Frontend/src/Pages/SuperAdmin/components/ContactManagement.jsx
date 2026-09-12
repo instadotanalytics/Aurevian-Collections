@@ -1,3 +1,4 @@
+
 // src/Pages/SuperAdmin/components/ContactManagement/ContactManagement.jsx
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -10,9 +11,10 @@ import {
   FiChevronUp,
   FiMessageCircle,
   FiClock,
-  FiEye,
   FiCheckCircle,
   FiArchive,
+  FiX,
+  FiInbox,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import styles from "./ContactManagement.module.css";
@@ -55,6 +57,32 @@ const formatDate = (dateStr) => {
     minute: "2-digit",
   });
 };
+
+const getInitials = (name) =>
+  name
+    ?.split(" ")
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "?";
+
+// Skeleton loader — mirrors SellerRequests' skeleton row pattern so both
+// admin screens feel like the same product while data is loading.
+const SkeletonLoader = ({ count = 5 }) => (
+  <div className={styles.skeletonList}>
+    {Array.from({ length: count }).map((_, index) => (
+      <div key={index} className={styles.skeletonCard}>
+        <div className={styles.skeletonAvatar}></div>
+        <div className={styles.skeletonBody}>
+          <div className={styles.skeletonLine}></div>
+          <div className={styles.skeletonLineShort}></div>
+        </div>
+        <div className={styles.skeletonBadge}></div>
+      </div>
+    ))}
+  </div>
+);
 
 const ContactManagement = () => {
   const [contacts, setContacts] = useState([]);
@@ -177,6 +205,7 @@ const ContactManagement = () => {
         throw new Error(data.message || "Failed to delete message");
       }
       setContacts((prev) => prev.filter((c) => c._id !== id));
+      if (expandedId === id) setExpandedId(null);
       toast.success("Contact message deleted");
     } catch (error) {
       console.error("❌ Delete contact error:", error);
@@ -184,103 +213,150 @@ const ContactManagement = () => {
     }
   };
 
+  const clearFilters = () => {
+    setSearch("");
+    setStatusFilter("all");
+  };
+
+  const hasActiveFilters = search || statusFilter !== "all";
+  const showLoadingState = loading && contacts.length === 0;
+
   return (
-    <div className={styles.wrap}>
+    <div className={styles.container}>
+      {/* Header */}
       <div className={styles.header}>
-        <div>
+        <div className={styles.headerLeft}>
           <h1 className={styles.title}>Contact Messages</h1>
-          <p className={styles.subtitle}>
-            Messages submitted through the website's Contact page form
-          </p>
+          <span className={styles.countPill}>
+            {stats?.total ?? contacts.length} messages
+          </span>
         </div>
-        <button
-          className={styles.refreshBtn}
-          onClick={fetchContacts}
-          disabled={loading}
-        >
-          <FiRefreshCw className={loading ? styles.spinIcon : ""} />
-          Refresh
-        </button>
+        <div className={styles.headerRight}>
+          {stats && (
+            <div className={styles.statsBar}>
+              <span className={styles.statsLabel}>
+                <FiInbox size={14} />
+                Overview:
+              </span>
+              <span className={styles.statsItem}>
+                New: <strong className={styles.statNewValue}>{stats.new}</strong>
+              </span>
+              <span className={styles.statsItem}>
+                Read: <strong>{stats.read}</strong>
+              </span>
+              <span className={styles.statsItem}>
+                Responded: <strong>{stats.responded}</strong>
+              </span>
+              <span className={styles.statsItem}>
+                Closed: <strong>{stats.closed}</strong>
+              </span>
+            </div>
+          )}
+          <button
+            className={styles.refreshBtn}
+            onClick={fetchContacts}
+            disabled={loading}
+          >
+            <FiRefreshCw className={loading ? styles.spinIcon : ""} />
+            Refresh
+          </button>
+        </div>
       </div>
 
-      {stats && (
-        <div className={styles.statsGrid}>
-          <div className={styles.statCard}>
-            <span className={styles.statValue}>{stats.total}</span>
-            <span className={styles.statLabel}>Total</span>
-          </div>
-          <div className={`${styles.statCard} ${styles.statNew}`}>
-            <span className={styles.statValue}>{stats.new}</span>
-            <span className={styles.statLabel}>New</span>
-          </div>
-          <div className={styles.statCard}>
-            <span className={styles.statValue}>{stats.read}</span>
-            <span className={styles.statLabel}>Read</span>
-          </div>
-          <div className={styles.statCard}>
-            <span className={styles.statValue}>{stats.responded}</span>
-            <span className={styles.statLabel}>Responded</span>
-          </div>
-          <div className={styles.statCard}>
-            <span className={styles.statValue}>{stats.closed}</span>
-            <span className={styles.statLabel}>Closed</span>
-          </div>
-        </div>
-      )}
-
-      <div className={styles.toolbar}>
-        <div className={styles.tabs}>
-          {STATUS_TABS.map((tab) => (
-            <button
-              key={tab.id}
-              className={`${styles.tab} ${statusFilter === tab.id ? styles.tabActive : ""}`}
-              onClick={() => setStatusFilter(tab.id)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-        <div className={styles.searchBox}>
+      {/* Filters */}
+      <div className={styles.filters}>
+        <div className={styles.searchWrapper}>
           <FiSearch className={styles.searchIcon} />
           <input
             type="text"
+            className={styles.searchInput}
             placeholder="Search by name, email, message..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+
+        <div className={styles.filterGroup}>
+          <div className={styles.tabs}>
+            {STATUS_TABS.map((tab) => (
+              <button
+                key={tab.id}
+                className={`${styles.tab} ${
+                  statusFilter === tab.id ? styles.tabActive : ""
+                }`}
+                onClick={() => setStatusFilter(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {hasActiveFilters && (
+            <button className={styles.clearFiltersBtn} onClick={clearFilters}>
+              <FiX size={16} />
+              Clear
+            </button>
+          )}
+        </div>
       </div>
 
-      {loading ? (
-        <div className={styles.loadingState}>Loading contact messages...</div>
+      {/* List */}
+      {showLoadingState ? (
+        <SkeletonLoader count={5} />
       ) : contacts.length === 0 ? (
         <div className={styles.emptyState}>
-          <FiMessageCircle size={36} />
-          <p>No contact messages found</p>
+          <FiMessageCircle size={52} className={styles.emptyIcon} />
+          <h3>No contact messages found</h3>
+          <p>
+            {hasActiveFilters
+              ? "Try adjusting your filters or search terms"
+              : "Messages submitted through the website's Contact page will show up here"}
+          </p>
+          {hasActiveFilters && (
+            <button className={styles.clearFiltersBtn} onClick={clearFilters}>
+              <FiX size={18} />
+              Clear All Filters
+            </button>
+          )}
         </div>
       ) : (
         <div className={styles.list}>
           {contacts.map((contact) => {
             const meta = STATUS_META[contact.status] || STATUS_META.new;
             const isExpanded = expandedId === contact._id;
+            const isSaving = savingId === contact._id;
+
             return (
-              <div key={contact._id} className={styles.card}>
+              <div
+                key={contact._id}
+                className={`${styles.card} ${isExpanded ? styles.cardOpen : ""}`}
+              >
                 <button
                   className={styles.cardHeader}
                   onClick={() => toggleExpand(contact)}
+                  aria-expanded={isExpanded}
                 >
                   <div className={styles.cardMain}>
-                    <span className={`${styles.statusBadge} ${styles[meta.className]}`}>
-                      {meta.label}
-                    </span>
+                    <div className={styles.avatar}>
+                      {getInitials(contact.name)}
+                    </div>
                     <div className={styles.cardIdentity}>
-                      <span className={styles.cardName}>{contact.name}</span>
-                      <span className={styles.cardEmail}>
+                      <div className={styles.cardNameRow}>
+                        <span className={styles.cardName}>{contact.name}</span>
+                        <span
+                          className={`${styles.statusBadge} ${
+                            styles[meta.className]
+                          }`}
+                        >
+                          {meta.label}
+                        </span>
+                      </div>
+                      <span className={styles.cardContact}>
                         <FiMail size={12} /> {contact.email}
                         {contact.phone && (
                           <>
-                            {" "}
-                            · <FiPhone size={12} /> {contact.phone}
+                            <span className={styles.dot}>·</span>
+                            <FiPhone size={12} /> {contact.phone}
                           </>
                         )}
                       </span>
@@ -290,48 +366,58 @@ const ContactManagement = () => {
                     <span className={styles.cardDate}>
                       <FiClock size={12} /> {formatDate(contact.createdAt)}
                     </span>
-                    {isExpanded ? <FiChevronUp /> : <FiChevronDown />}
+                    <span className={styles.chevron}>
+                      {isExpanded ? <FiChevronUp /> : <FiChevronDown />}
+                    </span>
                   </div>
                 </button>
 
-                <p className={styles.cardPreview}>
-                  {contact.message.length > 140
-                    ? `${contact.message.slice(0, 140)}...`
-                    : contact.message}
-                </p>
+                {!isExpanded && (
+                  <p className={styles.cardPreview}>
+                    {contact.message.length > 140
+                      ? `${contact.message.slice(0, 140)}...`
+                      : contact.message}
+                  </p>
+                )}
 
                 {isExpanded && (
                   <div className={styles.cardExpanded}>
                     <p className={styles.fullMessage}>{contact.message}</p>
 
                     <div className={styles.actionsRow}>
-                      <div className={styles.statusActions}>
+                      <div className={styles.actionBtnGroup}>
                         <button
-                          className={styles.actionBtn}
-                          disabled={savingId === contact._id}
+                          className={`${styles.actionIconBtn} ${styles.approveIconBtn}`}
+                          disabled={isSaving}
                           onClick={() => updateStatus(contact._id, "responded")}
                         >
-                          <FiCheckCircle size={14} /> Mark Responded
+                          <FiCheckCircle size={14} />
+                          <span>Mark Responded</span>
                         </button>
                         <button
-                          className={styles.actionBtn}
-                          disabled={savingId === contact._id}
+                          className={styles.actionIconBtn}
+                          disabled={isSaving}
                           onClick={() => updateStatus(contact._id, "closed")}
                         >
-                          <FiArchive size={14} /> Close
+                          <FiArchive size={14} />
+                          <span>Close</span>
                         </button>
                       </div>
                       <button
-                        className={styles.deleteBtn}
+                        className={`${styles.actionIconBtn} ${styles.rejectIconBtn}`}
                         onClick={() => handleDelete(contact._id)}
                       >
-                        <FiTrash2 size={14} /> Delete
+                        <FiTrash2 size={14} />
+                        <span>Delete</span>
                       </button>
                     </div>
 
                     <div className={styles.notesBlock}>
-                      <label>Admin Notes</label>
+                      <label htmlFor={`notes-${contact._id}`}>
+                        Admin Notes
+                      </label>
                       <textarea
+                        id={`notes-${contact._id}`}
                         rows={3}
                         value={noteDraft}
                         onChange={(e) => setNoteDraft(e.target.value)}
@@ -339,10 +425,10 @@ const ContactManagement = () => {
                       />
                       <button
                         className={styles.saveNotesBtn}
-                        disabled={savingId === contact._id}
+                        disabled={isSaving}
                         onClick={() => saveNotes(contact._id)}
                       >
-                        Save Notes
+                        {isSaving ? "Saving..." : "Save Notes"}
                       </button>
                     </div>
                   </div>
