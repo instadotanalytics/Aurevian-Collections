@@ -174,8 +174,8 @@
   border-radius: 0;
   overflow: hidden;
   transition: box-shadow 0.25s, transform 0.25s;
-  height: 340px;
-  max-height: 340px;
+  height: 320px;
+  max-height: 320px;
 }
 
 .card:hover {
@@ -401,9 +401,10 @@
   gap: 10px;
   font-size: 13px;
   flex-wrap: wrap;
-  padding: 0 15px;
+  padding: 0 25px;
   height: 30px;
   min-height: 30px;
+  margin:-10px;
 }
 
 .price {
@@ -622,8 +623,8 @@
   }
 
   .card {
-    height: 290px;
-    max-height: 290px;
+    height: 280px;
+    max-height: 280px;
   }
 
   /* ✅ Matches shop.module.css's @media (max-width: 480px) .productName */
