@@ -53,12 +53,12 @@ const infoCards = [
   {
     icon: FiMapPin,
     title: "Visit Our Studio",
-    details: ["Aurevian Flagship Studio", "Mumbai, India"],
+    details: ["1st floor, jr hostel, Ring Rd, Bholaram, Nanak Nagar, Indore, Madhya Pradesh 452010, India"],
   },
   {
     icon: FiPhone,
     title: "Call Us",
-    details: ["+91 91650 13748", "Mon–Sat, 10am–7pm"],
+    details: ["+91 6261478315", "Mon–Sat, 10am–7pm"],
   },
   {
     icon: FiMail,

@@ -47,12 +47,14 @@ import Footer from "../../Pages/Layout/Footer/Footer";
 /* ---------------------------------------------------------------- */
 /* Image imports                                                     */
 /* ---------------------------------------------------------------- */
-import beltsImage from "../../assets/CollectionBelts.jfif";
-import walletsImage from "../../assets/CollectionWallets.jfif";
-import sunglassesImage from "../../assets/CollectionSunglasses.jfif";
 import watchesImage from "../../assets/CollectionWatches.jfif";
 import bagsImage from "../../assets/CollectionBags.jfif";
 import perfumesImage from "../../assets/CollectionPerfumes.jfif";
+import sunglassesImage from "../../assets/CollectionSunglasses.jfif";
+import walletsImage from "../../assets/CollectionWallets.jfif";
+import beltsImage from "../../assets/CollectionBelts.jfif";
+import womenWalletsImage from "../../assets/CollectionWomenWallets.jpg";
+import womenSunglassesImage from "../../assets/CollectionWomenSunglasses.jpg";
 // ✅ NEW — backend base URL. Set VITE_API_URL in your .env if the API
 // lives on a different origin than the frontend; otherwise this falls
 // back to a same-origin relative request.
@@ -205,12 +207,14 @@ const TIMELINE_STEPS = [
 ];
 
 const COLLECTIONS = [
-  { title: "Belts", tag: "Leather & Formal", img: beltsImage },
-  { title: "Wallets", tag: "Purses & Cardholders", img: walletsImage },
-  { title: "Sunglasses", tag: "Everyday to Aviator", img: sunglassesImage },
-  { title: "Watches", tag: "Classic & Sport", img: watchesImage },
-  { title: "Bags", tag: "Totes, Slings & More", img: bagsImage },
-  { title: "Perfumes", tag: "Signature Scents", img: perfumesImage },
+  { title: "Watches",           tag: "Classic & Sport",        img: watchesImage },
+  { title: "Bags",              tag: "Totes, Slings & More",   img: bagsImage },
+  { title: "Perfumes",          tag: "Signature Scents",       img: perfumesImage },
+  { title: "Women's Wallets",   tag: "Elegant & Compact",      img: womenWalletsImage },
+  { title: "Women's Sunglasses", tag: "Chic & Timeless",       img: womenSunglassesImage },
+  { title: "Wallets",           tag: "Purses & Cardholders",   img: walletsImage },
+  { title: "Sunglasses",        tag: "Everyday to Aviator",    img: sunglassesImage },
+  { title: "Belts",             tag: "Leather & Formal",       img: beltsImage },
 ];
 
 const PROMISE_CARDS = [

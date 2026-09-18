@@ -58,7 +58,7 @@ const CONTACT_CARDS = [
     icon: FiHeadphones,
     title: "Customer Support",
     text: "Our team is available to assist you.",
-    detail: "+91 91650 13748",
+    detail: "+91 6261478315",
   },
   {
     icon: FiMail,
