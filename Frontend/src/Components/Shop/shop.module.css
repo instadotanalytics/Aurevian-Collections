@@ -41,25 +41,141 @@
   color: inherit;
 }
 
-/* ✅ Hero Banner - 40vh on all devices */
+/* ==========================================================
+   ✅ Hero Banner Carousel (Auto-scrolling)
+   ========================================================== */
 .heroBanner {
   width: 100%;
-  height: 60vh;
+  height: 85vh;
   overflow: hidden;
   position: relative;
+  background: var(--cream-card);
+}
+
+.heroTrack {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.heroSlide {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
 }
 
 .heroImage {
   width: 100%;
-  height: 80%;
+  height: 100%;
   object-fit: cover;
   display: block;
 }
 
-/* ✅ Responsive - Same height on all devices */
+/* Prev / Next arrows */
+/* Prev / Next arrows — blur / transparent, subtle */
+.heroArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  font-size: 30px;
+  line-height: 1;
+  color: #ffffff;
+  cursor: pointer;
+  z-index: 3;
+  transition:
+    background 0.25s ease,
+    transform 0.25s ease,
+    border-color 0.25s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.heroArrow:hover {
+  background: rgba(255, 255, 255, 0.32);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.heroArrow:active {
+  transform: translateY(-50%) scale(0.96);
+}
+
+.heroArrowPrev {
+  left: 24px;
+}
+
+.heroArrowNext {
+  right: 24px;
+}
+
+/* Dot indicators */
+.heroDots {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 3;
+}
+
+.heroDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.25s ease;
+}
+
+.heroDot:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.heroDotActive {
+  background: #fff;
+  width: 26px;
+  border-radius: 5px;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .heroBanner {
     height: 40vh;
+  }
+
+  .heroArrow {
+    width: 38px;
+    height: 38px;
+    font-size: 22px;
+  }
+
+  .heroArrowPrev {
+    left: 12px;
+  }
+
+  .heroArrowNext {
+    right: 12px;
+  }
+
+  .heroDots {
+    bottom: 16px;
+    gap: 8px;
   }
 }
 
@@ -67,20 +183,20 @@
   .heroBanner {
     height: 40vh;
   }
-}
 
-.heroImageOld {
-  display: none;
-}
-
-@keyframes titleFadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+  .heroArrow {
+    width: 34px;
+    height: 34px;
+    font-size: 20px;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .heroDot {
+    width: 8px;
+    height: 8px;
+  }
+
+  .heroDotActive {
+    width: 20px;
   }
 }
 
@@ -91,7 +207,7 @@
   gap: 40px;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 40px 80px;
+  padding: 40px 40px 80px;
   align-items: start;
 }
 
@@ -173,9 +289,6 @@
   background: var(--gold-soft);
 }
 
-/* ==========================================================
-   ✅ Products Wrapper (scrollable column beside the sticky sidebar)
-   ========================================================== */
 .productsWrapper {
   display: flex;
   flex-direction: column;
@@ -185,7 +298,6 @@
   scrollbar-width: thin;
   scrollbar-color: var(--cream-line) transparent;
 }
-
 
 .productsWrapper::-webkit-scrollbar {
   width: 5px;
@@ -575,7 +687,7 @@
 }
 
 /* ==========================================================
-   PRODUCT CARD - MATCHING COLLECTIONS
+   PRODUCT CARD
    ========================================================== */
 .productCard {
   background: var(--cream-card);
@@ -626,7 +738,6 @@
   transform: scale(1.05);
 }
 
-/* Discount Badge - White background, dark text */
 .badge {
   position: absolute;
   top: 12px;
@@ -712,7 +823,7 @@
 }
 
 /* ==========================================================
-   PRODUCT INFO - MATCHING COLLECTIONS
+   PRODUCT INFO
    ========================================================== */
 .productInfo {
   position: relative;
@@ -723,9 +834,6 @@
   padding: 0;
 }
 
-/* ==========================================================
-   PRODUCT NAME - SINGLE LINE WITH ELLIPSIS
-   ========================================================== */
 .productName {
   font-size: 15px;
   font-weight: 500;
@@ -766,7 +874,7 @@
 }
 
 /* ==========================================================
-   ADD TO CART BUTTON - MATCHING COLLECTIONS
+   ADD TO CART BUTTON
    ========================================================== */
 .addToCartBtn {
   display: flex;
@@ -992,7 +1100,6 @@
   display: block;
 }
 
-/* Mobile Filter Grid - 2 columns */
 .mobileFilterGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1017,7 +1124,6 @@
   flex-shrink: 0;
 }
 
-/* Mobile Custom Sort Dropdown */
 .mobileSortWrapper {
   position: relative;
   display: block;
@@ -1130,7 +1236,6 @@
   transform: scale(0.96);
 }
 
-/* Hide mobile sheet/overlay on desktop */
 @media (min-width: 1025px) {
   .filterOverlay {
     display: none !important;
@@ -1141,7 +1246,7 @@
 }
 
 /* ==========================================================
-   SEARCH HEADER - Shows search query (NO extra search bar)
+   SEARCH HEADER
    ========================================================== */
 .searchHeader {
   max-width: 1280px;
@@ -1197,9 +1302,6 @@
   color: var(--ink);
 }
 
-/* ==========================================================
-   CLEAR SEARCH LINK
-   ========================================================== */
 .clearSearchLink {
   background: none;
   border: none;
@@ -1219,7 +1321,7 @@
 }
 
 /* ==========================================================
-   RECOMMENDATION SECTION - "You Might Also Like"
+   RECOMMENDATION SECTION
    ========================================================== */
 .recommendationSection {
   max-width: 1280px;
@@ -1261,17 +1363,9 @@
 }
 
 /* ==========================================================
-   RESPONSIVE - MATCHING COLLECTIONS
+   RESPONSIVE
    ========================================================== */
-
-/* ============================================================
-   ✅ MOBILE STICKY FIX — .shopWrap becomes the scroll container
-   (mirrors how .productsWrapper scrolls on desktop), so
-   .filterToggle sticks to the top of that container while the
-   product cards scroll inside it.
-   ============================================================ */
 @media (max-width: 1024px) {
-  /* ✅ Turn .shopWrap into the scroll container on mobile */
   .shopWrap {
     display: block;
     max-height: calc(100vh - 100px);
@@ -1295,8 +1389,6 @@
     border-radius: 4px;
   }
 
-  /* ✅ filterToggle is the first child of the scroll container.
-     Sticky top:0 pins it right below the fixed header. */
   .filterToggle {
     display: flex;
     position: sticky;
@@ -1312,7 +1404,6 @@
     display: none;
   }
 
-  /* ✅ productsWrapper no longer scrolls on mobile — .shopWrap does. */
   .productsWrapper {
     max-height: none;
     overflow-y: visible;
@@ -1342,7 +1433,6 @@
   .searchHeader {
     padding: 0 20px 16px;
   }
-  
 }
 
 @media (max-width: 900px) {
@@ -1350,7 +1440,6 @@
     padding-top: 100px;
   }
 
-  /* ✅ Keep .shopWrap as the scroll container, height matches header. */
   .shopWrap {
     max-height: calc(100vh - 100px);
     padding: 0 20px 60px;
@@ -1370,7 +1459,6 @@
   .toolbar {
     justify-content: flex-end;
   }
-
 }
 
 @media (max-width: 860px) {
@@ -1397,10 +1485,6 @@
   }
   .searchHeaderText {
     font-size: 13px;
-  }
-
-  .heroBanner {
-    height: 40vh;
   }
 }
 
@@ -1438,8 +1522,8 @@
     font-size: 12px;
   }
   .productsWrapper {
-  max-height: calc(70vh - 120px);
-}
+    max-height: calc(70vh - 120px);
+  }
 }
 
 @media (max-width: 560px) {
@@ -1447,7 +1531,6 @@
     padding-top: 80px;
   }
 
-  /* ✅ Scroll container height matches smaller header at this breakpoint */
   .shopWrap {
     max-height: calc(100vh - 80px);
     padding: 0 14px 20px;
@@ -1558,10 +1641,6 @@
     padding: 12px;
     font-size: 15px;
   }
-
-  .heroBanner {
-    height: 40vh;
-  }
 }
 
 @media (max-width: 480px) {
@@ -1662,10 +1741,6 @@
   .searchHeaderClear {
     font-size: 11px;
   }
-
-  .heroBanner {
-    height: 37vh;
-  }
 }
 
 @media (max-width: 380px) {
@@ -1711,11 +1786,6 @@
     font-size: 10px;
     padding: 2px 6px;
   }
-
-  .heroBanner {
-    height: 37vh;
-  }
-
 }
 
 /* Empty State */

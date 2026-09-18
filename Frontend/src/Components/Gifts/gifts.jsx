@@ -14,7 +14,11 @@ import toast from "react-hot-toast";
 import styles from "./gifts.module.css";
 import Header from "../../Pages/Layout/Header/Header";
 import Footer from "../../Pages/Layout/Footer/Footer";
-import giftHero from "../../assets/heroimageg.png";
+
+// ✅ Auto-scrolling hero banner images
+import giftBanner1 from "../../assets/giftBanner1.png";
+import giftBanner2 from "../../assets/shopHero2.jfif";
+import giftBanner3 from "../../assets/shopHero2.jfif";
 import giftMiddle from "../../assets/giftmiddle.png";
 
 import {
@@ -34,7 +38,6 @@ import {
   toggleWishlistItem,
   fetchWishlist,
 } from "../../redux/slices/wishlistSlice";
-// ✅ NEW — forward the user's (optional) coordinates for location ranking
 import { useLocationContext } from "../../contexts/LocationContext";
 
 const API_BASE =
@@ -87,6 +90,27 @@ const SORT_OPTIONS = [
   { value: "price-high", label: "Price: High to Low" },
 ];
 
+// ✅ Hero banner carousel data
+const GIFT_BANNERS = [
+  {
+    id: "gift-banner-1",
+    image: giftBanner1,
+    alt: "Timeless gifts for every celebration",
+  },
+  {
+    id: "gift-banner-2",
+    image: giftBanner2,
+    alt: "Curated gifts for every occasion",
+  },
+  {
+    id: "gift-banner-3",
+    image: giftBanner3,
+    alt: "Signature gift collection",
+  },
+];
+
+const BANNER_AUTOPLAY_MS = 5000;
+
 const testimonials = [
   {
     name: "Ananya R.",
@@ -126,20 +150,6 @@ const perks = [
   },
 ];
 
-/* ─── Skeleton Card ─── */
-function SkeletonCard() {
-  return (
-    <div className={styles.skeletonCard}>
-      <div className={styles.skeletonImage} />
-      <div className={styles.skeletonBody}>
-        <div className={styles.skeletonText} style={{ width: "80%" }} />
-        <div className={styles.skeletonText} style={{ width: "40%" }} />
-        <div className={styles.skeletonBtn} />
-      </div>
-    </div>
-  );
-}
-
 export default function Gifts() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -148,7 +158,6 @@ export default function Gifts() {
   const cartItems = useSelector((state) => state.cart.items);
   const wishlistItems = useSelector((state) => state.wishlist.items);
 
-  // ✅ NEW
   const { coords } = useLocationContext();
 
   // Categories
@@ -166,6 +175,10 @@ export default function Gifts() {
   const [priceRange, setPriceRange] = useState([0, 8000]);
   const [sortBy, setSortBy] = useState("latest");
   const [cartLoadingId, setCartLoadingId] = useState(null);
+
+  // ✅ Auto-scroll banner state
+  const [activeBannerIndex, setActiveBannerIndex] = useState(0);
+  const bannerAutoplayRef = useRef(null);
 
   // Infinite scroll state - like Shop
   const [page, setPage] = useState(1);
@@ -191,6 +204,39 @@ export default function Gifts() {
   const [isSidebarSortOpen, setIsSidebarSortOpen] = useState(false);
   const sidebarSortRef = useRef(null);
 
+  // ✅ Auto-scroll the hero banner
+  useEffect(() => {
+    bannerAutoplayRef.current = setInterval(() => {
+      setActiveBannerIndex((prev) => (prev + 1) % GIFT_BANNERS.length);
+    }, BANNER_AUTOPLAY_MS);
+
+    return () => {
+      if (bannerAutoplayRef.current) {
+        clearInterval(bannerAutoplayRef.current);
+      }
+    };
+  }, []);
+
+  const goToBanner = (index) => {
+    setActiveBannerIndex(index);
+    if (bannerAutoplayRef.current) {
+      clearInterval(bannerAutoplayRef.current);
+      bannerAutoplayRef.current = setInterval(() => {
+        setActiveBannerIndex((prev) => (prev + 1) % GIFT_BANNERS.length);
+      }, BANNER_AUTOPLAY_MS);
+    }
+  };
+
+  const goToPrevBanner = () => {
+    goToBanner(
+      (activeBannerIndex - 1 + GIFT_BANNERS.length) % GIFT_BANNERS.length,
+    );
+  };
+
+  const goToNextBanner = () => {
+    goToBanner((activeBannerIndex + 1) % GIFT_BANNERS.length);
+  };
+
   // Keep occasion in sync with URL
   useEffect(() => {
     if (!filterSlug) return;
@@ -211,7 +257,7 @@ export default function Gifts() {
       });
   }, []);
 
-  // ✅ Apply client-side sorting as fallback
+  // Apply client-side sorting as fallback
   const getSortedProducts = useCallback(
     (products) => {
       if (!products || products.length === 0) return products;
@@ -257,7 +303,6 @@ export default function Gifts() {
       try {
         setCategoryError(null);
 
-        // ✅ Convert sort value to backend format
         let sortParam = sortBy;
         if (sortBy === "price-low") sortParam = "price-asc";
         else if (sortBy === "price-high") sortParam = "price-desc";
@@ -273,7 +318,6 @@ export default function Gifts() {
             occasion:
               selectedOccasion !== "All" ? selectedOccasion : undefined,
             sort: sortParam || undefined,
-            // ✅ NEW
             lat: coords?.lat,
             lng: coords?.lng,
           }),
@@ -307,7 +351,7 @@ export default function Gifts() {
     setRefreshKey((k) => k + 1);
   }, [selectedCategory, selectedOccasion, sortBy]);
 
-  // ✅ NEW — refetch when the user's location becomes available/changes
+  // Refetch when the user's location becomes available/changes
   useEffect(() => {
     setPage(1);
     setAllProducts([]);
@@ -468,7 +512,7 @@ export default function Gifts() {
     if (filterSlug) navigate("/gifts");
   };
 
-  // ✅ Apply client-side filters (recipient, budget, availability) AND sorting
+  // Apply client-side filters AND sorting
   const clientFilteredProducts = useMemo(() => {
     let filtered = allProducts.filter((p) => {
       if (selectedRecipient !== "All") {
@@ -500,7 +544,6 @@ export default function Gifts() {
       return true;
     });
 
-    // ✅ Apply client-side sorting as fallback
     return getSortedProducts(filtered);
   }, [
     allProducts,
@@ -559,20 +602,67 @@ export default function Gifts() {
       <Header />
       <div className={styles.page}>
         <div className={styles.mainContent}>
-          {/* ================= HERO ================= */}
+          {/* ================= HERO CAROUSEL ================= */}
           <section className={styles.hero}>
-            <img
-              src={giftHero}
-              alt="Timeless gifts for every celebration"
-              className={styles.heroImage}
-            />
+            <div
+              className={styles.heroTrack}
+              style={{
+                transform: `translateX(-${activeBannerIndex * 100}%)`,
+              }}
+            >
+              {GIFT_BANNERS.map((banner) => (
+                <div className={styles.heroSlide} key={banner.id}>
+                  <img
+                    src={banner.image}
+                    alt={banner.alt}
+                    className={styles.heroImage}
+                    loading="eager"
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Blur / transparent arrows */}
+            <button
+              type="button"
+              className={`${styles.heroArrow} ${styles.heroArrowPrev}`}
+              onClick={goToPrevBanner}
+              aria-label="Previous banner"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              className={`${styles.heroArrow} ${styles.heroArrowNext}`}
+              onClick={goToNextBanner}
+              aria-label="Next banner"
+            >
+              ›
+            </button>
+
+            {/* Dot indicators */}
+            <div
+              className={styles.heroDots}
+              role="tablist"
+              aria-label="Banner slides"
+            >
+              {GIFT_BANNERS.map((banner, i) => (
+                <button
+                  key={banner.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={i === activeBannerIndex}
+                  aria-label={`Go to slide ${i + 1}`}
+                  className={`${styles.heroDot} ${
+                    i === activeBannerIndex ? styles.heroDotActive : ""
+                  }`}
+                  onClick={() => goToBanner(i)}
+                />
+              ))}
+            </div>
           </section>
 
           {/* ================= GIFT SHOP BODY ================= */}
-          {/* ✅ MOBILE STICKY FILTER TOGGLE — moved OUT of .shopWrap,
-              as a direct sibling, so its sticky top is measured
-              against the page scroll, not .shopWrap's inner scroll
-              context. */}
           <button
             type="button"
             className={styles.filterToggle}

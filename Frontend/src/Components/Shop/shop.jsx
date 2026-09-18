@@ -17,7 +17,12 @@ import toast from "react-hot-toast";
 import styles from "./shop.module.css";
 import Header from "../../Pages/Layout/Header/Header";
 import Footer from "../../Pages/Layout/Footer/Footer";
-import shopHero from "../../assets/shophero.png";
+
+// ✅ Auto-scrolling hero banner images
+import shopHero1 from "../../assets/shopHero1.png";
+import shopHero2 from "../../assets/shopHero2.jfif";
+import shopHero3 from "../../assets/shopHero3.jfif";
+
 import { LuSlidersHorizontal } from "react-icons/lu";
 import { FiHeart } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
@@ -39,7 +44,6 @@ import {
   fetchWishlist,
 } from "../../redux/slices/wishlistSlice";
 import headerStyles from "../../Pages/Layout/Header/Header.module.css";
-// ✅ NEW — read the user's (optional, self-supplied) coordinates
 import { useLocationContext } from "../../contexts/LocationContext";
 
 const API_URL =
@@ -86,6 +90,15 @@ const perks = [
   },
 ];
 
+// ✅ Hero banner carousel data
+const BANNERS = [
+  { id: "banner-1", image: shopHero1, alt: "Aurevian accessories collection" },
+  { id: "banner-2", image: shopHero2, alt: "Women's accessories editorial" },
+  { id: "banner-3", image: shopHero3, alt: "Aurevian leather craft" },
+];
+
+const BANNER_AUTOPLAY_MS = 5000;
+
 const truncateName = (name) => {
   if (!name) return "";
   const words = name.trim().split(/\s+/);
@@ -102,9 +115,6 @@ const generateSlugFromLabel = (label) => {
     .replace(/^-+|-+$/g, "");
 };
 
-// ✅ skeleton placeholders for the Category filter list, shown while
-// categories are still being fetched. Purely a loading-state visual (same
-// pattern as ShopByCategory.jsx's SKELETON_CATEGORIES), never real data.
 const CATEGORY_SKELETON_COUNT = 5;
 
 export default function Shop() {
@@ -114,8 +124,6 @@ export default function Shop() {
   const cartItems = useSelector((state) => state.cart.items);
   const wishlistItems = useSelector((state) => state.wishlist.items);
 
-  // ✅ NEW — the user's own, self-shared coordinates (or null). Never
-  // sent anywhere except as query params on these product/search calls.
   const { coords } = useLocationContext();
 
   const [searchParams] = useSearchParams();
@@ -127,9 +135,6 @@ export default function Shop() {
   const isSearchMode = searchQuery.length > 0;
 
   const [categories, setCategories] = useState([]);
-  // ✅ tracks whether the categories request is still in flight, so
-  // the Category filter group can show a skeleton instead of silently
-  // rendering nothing (previously indistinguishable from "zero categories").
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [isResolvingSlug, setIsResolvingSlug] = useState(true);
@@ -151,7 +156,10 @@ export default function Shop() {
 
   const requestIdRef = useRef(0);
 
-  // ✅ "You Might Also Like" recommendations - ALWAYS from different categories
+  // ✅ Auto-scroll banner state
+  const [activeBannerIndex, setActiveBannerIndex] = useState(0);
+  const bannerAutoplayRef = useRef(null);
+
   const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [isLoadingRecommendations, setIsLoadingRecommendations] =
     useState(false);
@@ -170,9 +178,38 @@ export default function Shop() {
   const [isSidebarSortOpen, setIsSidebarSortOpen] = useState(false);
   const sidebarSortRef = useRef(null);
 
-  // ✅ track whether the user has actually scrolled, so the infinite-scroll
-  // observer doesn't fire the instant page 1 renders
   const hasUserScrolledRef = useRef(false);
+
+  // ✅ Auto-scroll the hero banner
+  useEffect(() => {
+    bannerAutoplayRef.current = setInterval(() => {
+      setActiveBannerIndex((prev) => (prev + 1) % BANNERS.length);
+    }, BANNER_AUTOPLAY_MS);
+
+    return () => {
+      if (bannerAutoplayRef.current) {
+        clearInterval(bannerAutoplayRef.current);
+      }
+    };
+  }, []);
+
+  const goToBanner = (index) => {
+    setActiveBannerIndex(index);
+    if (bannerAutoplayRef.current) {
+      clearInterval(bannerAutoplayRef.current);
+      bannerAutoplayRef.current = setInterval(() => {
+        setActiveBannerIndex((prev) => (prev + 1) % BANNERS.length);
+      }, BANNER_AUTOPLAY_MS);
+    }
+  };
+
+  const goToPrevBanner = () => {
+    goToBanner((activeBannerIndex - 1 + BANNERS.length) % BANNERS.length);
+  };
+
+  const goToNextBanner = () => {
+    goToBanner((activeBannerIndex + 1) % BANNERS.length);
+  };
 
   useEffect(() => {
     setCategoriesLoading(true);
@@ -278,8 +315,6 @@ export default function Shop() {
     hasUserScrolledRef.current = false;
   }, [sort, effectiveCategoryId, budgetFilter, promotionFilter, searchQuery]);
 
-  // ✅ CHANGED — also resets/refetches when the user's location changes
-  // (Feature: "if the user's location changes, ordering should update").
   useEffect(() => {
     setPage(1);
     setAllProducts([]);
@@ -287,7 +322,6 @@ export default function Shop() {
     setRefreshKey((k) => k + 1);
   }, [coords?.lat, coords?.lng]);
 
-  // Fetch products (infinite scroll)
   useEffect(() => {
     const load = async () => {
       const requestId = ++requestIdRef.current;
@@ -627,7 +661,6 @@ export default function Shop() {
     return getSortedProducts(filtered);
   }, [allProducts, budgetFilter, promotionFilter, getSortedProducts]);
 
-  // ✅ Fetch "You Might Also Like" — ALWAYS from DIFFERENT categories.
   useEffect(() => {
     if (isResolvingSlug || isInitialLoading) return;
 
@@ -770,7 +803,6 @@ export default function Shop() {
           >
             {displayName}
           </Link>
-          {/* ✅ CHANGED — distance badge removed from product cards */}
           <div className={styles.productPrice}>
             <span className={styles.priceNow}>
               ₹
@@ -806,9 +838,6 @@ export default function Shop() {
     );
   };
 
-  // ✅ shared renderer for the Category filter's contents, used by
-  // both the desktop sidebar and the mobile sheet so the loading/empty/
-  // loaded logic only lives in one place.
   const renderCategoryOptions = (namePrefix) => {
     if (categoriesLoading) {
       return (
@@ -860,21 +889,62 @@ export default function Shop() {
     );
   };
 
-    return (
+  return (
     <div className={styles.page}>
       <Header />
       <div className={styles.mainContent}>
+        {/* ✅ Auto-scrolling hero banner carousel */}
         <div className={styles.heroBanner}>
-          <img
-            src={shopHero}
-            alt="Shop our collection"
-            className={styles.heroImage}
-          />
+          <div
+            className={styles.heroTrack}
+            style={{ transform: `translateX(-${activeBannerIndex * 100}%)` }}
+          >
+            {BANNERS.map((banner) => (
+              <div className={styles.heroSlide} key={banner.id}>
+                <img
+                  src={banner.image}
+                  alt={banner.alt}
+                  className={styles.heroImage}
+                  loading="eager"
+                />
+              </div>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            className={`${styles.heroArrow} ${styles.heroArrowPrev}`}
+            onClick={goToPrevBanner}
+            aria-label="Previous banner"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            className={`${styles.heroArrow} ${styles.heroArrowNext}`}
+            onClick={goToNextBanner}
+            aria-label="Next banner"
+          >
+            ›
+          </button>
+
+          <div className={styles.heroDots} role="tablist" aria-label="Banner slides">
+            {BANNERS.map((banner, i) => (
+              <button
+                key={banner.id}
+                type="button"
+                role="tab"
+                aria-selected={i === activeBannerIndex}
+                aria-label={`Go to slide ${i + 1}`}
+                className={`${styles.heroDot} ${
+                  i === activeBannerIndex ? styles.heroDotActive : ""
+                }`}
+                onClick={() => goToBanner(i)}
+              />
+            ))}
+          </div>
         </div>
 
-        {/* ✅ MOBILE STICKY FILTER TOGGLE — lives OUTSIDE .shopWrap,
-            as a direct sibling, so its sticky top is relative to the
-            page/body scroll, not .shopWrap's own scroll context. */}
         <button
           type="button"
           className={styles.filterToggle}
@@ -928,7 +998,6 @@ export default function Shop() {
               </div>
             </div>
 
-            {/* Category */}
             <div className={styles.filterGroup}>
               <span className={styles.filterGroupLabel}>Category</span>
               {renderCategoryOptions("category")}
@@ -988,7 +1057,6 @@ export default function Shop() {
           </aside>
 
           <main className={styles.productsWrapper}>
-            {/* Toolbar */}
             <div className={styles.toolbar}>
               <span className={styles.resultsCount}>
                 {isInitialLoading
@@ -1217,7 +1285,6 @@ export default function Shop() {
               </div>
             </div>
 
-            {/* Category */}
             <div className={styles.mobileFilterGroup}>
               <span className={styles.mobileFilterGroupLabel}>Category</span>
               <div className={styles.mobileFilterGrid}>

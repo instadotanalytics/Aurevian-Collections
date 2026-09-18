@@ -87,7 +87,9 @@
   filter: blur(0);
 }
 
-/* Hero Banner */
+/* ============================================================
+   ✅ Hero Banner Carousel (Auto-scrolling)
+   ============================================================ */
 .heroBanner {
   height: 85vh;
   margin-top: 115px;
@@ -98,11 +100,110 @@
   justify-content: center;
   padding: 0;
   position: relative;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  border-bottom: 1px solid var(--cream-line);
   overflow: hidden;
+  background: #efe7d4;
+  border-bottom: 1px solid var(--cream-line);
+}
+
+.heroTrack {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.heroSlide {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.heroImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+}
+
+/* Blur / transparent arrows */
+.heroArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  font-size: 30px;
+  line-height: 1;
+  color: #ffffff;
+  cursor: pointer;
+  z-index: 3;
+  transition:
+    background 0.25s ease,
+    transform 0.25s ease,
+    border-color 0.25s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.heroArrow:hover {
+  background: rgba(255, 255, 255, 0.32);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.heroArrow:active {
+  transform: translateY(-50%) scale(0.96);
+}
+
+.heroArrowPrev {
+  left: 24px;
+}
+
+.heroArrowNext {
+  right: 24px;
+}
+
+/* Dots */
+.heroDots {
+  position: absolute;
+  bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 3;
+}
+
+.heroDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.25s ease;
+}
+
+.heroDot:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.heroDotActive {
+  background: #fff;
+  width: 26px;
+  border-radius: 5px;
 }
 
 /* Section Header */
@@ -1301,13 +1402,6 @@
 /* ==========================================================
    Responsive
    ========================================================== */
-
-/* ============================================================
-   ✅ MOBILE STICKY FIX — mirrors the Shop component exactly.
-   • .filterToggle is a SIBLING of .shopLayout (see Offers.jsx).
-   • .shopLayout becomes the scroll container on mobile, just
-     like .shopWrap in Shop.
-   ============================================================ */
 @media (max-width: 1024px) {
   .heroBanner {
     height: 55vh;
@@ -1315,7 +1409,21 @@
     max-height: 600px;
   }
 
-  /* ✅ Sticky toggle pinned below the fixed header. */
+  .heroArrow {
+    width: 42px;
+    height: 42px;
+    font-size: 24px;
+  }
+  .heroArrowPrev {
+    left: 12px;
+  }
+  .heroArrowNext {
+    right: 12px;
+  }
+  .heroDots {
+    bottom: 16px;
+  }
+
   .filterToggle {
     display: flex;
     position: sticky;
@@ -1326,12 +1434,11 @@
     margin: 0 0 16px;
   }
 
-  /* ✅ .shopLayout becomes the inner scroll container on mobile. */
   .shopLayout {
     display: block;
     grid-template-columns: 1fr;
     gap: 0;
-    max-height: calc(100vh - 160px); /* header 100 + toggle ~60 */
+    max-height: calc(100vh - 160px);
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
@@ -1479,11 +1586,26 @@
     margin-top: 80px;
   }
 
+  .heroArrow {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+    background: rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .heroDot {
+    width: 8px;
+    height: 8px;
+  }
+  .heroDotActive {
+    width: 20px;
+  }
+
   .sectionTitle {
     font-size: 26px;
   }
 
-  /* ✅ Match the smaller header height */
   .filterToggle {
     padding: 10px 14px;
     font-size: 12px;
@@ -1492,7 +1614,7 @@
   }
 
   .shopLayout {
-    max-height: calc(100vh - 140px); /* header 80 + toggle ~60 */
+    max-height: calc(100vh - 140px);
   }
 
   .productsGrid {
@@ -1640,9 +1762,10 @@
   .sectionHeader {
     margin: 24px 0 16px;
   }
-    .productsWrapper {
-  max-height: calc(70vh - 120px);
-}
+
+  .productsWrapper {
+    max-height: calc(70vh - 120px);
+  }
 }
 
 @media (max-width: 560px) {
@@ -1985,6 +2108,10 @@
     transform: none !important;
     filter: blur(0) !important;
     animation: none !important;
+    transition: none !important;
+  }
+
+  .heroTrack {
     transition: none !important;
   }
 

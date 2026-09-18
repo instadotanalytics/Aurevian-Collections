@@ -45,7 +45,7 @@
    HERO GALLERY
    ========================================================== */
 .heroGallery {
-  height: 80vh;
+  height: 85vh;
   min-height: 500px;
   max-height: 950px;
   margin-bottom: clamp(20px, 3vw, 40px);

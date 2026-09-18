@@ -44,7 +44,9 @@
   text-decoration: none;
 }
 
-/* ---------- Hero ---------- */
+/* ============================================================
+   ✅ Hero Banner Carousel (Auto-scrolling)
+   ============================================================ */
 .hero {
   position: relative;
   width: 100%;
@@ -52,15 +54,108 @@
   border-bottom: 1px solid var(--line);
   animation: titleFadeUp 0.6s ease both;
   background: #efe7d4;
+  height: 85vh;
+}
+
+.heroTrack {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.heroSlide {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
 }
 
 .heroImage {
   display: block;
   width: 100%;
-  height: auto;
-  aspect-ratio: 21 / 8;
+  height: 100%;
   object-fit: cover;
   object-position: center 30%;
+}
+
+/* Prev / Next arrows — blur / transparent, subtle */
+.heroArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  font-size: 30px;
+  line-height: 1;
+  color: #ffffff;
+  cursor: pointer;
+  z-index: 3;
+  transition:
+    background 0.25s ease,
+    transform 0.25s ease,
+    border-color 0.25s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.heroArrow:hover {
+  background: rgba(255, 255, 255, 0.32);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.heroArrow:active {
+  transform: translateY(-50%) scale(0.96);
+}
+
+.heroArrowPrev {
+  left: 24px;
+}
+
+.heroArrowNext {
+  right: 24px;
+}
+
+/* Dots */
+.heroDots {
+  position: absolute;
+  bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 3;
+}
+
+.heroDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.25s ease;
+}
+
+.heroDot:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.heroDotActive {
+  background: #fff;
+  width: 26px;
+  border-radius: 5px;
 }
 
 @keyframes titleFadeUp {
@@ -77,6 +172,9 @@
 @media (prefers-reduced-motion: reduce) {
   .hero {
     animation: none;
+  }
+  .heroTrack {
+    transition: none;
   }
 }
 
@@ -1348,22 +1446,37 @@
 }
 
 /* ============================================================
-   ✅ MOBILE STICKY FIX — mirrors the Shop component exactly.
-   • .filterToggle is a SIBLING of .shopWrap (see Gifts.jsx).
-   • .shopWrap becomes the inner scroll container on mobile.
+   ✅ MOBILE STICKY FIX
    ============================================================ */
 @media (max-width: 900px) {
   .mainContent {
     padding-top: 100px;
   }
 
+  /* Hero on mobile */
+  .hero {
+    height: auto;
+  }
   .heroImage {
     aspect-ratio: auto;
     height: auto;
     object-fit: unset;
     object-position: center;
-    background: none;
     padding-top: 22px;
+  }
+  .heroArrow {
+    width: 42px;
+    height: 42px;
+    font-size: 24px;
+  }
+  .heroArrowPrev {
+    left: 12px;
+  }
+  .heroArrowNext {
+    right: 12px;
+  }
+  .heroDots {
+    bottom: 16px;
   }
 
   .commitment {
@@ -1396,7 +1509,7 @@
     gap: 16px;
   }
 
-  /* ✅ Sticky toggle pinned just below the fixed header */
+  /* Sticky toggle pinned just below the fixed header */
   .filterToggle {
     display: flex;
     position: sticky;
@@ -1409,11 +1522,10 @@
     box-sizing: border-box;
   }
 
-  /* ✅ .shopWrap becomes the inner scroll container on mobile. */
   .shopWrap {
     display: block;
     grid-template-columns: 1fr;
-    max-height: calc(100vh - 160px); /* header 100 + toggle ~60 */
+    max-height: calc(100vh - 160px);
     overflow-y: auto;
     overflow-x: hidden;
     padding: 24px 20px 60px;
@@ -1482,8 +1594,8 @@
     margin: 8px -12px -4px;
   }
   .productsWrapper {
-  max-height: calc(70vh - 120px);
-}
+    max-height: calc(70vh - 120px);
+  }
 }
 
 @media (max-width: 560px) {
@@ -1498,14 +1610,29 @@
     padding-top: 80px;
   }
 
+  /* Hero on smaller phones */
   .heroImage {
     aspect-ratio: auto;
     height: auto;
     object-fit: unset;
     padding-top: 28px;
   }
+  .heroArrow {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+    background: rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .heroDot {
+    width: 8px;
+    height: 8px;
+  }
+  .heroDotActive {
+    width: 20px;
+  }
 
-  /* ✅ Match the smaller header height */
   .filterToggle {
     top: 80px;
     margin: 20px auto 0;
@@ -1518,7 +1645,6 @@
   }
 
   .shopWrap {
-    /* 80px header + ~60px toggle */
     max-height: calc(100vh - 140px);
     padding: 20px 14px 48px;
   }
@@ -1858,6 +1984,9 @@
 @media (prefers-reduced-motion: reduce) {
   .hero {
     animation: none !important;
+  }
+  .heroTrack {
+    transition: none !important;
   }
   .skeletonImage,
   .skeletonText,

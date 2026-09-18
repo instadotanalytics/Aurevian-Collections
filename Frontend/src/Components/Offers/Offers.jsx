@@ -25,7 +25,12 @@ import {
 import { FaHeart } from "react-icons/fa";
 import { LuSlidersHorizontal } from "react-icons/lu";
 import styles from "./Offers.module.css";
-import craftImage1 from "../../assets/offersbanner.png";
+
+// ✅ Auto-scrolling hero banner images
+import offerBanner1 from "../../assets/offerBanner1.png";
+import offerBanner2 from "../../assets/shopHero2.jfif";
+import offerBanner3 from "../../assets/shopHero2.jfif";
+
 import Footer from "../../Pages/Layout/Footer/Footer.jsx";
 import Header from "../../Pages/Layout/Header/Header.jsx";
 import { fetchProductsByPlacement } from "../../redux/slices/storefrontProductSlice";
@@ -73,6 +78,27 @@ const SORT_OPTIONS = [
 ];
 
 const ITEMS_PER_BATCH = 10;
+
+// ✅ Hero banner carousel data
+const OFFER_BANNERS = [
+  {
+    id: "offer-banner-1",
+    image: offerBanner1,
+    alt: "Aurevian exclusive offers — banner one",
+  },
+  {
+    id: "offer-banner-2",
+    image: offerBanner2,
+    alt: "Aurevian exclusive offers — banner two",
+  },
+  {
+    id: "offer-banner-3",
+    image: offerBanner3,
+    alt: "Aurevian exclusive offers — banner three",
+  },
+];
+
+const BANNER_AUTOPLAY_MS = 5000;
 
 const generateSlugFromLabel = (label) => {
   return label
@@ -156,6 +182,10 @@ export default function Offers() {
   const [sortBy, setSortBy] = useState("newest");
   const [cartLoadingId, setCartLoadingId] = useState(null);
 
+  // ✅ Auto-scroll banner state
+  const [activeBannerIndex, setActiveBannerIndex] = useState(0);
+  const bannerAutoplayRef = useRef(null);
+
   const [page, setPage] = useState(1);
   const [allProducts, setAllProducts] = useState([]);
   const [hasMore, setHasMore] = useState(true);
@@ -179,6 +209,39 @@ export default function Offers() {
   const offerLabelFromSlug = filterSlug
     ? filterSlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
     : null;
+
+  // ✅ Auto-scroll the hero banner
+  useEffect(() => {
+    bannerAutoplayRef.current = setInterval(() => {
+      setActiveBannerIndex((prev) => (prev + 1) % OFFER_BANNERS.length);
+    }, BANNER_AUTOPLAY_MS);
+
+    return () => {
+      if (bannerAutoplayRef.current) {
+        clearInterval(bannerAutoplayRef.current);
+      }
+    };
+  }, []);
+
+  const goToBanner = (index) => {
+    setActiveBannerIndex(index);
+    if (bannerAutoplayRef.current) {
+      clearInterval(bannerAutoplayRef.current);
+      bannerAutoplayRef.current = setInterval(() => {
+        setActiveBannerIndex((prev) => (prev + 1) % OFFER_BANNERS.length);
+      }, BANNER_AUTOPLAY_MS);
+    }
+  };
+
+  const goToPrevBanner = () => {
+    goToBanner(
+      (activeBannerIndex - 1 + OFFER_BANNERS.length) % OFFER_BANNERS.length,
+    );
+  };
+
+  const goToNextBanner = () => {
+    goToBanner((activeBannerIndex + 1) % OFFER_BANNERS.length);
+  };
 
   useEffect(() => {
     axios
@@ -525,10 +588,65 @@ export default function Offers() {
         className={styles.offers}
         aria-label="Aurevian Exclusive Offers"
       >
-        <div
-          className={styles.heroBanner}
-          style={{ backgroundImage: `url(${craftImage1})` }}
-        />
+        {/* ================= HERO CAROUSEL ================= */}
+        <div className={styles.heroBanner}>
+          <div
+            className={styles.heroTrack}
+            style={{
+              transform: `translateX(-${activeBannerIndex * 100}%)`,
+            }}
+          >
+            {OFFER_BANNERS.map((banner) => (
+              <div className={styles.heroSlide} key={banner.id}>
+                <img
+                  src={banner.image}
+                  alt={banner.alt}
+                  className={styles.heroImage}
+                  loading="eager"
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Blur / transparent arrows */}
+          <button
+            type="button"
+            className={`${styles.heroArrow} ${styles.heroArrowPrev}`}
+            onClick={goToPrevBanner}
+            aria-label="Previous banner"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            className={`${styles.heroArrow} ${styles.heroArrowNext}`}
+            onClick={goToNextBanner}
+            aria-label="Next banner"
+          >
+            ›
+          </button>
+
+          {/* Dots */}
+          <div
+            className={styles.heroDots}
+            role="tablist"
+            aria-label="Banner slides"
+          >
+            {OFFER_BANNERS.map((banner, i) => (
+              <button
+                key={banner.id}
+                type="button"
+                role="tab"
+                aria-selected={i === activeBannerIndex}
+                aria-label={`Go to slide ${i + 1}`}
+                className={`${styles.heroDot} ${
+                  i === activeBannerIndex ? styles.heroDotActive : ""
+                }`}
+                onClick={() => goToBanner(i)}
+              />
+            ))}
+          </div>
+        </div>
 
         <div className={styles.container}>
           <Reveal as="div" className={styles.offersSection} delay={100}>
@@ -545,9 +663,7 @@ export default function Offers() {
               )}
             </div>
 
-            {/* ✅ MOBILE STICKY FILTER TOGGLE — lives OUTSIDE .shopLayout,
-                as a direct sibling, so its sticky top is relative to the
-                page scroll, not .shopLayout's inner scroll context. */}
+            {/* ✅ MOBILE STICKY FILTER TOGGLE */}
             <button
               type="button"
               className={styles.filterToggle}
@@ -673,7 +789,7 @@ export default function Offers() {
                 </button>
               </aside>
 
-              {/* Products Wrapper — becomes the scroll container on mobile */}
+              {/* Products Wrapper */}
               <div className={styles.productsWrapper}>
                 <div className={styles.productsHeader}>
                   <span className={styles.productsCount}>
