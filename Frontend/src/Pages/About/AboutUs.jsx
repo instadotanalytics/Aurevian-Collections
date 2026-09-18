@@ -1,20 +1,23 @@
 import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { FiDroplet, FiFeather, FiRepeat, FiArrowRight } from "react-icons/fi";
+import { FiFeather, FiRepeat, FiArrowRight, FiTrendingUp } from "react-icons/fi";
 import styles from "./AboutUs.module.css";
+
+// ---------------------------------------------------------------------------
+// Local assets — About page imagery (accessories brand, 60% men / 40% women)
+// ---------------------------------------------------------------------------
+import aboutHero from "../../assets/AboutHero.jpg";
+import aboutDisplay1 from "../../assets/AboutDisplay1.jfif";
+import aboutDisplay2 from "../../assets/AboutDisplay2.jfif";
 import craftImage1 from "../../assets/CraftImage1.png";
-import craftImage2 from "../../assets/CraftImage2.png";
+import craftImage2 from "../../assets/CraftImage1.jfif";
 
 import Header from "../Layout/Header/Header";
 import Footer from "../Layout/Footer/Footer";
 
-const heroImage =
-  "https://i.pinimg.com/1200x/07/b4/c0/07b4c09ebe702682087fb62a5f72d301.jpg";
-const displayImage1 =
-  "https://i.pinimg.com/1200x/d9/0f/0b/d90f0b0c3032dc4f1674f204a8e1fdd0.jpg";
-const displayImage2 =
-  "https://i.pinimg.com/1200x/50/8b/dd/508bddb1d6999237bddcc41e80084f6e.jpg";
-
+// ---------------------------------------------------------------------------
+// Motion variants
+// ---------------------------------------------------------------------------
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
   visible: {
@@ -50,36 +53,42 @@ const staggerContainer = {
 
 const viewportOnce = { once: true, amount: 0.3 };
 
+// ---------------------------------------------------------------------------
+// Brand values — accessories-focused, no gender, no jewellery
+// ---------------------------------------------------------------------------
 const values = [
   {
-    id: "plating",
-    icon: FiDroplet,
+    id: "materials",
+    icon: FiFeather,
     num: "01",
-    title: "Tarnish-resistant plating",
-    copy: "Every piece is layered in 18K gold vermeil over sterling silver, built to hold up to water, sweat and daily weather — not just special occasions.",
+    title: "Material-first construction",
+    copy: "Every piece starts with the material — full-grain leathers, brushed metals, quality textiles — chosen for how they age, not just how they photograph.",
   },
   {
     id: "everyday",
-    icon: FiFeather,
+    icon: FiRepeat,
     num: "02",
-    title: "Made for everyday, not someday",
-    copy: "No safety-deposit-box jewellery here. Aurevian pieces are designed to be worn on repeat, layered, and lived in.",
+    title: "Made for every day, not one occasion",
+    copy: "No pieces that only come out twice a year. Aurevian is built around a rotation — accessories that work from weekday to weekend without a second thought.",
   },
   {
-    id: "value",
-    icon: FiRepeat,
+    id: "evolution",
+    icon: FiTrendingUp,
     num: "03",
-    title: "Built to last, priced to repeat",
-    copy: "Constructed to outlast trends and touch-ups, at a price that lets you build a full edit — not just one piece.",
+    title: "Designed to evolve with you",
+    copy: "Timeless finishes, considered proportions, and construction that holds up — so every addition still fits the collection you already have.",
   },
 ];
 
 const craftStats = [
-  { id: "gold", num: "18K", label: "Gold vermeil plating" },
-  { id: "finish", num: "3×", label: "Hand-finishing passes" },
-  { id: "durable", num: "100%", label: "Water & sweat tested" },
+  { id: "materials", num: "100%", label: "Responsibly sourced materials" },
+  { id: "checks", num: "3×", label: "Quality checks per piece" },
+  { id: "wear", num: "365", label: "Days of wear testing" },
 ];
 
+// ---------------------------------------------------------------------------
+// HERO
+// ---------------------------------------------------------------------------
 function Hero() {
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({
@@ -101,18 +110,18 @@ function Hero() {
         </motion.span>
         <motion.hr variants={fadeUp} className={styles.hairline} />
         <motion.h1 variants={fadeUp} className={styles.heroTitle}>
-          Gold-plated confidence, worn every day.
+          Everyday essentials, made to last.
         </motion.h1>
         <motion.p variants={fadeUp} className={styles.heroSub}>
-          Aurevian designs jewellery for the days that don't wait for an
-          occasion.
+          Aurevian builds modern accessories — belts, wallets, watches, bags,
+          and perfumes — for people who carry things with intention.
         </motion.p>
       </motion.div>
 
       <motion.div className={styles.heroMedia} style={{ y: imageY }}>
         <motion.img
-          src={heroImage}
-          alt="Aurevian jewellery showroom"
+          src={aboutHero}
+          alt="Aurevian accessories editorial — belt, wallet, watch, and sunglasses"
           className={styles.heroImage}
           variants={imageReveal}
           initial="hidden"
@@ -123,6 +132,9 @@ function Hero() {
   );
 }
 
+// ---------------------------------------------------------------------------
+// OUR STORY
+// ---------------------------------------------------------------------------
 function OurStory() {
   return (
     <section className={styles.storySection} aria-label="Our story">
@@ -136,16 +148,16 @@ function OurStory() {
         >
           <motion.div className={styles.storyImgMain} variants={imageReveal}>
             <img
-              src={displayImage1}
-              alt="Aurevian jewellery, close detail"
+              src={aboutDisplay1}
+              alt="Man wearing Aurevian leather belt, watch, and carrying a briefcase"
               loading="lazy"
               decoding="async"
             />
           </motion.div>
           <motion.div className={styles.storyImgAccent} variants={imageReveal}>
             <img
-              src={displayImage2}
-              alt="Aurevian jewellery, worn styling"
+              src={aboutDisplay2}
+              alt="Close-up of a leather cardholder wallet and wristwatch"
               loading="lazy"
               decoding="async"
             />
@@ -167,15 +179,15 @@ function OurStory() {
             Why we started Aurevian
           </motion.h2>
           <motion.p variants={fadeUp} className={styles.storyParagraph}>
-            Fine jewellery asks you to be careful with it — take it off before
-            the shower, before the gym, before you actually live your life. We
-            didn't want a jewellery box full of pieces we were too nervous to
-            wear.
+            Accessories had split into two camps — fast, disposable pieces on
+            one side, and unreachable luxury pricing on the other. Neither was
+            built for someone who actually carries their things every day.
           </motion.p>
           <motion.p variants={fadeUp} className={styles.storyParagraph}>
-            So Aurevian set out to make demifine jewellery that behaves like
-            fine jewellery — the same warmth, the same weight, the same finish —
-            but priced and built for daily wear, not display.
+            So Aurevian set out to design the middle ground: considered
+            materials, honest construction, and detailing built to hold up year
+            after year — for anyone who values quality without the luxury
+            markup.
           </motion.p>
         </motion.div>
       </div>
@@ -183,6 +195,9 @@ function OurStory() {
   );
 }
 
+// ---------------------------------------------------------------------------
+// WHAT WE BELIEVE
+// ---------------------------------------------------------------------------
 function WhatWeBelieve() {
   return (
     <section className={styles.valuesSection} aria-label="What we believe">
@@ -222,6 +237,9 @@ function WhatWeBelieve() {
   );
 }
 
+// ---------------------------------------------------------------------------
+// THE CRAFT
+// ---------------------------------------------------------------------------
 function TheCraft() {
   const mediaRef = useRef(null);
   const { scrollYProgress } = useScroll({
@@ -249,12 +267,12 @@ function TheCraft() {
             variants={fadeUp}
             className={`${styles.h2} ${styles.h2Light}`}
           >
-            Behind every clasp
+            Behind every stitch
           </motion.h2>
           <motion.p variants={fadeUp} className={styles.craftCopy}>
-            Each design passes through three rounds of hand-finishing before
-            it's plated — checked for weight, balance, and how it catches light,
-            not just how it photographs.
+            Each piece passes through three rounds of quality checking before
+            it reaches you — tested for finish, durability, and how it holds up
+            after months of daily use, not just how it looks in the studio.
           </motion.p>
           <motion.ul variants={fadeUp} className={styles.craftStats}>
             {craftStats.map(({ id, num, label }) => (
@@ -277,7 +295,7 @@ function TheCraft() {
           >
             <img
               src={craftImage1}
-              alt="Hand-finishing a gold vermeil piece"
+              alt="Craftsman hand-finishing a leather piece on a workbench"
               loading="lazy"
               decoding="async"
             />
@@ -292,7 +310,7 @@ function TheCraft() {
           >
             <img
               src={craftImage2}
-              alt="Close-up of clasp detailing"
+              alt="Close-up of hand-stitched leather detailing"
               loading="lazy"
               decoding="async"
             />
@@ -303,9 +321,12 @@ function TheCraft() {
   );
 }
 
+// ---------------------------------------------------------------------------
+// CLOSING QUOTE
+// ---------------------------------------------------------------------------
 function ClosingQuote() {
   return (
-    <section className={styles.quoteSection} aria-label="In her words">
+    <section className={styles.quoteSection} aria-label="In their words">
       <motion.div
         className={styles.quoteRule}
         initial={{ scaleY: 0 }}
@@ -322,11 +343,11 @@ function ClosingQuote() {
         className={styles.quoteBody}
       >
         <motion.span variants={fadeUp} className={styles.eyebrow}>
-          In Her Words
+          In Their Words
         </motion.span>
         <motion.blockquote variants={fadeIn} className={styles.quote}>
-          “We didn't want to make cheaper jewellery. We wanted to make jewellery
-          you don't have to be careful with.”
+          “We didn't set out to make trend pieces. We set out to make the belt,
+          the wallet, the watch — the pieces you reach for first, every day.”
         </motion.blockquote>
         <motion.cite variants={fadeUp} className={styles.quoteCite}>
           Founder, Aurevian
@@ -336,6 +357,9 @@ function ClosingQuote() {
   );
 }
 
+// ---------------------------------------------------------------------------
+// CTA
+// ---------------------------------------------------------------------------
 function CallToAction() {
   return (
     <section className={styles.cta} aria-label="Shop the collection">
@@ -346,7 +370,7 @@ function CallToAction() {
         whileInView="visible"
         viewport={viewportOnce}
       >
-        Ready to build your everyday edit?
+        Ready to build your everyday carry?
       </motion.h2>
       <motion.a
         href="/collections"
@@ -363,6 +387,9 @@ function CallToAction() {
   );
 }
 
+// ---------------------------------------------------------------------------
+// PAGE
+// ---------------------------------------------------------------------------
 const AboutUs = () => {
   return (
     <>

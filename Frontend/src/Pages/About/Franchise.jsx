@@ -47,13 +47,12 @@ import Footer from "../../Pages/Layout/Footer/Footer";
 /* ---------------------------------------------------------------- */
 /* Image imports                                                     */
 /* ---------------------------------------------------------------- */
-import bridalSetImage from "../../assets/Bridalsetimage.png";
-import ringsImage from "../../assets/Ringsimage.png";
-import necklaceImage from "../../assets/Necklaceimage.png";
-import earingsImage from "../../assets/Earingsimage.png";
-import banglesImage from "../../assets/Banglesimage.png";
-import ankletsImage from "../../assets/Ankletsimage.png";
-
+import beltsImage from "../../assets/CollectionBelts.jfif";
+import walletsImage from "../../assets/CollectionWallets.jfif";
+import sunglassesImage from "../../assets/CollectionSunglasses.jfif";
+import watchesImage from "../../assets/CollectionWatches.jfif";
+import bagsImage from "../../assets/CollectionBags.jfif";
+import perfumesImage from "../../assets/CollectionPerfumes.jfif";
 // ✅ NEW — backend base URL. Set VITE_API_URL in your .env if the API
 // lives on a different origin than the frontend; otherwise this falls
 // back to a same-origin relative request.
@@ -62,12 +61,11 @@ const API_BASE = import.meta.env.VITE_API_URL || "";
 /* ---------------------------------------------------------------- */
 /* Static data                                                       */
 /* ---------------------------------------------------------------- */
-
 const HERO_FEATURES = [
   {
     icon: <FaGem />,
     title: "Premium Brand",
-    desc: "Associate with a trusted and elegant jewellery brand.",
+    desc: "Associate with a trusted, design-led accessories brand.",
   },
   {
     icon: <FaHandshake />,
@@ -80,22 +78,21 @@ const HERO_FEATURES = [
     desc: "High margins, strong demand & scalable business model.",
   },
 ];
-
 const WHY_PARTNER = [
   {
     icon: <FaGem />,
     title: "Premium Brand",
-    desc: "Align with a recognised anti-tarnish jewellery,customers already trust.",
+    desc: "Align with a recognised accessories label customers already trust.",
   },
   {
     icon: <HiSparkles />,
-    title: "Trending Jewellery",
+    title: "Trending Collections",
     desc: "A catalogue refreshed monthly to match what's actually selling now.",
   },
   {
     icon: <FaChartLine />,
     title: "High Profit Margin",
-    desc: "Margins built into every price point, from studs to statement sets.",
+    desc: "Margins built into every price point, from essentials to statement pieces.",
   },
   {
     icon: <FaBullhorn />,
@@ -105,7 +102,7 @@ const WHY_PARTNER = [
   {
     icon: <FaChalkboardTeacher />,
     title: "Training",
-    desc: "Sales, styling and store-operations training for you and your staff.",
+    desc: "Product knowledge, styling and store-operations training for you and your staff.",
   },
   {
     icon: <FaBoxes />,
@@ -115,7 +112,7 @@ const WHY_PARTNER = [
   {
     icon: <FaTruck />,
     title: "Fast Delivery",
-    desc: "A logistics network built to keep your counters full, not waiting.",
+    desc: "A logistics network built to keep your shelves full, not waiting.",
   },
   {
     icon: <FaMobileAlt />,
@@ -140,7 +137,7 @@ const WHY_PARTNER = [
   {
     icon: <FaShieldAlt />,
     title: "Warranty Support",
-    desc: "A one-year warranty programme handled end-to-end by our team.",
+    desc: "A one-year quality warranty programme handled end-to-end by our team.",
   },
 ];
 
@@ -208,24 +205,24 @@ const TIMELINE_STEPS = [
 ];
 
 const COLLECTIONS = [
-  { title: "Bridal Sets", tag: "Statement Pieces", img: bridalSetImage },
-  { title: "Rings", tag: "Everyday Elegance", img: ringsImage },
-  { title: "Necklaces", tag: "Layered & Timeless", img: necklaceImage },
-  { title: "Earrings", tag: "Studs to Danglers", img: earingsImage },
-  { title: "Bracelets & Bangles", tag: "Stackable Shine", img: banglesImage },
-  { title: "Anklets", tag: "festive favorites", img: ankletsImage },
+  { title: "Belts", tag: "Leather & Formal", img: beltsImage },
+  { title: "Wallets", tag: "Purses & Cardholders", img: walletsImage },
+  { title: "Sunglasses", tag: "Everyday to Aviator", img: sunglassesImage },
+  { title: "Watches", tag: "Classic & Sport", img: watchesImage },
+  { title: "Bags", tag: "Totes, Slings & More", img: bagsImage },
+  { title: "Perfumes", tag: "Signature Scents", img: perfumesImage },
 ];
 
 const PROMISE_CARDS = [
   {
     icon: <LuSparkles />,
-    title: ["Timeless", "Craftsmanship"],
-    desc: ["Thoughtful designs", "made to last."],
+    title: ["Timeless", "Design"],
+    desc: ["Thoughtful pieces", "made to last."],
   },
   {
     icon: <LuGem />,
     title: ["Premium", "Materials"],
-    desc: ["Quality materials", "you can trust."],
+    desc: ["Quality you", "can trust."],
   },
   {
     icon: <LuGift />,
@@ -239,8 +236,8 @@ const PROMISE_CARDS = [
   },
   {
     icon: <LuHeart />,
-    title: ["Designed", "For You"],
-    desc: ["Jewellery for", "every occasion."],
+    title: ["Designed", "For All"],
+    desc: ["Accessories for", "every occasion."],
   },
   {
     icon: <LuShoppingBag />,
@@ -1160,29 +1157,29 @@ const Franchise = () => {
 
   return (
     <>
-    <Header/>
+      <Header />
       <Helmet>
-        <title>Aurevian Jewellery Franchise | Become a Franchise Partner</title>
+        <title>Aurevian Accessories Franchise | Become a Franchise Partner</title>
         <meta
           name="description"
-          content="Start your own Aurevian Jewellery Franchise and become part of India's premium anti-tarnish jewellery brand. Low investment, high returns, complete business support."
+          content="Start your own Aurevian Accessories franchise — a modern accessories brand for everyone. Low investment, high returns, complete business support."
         />
         <meta
           property="og:title"
-          content="Aurevian Jewellery Franchise | Become a Franchise Partner"
+          content="Aurevian Accessories Franchise | Become a Franchise Partner"
         />
         <meta
           property="og:description"
-          content="Start your own Aurevian Jewellery Franchise and become part of India's premium anti-tarnish jewellery brand."
+          content="Start your own Aurevian Accessories franchise — a modern accessories brand for everyone."
         />
         <meta property="og:type" content="website" />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "FranchiseOffer",
-            name: "Aurevian Jewellery Franchise",
+            name: "Aurevian Accessories Franchise",
             description:
-              "Franchise opportunity with India's premium anti-tarnish jewellery brand.",
+              "Franchise opportunity with a modern accessories brand for everyone.",
           })}
         </script>
       </Helmet>
@@ -1200,7 +1197,7 @@ const Franchise = () => {
               variants={stagger}
             >
               <motion.p variants={fadeUp} className={styles.heroTopEyebrow}>
-                Partner With A Premium Jewellery Brand
+                Partner With A Premium Accessories Brand
               </motion.p>
               <motion.div
                 variants={fadeUp}
@@ -1213,12 +1210,12 @@ const Franchise = () => {
 
               <motion.h1 variants={fadeUp} className={styles.heroHeading}>
                 Build Your Own <span className={styles.goldText}>Aurevian</span>{" "}
-                Jewellery Business
+                Accessories Store
               </motion.h1>
 
               <motion.p variants={fadeUp} className={styles.heroSub}>
-                A premium retail opportunity designed for ambitious
-                entrepreneurs.
+                A premium retail opportunity built on belts, wallets, sunglasses,
+                watches, bags, and perfumes — for men and women alike.
               </motion.p>
 
               <motion.div variants={fadeUp} className={styles.heroButtons}>
@@ -1403,9 +1400,9 @@ const Franchise = () => {
 
           <div className={styles.featurePills}>
             {[
-              "Anti-Tarnish",
-              "Waterproof",
-              "Hypoallergenic",
+              "Premium Materials",
+              "Everyday Carry",
+              "Timeless Design",
               "1 Year Warranty",
             ].map((f) => (
               <span key={f} className={styles.pill}>
@@ -1437,9 +1434,9 @@ const Franchise = () => {
                 <span className={styles.promiseDividerLine} />
               </div>
               <h2 className={styles.promiseHeading}>
-                Jewellery designed with intention.
+                Accessories designed with intention.
                 <br />
-                Made to be cherished.
+                Made to be carried.
               </h2>
             </Reveal>
 
@@ -1527,7 +1524,7 @@ const Franchise = () => {
           <div className={styles.footerCtaBg} aria-hidden="true" />
           <Reveal className={styles.footerCtaInner}>
             <GiFactory className={styles.footerCtaIcon} />
-            <h2>Ready to Build Your Jewellery Business?</h2>
+            <h2>Ready to Build Your Accessories Business?</h2>
             <p>Join Aurevian's growing franchise network today.</p>
             <a href="#inquiry" className={styles.btnPrimary}>
               Apply for Franchise

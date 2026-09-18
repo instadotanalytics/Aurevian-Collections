@@ -1,7 +1,7 @@
 // src/Pages/Contact/Contact.jsx
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Heart, Gem, Sparkles } from "lucide-react";
+import { Heart, Shirt, Sparkles } from "lucide-react";
 import {
   FiMapPin,
   FiPhone,
@@ -52,18 +52,18 @@ const viewportOnce = { once: true, amount: 0.25 };
 const infoCards = [
   {
     icon: FiMapPin,
-    title: "Visit Our Showroom",
-    details: ["123 Luxury Avenue", "New York, NY 10001"],
+    title: "Visit Our Studio",
+    details: ["Aurevian Flagship Studio", "Mumbai, India"],
   },
   {
     icon: FiPhone,
     title: "Call Us",
-    details: ["+1 (555) 123-4567", "24 hours available"],
+    details: ["+91 91650 13748", "Mon–Sat, 10am–7pm"],
   },
   {
     icon: FiMail,
     title: "Email Us",
-    details: ["info@aurevian.com", "support@aurevian.com"],
+    details: ["hello@aurevian.com", "support@aurevian.com"],
   },
 ];
 
@@ -74,36 +74,27 @@ const socialProof = [
 ];
 
 const features = [
-  {
-    icon: Heart,
-    label: "Discover",
-  },
-  {
-    icon: Gem,
-    label: "Ask",
-  },
-  {
-    icon: Sparkles,
-    label: "Connect",
-  },
+  { icon: Shirt, label: "Discover" },
+  { icon: Heart, label: "Ask" },
+  { icon: Sparkles, label: "Connect" },
 ];
 
 const faqs = [
   {
     q: "What is your return policy?",
-    a: "We offer a 30-day return policy on unworn items in their original packaging. Custom orders may have different conditions.",
+    a: "We offer a 30-day return window on unused items in their original packaging. Personalised and custom pieces may have different conditions.",
   },
   {
-    q: "Do you offer custom jewelry design?",
-    a: "Yes, we offer bespoke custom design services. Schedule a consultation with our expert designers.",
+    q: "Do you offer gift wrapping?",
+    a: "Yes — complimentary gift wrapping is available on every order. Just select the option at checkout.",
   },
   {
     q: "How long does shipping take?",
-    a: "Domestic orders arrive within 3-5 business days. International orders take 7-14 business days.",
+    a: "Domestic orders arrive within 3–5 business days. International orders take 7–14 business days.",
   },
   {
-    q: "Are your products certified?",
-    a: "All our jewellery is hallmarked and certified with authenticity certificates for your peace of mind.",
+    q: "How do I care for my Aurevian pieces?",
+    a: "Wipe leather with a soft dry cloth and store in the dust bag your order arrived with. Full care instructions ship with every piece.",
   },
 ];
 
@@ -181,41 +172,42 @@ const Contact = () => {
       <main className={styles.container}>
         {/* ================= HERO ================= */}
         <section className={styles.hero}>
-         <motion.div
-  className={styles.heroText}
-  variants={staggerContainer}
-  initial="hidden"
-  animate="visible"
->
-  <motion.span variants={fadeUp} className={styles.eyebrow}>
-    AUREVIAN COLLECTIONS
-  </motion.span>
+          <motion.div
+            className={styles.heroText}
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.span variants={fadeUp} className={styles.eyebrow}>
+              AUREVIAN COLLECTIONS
+            </motion.span>
 
-  <motion.hr variants={fadeUp} className={styles.hairline} />
+            <motion.hr variants={fadeUp} className={styles.hairline} />
 
-  <motion.h1 variants={fadeUp} className={styles.heroTitle}>
-    Let’s Start
-A Conversation
-  {/* <span className={styles.heroTitleAccent}>Conversation</span> */}
-  </motion.h1>
+            <motion.h1 variants={fadeUp} className={styles.heroTitle}>
+              Let’s Start
+              A Conversation
+              {/* <span className={styles.heroTitleAccent}>Conversation</span> */}
+            </motion.h1>
 
-  <motion.p variants={fadeUp} className={styles.heroSub}>
-    Have a question or need assistance? Our team is here to help you find
-    the right piece and make your Aurevian experience truly special.
-  </motion.p>
+            <motion.p variants={fadeUp} className={styles.heroSub}>
+               Have a question or need help choosing? Our team is here to help you
+  find the right piece — belt, wallet, watch, sunglasses, bag, or
+  perfume — and make your Aurevian experience a good one.
+            </motion.p>
 
-  <motion.div
-    variants={fadeUp}
-    className={styles.featureList}
-  >
-    {features.map(({ icon: Icon, label }) => (
-      <span className={styles.feature} key={label}>
-        <Icon className={styles.featureIcon} />
-        {label}
-      </span>
-    ))}
-  </motion.div>
-</motion.div>
+            <motion.div
+              variants={fadeUp}
+              className={styles.featureList}
+            >
+              {features.map(({ icon: Icon, label }) => (
+                <span className={styles.feature} key={label}>
+                  <Icon className={styles.featureIcon} />
+                  {label}
+                </span>
+              ))}
+            </motion.div>
+          </motion.div>
 
           <motion.div
             className={styles.heroMedia}
@@ -440,7 +432,7 @@ A Conversation
             viewport={viewportOnce}
             className={styles.ctaTitle}
           >
-            Let's Create Something Beautiful Together
+            Let's Build Your Wardrobe Together
           </motion.h3>
           <motion.p
             variants={fadeUp}
@@ -449,8 +441,8 @@ A Conversation
             viewport={viewportOnce}
             className={styles.ctaSub}
           >
-            Whether you're looking for the perfect piece or need expert
-            guidance, our team is here to bring your vision to life.
+            Whether you're looking for the perfect piece or need styling guidance,
+            our team is here to bring your vision to life.
           </motion.p>
         </section>
       </main>

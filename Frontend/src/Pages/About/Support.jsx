@@ -51,8 +51,7 @@ const staggerContainer = {
 
 const viewportOnce = { once: true, amount: 0.25 };
 
-const HERO_IMAGE =
-  "https://i.pinimg.com/1200x/6f/5f/6a/6f5f6aa1bea4fae5c1981d0ad606b029.jpg";
+import HERO_IMAGE from "../../assets/supportpage.png"
 
 const CONTACT_CARDS = [
   {
@@ -90,18 +89,18 @@ const TRUST_ITEMS = [
   },
   {
     icon: PiTruckLight,
-    title: "Fast Delivery",
+    title: "Fast Shipping",
     text: "Timely and safe delivery to your door.",
   },
   {
     icon: PiDiamondLight,
-    title: "Certified Jewellery",
-    text: "All our jewellery is authentic & certified.",
+    title: "Considered Craft",
+    text: "Every piece passes a three-stage quality check.",
   },
   {
     icon: PiArrowsClockwiseLight,
     title: "Easy Returns",
-    text: "Hassle-free returns within 7 days.",
+    text: "Hassle-free returns within 30 days.",
   },
 ];
 
@@ -109,32 +108,32 @@ const FAQS = [
   {
     question: "How can I track my order?",
     answer:
-      "You can track your order by logging into your account and visiting 'My Orders'. You'll also receive a tracking number via email once your order ships.",
+      "Log into your account and visit 'My Orders', or use the tracking link we send by email as soon as your order ships.",
   },
   {
     question: "What is your return policy?",
     answer:
-      "We offer a 30-day return policy on unworn items in their original packaging. Custom orders and personalized items may have different return conditions.",
+      "We offer a 30-day return window on unused items in their original packaging. Personalised and custom pieces may have different conditions.",
   },
   {
-    question: "How can I care for my jewellery?",
+    question: "How should I care for my Aurevian pieces?",
     answer:
-      "Store your jewellery in a cool, dry place. Clean with a soft cloth and avoid contact with chemicals, perfumes, and water.",
+      "Wipe leather with a soft dry cloth and store in the dust bag your order arrived with. Full care instructions ship with every piece.",
   },
   {
     question: "Do you offer gift wrapping?",
     answer:
-      "Yes, we offer complimentary gift wrapping for all orders. You can select this option at checkout.",
+      "Yes — complimentary gift wrapping is available on every order. Just select the option at checkout.",
   },
   {
-    question: "Are your products certified?",
+    question: "How do I know which size to order?",
     answer:
-      "Yes, all our jewellery is hallmarked and certified with authenticity certificates for your peace of mind.",
+      "Every product page carries a detailed size guide with measurements. If you're between sizes, our team is happy to advise — just reach out.",
   },
   {
     question: "What payment methods do you accept?",
     answer:
-      "We accept all major credit cards (Visa, Mastercard, Amex), PayPal, Apple Pay, Google Pay, and UPI payments for your convenience.",
+      "We accept all major credit and debit cards, UPI, net banking, and popular wallets including Paytm, Google Pay, and PhonePe.",
   },
 ];
 
@@ -165,7 +164,7 @@ function Hero() {
       <motion.div className={styles.heroBackground} style={{ y: imageY }}>
         <img
           src={HERO_IMAGE}
-          alt="Aurevian jewellery support"
+          alt="Aurevian support — menswear editorial"
           className={styles.heroImage}
           fetchpriority="high"
         />

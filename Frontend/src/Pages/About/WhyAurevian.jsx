@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
   FiShield,
-  FiDroplet,
+  FiFeather,
   FiHeart,
   FiRefreshCw,
   FiAward,
@@ -10,15 +10,15 @@ import {
   FiArrowRight,
 } from "react-icons/fi";
 import styles from "./WhyAurevian.module.css";
-import productImage from "../../assets/ProductImage.png";
+import productImage from "../../assets/ProductImage.jpg";
 import Header from "../Layout/Header/Header";
 import Footer from "../Layout/Footer/Footer";
 
 const HERO_IMAGE_URL =
-  "https://i.pinimg.com/1200x/20/2a/df/202adfdd80a767b9a2c34653860b6eed.jpg";
+  "https://i.pinimg.com/1200x/cb/99/60/cb99604d9200b86a68432b4fd4efcfdc.jpg";
 
 const MAKING_IMAGE_URL =
-  "https://i.pinimg.com/736x/54/19/95/541995c08c6b6a81bab622d111446fa4.jpg";
+  "https://i.pinimg.com/736x/ea/5a/54/ea5a54e37fe7c17e69b2dd94d7dfba84.jpg";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -65,66 +65,66 @@ const viewportOnce = { once: true, amount: 0.3 };
 
 const makingPoints = [
   {
-    id: "material",
+    id: "materials",
     num: "01",
-    title: "The Base",
-    copy: "A skin-safe alloy, chosen for what it can hold, not just what it costs.",
+    title: "The Materials",
+    copy: "Full-grain leathers, brushed metals, and quality textiles — chosen for how they age, not just how they photograph.",
   },
   {
-    id: "plating",
+    id: "construction",
     num: "02",
-    title: "The Finish",
-    copy: "Layered gold, thick enough to survive real wear — not just a photograph.",
+    title: "The Construction",
+    copy: "Hand-stitched edges, reinforced hardware, and finishes built to survive years of daily use.",
   },
   {
     id: "check",
     num: "03",
-    title: "The Check",
+    title: "The Quality Check",
     copy: "Every piece inspected by hand before it ever reaches a box.",
   },
 ];
 
 const reasons = [
   {
-    id: "plating",
+    id: "quality",
     icon: FiShield,
-    title: "A finish that behaves like gold",
-    copy: "An even, considered layer of gold over a base built to hold it — so it catches light the way fine jewellery does, without asking a fine-jewellery budget of you.",
+    title: "Materials that behave like they cost more",
+    copy: "Considered construction over fast-fashion shortcuts — so it ages, holds its shape, and feels the way good accessories should, without the luxury markup.",
   },
   {
     id: "water",
-    icon: FiDroplet,
+    icon: FiFeather,
     title: "Built for a life, not a display case",
-    copy: "Showers, workouts, forgetting it's even on — it's made for the version of you that actually lives in it, not the version that takes it off first.",
+    copy: "Weekday commutes, weekend plans, whatever's on the calendar — Aurevian is designed for the version of you that actually carries your things.",
   },
   {
     id: "skin",
     icon: FiHeart,
-    title: "Gentle by design",
-    copy: "Nickel-free from the first sketch, so a full day of wear never becomes a reason to take it off early.",
+    title: "Comfortable by design",
+    copy: "Soft leather interiors, non-irritating finishes, from the first pattern cut. A full day of wear should never become a reason to take it off early.",
   },
   {
     id: "resize",
     icon: FiRefreshCw,
-    title: "One resize, no back-and-forth",
-    copy: "If a ring doesn't sit right, we fix it once, free, within your first thirty days — no forms, no negotiation.",
+    title: "One repair, on us",
+    copy: "If a piece doesn't hold up the way it should, we handle it once, free, within your first thirty days — no forms, no back-and-forth.",
   },
   {
     id: "warranty",
     icon: FiAward,
     title: "A year behind every piece",
-    copy: "Plating that thins from ordinary wear within the year gets replated or replaced. That's not a policy we advertise loudly — it's just what we do.",
+    copy: "Manufacturing defects within the year get repaired or replaced. That's not a policy we advertise loudly — it's just what we do.",
   },
   {
     id: "kit",
     icon: FiPackage,
     title: "The care, already included",
-    copy: "A cloth and a pouch in every order, because keeping something looking new should take thirty seconds, not a routine.",
+    copy: "A polish cloth and dust bag in every order, because keeping something looking new should take thirty seconds, not a routine.",
   },
 ];
 
 const promiseStats = [
-  { id: "warranty", num: "1 Yr", label: "Plating warranty" },
+  { id: "warranty", num: "1 Yr", label: "Quality warranty" },
   { id: "returns", num: "30 Day", label: "Free returns" },
   { id: "worn", num: "10K+", label: "Pieces worn daily" },
 ];
@@ -134,22 +134,22 @@ const ritual = [
     id: "wear",
     icon: FiHeart,
     order: "01",
-    title: "Wear It, Without Thinking Twice",
-    desc: "On for the commute, the gym, the shower. That's the point.",
+    title: "Carry It, Without Thinking Twice",
+    desc: "To the office, dinner, on the weekend. That's the point.",
   },
   {
-    id: "rinse",
-    icon: FiDroplet,
-    order: "02",
-    title: "Rinse Off Sweat or Chlorine",
-    desc: "A quick rinse under water is all it ever needs — no soaking, no special solution.",
-  },
-  {
-    id: "restore",
+    id: "wipe",
     icon: FiRefreshCw,
-    order: "03",
+    order: "02",
     title: "Wipe With the Included Cloth",
-    desc: "Thirty seconds with the cloth in your box brings the shine right back.",
+    desc: "A quick wipe keeps leather supple and metal polished — no special solutions needed.",
+  },
+  {
+    id: "store",
+    icon: FiPackage,
+    order: "03",
+    title: "Store in the Included Dust Bag",
+    desc: "Thirty seconds in the dust bag keeps the finish intact, season after season.",
   },
 ];
 
@@ -169,7 +169,7 @@ function Hero() {
       <motion.div className={styles.heroBackground} style={{ y: imageY }}>
         <img
           src={HERO_IMAGE_URL}
-          alt="Aurevian jewellery, styled editorially"
+          alt="Aurevian menswear, styled editorially"
           className={styles.heroImage}
           fetchpriority="high"
         />
@@ -196,7 +196,7 @@ function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.1, ease: [0.4, 0, 0.2, 1], delay: 0.45 }}
         >
-          Jewellery that keeps up with your actual life.
+          Accessories that keep up with your actual life.
         </motion.h1>
 
         <motion.p
@@ -205,9 +205,8 @@ function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.1, ease: [0.4, 0, 0.2, 1], delay: 0.65 }}
         >
-          Not fast-fashion that fades by the third wear, not fine jewellery
-          you're afraid to put on. Here's what sits in between — and why it
-          holds.
+          Not fast-fashion that fades by the third month, not luxury pricing you
+          can't justify. Here's what sits in between — and why it lasts.
         </motion.p>
       </motion.div>
     </section>
@@ -224,7 +223,7 @@ function EditorialQuote() {
         whileInView="visible"
         viewport={viewportOnce}
       >
-        <span>We didn't set out to make jewellery cheaper.</span>
+        <span>We didn't set out to make clothing cheaper.</span>
         <span>We set out to make it honest.</span>
       </motion.p>
     </section>
@@ -253,7 +252,7 @@ function MakingOf() {
           >
             <img
               src={MAKING_IMAGE_URL}
-              alt="Hands shaping a gold jewellery setting"
+              alt="Tailor's hands finishing a garment on a workbench"
               className={styles.makingImage}
               loading="lazy"
               decoding="async"
@@ -277,9 +276,9 @@ function MakingOf() {
             Made the slower way, on purpose.
           </motion.h2>
           <motion.p variants={fadeUp} className={styles.sectionLead}>
-            The gap between mall jewellery and fine jewellery was never really
+            The gap between fast accessories and luxury goods was never really
             about price — it was about how much care goes into what's under the
-            shine. That's the part we chose not to skip.
+            finish. That's the part we chose not to skip.
           </motion.p>
 
           <div className={styles.makingPoints}>
@@ -365,9 +364,9 @@ function Promise() {
             Wear it. If it lets you down, we'll fix it.
           </motion.h2>
           <motion.p variants={fadeUp} className={styles.promiseCopy}>
-            Every piece leaves our workshop backed by a plating warranty, not
+            Every piece leaves our workroom backed by a quality warranty, not
             just a return window. If something's off, we make it right —
-            replate, resize, or replace. No fine print, no runaround.
+            repair, alter, or replace. No fine print, no runaround.
           </motion.p>
           <motion.ul variants={fadeUp} className={styles.promiseStats}>
             {promiseStats.map(({ id, num, label }) => (
@@ -388,7 +387,7 @@ function Promise() {
         >
           <img
             src={productImage}
-            alt="Aurevian jewellery, everyday wear"
+            alt="Aurevian menswear, everyday wear"
             className={styles.promiseImage}
             loading="lazy"
           />
@@ -461,7 +460,7 @@ function CallToAction() {
 function WhyAurevian() {
   return (
     <>
-        <Header /> 
+      <Header />
       <main className={styles.page}>
         <Hero />
         <EditorialQuote />

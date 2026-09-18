@@ -99,7 +99,7 @@ function Hero({ data }) {
     <section
       ref={heroRef}
       className={styles.hero}
-      aria-label="Aurevian — Where Light Becomes Legacy"
+      aria-label="Aurevian — Style Without a Category"
     >
       <motion.div className={styles.heroBackground} style={{ y: imageY }}>
         <img
