@@ -1,8 +1,14 @@
 // src/Pages/Seller/SellerDashboard/components/FeaturedProductsManagement/FeaturedProductsManagement.jsx
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
+import {
+  FiMoreVertical,
+  FiTrash2,
+  FiCheckCircle,
+  FiXCircle,
+} from "react-icons/fi";
 import {
   fetchFeaturedProductsSeller,
   fetchAvailableProductsSeller,
@@ -48,6 +54,10 @@ const FeaturedProductsManagement = ({
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState({});
 
+  // ✅ Actions dropdown state (works on all devices)
+  const [openActionMenu, setOpenActionMenu] = useState(null);
+  const actionMenuRef = useRef(null);
+
   const loadEntries = useCallback(() => {
     dispatch(fetchFeaturedProductsSeller(section));
   }, [dispatch, section]);
@@ -62,6 +72,27 @@ const FeaturedProductsManagement = ({
       dispatch(clearSellerFeaturedProductsError(section));
     }
   }, [error, dispatch, section]);
+
+  // ✅ Close action menu on outside click / scroll
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        actionMenuRef.current &&
+        !actionMenuRef.current.contains(event.target)
+      ) {
+        setOpenActionMenu(null);
+      }
+    };
+    const handleScroll = () => setOpenActionMenu(null);
+
+    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("scroll", handleScroll, true);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScroll, true);
+    };
+  }, []);
 
   const openPicker = () => {
     setSelectedIds({});
@@ -150,6 +181,12 @@ const FeaturedProductsManagement = ({
     }
   };
 
+  // ✅ Toggle actions dropdown
+  const toggleActionMenu = (e, entryId) => {
+    e.stopPropagation();
+    setOpenActionMenu((prev) => (prev === entryId ? null : entryId));
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -192,6 +229,8 @@ const FeaturedProductsManagement = ({
                 if (!product) return null;
                 const displayPrice =
                   product.pricing?.salePrice || product.pricing?.originalPrice;
+                const isMenuOpen = openActionMenu === entry._id;
+
                 return (
                   <tr key={entry._id}>
                     <td>
@@ -249,18 +288,61 @@ const FeaturedProductsManagement = ({
                     </td>
                     <td>
                       <div className={styles.actionsCell}>
-                        <button
-                          className={styles.actionButton}
-                          onClick={() => handleToggleStatus(entry)}
+                        <div
+                          className={styles.actionMenuWrapper}
+                          ref={isMenuOpen ? actionMenuRef : null}
                         >
-                          {entry.isActive ? "Deactivate" : "Activate"}
-                        </button>
-                        <button
-                          className={`${styles.actionButton} ${styles.deleteButton}`}
-                          onClick={() => handleRemove(entry)}
-                        >
-                          Remove
-                        </button>
+                          <button
+                            type="button"
+                            className={`${styles.actionMenuBtn} ${
+                              isMenuOpen ? styles.actionMenuBtnActive : ""
+                            }`}
+                            onClick={(e) => toggleActionMenu(e, entry._id)}
+                            aria-label="Actions"
+                            aria-haspopup="true"
+                            aria-expanded={isMenuOpen}
+                          >
+                            <FiMoreVertical size={18} />
+                          </button>
+
+                          {isMenuOpen && (
+                            <div className={styles.actionMenuDropdown}>
+                              <button
+                                type="button"
+                                className={styles.actionMenuItem}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenActionMenu(null);
+                                  handleToggleStatus(entry);
+                                }}
+                              >
+                                {entry.isActive ? (
+                                  <FiXCircle size={15} />
+                                ) : (
+                                  <FiCheckCircle size={15} />
+                                )}
+                                <span>
+                                  {entry.isActive ? "Deactivate" : "Activate"}
+                                </span>
+                              </button>
+
+                              <div className={styles.actionMenuDivider} />
+
+                              <button
+                                type="button"
+                                className={`${styles.actionMenuItem} ${styles.actionMenuItemDanger}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenActionMenu(null);
+                                  handleRemove(entry);
+                                }}
+                              >
+                                <FiTrash2 size={15} />
+                                <span>Remove</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </td>
                   </tr>

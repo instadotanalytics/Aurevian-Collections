@@ -1,6 +1,6 @@
 // src/Pages/Seller/SellerDashboard/ProductManagement.jsx
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -14,9 +14,8 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiX,
-  FiChevronDown,
-  FiChevronUp,
   FiTag,
+  FiMoreVertical,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import styles from "./ProductManagement.module.css";
@@ -26,7 +25,7 @@ import {
   deleteProduct,
   fetchProductLimitStatus,
   fetchPlacementCounts,
-  setSelectedProduct, // ✅ NEW — import setSelectedProduct action
+  setSelectedProduct,
 } from "../../../../redux/slices/sellerProductSlice";
 
 // Debounce utility
@@ -70,7 +69,6 @@ const SkeletonLoader = ({ count = 10 }) => {
           <div className={styles.skeletonActions}>
             <div className={styles.skeletonIcon}></div>
             <div className={styles.skeletonIcon}></div>
-            <div className={styles.skeletonIcon}></div>
           </div>
         </div>
       ))}
@@ -99,10 +97,14 @@ const ProductManagement = () => {
   const [allProductsLoaded, setAllProductsLoaded] = useState(false);
   const [isThrottled, setIsThrottled] = useState(false);
   const [showSkeleton, setShowSkeleton] = useState(true);
-  
+
   // Product Popup States
   const [selectedProductPopup, setSelectedProductPopup] = useState(null);
   const [showProductPopup, setShowProductPopup] = useState(false);
+
+  // Actions dropdown state (desktop only)
+  const [openActionMenu, setOpenActionMenu] = useState(null);
+  const actionMenuRef = useRef(null);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const debouncedStatusFilter = useDebounce(statusFilter, 300);
@@ -113,6 +115,27 @@ const ProductManagement = () => {
   useEffect(() => {
     dispatch(fetchPlacementCounts());
     dispatch(fetchProductLimitStatus());
+  }, []);
+
+  // Close action menu on outside click / scroll
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        actionMenuRef.current &&
+        !actionMenuRef.current.contains(event.target)
+      ) {
+        setOpenActionMenu(null);
+      }
+    };
+    const handleScroll = () => setOpenActionMenu(null);
+
+    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("scroll", handleScroll, true);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScroll, true);
+    };
   }, []);
 
   useEffect(() => {
@@ -163,13 +186,14 @@ const ProductManagement = () => {
   };
 
   const handleEdit = (product) => {
-    dispatch(setSelectedProduct(product)); // ✅ NEW — hand the already-loaded product to the form
+    dispatch(setSelectedProduct(product));
     navigate(`/seller/dashboard/products/edit/${product._id}`);
   };
 
   const handleDeleteClick = (product) => {
     setSelectedProductLocal(product);
     setShowDeleteModal(true);
+    setOpenActionMenu(null);
   };
 
   const handleConfirmDelete = async () => {
@@ -224,7 +248,6 @@ const ProductManagement = () => {
     setSelectedRows(newState);
   };
 
-  // Product Popup Functions
   const openProductPopup = (product) => {
     setSelectedProductPopup(product);
     setShowProductPopup(true);
@@ -239,6 +262,12 @@ const ProductManagement = () => {
 
   const handleCardClick = (product) => {
     openProductPopup(product);
+  };
+
+  // Toggle actions dropdown (desktop only)
+  const toggleActionMenu = (e, productId) => {
+    e.stopPropagation();
+    setOpenActionMenu((prev) => (prev === productId ? null : productId));
   };
 
   const getStatusBadge = (status) => {
@@ -345,6 +374,7 @@ const ProductManagement = () => {
   const renderTableRow = (product, index) => {
     const isExpanded = expandedRows[product._id];
     const isSelected = selectedRows[product._id];
+    const isMenuOpen = openActionMenu === product._id;
     const displayPrice =
       product.pricing?.salePrice || product.pricing?.originalPrice;
     const hasDiscount =
@@ -401,12 +431,10 @@ const ProductManagement = () => {
 
           {/* Category */}
           <td className={styles.categoryCell}>
-
-            <span className={styles.categoryIconMobile}><FiTag size={11} /></span>
-            {product.category?.categoryData?.label || 'Uncategorized'}
-
+            <span className={styles.categoryIconMobile}>
+              <FiTag size={11} />
+            </span>
             {product.category?.categoryData?.label || "Uncategorized"}
-
           </td>
 
           {/* Price */}
@@ -459,8 +487,6 @@ const ProductManagement = () => {
             {product.placements && product.placements.length > 0 ? (
               <span className={styles.placementTags}>
                 <FiGrid size={11} className={styles.placementIconMobile} />
-                {product.placements.slice(0, 2).join(', ')}
-                {product.placements.length > 2 && ` +${product.placements.length - 2}`}
                 {product.placements.slice(0, 2).join(", ")}
                 {product.placements.length > 2 &&
                   ` +${product.placements.length - 2}`}
@@ -470,42 +496,111 @@ const ProductManagement = () => {
             )}
           </td>
 
-          {/* Actions */}
+          {/* Actions — Desktop: 3-dot menu / Mobile: 2 icons */}
           <td
             className={styles.actionsCell}
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              className={styles.actionIconBtn}
-              onClick={() => handleViewProduct(product)}
-              title="View Product"
-            >
-              <FiEye size={16} />
-              <span className={styles.actionBtnLabel}>View</span>
-            </button>
-            <button
-              className={styles.actionIconBtn}
-              onClick={() => handleEdit(product)}
-              title="Edit Product"
-            >
-              <FiEdit2 size={16} />
-              <span className={styles.actionBtnLabel}>Edit</span>
-            </button>
-            <button
-              className={styles.actionIconBtn}
-              onClick={() => toggleRowExpand(product._id)}
-              title="Expand Details"
-            >
+            {/* ===== DESKTOP — 3-dot dropdown ===== */}
+            <div className={styles.actionMenuDesktop}>
+              <div
+                className={styles.actionMenuWrapper}
+                ref={isMenuOpen ? actionMenuRef : null}
+              >
+                <button
+                  type="button"
+                  className={`${styles.actionMenuBtn} ${
+                    isMenuOpen ? styles.actionMenuBtnActive : ""
+                  }`}
+                  onClick={(e) => toggleActionMenu(e, product._id)}
+                  aria-label="Acti"
+                  aria-haspopup="true"
+                  aria-expanded={isMenuOpen}
+                >
+                  <FiMoreVertical size={18} />
+                </button>
 
-              {isExpanded ? <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
-              <span className={styles.actionBtnLabel}>{isExpanded ? "Less" : "More"}</span>
-              {isExpanded ? (
-                <FiChevronUp size={16} />
-              ) : (
-                <FiChevronDown size={16} />
-              )}
+                {isMenuOpen && (
+                  <div className={styles.actionMenuDropdown}>
+                    <button
+                      type="button"
+                      className={styles.actionMenuItem}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenActionMenu(null);
+                        handleViewProduct(product);
+                      }}
+                    >
+                      <FiEye size={15} />
+                      <span>View Product</span>
+                    </button>
 
-            </button>
+                    <button
+                      type="button"
+                      className={styles.actionMenuItem}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenActionMenu(null);
+                        handleEdit(product);
+                      }}
+                    >
+                      <FiEdit2 size={15} />
+                      <span>Edit Product</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className={styles.actionMenuItem}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenActionMenu(null);
+                        toggleRowExpand(product._id);
+                      }}
+                    >
+                      <FiGrid size={15} />
+                      <span>
+                        {isExpanded ? "Hide Details" : "View Details"}
+                      </span>
+                    </button>
+
+                    <div className={styles.actionMenuDivider} />
+
+                    <button
+                      type="button"
+                      className={`${styles.actionMenuItem} ${styles.actionMenuItemDanger}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenActionMenu(null);
+                        handleDeleteClick(product);
+                      }}
+                    >
+                      <FiTrash2 size={15} />
+                      <span>Archive</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* ===== MOBILE — 2 icon buttons (View + Edit only) ===== */}
+            <div className={styles.actionIconsMobile}>
+              <button
+                className={styles.actionIconBtn}
+                onClick={() => handleViewProduct(product)}
+                title="View Product"
+              >
+                <FiEye size={16} />
+                <span className={styles.actionBtnLabel}>View</span>
+              </button>
+              <button
+                className={styles.actionIconBtn}
+                onClick={() => handleEdit(product)}
+                title="Edit Product"
+              >
+                <FiEdit2 size={16} />
+                <span className={styles.actionBtnLabel}>Edit</span>
+              </button>
+            </div>
           </td>
         </tr>
 
@@ -705,19 +800,27 @@ const ProductManagement = () => {
     );
   };
 
-  // Product Popup Component
   const renderProductPopup = () => {
     if (!showProductPopup || !selectedProductPopup) return null;
-    
+
     const product = selectedProductPopup;
     const statusStyle = getStatusStyle(product.status);
-    const displayPrice = product.pricing?.salePrice || product.pricing?.originalPrice;
-    const hasDiscount = product.pricing?.salePrice && product.pricing?.salePrice < product.pricing?.originalPrice;
-    
+    const displayPrice =
+      product.pricing?.salePrice || product.pricing?.originalPrice;
+    const hasDiscount =
+      product.pricing?.salePrice &&
+      product.pricing?.salePrice < product.pricing?.originalPrice;
+
     return (
       <div className={styles.productPopupOverlay} onClick={closeProductPopup}>
-        <div className={styles.productPopup} onClick={(e) => e.stopPropagation()}>
-          <button className={styles.productPopupClose} onClick={closeProductPopup}>
+        <div
+          className={styles.productPopup}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            className={styles.productPopupClose}
+            onClick={closeProductPopup}
+          >
             <FiX size={20} />
           </button>
 
@@ -728,79 +831,87 @@ const ProductManagement = () => {
                   {product.productName}
                 </div>
                 <div className={styles.productPopupSku}>
-                  SKU: {product.sku || 'N/A'}
+                  SKU: {product.sku || "N/A"}
                 </div>
               </div>
               <div className={styles.productPopupBadges}>
-                <span 
+                <span
                   className={styles.productPopupStatusBadge}
                   style={{
                     backgroundColor: statusStyle.bg,
                     color: statusStyle.text,
                   }}
                 >
-                  {product.status || 'Draft'}
+                  {product.status || "Draft"}
                 </span>
               </div>
             </div>
 
             <div className={styles.productPopupBody}>
               {product.thumbnail?.url && (
-                <img 
-                  src={product.thumbnail.url} 
+                <img
+                  src={product.thumbnail.url}
                   alt={product.productName}
                   className={styles.productPopupImage}
                   onError={(e) => {
-                    e.target.src = '/placeholder-image.jpg';
+                    e.target.src = "/placeholder-image.jpg";
                   }}
                 />
               )}
 
               <div className={styles.productPopupSection}>
                 <h4>
-                  <FiPackage className={styles.productPopupSectionIcon} /> Product Details
+                  <FiPackage className={styles.productPopupSectionIcon} />{" "}
+                  Product Details
                 </h4>
                 <div className={styles.productPopupCompactGrid}>
                   <div className={styles.productPopupCompactItem}>
                     <span className={styles.productPopupLabel}>Category</span>
                     <span className={styles.productPopupValue}>
-                      {product.category?.categoryData?.label || 'Uncategorized'}
+                      {product.category?.categoryData?.label || "Uncategorized"}
                     </span>
                   </div>
                   <div className={styles.productPopupCompactItem}>
                     <span className={styles.productPopupLabel}>Brand</span>
                     <span className={styles.productPopupValue}>
-                      {product.brand || 'N/A'}
+                      {product.brand || "N/A"}
                     </span>
                   </div>
                   <div className={styles.productPopupCompactItem}>
                     <span className={styles.productPopupLabel}>Price</span>
                     <span className={styles.productPopupValue}>
-                      ₹{displayPrice?.toLocaleString() || '0'}
+                      ₹{displayPrice?.toLocaleString() || "0"}
                       {hasDiscount && (
-                        <span style={{ 
-                          textDecoration: 'line-through', 
-                          color: '#8a8072', 
-                          marginLeft: '6px',
-                          fontSize: '12px'
-                        }}>
+                        <span
+                          style={{
+                            textDecoration: "line-through",
+                            color: "#8a8072",
+                            marginLeft: "6px",
+                            fontSize: "12px",
+                          }}
+                        >
                           ₹{product.pricing.originalPrice.toLocaleString()}
                         </span>
                       )}
                       {hasDiscount && (
-                        <span style={{
-                          marginLeft: '6px',
-                          fontSize: '11px',
-                          color: '#10b981',
-                          fontWeight: 600,
-                          background: 'rgba(16, 185, 129, 0.1)',
-                          padding: '1px 8px',
-                          borderRadius: '12px'
-                        }}>
+                        <span
+                          style={{
+                            marginLeft: "6px",
+                            fontSize: "11px",
+                            color: "#10b981",
+                            fontWeight: 600,
+                            background: "rgba(16, 185, 129, 0.1)",
+                            padding: "1px 8px",
+                            borderRadius: "12px",
+                          }}
+                        >
                           {Math.round(
-                            ((product.pricing.originalPrice - product.pricing.salePrice) /
-                              product.pricing.originalPrice) * 100
-                          )}% OFF
+                            ((product.pricing.originalPrice -
+                              product.pricing.salePrice) /
+                              product.pricing.originalPrice) *
+                              100,
+                          )}
+                          % OFF
                         </span>
                       )}
                     </span>
@@ -810,51 +921,61 @@ const ProductManagement = () => {
                     <span className={styles.productPopupValue}>
                       {product.inventory?.stockQuantity || 0} units
                       {product.inventory?.stockQuantity <= 0 && (
-                        <span style={{ color: '#ef4444', marginLeft: '6px', fontSize: '12px' }}>
+                        <span
+                          style={{
+                            color: "#ef4444",
+                            marginLeft: "6px",
+                            fontSize: "12px",
+                          }}
+                        >
                           (Out of Stock)
                         </span>
                       )}
                     </span>
                   </div>
                   <div className={styles.productPopupCompactItem}>
-                    <span className={styles.productPopupLabel}>Placements</span>
+                    <span className={styles.productPopupLabel}>
+                      Placements
+                    </span>
                     <span className={styles.productPopupValue}>
-                      {product.placements?.length > 0 
-                        ? product.placements.join(', ') 
-                        : 'None'}
+                      {product.placements?.length > 0
+                        ? product.placements.join(", ")
+                        : "None"}
                     </span>
                   </div>
                   <div className={styles.productPopupCompactItem}>
                     <span className={styles.productPopupLabel}>Created</span>
                     <span className={styles.productPopupValue}>
-                      {new Date(product.createdAt).toLocaleDateString('en-IN', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric'
+                      {new Date(product.createdAt).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
                       })}
                     </span>
                   </div>
                   <div className={styles.productPopupCompactItem}>
                     <span className={styles.productPopupLabel}>Status</span>
                     <span className={styles.productPopupValue}>
-                      <span 
+                      <span
                         className={styles.statusBadge}
                         style={{
                           backgroundColor: statusStyle.bg,
                           color: statusStyle.text,
                         }}
                       >
-                        {product.status || 'Draft'}
+                        {product.status || "Draft"}
                       </span>
                     </span>
                   </div>
                   <div className={styles.productPopupCompactItem}>
-                    <span className={styles.productPopupLabel}>Last Updated</span>
+                    <span className={styles.productPopupLabel}>
+                      Last Updated
+                    </span>
                     <span className={styles.productPopupValue}>
-                      {new Date(product.updatedAt).toLocaleDateString('en-IN', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric'
+                      {new Date(product.updatedAt).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
                       })}
                     </span>
                   </div>
@@ -864,7 +985,14 @@ const ProductManagement = () => {
               {product.description && (
                 <div className={styles.productPopupSection}>
                   <h4>Description</h4>
-                  <p style={{ fontSize: '13px', color: '#55554d', margin: 0, lineHeight: 1.5 }}>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      color: "#55554d",
+                      margin: 0,
+                      lineHeight: 1.5,
+                    }}
+                  >
                     {product.description}
                   </p>
                 </div>
@@ -873,7 +1001,7 @@ const ProductManagement = () => {
 
             <div className={styles.productPopupFooter}>
               <div className={styles.productPopupActions}>
-                <button 
+                <button
                   className={styles.productPopupViewBtn}
                   onClick={() => {
                     closeProductPopup();
@@ -883,7 +1011,7 @@ const ProductManagement = () => {
                   <FiEye size={14} />
                   View Product
                 </button>
-                <button 
+                <button
                   className={styles.productPopupEditBtn}
                   onClick={() => {
                     closeProductPopup();

@@ -270,7 +270,7 @@
   background: #ffffff;
   border: 1px solid #e8e3dc;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   width: 100%;
   overflow-x: auto;
@@ -435,10 +435,163 @@
 }
 
 .productTable .actionsCell {
-  width: 15%;
-  min-width: 140px;
-  text-align: right !important;
-  padding: 12px 10px !important;
+  width: 60px;
+  min-width: 60px;
+  max-width: 60px;
+  text-align: center !important;
+  padding: 12px 6px !important;
+  position: relative;
+  overflow: visible;
+}
+
+/* ============================================
+   ✅ DESKTOP — 3-dot dropdown
+   ============================================ */
+.actionMenuDesktop {
+  display: block;
+}
+
+.actionIconsMobile {
+  display: none;
+}
+
+.actionMenuWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.actionMenuBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: #55554d;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.actionMenuBtn:hover {
+  background: #f5f2ee;
+  border-color: #e8e3dc;
+  color: #14140f;
+}
+
+.actionMenuBtnActive {
+  background: #f5f2ee;
+  border-color: #c8a86e;
+  color: #c8a86e;
+}
+
+.actionMenuDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 180px;
+  background: #ffffff;
+  border: 1px solid #e8e3dc;
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  z-index: 100;
+  animation: actionMenuFadeIn 0.15s ease;
+}
+
+@keyframes actionMenuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.actionMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #14140f;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.actionMenuItem svg {
+  color: #8a8072;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.actionMenuItem:hover {
+  background: #f5f2ee;
+}
+
+.actionMenuItem:hover svg {
+  color: #c8a86e;
+}
+
+.actionMenuDivider {
+  height: 1px;
+  background: #f0edeb;
+  margin: 6px 4px;
+}
+
+.actionMenuItemDanger {
+  color: #ef4444;
+}
+
+.actionMenuItemDanger svg {
+  color: #ef4444;
+}
+
+.actionMenuItemDanger:hover {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.actionMenuItemDanger:hover svg {
+  color: #dc2626;
+}
+
+/* ============================================
+   ✅ MOBILE — 3 icon buttons (old style)
+   ============================================ */
+.actionIconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #8a8072;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 2px;
+}
+
+.actionIconBtn:hover {
+  background: #f5f2ee;
+  color: #14140f;
+}
+
+.actionBtnLabel {
+  display: none;
 }
 
 .indexNumber {
@@ -465,6 +618,7 @@
   background: #f5f2ee;
   border-radius: 0;
   display: block;
+  margin: 0 auto;
 }
 
 .productNameCompact {
@@ -500,10 +654,6 @@
 }
 
 .placementIconMobile {
-  display: none;
-}
-
-.actionBtnLabel {
   display: none;
 }
 
@@ -606,26 +756,6 @@
 
 .noPlacements {
   color: #b5aa9a;
-}
-
-.actionIconBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  background: transparent;
-  border: none;
-  border-radius: 6px;
-  color: #8a8072;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin: 0 2px;
-}
-
-.actionIconBtn:hover {
-  background: #f5f2ee;
-  color: #14140f;
 }
 
 /* ============================================
@@ -817,9 +947,15 @@
 }
 
 @keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .loadingMore {
@@ -842,7 +978,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .sentinel {
@@ -1090,7 +1228,7 @@
 }
 
 /* ============================================
-   PRODUCT POPUP - Like Orders Component
+   PRODUCT POPUP
    ============================================ */
 .productPopupOverlay {
   position: fixed;
@@ -1107,8 +1245,12 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .productPopup {
@@ -1343,7 +1485,7 @@
 }
 
 /* ============================================
-   RESPONSIVE - MOBILE (20vh, Full Product Name, SKU visible, Readable Text)
+   ✅ MOBILE — 3 icon buttons (old style)
    ============================================ */
 @media (max-width: 768px) {
   .container {
@@ -1425,7 +1567,6 @@
     text-align: left;
   }
 
-  /* ===== MOBILE CARD - 20vh ===== */
   .productTable tbody tr {
     display: grid;
     grid-template-columns: 1fr auto;
@@ -1456,7 +1597,6 @@
     margin-bottom: 0;
   }
 
-  /* Hide checkbox, index and image on mobile */
   .productTable td:nth-child(1),
   .productTable td:nth-child(2),
   .productTable td:nth-child(3) {
@@ -1470,9 +1610,6 @@
     width: 100%;
   }
 
-  /* ===== LEFT COLUMN - Product Info ===== */
-
-  /* Row 1: Product Name + SKU */
   .productTable td:nth-child(4) {
     grid-column: 1 / 2;
     grid-row: 1 / 2;
@@ -1513,7 +1650,6 @@
     display: block !important;
   }
 
-  /* Row 2: Category */
   .productTable td:nth-child(5) {
     grid-column: 1 / 2;
     grid-row: 2 / 3;
@@ -1534,7 +1670,6 @@
     font-weight: 500;
   }
 
-  /* Row 3: Price */
   .productTable td:nth-child(6) {
     grid-column: 1 / 2;
     grid-row: 3 / 4;
@@ -1583,14 +1718,10 @@
     display: inline-block;
   }
 
-  /* Hide Stock on mobile */
   .productTable td:nth-child(7) {
     display: none;
   }
 
-  /* ===== RIGHT COLUMN - Status + Placements + Actions ===== */
-
-  /* Status - Top Right */
   .productTable td:nth-child(8) {
     grid-column: 2 / 3;
     grid-row: 1 / 2;
@@ -1610,7 +1741,6 @@
     white-space: nowrap;
   }
 
-  /* Placements - Middle Right */
   .productTable td:nth-child(9) {
     grid-column: 2 / 3;
     grid-row: 2 / 3;
@@ -1638,7 +1768,7 @@
     font-size: 9px;
   }
 
-  /* ===== Action Buttons - Bottom Right ===== */
+  /* ✅ Actions on mobile — 3 icon buttons (old style) */
   .productTable td:nth-child(10) {
     grid-column: 2 / 3;
     grid-row: 3 / 4;
@@ -1649,6 +1779,26 @@
     padding: 0;
     border: none;
     width: 100%;
+  }
+
+  .productTable .actionsCell {
+    width: auto;
+    min-width: auto;
+    max-width: none;
+    padding: 0;
+  }
+
+  /* Hide desktop dropdown on mobile */
+  .actionMenuDesktop {
+    display: none !important;
+  }
+
+  /* Show mobile icon buttons */
+  .actionIconsMobile {
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 3px;
   }
 
   .productTable td .actionIconBtn {
@@ -1681,21 +1831,10 @@
     display: none;
   }
 
-  /* ============================================
-     REMOVE EXPANDED ROW - Mobile (Arrow removed)
-     ============================================ */
   .productTable tbody tr .expandedRow {
     display: none !important;
   }
 
-  /* Hide the More/Less button on mobile */
-  .productTable td .actionIconBtn:last-child {
-    display: none !important;
-  }
-
-  /* ============================================
-     PRODUCT POPUP - Mobile
-     ============================================ */
   .productPopup {
     max-width: 100%;
     max-height: 100vh;
@@ -1733,9 +1872,6 @@
     justify-content: center;
   }
 
-  /* ============================================
-     SKELETON - Mobile
-     ============================================ */
   .skeletonRow {
     display: grid;
     grid-template-columns: 1fr auto;
@@ -1760,6 +1896,7 @@
   .skeletonIndex {
     display: none;
   }
+
   .skeletonCheckbox {
     display: none;
   }
@@ -1818,21 +1955,21 @@
     background: #f0edeb;
     animation: pulse 1.5s ease-in-out infinite;
   }
+
   .skeletonLine {
     height: 11px;
   }
+
   .skeletonLineShort {
     height: 9px;
   }
 }
 
-/* ============================================
-   RESPONSIVE - EXTRA SMALL SCREENS
-   ============================================ */
 @media (max-width: 480px) {
   .productTable td {
     text-align: left;
   }
+
   .container {
     padding: 8px;
   }
@@ -1912,7 +2049,6 @@
     height: 11px;
   }
 
-  /* SKELETON - Extra Small */
   .skeletonRow {
     padding: 4px 8px;
     gap: 0px 8px;
@@ -1925,25 +2061,31 @@
     width: 40px;
     height: 14px;
   }
+
   .skeletonPrice {
     width: 50px;
     height: 12px;
   }
+
   .skeletonStatus {
     width: 40px;
     height: 16px;
   }
+
   .skeletonPlacements {
     width: 50px;
     height: 12px;
   }
+
   .skeletonIcon {
     width: 24px;
     height: 24px;
   }
+
   .skeletonLine {
     height: 10px;
   }
+
   .skeletonLineShort {
     height: 8px;
   }

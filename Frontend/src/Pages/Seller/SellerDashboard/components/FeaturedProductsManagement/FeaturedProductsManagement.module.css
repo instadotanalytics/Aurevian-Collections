@@ -1,3 +1,5 @@
+/* src/Pages/Seller/SellerDashboard/components/FeaturedProductsManagement/FeaturedProductsManagement.module.css */
+
 .container {
   padding: 24px;
 }
@@ -74,8 +76,11 @@
 
 .tableWrap {
   overflow-x: auto;
-  border: 1px solid #eee2d0;
-  border-radius: 10px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgb(238, 226, 208);
+    border-image: none;
+    border-radius: 10px;
 }
 
 .table {
@@ -183,32 +188,124 @@
 
 .actionsCell {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
 }
 
-.actionButton {
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1px solid #eee2d0;
+/* ==========================================================
+   ✅ 3-DOT DROPDOWN MENU (Works on all devices)
+   ========================================================== */
+.actionMenuWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.actionMenuBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
   background: #fff;
-  font-size: 12px;
-  font-weight: 600;
+  border: 1px solid #eee2d0;
+  border-radius: 6px;
+  color: #4a4136;
   cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.actionMenuBtn:hover {
+  background: #faf6ef;
+  border-color: #b6863c;
   color: #1c1c1c;
 }
 
-.actionButton:hover {
+.actionMenuBtnActive {
+  background: #faf6ef;
+  border-color: #b6863c;
+  color: #b6863c;
+}
+
+.actionMenuDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 170px;
+  background: #ffffff;
+  border: 1px solid #eee2d0;
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(28, 20, 6, 0.12);
+  padding: 6px;
+  z-index: 100;
+  animation: actionMenuFadeIn 0.15s ease;
+}
+
+@keyframes actionMenuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.actionMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #1c1c1c;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.actionMenuItem svg {
+  color: #8a8072;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.actionMenuItem:hover {
   background: #faf6ef;
 }
 
-.deleteButton {
-  color: #dc2626;
-  border-color: #fecaca;
+.actionMenuItem:hover svg {
+  color: #b6863c;
 }
 
-.deleteButton:hover {
+.actionMenuDivider {
+  height: 1px;
+  background: #f2ece0;
+  margin: 6px 4px;
+}
+
+.actionMenuItemDanger {
+  color: #dc2626;
+}
+
+.actionMenuItemDanger svg {
+  color: #dc2626;
+}
+
+.actionMenuItemDanger:hover {
   background: #fef2f2;
+}
+
+.actionMenuItemDanger:hover svg {
+  color: #b91c1c;
 }
 
 /* ==========================================================
@@ -378,50 +475,333 @@
   cursor: not-allowed;
 }
 
-/* Add to FeaturedProductsManagement.module.css */
+/* ==========================================================
+   RESPONSIVE — TABLET & MOBILE
+   ========================================================== */
+@media (max-width: 900px) {
+  .container {
+    padding: 16px;
+  }
 
-.filterBar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  margin-bottom: 16px;
+  .header {
+    margin-bottom: 16px;
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  .subtitle {
+    font-size: 12.5px;
+  }
 }
 
-.filterLabel {
-  font-size: 14px;
-  font-weight: 500;
-  color: #495057;
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .addButton {
+    justify-content: center;
+    width: 100%;
+  }
+
+  /* ==========================================================
+     Mobile Card Layout for table
+     ========================================================== */
+  .tableWrap {
+    border: none;
+    background: transparent;
+    border-radius: 0;
+  }
+
+  .table {
+    display: block;
+    min-width: unset;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .table tbody tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px 12px;
+    background: #ffffff;
+    border: 1px solid #eee2d0;
+    border-radius: 10px;
+    padding: 12px 14px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  }
+
+  .table td {
+    padding: 0;
+    border: none;
+    display: block;
+  }
+
+  /* Product cell — full width row 1 */
+  .table td:nth-child(1) {
+    grid-column: 1 / -1;
+    grid-row: 1 / 2;
+    margin-bottom: 6px;
+  }
+
+  .table td:nth-child(1) .productCell {
+    gap: 10px;
+  }
+
+  .table td:nth-child(1) .productThumb {
+    width: 44px;
+    height: 44px;
+  }
+
+  .table td:nth-child(1) .productName {
+    font-size: 13px;
+    line-height: 1.3;
+  }
+
+  .table td:nth-child(1) .productStatus {
+    font-size: 10.5px;
+  }
+
+  /* Price — row 2, left */
+  .table td:nth-child(2) {
+    grid-column: 1 / 2;
+    grid-row: 2 / 3;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1c1c1c;
+    align-self: center;
+  }
+
+  .table td:nth-child(2)::before {
+    content: "Price: ";
+    font-weight: 500;
+    color: #8a8072;
+    font-size: 11.5px;
+  }
+
+  /* Status — row 2, right */
+  .table td:nth-child(3) {
+    grid-column: 2 / 3;
+    grid-row: 2 / 3;
+    justify-self: end;
+    align-self: center;
+  }
+
+  /* Order — row 3, left */
+  .table td:nth-child(4) {
+    grid-column: 1 / 2;
+    grid-row: 3 / 4;
+    align-self: center;
+  }
+
+  .table td:nth-child(4) .orderControls {
+    gap: 6px;
+  }
+
+  .table td:nth-child(4) .orderBtn {
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Actions — row 3, right */
+  .table td:nth-child(5) {
+    grid-column: 2 / 3;
+    grid-row: 3 / 4;
+    justify-self: end;
+    align-self: center;
+  }
+
+  .actionsCell {
+    justify-content: flex-end;
+  }
+
+  /* Picker modal on mobile */
+  .modal {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 12px;
+  }
+
+  .modalHeader {
+    padding: 14px 16px;
+  }
+
+  .modalHeader h2 {
+    font-size: 15px;
+  }
+
+  .searchForm {
+    padding: 12px 16px;
+    flex-direction: column;
+  }
+
+  .searchInput {
+    width: 100%;
+  }
+
+  .searchButton {
+    width: 100%;
+    padding: 10px 16px;
+  }
+
+  .pickerList {
+    padding: 6px 10px;
+  }
+
+  .pickerRow {
+    padding: 8px 6px;
+    gap: 10px;
+  }
+
+  .pickerThumb {
+    width: 36px;
+    height: 36px;
+  }
+
+  .pickerName {
+    font-size: 13px;
+  }
+
+  .pickerMeta {
+    font-size: 11px;
+  }
+
+  .modalActions {
+    padding: 12px 16px;
+    gap: 8px;
+  }
+
+  .cancelButton,
+  .submitButton {
+    flex: 1;
+    padding: 10px 14px;
+  }
 }
 
-.filterSelect {
-  padding: 6px 12px;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-  font-size: 14px;
-  background: white;
-  min-width: 180px;
-  cursor: pointer;
+@media (max-width: 480px) {
+  .container {
+    padding: 10px;
+  }
+
+  .title {
+    font-size: 17px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .addButton {
+    padding: 9px 16px;
+    font-size: 13px;
+  }
+
+  .table tbody tr {
+    padding: 10px 12px;
+    gap: 6px 10px;
+  }
+
+  .table td:nth-child(1) .productThumb {
+    width: 40px;
+    height: 40px;
+  }
+
+  .table td:nth-child(1) .productName {
+    font-size: 12.5px;
+  }
+
+  .table td:nth-child(1) .productStatus {
+    font-size: 10px;
+  }
+
+  .table td:nth-child(2) {
+    font-size: 12px;
+  }
+
+  .table td:nth-child(2)::before {
+    font-size: 11px;
+  }
+
+  .statusBadge {
+    font-size: 10.5px;
+    padding: 3px 9px;
+  }
+
+  .orderBtn {
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+  }
+
+  .orderNumber {
+    font-size: 12.5px;
+  }
+
+  .actionMenuBtn {
+    width: 30px;
+    height: 30px;
+  }
+
+  .actionMenuBtn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .pickerThumb {
+    width: 34px;
+    height: 34px;
+  }
+
+  .pickerName {
+    font-size: 12.5px;
+  }
+
+  .pickerMeta {
+    font-size: 10.5px;
+  }
 }
 
-.filterSelect:focus {
-  outline: none;
-  border-color: #6c63ff;
-  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+@media (max-width: 380px) {
+  .table tbody tr {
+    padding: 8px 10px;
+  }
+
+  .table td:nth-child(1) .productName {
+    font-size: 12px;
+  }
+
+  .actionMenuBtn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .actionMenuBtn svg {
+    width: 15px;
+    height: 15px;
+  }
 }
 
-.sellerName {
-  font-size: 13px;
-  color: #495057;
-  font-weight: 500;
-}
-
-.filterInfo {
-  padding: 12px 16px;
-  font-size: 13px;
-  color: #6c757d;
-  text-align: center;
-  border-top: 1px solid #e9ecef;
+/* ==========================================================
+   FOCUS VISIBLE
+   ========================================================== */
+button:focus-visible,
+.searchInput:focus-visible {
+  outline: 2px solid #b6863c;
+  outline-offset: 2px;
 }
