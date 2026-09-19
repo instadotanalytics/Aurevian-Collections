@@ -28,8 +28,8 @@ import styles from "./Offers.module.css";
 
 // ✅ Auto-scrolling hero banner images
 import offerBanner1 from "../../assets/offerBanner1.png";
-import offerBanner2 from "../../assets/shopHero2.jfif";
-import offerBanner3 from "../../assets/shopHero2.jfif";
+import offerBanner2 from "../../assets/offerBanner2.png";
+import offerBanner3 from "../../assets/offerBanner3.png";
 
 import Footer from "../../Pages/Layout/Footer/Footer.jsx";
 import Header from "../../Pages/Layout/Header/Header.jsx";

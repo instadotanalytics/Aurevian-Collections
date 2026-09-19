@@ -157,6 +157,7 @@
 @media (max-width: 768px) {
   .heroBanner {
     height: 40vh;
+    margin: 15px 0 25px;
   }
 
   .heroArrow {
@@ -181,7 +182,8 @@
 
 @media (max-width: 480px) {
   .heroBanner {
-    height: 40vh;
+    height: 30vh;
+    margin: 20px 0;
   }
 
   .heroArrow {

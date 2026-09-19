@@ -17,8 +17,8 @@ import Footer from "../../Pages/Layout/Footer/Footer";
 
 // ✅ Auto-scrolling hero banner images
 import giftBanner1 from "../../assets/giftBanner1.png";
-import giftBanner2 from "../../assets/shopHero2.jfif";
-import giftBanner3 from "../../assets/shopHero2.jfif";
+import giftBanner2 from "../../assets/giftBanner2.png";
+import giftBanner3 from "../../assets/giftBanner3.png";
 import giftMiddle from "../../assets/giftmiddle.png";
 
 import {

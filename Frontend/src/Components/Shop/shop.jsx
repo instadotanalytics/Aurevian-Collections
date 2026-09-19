@@ -20,8 +20,8 @@ import Footer from "../../Pages/Layout/Footer/Footer";
 
 // ✅ Auto-scrolling hero banner images
 import shopHero1 from "../../assets/shopHero1.png";
-import shopHero2 from "../../assets/shopHero2.jfif";
-import shopHero3 from "../../assets/shopHero3.jfif";
+import shopHero2 from "../../assets/shopHero2.png";
+import shopHero3 from "../../assets/shopHero3.png";
 
 import { LuSlidersHorizontal } from "react-icons/lu";
 import { FiHeart } from "react-icons/fi";
