@@ -273,7 +273,6 @@
   overflow: visible;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   width: 100%;
-  overflow-x: auto;
 }
 
 .tableToolbar {
@@ -397,49 +396,49 @@
 }
 
 .productTable .nameCell {
-  width: 25%;
-  min-width: 180px;
+  width: 22%;
+  min-width: 170px;
   padding: 12px 10px !important;
 }
 
 .productTable .categoryCell {
-  width: 14%;
-  min-width: 100px;
+  width: 12%;
+  min-width: 95px;
   padding: 12px 10px !important;
 }
 
 .productTable .priceCell {
-  width: 15%;
-  min-width: 120px;
+  width: 13%;
+  min-width: 110px;
   padding: 12px 10px !important;
   text-align: center !important;
 }
 
 .productTable .stockCell {
-  width: 8%;
-  min-width: 60px;
+  width: 7%;
+  min-width: 55px;
   text-align: center !important;
   padding: 12px 10px !important;
 }
 
 .productTable .statusCell {
-  width: 12%;
-  min-width: 100px;
+  width: 11%;
+  min-width: 95px;
   padding: 12px 10px !important;
 }
 
 .productTable .placementsCell {
-  width: 12%;
-  min-width: 80px;
+  width: 11%;
+  min-width: 75px;
   padding: 12px 10px !important;
 }
 
 .productTable .actionsCell {
-  width: 60px;
-  min-width: 60px;
-  max-width: 60px;
+  width: 72px;
+  min-width: 72px;
+  max-width: 72px;
   text-align: center !important;
-  padding: 12px 6px !important;
+  padding: 12px 8px !important;
   position: relative;
   overflow: visible;
 }
@@ -568,7 +567,7 @@
 }
 
 /* ============================================
-   ✅ MOBILE — 3 icon buttons (old style)
+   ✅ MOBILE — 2 icon buttons
    ============================================ */
 .actionIconBtn {
   display: inline-flex;
@@ -1485,7 +1484,7 @@
 }
 
 /* ============================================
-   ✅ MOBILE — 3 icon buttons (old style)
+   ✅ MOBILE
    ============================================ */
 @media (max-width: 768px) {
   .container {
@@ -1768,7 +1767,7 @@
     font-size: 9px;
   }
 
-  /* ✅ Actions on mobile — 3 icon buttons (old style) */
+  /* ✅ Actions on mobile — 2 icon buttons */
   .productTable td:nth-child(10) {
     grid-column: 2 / 3;
     grid-row: 3 / 4;
@@ -1788,12 +1787,10 @@
     padding: 0;
   }
 
-  /* Hide desktop dropdown on mobile */
   .actionMenuDesktop {
     display: none !important;
   }
 
-  /* Show mobile icon buttons */
   .actionIconsMobile {
     display: flex !important;
     align-items: center;
