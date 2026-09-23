@@ -42,7 +42,7 @@
 }
 
 /* ==========================================================
-   HERO GALLERY
+   HERO CAROUSEL (translateX based)
    ========================================================== */
 .heroGallery {
   height: 85vh;
@@ -58,26 +58,14 @@
   display: flex;
   height: 100%;
   width: 100%;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  cursor: grab;
-  scrollbar-width: none;
-}
-
-.heroTrack::-webkit-scrollbar {
-  display: none;
-}
-
-.heroTrack:active {
-  cursor: grabbing;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
 }
 
 .heroSlide {
   flex: 0 0 100%;
+  width: 100%;
   height: 100%;
-  scroll-snap-align: start;
   position: relative;
   overflow: hidden;
   cursor: pointer;
@@ -213,68 +201,85 @@
   transform: scale(0.96);
 }
 
-.heroNavWrapper {
+/* ==========================================================
+   ✅ Blur / transparent arrows (same as Shop / Gifts / Offers)
+   ========================================================== */
+.heroArrow {
   position: absolute;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-}
-
-.heroNavArrows {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.heroNavBtn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  font-size: 18px;
-  font-weight: 300;
-  cursor: pointer;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  padding: 0;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  font-size: 30px;
   line-height: 1;
+  color: #ffffff;
+  cursor: pointer;
+  z-index: 5;
+  transition:
+    background 0.25s ease,
+    transform 0.25s ease,
+    border-color 0.25s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  padding: 0;
 }
 
-.heroNavBtn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.08);
+.heroArrow:hover {
+  background: rgba(255, 255, 255, 0.32);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-50%) scale(1.08);
 }
 
-.heroNavBtn:active {
-  transform: scale(0.92);
+.heroArrow:active {
+  transform: translateY(-50%) scale(0.96);
 }
 
+.heroArrowPrev {
+  left: 24px;
+}
+
+.heroArrowNext {
+  right: 24px;
+}
+
+/* ==========================================================
+   ✅ Dots (same as Shop / Gifts / Offers)
+   ========================================================== */
 .heroDots {
+  position: absolute;
+  bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  gap: 8px;
-  align-items: center;
+  gap: 10px;
+  z-index: 5;
 }
 
 .heroDot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.4);
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.35);
   cursor: pointer;
-  transition: all 0.3s ease;
   padding: 0;
+  transition: all 0.25s ease;
+}
+
+.heroDot:hover {
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .heroDotActive {
-  background: var(--gold);
-  width: 28px;
+  background: #fff;
+  width: 26px;
   border-radius: 5px;
 }
 
@@ -372,7 +377,7 @@
 }
 
 /* ==========================================================
-   Shop Layout - Fixed Filter Sidebar & Scrollable Products
+   Shop Layout
    ========================================================== */
 .shopLayout {
   display: grid;
@@ -383,7 +388,6 @@
   position: relative;
 }
 
-/* Filter Sidebar - Sticky/Fixed */
 .filterSidebar {
   position: sticky;
   top: 100px;
@@ -633,7 +637,7 @@
   transform: translateX(3px);
 }
 
-/* Sidebar Sort Dropdown (Desktop) */
+/* Sidebar Sort Dropdown */
 .sidebarSortWrapper {
   position: relative;
   display: block;
@@ -714,7 +718,7 @@
   color: var(--gold-deep);
 }
 
-/* Products Section - Scrollable */
+/* Products Wrapper */
 .productsWrapper {
   display: flex;
   flex-direction: column;
@@ -760,9 +764,7 @@
   font-weight: 400;
 }
 
-/* ==========================================================
-   Skeleton Loading Grid
-   ========================================================== */
+/* Skeleton */
 .skeletonGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -820,9 +822,7 @@
   }
 }
 
-/* ==========================================================
-   PRODUCT CARD - MATCHING SHOP COMPONENT
-   ========================================================== */
+/* Product Card */
 .productsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1078,9 +1078,7 @@
   letter-spacing: 0.05em;
 }
 
-/* ==========================================================
-   Explore More
-   ========================================================== */
+/* Explore More */
 .exploreSection {
   background: var(--cream-deep);
   margin: clamp(40px, 6vw, 80px) 0;
@@ -1167,9 +1165,7 @@
   letter-spacing: 0.03em;
 }
 
-/* ==========================================================
-   Closing Section
-   ========================================================== */
+/* Closing Section */
 .closingSection {
   display: grid;
   grid-template-columns: 1fr 1.15fr;
@@ -1251,9 +1247,7 @@
   transform: scale(1.06);
 }
 
-/* ==========================================================
-   Feature Section - From: Blush Set
-   ========================================================== */
+/* Feature Section */
 .featureSection {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1401,9 +1395,7 @@
   transform: scale(0.96);
 }
 
-/* ==========================================================
-   Mobile Filter Overlay
-   ========================================================== */
+/* Mobile Filter Overlay + Sheet */
 .filterOverlay {
   display: none;
   position: fixed;
@@ -1412,9 +1404,6 @@
   z-index: 998;
 }
 
-/* ==========================================================
-   Mobile Filter Sheet - Bottom Sheet
-   ========================================================== */
 .mobileFilterSheet {
   position: fixed;
   left: 0;
@@ -1532,9 +1521,6 @@
   flex-shrink: 0;
 }
 
-/* ==========================================================
-   Mobile Custom Sort Dropdown
-   ========================================================== */
 .mobileSortWrapper {
   position: relative;
   display: block;
@@ -1647,9 +1633,6 @@
   transform: scale(0.96);
 }
 
-/* ==========================================================
-   Filter Empty Note
-   ========================================================== */
 .filterEmptyNote {
   display: block;
   font-size: 13px;
@@ -1658,9 +1641,7 @@
   padding: 6px 0;
 }
 
-/* ==========================================================
-   Empty State
-   ========================================================== */
+/* Empty State */
 .emptyState {
   grid-column: 1 / -1;
   text-align: center;
@@ -1719,15 +1700,7 @@
 /* ==========================================================
    Responsive
    ========================================================== */
-
-/* ============================================================
-   ✅ MOBILE STICKY FIX — mirrors the Shop component exactly.
-   • .filterToggle is a SIBLING of .shopLayout (see Collections.jsx).
-   • .shopLayout becomes the scroll container on mobile, exactly
-     like .shopWrap in Shop.
-   ============================================================ */
 @media (max-width: 1024px) {
-  /* ✅ Sticky toggle pinned below the fixed header. */
   .filterToggle {
     display: flex;
     position: sticky;
@@ -1738,12 +1711,11 @@
     margin: 0 0 16px;
   }
 
-  /* ✅ .shopLayout becomes the inner scroll container on mobile. */
   .shopLayout {
     display: block;
     grid-template-columns: 1fr;
     gap: 0;
-    max-height: calc(100vh - 160px); /* header 100 + toggle ~60 */
+    max-height: calc(100vh - 160px);
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
@@ -1782,14 +1754,19 @@
     min-height: 400px;
   }
 
-  .heroNavBtn {
-    width: 36px;
-    height: 36px;
-    font-size: 16px;
+  .heroArrow {
+    width: 42px;
+    height: 42px;
+    font-size: 24px;
   }
-
-  .heroNavWrapper {
-    bottom: 20px;
+  .heroArrowPrev {
+    left: 12px;
+  }
+  .heroArrowNext {
+    right: 12px;
+  }
+  .heroDots {
+    bottom: 16px;
   }
 
   .productsGrid {
@@ -1827,25 +1804,16 @@
     min-height: 350px;
   }
 
-  .heroNavBtn {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
-  }
-
-  .heroNavWrapper {
-    bottom: 16px;
-  }
-
-  .heroNavArrows {
-    gap: 12px;
+  .heroArrow {
+    width: 40px;
+    height: 40px;
+    font-size: 22px;
   }
 
   .heroDot {
     width: 8px;
     height: 8px;
   }
-
   .heroDotActive {
     width: 20px;
   }
@@ -1951,14 +1919,13 @@
     padding: 80px 0 20px;
   }
 
-  /* ✅ Match the smaller header height */
   .filterToggle {
     top: 80px;
     margin: 0 0 14px;
   }
 
   .shopLayout {
-    max-height: calc(100vh - 140px); /* header 80 + toggle ~60 */
+    max-height: calc(100vh - 140px);
   }
 
   .heroGallery {
@@ -1967,27 +1934,21 @@
     margin-bottom: 16px;
   }
 
-  .heroNavBtn {
-    width: 28px;
-    height: 28px;
-    font-size: 12px;
-  }
-
-  .heroNavWrapper {
-    bottom: 12px;
-  }
-
-  .heroNavArrows {
-    gap: 8px;
+  .heroArrow {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+    background: rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 
   .heroDot {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
-
   .heroDotActive {
-    width: 16px;
+    width: 20px;
   }
 
   .heroOverlay {
@@ -2163,9 +2124,10 @@
     padding: 12px;
     font-size: 15px;
   }
-    .productsWrapper {
-  max-height: calc(70vh - 120px);
-}
+
+  .productsWrapper {
+    max-height: calc(70vh - 120px);
+  }
 }
 
 @media (max-width: 480px) {
@@ -2174,23 +2136,18 @@
     min-height: 260px;
   }
 
-  .heroNavBtn {
-    width: 24px;
-    height: 24px;
-    font-size: 10px;
-  }
-
-  .heroNavArrows {
-    gap: 6px;
+  .heroArrow {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
   }
 
   .heroDot {
-    width: 5px;
-    height: 5px;
+    width: 6px;
+    height: 6px;
   }
-
   .heroDotActive {
-    width: 14px;
+    width: 16px;
   }
 
   .productsGrid {
@@ -2319,10 +2276,10 @@
     min-height: 220px;
   }
 
-  .heroNavBtn {
-    width: 22px;
-    height: 22px;
-    font-size: 9px;
+  .heroArrow {
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
   }
 
   .productsGrid {
@@ -2396,9 +2353,7 @@
   }
 }
 
-/* ==========================================================
-   Hide mobile filter on desktop
-   ========================================================== */
+/* Hide mobile filter on desktop */
 @media (min-width: 1025px) {
   .filterOverlay {
     display: none !important;
@@ -2409,9 +2364,7 @@
   }
 }
 
-/* ==========================================================
-   Reduced Motion
-   ========================================================== */
+/* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   .reveal,
   .revealStagger > * {
@@ -2436,6 +2389,7 @@
   .productImage,
   .productAddBtn,
   .heroSlide,
+  .heroTrack,
   .mobileFilterSheet,
   .wishlistBtn {
     transition: none !important;

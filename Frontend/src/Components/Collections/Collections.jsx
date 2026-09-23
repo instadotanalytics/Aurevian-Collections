@@ -33,42 +33,42 @@ const HERO_SLIDES = [
     id: "hero-1",
     title: "Elegant Jewelry Collection",
     subtitle: "Handcrafted pieces for every occasion",
-    img: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=1600&auto=format&fit=crop",
+    img: "https://i.pinimg.com/1200x/67/b4/79/67b479dbc96274acf3fc66c558c70f6e.jpg",
     tag: "New Collection",
   },
   {
     id: "hero-2",
     title: "The Royal Collection",
     subtitle: "Inspired by timeless elegance",
-    img: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=1600&auto=format&fit=crop",
+    img: "https://i.pinimg.com/736x/e3/f3/43/e3f343cc7dba483c11f034df089014af.jpg",
     tag: "Featured",
   },
   {
     id: "hero-3",
     title: "Timeless Elegance",
     subtitle: "Designed to shine, made to last",
-    img: "https://images.unsplash.com/photo-1588444837495-c6cfeb53f32d?q=80&w=1600&auto=format&fit=crop",
+    img: "https://i.pinimg.com/1200x/75/69/24/7569240bb39e565d32510481e0ed452e.jpg",
     tag: "Best Seller",
   },
   {
     id: "hero-4",
     title: "The Pearl Collection",
     subtitle: "Timeless beauty, modern grace",
-    img: "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?q=80&w=1600&auto=format&fit=crop",
+    img: "https://i.pinimg.com/1200x/6a/c8/e8/6ac8e8dcd4ee79e929468069c9e275dd.jpg",
     tag: "New Arrival",
   },
   {
     id: "hero-5",
     title: "Bridal Elegance",
     subtitle: "Celebrate your special day",
-    img: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=1600&auto=format&fit=crop",
+    img: "https://i.pinimg.com/1200x/d2/af/f0/d2aff0035cbd5c8be4dd9d58108a059d.jpg",
     tag: "Bridal",
   },
   {
     id: "hero-6",
     title: "Diamond Collection",
     subtitle: "Where brilliance meets artistry",
-    img: "https://images.unsplash.com/photo-1747933509433-c58152c10ee7?q=80&w=1600&auto=format&fit=crop",
+    img: "https://i.pinimg.com/1200x/c3/ca/b0/c3cab0059146c33879667e89f76fd341.jpg",
     tag: "Luxury",
   },
 ];
@@ -202,7 +202,6 @@ export default function Collections() {
 
   const { coords } = useLocationContext();
 
-  const heroRef = useRef(null);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const [categories, setCategories] = useState([]);
@@ -474,19 +473,13 @@ export default function Collections() {
     };
   }, [isDraggingSheet]);
 
+  // ✅ Auto-scroll hero banner every 4.5s
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
     }, 4500);
     return () => clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-    const hero = heroRef.current;
-    if (!hero) return;
-    const slideWidth = hero.offsetWidth;
-    hero.scrollTo({ left: slideWidth * currentSlide, behavior: "smooth" });
-  }, [currentSlide]);
 
   const goToSlide = (index) => {
     setCurrentSlide(index);
@@ -636,8 +629,12 @@ export default function Collections() {
         className={styles.collections}
         aria-label="Aurevian Collections"
       >
+        {/* ================= HERO CAROUSEL ================= */}
         <div className={styles.heroGallery}>
-          <div className={styles.heroTrack} ref={heroRef}>
+          <div
+            className={styles.heroTrack}
+            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+          >
             {HERO_SLIDES.map((slide, index) => (
               <div
                 key={slide.id}
@@ -669,42 +666,48 @@ export default function Collections() {
             ))}
           </div>
 
-          <div className={styles.heroNavWrapper}>
-            <div className={styles.heroNavArrows}>
+          {/* Blur arrows */}
+          <button
+            type="button"
+            className={`${styles.heroArrow} ${styles.heroArrowPrev}`}
+            onClick={prevSlide}
+            aria-label="Previous slide"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            className={`${styles.heroArrow} ${styles.heroArrowNext}`}
+            onClick={nextSlide}
+            aria-label="Next slide"
+          >
+            ›
+          </button>
+
+          {/* Dots */}
+          <div
+            className={styles.heroDots}
+            role="tablist"
+            aria-label="Hero slides"
+          >
+            {HERO_SLIDES.map((_, index) => (
               <button
-                className={styles.heroNavBtn}
-                onClick={prevSlide}
-                aria-label="Previous slide"
-              >
-                ‹
-              </button>
-              <div className={styles.heroDots}>
-                {HERO_SLIDES.map((_, index) => (
-                  <button
-                    key={index}
-                    className={`${styles.heroDot} ${
-                      index === currentSlide ? styles.heroDotActive : ""
-                    }`}
-                    onClick={() => goToSlide(index)}
-                    aria-label={`Go to slide ${index + 1}`}
-                  />
-                ))}
-              </div>
-              <button
-                className={styles.heroNavBtn}
-                onClick={nextSlide}
-                aria-label="Next slide"
-              >
-                ›
-              </button>
-            </div>
+                key={index}
+                type="button"
+                role="tab"
+                aria-selected={index === currentSlide}
+                aria-label={`Go to slide ${index + 1}`}
+                className={`${styles.heroDot} ${
+                  index === currentSlide ? styles.heroDotActive : ""
+                }`}
+                onClick={() => goToSlide(index)}
+              />
+            ))}
           </div>
         </div>
 
         <div className={styles.container}>
-          {/* ✅ MOBILE STICKY FILTER TOGGLE — now a SIBLING of
-              .shopLayout, so its sticky top is measured against the
-              page scroll, not .shopLayout's inner scroll context. */}
+          {/* MOBILE STICKY FILTER TOGGLE */}
           <button
             type="button"
             className={styles.filterToggle}
@@ -1051,7 +1054,8 @@ export default function Collections() {
                         >
                           <div className={styles.skeletonImage} />
                           <div className={styles.skeletonText} />
-                          <div                            className={`${styles.skeletonText} ${styles.skeletonTextShort}`}
+                          <div
+                            className={`${styles.skeletonText} ${styles.skeletonTextShort}`}
                           />
                           <div className={styles.skeletonBtn} />
                         </div>
@@ -1071,7 +1075,7 @@ export default function Collections() {
             </div>
           </div>
 
-          {/* Feature Section — unchanged */}
+          {/* Feature Section */}
           <div className={styles.featureSection}>
             <Reveal as="div" className={styles.featureImageWrap} delay={0}>
               <img
