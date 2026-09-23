@@ -13,6 +13,11 @@ import {
   ShippingUnavailableError,
 } from "./shippingController.js";
 
+// ✅ NEW — commission ledger integration. This is the ONLY place order
+// lifecycle events are translated into commission-ledger transitions;
+// the math itself lives in commissionService/money.js, never here.
+import commissionService from "../services/commissionService.js";
+
 // ============================================
 // SOCKET.IO IMPORTS
 // ============================================
@@ -25,6 +30,13 @@ import {
   emitOrderStatusUpdated,
   emitShippingUpdated,
 } from "../socket/orderEvents.js";
+
+// Orders in these orderStatus values represent money being given back to
+// the customer — mirrors the same list used by sellerEarningsController
+// and sellerCustomersController for revenue exclusion. Kept as a local
+// constant here (not imported from those files) so this controller has
+// no dependency on the seller-earnings module's internals.
+const COMMISSION_REVERSAL_ORDER_STATUSES = ["cancelled", "returned", "rto"];
 
 const getProductSnapshot = (product) => {
   const name = product.productName || "Product";
@@ -491,6 +503,20 @@ export const verifyRazorpayPayment = async (req, res) => {
 
     await finalizeInventoryAndCart(order, userId);
 
+    // ✅ NEW — payment is now confirmed real: create the commission
+    // ledger rows for this order. Idempotent — safe even if a duplicate
+    // webhook/request ever calls this twice for the same order, and
+    // deliberately non-blocking: a ledger-creation hiccup must never
+    // prevent the customer from seeing their payment succeed.
+    try {
+      await commissionService.createLedgerEntriesForOrder(order);
+    } catch (ledgerErr) {
+      console.error(
+        `⚠️ Commission ledger creation failed for order ${order.orderNumber}:`,
+        ledgerErr.message,
+      );
+    }
+
     emitOrderCreated(order);
 
     return res.status(200).json({
@@ -660,6 +686,15 @@ export const createCODOrder = async (req, res) => {
     }
 
     await finalizeInventoryAndCart(order, userId);
+
+    // ✅ NOTE — no commission ledger entry is created here. For COD, the
+    // sale isn't actually "paid" yet (paymentStatus stays "pending" until
+    // cash is physically collected on delivery — see updateOrderStatus
+    // below, which flips paymentStatus to "paid" and creates the ledger
+    // entry at the same moment the order is marked delivered). This
+    // mirrors the pre-existing revenue-calculation convention in
+    // sellerEarningsController.js, which already excluded COD orders
+    // with paymentStatus !== "paid" from every seller revenue figure.
 
     emitOrderCreated(order);
 
@@ -856,6 +891,7 @@ export const updateOrderStatus = async (req, res) => {
       });
     }
 
+    const previousOrderStatus = order.orderStatus;
     order.orderStatus = status;
 
     // ✅ FIX — the return-eligibility window (see returnController's
@@ -874,7 +910,47 @@ export const updateOrderStatus = async (req, res) => {
       order.shipping.deliveredAt = new Date();
     }
 
+    // ✅ NEW — COD sales are only actually "paid" once cash is collected
+    // on delivery. There is no other point in this codebase where a COD
+    // order's paymentStatus ever changes from "pending" — this is the
+    // minimum necessary fix so COD sales are ever recognized as revenue
+    // (or commission-eligible) at all, matching what COD literally means.
+    if (
+      status === "delivered" &&
+      order.paymentMethod === "cod" &&
+      order.paymentStatus !== "paid"
+    ) {
+      order.paymentStatus = "paid";
+    }
+
     await order.save();
+
+    // ✅ NEW — commission ledger lifecycle, driven by the same status
+    // transition that already governs return eligibility above. Both
+    // effects are non-blocking: a ledger hiccup must never prevent an
+    // order status update from succeeding.
+    try {
+      if (status === "delivered") {
+        // Ensure ledger rows exist (idempotent — covers COD orders that
+        // never got them at creation time, and is a safe no-op for
+        // razorpay orders that already have them from verifyRazorpayPayment).
+        await commissionService.createLedgerEntriesForOrder(order);
+        await commissionService.markOrderTransactionsEligible(order._id);
+      } else if (
+        COMMISSION_REVERSAL_ORDER_STATUSES.includes(status) &&
+        !COMMISSION_REVERSAL_ORDER_STATUSES.includes(previousOrderStatus)
+      ) {
+        await commissionService.reverseOrderTransactions(order, {
+          reason: `Order status changed to "${status}"`,
+          changedBy: req.user._id || req.user.id,
+        });
+      }
+    } catch (commissionErr) {
+      console.error(
+        `⚠️ Commission ledger transition failed for order ${order.orderNumber} (status=${status}):`,
+        commissionErr.message,
+      );
+    }
 
     emitOrderStatusUpdated(order);
 
@@ -1011,6 +1087,21 @@ export const sellerRejectOrder = async (req, res) => {
       timestamp: new Date(),
     });
     await order.save();
+
+    // ✅ NEW — a seller-rejected order will never be fulfilled; treat it
+    // the same as a cancellation for commission purposes so it never
+    // shows up as pending/eligible earnings.
+    try {
+      await commissionService.reverseOrderTransactions(order, {
+        reason: "Seller rejected the order",
+        changedBy: sellerId,
+      });
+    } catch (commissionErr) {
+      console.error(
+        `⚠️ Commission ledger reversal failed for rejected order ${order.orderNumber}:`,
+        commissionErr.message,
+      );
+    }
 
     emitSellerRejected(order);
 
@@ -1266,6 +1357,20 @@ export const adminRejectOrder = async (req, res) => {
       timestamp: new Date(),
     });
     await order.save();
+
+    // ✅ NEW — same reasoning as sellerRejectOrder: an admin-rejected
+    // order will never be fulfilled.
+    try {
+      await commissionService.reverseOrderTransactions(order, {
+        reason: "Admin rejected the order",
+        changedBy: req.user._id || req.user.id,
+      });
+    } catch (commissionErr) {
+      console.error(
+        `⚠️ Commission ledger reversal failed for admin-rejected order ${order.orderNumber}:`,
+        commissionErr.message,
+      );
+    }
 
     emitAdminRejected(order);
 

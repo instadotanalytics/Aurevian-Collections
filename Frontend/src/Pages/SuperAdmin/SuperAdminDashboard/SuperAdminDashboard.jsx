@@ -34,6 +34,7 @@ import {
   FiBriefcase,
   FiTrendingUp,
   FiMapPin,
+  FiPercent, // ✅ NEW — icon for the Payouts & Revenue menu item
 } from "react-icons/fi";
 
 import {
@@ -61,6 +62,8 @@ import PromotionRequestsManagement from "../components/PromotionRequestsManageme
 import ContactManagement from "../components/ContactManagement.jsx";
 import FranchiseManagement from "../components/FranchiseManagement.jsx";
 import LocationSettings from "../../Seller/SellerDashboard/components/LocationSettings/LocationSettings.jsx";
+// ✅ NEW — Seller Earnings / Platform Commission / Payout Management
+import PayoutsManagement from "../components/PayoutsManagement/PayoutsManagement.jsx";
 
 // SOCKET.IO — admin notifications
 import useAdminNotifications from "../../../hooks/useAdminNotifications.js";
@@ -91,6 +94,15 @@ const menuItems = [
     id: "payments",
     label: "Payments",
     icon: FiDollarSign,
+    isSubMenu: false,
+  },
+  // ✅ NEW — Seller Earnings / Platform Commission / Payout Management.
+  // Distinct from "Payments" above, which is seller SUBSCRIPTION billing,
+  // not marketplace order commission.
+  {
+    id: "payouts",
+    label: "Payouts & Revenue",
+    icon: FiPercent,
     isSubMenu: false,
   },
   {
@@ -171,8 +183,6 @@ const SuperAdminDashboard = () => {
 
   const profileRef = useRef(null);
 
-  // Route precedence: /seller-details/:id and /sellers-products/:sellerId
-  // are both more specific than the generic /:section route.
   const activeMenu = sellerId
     ? "seller-products-detail"
     : id
@@ -185,7 +195,6 @@ const SuperAdminDashboard = () => {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
 
-  // Which sidebar dropdown group ("blog" / "requests") is currently open
   const [openMenu, setOpenMenu] = useState(() => {
     const found = dropdownMenuItems.find((item) =>
       item.subItems.some((c) => c.id === activeMenu),
@@ -204,7 +213,6 @@ const SuperAdminDashboard = () => {
     setMobileProfileOpen(false);
   }, [activeMenu]);
 
-  // SOCKET.IO — mounted at the persistent dashboard shell level
   const { notifications, unreadCount, handleItemClick } =
     useAdminNotifications();
 
@@ -223,8 +231,6 @@ const SuperAdminDashboard = () => {
     }
   };
 
-  // Instant render using the seller object we already have, while the
-  // URL updates to a shareable/refreshable /seller-details/:id route
   const handleViewSeller = (seller) => {
     setSelectedSeller(seller);
     navigate(`/super-admin/dashboard/seller-details/${seller._id}`);
@@ -314,11 +320,14 @@ const SuperAdminDashboard = () => {
         );
       case "payments":
         return <PaymentsManagement />;
+      // ✅ NEW
+      case "payouts":
+        return <PayoutsManagement />;
       case "subscription-plans":
         return (
           <div className={styles.subscriptionPlansContainer}>
             <div className={styles.pageHeader}>
-            
+
             </div>
             <SubscriptionPlanManagement />
           </div>
@@ -503,7 +512,6 @@ const SuperAdminDashboard = () => {
       </header>
 
       <div className={styles.mainContent}>
-        {/* Sidebar — hover to expand on desktop, hamburger on mobile */}
         <aside
           className={`${styles.sidebar} ${sidebarExpanded ? styles.expanded : ""} ${mobileMenuOpen ? styles.mobileOpen : ""}`}
           onMouseEnter={() => setSidebarExpanded(true)}
@@ -560,8 +568,6 @@ const SuperAdminDashboard = () => {
 
               const isActive =
                 activeMenu === item.id ||
-                // Keep "Sellers & Products" highlighted while viewing a
-                // specific seller's product catalog
                 (item.id === "sellers-products" &&
                   activeMenu === "seller-products-detail");
 
@@ -616,7 +622,6 @@ const SuperAdminDashboard = () => {
           />
         )}
 
-        {/* Content Area */}
         <main className={styles.contentArea}>
           <div className={styles.contentWrapper}>{renderContent()}</div>
         </main>

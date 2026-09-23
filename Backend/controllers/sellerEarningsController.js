@@ -1,8 +1,15 @@
 // backend/controllers/sellerEarningsController.js
-// Every earnings figure funnels through getSellerOrderRows() — the ONE
-// place that isolates a seller's own item subtotal out of an order that
-// could (schema-wise) contain other sellers' items too. Nothing here ever
-// reads order.totalAmount as if it were the seller's revenue.
+//
+// Seller-facing Earnings/Payouts dashboard data. Every financial figure
+// here is derived from the CommissionTransaction ledger via
+// commissionService — nothing here recomputes gross/commission/net from
+// order.items directly, and nothing here trusts a client-supplied amount.
+//
+// getSellerOrderRows() below is UNCHANGED and still exported — it backs
+// getSellerDashboard() in sellerController.js and sellerCustomersController.js,
+// neither of which this feature touches. This file's ledger-based rewrite
+// is scoped to the Earnings/Payouts section only, which must show
+// POST-COMMISSION seller net, not gross item subtotals.
 //
 // sellerId always comes from req.seller._id (set by protectSeller from the
 // verified JWT) — never from req.query/req.body/req.params. This is what
@@ -15,21 +22,30 @@ import JewelleryProduct from "../models/JewelleryProduct.js";
 import Seller from "../models/Seller.js";
 import SellerPayout from "../models/SellerPayout.js";
 import PlatformSettings from "../models/PlatformSettings.js";
-
-// Orders that reached these orderStatus values had money collected and
-// then given back. There's no partial-refund field on Order, so the FULL
-// seller-subtotal of the order is treated as refunded — an approximation
-// until partial-refund tracking exists.
-const REFUNDED_ORDER_STATUSES = ["cancelled", "returned", "rto"];
-// The only orderStatus this codebase currently uses to mean "delivery is
-// confirmed, unlikely to be reversed" — used as the payout-eligibility line.
-const FINAL_ORDER_STATUS = "delivered";
+import CommissionTransaction, {
+  COMMISSION_TXN_STATUS,
+} from "../models/CommissionTransaction.js";
+import commissionService from "../services/commissionService.js";
 
 const toObjectId = (id) => new mongoose.Types.ObjectId(id);
 
-// ✅ EXPORTED — reused by sellerController.js (dashboard summary) so
-// revenue is calculated identically everywhere in the app, never
-// re-derived with slightly different (and therefore incompatible) logic.
+// Ledger statuses that represent a line item that was actually placed
+// and paid for, whether or not it was later refunded — excludes rows
+// that never became a real sale (voided before ever going eligible, or
+// failed to even attribute a seller).
+const REALIZED_SALE_STATUSES = [
+  COMMISSION_TXN_STATUS.pending,
+  COMMISSION_TXN_STATUS.eligible,
+  COMMISSION_TXN_STATUS.processing,
+  COMMISSION_TXN_STATUS.paid,
+  COMMISSION_TXN_STATUS.refunded,
+];
+
+// ✅ UNCHANGED — reused by sellerController.js (dashboard summary) and
+// sellerCustomersController.js. Left exactly as it was so the main
+// seller Dashboard and Customers tab keep computing their own numbers
+// exactly as before — this file's rewrite below only changes the
+// Earnings/Payouts section.
 export async function getSellerOrderRows(sellerId, { from, to } = {}) {
   const sellerOid = toObjectId(sellerId);
 
@@ -92,99 +108,98 @@ function periodToRange(period) {
   return { from: new Date(now.getFullYear(), now.getMonth(), 1), to: now };
 }
 
+// Original (non-reversal) ledger rows for this seller representing a
+// real, placed sale — used for "best day", "best product", order counts
+// and month-over-month comparisons. The headline money TOTALS on the
+// dashboard always come from commissionService.getSellerPayoutSummary,
+// which nets out reversals correctly by status bucket; these rows are
+// only for the descriptive/analytical figures below.
+async function getSellerRealizedSaleRows(sellerId, { from, to } = {}) {
+  const match = {
+    seller: toObjectId(sellerId),
+    reversalOf: { $exists: false },
+    status: { $in: REALIZED_SALE_STATUSES },
+  };
+  if (from || to) {
+    match.createdAt = {};
+    if (from) match.createdAt.$gte = from;
+    if (to) match.createdAt.$lte = to;
+  }
+  return CommissionTransaction.find(match).lean();
+}
+
 // ============================================
 // GET /api/seller/earnings/summary
-// Everything here is LIFETIME (not period-scoped) — the This Week/Month/
-// Year toggle only drives the chart. See getEarningsChart below.
+// The authoritative source for the Earnings page's summary cards. Every
+// amount is post-commission and comes from the ledger — never from raw
+// order.items subtotals.
 // ============================================
 export const getEarningsSummary = async (req, res) => {
   try {
     const sellerId = req.seller._id;
     const settings = await PlatformSettings.getSettings();
 
-    const allRows = await getSellerOrderRows(sellerId);
-    const paidRows = allRows.filter((r) => r.paymentStatus === "paid");
-    const deliveredPaid = paidRows.filter(
-      (r) => r.orderStatus === FINAL_ORDER_STATUS,
+    const summary = await commissionService.getSellerPayoutSummary(sellerId);
+    const realizedRows = await getSellerRealizedSaleRows(sellerId);
+
+    const distinctOrderIds = new Set(
+      realizedRows.map((r) => r.order.toString()),
     );
-    const refundedPaid = paidRows.filter((r) =>
-      REFUNDED_ORDER_STATUSES.includes(r.orderStatus),
-    );
-    const inPipelinePaid = paidRows.filter(
-      (r) =>
-        r.orderStatus !== FINAL_ORDER_STATUS &&
-        !REFUNDED_ORDER_STATUSES.includes(r.orderStatus),
-    );
+    const totalSalesCount = distinctOrderIds.size;
+    const averageOrderValue =
+      totalSalesCount > 0 ? summary.totalNetEarnings / totalSalesCount : 0;
 
-    const sum = (rows) => rows.reduce((s, r) => s + (r.sellerSubtotal || 0), 0);
-
-    const totalEarnings = sum(paidRows) - sum(refundedPaid);
-    const pendingBalance = sum(inPipelinePaid);
-    const deliveredEarnings = sum(deliveredPaid);
-    const refundsTotal = sum(refundedPaid);
-
-    const [paidOutAgg, processingAgg] = await Promise.all([
-      SellerPayout.aggregate([
-        { $match: { seller: toObjectId(sellerId), status: "paid" } },
-        { $group: { _id: null, total: { $sum: "$amount" } } },
-      ]),
-      SellerPayout.aggregate([
-        {
-          $match: {
-            seller: toObjectId(sellerId),
-            status: { $in: ["requested", "processing"] },
-          },
-        },
-        { $group: { _id: null, total: { $sum: "$amount" } } },
-      ]),
-    ]);
-    const totalPaidOut = paidOutAgg[0]?.total || 0;
-    const totalAwaitingProcessing = processingAgg[0]?.total || 0;
-    const availableBalance = Math.max(
-      0,
-      deliveredEarnings - totalPaidOut - totalAwaitingProcessing,
-    );
-
-    const totalOrders = paidRows.length;
-    const averageOrderValue = totalOrders > 0 ? totalEarnings / totalOrders : 0;
-
-    // Commission — never invented. Null until a super admin configures it.
-    const commissionPercent = settings.commissionPercent;
-    const commissionAmount =
-      commissionPercent != null
-        ? Math.round((totalEarnings * commissionPercent) / 100)
-        : null;
-
-    // Best day — lifetime, grouped by calendar date of paid orders.
+    // Best day — by calendar date, summing net earnings.
     const byDay = {};
-    for (const r of paidRows) {
-      const key = new Date(r.effectiveDate).toISOString().slice(0, 10);
-      byDay[key] = (byDay[key] || 0) + r.sellerSubtotal;
+    for (const r of realizedRows) {
+      const key = new Date(r.createdAt).toISOString().slice(0, 10);
+      byDay[key] = (byDay[key] || 0) + r.sellerNetAmount;
     }
     let bestDay = null;
     for (const [date, amount] of Object.entries(byDay)) {
       if (!bestDay || amount > bestDay.amount) bestDay = { date, amount };
     }
 
-    // Best product — unwind seller items across paid orders.
+    // Best product — by net revenue / units sold.
     const byProduct = {};
-    for (const r of paidRows) {
-      for (const it of r.sellerItems) {
-        const key = it.product?.toString() || it.name;
-        if (!byProduct[key])
-          byProduct[key] = { name: it.name, unitsSold: 0, revenue: 0 };
-        byProduct[key].unitsSold += it.quantity;
-        byProduct[key].revenue += it.subtotal;
+    for (const r of realizedRows) {
+      const key = r.product.toString();
+      if (!byProduct[key]) {
+        byProduct[key] = {
+          name: r.productNameSnapshot,
+          unitsSold: 0,
+          revenue: 0,
+        };
       }
+      byProduct[key].unitsSold += r.quantity;
+      byProduct[key].revenue += r.sellerNetAmount;
     }
     let bestProduct = null;
     for (const p of Object.values(byProduct)) {
       if (!bestProduct || p.revenue > bestProduct.revenue) bestProduct = p;
     }
 
-    // Rating — derived from this seller's own JewelleryProduct.reviews
-    // fields. There is no separate Review model in this codebase. Null if
-    // nothing has a review yet, rather than a fabricated figure.
+    // Month-over-month change, computed from the same realized rows.
+    const now = new Date();
+    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const sumRange = (start, end) =>
+      realizedRows
+        .filter(
+          (r) =>
+            new Date(r.createdAt) >= start &&
+            (!end || new Date(r.createdAt) < end),
+        )
+        .reduce((s, r) => s + r.sellerNetAmount, 0);
+    const thisMonthTotal = sumRange(thisMonthStart, null);
+    const lastMonthTotal = sumRange(lastMonthStart, thisMonthStart);
+    const monthOverMonthChangePercent =
+      lastMonthTotal > 0
+        ? ((thisMonthTotal - lastMonthTotal) / lastMonthTotal) * 100
+        : null;
+
+    // Rating — from this seller's own product review aggregates. There
+    // is no separate Review model in this codebase.
     const sellerProducts = await JewelleryProduct.find({
       "seller.sellerId": sellerId,
     }).select("reviews.averageRating reviews.totalReviews");
@@ -198,36 +213,6 @@ export const getEarningsSummary = async (req, res) => {
     const rating =
       ratingReviewCount > 0 ? ratingWeightedSum / ratingReviewCount : null;
 
-    // Month-over-month change — real comparison, computed from the same
-    // rows, not a guessed percentage.
-    const now = new Date();
-    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const thisMonthTotal =
-      sum(paidRows.filter((r) => new Date(r.effectiveDate) >= thisMonthStart)) -
-      sum(
-        refundedPaid.filter((r) => new Date(r.effectiveDate) >= thisMonthStart),
-      );
-    const lastMonthTotal =
-      sum(
-        paidRows.filter(
-          (r) =>
-            new Date(r.effectiveDate) >= lastMonthStart &&
-            new Date(r.effectiveDate) < thisMonthStart,
-        ),
-      ) -
-      sum(
-        refundedPaid.filter(
-          (r) =>
-            new Date(r.effectiveDate) >= lastMonthStart &&
-            new Date(r.effectiveDate) < thisMonthStart,
-        ),
-      );
-    const monthOverMonthChangePercent =
-      lastMonthTotal > 0
-        ? ((thisMonthTotal - lastMonthTotal) / lastMonthTotal) * 100
-        : null;
-
     // Payout method snapshot for the Payout Summary card.
     const seller = await Seller.findById(sellerId).select("bankDetails");
     let payoutMethod = null;
@@ -240,32 +225,44 @@ export const getEarningsSummary = async (req, res) => {
       const last4 = seller.bankDetails.accountNumber.slice(-4);
       payoutMethod = {
         type: "bank_transfer",
-        label: `Bank Transfer •••• ${last4}${seller.bankDetails.bankName ? " • " + seller.bankDetails.bankName : ""}`,
+        label: `Bank Transfer •••• ${last4}${
+          seller.bankDetails.bankName ? " • " + seller.bankDetails.bankName : ""
+        }`,
       };
     }
 
     const minimumPayoutAmount = settings.minimumPayoutAmount;
     const payoutEligible =
-      minimumPayoutAmount != null &&
-      availableBalance >= minimumPayoutAmount &&
+      summary.availableBalance > 0 &&
+      summary.availableBalance >= (minimumPayoutAmount || 0) &&
       !!payoutMethod;
 
     return res.status(200).json({
       success: true,
       data: {
-        totalEarnings,
-        availableBalance,
-        pendingBalance,
-        totalOrders,
+        // ---- Required summary cards ----
+        totalSalesCount,
+        grossEarnings: summary.totalGrossSales,
+        platformFees: summary.totalCommission,
+        netEarnings: summary.totalNetEarnings,
+        pendingEarnings: summary.pendingBalance,
+        availableBalance: summary.availableBalance,
+        paidOut: summary.paidOut,
+        processingBalance: summary.processingBalance,
+        reversedAmount: summary.reversedAmount,
+        cancelledAmount: summary.cancelledAmount,
+
+        // ---- Descriptive / secondary fields ----
+        totalEarnings: summary.totalNetEarnings,
+        totalOrders: totalSalesCount,
         averageOrderValue,
         monthOverMonthChangePercent,
         commission: {
-          percent: commissionPercent,
-          amount: commissionAmount,
-          configured: commissionPercent != null,
+          percent: settings.commissionPercent,
+          amount: summary.totalCommission,
+          configured: true,
         },
-        refunds: refundsTotal,
-        refundedOrderCount: refundedPaid.length,
+        refunds: Math.abs(summary.reversedAmount || 0),
         bestDay,
         bestProduct,
         rating,
@@ -275,11 +272,8 @@ export const getEarningsSummary = async (req, res) => {
           method: payoutMethod,
           minimumPayoutAmount,
           eligible: payoutEligible,
-          totalPaidOut,
-          totalAwaitingProcessing,
-        },
-        dataNotes: {
-          codOrdersExcluded: allRows.some((r) => r.paymentStatus !== "paid"),
+          totalPaidOut: summary.paidOut,
+          totalAwaitingProcessing: summary.processingBalance,
         },
       },
     });
@@ -295,6 +289,8 @@ export const getEarningsSummary = async (req, res) => {
 
 // ============================================
 // GET /api/seller/earnings/chart?period=this-week|this-month|this-year
+// Buckets NET seller earnings (post-commission) from realized ledger
+// rows, so the chart is always consistent with "Net Earnings" above.
 // ============================================
 export const getEarningsChart = async (req, res) => {
   try {
@@ -306,8 +302,7 @@ export const getEarningsChart = async (req, res) => {
       : "this-month";
 
     const { from, to } = periodToRange(period);
-    const rows = await getSellerOrderRows(sellerId, { from, to });
-    const paidRows = rows.filter((r) => r.paymentStatus === "paid");
+    const rows = await getSellerRealizedSaleRows(sellerId, { from, to });
 
     let buckets = [];
 
@@ -315,9 +310,9 @@ export const getEarningsChart = async (req, res) => {
       const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
       const totals = new Array(7).fill(0);
       const orders = new Array(7).fill(0);
-      for (const r of paidRows) {
-        const idx = (new Date(r.effectiveDate).getDay() + 6) % 7;
-        totals[idx] += r.sellerSubtotal;
+      for (const r of rows) {
+        const idx = (new Date(r.createdAt).getDay() + 6) % 7;
+        totals[idx] += r.sellerNetAmount;
         orders[idx] += 1;
       }
       buckets = labels.map((label, i) => ({
@@ -342,9 +337,9 @@ export const getEarningsChart = async (req, res) => {
       ];
       const totals = new Array(12).fill(0);
       const orders = new Array(12).fill(0);
-      for (const r of paidRows) {
-        const m = new Date(r.effectiveDate).getMonth();
-        totals[m] += r.sellerSubtotal;
+      for (const r of rows) {
+        const m = new Date(r.createdAt).getMonth();
+        totals[m] += r.sellerNetAmount;
         orders[m] += 1;
       }
       buckets = labels.map((label, i) => ({
@@ -361,9 +356,9 @@ export const getEarningsChart = async (req, res) => {
       ).getDate();
       const totals = new Array(daysInMonth).fill(0);
       const orders = new Array(daysInMonth).fill(0);
-      for (const r of paidRows) {
-        const d = new Date(r.effectiveDate).getDate() - 1;
-        totals[d] += r.sellerSubtotal;
+      for (const r of rows) {
+        const d = new Date(r.createdAt).getDate() - 1;
+        totals[d] += r.sellerNetAmount;
         orders[d] += 1;
       }
       buckets = totals.map((earnings, i) => ({
@@ -385,12 +380,11 @@ export const getEarningsChart = async (req, res) => {
 };
 
 // ============================================
-// ✅ NEW: GET /api/seller/dashboard/performance?period=this-week|this-month|this-year
-// Same bucketing rules as getEarningsChart (kept intentionally identical
-// so "Sales Performance" on the dashboard and the Earnings tab chart never
-// disagree about what a week/month/year total means), but with the label
-// format the dashboard spec asked for ("1 Aug" instead of a bare "1"), and
-// "revenue" instead of "earnings" as the field name.
+// ✅ UNCHANGED — GET /api/seller/dashboard/performance
+// Backs the main Dashboard's "Sales Performance" widget, a gross-sales
+// view scoped to the whole seller dashboard (not the Earnings/Payouts
+// section). Still backed by getSellerOrderRows so the main dashboard's
+// existing numbers don't shift as a side effect of this feature.
 // ============================================
 const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTH_LABELS = [
@@ -483,75 +477,17 @@ export const getDashboardPerformance = async (req, res) => {
 };
 
 // ============================================
-// GET /api/seller/earnings/transactions?page=&limit=
-// ============================================
-export const getEarningsTransactions = async (req, res) => {
-  try {
-    const sellerId = req.seller._id;
-    const page = Math.max(1, parseInt(req.query.page) || 1);
-    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
-
-    const rows = await getSellerOrderRows(sellerId);
-    const relevant = rows.filter(
-      (r) =>
-        r.paymentStatus === "paid" ||
-        REFUNDED_ORDER_STATUSES.includes(r.orderStatus),
-    );
-
-    const total = relevant.length;
-    const pageRows = relevant.slice((page - 1) * limit, page * limit);
-
-    const shaped = pageRows.map((r) => {
-      const isRefund = REFUNDED_ORDER_STATUSES.includes(r.orderStatus);
-      const status = isRefund
-        ? "refunded"
-        : r.orderStatus === FINAL_ORDER_STATUS
-          ? "completed"
-          : "pending";
-      return {
-        id: r.orderNumber,
-        date: r.effectiveDate,
-        customer: r.customerName,
-        amount: r.sellerSubtotal,
-        status,
-        type: isRefund ? "refund" : "sale",
-      };
-    });
-
-    return res.status(200).json({
-      success: true,
-      data: shaped,
-      pagination: {
-        currentPage: page,
-        totalPages: Math.max(1, Math.ceil(total / limit)),
-        total,
-      },
-    });
-  } catch (error) {
-    console.error("❌ Get earnings transactions error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to load transactions",
-      error: error.message,
-    });
-  }
-};
-
-// ============================================
 // POST /api/seller/earnings/payout/request
+// Recomputes the eligible balance server-side straight from the ledger —
+// never trusts a client-supplied amount. Links the created SellerPayout
+// to the exact CommissionTransaction rows it covers and flips those rows
+// to "processing" so they can never be pulled into a second concurrent
+// payout request.
 // ============================================
 export const requestPayout = async (req, res) => {
   try {
     const sellerId = req.seller._id;
     const settings = await PlatformSettings.getSettings();
-
-    if (settings.minimumPayoutAmount == null) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Payouts are not configured yet on this platform. Please contact support.",
-      });
-    }
 
     const seller = await Seller.findById(sellerId).select("bankDetails");
     const hasUpi = !!seller?.bankDetails?.upiId;
@@ -564,43 +500,32 @@ export const requestPayout = async (req, res) => {
       });
     }
 
-    // Recompute available balance server-side — never trust a client amount.
-    const rows = await getSellerOrderRows(sellerId);
-    const paidRows = rows.filter((r) => r.paymentStatus === "paid");
-    const deliveredPaid = paidRows.filter(
-      (r) => r.orderStatus === FINAL_ORDER_STATUS,
-    );
-    const deliveredEarnings = deliveredPaid.reduce(
-      (s, r) => s + r.sellerSubtotal,
+    const eligibleRows = await CommissionTransaction.find({
+      seller: sellerId,
+      status: COMMISSION_TXN_STATUS.eligible,
+      reversalOf: { $exists: false },
+    });
+
+    const availableBalance = eligibleRows.reduce(
+      (s, r) => s + r.sellerNetAmount,
       0,
     );
 
-    const [paidOutAgg, processingAgg] = await Promise.all([
-      SellerPayout.aggregate([
-        { $match: { seller: toObjectId(sellerId), status: "paid" } },
-        { $group: { _id: null, total: { $sum: "$amount" } } },
-      ]),
-      SellerPayout.aggregate([
-        {
-          $match: {
-            seller: toObjectId(sellerId),
-            status: { $in: ["requested", "processing"] },
-          },
-        },
-        { $group: { _id: null, total: { $sum: "$amount" } } },
-      ]),
-    ]);
-    const availableBalance = Math.max(
-      0,
-      deliveredEarnings -
-        (paidOutAgg[0]?.total || 0) -
-        (processingAgg[0]?.total || 0),
-    );
-
-    if (availableBalance < settings.minimumPayoutAmount) {
+    if (eligibleRows.length === 0 || availableBalance <= 0) {
       return res.status(400).json({
         success: false,
-        message: `Available balance (₹${availableBalance.toLocaleString("en-IN")}) is below the minimum payout amount (₹${settings.minimumPayoutAmount.toLocaleString("en-IN")}).`,
+        message: "No eligible earnings are available for payout right now.",
+      });
+    }
+
+    if (availableBalance < (settings.minimumPayoutAmount || 0)) {
+      return res.status(400).json({
+        success: false,
+        message: `Available balance (₹${availableBalance.toLocaleString(
+          "en-IN",
+        )}) is below the minimum payout amount (₹${(
+          settings.minimumPayoutAmount || 0
+        ).toLocaleString("en-IN")}).`,
       });
     }
 
@@ -619,12 +544,32 @@ export const requestPayout = async (req, res) => {
       amount: availableBalance,
       status: "requested",
       method,
+      commissionTransactionIds: eligibleRows.map((r) => r._id),
     });
+
+    await CommissionTransaction.updateMany(
+      { _id: { $in: eligibleRows.map((r) => r._id) } },
+      {
+        $set: {
+          status: COMMISSION_TXN_STATUS.processing,
+          payoutReference: payout._id,
+        },
+        $push: {
+          statusHistory: {
+            status: COMMISSION_TXN_STATUS.processing,
+            previousStatus: COMMISSION_TXN_STATUS.eligible,
+            role: "seller",
+            changedBy: sellerId,
+            timestamp: new Date(),
+          },
+        },
+      },
+    );
 
     return res.status(201).json({
       success: true,
       message:
-        "Payout requested. Our team will process this manually — you'll be notified once it's completed.",
+        "Payout requested. Our team will process this and confirm once the transfer is completed.",
       data: payout,
     });
   } catch (error) {
@@ -639,6 +584,8 @@ export const requestPayout = async (req, res) => {
 
 // ============================================
 // GET /api/seller/earnings/payout/history
+// The seller's own payout REQUESTS (SellerPayout docs). Distinct from
+// the line-item ledger, which is available via GET /api/seller/payouts.
 // ============================================
 export const getPayoutHistory = async (req, res) => {
   try {

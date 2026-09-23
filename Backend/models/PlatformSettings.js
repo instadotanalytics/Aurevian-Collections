@@ -1,16 +1,32 @@
 // backend/models/PlatformSettings.js
-// Single-document config store. Both fields default to null — commission
-// and payout minimums must be explicitly set by a super admin. Nothing
-// downstream is allowed to fall back to a guessed number when these are
-// null; see sellerEarningsController.js.
+// Single-document config store for platform-wide financial settings.
+//
+// ✅ CHANGED — commissionPercent now defaults to 10 (was null). The
+// platform's core business rule is "10% commission on every eligible
+// sale" and that must work out of the box; a super admin can still
+// change it via PATCH /api/super-admin/settings/platform (see
+// platformSettingsController.js). minimumPayoutAmount now defaults to 0
+// (no minimum enforced) rather than null/"payouts disabled" — a super
+// admin can raise it later. Every consumer of this document (see
+// commissionService.js, sellerEarningsController.js) reads these two
+// fields fresh at calculation time; nothing hardcodes "10" anywhere else
+// in the codebase.
 
 import mongoose from "mongoose";
 
 const platformSettingsSchema = new mongoose.Schema(
   {
     singleton: { type: String, default: "singleton", unique: true },
-    commissionPercent: { type: Number, default: null, min: 0, max: 100 },
-    minimumPayoutAmount: { type: Number, default: null, min: 0 },
+    // Percentage, e.g. 10 means 10%. Defaults to the platform's standard
+    // marketplace commission rate.
+    commissionPercent: { type: Number, default: 10, min: 0, max: 100 },
+    // 0 = no minimum enforced.
+    minimumPayoutAmount: { type: Number, default: 0, min: 0 },
+    updatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "SuperAdmin",
+      default: null,
+    },
   },
   { timestamps: true },
 );
