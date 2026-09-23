@@ -13,7 +13,7 @@ import {
   getCurrentSeller,
   updateSellerProfile,
   updateSellerPickupAddress,
-  retrySellerPickupSync, // ✅ NEW
+  retrySellerPickupSync,
   sellerLogout,
   refreshSellerToken,
   getSellerDashboard,
@@ -29,11 +29,19 @@ import { protectSeller } from "../middleware/sellerAuth.js";
 import {
   getEarningsSummary,
   getEarningsChart,
-  getEarningsTransactions,
   requestPayout,
   getPayoutHistory,
   getDashboardPerformance,
 } from "../controllers/sellerEarningsController.js";
+
+// ✅ NEW — seller's own read-only view of the commission ledger. All
+// three handlers scope every query through req.seller._id internally, so
+// a seller can never read another seller's financial data.
+import {
+  getMyPayoutSummary,
+  getMyPayoutTransactions,
+  getMyPayoutTransactionDetail,
+} from "../controllers/sellerPayoutsController.js";
 
 import {
   getCustomersSummary,
@@ -108,9 +116,8 @@ router.use(protectSeller);
 router.get("/me", getCurrentSeller);
 router.put("/profile", updateSellerProfile);
 
-// ✅ NEW — seller's own Shiprocket pickup/warehouse address
 router.put("/pickup-address", updateSellerPickupAddress);
-router.post("/pickup-address/retry-sync", retrySellerPickupSync); // ✅ NEW
+router.post("/pickup-address/retry-sync", retrySellerPickupSync);
 
 router.get("/dashboard", getSellerDashboard);
 router.get("/dashboard/performance", getDashboardPerformance);
@@ -118,11 +125,17 @@ router.get("/orders/recent", getRecentOrders);
 router.get("/activities/recent", getRecentActivities);
 router.get("/verification-status", getVerificationStatus);
 
+// ---- Earnings/Payouts: summary cards, chart, and payout request flow ----
 router.get("/earnings/summary", getEarningsSummary);
 router.get("/earnings/chart", getEarningsChart);
-router.get("/earnings/transactions", getEarningsTransactions);
 router.post("/earnings/payout/request", requestPayout);
 router.get("/earnings/payout/history", getPayoutHistory);
+
+// ---- Earnings/Payouts: line-item ledger (search/filter/pagination/detail) ----
+// ✅ NEW
+router.get("/payouts/summary", getMyPayoutSummary);
+router.get("/payouts/:id", getMyPayoutTransactionDetail);
+router.get("/payouts", getMyPayoutTransactions);
 
 router.get("/customers/summary", getCustomersSummary);
 router.get("/customers", getCustomers);
@@ -146,25 +159,13 @@ router.post(
 );
 
 console.log("✅ Seller routes configured successfully");
-console.log("  📌 POST   /api/seller/register (rate limited: 5/10min)");
-console.log("  📌 POST   /api/seller/verify-email");
-console.log("  📌 POST   /api/seller/verify-phone");
-console.log("  📌 POST   /api/seller/resend-otp (rate limited: 5/10min)");
-console.log("  📌 POST   /api/seller/login");
-console.log("  📌 POST   /api/seller/forgot-password");
-console.log("  📌 POST   /api/seller/reset-password/:token");
-console.log("  📌 GET    /api/seller/me");
-console.log("  📌 PUT    /api/seller/pickup-address");
-console.log("  📌 POST   /api/seller/pickup-address/retry-sync");
-console.log("  📌 GET    /api/seller/dashboard");
-console.log("  📌 GET    /api/seller/dashboard/performance");
-console.log("  📌 POST   /api/seller/upload-documents");
-console.log("  📌 GET    /api/seller/verification-status");
 console.log("  📌 GET    /api/seller/earnings/summary");
 console.log("  📌 GET    /api/seller/earnings/chart");
-console.log("  📌 GET    /api/seller/earnings/transactions");
 console.log("  📌 POST   /api/seller/earnings/payout/request");
 console.log("  📌 GET    /api/seller/earnings/payout/history");
+console.log("  📌 GET    /api/seller/payouts/summary");
+console.log("  📌 GET    /api/seller/payouts/:id");
+console.log("  📌 GET    /api/seller/payouts");
 console.log("  📌 GET    /api/seller/customers/summary");
 console.log("  📌 GET    /api/seller/customers");
 console.log("  📌 GET    /api/seller/customers/:userId");

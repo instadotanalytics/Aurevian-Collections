@@ -1,8 +1,5 @@
 /* src/Pages/Seller/SellerDashboard/Earnings.module.css */
 
-/* ============================================
-   CONTAINER
-   ============================================ */
 .container {
   padding: 24px 28px;
   max-width: 1200px;
@@ -12,9 +9,6 @@
   border-radius: 16px;
 }
 
-/* ============================================
-   HEADER
-   ============================================ */
 .header {
   display: flex;
   justify-content: space-between;
@@ -86,32 +80,6 @@
   }
 }
 
-.exportBtn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 18px;
-  background: #c8a86e;
-  border: none;
-  border-radius: 8px;
-  color: #ffffff;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: inherit;
-  transition: all 0.25s ease;
-  box-shadow: 0 2px 8px rgba(200, 168, 110, 0.2);
-}
-
-.exportBtn:hover {
-  background: #d4b88a;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(200, 168, 110, 0.3);
-}
-
-/* ============================================
-   PERIOD SELECTOR
-   ============================================ */
 .periodSelector {
   display: flex;
   gap: 4px;
@@ -148,12 +116,9 @@
   box-shadow: 0 2px 8px rgba(200, 168, 110, 0.2);
 }
 
-/* ============================================
-   STATS GRID
-   ============================================ */
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -204,7 +169,7 @@
 }
 
 .statValue {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   color: #3d3228;
 }
@@ -225,9 +190,6 @@
   color: #e74c3c;
 }
 
-/* ============================================
-   CHART SECTION
-   ============================================ */
 .chartSection {
   background: #ffffff;
   border: 1px solid #ebe3d8;
@@ -251,37 +213,6 @@
   font-weight: 600;
   color: #3d3228;
   margin: 0;
-}
-
-.chartTabs {
-  display: flex;
-  gap: 4px;
-  background: #f5f0ea;
-  padding: 3px;
-  border-radius: 8px;
-}
-
-.chartTab {
-  padding: 4px 14px;
-  background: transparent;
-  border: none;
-  border-radius: 6px;
-  color: #8a7a68;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
-  font-family: inherit;
-  transition: all 0.2s ease;
-}
-
-.chartTab:hover {
-  color: #5a4d3e;
-}
-
-.chartTab.active {
-  background: #ffffff;
-  color: #3d3228;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .chartContainer {
@@ -346,9 +277,6 @@
   font-weight: 500;
 }
 
-/* ============================================
-   TRANSACTIONS SECTION
-   ============================================ */
 .transactionsSection {
   background: #ffffff;
   border: 1px solid #ebe3d8;
@@ -374,23 +302,56 @@
   margin: 0;
 }
 
-.viewAllBtn {
+/* ---- Filters bar ---- */
+.filtersBar {
   display: flex;
-  align-items: center;
-  gap: 4px;
-  background: transparent;
-  border: none;
-  color: #c8a86e;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  font-family: inherit;
-  transition: all 0.2s ease;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
-.viewAllBtn:hover {
-  color: #d4b88a;
+.searchBox {
+  display: flex;
+  align-items: center;
   gap: 8px;
+  background: #f8f6f4;
+  border: 1px solid #ebe3d8;
+  border-radius: 8px;
+  padding: 7px 12px;
+  min-width: 220px;
+  flex: 1 1 220px;
+}
+
+.searchBox input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13px;
+  width: 100%;
+  color: #4a3d32;
+  font-family: inherit;
+}
+
+.searchIcon {
+  color: #9a8a78;
+  flex-shrink: 0;
+}
+
+.filterSelect,
+.dateInput {
+  border: 1px solid #ebe3d8;
+  background: #f8f6f4;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 13px;
+  color: #4a3d32;
+  font-family: inherit;
+  outline: none;
+}
+
+.filterSelect:focus,
+.dateInput:focus {
+  border-color: #c8a86e;
 }
 
 .tableWrapper {
@@ -413,12 +374,14 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-bottom: 2px solid #f0e8e0;
+  white-space: nowrap;
 }
 
 .table tbody td {
   padding: 10px 12px;
   border-bottom: 1px solid #f0e8e0;
   color: #4a3d32;
+  white-space: nowrap;
 }
 
 .table tbody tr:hover {
@@ -433,21 +396,35 @@
   font-weight: 600;
   color: #3d3228;
   font-size: 12px;
+  font-family: monospace;
 }
 
 .amount {
-  font-weight: 600;
+  font-weight: 700;
   color: #27ae60;
 }
 
-.refundAmount {
-  font-weight: 600;
-  color: #e74c3c;
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  border: 1px solid #ebe3d8;
+  background: #f8f6f4;
+  color: #6b5d4f;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-/* ============================================
-   STATUS BADGES
-   ============================================ */
+.actionBtn:hover {
+  background: #c8a86e;
+  color: #ffffff;
+  border-color: #c8a86e;
+}
+
+/* ---- Status badges ---- */
 .statusBadge {
   display: inline-flex;
   align-items: center;
@@ -457,11 +434,7 @@
   font-size: 11px;
   font-weight: 600;
   text-transform: capitalize;
-}
-
-.statusBadge.completed {
-  background: #e8f8ef;
-  color: #27ae60;
+  white-space: nowrap;
 }
 
 .statusBadge.pending {
@@ -469,46 +442,73 @@
   color: #f39c12;
 }
 
+.statusBadge.eligible {
+  background: #e8f0fe;
+  color: #2980b9;
+}
+
+.statusBadge.processing {
+  background: #eef2ff;
+  color: #6366f1;
+}
+
+.statusBadge.paidStatus {
+  background: #e8f8ef;
+  color: #27ae60;
+}
+
+.statusBadge.failedStatus {
+  background: #fde8e8;
+  color: #e74c3c;
+}
+
+.statusBadge.cancelledStatus {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.statusBadge.reversedStatus {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
 .statusBadge.refunded {
   background: #fde8e8;
   color: #e74c3c;
 }
 
-.statusCompleted {
-  color: #27ae60;
-  font-size: 14px;
+/* ---- Pagination ---- */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
 }
 
-.statusPending {
-  color: #f39c12;
-  font-size: 14px;
-}
-
-.statusRefunded {
-  color: #e74c3c;
-  font-size: 14px;
-}
-
-.typeBadge {
-  padding: 2px 10px;
-  border-radius: 4px;
-  font-size: 11px;
+.paginationBtn {
+  background: #ffffff;
+  border: 1px solid #ebe3d8;
+  padding: 7px 16px;
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 600;
+  cursor: pointer;
+  color: #6b5d4f;
+  font-family: inherit;
 }
 
-.typeBadge.sale {
-  background: #e8f0fe;
-  color: #2980b9;
+.paginationBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.typeBadge.refund {
-  background: #fde8e8;
-  color: #e74c3c;
+.pagination span {
+  font-size: 13px;
+  color: #9a8a78;
 }
 
-/* ============================================
-   PAYOUT SECTION
-   ============================================ */
+/* ---- Payout section ---- */
 .payoutSection {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -591,14 +591,16 @@
   transition: all 0.25s ease;
 }
 
-.payoutBtn:hover {
+.payoutBtn:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 4px 16px rgba(200, 168, 110, 0.3);
 }
 
-/* ============================================
-   QUICK STATS
-   ============================================ */
+.payoutBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .quickStats {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -644,9 +646,99 @@
   color: #b0a090;
 }
 
-/* ============================================
-   SKELETON LOADING
-   ============================================ */
+/* ---- Modal (Transaction detail drawer) ---- */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 24, 16, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modalContent {
+  background: #ffffff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 460px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 22px;
+  border-bottom: 1px solid #f0e8e0;
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+}
+
+.modalHeader h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #3d3228;
+}
+
+.modalClose {
+  background: #f5f0ea;
+  border: none;
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6b5d4f;
+}
+
+.detailGrid {
+  padding: 18px 22px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.detailRow span {
+  color: #9a8a78;
+  font-weight: 500;
+}
+
+.detailRow strong {
+  color: #3d3228;
+  font-weight: 700;
+  text-align: right;
+}
+
+.detailRow strong.positive {
+  color: #27ae60;
+}
+
+.detailRow strong.negative {
+  color: #e74c3c;
+}
+
+.detailDivider {
+  border-top: 1px dashed #ebe3d8;
+  margin: 4px 0;
+}
+
+/* ---- Skeleton ---- */
 .skeletonContainer {
   animation: pulse 1.5s ease-in-out infinite;
 }
@@ -688,7 +780,7 @@
 
 .skeletonStats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -724,15 +816,8 @@
 }
 
 .skeletonStatValue {
-  width: 120px;
-  height: 22px;
-  background: #ddd2c4;
-  border-radius: 4px;
-}
-
-.skeletonStatChange {
   width: 100px;
-  height: 12px;
+  height: 20px;
   background: #ddd2c4;
   border-radius: 4px;
 }
@@ -745,22 +830,11 @@
 }
 
 .skeletonChartHeader {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
-.skeletonChartHeader div {
   height: 20px;
+  width: 150px;
   background: #ddd2c4;
   border-radius: 4px;
-}
-
-.skeletonChartHeader div:first-child {
-  width: 150px;
-}
-.skeletonChartHeader div:last-child {
-  width: 120px;
+  margin-bottom: 20px;
 }
 
 .skeletonChartBars {
@@ -823,9 +897,7 @@
   margin-bottom: 0;
 }
 
-/* ============================================
-   ERROR STATE
-   ============================================ */
+/* ---- Error state ---- */
 .errorContainer {
   display: flex;
   flex-direction: column;
@@ -873,9 +945,7 @@
   transform: translateY(-1px);
 }
 
-/* ============================================
-   RESPONSIVE
-   ============================================ */
+/* ---- Responsive ---- */
 @media (max-width: 1024px) {
   .container {
     padding: 20px;
@@ -896,11 +966,6 @@
     gap: 12px;
   }
 
-  .headerRight {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
   .title {
     font-size: 22px;
   }
@@ -909,14 +974,6 @@
     width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 4px;
-    gap: 2px;
-  }
-
-  .periodBtn {
-    padding: 6px 14px;
-    font-size: 12px;
-    white-space: nowrap;
   }
 
   .statsGrid {
@@ -929,231 +986,40 @@
   }
 
   .statValue {
-    font-size: 18px;
+    font-size: 16px;
   }
 
-  .chartSection {
-    padding: 16px 18px;
-  }
-
-  .chartHeader {
+  .filtersBar {
     flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
   }
 
-  .chartTabs {
-    width: fit-content;
+  .searchBox,
+  .filterSelect,
+  .dateInput {
+    width: 100%;
+    flex: 1 1 auto;
   }
 
-  .chartBars {
-    height: 120px;
-    gap: 8px;
-  }
-
-  .chartBarWrapper {
-    height: 100px;
-  }
-
-  .chartBarValue {
-    font-size: 8px;
-    top: -18px;
-  }
-
-  .chartLabel {
-    font-size: 10px;
-  }
-
-  .transactionsSection {
-    padding: 16px 18px;
-  }
-
-  .table thead th,
-  .table tbody td {
-    padding: 8px 10px;
-    font-size: 12px;
-  }
-
-  .table tbody td:first-child,
-  .table thead th:first-child {
-    padding-left: 4px;
-  }
-
-  .table tbody td:last-child,
-  .table thead th:last-child {
-    padding-right: 4px;
-  }
-
-  /* Hide less important columns on mobile */
   .table thead th:nth-child(3),
   .table tbody td:nth-child(3) {
     display: none;
   }
 
-  .statusBadge {
-    font-size: 10px;
-    padding: 2px 8px;
-  }
-
-  .typeBadge {
-    font-size: 10px;
-    padding: 1px 8px;
-  }
-
-  .payoutSection {
-    gap: 14px;
-  }
-
-  .payoutCard {
-    padding: 16px 18px;
-  }
-
-  .payoutItem strong {
-    font-size: 14px;
-  }
-
   .quickStats {
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  .quickStatItem {
-    padding: 14px 16px;
-  }
-
-  .quickStatValue {
-    font-size: 16px;
-  }
-
-  /* Skeleton responsive */
-  .skeletonStats {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .skeletonChartBars {
-    height: 100px;
   }
 }
 
 @media (max-width: 480px) {
-  .container {
-    padding: 10px 12px;
-  }
-
   .statsGrid {
     grid-template-columns: 1fr;
-  }
-
-  .title {
-    font-size: 20px;
-  }
-
-  .subtitle {
-    font-size: 12px;
-  }
-
-  .refreshBtn,
-  .exportBtn {
-    padding: 6px 12px;
-    font-size: 12px;
-  }
-
-  .statCard {
-    padding: 12px 14px;
-  }
-
-  .statIcon {
-    width: 36px;
-    height: 36px;
-  }
-
-  .statValue {
-    font-size: 16px;
-  }
-
-  .chartSection {
-    padding: 12px 14px;
-  }
-
-  .chartBars {
-    height: 100px;
-    gap: 4px;
-  }
-
-  .chartBarWrapper {
-    height: 80px;
-  }
-
-  .chartBar {
-    max-width: 28px;
-  }
-
-  .transactionsSection {
-    padding: 12px 14px;
-  }
-
-  .table thead th,
-  .table tbody td {
-    padding: 6px 6px;
-    font-size: 11px;
-  }
-
-  .table tbody td:nth-child(2) {
-    font-size: 10px;
   }
 
   .quickStats {
     grid-template-columns: 1fr;
   }
 
-  .payoutCard {
-    padding: 14px 16px;
+  .modalContent {
+    max-width: 100%;
   }
-
-  .payoutBtn {
-    font-size: 13px;
-    padding: 8px;
-  }
-
-  /* Skeleton responsive */
-  .skeletonStats {
-    grid-template-columns: 1fr;
-  }
-
-  .skeletonTitle {
-    width: 140px;
-    height: 28px;
-  }
-
-  .skeletonButtons div {
-    width: 80px;
-    height: 32px;
-  }
-}
-
-/* ============================================
-   SCROLLBAR STYLING
-   ============================================ */
-.tableWrapper::-webkit-scrollbar {
-  height: 4px;
-}
-
-.tableWrapper::-webkit-scrollbar-track {
-  background: #f5f0ea;
-  border-radius: 2px;
-}
-
-.tableWrapper::-webkit-scrollbar-thumb {
-  background: #e0d6ca;
-  border-radius: 2px;
-}
-
-.tableWrapper::-webkit-scrollbar-thumb:hover {
-  background: #c8b8a8;
-}
-
-/* Focus visible for accessibility */
-button:focus-visible {
-  outline: 2px solid #c8a86e;
-  outline-offset: 2px;
 }

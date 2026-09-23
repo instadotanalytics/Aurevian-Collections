@@ -20,27 +20,41 @@ import {
   getAllPayments,
   getPaymentStats,
 } from "../controllers/superAdminController.js";
-// ✅ NEW: "Sellers & Products" admin view layer
 import {
   getSellersWithProductCounts,
   getSellerProductStatsAdmin,
   getSellerProductsAdmin,
   getSellerProductDetailAdmin,
 } from "../controllers/superAdminProductManagementController.js";
-// ✅ NEW: Contact Messages admin view layer
 import {
   getAllContacts,
   getContactDetail,
   updateContactStatus,
   deleteContact,
 } from "../controllers/contactController.js";
-// ✅ NEW: Franchise Enquiries admin view layer
 import {
   getAllFranchises,
   getFranchiseDetail,
   updateFranchiseStatus,
   deleteFranchise,
 } from "../controllers/franchiseController.js";
+
+// ✅ NEW — marketplace commission/payout ledger, admin side
+import {
+  getPlatformPayoutSummary,
+  getAllPayoutTransactions,
+  exportPayoutTransactions,
+  getPayoutTransactionDetail,
+  getPayoutRequests,
+  updatePayoutRequestStatus,
+} from "../controllers/adminPayoutController.js";
+
+// ✅ NEW — the single 10% commission config, editable by super admin only
+import {
+  getPlatformSettings,
+  updatePlatformSettings,
+} from "../controllers/platformSettingsController.js";
+
 import { protectSuperAdmin } from "../middleware/superAdminAuth.js";
 
 const router = express.Router();
@@ -81,10 +95,7 @@ router.put("/sellers/:id/verify-kyc", verifySellerKyc);
 router.delete("/sellers/:id", deleteSeller);
 
 // ============================================
-// ✅ NEW: SELLERS & PRODUCTS (admin view/management layer)
-// Registered under the SAME protectSuperAdmin guard above — no separate
-// auth needed. Product routes are scoped by seller.sellerId, so one seller
-// can never see another seller's products through these endpoints either.
+// SELLERS & PRODUCTS (admin view/management layer)
 // ============================================
 router.get("/sellers-products", getSellersWithProductCounts);
 router.get("/sellers/:id/product-stats", getSellerProductStatsAdmin);
@@ -92,7 +103,7 @@ router.get("/sellers/:id/products", getSellerProductsAdmin);
 router.get("/sellers/:id/products/:productId", getSellerProductDetailAdmin);
 
 // ============================================
-// ✅ NEW: CONTACT MESSAGES (from the public Contact page form)
+// CONTACT MESSAGES
 // ============================================
 router.get("/contacts", getAllContacts);
 router.get("/contacts/:id", getContactDetail);
@@ -100,7 +111,7 @@ router.put("/contacts/:id/status", updateContactStatus);
 router.delete("/contacts/:id", deleteContact);
 
 // ============================================
-// ✅ NEW: FRANCHISE ENQUIRIES (from the public Franchise page form)
+// FRANCHISE ENQUIRIES
 // ============================================
 router.get("/franchises", getAllFranchises);
 router.get("/franchises/:id", getFranchiseDetail);
@@ -108,9 +119,27 @@ router.put("/franchises/:id/status", updateFranchiseStatus);
 router.delete("/franchises/:id", deleteFranchise);
 
 // ============================================
-// PAYMENTS
+// PAYMENTS (seller subscription payments — unrelated to order commission)
 // ============================================
 router.get("/payments", getAllPayments);
 router.get("/payments/stats", getPaymentStats);
+
+// ============================================
+// ✅ NEW — MARKETPLACE PAYOUTS / SELLER EARNINGS / PLATFORM REVENUE
+// Static sub-paths (summary, export, requests) are registered before the
+// dynamic ":id" route so they can never be shadowed by it.
+// ============================================
+router.get("/payouts/summary", getPlatformPayoutSummary);
+router.get("/payouts/export", exportPayoutTransactions);
+router.get("/payouts/requests", getPayoutRequests);
+router.patch("/payouts/requests/:id/status", updatePayoutRequestStatus);
+router.get("/payouts/:id", getPayoutTransactionDetail);
+router.get("/payouts", getAllPayoutTransactions);
+
+// ============================================
+// ✅ NEW — PLATFORM FINANCIAL SETTINGS (commission %, minimum payout)
+// ============================================
+router.get("/settings/platform", getPlatformSettings);
+router.patch("/settings/platform", updatePlatformSettings);
 
 export default router;

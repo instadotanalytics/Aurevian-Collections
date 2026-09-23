@@ -3,7 +3,7 @@
  * Sets up routing and global providers with authentication
  */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
@@ -17,8 +17,6 @@ import PrivateRoute from "./Components/common/PrivateRoute.jsx";
 import SuperAdminRoute from "./Components/common/SuperAdminRoute.jsx";
 import SellerRoute from "./Components/common/SellerRoute.jsx";
 import Navbar from "./Pages/Layout/Header/Navbar.jsx";
-import LoadingScreen from "./Components/common/LoadingScreen.jsx";
-import HomePageSkeleton from "./Components/common/HomePageSkeleton/HomePageSkeleton.jsx";
 
 // ============================================
 // SELLER AUTH PROVIDER
@@ -161,39 +159,24 @@ const App = () => {
     (state) => state.seller,
   );
 
-  const location = useLocation();
-
-  // ✅ NEW — run the "who am I" bootstrapping once, then never gate on it again
-  const [bootstrapping, setBootstrapping] = useState(true);
-
+  // ✅ CHANGED — auth/superAdmin/seller "who am I" bootstrapping now runs
+  // in the background and no longer blocks rendering of the app shell.
+  // Each slice tracks its own isLoading, and route guards (PrivateRoute /
+  // SuperAdminRoute / SellerRoute) already read that per-slice isLoading
+  // to show their own small, scoped loader instead of gating everything
+  // behind one global full-page skeleton.
   useEffect(() => {
-    const tasks = [];
-
     if (localStorage.getItem("accessToken")) {
-      tasks.push(dispatch(fetchCurrentUser()));
+      dispatch(fetchCurrentUser());
     }
     if (localStorage.getItem("superAdminToken")) {
-      tasks.push(dispatch(fetchCurrentSuperAdmin()));
+      dispatch(fetchCurrentSuperAdmin());
     }
     if (localStorage.getItem("sellerAccessToken")) {
-      tasks.push(dispatch(fetchCurrentSeller()));
+      dispatch(fetchCurrentSeller());
     }
-
-    if (tasks.length === 0) {
-      setBootstrapping(false);
-      return;
-    }
-
-    Promise.allSettled(tasks).finally(() => setBootstrapping(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
-
-  if (bootstrapping) {
-    if (location.pathname === ROUTES.HOME) {
-      return <HomePageSkeleton />;
-    }
-    return <LoadingScreen text="Loading your account..." />;
-  }
 
   return (
     <HelmetProvider>
