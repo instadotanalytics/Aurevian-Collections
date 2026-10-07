@@ -103,9 +103,6 @@
   gap: 10px;
   flex-shrink: 1;
   min-width: 0;
-  /* margin-left: 22px; */
-  /* padding-left: 22px; */
-  /* border-left: 1px solid var(--line); */
 }
 
 .logoText {
@@ -451,6 +448,7 @@
   display: flex;
   flex: 1;
   position: relative;
+  min-width: 0; /* ✅ FIX — allow content to shrink instead of overflowing */
 }
 
 .sidebar {
@@ -545,11 +543,7 @@
 }
 
 /* ============================================
-   ✅ NEW — SIDEBAR DROPDOWN GROUP
-   ("Homepage Sections": Offers Section, Curated For You,
-   Trending Picks, New Collections)
-   Supports both click-to-toggle and hover-to-open/close,
-   with a smooth height + fade transition and a rotating chevron.
+   SIDEBAR DROPDOWN GROUP ("Homepage Sections")
    ============================================ */
 .navGroup {
   margin-bottom: 3px;
@@ -559,7 +553,6 @@
   margin-bottom: 0;
 }
 
-/* Chevron indicator on the dropdown's header button */
 .navChevron {
   font-size: 15px;
   flex-shrink: 0;
@@ -578,9 +571,6 @@
   transform: rotate(180deg);
 }
 
-/* Submenu wrapper — collapsed by default (max-height animation),
-   only ever visible once the sidebar itself is expanded/mobile-open,
-   so it never appears while the sidebar is showing icons only. */
 .submenu {
   display: flex;
   flex-direction: column;
@@ -753,18 +743,15 @@
    ============================================ */
 .contentArea {
   flex: 1;
-  /* padding: 0 var(--content-pad-x) var(--content-pad-b); */
+  min-width: 0; /* ✅ FIX — a flex child must be allowed to shrink below its content width */
   overflow-y: auto;
+  overflow-x: hidden;
   height: calc(100vh - var(--header-height));
   background: var(--surface-sunk);
   animation: contentFadeIn 0.4s ease;
 }
 
-/* Layered onto planStyles.welcomeBanner so it can go full-bleed and
-   lose its radius without needing to touch PlanTheme.module.css */
 .welcomeBannerOverride {
-  /* width: calc(100% + var(--content-pad-x) * 2) !important;
-  margin: 0 calc(var(--content-pad-x) * -1) 24px !important; */
   border-radius: 0 !important;
 }
 
@@ -781,11 +768,29 @@
 
 .contentWrapper {
   max-width: 1400px;
+  width: 100%;
+  min-width: 0; /* ✅ FIX */
   margin: 0 auto;
 }
 
 .contentWrapper > *:first-child {
   margin-top: 0;
+}
+
+/* ✅ FIX — tables (e.g. "Recent Orders") never blow past the screen.
+   Each table scrolls sideways on its own, and cells keep their text
+   on a single line so ORDER ID / CUSTOMER / TOTAL can't overlap. */
+.contentWrapper table {
+  max-width: 100%;
+  table-layout: auto !important;
+}
+
+.contentWrapper th,
+.contentWrapper td {
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+  vertical-align: middle;
 }
 
 .placeholderContent {
@@ -839,10 +844,11 @@
   .topHeader {
     padding: 0 20px;
   }
+
   .logoImage {
-  height: var(--logo-size);
-  width: 75px;
-}
+    height: var(--logo-size);
+    width: 75px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -862,14 +868,11 @@
   }
 
   .headerTitleBlock {
-    /* margin-left: 10px;
-    padding-left: 10px; */
     gap: 8px;
   }
 
   .logoText {
     font-size: 13px;
-    /* max-width: 90px; */
   }
 
   .headerPlanBadge {
@@ -878,7 +881,6 @@
     padding: 3px 8px !important;
   }
 
-  /* Full search bar hidden, replaced by icon + expanding bar */
   .headerSearch {
     display: none;
   }
@@ -895,7 +897,6 @@
     gap: 6px;
   }
 
-  /* Collapse the pill down to just the avatar circle on mobile */
   .adminProfile {
     padding: 0;
     background: none;
@@ -954,17 +955,44 @@
   }
 
   .contentArea {
-    /* padding: 0 13px 20px; */
+    width: 100%;
     height: calc(100vh - var(--header-height));
   }
 
   .mobileProfileDropdown {
     display: block;
   }
+
   .logoImage {
-  height: var(--logo-size);
-  width: 70px;
-}
+    height: var(--logo-size);
+    width: 70px;
+  }
+
+  /* ✅ FIX — MOBILE TABLES
+     The table becomes its own horizontal scroller, so wide tables like
+     "Recent Orders" scroll sideways inside their card instead of cramming
+     columns on top of each other. */
+  .contentWrapper table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .contentWrapper th,
+  .contentWrapper td {
+    padding-left: 10px;
+    padding-right: 14px;
+    font-size: 12.5px;
+  }
+
+  /* Keep long IDs / names from touching the next column */
+  .contentWrapper td {
+    max-width: none !important;
+    min-width: 0;
+  }
 }
 
 @media (max-width: 480px) {
@@ -991,11 +1019,6 @@
     display: none;
   }
 
-  .headerTitleBlock {
-    /* margin-left: 8px; */
-    /* padding-left: 8px; */
-  }
-
   .navItem {
     padding: 10px 14px;
     font-size: 13px;
@@ -1009,10 +1032,18 @@
   .mobileProfileDropdown {
     width: 210px;
   }
+
   .logoImage {
-  height: var(--logo-size);
-  width: 65px;
-}
+    height: var(--logo-size);
+    width: 65px;
+  }
+
+  .contentWrapper th,
+  .contentWrapper td {
+    font-size: 12px;
+    padding-left: 8px;
+    padding-right: 12px;
+  }
 }
 
 @media (max-width: 360px) {
@@ -1022,11 +1053,10 @@
 
   .headerTitleBlock {
     border-left: none;
-    /* margin-left: 0;
-    padding-left: 0; */
   }
+
   .logoImage {
-  height: var(--logo-size);
-  width: 65px;
-}
+    height: var(--logo-size);
+    width: 65px;
+  }
 }
